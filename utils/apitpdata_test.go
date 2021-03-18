@@ -1119,10 +1119,8 @@ func TestUsageMinute(t *testing.T) {
 			Opts:   map[string]interface{}{},
 		},
 	}
-	if result, err := testCostEventStruct.Usage(); err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	} else if !reflect.DeepEqual(result, time.Minute) {
-		t.Errorf("Expected <%+v> , received <%+v>", time.Minute, result)
+	if _, err := testCostEventStruct.Usage(); err == nil || err != ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", ErrNotFound, err)
 	}
 }
 
@@ -1154,9 +1152,9 @@ func TestUsage(t *testing.T) {
 	}
 
 	if result, err := testCostEventStruct.Usage(); err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	} else if !reflect.DeepEqual(result.String(), "2m10s") {
-		t.Errorf("Expected <2m10s> , received <%+v>", result.String())
+		t.Error(err)
+	} else if !reflect.DeepEqual(result.String(), "130000000000") {
+		t.Errorf("Expected <130000000000> , received <%+v>", result.String())
 	}
 }
 

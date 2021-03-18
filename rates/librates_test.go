@@ -24,11 +24,9 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cgrates/cgrates/engine"
 )
 
-func TestOrderRatesOnIntervals(t *testing.T) {
+func TestOrderRatesOnIntervals11(t *testing.T) {
 	rt0 := &utils.Rate{
 		ID: "RATE0",
 		Weights: utils.DynamicWeights{
@@ -38,12 +36,12 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 		},
 		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	rt0.Compile()
-	rtChristmas := &engine.Rate{
+	rtChristmas := &utils.Rate{
 		ID:              "RT_CHRISTMAS",
 		ActivationTimes: "* * 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -51,103 +49,102 @@ func TestOrderRatesOnIntervals(t *testing.T) {
 				Weight: 50,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	rtChristmas.Compile()
-	allRts := []*engine.Rate{rt0, rtChristmas}
+	allRts := []*utils.Rate{rt0, rtChristmas}
 	expOrdered := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 	}
 	wghts := []float64{10, 50}
 	sTime := time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC)
-	usage := 2 * time.Minute
+	usage := utils.NewDecimal(int64(2*time.Minute), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		allRts, wghts, sTime, usage, true, 10); err != nil {
+		allRts, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
-		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+		t.Errorf("expecting: %s\n, received: %s", utils.ToJSON(expOrdered), utils.ToJSON(ordRts))
 	}
 
 	expOrdered = []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			55 * time.Second,
+			utils.NewDecimal(int64(55*time.Second), 0).Big,
 			rtChristmas,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
-	usage = 2 * time.Minute
+	usage = utils.NewDecimal(int64(2*time.Minute), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		allRts, wghts, sTime, usage, true, 10); err != nil {
+		allRts, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+			utils.ToJSON(expOrdered), utils.ToJSON(ordRts))
 	}
 
 	expOrdered = []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			55 * time.Second,
+			utils.NewDecimal(int64(55*time.Second), 0).Big,
 			rtChristmas,
 		},
 		{
-			86455 * time.Second,
+			utils.NewDecimal(int64(86455*time.Second), 0).Big,
 			rt0,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
-	usage = 25 * time.Hour
+	usage = utils.NewDecimal(int64(25*time.Hour), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		allRts, wghts, sTime, usage, true, 10); err != nil {
+		allRts, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+			utils.ToJSON(expOrdered), utils.ToJSON(ordRts))
 	}
 
-	rts := []*engine.Rate{rtChristmas}
+	rts := []*utils.Rate{rtChristmas}
 	expOrdered = nil
 	sTime = time.Date(2020, time.December, 25, 23, 59, 05, 0, time.UTC)
-	usage = 2 * time.Minute
+	usage = utils.NewDecimal(int64(2*time.Minute), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		rts, wghts, sTime, usage, true, 10); err != nil {
+		rts, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
-			utils.ToIJSON(expOrdered), utils.ToIJSON(ordRts))
+			utils.ToJSON(expOrdered), utils.ToJSON(ordRts))
 	}
 }
 
 func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh1 := &engine.Rate{
+	rtCh1 := &utils.Rate{
 		ID:              "CHRISTMAS1",
 		ActivationTimes: "* 0-6 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -155,13 +152,13 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh2 := &engine.Rate{
+	rtCh2 := &utils.Rate{
 		ID:              "CHRISTMAS2",
 		ActivationTimes: "* 7-12 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -169,13 +166,13 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh3 := &engine.Rate{
+	rtCh3 := &utils.Rate{
 		ID:              "CHRISTMAS3",
 		ActivationTimes: "* 13-19 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -183,13 +180,13 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh4 := &engine.Rate{
+	rtCh4 := &utils.Rate{
 		ID:              "CHRISTMAS4",
 		ActivationTimes: "* 20-23 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -197,48 +194,48 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 20, 20, 20}
-	allRates := []*engine.Rate{rt1, rtCh1, rtCh2, rtCh3, rtCh4}
+	allRates := []*utils.Rate{rt1, rtCh1, rtCh2, rtCh3, rtCh4}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 12, 23, 22, 0, 0, 0, time.UTC)
-	usage := 31 * time.Hour
+	usage := utils.NewDecimal(int64(31*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			2 * time.Hour,
+			utils.NewDecimal(int64(2*time.Hour), 0).Big,
 			rtCh1,
 		},
 		{
-			9 * time.Hour,
+			utils.NewDecimal(int64(9*time.Hour), 0).Big,
 			rtCh2,
 		},
 		{
-			15 * time.Hour,
+			utils.NewDecimal(int64(15*time.Hour), 0).Big,
 			rtCh3,
 		},
 		{
-			22 * time.Hour,
+			utils.NewDecimal(int64(22*time.Hour), 0).Big,
 			rtCh4,
 		},
 		{
-			26 * time.Hour,
+			utils.NewDecimal(int64(26*time.Hour), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -246,20 +243,20 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh1 := &engine.Rate{
+	rtCh1 := &utils.Rate{
 		ID:              "CHRISTMAS1",
 		ActivationTimes: "* * 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -267,13 +264,13 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh2 := &engine.Rate{
+	rtCh2 := &utils.Rate{
 		ID:              "CHRISTMAS2",
 		ActivationTimes: "* 18-23 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -281,40 +278,40 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 30}
-	allRates := []*engine.Rate{rt1, rtCh1, rtCh2}
+	allRates := []*utils.Rate{rt1, rtCh1, rtCh2}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 12, 23, 21, 28, 12, 0, time.UTC)
-	usage := 31 * time.Hour
+	usage := utils.NewDecimal(int64(31*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			2*time.Hour + 31*time.Minute + 48*time.Second,
+			utils.NewDecimal(int64(2*time.Hour+31*time.Minute+48*time.Second), 0).Big,
 			rtCh1,
 		},
 		{
-			20*time.Hour + 31*time.Minute + 48*time.Second,
+			utils.NewDecimal(int64(20*time.Hour+31*time.Minute+48*time.Second), 0).Big,
 			rtCh2,
 		},
 		{
-			26*time.Hour + 31*time.Minute + 48*time.Second,
+			utils.NewDecimal(int64(26*time.Hour+31*time.Minute+48*time.Second), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -322,7 +319,7 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
-	rtTwentyFiveMins := &engine.Rate{
+	rtTwentyFiveMins := &utils.Rate{
 		ID:              "TWENTYFIVE_MINS",
 		ActivationTimes: "*/25 * * * *",
 		Weights: utils.DynamicWeights{
@@ -330,13 +327,13 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * * * 3",
 		Weights: utils.DynamicWeights{
@@ -344,48 +341,48 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rt1, rtTwentyFiveMins}
+	allRates := []*utils.Rate{rt1, rtTwentyFiveMins}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 10, 28, 20, 0, 0, 0, time.UTC)
-	usage := time.Hour
+	usage := utils.NewDecimal(int64(time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtTwentyFiveMins,
 		},
 		{
-			time.Minute,
+			utils.NewDecimal(int64(time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			25 * time.Minute,
+			utils.NewDecimal(int64(25*time.Minute), 0).Big,
 			rtTwentyFiveMins,
 		},
 		{
-			26 * time.Minute,
+			utils.NewDecimal(int64(26*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			50 * time.Minute,
+			utils.NewDecimal(int64(50*time.Minute), 0).Big,
 			rtTwentyFiveMins,
 		},
 		{
-			51 * time.Minute,
+			utils.NewDecimal(int64(51*time.Minute), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -393,7 +390,7 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "ALWAYS_RATE",
 		ActivationTimes: "26 * * * *",
 		Weights: utils.DynamicWeights{
@@ -401,13 +398,13 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtFirstInterval := &engine.Rate{
+	rtFirstInterval := &utils.Rate{
 		ID:              "FIRST_INTERVAL",
 		ActivationTimes: "0-25 * * * *",
 		Weights: utils.DynamicWeights{
@@ -415,13 +412,13 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtSecondINterval := &engine.Rate{
+	rtSecondINterval := &utils.Rate{
 		ID:              "SECOND_INTERVAL",
 		ActivationTimes: "27-59 * * * *",
 		Weights: utils.DynamicWeights{
@@ -429,36 +426,36 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 20}
-	allRates := []*engine.Rate{rt1, rtFirstInterval, rtSecondINterval}
+	allRates := []*utils.Rate{rt1, rtFirstInterval, rtSecondINterval}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 10, 28, 20, 0, 0, 0, time.UTC)
-	usage := time.Hour
+	usage := utils.NewDecimal(int64(time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtFirstInterval,
 		},
 		{
-			26 * time.Minute,
+			utils.NewDecimal(int64(26*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			27 * time.Minute,
+			utils.NewDecimal(int64(27*time.Minute), 0).Big,
 			rtSecondINterval,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -466,20 +463,20 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt1NewYear := &engine.Rate{
+	rt1NewYear := &utils.Rate{
 		ID:              "NEW_YEAR1",
 		ActivationTimes: "* 20-23 * * *",
 		Weights: utils.DynamicWeights{
@@ -487,13 +484,13 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt1NewYear2 := &engine.Rate{
+	rt1NewYear2 := &utils.Rate{
 		ID:              "NEW_YEAR2",
 		ActivationTimes: "0-30 22 * * *",
 		Weights: utils.DynamicWeights{
@@ -501,48 +498,48 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 30}
-	allRates := []*engine.Rate{rt1, rt1NewYear, rt1NewYear2}
+	allRates := []*utils.Rate{rt1, rt1NewYear, rt1NewYear2}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 12, 30, 23, 0, 0, 0, time.UTC)
-	usage := 26 * time.Hour
+	usage := utils.NewDecimal(int64(26*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1NewYear,
 		},
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rt1,
 		},
 		{
-			21 * time.Hour,
+			utils.NewDecimal(int64(21*time.Hour), 0).Big,
 			rt1NewYear,
 		},
 		{
-			23 * time.Hour,
+			utils.NewDecimal(int64(23*time.Hour), 0).Big,
 			rt1NewYear2,
 		},
 		{
-			23*time.Hour + 31*time.Minute,
+			utils.NewDecimal(int64(23*time.Hour+31*time.Minute), 0).Big,
 			rt1NewYear,
 		},
 		{
-			25 * time.Hour,
+			utils.NewDecimal(int64(25*time.Hour), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -550,7 +547,7 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 }
 
 func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
-	rtEveryHour := &engine.Rate{
+	rtEveryHour := &utils.Rate{
 		ID:              "HOUR_RATE",
 		ActivationTimes: "* */1 * * *",
 		Weights: utils.DynamicWeights{
@@ -558,13 +555,13 @@ func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtEveryDay := &engine.Rate{
+	rtEveryDay := &utils.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * 22 * *",
 		Weights: utils.DynamicWeights{
@@ -572,36 +569,36 @@ func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rtEveryHour, rtEveryDay}
+	allRates := []*utils.Rate{rtEveryHour, rtEveryDay}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 10, 24, 15, 0, time.UTC)
-	usage := 49 * time.Hour
+	usage := utils.NewDecimal(int64(49*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtEveryHour,
 		},
 		{
-			13*time.Hour + 35*time.Minute + 45*time.Second,
+			utils.NewDecimal(int64(13*time.Hour+35*time.Minute+45*time.Second), 0).Big,
 			rtEveryDay,
 		},
 		{
-			37*time.Hour + 35*time.Minute + 45*time.Second,
+			utils.NewDecimal(int64(37*time.Hour+35*time.Minute+45*time.Second), 0).Big,
 			rtEveryHour,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -609,7 +606,7 @@ func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
-	rtOneHour1 := &engine.Rate{
+	rtOneHour1 := &utils.Rate{
 		ID:              "HOUR_RATE_1",
 		ActivationTimes: "0-19 * * * *",
 		Weights: utils.DynamicWeights{
@@ -617,13 +614,13 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtOneHour2 := &engine.Rate{
+	rtOneHour2 := &utils.Rate{
 		ID:              "HOUR_RATE_2",
 		ActivationTimes: "20-39 * * * *",
 		Weights: utils.DynamicWeights{
@@ -631,13 +628,13 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtOneHour3 := &engine.Rate{
+	rtOneHour3 := &utils.Rate{
 		ID:              "HOUR_RATE_3",
 		ActivationTimes: "40-59 * * * *",
 		Weights: utils.DynamicWeights{
@@ -645,52 +642,52 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{20, 20, 20}
-	allRates := []*engine.Rate{rtOneHour1, rtOneHour2, rtOneHour3}
+	allRates := []*utils.Rate{rtOneHour1, rtOneHour2, rtOneHour3}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 15, 10, 59, 59, 0, time.UTC)
-	usage := 2 * time.Hour
+	usage := utils.NewDecimal(int64(2*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtOneHour3,
 		},
 		{
-			time.Second,
+			utils.NewDecimal(int64(time.Second), 0).Big,
 			rtOneHour1,
 		},
 		{
-			20*time.Minute + time.Second,
+			utils.NewDecimal(int64(20*time.Minute+time.Second), 0).Big,
 			rtOneHour2,
 		},
 		{
-			40*time.Minute + time.Second,
+			utils.NewDecimal(int64(40*time.Minute+time.Second), 0).Big,
 			rtOneHour3,
 		},
 		{
-			time.Hour + time.Second,
+			utils.NewDecimal(int64(time.Hour+time.Second), 0).Big,
 			rtOneHour1,
 		},
 		{
-			time.Hour + 20*time.Minute + time.Second,
+			utils.NewDecimal(int64(time.Hour+20*time.Minute+time.Second), 0).Big,
 			rtOneHour2,
 		},
 		{
-			time.Hour + 40*time.Minute + time.Second,
+			utils.NewDecimal(int64(time.Hour+40*time.Minute+time.Second), 0).Big,
 			rtOneHour3,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -698,7 +695,7 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 }
 
 func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
-	rtEveryThreeH := &engine.Rate{
+	rtEveryThreeH := &utils.Rate{
 		ID:              "EVERY_THREE_RATE",
 		ActivationTimes: "* */3 * * *",
 		Weights: utils.DynamicWeights{
@@ -706,13 +703,13 @@ func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtByDay := &engine.Rate{
+	rtByDay := &utils.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* 15-23 * * *",
 		Weights: utils.DynamicWeights{
@@ -720,32 +717,32 @@ func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rtEveryThreeH, rtByDay}
+	allRates := []*utils.Rate{rtEveryThreeH, rtByDay}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 15, 0, 0, 0, 0, time.UTC)
-	usage := 24 * time.Hour
+	usage := utils.NewDecimal(int64(24*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtEveryThreeH,
 		},
 		{
-			15 * time.Hour,
+			utils.NewDecimal(int64(15*time.Hour), 0).Big,
 			rtByDay,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -753,7 +750,7 @@ func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 }
 
 func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
-	rtHalfDay1 := &engine.Rate{
+	rtHalfDay1 := &utils.Rate{
 		ID:              "HALF_RATE1",
 		ActivationTimes: "* 0-11 22 12 *",
 		Weights: utils.DynamicWeights{
@@ -761,13 +758,13 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtHalfDay2 := &engine.Rate{
+	rtHalfDay2 := &utils.Rate{
 		ID:              "HALF_RATE2",
 		ActivationTimes: "* 12-23 22 12 *",
 		Weights: utils.DynamicWeights{
@@ -775,13 +772,13 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtHalfDay2r1 := &engine.Rate{
+	rtHalfDay2r1 := &utils.Rate{
 		ID:              "HALF_RATE2.1",
 		ActivationTimes: "* 12-16 22 12 *",
 		Weights: utils.DynamicWeights{
@@ -789,13 +786,13 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtHalfDay2r2 := &engine.Rate{
+	rtHalfDay2r2 := &utils.Rate{
 		ID:              "HALF_RATE2.2",
 		ActivationTimes: "* 18-23 22 12 *",
 		Weights: utils.DynamicWeights{
@@ -803,40 +800,40 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 10, 20, 20}
-	allRates := []*engine.Rate{rtHalfDay1, rtHalfDay2, rtHalfDay2r1, rtHalfDay2r2}
+	allRates := []*utils.Rate{rtHalfDay1, rtHalfDay2, rtHalfDay2r1, rtHalfDay2r2}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 12, 21, 23, 0, 0, 0, time.UTC)
-	usage := 25 * time.Hour
+	usage := utils.NewDecimal(int64(25*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rtHalfDay1,
 		},
 		{
-			13 * time.Hour,
+			utils.NewDecimal(int64(13*time.Hour), 0).Big,
 			rtHalfDay2r1,
 		},
 		{
-			18 * time.Hour,
+			utils.NewDecimal(int64(18*time.Hour), 0).Big,
 			rtHalfDay2,
 		},
 		{
-			19 * time.Hour,
+			utils.NewDecimal(int64(19*time.Hour), 0).Big,
 			rtHalfDay2r2,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -844,7 +841,7 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 }
 
 func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
-	rateEvery1H := &engine.Rate{
+	rateEvery1H := &utils.Rate{
 		ID:              "HOUR_RATE",
 		ActivationTimes: "* */1 * * *",
 		Weights: utils.DynamicWeights{
@@ -852,13 +849,13 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rateEvery30Mins := &engine.Rate{
+	rateEvery30Mins := &utils.Rate{
 		ID:              "MINUTES_RATE",
 		ActivationTimes: "*/30 * * * *",
 		Weights: utils.DynamicWeights{
@@ -866,44 +863,44 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rateEvery1H, rateEvery30Mins}
+	allRates := []*utils.Rate{rateEvery1H, rateEvery30Mins}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 9, 20, 10, 0, 0, 0, time.UTC)
-	usage := time.Hour + time.Second
+	usage := utils.NewDecimal(int64(time.Hour+time.Second), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rateEvery30Mins,
 		},
 		{
-			time.Minute,
+			utils.NewDecimal(int64(time.Minute), 0).Big,
 			rateEvery1H,
 		},
 		{
-			30 * time.Minute,
+			utils.NewDecimal(int64(30*time.Minute), 0).Big,
 			rateEvery30Mins,
 		},
 		{
-			30*time.Minute + time.Minute,
+			utils.NewDecimal(int64(30*time.Minute+time.Minute), 0).Big,
 			rateEvery1H,
 		},
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rateEvery30Mins,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -911,7 +908,7 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
-	rtPrincipal := &engine.Rate{
+	rtPrincipal := &utils.Rate{
 		ID:              "PRINCIPAL_RATE",
 		ActivationTimes: "* 10-22 * * *",
 		Weights: utils.DynamicWeights{
@@ -919,13 +916,13 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT1",
 		ActivationTimes: "* 10-18 * * *",
 		Weights: utils.DynamicWeights{
@@ -933,13 +930,13 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID:              "RT2",
 		ActivationTimes: "* 10-16 * * *",
 		Weights: utils.DynamicWeights{
@@ -947,13 +944,13 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt3 := &engine.Rate{
+	rt3 := &utils.Rate{
 		ID:              "RT3",
 		ActivationTimes: "* 10-14 * * *",
 		Weights: utils.DynamicWeights{
@@ -961,40 +958,40 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 				Weight: 40,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 30, 40}
-	allRates := []*engine.Rate{rtPrincipal, rt1, rt2, rt3}
+	allRates := []*utils.Rate{rtPrincipal, rt1, rt2, rt3}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC)
-	usage := 13 * time.Hour
+	usage := utils.NewDecimal(int64(13*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt3,
 		},
 		{
-			5 * time.Hour,
+			utils.NewDecimal(int64(5*time.Hour), 0).Big,
 			rt2,
 		},
 		{
-			7 * time.Hour,
+			utils.NewDecimal(int64(7*time.Hour), 0).Big,
 			rt1,
 		},
 		{
-			9 * time.Hour,
+			utils.NewDecimal(int64(9*time.Hour), 0).Big,
 			rtPrincipal,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1002,7 +999,7 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
-	rtPrincipal := &engine.Rate{
+	rtPrincipal := &utils.Rate{
 		ID:              "PRINCIPAL_RATE",
 		ActivationTimes: "* 10-22 * * *",
 		Weights: utils.DynamicWeights{
@@ -1010,13 +1007,13 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT1",
 		ActivationTimes: "* 18-22 * * *",
 		Weights: utils.DynamicWeights{
@@ -1024,13 +1021,13 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 				Weight: 40,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID:              "RT2",
 		ActivationTimes: "* 16-22 * * *",
 		Weights: utils.DynamicWeights{
@@ -1038,13 +1035,13 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rt3 := &engine.Rate{
+	rt3 := &utils.Rate{
 		ID:              "RT3",
 		ActivationTimes: "* 14-22 * * *",
 		Weights: utils.DynamicWeights{
@@ -1052,40 +1049,40 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wght := []float64{10, 40, 30, 20}
-	allRates := []*engine.Rate{rtPrincipal, rt1, rt2, rt3}
+	allRates := []*utils.Rate{rtPrincipal, rt1, rt2, rt3}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC)
-	usage := 13 * time.Hour
+	usage := utils.NewDecimal(int64(13*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtPrincipal,
 		},
 		{
-			4 * time.Hour,
+			utils.NewDecimal(int64(4*time.Hour), 0).Big,
 			rt3,
 		},
 		{
-			6 * time.Hour,
+			utils.NewDecimal(int64(6*time.Hour), 0).Big,
 			rt2,
 		},
 		{
-			8 * time.Hour,
+			utils.NewDecimal(int64(8*time.Hour), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wght, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wght, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1093,7 +1090,7 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
-	rtOddMInutes := &engine.Rate{
+	rtOddMInutes := &utils.Rate{
 		ID:              "ODD_RATE",
 		ActivationTimes: "*/1 * * * *",
 		Weights: utils.DynamicWeights{
@@ -1101,13 +1098,13 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtEvenMinutes := &engine.Rate{
+	rtEvenMinutes := &utils.Rate{
 		ID:              "EVEN_RATE",
 		ActivationTimes: "*/2 * * * *",
 		Weights: utils.DynamicWeights{
@@ -1115,48 +1112,48 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rtOddMInutes, rtEvenMinutes}
+	allRates := []*utils.Rate{rtOddMInutes, rtEvenMinutes}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 12, 23, 22, 0, 0, 0, time.UTC)
-	usage := 5*time.Minute + time.Second
+	usage := utils.NewDecimal(int64(5*time.Minute+time.Second), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtEvenMinutes,
 		},
 		{
-			time.Minute,
+			utils.NewDecimal(int64(time.Minute), 0).Big,
 			rtOddMInutes,
 		},
 		{
-			2 * time.Minute,
+			utils.NewDecimal(int64(2*time.Minute), 0).Big,
 			rtEvenMinutes,
 		},
 		{
-			3 * time.Minute,
+			utils.NewDecimal(int64(3*time.Minute), 0).Big,
 			rtOddMInutes,
 		},
 		{
-			4 * time.Minute,
+			utils.NewDecimal(int64(4*time.Minute), 0).Big,
 			rtEvenMinutes,
 		},
 		{
-			5 * time.Minute,
+			utils.NewDecimal(int64(5*time.Minute), 0).Big,
 			rtOddMInutes,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1164,20 +1161,20 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh1 := &engine.Rate{
+	rtCh1 := &utils.Rate{
 		ID:              "CHRISTMAS1",
 		ActivationTimes: "* * 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -1185,13 +1182,13 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh2 := &engine.Rate{
+	rtCh2 := &utils.Rate{
 		ID:              "CHRISTMAS2",
 		ActivationTimes: "* 10-12 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -1199,13 +1196,13 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtCh3 := &engine.Rate{
+	rtCh3 := &utils.Rate{
 		ID:              "CHRISTMAS3",
 		ActivationTimes: "* 20-22 24 12 *",
 		Weights: utils.DynamicWeights{
@@ -1213,52 +1210,52 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 30, 30}
-	allRates := []*engine.Rate{rt1, rtCh1, rtCh2, rtCh3}
+	allRates := []*utils.Rate{rt1, rtCh1, rtCh2, rtCh3}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 12, 23, 22, 0, 0, 0, time.UTC)
-	usage := 36 * time.Hour
+	usage := utils.NewDecimal(int64(36*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			2 * time.Hour,
+			utils.NewDecimal(int64(2*time.Hour), 0).Big,
 			rtCh1,
 		},
 		{
-			12 * time.Hour,
+			utils.NewDecimal(int64(12*time.Hour), 0).Big,
 			rtCh2,
 		},
 		{
-			15 * time.Hour,
+			utils.NewDecimal(int64(15*time.Hour), 0).Big,
 			rtCh1,
 		},
 		{
-			22 * time.Hour,
+			utils.NewDecimal(int64(22*time.Hour), 0).Big,
 			rtCh3,
 		},
 		{
-			25 * time.Hour,
+			utils.NewDecimal(int64(25*time.Hour), 0).Big,
 			rtCh1,
 		},
 		{
-			26 * time.Hour,
+			utils.NewDecimal(int64(26*time.Hour), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1266,20 +1263,20 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 }
 
 func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtEvTwoHours := &engine.Rate{
+	rtEvTwoHours := &utils.Rate{
 		ID: "EVERY_TWO_HOURS",
 		Weights: utils.DynamicWeights{
 			{
@@ -1287,44 +1284,44 @@ func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 			},
 		},
 		ActivationTimes: "* */2 * * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rt1, rtEvTwoHours}
+	allRates := []*utils.Rate{rt1, rtEvTwoHours}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 12, 10, 0, 0, time.UTC)
-	usage := 4 * time.Hour
+	usage := utils.NewDecimal(int64(4*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtEvTwoHours,
 		},
 		{
-			50 * time.Minute,
+			utils.NewDecimal(int64(50*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			time.Hour + 50*time.Minute,
+			utils.NewDecimal(int64(time.Hour+50*time.Minute), 0).Big,
 			rtEvTwoHours,
 		},
 		{
-			2*time.Hour + 50*time.Minute,
+			utils.NewDecimal(int64(2*time.Hour+50*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			3*time.Hour + 50*time.Minute,
+			utils.NewDecimal(int64(3*time.Hour+50*time.Minute), 0).Big,
 			rtEvTwoHours,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1332,20 +1329,20 @@ func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtEveryTwoDays := &engine.Rate{
+	rtEveryTwoDays := &utils.Rate{
 		ID:              "RATE_EVERY_DAY",
 		ActivationTimes: "* * */2 * *",
 		Weights: utils.DynamicWeights{
@@ -1353,48 +1350,48 @@ func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRates := []*engine.Rate{rt1, rtEveryTwoDays}
+	allRates := []*utils.Rate{rt1, rtEveryTwoDays}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 23, 59, 59, 0, time.UTC)
-	usage := 96*time.Hour + 2*time.Second
+	usage := utils.NewDecimal(int64(96*time.Hour+2*time.Second), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rtEveryTwoDays,
 		},
 		{
-			time.Second,
+			utils.NewDecimal(int64(time.Second), 0).Big,
 			rt1,
 		},
 		{
-			24*time.Hour + time.Second,
+			utils.NewDecimal(int64(24*time.Hour+time.Second), 0).Big,
 			rtEveryTwoDays,
 		},
 		{
-			48*time.Hour + time.Second,
+			utils.NewDecimal(int64(48*time.Hour+time.Second), 0).Big,
 			rt1,
 		},
 		{
-			72*time.Hour + time.Second,
+			utils.NewDecimal(int64(72*time.Hour+time.Second), 0).Big,
 			rtEveryTwoDays,
 		},
 		{
-			96*time.Hour + time.Second,
+			utils.NewDecimal(int64(96*time.Hour+time.Second), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1402,7 +1399,7 @@ func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
-	rtRestricted := &engine.Rate{
+	rtRestricted := &utils.Rate{
 		ID:              "RESTRICTED",
 		ActivationTimes: "* 10-22 * * *",
 		Weights: utils.DynamicWeights{
@@ -1410,13 +1407,13 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtWayRestricted := &engine.Rate{
+	rtWayRestricted := &utils.Rate{
 		ID:              "WAY_RESTRICTED",
 		ActivationTimes: "* 12-14 * * *",
 		Weights: utils.DynamicWeights{
@@ -1424,13 +1421,13 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtSpecialHour := &engine.Rate{
+	rtSpecialHour := &utils.Rate{
 		ID:              "SPECIAL_HOUR",
 		ActivationTimes: "* 13 * * *",
 		Weights: utils.DynamicWeights{
@@ -1438,44 +1435,44 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 				Weight: 40,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{20, 30, 40}
-	allRts := []*engine.Rate{rtRestricted, rtWayRestricted, rtSpecialHour}
+	allRts := []*utils.Rate{rtRestricted, rtWayRestricted, rtSpecialHour}
 	for _, idx := range allRts {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 9, 0, 0, 0, time.UTC)
-	usage := 11 * time.Hour
+	usage := utils.NewDecimal(int64(11*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rtRestricted,
 		},
 		{
-			3 * time.Hour,
+			utils.NewDecimal(int64(3*time.Hour), 0).Big,
 			rtWayRestricted,
 		},
 		{
-			4 * time.Hour,
+			utils.NewDecimal(int64(4*time.Hour), 0).Big,
 			rtSpecialHour,
 		},
 		{
-			5 * time.Hour,
+			utils.NewDecimal(int64(5*time.Hour), 0).Big,
 			rtWayRestricted,
 		},
 		{
-			6 * time.Hour,
+			utils.NewDecimal(int64(6*time.Hour), 0).Big,
 			rtRestricted,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1483,7 +1480,7 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 }
 
 func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * 21 7 *",
 		Weights: utils.DynamicWeights{
@@ -1491,13 +1488,13 @@ func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtEveryTenMin := &engine.Rate{
+	rtEveryTenMin := &utils.Rate{
 		ID:              "EVERY_TEN_MIN",
 		ActivationTimes: "*/20 * * * *",
 		Weights: utils.DynamicWeights{
@@ -1505,44 +1502,44 @@ func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20}
-	allRts := []*engine.Rate{rt1, rtEveryTenMin}
+	allRts := []*utils.Rate{rt1, rtEveryTenMin}
 	for _, idx := range allRts {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 21, 10, 05, 0, 0, time.UTC)
-	usage := 40 * time.Minute
+	usage := utils.NewDecimal(int64(40*time.Minute), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			15 * time.Minute,
+			utils.NewDecimal(int64(15*time.Minute), 0).Big,
 			rtEveryTenMin,
 		},
 		{
-			16 * time.Minute,
+			utils.NewDecimal(int64(16*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			35 * time.Minute,
+			utils.NewDecimal(int64(35*time.Minute), 0).Big,
 			rtEveryTenMin,
 		},
 		{
-			36 * time.Minute,
+			utils.NewDecimal(int64(36*time.Minute), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1550,20 +1547,20 @@ func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "ALWAYS_RATE",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtDay := &engine.Rate{
+	rtDay := &utils.Rate{
 		ID:              "DAY_RATE",
 		ActivationTimes: "* * 21 7 2",
 		Weights: utils.DynamicWeights{
@@ -1571,13 +1568,13 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtDay1 := &engine.Rate{
+	rtDay1 := &utils.Rate{
 		ID:              "DAY_RATE1",
 		ActivationTimes: "* 15 21 7 2",
 		Weights: utils.DynamicWeights{
@@ -1585,13 +1582,13 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
-	rtDay2 := &engine.Rate{
+	rtDay2 := &utils.Rate{
 		ID:              "DAY_RATE2",
 		ActivationTimes: "* 18 21 7 2",
 		Weights: utils.DynamicWeights{
@@ -1599,52 +1596,52 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 				Weight: 30,
 			},
 		},
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	wghts := []float64{10, 20, 30, 30}
-	allRates := []*engine.Rate{rt1, rtDay, rtDay1, rtDay2}
+	allRates := []*utils.Rate{rt1, rtDay, rtDay1, rtDay2}
 	for _, idx := range allRates {
 		if err := idx.Compile(); err != nil {
 			t.Error(err)
 		}
 	}
 	sTime := time.Date(2020, 7, 20, 23, 0, 0, 0, time.UTC)
-	usage := 30 * time.Hour
+	usage := utils.NewDecimal(int64(30*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rtDay,
 		},
 		{
-			16 * time.Hour,
+			utils.NewDecimal(int64(16*time.Hour), 0).Big,
 			rtDay1,
 		},
 		{
-			17 * time.Hour,
+			utils.NewDecimal(int64(17*time.Hour), 0).Big,
 			rtDay,
 		},
 		{
-			19 * time.Hour,
+			utils.NewDecimal(int64(19*time.Hour), 0).Big,
 			rtDay2,
 		},
 		{
-			20 * time.Hour,
+			utils.NewDecimal(int64(20*time.Hour), 0).Big,
 			rtDay,
 		},
 		{
-			25 * time.Hour,
+			utils.NewDecimal(int64(25*time.Hour), 0).Big,
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1667,12 +1664,12 @@ func TestNewRatesWithWinner(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalCaseMaxIterations(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT_1",
 		ActivationTimes: "1 * * * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
@@ -1681,22 +1678,22 @@ func TestOrderRatesOnIntervalCaseMaxIterations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	aRts := []*engine.Rate{rt1}
+	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(2020, 01, 02, 0, 1, 0, 0, time.UTC)
-	usage := 96 * time.Hour
+	usage := utils.NewDecimal(int64(96*time.Hour), 0)
 	expectedErr := "maximum iterations reached"
-	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 1); err == nil || err.Error() != expectedErr {
+	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 1); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
 func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT_1",
 		ActivationTimes: "* * 27 02 *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
@@ -1706,7 +1703,7 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 	}
@@ -1715,10 +1712,10 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 		t.Error(err)
 	}
 	wghts := []float64{0}
-	aRts := []*engine.Rate{rt1}
+	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(0001, 02, 27, 0, 0, 0, 0, time.UTC)
-	usage := 48 * time.Hour
-	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 5); err != nil {
+	usage := utils.NewDecimal(int64(48*time.Hour), 0)
+	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 5); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1726,12 +1723,12 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT_1",
 		ActivationTimes: "* * 1 * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 			},
 		},
 	}
@@ -1741,7 +1738,7 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 	}
@@ -1750,10 +1747,10 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 		t.Error(err)
 	}
 	wghts := []float64{0}
-	aRts := []*engine.Rate{rt1}
+	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
-	usage := 96 * time.Hour
-	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, true, 4); err != nil {
+	usage := utils.NewDecimal(int64(96*time.Hour), 0)
+	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, true, 4); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1761,12 +1758,12 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 }
 
 func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT_1",
 		ActivationTimes: "* * 1 * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 48 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(48*time.Hour), 0),
 			},
 		},
 	}
@@ -1776,7 +1773,7 @@ func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 	}
@@ -1785,24 +1782,24 @@ func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
 		t.Error(err)
 	}
 	wghts := []float64{0}
-	aRts := []*engine.Rate{rt1}
+	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
-	usage := 48 * time.Hour
-	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 4); err != nil {
+	usage := utils.NewDecimal(int64(48*time.Hour), 0)
+	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RT_1",
 		ActivationTimes: "* * 1 * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 23 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(23*time.Hour), 0),
 			},
 			{
-				IntervalStart: -time.Hour,
+				IntervalStart: utils.NewDecimal(int64(-time.Hour), 0),
 			},
 		},
 	}
@@ -1812,7 +1809,7 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 	}
@@ -1820,11 +1817,11 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	aRts := []*engine.Rate{rt1}
+	aRts := []*utils.Rate{rt1}
 	wghts := []float64{0}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
-	usage := 48 * time.Hour
-	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 4); err != nil {
+	usage := utils.NewDecimal(int64(48*time.Hour), 0)
+	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1840,17 +1837,17 @@ func TestComputeRateSIntervals(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt0 := &engine.Rate{
+	rt0 := &utils.Rate{
 		ID: "RATE0",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(10, 1),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: 60 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(60*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(5, 3),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -1858,17 +1855,17 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -1876,10 +1873,10 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt0.ID: rt0,
 			rt1.ID: rt1,
 		},
@@ -1890,29 +1887,29 @@ func TestComputeRateSIntervals(t *testing.T) {
 
 	rts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			90 * time.Second,
+			utils.NewDecimal(int64(90*time.Second), 0).Big,
 			rt1,
 		},
 	}
 
-	eRtIvls := []*engine.RateSInterval{
+	eRtIvls := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
-					Usage:             time.Minute,
+					IncrementStart:    utils.NewDecimal(0, 0),
+					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 					Rate:              rt0,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
 				},
 				{
-					UsageStart:        time.Minute,
-					Usage:             30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt0,
 					IntervalRateIndex: 1,
 					CompressFactor:    30,
@@ -1921,18 +1918,18 @@ func TestComputeRateSIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 90 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(90*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        90 * time.Second,
-					Usage:             30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    30,
 				},
 				{
-					UsageStart:        2 * time.Minute,
-					Usage:             10 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
+					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    10,
@@ -1942,7 +1939,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 	if rtIvls, err := computeRateSIntervals(rts,
-		0, 130*time.Second); err != nil {
+		utils.NewDecimal(0, 0).Big, utils.NewDecimal(int64(130*time.Second), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
 		t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
@@ -1950,22 +1947,22 @@ func TestComputeRateSIntervals(t *testing.T) {
 
 	rts = []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			90 * time.Second,
+			utils.NewDecimal(int64(90*time.Second), 0).Big,
 			rt1,
 		},
 	}
 
-	eRtIvls = []*engine.RateSInterval{
+	eRtIvls = []*utils.RateSInterval{
 		{
-			UsageStart: time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute,
-					Usage:             30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt0,
 					IntervalRateIndex: 1,
 					CompressFactor:    30,
@@ -1974,18 +1971,18 @@ func TestComputeRateSIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 90 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(90*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        90 * time.Second,
-					Usage:             30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    30,
 				},
 				{
-					UsageStart:        2 * time.Minute,
-					Usage:             10 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
+					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    10,
@@ -1995,7 +1992,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 	if rtIvls, err := computeRateSIntervals(rts,
-		time.Minute, 70*time.Second); err != nil {
+		utils.NewDecimal(int64(time.Minute), 0).Big, utils.NewDecimal(int64(70*time.Second), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToIJSON(eRtIvls), utils.ToIJSON(rtIvls))
@@ -2015,17 +2012,17 @@ func TestComputeRateSIntervals1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt0 := &engine.Rate{
+	rt0 := &utils.Rate{
 		ID: "RATE0",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tsecDecimal,
 				Increment:     tsecDecimal,
 			},
 			{
-				IntervalStart: 30 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -2033,17 +2030,17 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		},
 	}
 
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -2051,10 +2048,10 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt0.ID: rt0,
 			rt1.ID: rt1,
 		},
@@ -2065,22 +2062,22 @@ func TestComputeRateSIntervals1(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			time.Minute + 10*time.Second,
+			utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big,
 			rt1,
 		},
 	}
 
-	eRtIvls := []*engine.RateSInterval{
+	eRtIvls := []*utils.RateSInterval{
 		{
-			UsageStart: 30 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        30 * time.Second,
-					Usage:             40 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
+					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 					Rate:              rt0,
 					IntervalRateIndex: 1,
 					CompressFactor:    40,
@@ -2089,18 +2086,18 @@ func TestComputeRateSIntervals1(t *testing.T) {
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Minute + 10*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute + 10*time.Second,
-					Usage:             50 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
+					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    50,
 				},
 				{
-					UsageStart:        2 * time.Minute,
-					Usage:             90 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
+					Usage:             utils.NewDecimal(int64(90*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    90,
@@ -2109,7 +2106,8 @@ func TestComputeRateSIntervals1(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rtIvls, err := computeRateSIntervals(ordRts, 30*time.Second, 3*time.Minute); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(30*time.Second), 0).Big,
+		utils.NewDecimal(int64(3*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtIvls, eRtIvls) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
@@ -2129,18 +2127,18 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt0 := &engine.Rate{
+	rt0 := &utils.Rate{
 		ID: "RATE0",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				FixedFee:      utils.NewDecimal(123, 3),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tsecDecimal,
 				Increment:     tsecDecimal,
 			},
 			{
-				IntervalStart: 30 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -2148,18 +2146,18 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				FixedFee:      utils.NewDecimal(567, 3),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -2167,10 +2165,10 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt0.ID: rt0,
 			rt1.ID: rt1,
 		},
@@ -2181,72 +2179,73 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			time.Minute + 10*time.Second,
+			utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big,
 			rt1,
 		},
 	}
 
-	eRtIvls := []*engine.RateSInterval{
+	eRtIvls := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt0,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
-					Usage:             -1,
+					Usage:             utils.NewDecimal(-1, 0),
 				},
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt0,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 				{
-					UsageStart:        30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt0,
 					IntervalRateIndex: 1,
 					CompressFactor:    40,
-					Usage:             40 * time.Second,
+					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Minute + 10*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute + 10*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
-					Usage:             -1,
+					Usage:             utils.NewDecimal(-1, 0),
 				},
 				{
-					UsageStart:        time.Minute + 10*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    50,
-					Usage:             50 * time.Second,
+					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
 				},
 				{
-					UsageStart:        2 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    60,
-					Usage:             60 * time.Second,
+					Usage:             utils.NewDecimal(int64(60*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
-	if rtIvls, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(3*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtIvls, eRtIvls) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
@@ -2258,18 +2257,18 @@ func TestComputeRateSIntervals2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt0 := &engine.Rate{
+	rt0 := &utils.Rate{
 		ID:              "RATE0",
 		ActivationTimes: "* * * * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(1, 0),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: 50 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(50*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
@@ -2278,18 +2277,18 @@ func TestComputeRateSIntervals2(t *testing.T) {
 	}
 	rt0.Compile()
 
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID:              "RATE1",
 		ActivationTimes: "45-49 * * * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: 45 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
@@ -2298,71 +2297,72 @@ func TestComputeRateSIntervals2(t *testing.T) {
 	}
 	rt1.Compile()
 	wghts := []float64{0, 0}
-	allRates := []*engine.Rate{rt0, rt1}
+	allRates := []*utils.Rate{rt0, rt1}
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt0,
 		},
 		{
-			45 * time.Minute,
+			utils.NewDecimal(int64(45*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			50 * time.Minute,
+			utils.NewDecimal(int64(50*time.Minute), 0).Big,
 			rt0,
 		},
 	}
 
-	eRtIvls := []*engine.RateSInterval{
+	eRtIvls := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt0,
 					IntervalRateIndex: 0,
 					CompressFactor:    45,
-					Usage:             45 * time.Minute,
+					Usage:             utils.NewDecimal(int64(45*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 45 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        45 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    5,
-					Usage:             5 * time.Minute,
+					Usage:             utils.NewDecimal(int64(5*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 50 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(50*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        50 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(50*time.Minute), 0),
 					Rate:              rt0,
 					IntervalRateIndex: 1,
 					CompressFactor:    10,
-					Usage:             10 * time.Minute,
+					Usage:             utils.NewDecimal(int64(10*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
+
 	sTime := time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC)
-	usage := time.Hour
-	if rcvOrdRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
+	usage := utils.NewDecimal(int64(time.Hour), 0)
+	if rcvOrdRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(eRtIvls)
 	} else if !reflect.DeepEqual(ordRts, rcvOrdRts) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ordRts), utils.ToJSON(rcvOrdRts))
-	} else if rcveRtIvls, err := computeRateSIntervals(rcvOrdRts, 0, usage); err != nil {
+	} else if rcveRtIvls, err := computeRateSIntervals(rcvOrdRts, utils.NewDecimal(0, 0).Big, usage.Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcveRtIvls, eRtIvls) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rcveRtIvls))
@@ -2378,23 +2378,23 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: time.Minute,
+				IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
@@ -2402,23 +2402,23 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 30 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: time.Minute + 30*time.Second,
+				IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(25, 2),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2*time.Minute + 30*time.Second,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(35, 2),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
@@ -2426,10 +2426,10 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 		},
@@ -2440,112 +2440,113 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			30 * time.Second,
+			utils.NewDecimal(int64(30*time.Second), 0).Big,
 			rt2,
 		},
 		{
-			time.Minute,
+			utils.NewDecimal(int64(time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			time.Minute + 30*time.Second,
+			utils.NewDecimal(int64(time.Minute+30*time.Second), 0).Big,
 			rt2,
 		},
 		{
-			2 * time.Minute,
+			utils.NewDecimal(int64(2*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			2*time.Minute + 30*time.Second,
+			utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0).Big,
 			rt2,
 		},
 	}
 
-	expOrdRates := []*engine.RateSInterval{
+	expOrdRates := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    30,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 30 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    30,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    30,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Minute + 30*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute + 30*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    30,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    30,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2*time.Minute + 30*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2*time.Minute + 30*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 2,
 					CompressFactor:    30,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
-	if rcvOrdRates, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err != nil {
+	if rcvOrdRates, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(3*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRates, expOrdRates) {
 		t.Errorf("Expected %+v,\nreceived %+v", utils.ToJSON(expOrdRates), utils.ToJSON(rcvOrdRates))
@@ -2557,11 +2558,11 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: time.Minute,
+				IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tsecDecimal,
 				Increment:     tsecDecimal,
@@ -2569,11 +2570,11 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 2 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tsecDecimal,
 				Increment:     tsecDecimal,
@@ -2581,10 +2582,10 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 		},
@@ -2595,13 +2596,14 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 	}
 
-	expected := "intervalStart for rate: <cgrates.org:RATE_PROFILE:RATE1> higher than usage: 0s"
-	if _, err := computeRateSIntervals(ordRts, 0, 3*time.Minute); err == nil || err.Error() != expected {
+	expected := "intervalStart for rate: <cgrates.org:RATE_PROFILE:RATE1> higher than usage: 0"
+	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(3*time.Minute), 0).Big); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
@@ -2615,11 +2617,11 @@ func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tsecDecimal,
 				Increment:     zeroDecimal,
@@ -2630,13 +2632,14 @@ func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0 * time.Second,
+			utils.NewDecimal(int64(0*time.Second), 0).Big,
 			rt1,
 		},
 	}
 
 	expected := "zero increment to be charged within rate: <>"
-	if _, err := computeRateSIntervals(ordRts, 33*time.Second, 3*time.Minute); err == nil || err.Error() != expected {
+	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(33*time.Second), 0).Big,
+		utils.NewDecimal(int64(3*time.Minute), 0).Big); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
@@ -2658,17 +2661,17 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 30 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(25, 3),
 				Unit:          minDecimal,
 				Increment:     ssecDecimal,
@@ -2679,33 +2682,34 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 	}
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
 				{
-					UsageStart:        30 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
-					Usage:             40 * time.Second,
+					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 					CompressFactor:    6,
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Minute+10*time.Second); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -2737,17 +2741,17 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 25 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(25*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(25, 2),
 				Unit:          minDecimal,
 				Increment:     ssecDecimal,
@@ -2755,17 +2759,17 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 45 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 55 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(55*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          tsecDecimal,
 				Increment:     fsecDecimal,
@@ -2773,17 +2777,17 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 	}
 
-	rt3 := &engine.Rate{
+	rt3 := &utils.Rate{
 		ID: "RATE3",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 30 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          fssecDecimal,
 				Increment:     fsecDecimal,
 			},
 			{
-				IntervalStart: time.Minute,
+				IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(5, 3),
 				Unit:          tsecDecimal,
 				Increment:     fsecDecimal,
@@ -2791,10 +2795,10 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 			rt3.ID: rt3,
@@ -2806,85 +2810,85 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			35 * time.Second,
+			utils.NewDecimal(int64(35*time.Second), 0).Big,
 			rt3,
 		},
 		{
-			46 * time.Second,
+			utils.NewDecimal(int64(46*time.Second), 0).Big,
 			rt2,
 		},
 		{
-			time.Minute,
+			utils.NewDecimal(int64(time.Minute), 0).Big,
 			rt3,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
-					Usage:             25 * time.Second,
+					Usage:             utils.NewDecimal(int64(25*time.Second), 0),
 					CompressFactor:    25,
 				},
 				{
-					UsageStart:        25 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(25*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
-					Usage:             10 * time.Second,
+					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					CompressFactor:    2,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 35 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(35*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        35 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(35*time.Second), 0),
 					Rate:              rt3,
 					IntervalRateIndex: 0,
-					Usage:             11 * time.Second,
+					Usage:             utils.NewDecimal(int64(11*time.Second), 0),
 					CompressFactor:    3,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 46 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(46*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        46 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(46*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
-					Usage:             9 * time.Second,
+					Usage:             utils.NewDecimal(int64(9*time.Second), 0),
 					CompressFactor:    9,
 				},
 				{
-					UsageStart:        55 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(55*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
-					Usage:             5 * time.Second,
+					Usage:             utils.NewDecimal(int64(5*time.Second), 0),
 					CompressFactor:    1,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Rate:              rt3,
 					IntervalRateIndex: 1,
-					Usage:             10 * time.Second,
+					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					CompressFactor:    2,
 				},
 			},
@@ -2892,7 +2896,8 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Minute+10*time.Second); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -2916,17 +2921,17 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: time.Minute,
+				IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 3 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(3*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          minDecimal,
 				Increment:     ssecDecimal,
@@ -2934,17 +2939,17 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: time.Minute + 30*time.Second,
+				IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2*time.Minute + 30*time.Second,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tsecDecimal,
 				Increment:     ssecDecimal,
@@ -2952,11 +2957,11 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 	}
 
-	rt3 := &engine.Rate{
+	rt3 := &utils.Rate{
 		ID: "RATE3",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 2 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tsecDecimal,
 				Increment:     tsecDecimal,
@@ -2964,10 +2969,10 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 			rt3.ID: rt3,
@@ -2979,91 +2984,91 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 
 	ordRates := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			time.Minute,
+			utils.NewDecimal(int64(time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			time.Minute + 30*time.Second,
+			utils.NewDecimal(int64(time.Minute+30*time.Second), 0).Big,
 			rt2,
 		},
 		{
-			2 * time.Minute,
+			utils.NewDecimal(int64(2*time.Minute), 0).Big,
 			rt3,
 		},
 		{
-			2*time.Minute + 30*time.Second,
+			utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0).Big,
 			rt2,
 		},
 		{
-			3 * time.Minute,
+			utils.NewDecimal(int64(3*time.Minute), 0).Big,
 			rt1,
 		},
 	}
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Minute + 30*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Minute + 30*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Rate:              rt3,
 					IntervalRateIndex: 0,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    1,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2*time.Minute + 30*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2*time.Minute + 30*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
-					Usage:             30 * time.Second,
+					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    5,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 3 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(3*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        3 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(3*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
-					Usage:             4 * time.Minute,
+					Usage:             utils.NewDecimal(int64(4*time.Minute), 0),
 					CompressFactor:    35,
 				},
 			},
@@ -3071,7 +3076,8 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRates, time.Minute, 6*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRates, utils.NewDecimal(int64(time.Minute), 0).Big,
+		utils.NewDecimal(int64(6*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -3087,17 +3093,17 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          hourDecimal,
 				Increment:     tminDecimal,
 			},
 			{
-				IntervalStart: 4 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(4*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(35, 2),
 				Unit:          hourDecimal,
 				Increment:     tminDecimal,
@@ -3105,17 +3111,17 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 13 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(13*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          hourDecimal,
 				Increment:     tminDecimal,
 			},
 			{
-				IntervalStart: 16 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(16*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(35, 2),
 				Unit:          hourDecimal,
 				Increment:     tminDecimal,
@@ -3134,17 +3140,17 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rtGH := &engine.Rate{
+	rtGH := &utils.Rate{
 		ID: "RATE_GOLDEN_HOUR",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 12 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          thourDecimal,
 				Increment:     dminDecimal,
 			},
 			{
-				IntervalStart: 12*time.Hour + 30*time.Minute,
+				IntervalStart: utils.NewDecimal(int64(12*time.Hour+30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          hourDecimal,
 				Increment:     fminDecimal,
@@ -3152,10 +3158,10 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFIOLE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID:  rt1,
 			rt2.ID:  rt2,
 			rtGH.ID: rtGH,
@@ -3167,92 +3173,92 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			6 * time.Hour,
+			utils.NewDecimal(int64(6*time.Hour), 0).Big,
 			rt1,
 		},
 		{
-			12 * time.Hour,
+			utils.NewDecimal(int64(12*time.Hour), 0).Big,
 			rtGH,
 		},
 		{
-			13 * time.Hour,
+			utils.NewDecimal(int64(13*time.Hour), 0).Big,
 			rt2,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
-					Usage:             4 * time.Hour,
+					Usage:             utils.NewDecimal(int64(4*time.Hour), 0),
 					CompressFactor:    80,
 				},
 				{
-					UsageStart:        4 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(4*time.Hour), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
-					Usage:             2 * time.Hour,
+					Usage:             utils.NewDecimal(int64(2*time.Hour), 0),
 					CompressFactor:    40,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 6 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(6*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        6 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(6*time.Hour), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
-					Usage:             6 * time.Hour,
+					Usage:             utils.NewDecimal(int64(6*time.Hour), 0),
 					CompressFactor:    120,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 12 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        12 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
 					Rate:              rtGH,
 					IntervalRateIndex: 0,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 					CompressFactor:    15,
 				},
 				{
-					UsageStart:        12*time.Hour + 30*time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(12*time.Hour+30*time.Minute), 0),
 					Rate:              rtGH,
 					IntervalRateIndex: 1,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 					CompressFactor:    6,
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 13 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(13*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        13 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
-					Usage:             3 * time.Hour,
+					Usage:             utils.NewDecimal(int64(3*time.Hour), 0),
 					CompressFactor:    60,
 				},
 				{
-					UsageStart:        16 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(16*time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
-					Usage:             9 * time.Hour,
+					Usage:             utils.NewDecimal(int64(9*time.Hour), 0),
 					CompressFactor:    180,
 				},
 			},
@@ -3260,7 +3266,8 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 25*time.Hour); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(25*time.Hour), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -3280,23 +3287,23 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          tsecDecimal,
 				Increment:     twsecDecimal,
 			},
 			{
-				IntervalStart: 4 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(4*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(48, 2),
 				Unit:          tsecDecimal,
 				Increment:     twsecDecimal,
 			},
 			{
-				IntervalStart: 8 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(8*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(45, 2),
 				Unit:          tsecDecimal,
 				Increment:     twsecDecimal,
@@ -3304,23 +3311,23 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          twsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 2 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(2*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(48, 2),
 				Unit:          twsecDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 6 * time.Second,
+				IntervalStart: utils.NewDecimal(int64(6*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(45, 2),
 				Unit:          twsecDecimal,
 				Increment:     secDecimal,
@@ -3328,10 +3335,10 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 		},
@@ -3342,113 +3349,114 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			time.Second,
+			utils.NewDecimal(int64(time.Second), 0).Big,
 			rt2,
 		},
 		{
-			2 * time.Second,
+			utils.NewDecimal(int64(2*time.Second), 0).Big,
 			rt1,
 		},
 		{
-			3 * time.Second,
+			utils.NewDecimal(int64(3*time.Second), 0).Big,
 			rt2,
 		},
 		{
-			5 * time.Second,
+			utils.NewDecimal(int64(5*time.Second), 0).Big,
 			rt1,
 		},
 		{
-			7 * time.Second,
+			utils.NewDecimal(int64(7*time.Second), 0).Big,
 			rt2,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
-					Usage:             time.Second,
+					Usage:             utils.NewDecimal(int64(time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
-					Usage:             time.Second,
+					Usage:             utils.NewDecimal(int64(time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    1,
-					Usage:             time.Second,
+					Usage:             utils.NewDecimal(int64(time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 3 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(3*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        3 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(3*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    2,
-					Usage:             2 * time.Second,
+					Usage:             utils.NewDecimal(int64(2*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 5 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(5*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        5 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(5*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    1,
-					Usage:             2 * time.Second,
+					Usage:             utils.NewDecimal(int64(2*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 7 * time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(7*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        7 * time.Second,
+					IncrementStart:    utils.NewDecimal(int64(7*time.Second), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 2,
 					CompressFactor:    3,
-					Usage:             3 * time.Second,
+					Usage:             utils.NewDecimal(int64(3*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 10*time.Second); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(10*time.Second), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -3468,17 +3476,17 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 3),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: time.Hour,
+				IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          fminDeminal,
 				Increment:     cDecimal,
@@ -3493,23 +3501,23 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 15 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(15*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tminDeminal,
 				Increment:     ominDeminal,
 			},
 			{
-				IntervalStart: 30 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(15, 2),
 				Unit:          tminDeminal,
 				Increment:     ominDeminal,
 			},
 			{
-				IntervalStart: 45 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tminDeminal,
 				Increment:     ominDeminal,
@@ -3517,10 +3525,10 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 		},
@@ -3531,76 +3539,77 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			20 * time.Minute,
+			utils.NewDecimal(int64(20*time.Minute), 0).Big,
 			rt2,
 		},
 		{
-			time.Hour + time.Minute,
+			utils.NewDecimal(int64(time.Hour+time.Minute), 0).Big,
 			rt1,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    2,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 20 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        20 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    10,
-					Usage:             10 * time.Minute,
+					Usage:             utils.NewDecimal(int64(10*time.Minute), 0),
 				},
 				{
-					UsageStart:        30 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    15,
-					Usage:             15 * time.Minute,
+					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
-					UsageStart:        45 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 2,
 					CompressFactor:    16,
-					Usage:             16 * time.Minute,
+					Usage:             utils.NewDecimal(int64(16*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Hour + time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Hour+time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Hour + time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    6,
-					Usage:             9 * time.Minute,
+					Usage:             utils.NewDecimal(int64(9*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Hour+10*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour+10*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -3617,17 +3626,17 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 		t.Error(err)
 	}
 
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     tsecDecimal,
 			},
 			{
-				IntervalStart: 30 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     tsecDecimal,
@@ -3635,17 +3644,17 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     tsecDecimal,
 			},
 			{
-				IntervalStart: 30 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          minDecimal,
 				Increment:     tsecDecimal,
@@ -3653,10 +3662,10 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 		},
@@ -3667,52 +3676,53 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			25 * time.Minute,
+			utils.NewDecimal(int64(25*time.Minute), 0).Big,
 			rt1,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    50,
-					Usage:             25 * time.Minute,
+					Usage:             utils.NewDecimal(int64(25*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 25 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(25*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        25 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(25*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    10,
-					Usage:             5 * time.Minute,
+					Usage:             utils.NewDecimal(int64(5*time.Minute), 0),
 				},
 				{
-					UsageStart:        30 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    60,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Hour); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -3742,11 +3752,11 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		t.Error(err)
 	}
 
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(22, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -3754,11 +3764,11 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 60 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(60*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tminDecimal,
 				Increment:     tensecDecimal,
@@ -3774,11 +3784,11 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		t.Error(err)
 	}
 
-	rt3 := &engine.Rate{
+	rt3 := &utils.Rate{
 		ID: "RATE3",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 120 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(120*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(18, 2),
 				Unit:          twminDecimal,
 				Increment:     twsecDecimal,
@@ -3790,11 +3800,11 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		t.Error(err)
 	}
 
-	rt4 := &engine.Rate{
+	rt4 := &utils.Rate{
 		ID: "RATE4",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 180 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(180*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(16, 2),
 				Unit:          trminDecimal,
 				Increment:     tsecDecimal,
@@ -3802,10 +3812,10 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 			rt3.ID: rt3,
@@ -3818,79 +3828,80 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 
 	ordRts := []*orderedRate{
 		{
-			20 * time.Minute,
+			utils.NewDecimal(int64(20*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			80 * time.Minute,
+			utils.NewDecimal(int64(80*time.Minute), 0).Big,
 			rt2,
 		},
 		{
-			140 * time.Minute,
+			utils.NewDecimal(int64(140*time.Minute), 0).Big,
 			rt3,
 		},
 		{
-			200 * time.Minute,
+			utils.NewDecimal(int64(200*time.Minute), 0).Big,
 			rt4,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 20 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        20 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    3600,
-					Usage:             time.Hour,
+					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 80 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(80*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        80 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    360,
-					Usage:             time.Hour,
+					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 140 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(140*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        140 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					Rate:              rt3,
 					IntervalRateIndex: 0,
 					CompressFactor:    180,
-					Usage:             time.Hour,
+					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 200 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(200*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        200 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					Rate:              rt4,
 					IntervalRateIndex: 0,
 					CompressFactor:    60,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 20*time.Minute, 210*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
+		utils.NewDecimal(int64(210*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -3930,29 +3941,29 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(22, 2),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: 60 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(60*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          tminDecimal,
 				Increment:     tssecDecimal,
 			},
 			{
-				IntervalStart: 120 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(120*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(18, 2),
 				Unit:          twminDecimal,
 				Increment:     twsecDecimal,
 			},
 			{
-				IntervalStart: 180 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(180*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(16, 2),
 				Unit:          thminDecimal,
 				Increment:     tsecDecimal,
@@ -3963,180 +3974,182 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			20 * time.Minute,
+			utils.NewDecimal(int64(20*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			80 * time.Minute,
+			utils.NewDecimal(int64(80*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			140 * time.Minute,
+			utils.NewDecimal(int64(140*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			200 * time.Minute,
+			utils.NewDecimal(int64(200*time.Minute), 0).Big,
 			rt1,
 		},
 	}
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 20 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        20 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    2400,
-					Usage:             40 * time.Minute,
+					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
-					UsageStart:        60 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(60*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    120,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 80 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(80*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        80 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    240,
-					Usage:             40 * time.Minute,
+					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
-					UsageStart:        120 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(120*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    60,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 140 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(140*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        140 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    120,
-					Usage:             40 * time.Minute,
+					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
-					UsageStart:        180 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(180*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 3,
 					CompressFactor:    40,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 200 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(200*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        200 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 3,
 					CompressFactor:    60,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 20*time.Minute, 210*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
+		utils.NewDecimal(int64(210*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
 	}
 
-	expOrdRts = []*engine.RateSInterval{
+	expOrdRts = []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    3600,
-					Usage:             60 * time.Minute,
+					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
 				{
-					UsageStart:        60 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(60*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    120,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 80 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(80*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        80 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    240,
-					Usage:             40 * time.Minute,
+					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
-					UsageStart:        120 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(120*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    60,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 140 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(140*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        140 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    120,
-					Usage:             40 * time.Minute,
+					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
-					UsageStart:        180 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(180*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 3,
 					CompressFactor:    40,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 200 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(200*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        200 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 3,
 					CompressFactor:    60,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0*time.Minute, 230*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(0*time.Minute), 0).Big,
+		utils.NewDecimal(int64(230*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -4161,17 +4174,17 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          twminDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: 24 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(24*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          twminDecimal,
 				Increment:     secDecimal,
@@ -4179,29 +4192,29 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 4*time.Hour + 30*time.Minute,
+				IntervalStart: utils.NewDecimal(int64(4*time.Hour+30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(45, 2),
 				Unit:          twminDecimal,
 				Increment:     nminDecimal,
 			},
 			{
-				IntervalStart: 8*time.Hour + 30*time.Minute,
+				IntervalStart: utils.NewDecimal(int64(8*time.Hour+30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          twminDecimal,
 				Increment:     nminDecimal,
 			},
 			{
-				IntervalStart: 16*time.Hour + 30*time.Minute,
+				IntervalStart: utils.NewDecimal(int64(16*time.Hour+30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(35, 2),
 				Unit:          twminDecimal,
 				Increment:     nminDecimal,
 			},
 			{
-				IntervalStart: 20*time.Hour + 30*time.Minute,
+				IntervalStart: utils.NewDecimal(int64(20*time.Hour+30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          twminDecimal,
 				Increment:     nminDecimal,
@@ -4209,11 +4222,11 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 	}
 
-	rt3 := &engine.Rate{
+	rt3 := &utils.Rate{
 		ID: "RATE_SPECIAL",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 12 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          twminDecimal,
 				Increment:     secDecimal,
@@ -4221,10 +4234,10 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 			rt3.ID: rt3,
@@ -4236,117 +4249,118 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			4*time.Hour + 31*time.Minute,
+			utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0).Big,
 			rt2,
 		},
 		{
-			12 * time.Hour,
+			utils.NewDecimal(int64(12*time.Hour), 0).Big,
 			rt3,
 		},
 		{
-			13 * time.Hour,
+			utils.NewDecimal(int64(13*time.Hour), 0).Big,
 			rt2,
 		},
 		{
-			24 * time.Hour,
+			utils.NewDecimal(int64(24*time.Hour), 0).Big,
 			rt1,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    271,
-					Usage:             4*time.Hour + 31*time.Minute,
+					Usage:             utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 4*time.Hour + 31*time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        4*time.Hour + 31*time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    27,
-					Usage:             3*time.Hour + 59*time.Minute,
+					Usage:             utils.NewDecimal(int64(3*time.Hour+59*time.Minute), 0),
 				},
 				{
-					UsageStart:        8*time.Hour + 30*time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(8*time.Hour+30*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    24,
-					Usage:             3*time.Hour + 30*time.Minute,
+					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 12 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        12 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
 					Rate:              rt3,
 					IntervalRateIndex: 0,
 					CompressFactor:    3600,
-					Usage:             time.Hour,
+					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 13 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(13*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        13 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    24,
-					Usage:             3*time.Hour + 30*time.Minute,
+					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
 				{
-					UsageStart:        16*time.Hour + 30*time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(16*time.Hour+30*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 2,
 					CompressFactor:    27,
-					Usage:             4 * time.Hour,
+					Usage:             utils.NewDecimal(int64(4*time.Hour), 0),
 				},
 				{
-					UsageStart:        20*time.Hour + 30*time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(20*time.Hour+30*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 3,
 					CompressFactor:    24,
-					Usage:             3*time.Hour + 30*time.Minute,
+					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 24 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(24*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        24 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(24*time.Hour), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    3600,
-					Usage:             time.Hour,
+					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 25*time.Hour); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(25*time.Hour), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -4374,18 +4388,20 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
-			{},
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 15 * time.Minute,
+				IntervalStart: utils.NewDecimal(0, 0),
+			},
+			{
+				IntervalStart: utils.NewDecimal(int64(15*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          fminDecimal,
 				Increment:     eminDecimal,
 			},
 			{
-				IntervalStart: 30 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          fminDecimal,
 				Increment:     nminDecimal,
@@ -4393,17 +4409,17 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 45 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          fminDecimal,
 				Increment:     sminDecimal,
 			},
 			{
-				IntervalStart: time.Hour,
+				IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          fminDecimal,
 				Increment:     fvminDecimal,
@@ -4411,10 +4427,10 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 		},
 	}
 
-	rp := &engine.RateProfile{
+	rp := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RATE_PROFILE",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			rt1.ID: rt1,
 			rt2.ID: rt2,
 		},
@@ -4425,59 +4441,60 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			45 * time.Minute,
+			utils.NewDecimal(int64(45*time.Minute), 0).Big,
 			rt2,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 15 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(15*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        15 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(15*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    2,
-					Usage:             15 * time.Minute,
+					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
-					UsageStart:        30 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    2,
-					Usage:             15 * time.Minute,
+					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 45 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        45 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    3,
-					Usage:             15 * time.Minute,
+					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
-					UsageStart:        time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    6,
-					Usage:             30 * time.Minute,
+					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 15*time.Minute, time.Hour+15*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(15*time.Minute), 0).Big,
+		utils.NewDecimal(int64(time.Hour+15*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -4509,23 +4526,23 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          tminDecimal,
 				Increment:     tsecDecimal,
 			},
 			{
-				IntervalStart: 12*time.Minute + 35*time.Second,
+				IntervalStart: utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          sminDecimal,
 				Increment:     secDecimal,
 			},
 			{
-				IntervalStart: time.Hour + 37*time.Minute + 19*time.Second,
+				IntervalStart: utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          nminDecimal,
 				Increment:     sminDecimal,
@@ -4534,11 +4551,11 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 	}
 	rt1.Compile()
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 38*time.Minute + 15*time.Second,
+				IntervalStart: utils.NewDecimal(int64(38*time.Minute+15*time.Second), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          eminDecimal,
 				Increment:     secDecimal,
@@ -4549,69 +4566,70 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			39 * time.Minute,
+			utils.NewDecimal(int64(39*time.Minute), 0).Big,
 			rt2,
 		},
 		{
-			time.Hour + 37*time.Minute + 19*time.Second,
+			utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0).Big,
 			rt1,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    378,
-					Usage:             12*time.Minute + 35*time.Second,
+					Usage:             utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
 				},
 				{
-					UsageStart:        12*time.Minute + 35*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    1585,
-					Usage:             26*time.Minute + 25*time.Second,
+					Usage:             utils.NewDecimal(int64(26*time.Minute+25*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 39 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(39*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        39 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(39*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    3499,
-					Usage:             58*time.Minute + 19*time.Second,
+					Usage:             utils.NewDecimal(int64(58*time.Minute+19*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Hour + 37*time.Minute + 19*time.Second,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Hour + 37*time.Minute + 19*time.Second,
+					IncrementStart:    utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 2,
 					CompressFactor:    1,
-					Usage:             41 * time.Second,
+					Usage:             utils.NewDecimal(int64(41*time.Second), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Hour+38*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour+38*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -4639,11 +4657,11 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          tminDecimal,
 				Increment:     tsecDecimal,
@@ -4652,29 +4670,29 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 	}
 	rt1.Compile()
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 20 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          ttminDecimal,
 				Increment:     tsecDecimal,
 			},
 			{
-				IntervalStart: 40 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(40*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(3, 1),
 				Unit:          ttminDecimal,
 				Increment:     fsecDecimal,
 			},
 			{
-				IntervalStart: time.Hour,
+				IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          ttminDecimal,
 				Increment:     tminDecimal,
 			},
 			{
-				IntervalStart: 2 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(2*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          ttminDecimal,
 				Increment:     fminDecimal,
@@ -4685,164 +4703,165 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			20 * time.Minute,
+			utils.NewDecimal(int64(20*time.Minute), 0).Big,
 			rt2,
 		},
 		{
-			21 * time.Minute,
+			utils.NewDecimal(int64(21*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			40 * time.Minute,
+			utils.NewDecimal(int64(40*time.Minute), 0).Big,
 			rt2,
 		},
 		{
-			41 * time.Minute,
+			utils.NewDecimal(int64(41*time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rt2,
 		},
 		{
-			time.Hour + time.Minute,
+			utils.NewDecimal(int64(time.Hour+time.Minute), 0).Big,
 			rt1,
 		},
 		{
-			2 * time.Hour,
+			utils.NewDecimal(int64(2*time.Hour), 0).Big,
 			rt2,
 		},
 		{
-			2*time.Hour + time.Minute,
+			utils.NewDecimal(int64(2*time.Hour+time.Minute), 0).Big,
 			rt1,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    600,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 20 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        20 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    30,
-					Usage:             time.Minute,
+					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 21 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(21*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        21 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(21*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    570,
-					Usage:             19 * time.Minute,
+					Usage:             utils.NewDecimal(int64(19*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 40 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(40*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        40 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(40*time.Minute), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    15,
-					Usage:             time.Minute,
+					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 41 * time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(41*time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        41 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(41*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    570,
-					Usage:             19 * time.Minute,
+					Usage:             utils.NewDecimal(int64(19*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 2,
 					CompressFactor:    1,
-					Usage:             time.Minute,
+					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Hour + time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Hour+time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Hour + time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    1770,
-					Usage:             59 * time.Minute,
+					Usage:             utils.NewDecimal(int64(59*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 3,
 					CompressFactor:    1,
-					Usage:             time.Minute,
+					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 2*time.Hour + time.Minute,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        2*time.Hour + time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    30,
-					Usage:             time.Minute,
+					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 2*time.Hour+2*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(2*time.Hour+2*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -4862,11 +4881,11 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          hourDecimal,
 				Increment:     fminDecimal,
@@ -4875,11 +4894,11 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 	}
 	rt1.Compile()
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 168 * time.Hour,
+				IntervalStart: utils.NewDecimal(int64(168*time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(5, 1),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
@@ -4890,45 +4909,46 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			168 * time.Hour,
+			utils.NewDecimal(int64(168*time.Hour), 0).Big,
 			rt2,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    593,
-					Usage:             168 * time.Hour,
+					Usage:             utils.NewDecimal(int64(168*time.Hour), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: 168 * time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(168*time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        168 * time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(168*time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 0,
 					CompressFactor:    60,
-					Usage:             time.Hour,
+					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, 169*time.Hour); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(169*time.Hour), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
@@ -4952,17 +4972,17 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rt1 := &engine.Rate{
+	rt1 := &utils.Rate{
 		ID: "RATE1",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(2, 1),
 				Unit:          fminDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: 20 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(4, 1),
 				Unit:          minDecimal,
 				Increment:     secDecimal,
@@ -4970,17 +4990,17 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 		},
 	}
 
-	rt2 := &engine.Rate{
+	rt2 := &utils.Rate{
 		ID: "RATE2",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 50 * time.Minute,
+				IntervalStart: utils.NewDecimal(int64(50*time.Minute), 0),
 				RecurrentFee:  utils.NewDecimal(1, 1),
 				Unit:          tminDecimal,
 				Increment:     minDecimal,
 			},
 			{
-				IntervalStart: time.Hour,
+				IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
 				RecurrentFee:  utils.NewDecimal(5, 3),
 				Unit:          fminDecimal,
 				Increment:     secDecimal,
@@ -4990,52 +5010,53 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			0,
+			utils.NewDecimal(0, 0).Big,
 			rt1,
 		},
 		{
-			time.Hour,
+			utils.NewDecimal(int64(time.Hour), 0).Big,
 			rt2,
 		},
 	}
 
-	expOrdRts := []*engine.RateSInterval{
+	expOrdRts := []*utils.RateSInterval{
 		{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        0,
+					IncrementStart:    utils.NewDecimal(0, 0),
 					Rate:              rt1,
 					IntervalRateIndex: 0,
 					CompressFactor:    20,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 				{
-					UsageStart:        20 * time.Minute,
+					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					Rate:              rt1,
 					IntervalRateIndex: 1,
 					CompressFactor:    2400,
-					Usage:             40 * time.Minute,
+					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 		{
-			UsageStart: time.Hour,
-			Increments: []*engine.RateSIncrement{
+			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
+			Increments: []*utils.RateSIncrement{
 				{
-					UsageStart:        time.Hour,
+					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					Rate:              rt2,
 					IntervalRateIndex: 1,
 					CompressFactor:    1200,
-					Usage:             20 * time.Minute,
+					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, 0, time.Hour+20*time.Minute); err != nil {
+	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour+20*time.Minute), 0).Big); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))

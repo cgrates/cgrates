@@ -168,7 +168,7 @@ func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time,
 	// compute the list of returned rates together with their index interval
 	if isDuration {
 		// add all the possible ActivationTimes from cron expressions
-		var usageIndx *decimal.Big // the difference between setup and activation time of the rate
+		usageIndx := decimal.New(0, 0) // the difference between setup and activation time of the rate
 		for _, aTime := range sortedATimes {
 			if !endTime.After(aTime) {
 				break // we are not interested about further rates

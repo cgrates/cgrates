@@ -4253,6 +4253,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	engine.Cache = tmp
 }
 
+/*
 func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
 	log.SetOutput(io.Discard)
 
@@ -4330,6 +4331,8 @@ func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
+
+*/
 
 func TestBiRPCv1GetCost(t *testing.T) {
 	log.SetOutput(io.Discard)
