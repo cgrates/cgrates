@@ -27,7 +27,7 @@ import (
 )
 
 // GetRateProfile returns an Rate Profile
-func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error {
+func (apierSv1 *APIerSv1) GetRateProfile(arg *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -88,7 +88,7 @@ func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithAPIOpts, 
 }
 
 //SetRateProfile add/update a new Rate Profile
-func (apierSv1 *APIerSv1) SetRateProfile(ext *engine.APIRateProfileWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetRateProfile(ext *utils.APIRateProfileWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -115,7 +115,7 @@ func (apierSv1 *APIerSv1) SetRateProfile(ext *engine.APIRateProfileWithOpts, rep
 }
 
 //SetRateProfileRates add/update Rates from existing RateProfiles
-func (apierSv1 *APIerSv1) SetRateProfileRates(ext *engine.APIRateProfileWithOpts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetRateProfileRates(ext *utils.APIRateProfileWithOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(ext.APIRateProfile, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

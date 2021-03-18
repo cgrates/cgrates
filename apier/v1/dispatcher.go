@@ -1020,7 +1020,7 @@ func (dS *DispatcherReplicatorSv1) GetDispatcherProfile(tntID *utils.TenantIDWit
 }
 
 // GetRateProfile
-func (dS *DispatcherReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error {
+func (dS *DispatcherReplicatorSv1) GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error {
 	return dS.dS.ReplicatorSv1GetRateProfile(tntID, reply)
 }
 

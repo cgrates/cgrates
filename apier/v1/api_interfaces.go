@@ -216,7 +216,7 @@ type ReplicatorSv1Interface interface {
 	GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error
 	GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error
 	GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error
-	GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error
+	GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error
 	GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error
 	GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) error
