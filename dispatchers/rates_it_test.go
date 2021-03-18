@@ -25,8 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -83,17 +81,17 @@ func testDspRPrfPing(t *testing.T) {
 }
 
 func testDspRPrfCostForEvent(t *testing.T) {
-	rPrf := &engine.APIRateProfile{
+	rPrf := &utils.APIRateProfile{
 		ID:        "DefaultRate",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
 		Weights:   ";10",
-		Rates: map[string]*engine.APIRate{
+		Rates: map[string]*utils.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
 				Weights:         ";0",
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.APIIntervalRate{
+				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "0",
 						RecurrentFee:  utils.Float64Pointer(0.12),
@@ -110,7 +108,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
-	var rply *engine.RateProfile
+	var rply *utils.RateProfile
 	if err := allEngine.RPC.Call(utils.APIerSv1GetRateProfile, &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "DefaultRate",
@@ -121,14 +119,14 @@ func testDspRPrfCostForEvent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	exp := &engine.RateProfileCost{
+	exp := &utils.RateProfileCost{
 		ID:   "DefaultRate",
 		Cost: 0.12,
-		RateSIntervals: []*engine.RateSInterval{{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{{
-				UsageStart:        0,
-				Usage:             time.Minute,
+		RateSIntervals: []*utils.RateSInterval{{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{{
+				IncrementStart:    utils.NewDecimal(0, 0),
+				Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				Rate:              rtWeek,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
@@ -137,7 +135,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 		}},
 	}
 
-	var rpCost *engine.RateProfileCost
+	var rpCost *utils.RateProfileCost
 	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -156,16 +154,16 @@ func testDspRPrfCostForEvent(t *testing.T) {
 }
 
 func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
-	rPrf := &engine.APIRateProfile{
+	rPrf := &utils.APIRateProfile{
 		ID:      "ID_RP",
 		Tenant:  "cgrates.org",
 		Weights: ";10",
-		Rates: map[string]*engine.APIRate{
+		Rates: map[string]*utils.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
 				Weights:         ";0",
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.APIIntervalRate{
+				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "0",
 						RecurrentFee:  utils.Float64Pointer(0.25),
@@ -182,7 +180,7 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
-	var rply *engine.RateProfile
+	var rply *utils.RateProfile
 	if err := allEngine.RPC.Call(utils.APIerSv1GetRateProfile, &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "ID_RP",
@@ -193,14 +191,14 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	exp := &engine.RateProfileCost{
+	exp := &utils.RateProfileCost{
 		ID:   "ID_RP",
 		Cost: 0.25,
-		RateSIntervals: []*engine.RateSInterval{{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{{
-				UsageStart:        0,
-				Usage:             time.Minute,
+		RateSIntervals: []*utils.RateSInterval{{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{{
+				IncrementStart:    utils.NewDecimal(0, 0),
+				Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				Rate:              rtWeek,
 				IntervalRateIndex: 0,
 				CompressFactor:    60,
@@ -209,7 +207,7 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 		}},
 	}
 
-	var rpCost *engine.RateProfileCost
+	var rpCost *utils.RateProfileCost
 	if err := dispEngine.RPC.Call(utils.RateSv1CostForEvent, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 

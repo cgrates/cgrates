@@ -2158,7 +2158,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 }
 
 func testOnStorITRateProfile(t *testing.T) {
-	rPrf := &RateProfile{
+	rPrf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
@@ -2168,7 +2168,7 @@ func testOnStorITRateProfile(t *testing.T) {
 			},
 		},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*gi:~*req.Usage:0"},

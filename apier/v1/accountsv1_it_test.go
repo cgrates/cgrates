@@ -781,16 +781,16 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 	}
 
 	//set a rate profile to be used in case of debit
-	apiRPrf := &engine.APIRateProfile{
+	apiRPrf := &utils.APIRateProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RP_Test",
 		Weights: ";10",
-		Rates: map[string]*engine.APIRate{
+		Rates: map[string]*utils.APIRate{
 			"RT_ALWAYS": {
 				ID:              "RT_ALWAYS",
 				Weights:         ";0",
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.APIIntervalRate{
+				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "0",
 						RecurrentFee:  utils.Float64Pointer(0.1),
@@ -803,8 +803,9 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
-		&engine.APIRateProfileWithOpts{
-			APIRateProfile: apiRPrf,
+		&APIRateProfileWithCache{
+			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+				APIRateProfile: apiRPrf},
 		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -877,17 +878,17 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 	}
 
 	//set a rate profile to be used in case of debit
-	apiRPrf := &engine.APIRateProfile{
+	apiRPrf := &utils.APIRateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP_Test2",
 		FilterIDs: []string{"*string:~*req.Account:ACC_WITH_RATES"},
 		Weights:   ";20",
-		Rates: map[string]*engine.APIRate{
+		Rates: map[string]*utils.APIRate{
 			"RT_ALWAYS": {
 				ID:              "RT_ALWAYS",
 				Weights:         ";0",
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.APIIntervalRate{
+				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "0",
 						RecurrentFee:  utils.Float64Pointer(0.5),
@@ -900,8 +901,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
-		&engine.APIRateProfileWithOpts{
-			APIRateProfile: apiRPrf,
+
 		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -981,17 +981,17 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 	}
 
 	//set a rate profile to be used in case of debit
-	apiRPrf := &engine.APIRateProfile{
+	apiRPrf := &utils.APIRateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP_Test22",
 		FilterIDs: []string{"*string:~*req.Account:ACC_WITH_RATES2"},
 		Weights:   ";20",
-		Rates: map[string]*engine.APIRate{
+		Rates: map[string]*utils.APIRate{
 			"RT_ALWAYS": {
 				ID:              "RT_ALWAYS",
 				Weights:         ";0",
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.APIIntervalRate{
+				IntervalRates: []*utils.APIIntervalRate{
 					{
 						IntervalStart: "0",
 						RecurrentFee:  utils.Float64Pointer(0.5),
@@ -1004,8 +1004,9 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
-		&engine.APIRateProfileWithOpts{
-			APIRateProfile: apiRPrf,
+		&APIRateProfileWithCache{
+			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+				APIRateProfile: apiRPrf},
 		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {

@@ -1337,7 +1337,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 
 func testInternalReplicateITRateProfile(t *testing.T) {
 	//set
-	rPrf := &engine.RateProfile{
+	rPrf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -1347,7 +1347,7 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 			},
 		},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			"RT_WEEK": {
 				ID: "RT_WEEK",
 				Weights: utils.DynamicWeights{
@@ -1378,13 +1378,13 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 		},
 	}
 
-	apiRPrf := &engine.APIRateProfile{
+	apiRPrf := &utils.APIRateProfile{
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       []string{"*string:~*req.Subject:1001"},
 		Weights:         ";0",
 		MaxCostStrategy: "*free",
-		Rates: map[string]*engine.APIRate{
+		Rates: map[string]*utils.APIRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
 				Weights:         ";0",
@@ -1409,7 +1409,7 @@ func testInternalReplicateITRateProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	// check
-	var reply *engine.RateProfile
+	var reply *utils.RateProfile
 	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
 		t.Fatal(err)
