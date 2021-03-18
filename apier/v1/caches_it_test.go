@@ -326,7 +326,7 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 
 func testCacheSReloadCache(t *testing.T) {
 	var reply string
-	if err := chcRPC.Call(utils.CacheSv1ReloadCache, new(utils.AttrReloadCacheWithOpts), &reply); err != nil {
+	if err := chcRPC.Call(utils.CacheSv1ReloadCache, new(utils.AttrReloadCacheWithAPIOpts), &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
@@ -391,9 +391,9 @@ func testCacheSRemoveItems(t *testing.T) {
 		t.Errorf("Expected: %v , received:%v", true, reply)
 	}
 	var remReply string
-	if err := chcRPC.Call(utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithOpts{
-		Opts:   make(map[string]interface{}),
-		Tenant: "cgrates.org",
+	if err := chcRPC.Call(utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: make(map[string]interface{}),
+		Tenant:  "cgrates.org",
 		ArgsCache: map[string][]string{
 			utils.StatsQueueProfileIDs: {"cgrates.org:Stats1"},
 			utils.RouteProfileIDs:      {"cgrates.org:ROUTE_1"},

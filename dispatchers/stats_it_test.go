@@ -320,9 +320,9 @@ func testDspStsTestAuthKey3(t *testing.T) {
 
 	estats := []string{"Stats2", "Stats2_1"}
 	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueIDs,
-		&utils.TenantWithOpts{
+		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
 			},
 		}, &reply); err != nil {

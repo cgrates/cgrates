@@ -168,7 +168,7 @@ func (stsv1 *StatSv1) Call(serviceMethod string, args interface{}, reply interfa
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (stsv1 *StatSv1) GetQueueIDs(tenant *utils.TenantWithOpts, qIDs *[]string) error {
+func (stsv1 *StatSv1) GetQueueIDs(tenant *utils.TenantWithAPIOpts, qIDs *[]string) error {
 	return stsv1.sS.V1GetQueueIDs(tenant.Tenant, qIDs)
 }
 

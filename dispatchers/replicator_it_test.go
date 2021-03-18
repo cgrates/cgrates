@@ -555,12 +555,12 @@ func testDspRplFilter(t *testing.T) {
 func testDspRplThreshold(t *testing.T) {
 	// Set Threshold
 	var replyStr string
-	setThreshold := &engine.ThresholdWithOpts{
+	setThreshold := &engine.ThresholdWithAPIOpts{
 		Threshold: &engine.Threshold{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -614,12 +614,12 @@ func testDspRplThreshold(t *testing.T) {
 func testDspRplThresholdProfile(t *testing.T) {
 	// Set ThresholdProfile
 	var replyStr string
-	setThresholdProfile := &engine.ThresholdProfileWithOpts{
+	setThresholdProfile := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -673,12 +673,12 @@ func testDspRplThresholdProfile(t *testing.T) {
 func testDspRplStatQueue(t *testing.T) {
 	// Set StatQueue
 	var replyStr string
-	setStatQueue := &engine.StatQueueWithOpts{
+	setStatQueue := &engine.StatQueueWithAPIOpts{
 		StatQueue: &engine.StatQueue{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1620,12 +1620,12 @@ func testDspRplAccountProfile(t *testing.T) {
 func testDspRplActionProfile(t *testing.T) {
 	// Set RateProfile
 	var replyStr string
-	rPrf := &engine.ActionProfileWithOpts{
+	rPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "RP1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}

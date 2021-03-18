@@ -71,7 +71,7 @@ func (apierSv1 *APIerSv1) GetActionProfileIDs(args *utils.PaginatorWithTenant, a
 
 // GetActionProfileIDsCount sets in reply var the total number of ActionProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ActionProfileIDs
-func (apierSv1 *APIerSv1) GetActionProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetActionProfileIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -89,7 +89,7 @@ func (apierSv1 *APIerSv1) GetActionProfileIDsCount(args *utils.TenantWithOpts, r
 }
 
 //SetActionProfile add/update a new Action Profile
-func (apierSv1 *APIerSv1) SetActionProfile(ap *engine.ActionProfileWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetActionProfile(ap *engine.ActionProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -104,8 +104,8 @@ func (apierSv1 *APIerSv1) SetActionProfile(ap *engine.ActionProfileWithOpts, rep
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(utils.IfaceAsString(ap.Opts[utils.CacheOpt]), ap.Tenant, utils.CacheActionProfiles,
-		ap.TenantID(), &ap.FilterIDs, nil, ap.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(ap.APIOpts[utils.CacheOpt]), ap.Tenant, utils.CacheActionProfiles,
+		ap.TenantID(), &ap.FilterIDs, nil, ap.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

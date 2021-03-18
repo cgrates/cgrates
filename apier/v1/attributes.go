@@ -69,7 +69,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.PaginatorWithTenant
 
 // GetAttributeProfileIDsCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant

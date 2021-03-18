@@ -40,7 +40,7 @@ func (cS *CoreSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(cS, serviceMethod, args, reply)
 }
 
-func (cS *CoreSv1) Status(arg *utils.TenantWithOpts, reply *map[string]interface{}) error {
+func (cS *CoreSv1) Status(arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
 	return cS.cS.Status(arg, reply)
 }
 

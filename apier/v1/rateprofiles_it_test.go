@@ -709,14 +709,14 @@ func testV1RatePrfGetRateProfileIDs(t *testing.T) {
 func testV1RatePrfGetRateProfileIDsCount(t *testing.T) {
 	var reply int
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfileIDsCount,
-		&utils.TenantWithOpts{},
+		&utils.TenantWithAPIOpts{},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
 		t.Errorf("Expected 1, received %+v", reply)
 	}
 	if err := ratePrfRpc.Call(utils.APIerSv1GetRateProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"},
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {

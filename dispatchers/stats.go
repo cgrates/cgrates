@@ -99,7 +99,7 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 	}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithOpts,
+func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithAPIOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -107,12 +107,12 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithOpts,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueIDs, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)
 }

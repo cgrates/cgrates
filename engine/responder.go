@@ -375,7 +375,7 @@ func (rs *Responder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnA
 	return
 }
 
-func (rs *Responder) Shutdown(arg *utils.TenantWithOpts, reply *string) (err error) {
+func (rs *Responder) Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err error) {
 	dm.DataDB().Close()
 	cdrStorage.Close()
 	defer rs.ShdChan.CloseOnce()

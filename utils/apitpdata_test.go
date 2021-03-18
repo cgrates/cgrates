@@ -1012,7 +1012,7 @@ func TestCDRsFilterPrepare(t *testing.T) {
 }
 
 func TestNewAttrReloadCacheWithOpts(t *testing.T) {
-	newAttrReloadCache := &AttrReloadCacheWithOpts{
+	newAttrReloadCache := &AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
 			DestinationIDs:             nil,
 			ReverseDestinationIDs:      nil,

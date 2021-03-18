@@ -32,7 +32,7 @@ func init() {
 type CmdStatus struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantWithOpts
+	rpcParams *utils.TenantWithAPIOpts
 	*CommandExecuter
 }
 
@@ -46,8 +46,8 @@ func (self *CmdStatus) RpcMethod() string {
 
 func (self *CmdStatus) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantWithOpts{
-			Opts: make(map[string]interface{}),
+		self.rpcParams = &utils.TenantWithAPIOpts{
+			APIOpts: make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

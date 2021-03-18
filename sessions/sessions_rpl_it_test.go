@@ -449,10 +449,10 @@ func testSessionSRplManualReplicate(t *testing.T) {
 		t.Errorf("Failed to kill process, error: %v", err.Error())
 	}
 	var status map[string]interface{}
-	if err := smgRplcMstrRPC.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err == nil { // master should not longer be reachable
+	if err := smgRplcMstrRPC.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err == nil { // master should not longer be reachable
 		t.Error(err, status)
 	}
-	if err := smgRplcSlvRPC.Call(utils.CoreSv1Status, utils.TenantWithOpts{}, &status); err != nil { // slave should be still operational
+	if err := smgRplcSlvRPC.Call(utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil { // slave should be still operational
 		t.Error(err)
 	}
 	// start master

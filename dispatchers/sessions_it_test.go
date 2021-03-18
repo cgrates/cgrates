@@ -742,8 +742,8 @@ func testDspSessionReplicate(t *testing.T) {
 	testDspSessionAuthorize(t)
 	testDspSessionInit(t)
 
-	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithOpts{
-		Opts: map[string]interface{}{
+	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, &ArgsReplicateSessionsWithAPIOpts{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant: "cgrates.org",

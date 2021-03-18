@@ -274,7 +274,7 @@ func testInternalRemoteITGetThreshold(t *testing.T) {
 
 func testInternalRemoteITGetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",
@@ -789,7 +789,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX, utils.ToJSON(indexes))
 	}
 
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Replication",

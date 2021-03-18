@@ -71,7 +71,7 @@ func (apierSv1 *APIerSv1) GetRateProfileIDs(args *utils.PaginatorWithTenant, att
 
 // GetRateProfileIDsCount sets in reply var the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
-func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetRateProfileIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant

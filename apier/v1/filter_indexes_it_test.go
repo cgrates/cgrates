@@ -216,7 +216,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -312,7 +312,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",
@@ -1468,7 +1468,7 @@ func testV1FISetActionProfileIndexes(t *testing.T) {
 	}
 
 	//set an actPrf in db, so we will get it without any problems
-	actPrf := &engine.ActionProfileWithOpts{
+	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant:    tenant,
 			ID:        "ACT_PRF",
@@ -1625,7 +1625,7 @@ func testVF1SetSecondActionProfile(t *testing.T) {
 	}
 
 	//set the second actPrf in db with our filter
-	actPrf := &engine.ActionProfileWithOpts{
+	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
 			Tenant:    tenant,
 			ID:        "ACT_PRF2",

@@ -60,7 +60,7 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 		args = &utils.AttrCacheIDsWithOpts{
 			Tenant:   tnt,
 			CacheIDs: cacheIDs,
-			Opts:     opts,
+			APIOpts:  opts,
 		}
 
 	}
@@ -70,13 +70,13 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithOpts, err error) {
-	rpl = utils.AttrReloadCacheWithOpts{
+func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
+	rpl = utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{
 			utils.CacheInstanceToArg[cacheID]: {itemID},
 		},
-		Opts: opts,
+		APIOpts: opts,
 	}
 	if filterIDs == nil { // in case we remove a profile we do not need to reload the indexes
 		return
@@ -148,37 +148,37 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
-		args = utils.AttrReloadCacheWithOpts{
+		args = utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
 			},
-			Opts: opts,
+			APIOpts: opts,
 		}
 	case utils.MetaLoad:
 		method = utils.CacheSv1LoadCache
-		args = utils.AttrReloadCacheWithOpts{
+		args = utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
 			},
-			Opts: opts,
+			APIOpts: opts,
 		}
 	case utils.MetaRemove:
 		method = utils.CacheSv1RemoveItems
-		args = utils.AttrReloadCacheWithOpts{
+		args = utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
 			},
-			Opts: opts,
+			APIOpts: opts,
 		}
 	case utils.MetaClear:
 		method = utils.CacheSv1Clear
 		args = &utils.AttrCacheIDsWithOpts{
 			Tenant:   tnt,
 			CacheIDs: []string{cacheID},
-			Opts:     opts,
+			APIOpts:  opts,
 		}
 	}
 	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,

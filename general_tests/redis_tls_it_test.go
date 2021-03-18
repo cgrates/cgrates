@@ -106,7 +106,7 @@ func testRedisTLSRPCCon(t *testing.T) {
 func testRedisTLSSetGetAttribute(t *testing.T) {
 	// status command to check if the engine starts
 	var rply map[string]interface{}
-	if err := redisTLSRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
+	if err := redisTLSRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	}
 }

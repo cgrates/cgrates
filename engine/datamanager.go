@@ -794,9 +794,9 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
-			&StatQueueWithOpts{
+			&StatQueueWithAPIOpts{
 				StatQueue: sq,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -1031,9 +1031,9 @@ func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleS
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdPrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThreshold,
-			&ThresholdWithOpts{
+			&ThresholdWithAPIOpts{
 				Threshold: th,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -1142,9 +1142,9 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdProfilePrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThresholdProfile,
-			&ThresholdProfileWithOpts{
+			&ThresholdProfileWithAPIOpts{
 				ThresholdProfile: th,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -3389,9 +3389,9 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ActionProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionProfile,
-			&ActionProfileWithOpts{
+			&ActionProfileWithAPIOpts{
 				ActionProfile: ap,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return

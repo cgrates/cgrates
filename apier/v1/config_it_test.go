@@ -426,7 +426,7 @@ func testConfigStartEngineWithConfigs(t *testing.T) {
 		t.Fatal(err)
 	}
 	var rply map[string]interface{}
-	if err := configRPC.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
+	if err := configRPC.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	} else if rply[utils.NodeID] != "EngineWithConfigSActive" {
 		t.Errorf("Expected %+v , received: %+v ", "EngineWithConfigSActive", rply)
@@ -460,7 +460,7 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	var rply map[string]interface{}
-	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithOpts{}, &rply); err != nil {
+	if err := jsonClnt.Call(utils.CoreSv1Status, &utils.TenantWithAPIOpts{}, &rply); err != nil {
 		t.Error(err)
 	}
 }

@@ -1065,7 +1065,7 @@ func testApierGetActionTrigger(t *testing.T) {
 // Test here ReloadCache
 func testApierReloadCache(t *testing.T) {
 	var reply string
-	arc := new(utils.AttrReloadCacheWithOpts)
+	arc := new(utils.AttrReloadCacheWithAPIOpts)
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())

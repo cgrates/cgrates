@@ -402,12 +402,12 @@ func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithOp
 }
 
 // SetThresholdProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetThresholdProfileDrv(th.ThresholdProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(th.Opts[utils.CacheOpt]),
-		th.Tenant, utils.CacheThresholdProfiles, th.TenantID(), &th.FilterIDs, nil, th.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(th.APIOpts[utils.CacheOpt]),
+		th.Tenant, utils.CacheThresholdProfiles, th.TenantID(), &th.FilterIDs, nil, th.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -415,12 +415,12 @@ func (rplSv1 *ReplicatorSv1) SetThresholdProfile(th *engine.ThresholdProfileWith
 }
 
 // SetThreshold is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetThresholdDrv(th.Threshold); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(th.Opts[utils.CacheOpt]),
-		th.Tenant, utils.CacheThresholds, th.TenantID(), nil, nil, th.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(th.APIOpts[utils.CacheOpt]),
+		th.Tenant, utils.CacheThresholds, th.TenantID(), nil, nil, th.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -441,12 +441,12 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWith
 }
 
 // SetStatQueue is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetStatQueueDrv(nil, sq.StatQueue); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.Opts[utils.CacheOpt]),
-		sq.Tenant, utils.CacheStatQueues, sq.TenantID(), nil, nil, sq.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.APIOpts[utils.CacheOpt]),
+		sq.Tenant, utils.CacheStatQueues, sq.TenantID(), nil, nil, sq.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -675,12 +675,12 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(dpp *engine.RateProfileWithOpts, rep
 }
 
 // SetActionProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionProfileDrv(acp.ActionProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.Opts[utils.CacheOpt]),
-		acp.Tenant, utils.CacheActionProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.APIOpts[utils.CacheOpt]),
+		acp.Tenant, utils.CacheActionProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

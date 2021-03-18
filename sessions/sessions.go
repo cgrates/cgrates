@@ -3601,7 +3601,7 @@ func (sS *SessionS) BiRPCv1GetCost(clnt rpcclient.ClientConnector,
 
 // BiRPCv1SyncSessions will sync sessions on demand
 func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.ClientConnector,
-	ignParam *utils.TenantWithOpts, reply *string) error {
+	ignParam *utils.TenantWithAPIOpts, reply *string) error {
 	sS.syncSessions()
 	*reply = utils.OK
 	return nil
@@ -4095,7 +4095,7 @@ func (sS *SessionS) Handlers() map[string]interface{} {
 		utils.SessionSv1UpdateSession: func(clnt *rpc2.Client, args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
 			return sS.BiRPCv1UpdateSession(clnt, args, rply)
 		},
-		utils.SessionSv1SyncSessions: func(clnt *rpc2.Client, args *utils.TenantWithOpts, rply *string) (err error) {
+		utils.SessionSv1SyncSessions: func(clnt *rpc2.Client, args *utils.TenantWithAPIOpts, rply *string) (err error) {
 			return sS.BiRPCv1SyncSessions(clnt, args, rply)
 		},
 		utils.SessionSv1TerminateSession: func(clnt *rpc2.Client, args *V1TerminateSessionArgs, rply *string) (err error) {

@@ -56,9 +56,9 @@ func TestCoreServiceStatus(t *testing.T) {
 	stopChan := make(chan struct{}, 1)
 
 	cores := NewCoreService(cfgDflt, caps, stopChan)
-	args := &utils.TenantWithOpts{
-		Tenant: "cgrates.org",
-		Opts:   map[string]interface{}{},
+	args := &utils.TenantWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]interface{}{},
 	}
 
 	var reply map[string]interface{}

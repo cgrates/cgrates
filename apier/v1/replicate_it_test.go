@@ -1002,7 +1002,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &engine.ThresholdProfileWithOpts{
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -1231,7 +1231,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
-	tPrfl := engine.ThresholdProfileWithOpts{
+	tPrfl := engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "THD_Test",

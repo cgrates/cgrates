@@ -41,8 +41,8 @@ func init() {
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
-	gob.Register(new(ThresholdProfileWithOpts))
-	gob.Register(new(ThresholdWithOpts))
+	gob.Register(new(ThresholdProfileWithAPIOpts))
+	gob.Register(new(ThresholdWithAPIOpts))
 	// Resource
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
@@ -69,7 +69,7 @@ func init() {
 	gob.Register(new(RateProfileWithOpts))
 	// ActionProfiles
 	gob.Register(new(ActionProfile))
-	gob.Register(new(ActionProfileWithOpts))
+	gob.Register(new(ActionProfileWithAPIOpts))
 
 	// CDRs
 	gob.Register(new(EventCost))
@@ -263,7 +263,7 @@ func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 
-func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
+func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) (err error) {
 	itmIDs := chS.tCache.GetItemIDs(args.CacheID, args.ItemIDPrefix)
 	if len(itmIDs) == 0 {
@@ -273,13 +273,13 @@ func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithOpts,
 	return
 }
 
-func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithOpts,
+func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) (err error) {
 	*reply = chS.tCache.HasItem(args.CacheID, args.ItemID)
 	return
 }
 
-func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
+func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *time.Time) (err error) {
 	expTime, has := chS.tCache.GetItemExpiryTime(args.CacheID, args.ItemID)
 	if !has {
@@ -289,14 +289,14 @@ func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithOpts,
 	return
 }
 
-func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithOpts,
+func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) (err error) {
 	chS.tCache.Remove(args.CacheID, args.ItemID, true, utils.NonTransactional)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1RemoveItems(args utils.AttrReloadCacheWithOpts,
+func (chS *CacheS) V1RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 	reply *string) (err error) {
 	for key, ids := range args.ArgsCache {
 		if cacheID, has := utils.ArgCacheToInstance[key]; has {
@@ -365,7 +365,7 @@ func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithOpts,
 	return
 }
 
-func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {
 			if err = chS.dm.CacheDataFromDB(prfx, ids, true); err != nil {
@@ -390,7 +390,7 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithOpts, reply *str
 	return nil
 }
 
-func (chS *CacheS) V1LoadCache(attrs utils.AttrReloadCacheWithOpts, reply *string) (err error) {
+func (chS *CacheS) V1LoadCache(attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	args := make(map[string][]string)
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {

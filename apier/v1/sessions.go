@@ -63,9 +63,9 @@ func (ssv1 *SessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
 	return ssv1.sS.BiRPCv1UpdateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) SyncSessions(args *utils.TenantWithOpts,
+func (ssv1 *SessionSv1) SyncSessions(args *utils.TenantWithAPIOpts,
 	rply *string) error {
-	return ssv1.sS.BiRPCv1SyncSessions(nil, &utils.TenantWithOpts{}, rply)
+	return ssv1.sS.BiRPCv1SyncSessions(nil, &utils.TenantWithAPIOpts{}, rply)
 }
 
 func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
@@ -122,7 +122,7 @@ func (ssv1 *SessionSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	return nil
 }
 
-func (ssv1 *SessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithOpts, rply *string) error {
+func (ssv1 *SessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error {
 	return ssv1.sS.BiRPCv1ReplicateSessions(nil, args.ArgsReplicateSessions, rply)
 }
 

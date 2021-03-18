@@ -740,9 +740,9 @@ type PaginatorWithTenant struct {
 	Paginator
 }
 
-type TenantWithOpts struct {
-	Tenant string
-	Opts   map[string]interface{}
+type TenantWithAPIOpts struct {
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 type TenantID struct {

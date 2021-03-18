@@ -655,7 +655,7 @@ func testAccITRemoveAccountWithoutTenant(t *testing.T) {
 
 func testAccITCountAccounts(t *testing.T) {
 	var reply int
-	args := &utils.TenantWithOpts{
+	args := &utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
 	}
 	if err := accRPC.Call(utils.APIerSv1GetAccountsCount, &args, &reply); err != nil {

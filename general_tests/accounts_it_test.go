@@ -249,7 +249,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_AccDisableAndLog",

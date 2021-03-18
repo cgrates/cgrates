@@ -1270,13 +1270,13 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 	var reply int
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 7 {
 		t.Errorf("Expecting: 7, received: %+v", reply)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 7 {
 		t.Errorf("Expecting: 7, received: %+v", reply)
@@ -1295,7 +1295,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 6 {
 		t.Errorf("Expecting: 6, received: %+v", reply)
@@ -1313,7 +1313,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 5 {
 		t.Errorf("Expecting: 5, received: %+v", reply)
@@ -1331,7 +1331,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 4 {
 		t.Errorf("Expecting: 4, received: %+v", reply)
@@ -1349,7 +1349,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 3 {
 		t.Errorf("Expecting: 3, received: %+v", reply)
@@ -1367,7 +1367,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {
 		t.Errorf("Expecting: 2, received: %+v", reply)
@@ -1386,7 +1386,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err != nil {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
 		t.Errorf("Expecting: 1, received: %+v", reply)
@@ -1405,7 +1405,7 @@ func testAttributeSGetAttributeProfileIDsCount(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfileIDsCount,
-		&utils.TenantWithOpts{Tenant: "cgrates.org"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

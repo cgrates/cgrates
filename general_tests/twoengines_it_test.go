@@ -145,7 +145,7 @@ func testTwoEnginesSetThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	var result string
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_TwoEnginesTest",
@@ -205,7 +205,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}
 	// after we verify the cache make sure it was set correctly there
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_TwoEnginesTest",
@@ -230,7 +230,7 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 func testTwoEnginesUpdateThreshold(t *testing.T) {
 	var rplTh *engine.ThresholdProfile
 	var result string
-	tPrfl := &engine.ThresholdProfileWithOpts{
+	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_TwoEnginesTest",
@@ -242,7 +242,7 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 			ActionIDs: []string{"ACT_1.1"},
 			Async:     true,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}

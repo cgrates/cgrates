@@ -80,8 +80,9 @@ func (dk *APDiktat) RSRValues(sep string) (v config.RSRParsers, err error) {
 	return dk.valRSR, nil
 }
 
-// ActionProfileWithOpts is used in API calls
-type ActionProfileWithOpts struct {
+// ActionProfileWithAPIOpts is used in API calls
+
+type ActionProfileWithAPIOpts struct {
 	*ActionProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }

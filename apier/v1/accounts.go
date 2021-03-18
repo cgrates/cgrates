@@ -144,7 +144,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 			return 0, err
 		}
 		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 				ArgsCache: map[string][]string{utils.ActionPlanIDs: {attrs.ActionPlanId}},
 			}, reply); err != nil {
 			return 0, err
@@ -156,7 +156,7 @@ func (apierSv1 *APIerSv1) RemoveActionTiming(attrs *AttrRemoveActionTiming, repl
 		}
 		if len(remAcntAPids) != 0 {
 			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: remAcntAPids},
 				}, reply); err != nil {
 				return 0, err
@@ -258,7 +258,7 @@ func (apierSv1 *APIerSv1) SetAccount(attr *utils.AttrSetAccount, reply *string) 
 					return 0, err
 				}
 				if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 						ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}, utils.ActionPlanIDs: apIDs},
 					}, reply); err != nil {
 					return 0, err
@@ -358,7 +358,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(attr *utils.AttrRemoveAccount, reply *st
 		return err
 	}
 	if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithOpts{
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}},
 		}, reply); err != nil {
 		return
@@ -724,7 +724,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(attr *utils.AttrSetBalance, reply *stri
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantWithOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetAccountsCount(attr *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := attr.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
