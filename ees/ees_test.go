@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -209,6 +210,236 @@ func TestV1ProcessEvent(t *testing.T) {
 	}
 }
 
+func TestV1ProcessEvent2(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cgrCfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
+	cgrCfg.EEsCfg().Exporters[0].Tenant = config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event: map[string]interface{}{
+				utils.Subject: "1001",
+				"ExtraFields": map[string]string{"extra1": "val_extra1",
+					"extra2": "val_extra2", "extra3": "val_extra3"},
+			},
+			Opts: map[string]interface{}{
+				utils.OptsAttributesProcessRuns: "10",
+			},
+		},
+	}
+	var rply map[string]map[string]interface{}
+	errExpect := "NOT_FOUND"
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %q but received %q", errExpect, err)
+	}
+
+	errExpect = "NOT_FOUND:test"
+	eeS.cfg.EEsCfg().Exporters[0].Filters = []string{"test"}
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %q but received %q", errExpect, err)
+	}
+}
+
+func TestV1ProcessEvent3(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cgrCfg.EEsCfg().Exporters[0].Flags = utils.FlagsWithParams{
+		utils.MetaAttributes: utils.FlagParams{},
+	}
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event:  map[string]interface{}{},
+		},
+	}
+	var rply map[string]map[string]interface{}
+	errExpect := "MANDATORY_IE_MISSING: [connIDs]"
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %q but received %q", errExpect, err)
+	}
+}
+
+func TestV1ProcessEvent4(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cgrCfg.EEsCfg().Exporters[0].Synchronous = true
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	eeS.eesChs = map[string]*ltcache.Cache{
+		utils.MetaHTTPPost: ltcache.NewCache(1,
+			time.Second, false, onCacheEvicted),
+	}
+	newEeS, err := NewEventExporter(cgrCfg, 0, filterS)
+	if err != nil {
+		t.Error(err)
+	}
+	eeS.eesChs[utils.MetaHTTPPost].Set("SQLExporterFull", newEeS, []string{"grp1"})
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event:  map[string]interface{}{},
+			Opts: map[string]interface{}{
+				utils.OptsEEsVerbose: struct{}{},
+			},
+		},
+	}
+	var rply map[string]map[string]interface{}
+	errExpect := "PARTIALLY_EXECUTED"
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %q but received %q", errExpect, err)
+	} else if len(rply) != 0 {
+		t.Error("Unexpected reply result")
+	}
+}
+
+type mockEventExporter struct{}
+
+func (mockEventExporter) ID() string                              { return utils.EmptyString }
+func (mockEventExporter) ExportEvent(cgrEv *utils.CGREvent) error { return nil }
+func (mockEventExporter) OnEvicted(itdmID string, value interface{}) {
+	utils.Logger.Warning("NOT IMPLEMENTED")
+}
+func (mockEventExporter) GetMetrics() utils.MapStorage {
+	return utils.MapStorage{
+		utils.NumberOfEvents:  int64(0),
+		utils.PositiveExports: utils.StringSet{},
+		utils.NegativeExports: 5,
+	}
+}
+
+func TestV1ProcessEventMockMetrics(t *testing.T) {
+	mEe := mockEventExporter{}
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	cgrCfg.EEsCfg().Exporters[0].Synchronous = true
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	eeS.eesChs = map[string]*ltcache.Cache{
+		utils.MetaHTTPPost: ltcache.NewCache(1,
+			time.Second, false, onCacheEvicted),
+	}
+	eeS.eesChs[utils.MetaHTTPPost].Set("SQLExporterFull", mEe, []string{"grp1"})
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event:  map[string]interface{}{},
+			Opts: map[string]interface{}{
+				utils.OptsEEsVerbose: struct{}{},
+			},
+		},
+	}
+	var rply map[string]map[string]interface{}
+	errExpect := "cannot cast to map[string]interface{} 5 for positive exports"
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+		t.Errorf("Expecting %q but received %q", errExpect, err)
+	}
+}
+func TestV1ProcessEvent5(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters = []*config.EventExporterCfg{
+		{
+			Type: utils.MetaNone,
+		},
+		{
+			ID:   "SQLExporterFull",
+			Type: "invalid_type",
+		},
+	}
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event:  map[string]interface{}{},
+			Opts: map[string]interface{}{
+				utils.OptsEEsVerbose: struct{}{},
+			},
+		},
+	}
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	var rply map[string]map[string]interface{}
+	errExpect := "unsupported exporter type: <invalid_type>"
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestV1ProcessEvent6(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
+	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	eeS := NewEventExporterS(cgrCfg, filterS, nil)
+	cgrEv := &utils.CGREventWithEeIDs{
+		EeIDs: []string{"SQLExporterFull"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "voiceEvent",
+			Time:   utils.TimePointer(time.Now()),
+			Event:  map[string]interface{}{},
+			Opts: map[string]interface{}{
+				utils.OptsEEsVerbose: struct{}{},
+			},
+		},
+	}
+	var rply map[string]map[string]interface{}
+	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestOnCacheEvicted(t *testing.T) {
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	bufLog := new(bytes.Buffer)
+	log.SetOutput(bufLog)
+	ee := mockEventExporter{}
+	onCacheEvicted(utils.EmptyString, ee)
+	rcvExpect := "CGRateS <> [WARNING] NOT IMPLEMENTED"
+	if rcv := bufLog.String(); !strings.Contains(rcv, rcvExpect) {
+		t.Errorf("Expected %v but received %v", rcvExpect, rcv)
+	}
+	bufLog.Reset()
+}
 func TestShutdown(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	newIDb := engine.NewInternalDB(nil, nil, true)
