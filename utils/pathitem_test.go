@@ -65,6 +65,12 @@ func TestNewPathItems(t *testing.T) {
 	if rply := NewPathItems(pathSlice); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
 	}
+
+	pathSlice = strings.Split("*req.Field1[*raw][0].Account", NestingSep)
+	expected = PathItems{{Field: MetaReq}, {Field: "Field1", Index: []string{"*raw", "0"}}, {Field: AccountField}}
+	if rply := NewPathItems(pathSlice); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %s, received: %s", ToJSON(expected), ToJSON(rply))
+	}
 }
 
 func TestPathItemString(t *testing.T) {

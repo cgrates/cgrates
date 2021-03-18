@@ -173,5 +173,8 @@ func GetPathIndexSlice(spath string) (opath string, idx []string) {
 	}
 	idxVal := spath[idxStart+1 : len(spath)-1]
 	opath = spath[:idxStart]
+	if strings.Index(idxVal, IdxCombination) == -1 {
+		return opath, []string{idxVal}
+	}
 	return opath, strings.Split(idxVal, IdxCombination)
 }
