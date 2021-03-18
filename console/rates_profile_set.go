@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetRateProfile{
 		name:      "rates_profile_set",
 		rpcMethod: utils.APIerSv1SetRateProfile,
-		rpcParams: &engine.APIRateProfileWithOpts{},
+		rpcParams: &utils.APIRateProfileWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +35,7 @@ func init() {
 type CmdSetRateProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.APIRateProfileWithOpts
+	rpcParams *utils.APIRateProfileWithOpts
 	*CommandExecuter
 }
 
@@ -50,11 +49,9 @@ func (self *CmdSetRateProfile) RpcMethod() string {
 
 func (self *CmdSetRateProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.APIRateProfileWithCache{
-			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-				APIRateProfile: new(utils.APIRateProfile),
-				Opts:           make(map[string]interface{}),
-			},
+		self.rpcParams = &utils.APIRateProfileWithOpts{
+			APIRateProfile: new(utils.APIRateProfile),
+			Opts:           make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

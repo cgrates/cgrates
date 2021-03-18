@@ -459,7 +459,7 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherHost(args *utils.TenantID
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetDispatcherHost, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetRateProfile(args *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) (err error) {
+func (dS *DispatcherService) ReplicatorSv1GetRateProfile(args *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant
