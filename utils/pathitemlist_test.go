@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -491,17 +493,97 @@ func TestPathItemListPushFrontList(t *testing.T) {
 	}
 }
 
-// const benchPath = "~*req.Field1[0][1].Field2[*raw].Field5.Field6[10].Field7[path1][path2][path3]"
-const benchPath = "~*req.Field1[0].Field2[*raw].Field5.Field6[10].Field7[path1]"
+// const benchPath = "~*req.Field1[0][-1][*raw][10][path1][path2][path3]"
 
-func BenchmarkGetPathIndexString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		GetPathIndexString(benchPath)
+// const benchPath = "~*req.Field1[*raw]"
+
+const benchPath = "Field1[1000000000000000]"
+
+// Benchmark results:
+// goos: linux
+// goarch: amd64
+// pkg: github.com/cgrates/cgrates/utils
+// cpu: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+// BenchmarkGetPathIndexSlice
+// BenchmarkGetPathIndexSlice             	16462084	       360.8 ns/op	     160 B/op	       2 allocs/op
+// BenchmarkGetPathIndexSliceSplit
+// BenchmarkGetPathIndexSliceSplit        	16291755	       359.4 ns/op	     112 B/op	       1 allocs/op
+// BenchmarkGetPathIndexSliceStringsIndex
+// BenchmarkGetPathIndexSliceStringsIndex 	10418586	       597.2 ns/op	     240 B/op	       4 allocs/op
+// BenchmarkGetPathIndexString
+// BenchmarkGetPathIndexString            	96080587	        61.19 ns/op	      16 B/op	       1 allocs/op
+// PASS
+// ok  	github.com/cgrates/cgrates/utils	25.372s
+
+func GetPathIndexSlice1(spath string) (opath string, idx []string) {
+	idxStart := strings.Index(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath, nil
 	}
+	idxVal := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	if len(idxVal) <= 3 {
+		return opath, []string{idxVal}
+	}
+	idxValB := []byte(idxVal)
+	n := bytes.Count(idxValB, []byte{']'}) // we number only ] as an optimization
+	if n <= 0 {
+		return opath, []string{idxVal}
+	}
+	idx = make([]string, n+1) // alloc the memory for the slice
+	for i := 0; i < n; i++ {  // expect a valid path
+		ix := bytes.IndexByte(idxValB, ']') // safe to asume that ix is not -1 as we counted before
+		if ix == len(idxValB)-1 ||
+			idxValB[ix+1] != '[' { // this is clearly an error so stop
+			return spath, nil
+		}
+		idx[i] = idxVal[:ix]
+		idxValB = idxValB[ix+2:]
+		idxVal = idxVal[ix+2:]
+	}
+	idx[n] = idxVal
+	return
+}
+
+func GetPathIndexSliceStringsIndex(spath string) (opath string, idx []string) {
+	idxStart := strings.Index(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath, nil
+	}
+	idxVal := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	if len(idxVal) <= 3 {
+		return opath, []string{idxVal}
+	}
+
+	for ix := strings.Index(idxVal, IdxCombination); ix != -1; ix = strings.Index(idxVal, IdxCombination) {
+		idx = append(idx, idxVal[:ix])
+		idxVal = idxVal[ix+1:]
+
+	}
+	idx = append(idx, string(idxVal))
+
+	return
 }
 
 func BenchmarkGetPathIndexSlice(b *testing.B) {
 	for i := 0; i < b.N; i++ {
+		GetPathIndexSlice1(benchPath)
+	}
+}
+
+func BenchmarkGetPathIndexSliceSplit(b *testing.B) {
+	for i := 0; i < b.N; i++ {
 		GetPathIndexSlice(benchPath)
+	}
+}
+func BenchmarkGetPathIndexSliceStringsIndex(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		GetPathIndexSliceStringsIndex(benchPath)
+	}
+}
+func BenchmarkGetPathIndexString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		GetPathIndexString(benchPath)
 	}
 }
