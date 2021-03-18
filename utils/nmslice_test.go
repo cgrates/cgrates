@@ -52,7 +52,7 @@ func TestNMSliceField(t *testing.T) {
 	nm = &NMSlice{
 		NewNMData("1001"),
 		NewNMData("1003"),
-		&NavigableMap{"Field1": NewNMData("Val")},
+		NavigableMap{"Field1": NewNMData("Val")},
 	}
 	if _, err := nm.Field(PathItems{{}}); err != ErrNotFound {
 		t.Error(err)
@@ -152,7 +152,7 @@ func TestNMSliceRemove(t *testing.T) {
 	nm := &NMSlice{
 		NewNMData("1001"),
 		NewNMData("1003"),
-		&NavigableMap{"Field1": NewNMData("Val")},
+		NavigableMap{"Field1": NewNMData("Val")},
 		&NMSlice{},
 	}
 	if err := nm.Remove(nil); err != ErrWrongPath {
@@ -171,7 +171,7 @@ func TestNMSliceRemove(t *testing.T) {
 	expected := &NMSlice{
 		NewNMData("1001"),
 		NewNMData("1003"),
-		&NavigableMap{"Field1": NewNMData("Val")},
+		NavigableMap{"Field1": NewNMData("Val")},
 	}
 
 	if err := nm.Remove(PathItems{{Index: []string{"-1"}}}); err != nil {
@@ -186,7 +186,7 @@ func TestNMSliceRemove(t *testing.T) {
 
 	expected = &NMSlice{
 		NewNMData("1001"),
-		&NavigableMap{"Field1": NewNMData("Val")},
+		NavigableMap{"Field1": NewNMData("Val")},
 	}
 	if err := nm.Remove(PathItems{{Index: []string{"1"}}}); err != nil {
 		t.Error(err)

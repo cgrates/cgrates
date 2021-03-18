@@ -190,6 +190,19 @@ func TestNavigableMapSet(t *testing.T) {
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
+
+	expected = NavigableMap{
+		"Field1": &NMSlice{NewNMData("1001"), NewNMData("1003"), NavigableMap{"Field6": NewNMData("1006")}},
+		"Field2": NewNMData("1004"),
+		"Field3": &NMSlice{NavigableMap{"Field4": NewNMData("1005")}},
+		"Field5": NavigableMap{"Field6": NewNMData("1007")},
+		"Field7": NavigableMap{"Field8": &NMSlice{NavigableMap{"Field9": NewNMData("1005")}}},
+	}
+	if _, err := nm.Set(PathItems{{Field: "Field7", Index: []string{"Field8", "0"}}, {Field: "Field9"}}, NewNMData("1005")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
 }
 
 func TestNavigableMapType(t *testing.T) {
@@ -326,6 +339,22 @@ func TestNavigableMapRemove(t *testing.T) {
 	} else if !reflect.DeepEqual(nm, expected) {
 		t.Errorf("Expected %s ,received: %s", expected, nm)
 	}
+
+	nm = NavigableMap{
+		"Field1": NewNMData("1001"),
+		"Field2": NewNMData("1003"),
+		"Field3": NavigableMap{"Field4": &NMSlice{NewNMData("Val")}},
+	}
+	expected = NavigableMap{
+		"Field1": NewNMData("1001"),
+		"Field2": NewNMData("1003"),
+	}
+	if err := nm.Remove(PathItems{{Field: "Field3", Index: []string{"Field4", "0"}}}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nm, expected) {
+		t.Errorf("Expected %s ,received: %s", expected, nm)
+	}
+
 }
 
 func TestNavigableMapGetSet(t *testing.T) {

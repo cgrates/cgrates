@@ -490,3 +490,18 @@ func TestPathItemListPushFrontList(t *testing.T) {
 		t.Errorf("Expecting: <pathB>, received: <%+v>", list1.Front().Next().Value.String())
 	}
 }
+
+// const benchPath = "~*req.Field1[0][1].Field2[*raw].Field5.Field6[10].Field7[path1][path2][path3]"
+const benchPath = "~*req.Field1[0].Field2[*raw].Field5.Field6[10].Field7[path1]"
+
+func BenchmarkGetPathIndexString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		GetPathIndexString(benchPath)
+	}
+}
+
+func BenchmarkGetPathIndexSlice(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		GetPathIndexSlice(benchPath)
+	}
+}

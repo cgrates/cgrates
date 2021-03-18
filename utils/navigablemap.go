@@ -20,6 +20,7 @@ package utils
 
 import (
 	"net"
+	"strconv"
 )
 
 // NavigableMap is the basic map of NM interface
@@ -76,21 +77,24 @@ func (nm NavigableMap) Set(path PathItems, val NMInterface) (added bool, err err
 	}
 	nmItm, has := nm[path[0].Field]
 
-	// for the moment we do not support nested indexes for set
-	if path[0].Index != nil { // has index, should be a slice which is kinda part of our map, hence separate handling
-		if !has {
-			nmItm = &NMSlice{}
-			if _, err = nmItm.Set(path, val); err != nil {
+	if len(path[0].Index) > 0 { // has indexes, should be a slice which is kinda part of our map, hence separate handling
+		if !has { // the NMInterface doesn't exit so create it based on indexes and the rest of the path
+			if nmItm, err = createFromIndexes(path[0].Index, path[1:], val); err != nil {
 				return
 			}
-			nm[path[0].Field] = nmItm
 			added = true
+			nm[path[0].Field] = nmItm
 			return
 		}
-		if nmItm.Type() != NMSliceType {
+		switch nmItm.Type() { // based on type we handle the indexes
+		default: // NMDataType
 			return false, ErrWrongPath
+		case NMSliceType: // let the slice handle the indexes
+			return nmItm.Set(path, val)
+		case NMMapType: // recreate the path list in order to not update the one above(it is needed for OrderNavigableMap indexing)
+			return nmItm.Set(append(PathItems{{Field: path[0].Index[0],
+				Index: path[0].Index[1:]}}, path[1:]...), val)
 		}
-		return nmItm.Set(path, val)
 	}
 
 	// standard handling
@@ -121,33 +125,23 @@ func (nm NavigableMap) Remove(path PathItems) (err error) {
 	if !has {
 		return // already removed
 	}
-	// we do not support nested indexes for remove in similar way we do not support them for set
-	if len(path) == 1 {
-		if path[0].Index != nil {
-			if el.Type() != NMSliceType {
-				return ErrWrongPath
-			}
-			// this should not return error
-			// but in case it does we propagate it further
-			err = el.Remove(path)
-			if el.Empty() {
-				delete(nm, path[0].Field)
-			}
-			return
-		}
-		delete(nm, path[0].Field)
-		return
-	}
-	if path[0].Index != nil {
-		if el.Type() != NMSliceType {
+	if len(path[0].Index) > 0 {
+		switch el.Type() { // based on type we handle the indexes
+		default: // NMDataType
 			return ErrWrongPath
-		}
-		if err = el.Remove(path); err != nil {
-			return
+		case NMSliceType: // let the slice handle the indexes
+			err = el.Remove(path)
+		case NMMapType: // recreate the path list in order to not update the one above(it is needed for OrderNavigableMap indexing)
+			err = el.Remove(append(PathItems{{Field: path[0].Index[0],
+				Index: path[0].Index[1:]}}, path[1:]...))
 		}
 		if el.Empty() {
 			delete(nm, path[0].Field)
 		}
+		return
+	}
+	if len(path) == 1 {
+		delete(nm, path[0].Field)
 		return
 	}
 	if el.Type() != NMMapType {
@@ -201,4 +195,36 @@ func (nm NavigableMap) FieldAsString(fldPath []string) (str string, err error) {
 // RemoteHost is part of dataStorage interface
 func (NavigableMap) RemoteHost() net.Addr {
 	return LocalAddr()
+}
+
+func createFromIndexes(indx []string, path PathItems, nm NMInterface) (nmItm NMInterface, err error) {
+	// safe to assume that len(indx) is greater than 0
+	if len(indx) != 1 { // not the last index
+		var nmEl NMInterface
+		if nmEl, err = createFromIndexes(indx[1:], path, nm); err != nil {
+			return
+		}
+		nm = nmEl
+	} else if len(path) != 0 { // last element in the indexes but it has extra path
+		nmEl := NavigableMap{}                       // we have path the next item is a map
+		if _, err = nmEl.Set(path, nm); err != nil { // set the element in map
+			return
+		}
+		nm = nmEl // rewrite the nm with the new map
+	}
+
+	// nm will be:
+	// 	- a new created NMInterface if we have more indexes
+	//  - a NavigableMap if we do not have any more indexes but we have extra path
+	//	- the original nm passed to the function if do not have indexes and extra path
+	// create the nmItem based on the index type
+	val, idxErr := strconv.Atoi(indx[0]) // ignore this error as if we can not convert this we asume that we want to create a map
+	if idxErr != nil {                   // is a map
+		return NavigableMap{indx[0]: nm}, nil
+	}
+	// is a slice
+	if val != 0 { // only create if index is 0
+		return nil, ErrWrongPath
+	}
+	return &NMSlice{nm}, nil
 }
