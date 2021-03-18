@@ -81,7 +81,7 @@ func (nms *NMSlice) Field(path PathItems) (val NMInterface, err error) {
 
 // Set sets the value for the given index
 func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err error) {
-	if len(path) == 0 || path[0].Index == nil {
+	if len(path) == 0 || len(path[0].Index) == 0 {
 		return false, ErrWrongPath
 	}
 	var idx int
@@ -91,24 +91,39 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 	}
 	if idx == len(*nms) { // append element
 		addedNew = true
-		if len(path) == 1 {
-			*nms = append(*nms, val)
-			return
-		}
-		nel := NavigableMap{}
-		if _, err = nel.Set(path[1:], val); err != nil {
-			return
+		nel := val
+		if len(path[0].Index) != 1 { // create the interface based on indexes
+			if nel, err = createFromIndexes(path[0].Index, path[1:], val); err != nil {
+				return
+			}
+		} else if len(path) > 1 { // we have a extra path so create a NavigableMap as nel
+			nel = NavigableMap{}
+			if _, err = nel.Set(path[1:], val); err != nil {
+				return
+			}
 		}
 		*nms = append(*nms, nel)
 		return
 	}
 	if idx < 0 {
 		idx = len(*nms) + idx
+		path[0].Index[0] = strconv.Itoa(idx)
 	}
 	if idx < 0 || idx >= len(*nms) {
 		return false, ErrWrongPath
 	}
-	path[0].Index = []string{strconv.Itoa(idx)}
+	if len(path[0].Index) > 1 { // we have more than one index
+		// recreate the path list in order to not update the one above(it is needed for OrderNavigableMap indexing)
+		switch (*nms)[idx].Type() { // based on type we handle the indexes
+		default: // NMDataType
+			return false, ErrWrongPath
+		case NMSliceType: // let the slice handle the indexes
+			return (*nms)[idx].Set(append(PathItems{{Index: path[0].Index[1:]}}, path[1:]...), val)
+		case NMMapType: // recreate the path list in order to not update the one above(it is needed for OrderNavigableMap indexing)
+			return (*nms)[idx].Set(append(PathItems{{Field: path[0].Index[1],
+				Index: path[0].Index[2:]}}, path[1:]...), val)
+		}
+	}
 	if len(path) == 1 {
 		(*nms)[idx] = val
 		return
@@ -121,21 +136,34 @@ func (nms *NMSlice) Set(path PathItems, val NMInterface) (addedNew bool, err err
 
 // Remove removes the item for the given index
 func (nms *NMSlice) Remove(path PathItems) (err error) {
-	if len(path) == 0 || path[0].Index == nil {
+	if len(path) == 0 || len(path[0].Index) == 0 {
 		return ErrWrongPath
 	}
 	var idx int
-	// we do not support nested indexes for remove in similar way we do not support them for set
 	if idx, err = strconv.Atoi(path[0].Index[0]); err != nil {
 		return
 	}
 	if idx < 0 {
 		idx = len(*nms) + idx
+		path[0].Index[0] = strconv.Itoa(idx)
 	}
 	if idx < 0 || idx >= len(*nms) { // already removed
 		return
 	}
-	path[0].Index = []string{strconv.Itoa(idx)}
+	if len(path[0].Index) != 1 {
+		if len(path[0].Index) > 1 { // we have more than one index
+			// recreate the path list in order to not update the one above(it is needed for OrderNavigableMap indexing)
+			switch (*nms)[idx].Type() { // based on type we handle the indexes
+			default: // NMDataType
+				return ErrWrongPath
+			case NMSliceType: // let the slice handle the indexes
+				return (*nms)[idx].Remove(append(PathItems{{Index: path[0].Index[1:]}}, path[1:]...))
+			case NMMapType: // recreate the path list in order to not update the one above(it is needed for OrderNavigableMap indexing)
+				return (*nms)[idx].Remove(append(PathItems{{Field: path[0].Index[1],
+					Index: path[0].Index[2:]}}, path[1:]...))
+			}
+		}
+	}
 	if len(path) == 1 {
 		*nms = append((*nms)[:idx], (*nms)[idx+1:]...)
 		return
