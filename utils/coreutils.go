@@ -914,10 +914,10 @@ func LongExecTimeDetector(logID string, maxDur time.Duration) (endchan chan stru
 	return
 }
 
-type StringWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
-	Arg    string
+type StringWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
+	Arg     string
 }
 
 func CastRPCErr(err error) error {

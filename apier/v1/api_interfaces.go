@@ -193,32 +193,32 @@ type RateProfileSv1Interface interface {
 
 type ReplicatorSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
-	GetAccount(args *utils.StringWithOpts, reply *engine.Account) error
-	GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error
-	GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error
+	GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error
+	GetDestination(key *utils.StringWithAPIOpts, reply *engine.Destination) error
+	GetReverseDestination(key *utils.StringWithAPIOpts, reply *[]string) error
 	GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error
 	GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error
 	GetThreshold(tntID *utils.TenantIDWithAPIOpts, reply *engine.Threshold) error
 	GetThresholdProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ThresholdProfile) error
 	GetStatQueueProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueueProfile) error
-	GetTiming(id *utils.StringWithOpts, reply *utils.TPTiming) error
+	GetTiming(id *utils.StringWithAPIOpts, reply *utils.TPTiming) error
 	GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
 	GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error
-	GetActionTriggers(id *utils.StringWithOpts, reply *engine.ActionTriggers) error
-	GetSharedGroup(id *utils.StringWithOpts, reply *engine.SharedGroup) error
-	GetActions(id *utils.StringWithOpts, reply *engine.Actions) error
-	GetActionPlan(id *utils.StringWithOpts, reply *engine.ActionPlan) error
-	GetAllActionPlans(_ *utils.StringWithOpts, reply *map[string]*engine.ActionPlan) error
-	GetAccountActionPlans(id *utils.StringWithOpts, reply *[]string) error
-	GetRatingPlan(id *utils.StringWithOpts, reply *engine.RatingPlan) error
-	GetRatingProfile(id *utils.StringWithOpts, reply *engine.RatingProfile) error
+	GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error
+	GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error
+	GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error
+	GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error
+	GetAllActionPlans(_ *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error
+	GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error
+	GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error
+	GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error
 	GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error
 	GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error
 	GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error
 	GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error
 	GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RateProfile) error
 	GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error
-	GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error
+	GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) error
 	SetThreshold(th *engine.ThresholdWithAPIOpts, reply *string) error
 	SetAccount(acc *engine.AccountWithOpts, reply *string) error
@@ -227,8 +227,8 @@ type ReplicatorSv1Interface interface {
 	SetStatQueue(ssq *engine.StatQueueWithAPIOpts, reply *string) error
 	SetFilter(fltr *engine.FilterWithOpts, reply *string) error
 	SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) error
-	SetTiming(tm *utils.TPTimingWithOpts, reply *string) error
-	SetResource(rs *engine.ResourceWithOpts, reply *string) error
+	SetTiming(tm *utils.TPTimingWithAPIOpts, reply *string) error
+	SetResource(rs *engine.ResourceWithAPIOpts, reply *string) error
 	SetResourceProfile(rs *engine.ResourceProfileWithOpts, reply *string) error
 	SetActionTriggers(args *engine.SetActionTriggersArgWithOpts, reply *string) error
 	SetSharedGroup(shg *engine.SharedGroupWithOpts, reply *string) error
@@ -245,22 +245,22 @@ type ReplicatorSv1Interface interface {
 	SetDispatcherHost(dpp *engine.DispatcherHostWithOpts, reply *string) error
 	RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) error
 	SetLoadIDs(args *utils.LoadIDsWithOpts, reply *string) error
-	RemoveDestination(id *utils.StringWithOpts, reply *string) error
-	RemoveAccount(id *utils.StringWithOpts, reply *string) error
+	RemoveDestination(id *utils.StringWithAPIOpts, reply *string) error
+	RemoveAccount(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-	RemoveTiming(id *utils.StringWithOpts, reply *string) error
+	RemoveTiming(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-	RemoveActionTriggers(id *utils.StringWithOpts, reply *string) error
-	RemoveSharedGroup(id *utils.StringWithOpts, reply *string) error
-	RemoveActions(id *utils.StringWithOpts, reply *string) error
-	RemoveActionPlan(id *utils.StringWithOpts, reply *string) error
+	RemoveActionTriggers(id *utils.StringWithAPIOpts, reply *string) error
+	RemoveSharedGroup(id *utils.StringWithAPIOpts, reply *string) error
+	RemoveActions(id *utils.StringWithAPIOpts, reply *string) error
+	RemoveActionPlan(id *utils.StringWithAPIOpts, reply *string) error
 	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, reply *string) error
-	RemoveRatingPlan(id *utils.StringWithOpts, reply *string) error
-	RemoveRatingProfile(id *utils.StringWithOpts, reply *string) error
+	RemoveRatingPlan(id *utils.StringWithAPIOpts, reply *string) error
+	RemoveRatingProfile(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error

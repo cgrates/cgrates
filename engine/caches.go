@@ -47,7 +47,7 @@ func init() {
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
 	gob.Register(new(ResourceProfileWithOpts))
-	gob.Register(new(ResourceWithOpts))
+	gob.Register(new(ResourceWithAPIOpts))
 	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))

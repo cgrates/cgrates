@@ -196,11 +196,11 @@ type TPTiming struct {
 	EndTime   string
 }
 
-// TPTimingWithOpts is used in replicatorV1 for dispatcher
-type TPTimingWithOpts struct {
+// TPTimingWithAPIOpts is used in replicatorV1 for dispatcher
+type TPTimingWithAPIOpts struct {
 	*TPTiming
-	Tenant string
-	Opts   map[string]interface{}
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
