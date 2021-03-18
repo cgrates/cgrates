@@ -175,12 +175,12 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	sTestMock := &testMockCall{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
-				rplCast, canCast := reply.(*engine.RateProfileCost)
+				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
 				}
-				customRply := &engine.RateProfileCost{
+				customRply := &utils.RateProfileCost{
 					ID:   "test",
 					Cost: 1,
 				}
@@ -270,12 +270,12 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	sTestMock := &testMockCall{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
-				rplCast, canCast := reply.(*engine.RateProfileCost)
+				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
 				}
-				customRply := &engine.RateProfileCost{
+				customRply := &utils.RateProfileCost{
 					ID:   "test",
 					Cost: 100,
 				}
@@ -603,18 +603,18 @@ func TestDebitFromBothBalances(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rtPrf := &engine.RateProfile{
+	rtPrf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RATE_1",
 		FilterIDs: []string{"*string:~*req.Account:2003"},
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			"RT_ALWAYS": {
 				ID:              "RT_ALWAYS",
 				FilterIDs:       nil,
 				ActivationTimes: "* * * * *",
-				IntervalRates: []*engine.IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0 * time.Second,
+						IntervalStart: utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(1, 2),
 						Unit:          minDecimal,
 						Increment:     secDecimal,

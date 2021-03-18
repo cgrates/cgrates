@@ -119,7 +119,7 @@ func main() {
 				},
 			}
 
-			var rplyRateS *engine.RateProfileCost
+			var rplyRateS *utils.RateProfileCost
 			tNow := time.Now()
 			if err := rpc.Call(utils.RateSv1CostForEvent, argsRateS, &rplyRateS); err != nil {
 				fmt.Printf("Unexpected nil error received for RateSv1CostForEvent: %+v\n", err.Error())

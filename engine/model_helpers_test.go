@@ -4300,7 +4300,7 @@ func TestRateProfileToAPI(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rPrf := &RateProfile{
+	rPrf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -4312,7 +4312,7 @@ func TestRateProfileToAPI(t *testing.T) {
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"RT_WEEK": {
 				ID: "RT_WEEK",
 				Weights: utils.DynamicWeights{
@@ -4321,15 +4321,15 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(12, 2),
 						Unit:          minDecimal,
 						Increment:     secDecimal,
 					},
 					{
-						IntervalStart: time.Minute,
+						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
 						FixedFee:      utils.NewDecimal(234, 5),
 						RecurrentFee:  utils.NewDecimal(6, 2),
 						Unit:          minDecimal,
@@ -4345,9 +4345,9 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(6, 2),
 						Unit:          minDecimal,
 						Increment:     secDecimal,
@@ -4362,9 +4362,9 @@ func TestRateProfileToAPI(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(6, 2),
 						Unit:          minDecimal,
 						Increment:     secDecimal,
@@ -4392,13 +4392,13 @@ func TestRateProfileToAPI(t *testing.T) {
 				ActivationTimes: "* * * * 1-5",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
-						IntervalStart: "0s",
+						IntervalStart: "0",
 						RecurrentFee:  0.12,
 						Unit:          "60000000000",
 						Increment:     "1000000000",
 					},
 					{
-						IntervalStart: "1m0s",
+						IntervalStart: "60000000000",
 						FixedFee:      0.00234,
 						RecurrentFee:  0.06,
 						Unit:          "60000000000",
@@ -4412,7 +4412,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				ActivationTimes: "* * * * 0,6",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
-						IntervalStart: "0s",
+						IntervalStart: "0",
 						RecurrentFee:  0.06,
 						Unit:          "60000000000",
 						Increment:     "1000000000",
@@ -4425,7 +4425,7 @@ func TestRateProfileToAPI(t *testing.T) {
 				ActivationTimes: "* * 24 12 *",
 				IntervalRates: []*utils.TPIntervalRate{
 					{
-						IntervalStart: "0s",
+						IntervalStart: "0",
 						RecurrentFee:  0.06,
 						Unit:          "60000000000",
 						Increment:     "1000000000",
@@ -4448,7 +4448,7 @@ func TestAPIToRateProfile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eRprf := &RateProfile{
+	eRprf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -4460,7 +4460,7 @@ func TestAPIToRateProfile(t *testing.T) {
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"RT_WEEK": {
 				ID: "RT_WEEK",
 				Weights: utils.DynamicWeights{
@@ -4469,16 +4469,16 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 						FixedFee:      utils.NewDecimal(23451, 4),
 						RecurrentFee:  utils.NewDecimal(12, 2),
 						Unit:          minDecimal,
 						Increment:     minDecimal,
 					},
 					{
-						IntervalStart: time.Minute,
+						IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
 						FixedFee:      utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(6, 2),
 						Unit:          minDecimal,
@@ -4494,9 +4494,9 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 						FixedFee:      utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(6, 2),
 						Unit:          minDecimal,
@@ -4512,9 +4512,9 @@ func TestAPIToRateProfile(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 						FixedFee:      utils.NewDecimal(0, 0),
 						RecurrentFee:  utils.NewDecimal(6, 2),
 						Unit:          minDecimal,
@@ -4657,7 +4657,7 @@ func TestAPIToRateProfileError(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
-	expectedErr = "time: invalid duration \"NOT_A_TIME\""
+	expectedErr = "strconv.ParseInt: parsing \"NOT_A_TIME\": invalid syntax"
 	tpRprf.ActivationInterval = nil
 	if _, err := APItoRateProfile(tpRprf, "UTC"); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+q", expectedErr, err)
@@ -5128,7 +5128,7 @@ func TestRouteProfileToAPICase1(t *testing.T) {
 }
 
 func TestRateProfileToAPIWithActInterval(t *testing.T) {
-	testProfile := &RateProfile{
+	testProfile := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -5146,7 +5146,7 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 		MinCost:         utils.NewDecimal(1, 1),
 		MaxCost:         utils.NewDecimal(6, 1),
 		MaxCostStrategy: "*free",
-		Rates:           map[string]*Rate{},
+		Rates:           map[string]*utils.Rate{},
 	}
 
 	expStruct := &utils.TPRateProfile{
