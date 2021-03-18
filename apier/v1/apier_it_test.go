@@ -856,7 +856,7 @@ func testApierLoadAccountActions(t *testing.T) {
 func testApierReloadScheduler(t *testing.T) {
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.SchedulerSv1Reload, utils.StringWithOpts{}, &reply); err != nil {
+	if err := rater.Call(utils.SchedulerSv1Reload, utils.StringWithAPIOpts{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
@@ -1973,7 +1973,7 @@ func testApierReloadCache2(t *testing.T) {
 func testApierReloadScheduler2(t *testing.T) {
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.SchedulerSv1Reload, utils.StringWithOpts{}, &reply); err != nil {
+	if err := rater.Call(utils.SchedulerSv1Reload, utils.StringWithAPIOpts{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
@@ -2059,7 +2059,7 @@ func testApierStartStopServiceStatus(t *testing.T) {
 	} else if reply != utils.RunningCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.SchedulerSv1Reload, utils.StringWithOpts{}, &reply); err != nil {
+	if err := rater.Call(utils.SchedulerSv1Reload, utils.StringWithAPIOpts{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)

@@ -902,17 +902,17 @@ func (dS *DispatcherReplicatorSv1) Ping(args *utils.CGREvent, reply *string) err
 }
 
 // GetAccount
-func (dS *DispatcherReplicatorSv1) GetAccount(args *utils.StringWithOpts, reply *engine.Account) error {
+func (dS *DispatcherReplicatorSv1) GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error {
 	return dS.dS.ReplicatorSv1GetAccount(args, reply)
 }
 
 // GetDestination
-func (dS *DispatcherReplicatorSv1) GetDestination(key *utils.StringWithOpts, reply *engine.Destination) error {
+func (dS *DispatcherReplicatorSv1) GetDestination(key *utils.StringWithAPIOpts, reply *engine.Destination) error {
 	return dS.dS.ReplicatorSv1GetDestination(key, reply)
 }
 
 // GetReverseDestination
-func (dS *DispatcherReplicatorSv1) GetReverseDestination(key *utils.StringWithOpts, reply *[]string) error {
+func (dS *DispatcherReplicatorSv1) GetReverseDestination(key *utils.StringWithAPIOpts, reply *[]string) error {
 	return dS.dS.ReplicatorSv1GetReverseDestination(key, reply)
 }
 
@@ -942,7 +942,7 @@ func (dS *DispatcherReplicatorSv1) GetStatQueueProfile(tntID *utils.TenantIDWith
 }
 
 // GetTiming
-func (dS *DispatcherReplicatorSv1) GetTiming(id *utils.StringWithOpts, reply *utils.TPTiming) error {
+func (dS *DispatcherReplicatorSv1) GetTiming(id *utils.StringWithAPIOpts, reply *utils.TPTiming) error {
 	return dS.dS.ReplicatorSv1GetTiming(id, reply)
 }
 
@@ -957,42 +957,42 @@ func (dS *DispatcherReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithA
 }
 
 // GetActionTriggers
-func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *utils.StringWithOpts, reply *engine.ActionTriggers) error {
+func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
 	return dS.dS.ReplicatorSv1GetActionTriggers(id, reply)
 }
 
 // GetSharedGroup
-func (dS *DispatcherReplicatorSv1) GetSharedGroup(id *utils.StringWithOpts, reply *engine.SharedGroup) error {
+func (dS *DispatcherReplicatorSv1) GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
 	return dS.dS.ReplicatorSv1GetSharedGroup(id, reply)
 }
 
 // GetActions
-func (dS *DispatcherReplicatorSv1) GetActions(id *utils.StringWithOpts, reply *engine.Actions) error {
+func (dS *DispatcherReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error {
 	return dS.dS.ReplicatorSv1GetActions(id, reply)
 }
 
 // GetActionPlan
-func (dS *DispatcherReplicatorSv1) GetActionPlan(id *utils.StringWithOpts, reply *engine.ActionPlan) error {
+func (dS *DispatcherReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
 	return dS.dS.ReplicatorSv1GetActionPlan(id, reply)
 }
 
 // GetAllActionPlans
-func (dS *DispatcherReplicatorSv1) GetAllActionPlans(args *utils.StringWithOpts, reply *map[string]*engine.ActionPlan) error {
+func (dS *DispatcherReplicatorSv1) GetAllActionPlans(args *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
 	return dS.dS.ReplicatorSv1GetAllActionPlans(args, reply)
 }
 
 // GetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(id *utils.StringWithOpts, reply *[]string) error {
+func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error {
 	return dS.dS.ReplicatorSv1GetAccountActionPlans(id, reply)
 }
 
 // GetRatingPlan
-func (dS *DispatcherReplicatorSv1) GetRatingPlan(id *utils.StringWithOpts, reply *engine.RatingPlan) error {
+func (dS *DispatcherReplicatorSv1) GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
 	return dS.dS.ReplicatorSv1GetRatingPlan(id, reply)
 }
 
 // GetRatingProfile
-func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithOpts, reply *engine.RatingProfile) error {
+func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
 	return dS.dS.ReplicatorSv1GetRatingProfile(id, reply)
 }
 
@@ -1027,7 +1027,7 @@ func (dS *DispatcherReplicatorSv1) GetDispatcherHost(tntID *utils.TenantIDWithAP
 }
 
 // GetItemLoadIDs
-func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithOpts, reply *map[string]int64) error {
+func (dS *DispatcherReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
 	return dS.dS.ReplicatorSv1GetItemLoadIDs(itemID, reply)
 }
 
@@ -1074,12 +1074,12 @@ func (dS *DispatcherReplicatorSv1) SetStatQueueProfile(args *engine.StatQueuePro
 }
 
 // SetTiming
-func (dS *DispatcherReplicatorSv1) SetTiming(args *utils.TPTimingWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetTiming(args *utils.TPTimingWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetTiming(args, reply)
 }
 
 // SetResource
-func (dS *DispatcherReplicatorSv1) SetResource(args *engine.ResourceWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetResource(args *engine.ResourceWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetResource(args, reply)
 }
 
@@ -1164,12 +1164,12 @@ func (dS *DispatcherReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithOpts, reply
 }
 
 // RemoveDestination
-func (dS *DispatcherReplicatorSv1) RemoveDestination(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveDestination(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveDestination(args, reply)
 }
 
 // RemoveAccount
-func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveAccount(args, reply)
 }
 
@@ -1194,7 +1194,7 @@ func (dS *DispatcherReplicatorSv1) RemoveStatQueueProfile(args *utils.TenantIDWi
 }
 
 // RemoveTiming
-func (dS *DispatcherReplicatorSv1) RemoveTiming(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveTiming(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveTiming(args, reply)
 }
 
@@ -1209,22 +1209,22 @@ func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWit
 }
 
 // RemoveActionTriggers
-func (dS *DispatcherReplicatorSv1) RemoveActionTriggers(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveActionTriggers(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveActionTriggers(args, reply)
 }
 
 // RemoveSharedGroup
-func (dS *DispatcherReplicatorSv1) RemoveSharedGroup(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveSharedGroup(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveSharedGroup(args, reply)
 }
 
 // RemoveActions
-func (dS *DispatcherReplicatorSv1) RemoveActions(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveActions(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveActions(args, reply)
 }
 
 // RemoveActionPlan
-func (dS *DispatcherReplicatorSv1) RemoveActionPlan(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveActionPlan(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveActionPlan(args, reply)
 }
 
@@ -1234,12 +1234,12 @@ func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(args *engine.RemAccount
 }
 
 // RemoveRatingPlan
-func (dS *DispatcherReplicatorSv1) RemoveRatingPlan(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveRatingPlan(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveRatingPlan(args, reply)
 }
 
 // RemoveRatingProfile
-func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveRatingProfile(args, reply)
 }
 

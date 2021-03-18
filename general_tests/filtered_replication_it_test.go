@@ -1790,7 +1790,7 @@ func testFltrRplAccount(t *testing.T) {
 	replyPrfl = nil
 
 	// use replicator to see if the attribute was changed in the DB
-	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetAccount, &utils.StringWithOpts{
+	if err := fltrRplEngine1RPC.Call(utils.ReplicatorSv1GetAccount, &utils.StringWithAPIOpts{
 		Arg: expPrf.ID,
 	}, &replyPrfl); err != nil {
 		t.Fatal(err)
@@ -1818,11 +1818,11 @@ func testFltrRplDestination(t *testing.T) {
 		Id:       dstID,
 		Prefixes: []string{"dan"},
 	}
-	args := &utils.StringWithOpts{
+	args := &utils.StringWithAPIOpts{
 		Arg:    dstID,
 		Tenant: "cgrates.org",
 	}
-	args2 := &utils.StringWithOpts{
+	args2 := &utils.StringWithAPIOpts{
 		Arg:    "dan",
 		Tenant: "cgrates.org",
 	}

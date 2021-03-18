@@ -153,9 +153,9 @@ func testDspRplAccount(t *testing.T) {
 	}
 	// Get
 	var reply *engine.Account
-	argsGetAccount := &utils.StringWithOpts{
+	argsGetAccount := &utils.StringWithAPIOpts{
 		Arg: "cgrates.org:1008",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -177,9 +177,9 @@ func testDspRplAccount(t *testing.T) {
 	// Start engine 1
 	allEngine.startEngine(t)
 	// Remove Account
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccount, &utils.StringWithOpts{
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccount, &utils.StringWithAPIOpts{
 		Arg: "cgrates.org:1008",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}, &replyStr); err != nil {
@@ -791,12 +791,12 @@ func testDspRplStatQueueProfile(t *testing.T) {
 func testDspRplResource(t *testing.T) {
 	// Set Resource
 	var replyStr string
-	setResource := &engine.ResourceWithOpts{
+	setResource := &engine.ResourceWithAPIOpts{
 		Resource: &engine.Resource{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -909,13 +909,13 @@ func testDspRplResourceProfile(t *testing.T) {
 func testDspRplTiming(t *testing.T) {
 	// Set Timing
 	var replyStr string
-	setTiming := &utils.TPTimingWithOpts{
+	setTiming := &utils.TPTimingWithAPIOpts{
 		TPTiming: &utils.TPTiming{
 			ID:    "testTimings",
 			Years: utils.Years{1999},
 		},
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -926,10 +926,10 @@ func testDspRplTiming(t *testing.T) {
 	}
 	// Get Timing
 	var reply utils.TPTiming
-	argsTiming := &utils.StringWithOpts{
+	argsTiming := &utils.StringWithAPIOpts{
 		Arg:    "testTimings",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -982,10 +982,10 @@ func testDspRplActionTriggers(t *testing.T) {
 	}
 	// Get ActionTriggers
 	var reply engine.ActionTriggers
-	argsActionTriggers := &utils.StringWithOpts{
+	argsActionTriggers := &utils.StringWithAPIOpts{
 		Arg:    "testActionTriggers",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1036,10 +1036,10 @@ func testDspRplSharedGroup(t *testing.T) {
 	}
 	// Get SharedGroup
 	var reply engine.SharedGroup
-	argsSharedGroup := &utils.StringWithOpts{
+	argsSharedGroup := &utils.StringWithAPIOpts{
 		Arg:    "IDSharedGroup",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1095,10 +1095,10 @@ func testDspRplActions(t *testing.T) {
 	}
 	// Get Actions
 	var reply engine.Actions
-	argsActions := &utils.StringWithOpts{
+	argsActions := &utils.StringWithAPIOpts{
 		Arg:    "KeyActions",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1161,10 +1161,10 @@ func testDspRplActionPlan(t *testing.T) {
 	}
 	// Get ActionPlan
 	var reply engine.ActionPlan
-	argsActionPlan := &utils.StringWithOpts{
+	argsActionPlan := &utils.StringWithAPIOpts{
 		Arg:    "KeyActionPlan",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1216,10 +1216,10 @@ func testDspRplAccountActionPlans(t *testing.T) {
 	}
 	// Get AccountActionPlans
 	var reply []string
-	argsAccountActionPlans := &utils.StringWithOpts{
+	argsAccountActionPlans := &utils.StringWithAPIOpts{
 		Arg:    "KeyAccountActionPlans",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1275,10 +1275,10 @@ func testDspRplRatingPlan(t *testing.T) {
 	}
 	// Get RatingPlan
 	var reply engine.RatingPlan
-	argsRatingPlan := &utils.StringWithOpts{
+	argsRatingPlan := &utils.StringWithAPIOpts{
 		Arg:    "id",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1332,10 +1332,10 @@ func testDspRplRatingProfile(t *testing.T) {
 	}
 	// Get RatingProfile
 	var reply engine.RatingProfile
-	argsRatingProfile := &utils.StringWithOpts{
+	argsRatingProfile := &utils.StringWithAPIOpts{
 		Arg:    "idRatingProfile",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1387,10 +1387,10 @@ func testDspRplDestination(t *testing.T) {
 	}
 	// Get Destination
 	var reply engine.Destination
-	argsDestination := &utils.StringWithOpts{
+	argsDestination := &utils.StringWithAPIOpts{
 		Arg:    "idDestination",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1442,10 +1442,10 @@ func testDspRplLoadIDs(t *testing.T) {
 	}
 	// Get LoadIDs
 	var reply map[string]int64
-	argsLoadIDs := &utils.StringWithOpts{
+	argsLoadIDs := &utils.StringWithAPIOpts{
 		Arg:    "idLoadIDs",
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}

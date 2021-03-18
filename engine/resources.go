@@ -99,10 +99,10 @@ type Resource struct {
 	rPrf   *ResourceProfile // for ordering purposes
 }
 
-// ResourceWithOpts is used in replicatorV1 for dispatcher
-type ResourceWithOpts struct {
+// ResourceWithAPIOpts is used in replicatorV1 for dispatcher
+type ResourceWithAPIOpts struct {
 	*Resource
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // TenantID returns the unique ID in a multi-tenant environment
