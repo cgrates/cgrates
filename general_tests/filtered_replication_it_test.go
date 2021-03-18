@@ -1342,28 +1342,30 @@ func testFltrRplDispatcherHost(t *testing.T) {
 
 func testFltrRplRateProfile(t *testing.T) {
 	rpID := "RP1"
-	rpPrf := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			Tenant:          "cgrates.org",
-			ID:              rpID,
-			FilterIDs:       []string{"*string:~*req.Account:dan"},
-			Weights:         ";0",
-			MaxCostStrategy: "*free",
-			Rates: map[string]*engine.APIRate{
-				"RT_WEEK": {
-					ID:              "RT_WEEK",
-					Weights:         ";0",
-					ActivationTimes: "* * * * 1-5",
-					IntervalRates: []*engine.APIIntervalRate{
-						{
-							IntervalStart: "0",
+	rpPrf := &v1.APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              rpID,
+				FilterIDs:       []string{"*string:~*req.Account:dan"},
+				Weights:         ";0",
+				MaxCostStrategy: "*free",
+				Rates: map[string]*utils.APIRate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						Weights:         ";0",
+						ActivationTimes: "* * * * 1-5",
+						IntervalRates: []*utils.APIIntervalRate{
+							{
+								IntervalStart: "0",
+							},
 						},
 					},
 				},
 			},
 		},
 	}
-	expPrf := &engine.RateProfile{
+	expPrf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        rpID,
 		FilterIDs: []string{"*string:~*req.Account:dan"},
@@ -1373,7 +1375,7 @@ func testFltrRplRateProfile(t *testing.T) {
 			},
 		},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*engine.Rate{
+		Rates: map[string]*utils.Rate{
 			"RT_WEEK": {
 				ID: "RT_WEEK",
 				Weights: utils.DynamicWeights{
@@ -1382,16 +1384,16 @@ func testFltrRplRateProfile(t *testing.T) {
 					},
 				},
 				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*engine.IntervalRate{
+				IntervalRates: []*utils.IntervalRate{
 					{
-						IntervalStart: 0,
+						IntervalStart: utils.NewDecimal(0, 0),
 					},
 				},
 			},
 		},
 	}
 	var result string
-	var replyPrfl *engine.RateProfile
+	var replyPrfl *utils.RateProfile
 	var rplyIDs []string
 	// empty
 	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetRateProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||

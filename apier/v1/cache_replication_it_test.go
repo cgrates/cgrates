@@ -173,7 +173,7 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 }
 
 func testCacheSReplicateProcessRateProfile(t *testing.T) {
-	var rply *engine.RateProfileCost
+	var rply *utils.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -191,7 +191,7 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rate1 := &engine.Rate{
+	rate1 := &utils.Rate{
 		ID: "RT_ALWAYS",
 		Weights: utils.DynamicWeights{
 			{
@@ -199,9 +199,9 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 			},
 		},
 		ActivationTimes: "* * * * *",
-		IntervalRates: []*engine.IntervalRate{
+		IntervalRates: []*utils.IntervalRate{
 			{
-				IntervalStart: 0,
+				IntervalStart: utils.NewDecimal(0, 0),
 				FixedFee:      utils.NewDecimal(0, 0),
 				RecurrentFee:  utils.NewDecimal(1, 2),
 				Unit:          minDecimal,
@@ -209,14 +209,14 @@ func testCacheSReplicateProcessRateProfile(t *testing.T) {
 			},
 		},
 	}
-	exp := &engine.RateProfileCost{
+	exp := &utils.RateProfileCost{
 		ID:   "RT_SPECIAL_1002",
 		Cost: 0.01,
-		RateSIntervals: []*engine.RateSInterval{{
-			UsageStart: 0,
-			Increments: []*engine.RateSIncrement{{
-				UsageStart:        0,
-				Usage:             time.Minute,
+		RateSIntervals: []*utils.RateSInterval{{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{{
+				IncrementStart:    utils.NewDecimal(0, 0),
+				Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				Rate:              rate1,
 				IntervalRateIndex: 0,
 				CompressFactor:    60,

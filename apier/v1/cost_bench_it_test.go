@@ -95,29 +95,31 @@ func testCostBenchLoadFromFolder2(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile(b *testing.B) {
-	rPrf := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			ID:        "DefaultRate",
-			FilterIDs: []string{"*string:~*req.Subject:1001"},
-			Weights:   ";10",
-			Rates: map[string]*engine.APIRate{
-				"RATE1": &engine.APIRate{
-					ID:              "RATE1",
-					Weights:         ";0",
-					ActivationTimes: "* * * * *",
-					IntervalRates: []*engine.APIIntervalRate{
-						{
-							IntervalStart: "0",
-							FixedFee:      utils.Float64Pointer(0.4),
-							RecurrentFee:  utils.Float64Pointer(0.2),
-							Unit:          utils.Float64Pointer(60000000000),
-							Increment:     utils.Float64Pointer(60000000000),
-						},
-						{
-							IntervalStart: "1m",
-							RecurrentFee:  utils.Float64Pointer(0.1),
-							Unit:          utils.Float64Pointer(60000000000),
-							Increment:     utils.Float64Pointer(1000000000),
+	rPrf := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				ID:        "DefaultRate",
+				FilterIDs: []string{"*string:~*req.Subject:1001"},
+				Weights:   ";10",
+				Rates: map[string]*utils.APIRate{
+					"RATE1": &utils.APIRate{
+						ID:              "RATE1",
+						Weights:         ";0",
+						ActivationTimes: "* * * * *",
+						IntervalRates: []*utils.APIIntervalRate{
+							{
+								IntervalStart: "0",
+								FixedFee:      utils.Float64Pointer(0.4),
+								RecurrentFee:  utils.Float64Pointer(0.2),
+								Unit:          utils.Float64Pointer(60000000000),
+								Increment:     utils.Float64Pointer(60000000000),
+							},
+							{
+								IntervalStart: "1m",
+								RecurrentFee:  utils.Float64Pointer(0.1),
+								Unit:          utils.Float64Pointer(60000000000),
+								Increment:     utils.Float64Pointer(1000000000),
+							},
 						},
 					},
 				},
@@ -133,11 +135,11 @@ func testCostBenchSetRateProfile(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile2(b *testing.B) {
-	rate1 := &engine.APIRate{
+	rate1 := &utils.APIRate{
 		ID:              "RATE1",
 		Weights:         ";0",
 		ActivationTimes: "* * * * *",
-		IntervalRates: []*engine.APIIntervalRate{
+		IntervalRates: []*utils.APIIntervalRate{
 			{
 				IntervalStart: "0",
 				RecurrentFee:  utils.Float64Pointer(0.2),
@@ -152,25 +154,27 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 			},
 		},
 	}
-	rtChristmas := &engine.APIRate{
+	rtChristmas := &utils.APIRate{
 		ID:              "RT_CHRISTMAS",
 		Weights:         ";30",
 		ActivationTimes: "* * 24 12 *",
-		IntervalRates: []*engine.APIIntervalRate{{
+		IntervalRates: []*utils.APIIntervalRate{{
 			IntervalStart: "0",
 			RecurrentFee:  utils.Float64Pointer(0.6),
 			Unit:          utils.Float64Pointer(60000000000),
 			Increment:     utils.Float64Pointer(1000000000),
 		}},
 	}
-	rPrf := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			ID:        "RateChristmas",
-			FilterIDs: []string{"*string:~*req.Subject:1010"},
-			Weights:   ";50",
-			Rates: map[string]*engine.APIRate{
-				"RATE1":          rate1,
-				"RATE_CHRISTMAS": rtChristmas,
+	rPrf := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				ID:        "RateChristmas",
+				FilterIDs: []string{"*string:~*req.Subject:1010"},
+				Weights:   ";50",
+				Rates: map[string]*utils.APIRate{
+					"RATE1":          rate1,
+					"RATE_CHRISTMAS": rtChristmas,
+				},
 			},
 		},
 	}
@@ -259,7 +263,7 @@ func BenchmarkCostWithRateS(b *testing.B) {
 	testCostBenchStartEngine(b)
 	testCostBenchRPCConn(b)
 	testCostBenchSetRateProfile(b)
-	var rply *engine.RateProfileCost
+	var rply *utils.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -291,7 +295,7 @@ func BenchmarkCostDiffPeriodWithRateS(b *testing.B) {
 	testCostBenchStartEngine(b)
 	testCostBenchRPCConn(b)
 	testCostBenchSetRateProfile2(b)
-	var rply *engine.RateProfileCost
+	var rply *utils.RateProfileCost
 	argsRt := &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

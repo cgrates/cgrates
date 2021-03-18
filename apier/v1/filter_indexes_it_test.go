@@ -1810,7 +1810,7 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//there are not any rates in db
-	var reply *engine.RateProfile
+	var reply *utils.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP1"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -1818,22 +1818,24 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	}
 
 	//set in db a ratePrf with double populated rates with our filter
-	ratePrfRates := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			Tenant:          "cgrates.org",
-			ID:              "RP1",
-			FilterIDs:       []string{"*string:~*req.Usage:10m"},
-			MaxCostStrategy: "*free",
-			Rates: map[string]*engine.APIRate{
-				"RT_WEEK": {
-					ID:              "RT_WEEK",
-					FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
-					ActivationTimes: "* * * * 1-5",
-				},
-				"RT_MONTH": {
-					ID:              "RT_MONTH",
-					FilterIDs:       []string{"RATE_FLTR1"},
-					ActivationTimes: "* * * * *",
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP1",
+				FilterIDs:       []string{"*string:~*req.Usage:10m"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*utils.APIRate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
+						ActivationTimes: "* * * * 1-5",
+					},
+					"RT_MONTH": {
+						ID:              "RT_MONTH",
+						FilterIDs:       []string{"RATE_FLTR1"},
+						ActivationTimes: "* * * * *",
+					},
 				},
 			},
 		},
@@ -1996,17 +1998,19 @@ func testV1FISetSecondRateProfileRate(t *testing.T) {
 	}
 
 	//append a new rate in the same rate profile
-	ratePrfRates := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			Tenant:          "cgrates.org",
-			ID:              "RP1",
-			FilterIDs:       []string{"*string:~*req.Usage:10m"},
-			MaxCostStrategy: "*free",
-			Rates: map[string]*engine.APIRate{
-				"RT_YEAR": {
-					ID:              "RT_YEAR",
-					FilterIDs:       []string{"RTPRF_FLTR3"},
-					ActivationTimes: "* * * * *",
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP1",
+				FilterIDs:       []string{"*string:~*req.Usage:10m"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*utils.APIRate{
+					"RT_YEAR": {
+						ID:              "RT_YEAR",
+						FilterIDs:       []string{"RTPRF_FLTR3"},
+						ActivationTimes: "* * * * *",
+					},
 				},
 			},
 		},
@@ -2237,24 +2241,26 @@ func testV1FISetRateProfileIndexes(t *testing.T) {
 	}
 
 	//there are not any rates in db
-	var reply *engine.RateProfile
+	var reply *utils.RateProfile
 	if err := tFIdxRpc.Call(utils.APIerSv1GetRateProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "RP2"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//set in db a ratePrf with with our filterS
-	ratePrfRates := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			Tenant:          "cgrates.org",
-			ID:              "RP2",
-			FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
-			MaxCostStrategy: "*free",
-			Rates: map[string]*engine.APIRate{
-				"RT_WEEK": {
-					ID:              "RT_WEEK",
-					FilterIDs:       []string{"*suffix:~*req.Account:1009"},
-					ActivationTimes: "* * * * 1-5",
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP2",
+				FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*utils.APIRate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						FilterIDs:       []string{"*suffix:~*req.Account:1009"},
+						ActivationTimes: "* * * * 1-5",
+					},
 				},
 			},
 		},
@@ -2419,17 +2425,19 @@ func testV1FISetSecondRateProfile(t *testing.T) {
 	}
 
 	//another rate profile
-	ratePrfRates := &engine.APIRateProfileWithOpts{
-		APIRateProfile: &engine.APIRateProfile{
-			Tenant:          "cgrates.org",
-			ID:              "RP3",
-			FilterIDs:       []string{"RTPRF_FLTR6"},
-			MaxCostStrategy: "*free",
-			Rates: map[string]*engine.APIRate{
-				"RT_WEEK": {
-					ID:              "RT_WEEK",
-					FilterIDs:       []string{"*suffix:~*req.Account:1019"},
-					ActivationTimes: "* * * * 1-5",
+	ratePrfRates := &APIRateProfileWithCache{
+		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
+			APIRateProfile: &utils.APIRateProfile{
+				Tenant:          "cgrates.org",
+				ID:              "RP3",
+				FilterIDs:       []string{"RTPRF_FLTR6"},
+				MaxCostStrategy: "*free",
+				Rates: map[string]*utils.APIRate{
+					"RT_WEEK": {
+						ID:              "RT_WEEK",
+						FilterIDs:       []string{"*suffix:~*req.Account:1019"},
+						ActivationTimes: "* * * * 1-5",
+					},
 				},
 			},
 		},

@@ -2185,7 +2185,7 @@ func testITTestIndexingMetaNot(t *testing.T) {
 }
 
 func testITIndexRateProfileRateIndexes(t *testing.T) {
-	rPrf := &RateProfile{
+	rPrf := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
@@ -2195,7 +2195,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
@@ -2240,7 +2240,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	}
 
 	// update the RateProfile by adding a new Rate
-	rPrf = &RateProfile{ // recreate the profile because if we test on internal
+	rPrf = &utils.RateProfile{ // recreate the profile because if we test on internal
 		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
@@ -2250,7 +2250,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
 				FilterIDs: []string{"*string:~*req.Category:call"},
@@ -2316,7 +2316,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fltr, true); err != nil {
 		t.Error(err)
 	}
-	rPrf2 := &RateProfile{
+	rPrf2 := &utils.RateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RP2",
 		Weights: utils.DynamicWeights{
@@ -2325,7 +2325,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"CUSTOM_RATE1": {
 				ID:        "CUSTOM_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1001", "FLTR"},
@@ -2442,12 +2442,12 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fltr1, true); err != nil {
 		t.Error(err)
 	}
-	rPrf1 := &RateProfile{
+	rPrf1 := &utils.RateProfile{
 		Tenant:          "cgrates.org",
 		ID:              "RP1",
 		FilterIDs:       []string{"*string:~*req.Subject:1004|1005", "FLTR"},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"CUSTOM1_RATE1": {
 				ID:        "CUSTOM1_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -2460,12 +2460,12 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	rPrf2 := &RateProfile{
+	rPrf2 := &utils.RateProfile{
 		Tenant:          "cgrates.org",
 		ID:              "RP2",
 		FilterIDs:       []string{"*string:~*req.ToR:*sms|*voice", "*string:~*req.Subject:1004"},
 		MaxCostStrategy: "*free",
-		Rates: map[string]*Rate{
+		Rates: map[string]*utils.Rate{
 			"CUSTOM2_RATE1": {
 				ID:        "CUSTOM2_RATE1",
 				FilterIDs: []string{"*string:~*req.Subject:1009"},
