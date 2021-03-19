@@ -461,7 +461,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	statConfig.FilterIDs = []string{"FLTR_1"}
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_1",
@@ -519,7 +519,7 @@ func testV1STSGetStatQueueProfileIDs(t *testing.T) {
 
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_2",

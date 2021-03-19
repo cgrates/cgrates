@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetFilter{
 		name:      "filter_set",
 		rpcMethod: utils.APIerSv1SetFilter,
-		rpcParams: &engine.FilterWithOpts{},
+		rpcParams: &engine.FilterWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetFilter struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.FilterWithOpts
+	rpcParams *engine.FilterWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdSetFilter) RpcMethod() string {
 
 func (self *CmdSetFilter) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.FilterWithOpts{Filter: new(engine.Filter)}
+		self.rpcParams = &engine.FilterWithAPIOpts{Filter: new(engine.Filter)}
 	}
 	return self.rpcParams
 }

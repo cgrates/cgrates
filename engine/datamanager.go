@@ -426,10 +426,10 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DestinationPrefix, dest.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDestination,
-			&DestinationWithOpts{
+			&DestinationWithAPIOpts{
 				Destination: dest,
 				Tenant:      config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -489,7 +489,7 @@ func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, t
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DestinationPrefix, destID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetReverseDestination,
-			&DestinationWithOpts{Destination: &Destination{Id: destID, Prefixes: prefixes}})
+			&DestinationWithAPIOpts{Destination: &Destination{Id: destID, Prefixes: prefixes}})
 	}
 	return
 }
@@ -629,9 +629,9 @@ func (dm *DataManager) SetAccount(acc *Account) (err error) {
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountPrefix, acc.ID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccount,
-			&AccountWithOpts{
+			&AccountWithAPIOpts{
 				Account: acc,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					utils.EmptyString, utils.EmptyString)}) // the account doesn't have cache
 	}
 	return
@@ -902,9 +902,9 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.FilterPrefix, fltr.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetFilter,
-			&FilterWithOpts{
+			&FilterWithAPIOpts{
 				Filter: fltr,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return

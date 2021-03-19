@@ -297,17 +297,15 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	var reply string
 	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:RP1"
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
-		&APIRateProfileWithCache{
-			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-				APIRateProfile: apiRPrf},
+		&utils.APIRateProfileWithOpts{
+			APIRateProfile: apiRPrf,
 		}, &reply); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
 	apiRPrf.FilterIDs = []string{"*string:~*req.Subject:1001"}
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
-		&APIRateProfileWithCache{
-			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-				APIRateProfile: apiRPrf},
+		&utils.APIRateProfileWithOpts{
+			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -357,18 +355,16 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	apiRPrfRates.Rates["RT_WEEK"].FilterIDs = []string{"*wrong:inline"}
 	expErr = "SERVER_ERROR: broken reference to filter: *wrong:inline for rate with ID: RT_WEEK"
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates,
-		&APIRateProfileWithCache{
-			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-				APIRateProfile: apiRPrfRates},
+		&utils.APIRateProfileWithOpts{
+			APIRateProfile: apiRPrfRates,
 		}, &reply); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
 	apiRPrfRates.Rates["RT_WEEK"].FilterIDs = nil
 
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates,
-		&APIRateProfileWithCache{
-			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-				APIRateProfile: apiRPrfRates},
+		&utils.APIRateProfileWithOpts{
+			APIRateProfile: apiRPrfRates,
 		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -488,9 +484,8 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
-		&APIRateProfileWithCache{
-			APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-				APIRateProfile: apiRPrf},
+		&utils.APIRateProfileWithOpts{
+			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -638,22 +633,20 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		rateProfile.Rates["RT_WEEK"].FilterIDs = nil
 	}
-	apiRPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				ID:              "RPWithoutTenant",
-				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-						IntervalRates: []*utils.APIIntervalRate{
-							{
-								IntervalStart: "0",
-							},
+	apiRPrf := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			ID:              "RPWithoutTenant",
+			FilterIDs:       []string{"*string:~*req.Subject:1001"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.APIIntervalRate{
+						{
+							IntervalStart: "0",
 						},
 					},
 				},
@@ -771,29 +764,27 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 			},
 		},
 	}
-	apiRPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				ID:              "SpecialRate",
-				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-					},
-					"RT_WEEKEND": {
-						ID:              "RT_WEEKEND",
-						Weights:         ";10",
-						ActivationTimes: "* * * * 0,6",
-					},
-					"RT_CHRISTMAS": {
-						ID:              "RT_CHRISTMAS",
-						Weights:         ";30",
-						ActivationTimes: "* * 24 12 *",
-					},
+	apiRPrf := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			ID:              "SpecialRate",
+			FilterIDs:       []string{"*string:~*req.Subject:1001"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+				},
+				"RT_WEEKEND": {
+					ID:              "RT_WEEKEND",
+					Weights:         ";10",
+					ActivationTimes: "* * * * 0,6",
+				},
+				"RT_CHRISTMAS": {
+					ID:              "RT_CHRISTMAS",
+					Weights:         ";30",
+					ActivationTimes: "* * 24 12 *",
 				},
 			},
 		},
@@ -863,30 +854,28 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 			},
 		},
 	}
-	rPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				ID:        "DefaultRate",
-				FilterIDs: []string{"*string:~*req.Subject:1001"},
-				Weights:   ";10",
-				Rates: map[string]*utils.APIRate{
-					"RATE1": &utils.APIRate{
-						ID:              "RATE1",
-						Weights:         ";0",
-						ActivationTimes: "* * * * *",
-						IntervalRates: []*utils.APIIntervalRate{
-							{
-								IntervalStart: "0",
-								RecurrentFee:  utils.Float64Pointer(0.12),
-								Unit:          utils.Float64Pointer(60000000000),
-								Increment:     utils.Float64Pointer(60000000000),
-							},
-							{
-								IntervalStart: "1m",
-								RecurrentFee:  utils.Float64Pointer(0.06),
-								Unit:          utils.Float64Pointer(60000000000),
-								Increment:     utils.Float64Pointer(1000000000),
-							},
+	rPrf := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			ID:        "DefaultRate",
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
+			Weights:   ";10",
+			Rates: map[string]*utils.APIRate{
+				"RATE1": &utils.APIRate{
+					ID:              "RATE1",
+					Weights:         ";0",
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*utils.APIIntervalRate{
+						{
+							IntervalStart: "0",
+							RecurrentFee:  utils.Float64Pointer(0.12),
+							Unit:          utils.Float64Pointer(60000000000),
+							Increment:     utils.Float64Pointer(60000000000),
+						},
+						{
+							IntervalStart: "1m",
+							RecurrentFee:  utils.Float64Pointer(0.06),
+							Unit:          utils.Float64Pointer(60000000000),
+							Increment:     utils.Float64Pointer(1000000000),
 						},
 					},
 				},

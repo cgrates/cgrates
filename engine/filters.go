@@ -199,9 +199,9 @@ type Filter struct {
 }
 
 // FilterWithOpts the arguments for the replication
-type FilterWithOpts struct {
+type FilterWithAPIOpts struct {
 	*Filter
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // TenantID returns the tenant wit the ID

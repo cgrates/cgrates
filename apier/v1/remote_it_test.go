@@ -711,30 +711,28 @@ func testInternalRemoteITGetRateProfile(t *testing.T) {
 			},
 		},
 	}
-	apiRPrf := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Subject:1001"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-					},
-					"RT_WEEKEND": {
-						ID:              "RT_WEEKEND",
-						Weights:         ";10",
-						ActivationTimes: "* * * * 0,6",
-					},
-					"RT_CHRISTMAS": {
-						ID:              "RT_CHRISTMAS",
-						Weights:         ";30",
-						ActivationTimes: "* * 24 12 *",
-					},
+	apiRPrf := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Subject:1001"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+				},
+				"RT_WEEKEND": {
+					ID:              "RT_WEEKEND",
+					Weights:         ";10",
+					ActivationTimes: "* * * * 0,6",
+				},
+				"RT_CHRISTMAS": {
+					ID:              "RT_CHRISTMAS",
+					Weights:         ";30",
+					ActivationTimes: "* * 24 12 *",
 				},
 			},
 		},

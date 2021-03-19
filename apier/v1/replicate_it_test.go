@@ -698,7 +698,7 @@ func testInternalReplicateITFilter(t *testing.T) {
 		t.Error(err)
 	}
 	//set
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "Filter1",
@@ -981,7 +981,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",
