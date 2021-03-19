@@ -1090,6 +1090,9 @@ func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) 
 		}
 		return chr.Increments, nil
 	}
+	if len(chr.Increments) <= *indx {
+		return nil, utils.ErrNotFound
+	}
 	incr := chr.Increments[*indx]
 	if len(fldPath) == 1 {
 		return incr, nil
@@ -1119,6 +1122,9 @@ func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val
 			return nil, utils.ErrNotFound
 		}
 		if indx != nil {
+			if len(rts) <= *indx {
+				return nil, utils.ErrNotFound
+			}
 			rt := rts[*indx]
 			if len(fldPath) == 1 {
 				return rt, nil
