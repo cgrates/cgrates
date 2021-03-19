@@ -119,7 +119,6 @@ func TestMatchingRateProfileForEventActivationInterval(t *testing.T) {
 	}
 }
 
-/*
 func TestRateProfileCostForEvent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -223,9 +222,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
 
-/*
 func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -322,7 +319,6 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
 
 func TestMatchingRateProfileEvent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
@@ -473,7 +469,6 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	}
 }
 
-/*
 func TestV1CostForEventError(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -558,7 +553,6 @@ func TestV1CostForEventError(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
 
 // go test -run=^$ -v -bench=BenchmarkRateS_V1CostForEvent -benchtime=5s
 func BenchmarkRateS_V1CostForEvent(b *testing.B) {

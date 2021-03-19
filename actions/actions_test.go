@@ -480,7 +480,22 @@ func TestActionShutDown(t *testing.T) {
 	acts := NewActionS(defaultCfg, filters, dm, nil)
 	acts.crn = &cron.Cron{}
 
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
 	acts.Shutdown()
+	expBuff := "CGRateS <> [INFO] <CoreS> shutdown <ActionS>"
+	if rcv := buff.String(); !strings.Contains(rcv, expBuff) {
+		t.Errorf("Expected %+v, received %+v", expBuff, rcv)
+	}
+
+	buff.Reset()
 }
 
 type dataDBMockError struct {

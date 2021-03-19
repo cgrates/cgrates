@@ -22,6 +22,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ericlagergren/decimal"
 )
 
 func TestTPDistinctIdsString(t *testing.T) {
@@ -1119,8 +1121,10 @@ func TestUsageMinute(t *testing.T) {
 			Opts:   map[string]interface{}{},
 		},
 	}
-	if _, err := testCostEventStruct.Usage(); err == nil || err != ErrNotFound {
-		t.Errorf("Expected %+v, received %+v", ErrNotFound, err)
+	if rcv, err := testCostEventStruct.Usage(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(decimal.New(int64(time.Minute), 0), rcv) {
+		t.Errorf("Expected %+v, received %+v", decimal.New(int64(time.Minute), 0), rcv)
 	}
 }
 
