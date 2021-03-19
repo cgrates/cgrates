@@ -34,33 +34,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (sqlEe *SQLEe, err error) {
-	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
-
+func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
 	var u *url.URL
-	if u, err = url.Parse(strings.TrimPrefix(cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath, utils.Meta)); err != nil {
+	// var err error
+	if u, err = url.Parse(strings.TrimPrefix(cgrCfg.EEsCfg().Exporters[0].ExportPath, utils.Meta)); err != nil {
 		return
 	}
 	password, _ := u.User.Password()
 
 	dbname := utils.SQLDefaultDBName
-	if vals, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLDBName]; has {
+	if vals, has := cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName]; has {
 		dbname = utils.IfaceAsString(vals)
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if vals, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLSSLMode]; has {
+	if vals, has := cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLSSLMode]; has {
 		ssl = utils.IfaceAsString(vals)
 	}
 	// tableName is mandatory in opts
-	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLTableName]; !has {
+	if iface, has := cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName]; !has {
 		return nil, utils.NewErrMandatoryIeMissing(utils.SQLTableName)
 	} else {
 		sqlEe.tableName = utils.IfaceAsString(iface)
 	}
 
-	var dialect gorm.Dialector
+	// var dialect gorm.Dialector
 	switch u.Scheme {
 	case utils.MySQL:
 		dialect = mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
@@ -69,6 +66,18 @@ func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 		dialect = postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl))
 	default:
 		return nil, fmt.Errorf("db type <%s> not supported", u.Scheme)
+	}
+	return
+}
+
+func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
+	dc utils.MapStorage) (sqlEe *SQLEe, err error) {
+	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+
+	dialect, err := sqlEe.NewSQLEeUrl(cgrCfg)
+	if err != nil {
+		return
 	}
 	var db *gorm.DB
 	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
