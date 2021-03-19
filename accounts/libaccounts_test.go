@@ -339,6 +339,19 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	} else if cb2.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
+
+	// debit more than we have in units
+	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
+	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
+
+	if _, err := debitConcreteUnits(decimal.New(1100, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
+		t.Errorf("Expected %+v, received %+v", utils.ErrInsufficientCredit, err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
 }
 
 func TestDebitUsageFromConcretesRestore(t *testing.T) {
@@ -403,6 +416,23 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		},
 		fltrS: filterS,
 	}
+
+	if _, err := maxDebitAbstractsFromConcretes(decimal.New(900, 0), utils.EmptyString,
+		[]*concreteBalance{cb1, cb2}, nil, new(utils.CGREvent),
+		nil, nil, nil, nil, &utils.CostIncrement{
+			Increment:    utils.NewDecimal(1, 0),
+			RecurrentFee: utils.NewDecimal(1, 0),
+		}); err != nil {
+		t.Error(err)
+	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
+	} else if cb2.blnCfg.Units.Cmp(decimal.New(100, 0)) != 0 {
+		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
+	}
+
+	//debit more than we have in balances with the restored units
+	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
+	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 	if _, err := maxDebitAbstractsFromConcretes(decimal.New(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, nil, new(utils.CGREvent),
 		nil, nil, nil, nil, &utils.CostIncrement{
@@ -657,4 +687,55 @@ func TestDebitFromBothBalances(t *testing.T) {
 	} else if !reflect.DeepEqual(rcvAcc, accPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcvAcc))
 	}
+
+	if err := dm.RemoveAccountProfile(accPrf.Tenant, accPrf.ID,
+		utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	} else if err := dm.RemoveRateProfile(rtPrf.Tenant, rtPrf.ID,
+		utils.NonTransactional, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	cncrtBlncs := []*concreteBalance{
+		{
+			blnCfg: &utils.Balance{
+				ID:   "CB1",
+				Type: utils.MetaAbstract,
+				UnitFactors: []*utils.UnitFactor{
+					{
+						FilterIDs: []string{"*test"},
+						Factor:    utils.NewDecimal(10, 0), // EuroCents
+					},
+				},
+				Units: utils.NewDecimal(80, 0), // 500 EuroCents
+			},
+			fltrS: filters,
+		},
+		{
+			blnCfg: &utils.Balance{
+				ID:    "CB2",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(1, 0),
+			},
+			fltrS: filters,
+		},
+	}
+
+	expectedErr := "inline parse error for string: <*test>"
+	if _, err := maxDebitAbstractsFromConcretes(decimal.New(110, 0), utils.EmptyString,
+		cncrtBlncs, nil, new(utils.CGREvent),
+		nil, nil, nil, nil, &utils.CostIncrement{
+			Increment:    utils.NewDecimal(2, 0),
+			RecurrentFee: utils.NewDecimal(1, 0),
+		}); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
 }

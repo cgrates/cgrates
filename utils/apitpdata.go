@@ -1522,7 +1522,8 @@ func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
 	if uIface, has := args.Event[Usage]; has {
 		return IfaceAsBig(uIface)
 	}
-	return nil, ErrNotFound
+	// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil
+	return decimal.New(int64(time.Minute), 0), nil
 }
 
 type TPActionProfile struct {
