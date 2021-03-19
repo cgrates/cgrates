@@ -1188,7 +1188,7 @@ func (acc *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
 
 // FieldAsInterface func to help EventCost FieldAsInterface
 func (as *AccountSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
+	if as == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {

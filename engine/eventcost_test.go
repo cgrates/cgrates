@@ -266,7 +266,6 @@ func TestECClone(t *testing.T) {
 	if _, has := testEC.Accounting["a012888"]; !has {
 		t.Error("Key removed from testEC")
 	}
-
 }
 
 func TestECComputeAndReset(t *testing.T) {
@@ -3746,4 +3745,49 @@ func TestECAsCallCost3(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestECAsDataProvider2(t *testing.T) {
+	ecDP := testEC
+	if data, err := ecDP.FieldAsInterface([]string{"RunID"}); err != nil {
+		t.Error(err)
+	} else if data != utils.MetaDefault {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", utils.MetaDefault, data)
+	}
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "ID"}); err != nil {
+		t.Error(err)
+	} else if data != "dan" {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", "data", data)
+	}
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "UUID"}); err != nil {
+		t.Error(err)
+	} else if data != "7a54a9e9-d610-4c82-bcb5-a315b9a65010" {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", "4b8b53d7-c1a1-4159-b845-4623a00a0165", data)
+	}
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Type"}); err != nil {
+		t.Error(err)
+	} else if data != "*voice" {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", "*voice", data)
+	}
+	ecDP = &EventCost{AccountSummary: &AccountSummary{}}
+	ecDP.initCache()
+	if _, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[0]", "Type"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error:%v", err)
+	}
+	if _, err := ecDP.FieldAsInterface([]string{"Charges[0]", "Increments"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error:%v", err)
+	}
+	ecDP.Charges = []*ChargingInterval{{}}
+	if _, err := ecDP.FieldAsInterface([]string{"Charges[0]", "Increments[0]"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error:%v", err)
+	}
+	ecDP.Rating = Rating{"": {}}
+	ecDP.Rates = ChargedRates{"": {}, "b": {}}
+	if _, err := ecDP.FieldAsInterface([]string{"Charges[0]", "Rating", "Rates[0]"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error:%v", err)
+	}
+
+	if _, err := ecDP.FieldAsInterface([]string{"Rates", "b[0]"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error:%v", err)
+	}
 }

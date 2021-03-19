@@ -239,7 +239,7 @@ type RGRate struct {
 
 // FieldAsInterface func to help EventCost FieldAsInterface
 func (r *RGRate) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) != 1 {
+	if r == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {

@@ -194,7 +194,7 @@ type BalanceCharge struct {
 
 // FieldAsInterface func to help EventCost FieldAsInterface
 func (bc *BalanceCharge) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) != 1 {
+	if bc == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {
@@ -263,11 +263,11 @@ func (rf RatingMatchedFilters) Clone() (cln map[string]interface{}) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (rf *RatingMatchedFilters) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) != 1 {
+func (rf RatingMatchedFilters) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if rf == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
-	ct, has := (*rf)[fldPath[0]]
+	ct, has := rf[fldPath[0]]
 	if !has || ct == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -300,7 +300,7 @@ func (ct *ChargedTiming) Clone() (cln *ChargedTiming) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (ct *ChargedTiming) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ct ChargedTiming) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -352,7 +352,7 @@ func (ru *RatingUnit) Clone() (cln *RatingUnit) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (ru *RatingUnit) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (ru RatingUnit) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
@@ -407,11 +407,11 @@ func (rfs RatingFilters) Clone() (cln RatingFilters) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (rfs *RatingFilters) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
+func (rfs RatingFilters) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if rfs == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	ct, has := (*rfs)[fldPath[0]]
+	ct, has := rfs[fldPath[0]]
 	if !has || ct == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -450,11 +450,11 @@ func (crus Rating) Clone() (cln Rating) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (crus *Rating) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
+func (crus Rating) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if crus == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	rt, has := (*crus)[fldPath[0]]
+	rt, has := crus[fldPath[0]]
 	if !has || rt == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -468,12 +468,12 @@ func (crus *Rating) FieldAsInterface(fldPath []string) (val interface{}, err err
 type ChargedRates map[string]RateGroups
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (crs *ChargedRates) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
+func (crs ChargedRates) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if crs == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	opath, indx := utils.GetPathIndex(fldPath[0])
-	cr, has := (*crs)[opath]
+	cr, has := crs[opath]
 	if !has || cr == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -522,11 +522,11 @@ func (crs ChargedRates) Clone() (cln ChargedRates) {
 type ChargedTimings map[string]*ChargedTiming
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (cts *ChargedTimings) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
+func (cts ChargedTimings) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if cts == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	ct, has := (*cts)[fldPath[0]]
+	ct, has := cts[fldPath[0]]
 	if !has || ct == nil {
 		return nil, utils.ErrNotFound
 	}
@@ -590,11 +590,11 @@ func (cbs Accounting) Clone() (cln Accounting) {
 }
 
 // FieldAsInterface func to help EventCost FieldAsInterface
-func (cbs *Accounting) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
+func (cbs Accounting) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+	if cbs == nil || len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	ac, has := (*cbs)[fldPath[0]]
+	ac, has := cbs[fldPath[0]]
 	if !has || ac == nil {
 		return nil, utils.ErrNotFound
 	}
