@@ -492,60 +492,60 @@ func TestParseEventValue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR), ""); tor != utils.MetaVoice {
+	if tor, _ := ev.ParseEventValue(utils.ToR, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.ToR), ""); tor != utils.MetaVoice {
 		t.Errorf("Unexpected tor parsed %q", tor)
 	}
-	if accid, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginID), ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+	if accid, _ := ev.ParseEventValue(utils.OriginID, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.OriginID), ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
 		t.Error("Unexpected result parsed", accid)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginHost), ""); parsed != "10.0.3.15" {
+	if parsed, _ := ev.ParseEventValue(utils.OriginHost, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.OriginHost), ""); parsed != "10.0.3.15" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Source), ""); parsed != "FS_EVENT" {
+	if parsed, _ := ev.ParseEventValue(utils.Source, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Source), ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RequestType), ""); parsed != utils.MetaPrepaid {
+	if parsed, _ := ev.ParseEventValue(utils.RequestType, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.RequestType), ""); parsed != utils.MetaPrepaid {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Tenant), ""); parsed != "cgrates.org" {
+	if parsed, _ := ev.ParseEventValue(utils.Tenant, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Tenant), ""); parsed != "cgrates.org" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Category), ""); parsed != "call" {
+	if parsed, _ := ev.ParseEventValue(utils.Category, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Category), ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.AccountField), ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(utils.AccountField, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.AccountField), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Subject), ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(utils.Subject, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Subject), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Destination), ""); parsed != "1003" {
+	if parsed, _ := ev.ParseEventValue(utils.Destination, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Destination), ""); parsed != "1003" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6], "") // We discard nanoseconds information so we can correlate csv
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.SetupTime), ""); parsed != sTime.String() {
+	if parsed, _ := ev.ParseEventValue(utils.SetupTime, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.SetupTime), ""); parsed != sTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.AnswerTime), ""); parsed != aTime.String() {
+	if parsed, _ := ev.ParseEventValue(utils.AnswerTime, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.AnswerTime), ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Usage), ""); parsed != "66000000000" {
+	if parsed, _ := ev.ParseEventValue(utils.Usage, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Usage), ""); parsed != "66000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.PDD), ""); parsed != "0.028" {
+	if parsed, _ := ev.ParseEventValue(utils.PDD, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.PDD), ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Route), ""); parsed != "supplier1" {
+	if parsed, _ := ev.ParseEventValue(utils.Route, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Route), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RunID), ""); parsed != utils.MetaDefault {
+	if parsed, _ := ev.ParseEventValue(utils.RunID, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.RunID), ""); parsed != utils.MetaDefault {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Cost), ""); parsed != "-1" {
+	if parsed, _ := ev.ParseEventValue(utils.Cost, config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Cost), ""); parsed != "-1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"Hangup-Cause"), ""); parsed != "NORMAL_CLEARING" {
+	if parsed, _ := ev.ParseEventValue("Hangup-Cause", config.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+"Hangup-Cause"), ""); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 }
@@ -609,9 +609,9 @@ func TestFsEvGetExtraFields(t *testing.T) {
 	var err error
 	err = nil
 	cfg.FsAgentCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{
-		"~Channel-Read-Codec-Name",
-		"~Channel-Write-Codec-Name",
-		"~NonExistingHeader",
+		"~*req.Channel-Read-Codec-Name",
+		"~*req.Channel-Write-Codec-Name",
+		"~*req.NonExistingHeader",
 	})
 	if err != nil {
 		t.Error(err)

@@ -287,20 +287,25 @@ func (fsev FSEvent) GetOriginHost() string {
 
 func (fsev FSEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
+	const dynprefix string = utils.MetaDynReq + utils.NestingSep
 	for _, fldRule := range config.CgrConfig().FsAgentCfg().ExtraFields {
-		if parsed, err := fsev.ParseEventValue(fldRule,
+		if !strings.HasPrefix(fldRule.Rules, dynprefix) {
+			continue
+		}
+		attrName := fldRule.AttrName()[5:]
+		if parsed, err := fsev.ParseEventValue(attrName, fldRule,
 			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: %s parsing event rule: %+v", utils.FreeSWITCHAgent, err.Error(), fldRule))
 		} else {
-			extraFields[fldRule.AttrName()] = parsed
+			extraFields[attrName] = parsed
 		}
 	}
 	return extraFields
 }
 
 // Used in derived charging and sittuations when we need to run regexp on fields
-func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (parsed string, err error) {
-	switch rsrFld.AttrName() {
+func (fsev FSEvent) ParseEventValue(attrName string, rsrFld *config.RSRParser, timezone string) (parsed string, err error) {
+	switch attrName {
 	case utils.ToR:
 		return rsrFld.ParseValue(utils.MetaVoice)
 	case utils.OriginID:
@@ -342,8 +347,8 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 	case utils.Cost:
 		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
-		if parsed, err = rsrFld.ParseValue(fsev[rsrFld.AttrName()]); err != nil {
-			parsed, err = rsrFld.ParseValue(fsev[FS_VARPREFIX+rsrFld.AttrName()])
+		if parsed, err = rsrFld.ParseValue(fsev[attrName]); err != nil {
+			parsed, err = rsrFld.ParseValue(fsev[FS_VARPREFIX+attrName])
 		}
 		return
 	}
