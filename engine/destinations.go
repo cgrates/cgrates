@@ -37,10 +37,10 @@ type Destination struct {
 	Prefixes []string
 }
 
-type DestinationWithOpts struct {
+type DestinationWithAPIOpts struct {
 	*Destination
-	Tenant string
-	Opts   map[string]interface{}
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 // returns prefix precision

@@ -268,7 +268,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 
 func testFltrRplFilters(t *testing.T) {
 	fltrID := "FLTR1"
-	fltr := &engine.FilterWithOpts{
+	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     fltrID,
@@ -1342,23 +1342,21 @@ func testFltrRplDispatcherHost(t *testing.T) {
 
 func testFltrRplRateProfile(t *testing.T) {
 	rpID := "RP1"
-	rpPrf := &v1.APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              rpID,
-				FilterIDs:       []string{"*string:~*req.Account:dan"},
-				Weights:         ";0",
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						Weights:         ";0",
-						ActivationTimes: "* * * * 1-5",
-						IntervalRates: []*utils.APIIntervalRate{
-							{
-								IntervalStart: "0",
-							},
+	rpPrf := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              rpID,
+			FilterIDs:       []string{"*string:~*req.Account:dan"},
+			Weights:         ";0",
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					Weights:         ";0",
+					ActivationTimes: "* * * * 1-5",
+					IntervalRates: []*utils.APIIntervalRate{
+						{
+							IntervalStart: "0",
 						},
 					},
 				},

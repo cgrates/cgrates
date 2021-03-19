@@ -546,54 +546,54 @@ func (dS *DispatcherService) ReplicatorSv1SetThreshold(args *engine.ThresholdWit
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetThreshold, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetDestination(args *engine.DestinationWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetDestination(args *engine.DestinationWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.DestinationWithOpts{}
+		args = &engine.DestinationWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetDestination, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetDestination, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetAccount(args *engine.AccountWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetAccount(args *engine.AccountWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.AccountWithOpts{}
+		args = &engine.AccountWithAPIOpts{}
 	}
 	tenant := utils.FirstNonEmpty(utils.SplitConcatenatedKey(args.ID)[0], dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetAccount, tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccount, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetReverseDestination(args *engine.DestinationWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetReverseDestination(args *engine.DestinationWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.DestinationWithOpts{}
+		args = &engine.DestinationWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetReverseDestination, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetReverseDestination, args, rpl)
 }
 
@@ -614,20 +614,20 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StatQueueWit
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetStatQueue, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetFilter(args *engine.FilterWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetFilter(args *engine.FilterWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.FilterWithOpts{}
+		args = &engine.FilterWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetFilter, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetFilter, args, rpl)
 }
 

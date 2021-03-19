@@ -59,7 +59,7 @@ func init() {
 	gob.Register(new(RouteProfileWithOpts))
 	// Filters
 	gob.Register(new(Filter))
-	gob.Register(new(FilterWithOpts))
+	gob.Register(new(FilterWithAPIOpts))
 	// Dispatcher
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))

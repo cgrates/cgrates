@@ -1047,17 +1047,17 @@ func (dS *DispatcherReplicatorSv1) SetThreshold(args *engine.ThresholdWithAPIOpt
 }
 
 // SetDestination
-func (dS *DispatcherReplicatorSv1) SetDestination(args *engine.DestinationWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetDestination(args *engine.DestinationWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetDestination(args, reply)
 }
 
 // SetAccount
-func (dS *DispatcherReplicatorSv1) SetAccount(args *engine.AccountWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetAccount(args *engine.AccountWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetAccount(args, reply)
 }
 
 // SetReverseDestination
-func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.DestinationWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.DestinationWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetReverseDestination(args, reply)
 }
 
@@ -1067,7 +1067,7 @@ func (dS *DispatcherReplicatorSv1) SetStatQueue(args *engine.StatQueueWithAPIOpt
 }
 
 // SetFilter
-func (dS *DispatcherReplicatorSv1) SetFilter(args *engine.FilterWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetFilter(args *engine.FilterWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetFilter(args, reply)
 }
 

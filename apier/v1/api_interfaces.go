@@ -221,11 +221,11 @@ type ReplicatorSv1Interface interface {
 	GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) error
 	SetThreshold(th *engine.ThresholdWithAPIOpts, reply *string) error
-	SetAccount(acc *engine.AccountWithOpts, reply *string) error
-	SetDestination(dst *engine.DestinationWithOpts, reply *string) error
-	SetReverseDestination(dst *engine.DestinationWithOpts, reply *string) error
+	SetAccount(acc *engine.AccountWithAPIOpts, reply *string) error
+	SetDestination(dst *engine.DestinationWithAPIOpts, reply *string) error
+	SetReverseDestination(dst *engine.DestinationWithAPIOpts, reply *string) error
 	SetStatQueue(ssq *engine.StatQueueWithAPIOpts, reply *string) error
-	SetFilter(fltr *engine.FilterWithOpts, reply *string) error
+	SetFilter(fltr *engine.FilterWithAPIOpts, reply *string) error
 	SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) error
 	SetTiming(tm *utils.TPTimingWithAPIOpts, reply *string) error
 	SetResource(rs *engine.ResourceWithAPIOpts, reply *string) error

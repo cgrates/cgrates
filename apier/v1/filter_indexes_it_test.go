@@ -190,7 +190,7 @@ func testV1FIdxRpcConn(t *testing.T) {
 //ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",
@@ -285,7 +285,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter2",
@@ -450,7 +450,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 //StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -553,7 +553,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -699,7 +699,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 //ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
@@ -792,7 +792,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -927,7 +927,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 //RouteProfile
 func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -1027,7 +1027,7 @@ func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -1170,7 +1170,7 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 //AccountProfile
 func testV1FISetAccountProfileIndexes(t *testing.T) {
 	var reply *utils.AccountProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACCPRF_FLTR",
@@ -1292,7 +1292,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 
 func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 	//new filter
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACCPRF_FLTR2",
@@ -1439,7 +1439,7 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 //ActionProfile
 func testV1FISetActionProfileIndexes(t *testing.T) {
 	//set a new filter in db
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACTION_FLTR",
@@ -1604,7 +1604,7 @@ func testV1FIComputeActionProfileIndexes(t *testing.T) {
 
 func testVF1SetSecondActionProfile(t *testing.T) {
 	//second filter in db
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "ACTION_FLTR2",
@@ -1792,7 +1792,7 @@ func testV1FIRemoveActionProfile(t *testing.T) {
 //RateProfileRate Indexes
 func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	//set a filter for our rates
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RATE_FLTR1",
@@ -1818,24 +1818,22 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	}
 
 	//set in db a ratePrf with double populated rates with our filter
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Usage:10m"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
-						ActivationTimes: "* * * * 1-5",
-					},
-					"RT_MONTH": {
-						ID:              "RT_MONTH",
-						FilterIDs:       []string{"RATE_FLTR1"},
-						ActivationTimes: "* * * * *",
-					},
+	ratePrfRates := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Usage:10m"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					FilterIDs:       []string{"RATE_FLTR1", "*suffix:~*req.Account:1009"},
+					ActivationTimes: "* * * * 1-5",
+				},
+				"RT_MONTH": {
+					ID:              "RT_MONTH",
+					FilterIDs:       []string{"RATE_FLTR1"},
+					ActivationTimes: "* * * * *",
 				},
 			},
 		},
@@ -1977,7 +1975,7 @@ func testV1FIComputeRateProfileRatesIndexes(t *testing.T) {
 
 func testV1FISetSecondRateProfileRate(t *testing.T) {
 	//second filter for a new rate in the same rate profile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RTPRF_FLTR3",
@@ -1998,19 +1996,17 @@ func testV1FISetSecondRateProfileRate(t *testing.T) {
 	}
 
 	//append a new rate in the same rate profile
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP1",
-				FilterIDs:       []string{"*string:~*req.Usage:10m"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_YEAR": {
-						ID:              "RT_YEAR",
-						FilterIDs:       []string{"RTPRF_FLTR3"},
-						ActivationTimes: "* * * * *",
-					},
+	ratePrfRates := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Usage:10m"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_YEAR": {
+					ID:              "RT_YEAR",
+					FilterIDs:       []string{"RTPRF_FLTR3"},
+					ActivationTimes: "* * * * *",
 				},
 			},
 		},
@@ -2215,7 +2211,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 //RateProfile Indexes
 func testV1FISetRateProfileIndexes(t *testing.T) {
 	//set a filter for our rates
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RATEFLTR_FLTR1",
@@ -2248,19 +2244,17 @@ func testV1FISetRateProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//set in db a ratePrf with with our filterS
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP2",
-				FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						FilterIDs:       []string{"*suffix:~*req.Account:1009"},
-						ActivationTimes: "* * * * 1-5",
-					},
+	ratePrfRates := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP2",
+			FilterIDs:       []string{"*string:~*req.Usage:10m", "RATEFLTR_FLTR1"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					FilterIDs:       []string{"*suffix:~*req.Account:1009"},
+					ActivationTimes: "* * * * 1-5",
 				},
 			},
 		},
@@ -2404,7 +2398,7 @@ func testV1FIComputeRateProfileIndexes(t *testing.T) {
 
 func testV1FISetSecondRateProfile(t *testing.T) {
 	//second filter for a new rate profile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "RTPRF_FLTR6",
@@ -2425,19 +2419,17 @@ func testV1FISetSecondRateProfile(t *testing.T) {
 	}
 
 	//another rate profile
-	ratePrfRates := &APIRateProfileWithCache{
-		APIRateProfileWithOpts: &utils.APIRateProfileWithOpts{
-			APIRateProfile: &utils.APIRateProfile{
-				Tenant:          "cgrates.org",
-				ID:              "RP3",
-				FilterIDs:       []string{"RTPRF_FLTR6"},
-				MaxCostStrategy: "*free",
-				Rates: map[string]*utils.APIRate{
-					"RT_WEEK": {
-						ID:              "RT_WEEK",
-						FilterIDs:       []string{"*suffix:~*req.Account:1019"},
-						ActivationTimes: "* * * * 1-5",
-					},
+	ratePrfRates := &utils.APIRateProfileWithOpts{
+		APIRateProfile: &utils.APIRateProfile{
+			Tenant:          "cgrates.org",
+			ID:              "RP3",
+			FilterIDs:       []string{"RTPRF_FLTR6"},
+			MaxCostStrategy: "*free",
+			Rates: map[string]*utils.APIRate{
+				"RT_WEEK": {
+					ID:              "RT_WEEK",
+					FilterIDs:       []string{"*suffix:~*req.Account:1019"},
+					ActivationTimes: "* * * * 1-5",
 				},
 			},
 		},
@@ -2589,7 +2581,7 @@ func testVF1RemoveRateProfile(t *testing.T) {
 //AttributeProfile Indexes
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -2697,7 +2689,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &engine.FilterWithOpts{
+	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",

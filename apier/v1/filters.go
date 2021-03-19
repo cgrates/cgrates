@@ -26,7 +26,7 @@ import (
 )
 
 //SetFilter add a new Filter
-func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -41,8 +41,8 @@ func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithOpts, reply *string) e
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheFilters,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheFilters,
+		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

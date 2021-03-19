@@ -136,13 +136,13 @@ func testDspRplPingFailover(t *testing.T) {
 func testDspRplAccount(t *testing.T) {
 	// Set
 	var replyStr string
-	attrSetAccount := &engine.AccountWithOpts{
+	attrSetAccount := &engine.AccountWithAPIOpts{
 		Account: &engine.Account{
 			ID:            "cgrates.org:1008",
 			AllowNegative: true,
 			Disabled:      true,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -496,12 +496,12 @@ func testDspRplDispatcherHost(t *testing.T) {
 func testDspRplFilter(t *testing.T) {
 	// Set Filter
 	var replyStr string
-	setFilter := &engine.FilterWithOpts{
+	setFilter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1372,11 +1372,11 @@ func testDspRplRatingProfile(t *testing.T) {
 func testDspRplDestination(t *testing.T) {
 	// Set Destination
 	var replyStr string
-	setDestination := &engine.DestinationWithOpts{
+	setDestination := &engine.DestinationWithAPIOpts{
 		Destination: &engine.Destination{
 			Id: "idDestination"},
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -1473,8 +1473,8 @@ func testDspRplLoadIDs(t *testing.T) {
 func testDspRplRateProfile(t *testing.T) {
 	// Set RateProfile
 	var replyStr string
-	rPrf := &engine.RateProfileWithOpts{
-		RateProfile: &engine.RateProfile{
+	rPrf := &utils.RateProfileWithOpts{
+		RateProfile: &utils.RateProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
 			FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
@@ -1484,7 +1484,7 @@ func testDspRplRateProfile(t *testing.T) {
 				},
 			},
 			MaxCostStrategy: "*free",
-			Rates: map[string]*engine.Rate{
+			Rates: map[string]*utils.Rate{
 				"FIRST_GI": {
 					ID:        "FIRST_GI",
 					FilterIDs: []string{"*gi:~*req.Usage:0"},
@@ -1517,7 +1517,7 @@ func testDspRplRateProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 	// Get RateProfile
-	var reply *engine.RateProfile
+	var reply *utils.RateProfile
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",

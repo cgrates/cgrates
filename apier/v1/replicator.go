@@ -366,7 +366,7 @@ func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[st
 }
 
 // SetAccount is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAccountDrv(acc.Account); err != nil {
 		return
 	}
@@ -376,12 +376,12 @@ func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithOpts, reply *stri
 }
 
 // SetDestination is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDestinationDrv(dst.Destination, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dst.Opts[utils.CacheOpt]),
-		dst.Tenant, utils.CacheDestinations, dst.Id, nil, nil, dst.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dst.APIOpts[utils.CacheOpt]),
+		dst.Tenant, utils.CacheDestinations, dst.Id, nil, nil, dst.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -389,12 +389,12 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithOpts, rep
 }
 
 // SetReverseDestination is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination.Id, dst.Destination.Prefixes, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(dst.Opts[utils.CacheOpt]),
-		dst.Tenant, utils.CacheReverseDestinations, dst.Prefixes, dst.Opts); err != nil {
+	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(dst.APIOpts[utils.CacheOpt]),
+		dst.Tenant, utils.CacheReverseDestinations, dst.Prefixes, dst.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -454,12 +454,12 @@ func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithAPIOpts, reply
 }
 
 // SetFilter is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetFilterDrv(fltr.Filter); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(fltr.Opts[utils.CacheOpt]),
-		fltr.Tenant, utils.CacheFilters, fltr.TenantID(), nil, nil, fltr.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(fltr.APIOpts[utils.CacheOpt]),
+		fltr.Tenant, utils.CacheFilters, fltr.TenantID(), nil, nil, fltr.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

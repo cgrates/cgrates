@@ -45,9 +45,9 @@ type Account struct {
 	executingTriggers bool
 }
 
-type AccountWithOpts struct {
+type AccountWithAPIOpts struct {
 	*Account
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // User's available minutes for the specified destination
