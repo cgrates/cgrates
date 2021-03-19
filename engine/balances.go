@@ -898,7 +898,7 @@ func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSumma
 
 // FieldAsInterface func to help EventCost FieldAsInterface
 func (bl *BalanceSummary) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) != 1 {
+	if bl == nil || len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
 	switch fldPath[0] {

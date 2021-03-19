@@ -932,7 +932,7 @@ func (ec *EventCost) fieldAsInterface(fldPath []string) (val interface{}, err er
 			return nil, fmt.Errorf("unsupported field prefix: <%s>", opath)
 		}
 		if indx != nil {
-			if len(ec.Charges) < *indx {
+			if len(ec.Charges) <= *indx {
 				return nil, utils.ErrNotFound
 			}
 			return ec.getChargesForPath(fldPath[1:], ec.Charges[*indx])
@@ -1027,6 +1027,9 @@ func (ec *EventCost) getChargesForPath(fldPath []string, chr *ChargingInterval) 
 		}
 		return chr.Increments, nil
 	}
+	if len(chr.Increments) <= *indx {
+		return nil, utils.ErrNotFound
+	}
 	incr := chr.Increments[*indx]
 	if len(fldPath) == 1 {
 		return incr, nil
@@ -1056,6 +1059,9 @@ func (ec *EventCost) getRatingForPath(fldPath []string, rating *RatingUnit) (val
 			return nil, utils.ErrNotFound
 		}
 		if indx != nil {
+			if len(rts) <= *indx {
+				return nil, utils.ErrNotFound
+			}
 			rt := rts[*indx]
 			if len(fldPath) == 1 {
 				return rt, nil

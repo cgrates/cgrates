@@ -58,7 +58,6 @@ func (ms MapStorage) FieldAsInterface(fldPath []string) (val interface{}, err er
 	if len(fldPath) == 1 {
 		if indx == nil {
 			return
-
 		}
 		switch rv := val.(type) {
 		case []string:
