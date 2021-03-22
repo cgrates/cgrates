@@ -4253,8 +4253,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	engine.Cache = tmp
 }
 
-/*
-func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
+func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	engine.Cache.Clear(nil)
@@ -4302,11 +4301,31 @@ func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
 			ID:     "testBiRPCv1ProcessEventStatsResources",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
+				utils.CGRID:       "TEST_CGRID",
 				utils.Destination: "1002",
 				utils.RequestType: utils.MetaPrepaid,
 			},
 			Opts: map[string]interface{}{
 				utils.OptsDebitInterval: "10s",
+			},
+		},
+	}
+	sessions.aSessions = map[string]*Session{
+		"TEST_CGRID": {
+			Tenant: "cgrates.org",
+			CGRID:  "TEST_CGRID",
+			SRuns: []*SRun{
+				{
+					Event: map[string]interface{}{
+						utils.RequestType: utils.MetaDynaprepaid,
+					},
+					CD:            &engine.CallDescriptor{Category: "test"},
+					EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+					ExtraDuration: 1,
+					LastUsage:     time.Minute,
+					TotalUsage:    3 * time.Minute,
+					NextAutoDebit: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)),
+				},
 			},
 		},
 	}
@@ -4320,10 +4339,24 @@ func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
 	args.Flags = []string{utils.MetaCDRs, utils.MetaBlockerError,
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaDerivedReply),
 		utils.MetaChargers}
-	expected = "CDRS_ERROR:NOT_IMPLEMENTED"
-	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
-		t.Errorf("Exepected %+v, received %+v", expected, err)
+
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
 	}
+	utils.Logger.SetLogLevel(7)
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
+	expectedLogger := "[WARNING] <SessionS> ProcessCDR called for active session with CGRID: <TEST_CGRID>"
+	expected = "CDRS_ERROR:PARTIALLY_EXECUTED"
+	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	} else if rcv := buff.String(); !strings.Contains(rcv, expectedLogger) {
+		t.Errorf("Expected %+v, received %+v", expectedLogger, rcv)
+	}
+	buff.Reset()
 
 	sessions.cgrCfg.SessionSCfg().CDRsConns = []string{}
 	expected = "NOT_CONNECTED: CDRs"
@@ -4331,8 +4364,6 @@ func TestBiRPCv1ProcessEventCDRs(t *testing.T) {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 }
-
-*/
 
 func TestBiRPCv1GetCost(t *testing.T) {
 	log.SetOutput(io.Discard)
