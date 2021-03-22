@@ -27,7 +27,7 @@ import (
 // NewOrderedNavigableMap initializates a structure of OrderedNavigableMap with a NavigableMap2
 func NewOrderedNavigableMap() *OrderedNavigableMap {
 	return &OrderedNavigableMap{
-		nm:       NavigableMap{},
+		nm:       &DataNode{Type: NMMapType, Map: make(map[string]*DataNode)},
 		orderIdx: NewPathItemList(),
 		orderRef: make(map[string][]*PathItemElement),
 	}
@@ -35,14 +35,14 @@ func NewOrderedNavigableMap() *OrderedNavigableMap {
 
 // OrderedNavigableMap is the same as NavigableMap2 but keeps the order of fields
 type OrderedNavigableMap struct {
-	nm       NMInterface
+	nm       *DataNode
 	orderIdx *PathItemList
 	orderRef map[string][]*PathItemElement
 }
 
 // String returns the map as json string
 func (onm *OrderedNavigableMap) String() string {
-	return onm.nm.String()
+	return ToJSON(onm.nm)
 }
 
 // GetFirstElement returns the first element from the order
@@ -56,24 +56,18 @@ func (onm *OrderedNavigableMap) Interface() interface{} {
 }
 
 // Field returns the item on the given path
-func (onm *OrderedNavigableMap) Field(fldPath PathItems) (val NMInterface, err error) {
+func (onm *OrderedNavigableMap) Field(fldPath []string) (val interface{}, err error) {
 	return onm.nm.Field(fldPath)
-}
-
-// Type returns the type of the NM map
-func (onm *OrderedNavigableMap) Type() NMType {
-	return onm.nm.Type()
 }
 
 // Empty returns true if the NM is empty(no data)
 func (onm *OrderedNavigableMap) Empty() bool {
-	return onm.nm.Empty()
+	return onm.nm.IsEmpty()
 }
 
 // Remove removes the item for the given path and updates the order
 func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
-	path := stripIdxFromLastPathElm(fullPath.Path)
-	if path == EmptyString || fullPath.PathItems[len(fullPath.PathItems)-1].Index != nil {
+	if fullPath.Path == EmptyString {
 		return ErrWrongPath
 	}
 	if err = onm.nm.Remove(fullPath.PathItems); err != nil {
@@ -81,42 +75,68 @@ func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
 	}
 
 	for idxPath, slcIdx := range onm.orderRef {
-		if !strings.HasPrefix(idxPath, path) {
-			continue
+		if strings.HasPrefix(idxPath, fullPath.Path) {
+			for _, el := range slcIdx {
+				onm.orderIdx.Remove(el)
+			}
+			delete(onm.orderRef, idxPath)
 		}
-		for _, el := range slcIdx {
-			onm.orderIdx.Remove(el)
-		}
-		delete(onm.orderRef, idxPath)
 	}
 	return
 }
 
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val NMInterface) (addedNew bool, err error) {
+func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val interface{}) (err error) {
 	if fullPath == nil || len(fullPath.PathItems) == 0 {
-		return false, ErrWrongPath
+		return ErrWrongPath
 	}
+	var addedNew bool
 	if addedNew, err = onm.nm.Set(fullPath.PathItems, val); err != nil {
 		return
 	}
 
-	var pathItmsSet []PathItems // can be multiples if we need to inflate due to missing Index in slice set
-	var nonIndexedSlcPath bool
-	if val.Type() == NMSliceType && fullPath.PathItems[len(fullPath.PathItems)-1].Index == nil { // special case when we overwrite with a slice without specifying indexes
-		nonIndexedSlcPath = true
-		pathItmsSet = make([]PathItems, len(*val.(*NMSlice)))
-		for i := 0; i < val.Len(); i++ {
-			pathItms := fullPath.PathItems.Clone()
-			pathItms[len(pathItms)-1].Index = []string{(strconv.Itoa(i))}
-			pathItmsSet[i] = pathItms
+	path := stripIdxFromLastPathElm(fullPath.Path)
+	if !addedNew { // cleanup old references since the value is being overwritten
+		for idxPath, slcIdx := range onm.orderRef {
+			if !strings.HasPrefix(idxPath, path) {
+				continue
+			}
+			for _, el := range slcIdx {
+				onm.orderIdx.Remove(el)
+			}
+			delete(onm.orderRef, idxPath)
 		}
+	}
+	_, hasRef := onm.orderRef[path]
+	if addedNew || !hasRef {
+		onm.orderRef[path] = append(onm.orderRef[path], onm.orderIdx.PushBack(fullPath.PathItems))
 	} else {
-		pathItmsSet = []PathItems{fullPath.PathItems}
+		onm.orderIdx.MoveToBack(onm.orderRef[path][len(onm.orderRef[path])-1])
+	}
+	return
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (onm *OrderedNavigableMap) SetAsSlice(fullPath *FullPath, vals []*DataNode) (err error) {
+	if fullPath == nil || len(fullPath.PathItems) == 0 {
+		return ErrWrongPath
+	}
+	var addedNew bool
+	if addedNew, err = onm.nm.Set(fullPath.PathItems, vals); err != nil {
+		return
+	}
+
+	pathItmsSet := make([][]string, len(vals))
+
+	for i := range vals {
+		pathItms := append([]string{}, fullPath.PathItems...)
+		pathItms = append(pathItms, strconv.Itoa(i))
+		pathItmsSet[i] = pathItms
 	}
 	path := stripIdxFromLastPathElm(fullPath.Path)
-	if !addedNew && nonIndexedSlcPath { // cleanup old references since the value is being overwritten
+	if !addedNew { // cleanup old references since the value is being overwritten
 		for idxPath, slcIdx := range onm.orderRef {
 			if !strings.HasPrefix(idxPath, path) {
 				continue
@@ -138,29 +158,19 @@ func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val NMInterface) (addedN
 	return
 }
 
-// Len returns the lenght of the map
-func (onm OrderedNavigableMap) Len() int {
-	return onm.nm.Len()
-}
-
 // FieldAsString returns the value from path as string
 func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err error) {
-	var val NMInterface
-	val, err = onm.nm.Field(NewPathItems(fldPath))
+	var val interface{}
+	val, err = onm.FieldAsInterface(fldPath)
 	if err != nil {
 		return
 	}
-	return IfaceAsString(val.Interface()), nil
+	return IfaceAsString(val), nil
 }
 
 // FieldAsInterface returns the interface at the path
 func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
-	var val NMInterface
-	val, err = onm.nm.Field(NewPathItems(fldPath))
-	if err != nil {
-		return
-	}
-	return val.Interface(), nil
+	return onm.nm.Field(CompilePathSlice(fldPath))
 }
 
 // RemoteHost is part of dataStorage interface
@@ -169,7 +179,7 @@ func (OrderedNavigableMap) RemoteHost() net.Addr {
 }
 
 // GetOrder returns the elements order as a slice
-func (onm *OrderedNavigableMap) GetOrder() (order []PathItems) {
+func (onm *OrderedNavigableMap) GetOrder() (order [][]string) {
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		order = append(order, el.Value)
 	}
@@ -178,27 +188,60 @@ func (onm *OrderedNavigableMap) GetOrder() (order []PathItems) {
 
 // OrderedFields returns the elements in order they were inserted
 func (onm *OrderedNavigableMap) OrderedFields() (flds []interface{}) {
-	flds = make([]interface{}, 0, onm.Len())
+	flds = make([]interface{}, 0, len(onm.nm.Map))
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		fld, _ := onm.Field(el.Value)
-		flds = append(flds, fld.Interface())
+		flds = append(flds, fld)
 	}
 	return
 }
 
 // RemoveAll will clean the data and the odrder from OrderedNavigableMap
 func (onm *OrderedNavigableMap) RemoveAll() {
-	onm.nm = NavigableMap{}
+	onm.nm = &DataNode{Type: NMMapType, Map: make(map[string]*DataNode)}
 	onm.orderIdx = NewPathItemList()
 	onm.orderRef = make(map[string][]*PathItemElement)
 }
 
 // OrderedFieldsAsStrings returns the elements as strings in order they were inserted
 func (onm *OrderedNavigableMap) OrderedFieldsAsStrings() (flds []string) {
-	flds = make([]string, 0, onm.Len())
+	flds = make([]string, 0, len(onm.nm.Map))
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		fld, _ := onm.Field(el.Value)
-		flds = append(flds, IfaceAsString(fld.Interface()))
+		flds = append(flds, IfaceAsString(fld))
+	}
+	return
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (onm *OrderedNavigableMap) Append(fullPath *FullPath, val interface{}) (err error) {
+	if fullPath == nil || len(fullPath.PathItems) == 0 {
+		return ErrWrongPath
+	}
+	var idx int
+	if idx, err = onm.nm.Append(fullPath.PathItems, val); err != nil {
+		return
+	}
+
+	onm.orderRef[fullPath.Path] = append(onm.orderRef[fullPath.Path], onm.orderIdx.PushBack(append(fullPath.PathItems, strconv.Itoa(idx))))
+	return
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (onm *OrderedNavigableMap) Compose(fullPath *FullPath, val interface{}) (err error) {
+	if fullPath == nil || len(fullPath.PathItems) == 0 {
+		return ErrWrongPath
+	}
+	if err = onm.nm.Compose(fullPath.PathItems, val); err != nil {
+		return
+	}
+
+	if _, hasRef := onm.orderRef[fullPath.Path]; !hasRef {
+		onm.orderRef[fullPath.Path] = append(onm.orderRef[fullPath.Path], onm.orderIdx.PushBack(append(fullPath.PathItems, "0")))
+	} else {
+		onm.orderIdx.MoveToBack(onm.orderRef[fullPath.Path][len(onm.orderRef[fullPath.Path])-1])
 	}
 	return
 }

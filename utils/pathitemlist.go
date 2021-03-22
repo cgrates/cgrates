@@ -32,7 +32,7 @@ type PathItemElement struct {
 	list *PathItemList
 
 	// The value stored with this element.
-	Value PathItems
+	Value []string
 }
 
 // Next returns the next list element or nil.
@@ -109,7 +109,7 @@ func (l *PathItemList) insert(e, at *PathItemElement) *PathItemElement {
 }
 
 // insertValue is a convenience wrapper for insert(&PathItemElement{Value: v}, at).
-func (l *PathItemList) insertValue(v PathItems, at *PathItemElement) *PathItemElement {
+func (l *PathItemList) insertValue(v []string, at *PathItemElement) *PathItemElement {
 	return l.insert(&PathItemElement{Value: v}, at)
 }
 
@@ -144,7 +144,7 @@ func (l *PathItemList) move(e, at *PathItemElement) *PathItemElement {
 // Remove removes e from l if e is an element of list l.
 // It returns the element value e.Value.
 // The element must not be nil.
-func (l *PathItemList) Remove(e *PathItemElement) PathItems {
+func (l *PathItemList) Remove(e *PathItemElement) []string {
 	if e.list == l {
 		// if e.list == l, l must have been initialized when e was inserted
 		// in l or l == nil (e is a zero PathItemElement) and l.remove will crash
@@ -154,13 +154,13 @@ func (l *PathItemList) Remove(e *PathItemElement) PathItems {
 }
 
 // PushFront inserts a new element e with value v at the front of list l and returns e.
-func (l *PathItemList) PushFront(v PathItems) *PathItemElement {
+func (l *PathItemList) PushFront(v []string) *PathItemElement {
 	l.lazyInit()
 	return l.insertValue(v, &l.root)
 }
 
 // PushBack inserts a new element e with value v at the back of list l and returns e.
-func (l *PathItemList) PushBack(v PathItems) *PathItemElement {
+func (l *PathItemList) PushBack(v []string) *PathItemElement {
 	l.lazyInit()
 	return l.insertValue(v, l.root.prev)
 }
@@ -168,7 +168,7 @@ func (l *PathItemList) PushBack(v PathItems) *PathItemElement {
 // InsertBefore inserts a new element e with value v immediately before mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-func (l *PathItemList) InsertBefore(v PathItems, mark *PathItemElement) *PathItemElement {
+func (l *PathItemList) InsertBefore(v []string, mark *PathItemElement) *PathItemElement {
 	if mark.list != l {
 		return nil
 	}
@@ -179,7 +179,7 @@ func (l *PathItemList) InsertBefore(v PathItems, mark *PathItemElement) *PathIte
 // InsertAfter inserts a new element e with value v immediately after mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-func (l *PathItemList) InsertAfter(v PathItems, mark *PathItemElement) *PathItemElement {
+func (l *PathItemList) InsertAfter(v []string, mark *PathItemElement) *PathItemElement {
 	if mark.list != l {
 		return nil
 	}

@@ -34,91 +34,18 @@ func stripIdxFromLastPathElm(path string) string {
 	return path[:lastIdxStart]
 }
 
-// NewFullPath is a constructor for FullPath out of string and separator
-func NewFullPath(pth string, sep string) *FullPath {
+// NewFullPath is a constructor for FullPath out of string
+func NewFullPath(path string) *FullPath {
 	return &FullPath{
-		Path:      pth,
-		PathItems: NewPathItems(strings.Split(pth, sep)),
+		Path:      path,
+		PathItems: CompilePath(path),
 	}
 }
 
 // FullPath is the path to the item with all the needed fields
 type FullPath struct {
-	PathItems PathItems
+	PathItems []string
 	Path      string
-}
-
-// NewPathItems returns the computed PathItems out of slice one
-func NewPathItems(path []string) (pItms PathItems) {
-	pItms = make(PathItems, len(path))
-	for i, v := range path {
-		field, indx := GetPathIndexSlice(v)
-		pItms[i] = PathItem{
-			Field: field,
-			Index: indx,
-		}
-	}
-	return
-}
-
-// PathItems a list of PathItem used to describe the path to an item from a NavigableMap
-type PathItems []PathItem
-
-// Clone creates a copy
-func (path PathItems) Clone() (c PathItems) {
-	if path == nil {
-		return
-	}
-	c = make(PathItems, len(path))
-	for i, v := range path {
-		c[i] = v.Clone()
-	}
-	return
-}
-
-func (path PathItems) String() (out string) {
-	for _, v := range path {
-		out += NestingSep + v.String()
-	}
-	if out == "" {
-		return
-	}
-	return out[1:]
-}
-
-// Slice returns the path as string slice
-func (path PathItems) Slice() (out []string) {
-	out = make([]string, len(path))
-	for i, v := range path {
-		out[i] = v.String()
-	}
-	return out
-}
-
-// PathItem used by the NM interface to store the path information
-type PathItem struct {
-	Field string
-	Index []string
-}
-
-func (p PathItem) String() (out string) {
-	out = p.Field
-	for _, indx := range p.Index {
-		out += IdxStart + indx + IdxEnd
-	}
-	return
-}
-
-// Clone creates a copy
-func (p PathItem) Clone() (c PathItem) {
-	c.Field = p.Field
-	if p.Index != nil {
-		c.Index = make([]string, len(p.Index))
-		for i, indx := range p.Index {
-			c.Index[i] = indx
-		}
-	}
-	return
 }
 
 // GetPathIndex returns the path and index if index present

@@ -326,8 +326,6 @@ func IfaceAsString(fld interface{}) (out string) {
 		return value.String()
 	case string:
 		return value
-	case NMInterface:
-		return value.String()
 	default: // Maybe we are lucky and the value converts to string
 		return ToJSON(fld)
 	}
