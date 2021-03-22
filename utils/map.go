@@ -186,7 +186,7 @@ func (fWp FlagParams) Add(opts []string) {
 	default: // just in case we call this function with more elements than needed
 		fallthrough
 	case 2:
-		fWp[opts[0]] = InfieldSplit(opts[1])
+		fWp[opts[0]] = strings.Split(opts[1], ANDSep)
 	}
 	return
 }
@@ -264,7 +264,7 @@ func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 				sls = append(sls, ConcatenatedKey(key, opt))
 				continue
 			}
-			sls = append(sls, ConcatenatedKey(key, opt, strings.Join(values, InfieldSep)))
+			sls = append(sls, ConcatenatedKey(key, opt, strings.Join(values, ANDSep)))
 		}
 	}
 	return

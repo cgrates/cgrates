@@ -360,13 +360,13 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp.GetMaxUsage, rcv.GetMaxUsage)
 	}
 
-	stasisStart2 := `{"type":"StasisStart","timestamp":"2018-11-25T05:03:26.464-0500","args":["cgr_reqtype=*prepaid","cgr_route=route1","cgr_flags=*accounts,*attributes,*resources,*stats,*routes,*thresholds"],"channel":{"id":"1543140206.0","dialplan":{"context":"internal","exten":"1002","priority":4},"caller":{"name":"","number":"1001"},"name":"PJSIP/1001-00000000","state":"Ring","connected":{"name":"","number":""},"language":"en","accountcode":"","creationtime":"2018-11-25T05:03:26.463-0500"},"asterisk_id":"08:00:27:b7:b8:1f","application":"cgrates_auth"}`
+	stasisStart2 := `{"type":"StasisStart","timestamp":"2018-11-25T05:03:26.464-0500","args":["cgr_reqtype=*prepaid","cgr_route=route1","cgr_flags=*accounts+*attributes+*resources+*stats+*routes+*thresholds"],"channel":{"id":"1543140206.0","dialplan":{"context":"internal","exten":"1002","priority":4},"caller":{"name":"","number":"1001"},"name":"PJSIP/1001-00000000","state":"Ring","connected":{"name":"","number":""},"language":"en","accountcode":"","creationtime":"2018-11-25T05:03:26.463-0500"},"asterisk_id":"08:00:27:b7:b8:1f","application":"cgrates_auth"}`
 	var ev2 map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart2), &ev2); err != nil {
 		t.Error(err)
 	}
 	smaEv2 := NewSMAsteriskEvent(ev2, "127.0.0.1", "")
-	smaEv2.parseStasisArgs()
+	//smaEv2.parseStasisArgs()
 	cgrEv2, err := smaEv2.AsCGREvent(timezone)
 	if err != nil {
 		t.Error(err)
@@ -421,7 +421,7 @@ func TestSMAEventV1InitSessionArgs(t *testing.T) {
 		InitSession:       true,
 		CGREvent:          cgrEv,
 	}
-	cgrEv.Event[utils.CGRFlags] = "*resources,*accounts,*attributes"
+	cgrEv.Event[utils.CGRFlags] = "*resources+*accounts+*attributes"
 	if rcv := smaEv.V1InitSessionArgs(*cgrEv); !reflect.DeepEqual(exp2, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
 	}
@@ -454,7 +454,7 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 		ProcessStats:     true,
 		CGREvent:         cgrEv,
 	}
-	cgrEv.Event[utils.CGRFlags] = "*resources,*accounts,*stats"
+	cgrEv.Event[utils.CGRFlags] = "*resources+*accounts+*stats"
 	if rcv := smaEv.V1TerminateSessionArgs(*cgrEv); !reflect.DeepEqual(exp2, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
 	}

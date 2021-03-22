@@ -301,7 +301,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		args.GetMaxUsage = true
 		return
 	}
-	args.ParseFlags(smaEv.Subsystems())
+	args.ParseFlags(smaEv.Subsystems(), utils.PlusChar)
 	return
 }
 
@@ -316,7 +316,7 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args 
 		args.InitSession = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.PlusChar)
 	return
 }
 
@@ -331,6 +331,6 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREvent) (
 		args.TerminateSession = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.PlusChar)
 	return
 }

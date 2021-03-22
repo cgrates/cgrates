@@ -284,7 +284,7 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 		return
 	}
 
-	//in case that we don't reveice cgr_flags from kamailio
+	//in case that we don't receive cgr_flags from kamailio
 	//we consider this as ping-pong event
 	if _, has := kev[utils.CGRFlags]; !has {
 		if err = ka.conns[connIdx].Send(kev.AsKamProcessMessageEmptyReply().String()); err != nil {

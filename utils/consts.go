@@ -299,6 +299,7 @@ const (
 	StaticHDRValSep          = "::"
 	FilterValStart           = "("
 	FilterValEnd             = ")"
+	PlusChar                 = "+"
 	JSON                     = "json"
 	JSONCaps                 = "JSON"
 	GOBCaps                  = "GOB"
