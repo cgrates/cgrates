@@ -115,13 +115,13 @@ func (dS *DispatcherService) AccountSv1ActionSetBalance(args *utils.ArgsActSetBa
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1ActionSetBalance, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaAccounts, utils.AccountSv1ActionSetBalance, args, reply)
 }
 
@@ -132,12 +132,12 @@ func (dS *DispatcherService) AccountSv1ActionRemoveBalance(args *utils.ArgsActRe
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1ActionRemoveBalance, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaAccounts, utils.AccountSv1ActionRemoveBalance, args, reply)
 }

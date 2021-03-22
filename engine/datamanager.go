@@ -3470,7 +3470,7 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 					TntCtx:     tntCtx,
 					IdxKey:     idxKey,
 					Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
-					Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &indexes); err == nil {
@@ -3521,7 +3521,7 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 				TntCtx:     tntCtx,
 				Indexes:    indexes,
 				Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -3544,7 +3544,7 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 				TntCtx:     tntCtx,
 				IdxKey:     idxKey,
 				Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return

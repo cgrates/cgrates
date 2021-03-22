@@ -1370,13 +1370,13 @@ func (dS *DispatcherService) ReplicatorSv1GetIndexes(args *utils.GetIndexesArg, 
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetIndexes, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetIndexes, args, reply)
 }
 
@@ -1388,13 +1388,13 @@ func (dS *DispatcherService) ReplicatorSv1SetIndexes(args *utils.SetIndexesArg, 
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetIndexes, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetIndexes, args, reply)
 }
 
@@ -1406,13 +1406,13 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesAr
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveIndexes, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Opts:   args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIndexes, args, reply)
 }
 

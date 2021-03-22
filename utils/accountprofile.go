@@ -485,7 +485,7 @@ type ArgsActSetBalance struct {
 	AccountID string
 	Diktats   []*BalDiktat
 	Reset     bool
-	Opts      map[string]interface{}
+	APIOpts   map[string]interface{}
 }
 
 type BalDiktat struct {
@@ -497,5 +497,5 @@ type ArgsActRemoveBalances struct {
 	Tenant     string
 	AccountID  string
 	BalanceIDs []string
-	Opts       map[string]interface{}
+	APIOpts    map[string]interface{}
 }

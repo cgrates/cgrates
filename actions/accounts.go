@@ -55,7 +55,7 @@ func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trg
 		AccountID: trgID,
 		Reset:     aL.reset,
 		Diktats:   make([]*utils.BalDiktat, len(aL.cfg().Diktats)),
-		Opts:      aL.cfg().Opts,
+		APIOpts:   aL.cfg().Opts,
 	}
 	for i, actD := range aL.cfg().Diktats {
 		var val string
@@ -103,7 +103,7 @@ func (aL *actRemBalance) execute(ctx context.Context, data utils.MapStorage, trg
 		Tenant:     aL.tnt,
 		AccountID:  trgID,
 		BalanceIDs: make([]string, len(aL.cfg().Diktats)),
-		Opts:       aL.cfg().Opts,
+		APIOpts:    aL.cfg().Opts,
 	}
 	for i, actD := range aL.cfg().Diktats {
 		args.BalanceIDs[i] = actD.Path
