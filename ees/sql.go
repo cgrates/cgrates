@@ -34,6 +34,34 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
+	dc utils.MapStorage) (sqlEe *SQLEe, err error) {
+	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
+		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+
+	dialect, err := sqlEe.NewSQLEeUrl(cgrCfg)
+	if err != nil {
+		return
+	}
+	sqlEe.db, sqlEe.sqldb, err = openDB(cgrCfg, cfgIdx, dialect)
+	return
+}
+
+// SQLEe implements EventExporter interface for SQL
+type SQLEe struct {
+	id      string
+	cgrCfg  *config.CGRConfig
+	cfgIdx  int // index of config instance within ERsCfg.Readers
+	filterS *engine.FilterS
+	db      *gorm.DB
+	sqldb   *sql.DB
+
+	tableName string
+
+	sync.RWMutex
+	dc utils.MapStorage
+}
+
 func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
 	var u *url.URL
 	// var err error
@@ -70,67 +98,38 @@ func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialecto
 	return
 }
 
-func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
-	dc utils.MapStorage) (sqlEe *SQLEe, err error) {
-	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
-		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
+func openDB(cgrCfg *config.CGRConfig, cfgIdx int, dialect gorm.Dialector) (db *gorm.DB, sqlDB *sql.DB, err error) {
 
-	dialect, err := sqlEe.NewSQLEeUrl(cgrCfg)
-	if err != nil {
-		return
-	}
-	var db *gorm.DB
 	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
 		return
 	}
-	var sqlDB *sql.DB
 	if sqlDB, err = db.DB(); err != nil {
-		return
-	}
-	if err = sqlDB.Ping(); err != nil {
 		return
 	}
 
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxIdleConns]; has {
 		val, err := utils.IfaceAsTInt64(iface)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		sqlDB.SetMaxIdleConns(int(val))
 	}
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxOpenConns]; has {
 		val, err := utils.IfaceAsTInt64(iface)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		sqlDB.SetMaxOpenConns(int(val))
 	}
 	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxConnLifetime]; has {
 		val, err := utils.IfaceAsDuration(iface)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		sqlDB.SetConnMaxLifetime(val)
 	}
 
-	sqlEe.db = db
-	sqlEe.sqldb = sqlDB
 	return
-}
-
-// SQLEe implements EventExporter interface for SQL
-type SQLEe struct {
-	id      string
-	cgrCfg  *config.CGRConfig
-	cfgIdx  int // index of config instance within ERsCfg.Readers
-	filterS *engine.FilterS
-	db      *gorm.DB
-	sqldb   *sql.DB
-
-	tableName string
-
-	sync.RWMutex
-	dc utils.MapStorage
 }
 
 // ID returns the identificator of this exporter
@@ -141,7 +140,6 @@ func (sqlEe *SQLEe) ID() string {
 // OnEvicted implements EventExporter, doing the cleanup before exit
 func (sqlEe *SQLEe) OnEvicted(_ string, _ interface{}) {
 	sqlEe.sqldb.Close()
-	return
 }
 
 // ExportEvent implements EventExporter
