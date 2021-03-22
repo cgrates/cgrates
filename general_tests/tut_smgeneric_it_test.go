@@ -170,7 +170,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 2
 	expectedStats[utils.CacheReverseFilterIndexes].Items = 15
 	expectedStats[utils.CacheReverseFilterIndexes].Groups = 13
-	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling APIerSv2.CacheSv1 expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))

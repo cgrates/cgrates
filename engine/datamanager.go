@@ -1270,9 +1270,9 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueueProfilePrefix, sqp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueueProfile,
-			&StatQueueProfileWithOpts{
+			&StatQueueProfileWithAPIOpts{
 				StatQueueProfile: sqp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -1605,9 +1605,9 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourceProfilesPrefix, rp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResourceProfile,
-			&ResourceProfileWithOpts{
+			&ResourceProfileWithAPIOpts{
 				ResourceProfile: rp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -1720,12 +1720,12 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-//SetActionTriggersArgWithOpts is used to send the key and the ActionTriggers to Replicator
-type SetActionTriggersArgWithOpts struct {
-	Key    string
-	Attrs  ActionTriggers
-	Tenant string
-	Opts   map[string]interface{}
+//SetActionTriggersArgWithAPIOpts is used to send the key and the ActionTriggers to Replicator
+type SetActionTriggersArgWithAPIOpts struct {
+	Key     string
+	Attrs   ActionTriggers
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
@@ -1744,11 +1744,11 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ActionTriggerPrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionTriggers,
-			&SetActionTriggersArgWithOpts{
+			&SetActionTriggersArgWithAPIOpts{
 				Attrs:  attr,
 				Key:    key,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return

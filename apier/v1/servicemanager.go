@@ -32,15 +32,15 @@ type ServiceManagerV1 struct {
 	sm *servmanager.ServiceManager // Need to have them capitalize so we can export in V2
 }
 
-func (servManager *ServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
 	return servManager.sm.V1StartService(args.ArgStartService, reply)
 }
 
-func (servManager *ServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithOpts, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
 	return servManager.sm.V1StopService(args.ArgStartService, reply)
 }
 
-func (servManager *ServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithOpts, reply *string) (err error) {
+func (servManager *ServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
 	return servManager.sm.V1ServiceStatus(args.ArgStartService, reply)
 }
 

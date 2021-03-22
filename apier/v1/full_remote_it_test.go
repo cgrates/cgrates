@@ -192,7 +192,7 @@ func testFullRemoteITStatQueue(t *testing.T) {
 	}
 
 	var replySet string
-	stat := &engine.StatQueueProfileWithOpts{
+	stat := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -317,7 +317,7 @@ func testFullRemoteITResource(t *testing.T) {
 	}
 
 	var replySet string
-	rlsPrf := &engine.ResourceProfileWithOpts{
+	rlsPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",

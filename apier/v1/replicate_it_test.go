@@ -423,7 +423,7 @@ func testInternalReplicateITStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: tenant,
 			ID:     "TEST_PROFILE1",
@@ -761,7 +761,7 @@ func testInternalReplicateITResourceProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	rlsConfig = &engine.ResourceProfileWithOpts{
+	rlsConfig = &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",

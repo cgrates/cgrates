@@ -34,7 +34,7 @@ type ConfigSv1 struct {
 }
 
 // GetConfig will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
+func (cSv1 *ConfigSv1) GetConfig(section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	return cSv1.cfg.V1GetConfig(section, reply)
 }
 
@@ -54,7 +54,7 @@ func (cSv1 *ConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, rep
 }
 
 // GetConfigAsJSON will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error) {
+func (cSv1 *ConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *string) (err error) {
 	return cSv1.cfg.V1GetConfigAsJSON(args, reply)
 }
 

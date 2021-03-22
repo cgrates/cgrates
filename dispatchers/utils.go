@@ -34,21 +34,21 @@ type ArgsReplicateSessionsWithAPIOpts struct {
 	sessions.ArgsReplicateSessions
 }
 
-type AttrRemoteLockWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
+type AttrRemoteLockWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
 	utils.AttrRemoteLock
 }
 
-type AttrRemoteUnlockWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
-	RefID  string
+type AttrRemoteUnlockWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
+	RefID   string
 }
 
-type ArgStartServiceWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
+type ArgStartServiceWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
 	servmanager.ArgStartService
 }
 

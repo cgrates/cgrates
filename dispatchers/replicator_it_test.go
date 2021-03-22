@@ -732,12 +732,12 @@ func testDspRplStatQueue(t *testing.T) {
 func testDspRplStatQueueProfile(t *testing.T) {
 	// Set StatQueueProfile
 	var replyStr string
-	setStatQueueProfile := &engine.StatQueueProfileWithOpts{
+	setStatQueueProfile := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -850,12 +850,12 @@ func testDspRplResource(t *testing.T) {
 func testDspRplResourceProfile(t *testing.T) {
 	// Set ResourceProfile
 	var replyStr string
-	setResourceProfile := &engine.ResourceProfileWithOpts{
+	setResourceProfile := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
@@ -967,11 +967,11 @@ func testDspRplTiming(t *testing.T) {
 func testDspRplActionTriggers(t *testing.T) {
 	// Set ActionTriggers
 	var replyStr string
-	setActionTriggers := &engine.SetActionTriggersArgWithOpts{
+	setActionTriggers := &engine.SetActionTriggersArgWithAPIOpts{
 		Key: "testActionTriggers",
 		Attrs: engine.ActionTriggers{
 			&engine.ActionTrigger{ID: "testActionTriggers"}},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
 	}

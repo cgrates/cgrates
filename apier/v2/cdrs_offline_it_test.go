@@ -206,7 +206,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithOpts{CDR: cdr}, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -377,7 +377,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithOpts{CDR: cdr}, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

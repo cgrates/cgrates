@@ -66,36 +66,36 @@ func (chSv1 *CacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (chSv1 *CacheSv1) Clear(args *utils.AttrCacheIDsWithOpts,
+func (chSv1 *CacheSv1) Clear(args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1Clear(args, reply)
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithOpts,
+func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
 	rply *map[string]*ltcache.CacheStats) error {
 	return chSv1.cacheS.V1GetCacheStats(args, rply)
 }
 
 // PrecacheStatus checks status of active precache processes
-func (chSv1 *CacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithOpts, rply *map[string]string) error {
+func (chSv1 *CacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) error {
 	return chSv1.cacheS.V1PrecacheStatus(args, rply)
 }
 
 // HasGroup checks existence of a group in cache
-func (chSv1 *CacheSv1) HasGroup(args *utils.ArgsGetGroupWithOpts,
+func (chSv1 *CacheSv1) HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	rply *bool) (err error) {
 	return chSv1.cacheS.V1HasGroup(args, rply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (chSv1 *CacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
+func (chSv1 *CacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
 	rply *[]string) (err error) {
 	return chSv1.cacheS.V1GetGroupItemIDs(args, rply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithOpts,
+func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	rply *string) (err error) {
 	return chSv1.cacheS.V1RemoveGroup(args, rply)
 }

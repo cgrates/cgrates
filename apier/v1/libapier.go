@@ -57,7 +57,7 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 			cacheIDs = append(cacheIDs, cIdx)
 		}
 		method = utils.CacheSv1Clear
-		args = &utils.AttrCacheIDsWithOpts{
+		args = &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   tnt,
 			CacheIDs: cacheIDs,
 			APIOpts:  opts,
@@ -175,7 +175,7 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 		}
 	case utils.MetaClear:
 		method = utils.CacheSv1Clear
-		args = &utils.AttrCacheIDsWithOpts{
+		args = &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   tnt,
 			CacheIDs: []string{cacheID},
 			APIOpts:  opts,

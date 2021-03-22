@@ -852,7 +852,7 @@ func testv2CDRsGetCDRsDest(t *testing.T) {
 
 func testV2CDRsRerate(t *testing.T) {
 	var reply string
-	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1018,7 +1018,7 @@ func testv2CDRsDynaPrepaid(t *testing.T) {
 
 func testV2CDRsDuplicateCDRs(t *testing.T) {
 	var reply string
-	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+	if err := cdrsRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)

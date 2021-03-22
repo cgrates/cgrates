@@ -691,7 +691,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 	argSmCost := &engine.AttrCDRSStoreSMCost{
 		Cost:           smCost,
 		CheckDuplicate: true,
-		Opts:           s.OptsStart,
+		APIOpts:        s.OptsStart,
 		Tenant:         s.Tenant,
 	}
 	var reply string

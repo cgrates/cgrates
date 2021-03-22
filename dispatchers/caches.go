@@ -143,7 +143,7 @@ func (dS *DispatcherService) CacheSv1RemoveItems(args utils.AttrReloadCacheWithA
 }
 
 // CacheSv1Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithOpts,
+func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -162,7 +162,7 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithOpts,
 }
 
 // CacheSv1GetCacheStats returns CacheStats filtered by cacheIDs
-func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithOpts,
+func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
 	reply *map[string]*ltcache.CacheStats) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -181,7 +181,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithO
 }
 
 // CacheSv1PrecacheStatus checks status of active precache processes
-func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWithOpts, reply *map[string]string) (err error) {
+func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -199,7 +199,7 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 }
 
 // CacheSv1HasGroup checks existence of a group in cache
-func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithOpts,
+func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	reply *bool) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -207,18 +207,18 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithOpts,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1HasGroup, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1HasGroup, args, reply)
 }
 
 // CacheSv1GetGroupItemIDs returns a list of itemIDs in a cache group
-func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
+func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -226,31 +226,31 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWit
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetGroupItemIDs, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1GetGroupItemIDs, args, reply)
 }
 
 // CacheSv1RemoveGroup will remove a group and all items belonging to it from cache
-func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveGroup, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1RemoveGroup, args, reply)
 }
 
@@ -298,13 +298,13 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplica
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReplicateRemove, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1ReplicateRemove, args, reply)
 }
 
@@ -316,12 +316,12 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(args *utils.ArgCacheReplicateS
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReplicateSet, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1ReplicateSet, args, reply)
 }

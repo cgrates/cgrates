@@ -171,7 +171,7 @@ func testEEsAddCDRs(t *testing.T) {
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
-		if err := eeSRPC.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithOpts{CDR: cdr}, &reply); err != nil {
+		if err := eeSRPC.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithAPIOpts{CDR: cdr}, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)

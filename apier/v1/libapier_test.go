@@ -132,7 +132,7 @@ func TestCallCache(t *testing.T) {
 	}
 	exp := &rpcRequest{
 		Method: utils.CacheSv1Clear,
-		Params: &utils.AttrCacheIDsWithOpts{
+		Params: &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   "cgrates.org",
 			CacheIDs: []string{utils.CacheStatQueueProfiles, utils.CacheStatFilterIndexes},
 			APIOpts:  make(map[string]interface{}),

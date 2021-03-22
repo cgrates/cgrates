@@ -2651,7 +2651,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 			return
 		}
 	case utils.MetaClear:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithOpts), &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 			return
 		}
 	}
@@ -2695,7 +2695,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	if verbose {
 		log.Print("Clearing indexes")
 	}
-	clearArgs := &utils.AttrCacheIDsWithOpts{
+	clearArgs := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts:  opts,
 		CacheIDs: cacheIDs,
 	}

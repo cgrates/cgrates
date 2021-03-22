@@ -698,12 +698,12 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			}
 		case utils.MetaClear:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithOpts), &reply); err != nil {
+				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 				return
 			}
 		}
 		if len(cacheIDs) != 0 {
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 				CacheIDs: cacheIDs,
 			}, &reply); err != nil {
 				return
@@ -1054,12 +1054,12 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 			}
 		case utils.MetaClear:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
-				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithOpts), &reply); err != nil {
+				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 				return
 			}
 		}
 		if len(cacheIDs) != 0 {
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 				CacheIDs: cacheIDs,
 			}, &reply); err != nil {
 				return

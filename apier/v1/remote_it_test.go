@@ -321,7 +321,7 @@ func testInternalRemoteITGetResource(t *testing.T) {
 }
 
 func testInternalRemoteITGetResourceProfile(t *testing.T) {
-	rlsPrf := &engine.ResourceProfileWithOpts{
+	rlsPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
@@ -1088,7 +1088,7 @@ func testInternalSetAccount(t *testing.T) {
 func testInternalReplicateStats(t *testing.T) {
 	var reply string
 
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatsToReplicate",

@@ -41,7 +41,7 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
 }
 
 // GuardianSv1RemoteLock will lock a key from remote
-func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithOpts,
+func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -49,18 +49,18 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithOpts,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.GuardianSv1RemoteLock, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
 }
 
 // GuardianSv1RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithOpts,
+func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAPIOpts,
 	reply *[]string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -68,12 +68,12 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithOp
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.GuardianSv1RemoteUnlock, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)
 }

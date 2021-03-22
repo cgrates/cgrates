@@ -116,7 +116,7 @@ func testV1RouteInitDataDb(t *testing.T) {
 
 func testV1RouteClearCache(t *testing.T) {
 	var reply string
-	if err := routeSv1Rpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{}, &reply); err != nil {
+	if err := routeSv1Rpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
 		t.Fatal(err)
 	}
 }

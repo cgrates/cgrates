@@ -108,7 +108,7 @@ func (apierSv1 *APIerSv1) GetResourceProfileIDs(args *utils.PaginatorWithTenant,
 }
 
 //SetResourceProfile adds a new resource configuration
-func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithOpts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -127,8 +127,8 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithOpts
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	if err = apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
+	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
+		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	var ttl *time.Duration
@@ -144,8 +144,8 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithOpts
 		return
 	}
 	//handle caching for Resource
-	if err = apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheResources,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResources,
+		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 

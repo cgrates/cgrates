@@ -50,10 +50,10 @@ type ResourceProfile struct {
 	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
-// ResourceProfileWithOpts is used in replicatorV1 for dispatcher
-type ResourceProfileWithOpts struct {
+// ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment

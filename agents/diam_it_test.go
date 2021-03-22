@@ -912,7 +912,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
+	args := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -997,7 +997,7 @@ func testDiamItCCRSMS(t *testing.T) {
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaSMS}}}
+	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaSMS}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -1076,7 +1076,7 @@ func testDiamItCCRMMS(t *testing.T) {
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaMMS}}}
+	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaMMS}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

@@ -26,7 +26,7 @@ func init() {
 	c := &CmdClear{
 		name:      "cache_clear",
 		rpcMethod: utils.CacheSv1Clear,
-		rpcParams: &utils.AttrCacheIDsWithOpts{},
+		rpcParams: &utils.AttrCacheIDsWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdClear struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrCacheIDsWithOpts
+	rpcParams *utils.AttrCacheIDsWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdClear) RpcMethod() string {
 
 func (self *CmdClear) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.AttrCacheIDsWithOpts)
+		self.rpcParams = new(utils.AttrCacheIDsWithAPIOpts)
 	}
 	return self.rpcParams
 }

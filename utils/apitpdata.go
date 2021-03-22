@@ -1284,10 +1284,10 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 	return smcFilter, err
 }
 
-type RPCCDRsFilterWithOpts struct {
+type RPCCDRsFilterWithAPIOpts struct {
 	*RPCCDRsFilter
-	Opts   map[string]interface{}
-	Tenant string
+	APIOpts map[string]interface{}
+	Tenant  string
 }
 
 type ArgsGetCacheItemIDsWithAPIOpts struct {
@@ -1349,15 +1349,15 @@ type AttrReloadCacheWithAPIOpts struct {
 	ArgsCache map[string][]string
 }
 
-type AttrCacheIDsWithOpts struct {
+type AttrCacheIDsWithAPIOpts struct {
 	APIOpts  map[string]interface{}
 	Tenant   string
 	CacheIDs []string
 }
 
-type ArgsGetGroupWithOpts struct {
-	Opts   map[string]interface{}
-	Tenant string
+type ArgsGetGroupWithAPIOpts struct {
+	APIOpts map[string]interface{}
+	Tenant  string
 	ArgsGetGroup
 }
 
@@ -1380,7 +1380,7 @@ type SessionFilter struct {
 	Limit   *int
 	Filters []string
 	Tenant  string
-	Opts    map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 type RatingPlanCostArg struct {
@@ -1388,12 +1388,12 @@ type RatingPlanCostArg struct {
 	Destination   string
 	SetupTime     string
 	Usage         string
-	Opts          map[string]interface{}
+	APIOpts       map[string]interface{}
 }
 type SessionIDsWithArgsDispatcher struct {
-	IDs    []string
-	Tenant string
-	Opts   map[string]interface{}
+	IDs     []string
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 type GetCostOnRatingPlansArgs struct {
@@ -1431,7 +1431,7 @@ type ArgCacheReplicateSet struct {
 	CacheID string
 	ItemID  string
 	Value   interface{}
-	Opts    map[string]interface{}
+	APIOpts map[string]interface{}
 	Tenant  string
 }
 
@@ -1443,7 +1443,7 @@ type Compiler interface {
 type ArgCacheReplicateRemove struct {
 	CacheID string
 	ItemID  string
-	Opts    map[string]interface{}
+	APIOpts map[string]interface{}
 	Tenant  string
 }
 
@@ -1451,7 +1451,7 @@ type AttrsExecuteActions struct {
 	ActionPlanID string
 	TimeStart    time.Time
 	TimeEnd      time.Time // replay the action timings between the two dates
-	Opts         map[string]interface{}
+	APIOpts      map[string]interface{}
 	Tenant       string
 }
 
@@ -1459,7 +1459,7 @@ type AttrsExecuteActionPlans struct {
 	ActionPlanIDs []string
 	Tenant        string
 	AccountID     string
-	Opts          map[string]interface{}
+	APIOpts       map[string]interface{}
 }
 
 type TPRateProfile struct {

@@ -119,12 +119,12 @@ type CacheSv1Interface interface {
 	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts, reply *time.Time) error
 	RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *string) error
 	RemoveItems(args utils.AttrReloadCacheWithAPIOpts, reply *string) error
-	Clear(cacheIDs *utils.AttrCacheIDsWithOpts, reply *string) error
-	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]*ltcache.CacheStats) error
-	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithOpts, rply *map[string]string) error
-	HasGroup(args *utils.ArgsGetGroupWithOpts, rply *bool) error
-	GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts, rply *[]string) error
-	RemoveGroup(args *utils.ArgsGetGroupWithOpts, rply *string) error
+	Clear(cacheIDs *utils.AttrCacheIDsWithAPIOpts, reply *string) error
+	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithAPIOpts, rply *map[string]*ltcache.CacheStats) error
+	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) error
+	HasGroup(args *utils.ArgsGetGroupWithAPIOpts, rply *bool) error
+	GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts, rply *[]string) error
+	RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts, rply *string) error
 	ReloadCache(attrs *utils.AttrReloadCacheWithAPIOpts, reply *string) error
 	LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) error
 	ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error)
@@ -133,8 +133,8 @@ type CacheSv1Interface interface {
 }
 
 type GuardianSv1Interface interface {
-	RemoteLock(attr *dispatchers.AttrRemoteLockWithOpts, reply *string) (err error)
-	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithOpts, reply *[]string) (err error)
+	RemoteLock(attr *dispatchers.AttrRemoteLockWithAPIOpts, reply *string) (err error)
+	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
@@ -146,20 +146,20 @@ type SchedulerSv1Interface interface {
 }
 
 type CDRsV1Interface interface {
-	ProcessCDR(cdr *engine.CDRWithOpts, reply *string) error
+	ProcessCDR(cdr *engine.CDRWithAPIOpts, reply *string) error
 	ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error
-	ProcessExternalCDR(cdr *engine.ExternalCDRWithOpts, reply *string) error
+	ProcessExternalCDR(cdr *engine.ExternalCDRWithAPIOpts, reply *string) error
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error
 	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
-	GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) error
-	GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) error
+	GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error
+	GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ServiceManagerV1Interface interface {
-	StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
-	StopService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
-	ServiceStatus(args *dispatchers.ArgStartServiceWithOpts, reply *string) error
+	StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
+	StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
+	ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
@@ -169,11 +169,11 @@ type RALsV1Interface interface {
 }
 
 type ConfigSv1Interface interface {
-	GetConfig(section *config.SectionWithOpts, reply *map[string]interface{}) (err error)
+	GetConfig(section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error)
 	ReloadConfig(section *config.ReloadArgs, reply *string) (err error)
 	SetConfig(args *config.SetConfigArgs, reply *string) (err error)
 	SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error)
-	GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error)
+	GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *string) (err error)
 }
 
 type CoreSv1Interface interface {
@@ -226,11 +226,11 @@ type ReplicatorSv1Interface interface {
 	SetReverseDestination(dst *engine.DestinationWithAPIOpts, reply *string) error
 	SetStatQueue(ssq *engine.StatQueueWithAPIOpts, reply *string) error
 	SetFilter(fltr *engine.FilterWithAPIOpts, reply *string) error
-	SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) error
+	SetStatQueueProfile(sq *engine.StatQueueProfileWithAPIOpts, reply *string) error
 	SetTiming(tm *utils.TPTimingWithAPIOpts, reply *string) error
 	SetResource(rs *engine.ResourceWithAPIOpts, reply *string) error
-	SetResourceProfile(rs *engine.ResourceProfileWithOpts, reply *string) error
-	SetActionTriggers(args *engine.SetActionTriggersArgWithOpts, reply *string) error
+	SetResourceProfile(rs *engine.ResourceProfileWithAPIOpts, reply *string) error
+	SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error
 	SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, reply *string) error
 	SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error
 	SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, reply *string) error

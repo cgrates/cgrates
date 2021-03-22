@@ -85,7 +85,7 @@ func testDspRALsGetRatingPlanCost(t *testing.T) {
 		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
 		SetupTime:     utils.MetaNow,
 		Usage:         "1h",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "rals12345",
 		},
 	}

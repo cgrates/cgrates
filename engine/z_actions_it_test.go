@@ -482,7 +482,7 @@ func testActionsitCDRAccount(t *testing.T) {
 		}
 	}
 
-	args := &CDRWithOpts{
+	args := &CDRWithAPIOpts{
 		CDR: &CDR{
 			Tenant:      "cgrates.org",
 			OriginID:    "testDspCDRsProcessCDR",
@@ -740,7 +740,7 @@ func testActionsitSetSDestinations(t *testing.T) {
 	}
 
 	// set a StatQueueProfile and simulate process event
-	statConfig := &StatQueueProfileWithOpts{
+	statConfig := &StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "DistinctMetricProfile",
@@ -863,7 +863,7 @@ func testActionsitresetAccountCDR(t *testing.T) {
 			break
 		}
 	}
-	args := &CDRWithOpts{
+	args := &CDRWithAPIOpts{
 		CDR: &CDR{
 			Tenant:      "cgrates.org",
 			OriginID:    "testDsp",
