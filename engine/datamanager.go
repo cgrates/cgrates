@@ -1817,10 +1817,10 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.SharedGroupPrefix, sg.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetSharedGroup,
-			&SharedGroupWithOpts{
+			&SharedGroupWithAPIOpts{
 				SharedGroup: sg,
 				Tenant:      config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -1900,11 +1900,11 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 }
 
 //SetActionsArgsWithOpts is used to send the key and the Actions to replicator
-type SetActionsArgsWithOpts struct {
-	Key    string
-	Acs    Actions
-	Tenant string
-	Opts   map[string]interface{}
+type SetActionsArgsWithAPIOpts struct {
+	Key     string
+	Acs     Actions
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
@@ -1919,11 +1919,11 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ActionPrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActions,
-			&SetActionsArgsWithOpts{
+			&SetActionsArgsWithAPIOpts{
 				Key:    key,
 				Acs:    as,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -1975,13 +1975,13 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 	return
 }
 
-// SetActionPlanArgWithOpts is used in replicatorV1 for dispatcher
-type SetActionPlanArgWithOpts struct {
+// SetActionPlanArgWithAPIOpts is used in replicatorV1 for dispatcher
+type SetActionPlanArgWithAPIOpts struct {
 	Key       string
 	Ats       *ActionPlan
 	Overwrite bool
 	Tenant    string
-	Opts      map[string]interface{}
+	APIOpts   map[string]interface{}
 }
 
 func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
@@ -1997,12 +1997,12 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ActionPlanPrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionPlan,
-			&SetActionPlanArgWithOpts{
+			&SetActionPlanArgWithAPIOpts{
 				Key:       key,
 				Ats:       ats,
 				Overwrite: overwrite,
 				Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2079,13 +2079,13 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 	return
 }
 
-//SetAccountActionPlansArgWithOpts is used to send the key and the Actions to replicator
-type SetAccountActionPlansArgWithOpts struct {
+//SetAccountActionPlansArgWithAPIOpts is used to send the key and the Actions to replicator
+type SetAccountActionPlansArgWithAPIOpts struct {
 	AcntID    string
 	AplIDs    []string
 	Overwrite bool
 	Tenant    string
-	Opts      map[string]interface{}
+	APIOpts   map[string]interface{}
 }
 
 func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
@@ -2100,12 +2100,12 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountActionPlansPrefix, acntID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccountActionPlans,
-			&SetAccountActionPlansArgWithOpts{
+			&SetAccountActionPlansArgWithAPIOpts{
 				AcntID:    acntID,
 				AplIDs:    aPlIDs,
 				Overwrite: overwrite,
 				Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2203,10 +2203,10 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RatingPlanPrefix, rp.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRatingPlan,
-			&RatingPlanWithOpts{
+			&RatingPlanWithAPIOpts{
 				RatingPlan: rp,
 				Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2300,10 +2300,10 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RatingProfilePrefix, rpf.Id, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRatingProfile,
-			&RatingProfileWithOpts{
+			&RatingProfileWithAPIOpts{
 				RatingProfile: rpf,
 				Tenant:        config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2425,9 +2425,9 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RouteProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRouteProfile,
-			&RouteProfileWithOpts{
+			&RouteProfileWithAPIOpts{
 				RouteProfile: rpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2561,9 +2561,9 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AttributeProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAttributeProfile,
-			&AttributeProfileWithOpts{
+			&AttributeProfileWithAPIOpts{
 				AttributeProfile: ap,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2690,9 +2690,9 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ChargerProfilePrefix, cpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetChargerProfile,
-			&ChargerProfileWithOpts{
+			&ChargerProfileWithAPIOpts{
 				ChargerProfile: cpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2820,9 +2820,9 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DispatcherProfilePrefix, dpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDispatcherProfile,
-			&DispatcherProfileWithOpts{
+			&DispatcherProfileWithAPIOpts{
 				DispatcherProfile: dpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -2929,9 +2929,9 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DispatcherHostPrefix, dpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDispatcherHost,
-			&DispatcherHostWithOpts{
+			&DispatcherHostWithAPIOpts{
 				DispatcherHost: dpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -3027,10 +3027,10 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.LoadIDPrefix, objIDs, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetLoadIDs,
-			&utils.LoadIDsWithOpts{
+			&utils.LoadIDsWithAPIOpts{
 				LoadIDs: loadIDs,
 				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -3158,9 +3158,9 @@ func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (e
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
-			&utils.RateProfileWithOpts{
+			&utils.RateProfileWithAPIOpts{
 				RateProfile: rpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -3248,9 +3248,9 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
-			&utils.RateProfileWithOpts{
+			&utils.RateProfileWithAPIOpts{
 				RateProfile: oldRpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
@@ -3298,9 +3298,9 @@ func (dm *DataManager) SetRateProfileRates(rpp *utils.RateProfile, withIndex boo
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
-			&utils.RateProfileWithOpts{
+			&utils.RateProfileWithAPIOpts{
 				RateProfile: oldRpp,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return

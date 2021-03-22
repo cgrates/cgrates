@@ -47,10 +47,10 @@ type AttributeProfile struct {
 	Weight             float64
 }
 
-// AttributeProfileWithOpts is used in replicatorV1 for dispatcher
-type AttributeProfileWithOpts struct {
+// AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type AttributeProfileWithAPIOpts struct {
 	*AttributeProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (ap *AttributeProfile) compileSubstitutes() (err error) {

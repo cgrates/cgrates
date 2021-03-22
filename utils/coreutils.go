@@ -934,10 +934,10 @@ func RandomInteger(min, max int) int {
 	return math_rand.Intn(max-min) + min
 }
 
-type LoadIDsWithOpts struct {
+type LoadIDsWithAPIOpts struct {
 	LoadIDs map[string]int64
 	Tenant  string
-	Opts    map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // IsURL returns if the path is an URL

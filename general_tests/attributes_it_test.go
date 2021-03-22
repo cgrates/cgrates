@@ -168,7 +168,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 func testAttributeSProcessEventWithAccount(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT",
@@ -250,7 +250,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT2",
@@ -380,7 +380,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 
 	// add new attribute profile
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS",
@@ -463,7 +463,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 
 func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	// add new attribute profile
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS2",
@@ -609,7 +609,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	// add new attribute profile
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE",
@@ -692,7 +692,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE2",
@@ -783,7 +783,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER2",
@@ -867,7 +867,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER_COMPOSED",
@@ -969,7 +969,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	// add new attribute profile
 	var result string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER",

@@ -163,7 +163,7 @@ func (apierSv1 *APIerSv1) GetDispatcherHostIDs(tenantArg *utils.PaginatorWithTen
 }
 
 //SetDispatcherHost add/update a new Dispatcher Host
-func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -178,8 +178,8 @@ func (apierSv1 *APIerSv1) SetDispatcherHost(args *engine.DispatcherHostWithOpts,
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherHosts,
-		args.TenantID(), nil, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheDispatcherHosts,
+		args.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1097,62 +1097,62 @@ func (dS *DispatcherReplicatorSv1) SetActionTriggers(args *engine.SetActionTrigg
 }
 
 // SetSharedGroup
-func (dS *DispatcherReplicatorSv1) SetSharedGroup(args *engine.SharedGroupWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetSharedGroup(args *engine.SharedGroupWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetSharedGroup(args, reply)
 }
 
 // SetActions
-func (dS *DispatcherReplicatorSv1) SetActions(args *engine.SetActionsArgsWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetActions(args, reply)
 }
 
 // SetRatingPlan
-func (dS *DispatcherReplicatorSv1) SetRatingPlan(args *engine.RatingPlanWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetRatingPlan(args *engine.RatingPlanWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetRatingPlan(args, reply)
 }
 
 // SetRatingProfile
-func (dS *DispatcherReplicatorSv1) SetRatingProfile(args *engine.RatingProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetRatingProfile(args *engine.RatingProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetRatingProfile(args, reply)
 }
 
 // SetRouteProfile
-func (dS *DispatcherReplicatorSv1) SetRouteProfile(args *engine.RouteProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetRouteProfile(args *engine.RouteProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetRouteProfile(args, reply)
 }
 
 // SetAttributeProfile
-func (dS *DispatcherReplicatorSv1) SetAttributeProfile(args *engine.AttributeProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetAttributeProfile(args *engine.AttributeProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetAttributeProfile(args, reply)
 }
 
 // SetChargerProfile
-func (dS *DispatcherReplicatorSv1) SetChargerProfile(args *engine.ChargerProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetChargerProfile(args *engine.ChargerProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetChargerProfile(args, reply)
 }
 
 // SetDispatcherProfile
-func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(args *engine.DispatcherProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetDispatcherProfile(args *engine.DispatcherProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetDispatcherProfile(args, reply)
 }
 
 // SetRateProfile
-func (dS *DispatcherReplicatorSv1) SetRateProfile(args *utils.RateProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetRateProfile(args *utils.RateProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetRateProfile(args, reply)
 }
 
 // SetActionPlan
-func (dS *DispatcherReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetActionPlan(args, reply)
 }
 
 // SetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetAccountActionPlans(args, reply)
 }
 
 // SetDispatcherHost
-func (dS *DispatcherReplicatorSv1) SetDispatcherHost(args *engine.DispatcherHostWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetDispatcherHost(args, reply)
 }
 
@@ -1162,7 +1162,7 @@ func (dS *DispatcherReplicatorSv1) RemoveThreshold(args *utils.TenantIDWithAPIOp
 }
 
 // SetLoadIDs
-func (dS *DispatcherReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetLoadIDs(args, reply)
 }
 

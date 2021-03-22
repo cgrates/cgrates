@@ -35,10 +35,10 @@ type ChargerProfile struct {
 	Weight             float64
 }
 
-// ChargerProfileWithOpts is used in replicatorV1 for dispatcher
-type ChargerProfileWithOpts struct {
+// ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type ChargerProfileWithAPIOpts struct {
 	*ChargerProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (cP *ChargerProfile) TenantID() string {

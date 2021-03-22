@@ -171,7 +171,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		},
 	}
 	var cdrs []*engine.CDR
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",

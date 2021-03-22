@@ -37,7 +37,7 @@ var Cache *CacheS
 func init() {
 	Cache = NewCacheS(config.CgrConfig(), nil, nil)
 	gob.Register(new(AttributeProfile))
-	gob.Register(new(AttributeProfileWithOpts))
+	gob.Register(new(AttributeProfileWithAPIOpts))
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
@@ -56,17 +56,17 @@ func init() {
 	gob.Register(new(StatQueueProfileWithOpts))
 	// RouteS
 	gob.Register(new(RouteProfile))
-	gob.Register(new(RouteProfileWithOpts))
+	gob.Register(new(RouteProfileWithAPIOpts))
 	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))
 	// Dispatcher
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
-	gob.Register(new(DispatcherHostWithOpts))
+	gob.Register(new(DispatcherHostWithAPIOpts))
 	// RateProfiles
 	gob.Register(new(utils.RateProfile))
-	gob.Register(new(utils.RateProfileWithOpts))
+	gob.Register(new(utils.RateProfileWithAPIOpts))
 	// ActionProfiles
 	gob.Register(new(ActionProfile))
 	gob.Register(new(ActionProfileWithAPIOpts))

@@ -38,7 +38,7 @@ var (
 	dispatcherCfg       *config.CGRConfig
 	dispatcherRPC       *rpc.Client
 	dispatcherProfile   *DispatcherWithAPIOpts
-	dispatcherHost      *engine.DispatcherHostWithOpts
+	dispatcherHost      *engine.DispatcherHostWithAPIOpts
 	dispatcherConfigDIR string //run tests for specific configuration
 
 	sTestsDispatcher = []func(t *testing.T){
@@ -262,7 +262,7 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherHost = &engine.DispatcherHostWithOpts{
+	dispatcherHost = &engine.DispatcherHostWithAPIOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
@@ -418,7 +418,7 @@ func testDispatcherSRemDispatcherProfileWithoutTenant(t *testing.T) {
 }
 
 func testDispatcherSSetDispatcherHostWithoutTenant(t *testing.T) {
-	dispatcherHost = &engine.DispatcherHostWithOpts{
+	dispatcherHost = &engine.DispatcherHostWithAPIOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			RemoteHost: &config.RemoteHost{
 				ID:      "DspHst7",

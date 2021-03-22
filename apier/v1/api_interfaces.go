@@ -231,20 +231,20 @@ type ReplicatorSv1Interface interface {
 	SetResource(rs *engine.ResourceWithAPIOpts, reply *string) error
 	SetResourceProfile(rs *engine.ResourceProfileWithOpts, reply *string) error
 	SetActionTriggers(args *engine.SetActionTriggersArgWithOpts, reply *string) error
-	SetSharedGroup(shg *engine.SharedGroupWithOpts, reply *string) error
-	SetActions(args *engine.SetActionsArgsWithOpts, reply *string) error
-	SetRatingPlan(rp *engine.RatingPlanWithOpts, reply *string) error
-	SetRatingProfile(rp *engine.RatingProfileWithOpts, reply *string) error
-	SetRouteProfile(sp *engine.RouteProfileWithOpts, reply *string) error
-	SetAttributeProfile(ap *engine.AttributeProfileWithOpts, reply *string) error
-	SetChargerProfile(cp *engine.ChargerProfileWithOpts, reply *string) error
-	SetDispatcherProfile(dpp *engine.DispatcherProfileWithOpts, reply *string) error
-	SetRateProfile(dpp *utils.RateProfileWithOpts, reply *string) error
-	SetActionPlan(args *engine.SetActionPlanArgWithOpts, reply *string) error
-	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithOpts, reply *string) error
-	SetDispatcherHost(dpp *engine.DispatcherHostWithOpts, reply *string) error
+	SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, reply *string) error
+	SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error
+	SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, reply *string) error
+	SetRatingProfile(rp *engine.RatingProfileWithAPIOpts, reply *string) error
+	SetRouteProfile(sp *engine.RouteProfileWithAPIOpts, reply *string) error
+	SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) error
+	SetChargerProfile(cp *engine.ChargerProfileWithAPIOpts, reply *string) error
+	SetDispatcherProfile(dpp *engine.DispatcherProfileWithAPIOpts, reply *string) error
+	SetRateProfile(dpp *utils.RateProfileWithAPIOpts, reply *string) error
+	SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) error
+	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error
+	SetDispatcherHost(dpp *engine.DispatcherHostWithAPIOpts, reply *string) error
 	RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) error
-	SetLoadIDs(args *utils.LoadIDsWithOpts, reply *string) error
+	SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) error
 	RemoveDestination(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveAccount(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) error

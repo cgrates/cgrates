@@ -115,10 +115,10 @@ func (rt *Rate) RunTimes(sTime, eTime time.Time, verbosity int) (aTimes [][]time
 	return nil, ErrMaxIterationsReached
 }
 
-// RateProfileWithOpts is used in replicatorV1 for dispatcher
-type RateProfileWithOpts struct {
+// RateProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type RateProfileWithAPIOpts struct {
 	*RateProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // RateSInterval is used by RateS to integrate Rate info for one charging interval

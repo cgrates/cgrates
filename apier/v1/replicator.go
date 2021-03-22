@@ -519,12 +519,12 @@ func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArg
 }
 
 // SetSharedGroup is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetSharedGroupDrv(shg.SharedGroup); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(shg.Opts[utils.CacheOpt]),
-		shg.Tenant, utils.CacheSharedGroups, shg.Id, nil, nil, shg.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(shg.APIOpts[utils.CacheOpt]),
+		shg.Tenant, utils.CacheSharedGroups, shg.Id, nil, nil, shg.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -532,12 +532,12 @@ func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithOpts, rep
 }
 
 // SetActions is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionsDrv(args.Key, args.Acs); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActions, args.Key, nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheActions, args.Key, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -545,12 +545,12 @@ func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithOpts, rep
 }
 
 // SetRatingPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRatingPlanDrv(rp.RatingPlan); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.Opts[utils.CacheOpt]),
-		rp.Tenant, utils.CacheRatingPlans, rp.Id, nil, nil, rp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.APIOpts[utils.CacheOpt]),
+		rp.Tenant, utils.CacheRatingPlans, rp.Id, nil, nil, rp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -558,12 +558,12 @@ func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithOpts, reply 
 }
 
 // SetRatingProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRatingProfileDrv(rp.RatingProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.Opts[utils.CacheOpt]),
-		rp.Tenant, utils.CacheRatingProfiles, rp.Id, nil, nil, rp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.APIOpts[utils.CacheOpt]),
+		rp.Tenant, utils.CacheRatingProfiles, rp.Id, nil, nil, rp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -571,12 +571,12 @@ func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithOpts, 
 }
 
 // SetRouteProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRouteProfileDrv(sp.RouteProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sp.Opts[utils.CacheOpt]),
-		sp.Tenant, utils.CacheRouteProfiles, sp.TenantID(), &sp.FilterIDs, nil, sp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sp.APIOpts[utils.CacheOpt]),
+		sp.Tenant, utils.CacheRouteProfiles, sp.TenantID(), &sp.FilterIDs, nil, sp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -584,12 +584,12 @@ func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithOpts, re
 }
 
 // SetAttributeProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAttributeProfileDrv(ap.AttributeProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ap.Opts[utils.CacheOpt]),
-		ap.Tenant, utils.CacheAttributeProfiles, ap.TenantID(), &ap.FilterIDs, ap.Contexts, ap.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ap.APIOpts[utils.CacheOpt]),
+		ap.Tenant, utils.CacheAttributeProfiles, ap.TenantID(), &ap.FilterIDs, ap.Contexts, ap.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -597,12 +597,12 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWith
 }
 
 // SetChargerProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetChargerProfileDrv(cp.ChargerProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(cp.Opts[utils.CacheOpt]),
-		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), &cp.FilterIDs, nil, cp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(cp.APIOpts[utils.CacheOpt]),
+		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), &cp.FilterIDs, nil, cp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -610,12 +610,12 @@ func (rplSv1 *ReplicatorSv1) SetChargerProfile(cp *engine.ChargerProfileWithOpts
 }
 
 // SetDispatcherProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDispatcherProfileDrv(dpp.DispatcherProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.Opts[utils.CacheOpt]),
-		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), &dpp.FilterIDs, dpp.Subsystems, dpp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.APIOpts[utils.CacheOpt]),
+		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), &dpp.FilterIDs, dpp.Subsystems, dpp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -623,12 +623,12 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileW
 }
 
 // SetActionPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActionPlans, args.Key, nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheActionPlans, args.Key, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -636,12 +636,12 @@ func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithOpts
 }
 
 // SetAccountActionPlans is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -649,12 +649,12 @@ func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountAction
 }
 
 // SetDispatcherHost is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetDispatcherHostDrv(dpp.DispatcherHost); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.Opts[utils.CacheOpt]),
-		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), nil, nil, dpp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.APIOpts[utils.CacheOpt]),
+		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), nil, nil, dpp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -662,12 +662,12 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHostWithOpt
 }
 
 // SetRateProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRateProfile(dpp *utils.RateProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRateProfile(dpp *utils.RateProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRateProfileDrv(dpp.RateProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.Opts[utils.CacheOpt]),
-		dpp.Tenant, utils.CacheRateProfiles, dpp.TenantID(), &dpp.FilterIDs, nil, dpp.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.APIOpts[utils.CacheOpt]),
+		dpp.Tenant, utils.CacheRateProfiles, dpp.TenantID(), &dpp.FilterIDs, nil, dpp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -701,7 +701,7 @@ func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithAPIO
 }
 
 // SetLoadIDs is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetLoadIDsDrv(args.LoadIDs); err != nil {
 		return
 	}
@@ -709,8 +709,8 @@ func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithOpts, reply *stri
 	for lID := range args.LoadIDs {
 		lIDs = append(lIDs, lID)
 	}
-	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheLoadIDs, lIDs, args.Opts); err != nil {
+	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheLoadIDs, lIDs, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

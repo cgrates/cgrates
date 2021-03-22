@@ -205,7 +205,7 @@ func testInternalReplicateITDestination(t *testing.T) {
 
 func testInternalReplicateITAttributeProfile(t *testing.T) {
 	//set
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_CDRE",
@@ -634,7 +634,7 @@ func testInternalReplicateITDispatcherHost(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	dispatcherHost = &engine.DispatcherHostWithOpts{
+	dispatcherHost = &engine.DispatcherHostWithAPIOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{
@@ -1456,7 +1456,7 @@ func testInternalReplicateITLoadIds(t *testing.T) {
 		t.Errorf("Expecting same LoadIDs for both engines")
 	}
 	// set AttributeProfile
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AttributeWithNonSubstitute",

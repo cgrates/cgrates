@@ -147,7 +147,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 		},
 	}
 
-	eAttrPrf := &engine.AttributeProfileWithOpts{
+	eAttrPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_1001_SIMPLEAUTH",
