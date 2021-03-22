@@ -87,7 +87,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantWithAPIO
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.ID, utils.Attributes}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -115,8 +115,8 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWit
 		return utils.APIErrorHandler(err)
 	}
 
-	if err := apierSv1.CallCache(utils.IfaceAsString(alsWrp.Opts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
-		alsWrp.TenantID(), &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(alsWrp.APIOpts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
+		alsWrp.TenantID(), &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

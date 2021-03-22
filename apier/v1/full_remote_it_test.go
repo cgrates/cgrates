@@ -131,7 +131,7 @@ func testFullRemoteITAttribute(t *testing.T) {
 	}
 
 	var replySet string
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_1001_SIMPLEAUTH",

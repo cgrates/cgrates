@@ -232,7 +232,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 }
 
 func testInternalRemoteITGetAttribute(t *testing.T) {
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_1001_SIMPLEAUTH",
@@ -635,7 +635,7 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherHost = &engine.DispatcherHostWithOpts{
+	dispatcherHost = &engine.DispatcherHostWithAPIOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{

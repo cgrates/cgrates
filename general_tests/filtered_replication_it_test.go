@@ -158,7 +158,7 @@ func testFltrRplRPCConn(t *testing.T) {
 
 func testFltrRplAttributeProfile(t *testing.T) {
 	attrID := "ATTR1"
-	attrPrf := &engine.AttributeProfileWithOpts{
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        attrID,
@@ -1242,7 +1242,7 @@ func testFltrRplDispatcherProfile(t *testing.T) {
 
 func testFltrRplDispatcherHost(t *testing.T) {
 	dspID := "DSH1"
-	dspPrf := &engine.DispatcherHostWithOpts{
+	dspPrf := &engine.DispatcherHostWithAPIOpts{
 		DispatcherHost: &engine.DispatcherHost{
 			Tenant: "cgrates.org",
 			RemoteHost: &config.RemoteHost{

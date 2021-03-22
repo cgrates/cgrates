@@ -59,10 +59,10 @@ type RouteProfile struct {
 	cache map[string]interface{}
 }
 
-// RouteProfileWithOpts is used in replicatorV1 for dispatcher
-type RouteProfileWithOpts struct {
+// RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type RouteProfileWithAPIOpts struct {
 	*RouteProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (rp *RouteProfile) compileCacheParameters() error {

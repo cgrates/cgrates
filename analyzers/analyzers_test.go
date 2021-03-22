@@ -261,7 +261,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestEncoding":    "*gob",
 		"RequestID":          3.,
 		"RequestMethod":      "CoreSv1.Ping",
-		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Time":null,"Event":null,"Opts":{"EventSource":"*attributes"}}`),
+		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Time":null,"Event":null,"APIOpts":{"EventSource":"*attributes"}}`),
 		"Reply":              json.RawMessage(`"Pong"`),
 		"RequestSource":      "127.0.0.1:5566",
 		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),
@@ -299,7 +299,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	reply = []map[string]interface{}{}
 	if err = anz.V1StringQuery(&QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*req.Opts.EventSource:*attributes"},
+		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*attributes"},
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
@@ -317,7 +317,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	reply = []map[string]interface{}{}
 	if err = anz.V1StringQuery(&QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*opts.EventSource:*attributes"},
+		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*attributes"},
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
@@ -328,7 +328,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	reply = []map[string]interface{}{}
 	if err = anz.V1StringQuery(&QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*string:~*req.Opts.EventSource:*cdrs"},
+		ContentFilters: []string{"*string:~*req.APIOpts.EventSource:*cdrs"},
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {
@@ -336,7 +336,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	}
 	if err = anz.V1StringQuery(&QueryArgs{
 		HeaderFilters:  "RequestEncoding:*gob",
-		ContentFilters: []string{"*notstring:~*req.Opts.EventSource:*attributes"},
+		ContentFilters: []string{"*notstring:~*req.APIOpts.EventSource:*attributes"},
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expRply, reply) {

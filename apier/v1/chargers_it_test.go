@@ -209,7 +209,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:   "cgrates.org",
 			ID:       "ATTR_1001_SIMPLEAUTH",

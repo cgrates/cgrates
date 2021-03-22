@@ -33,10 +33,10 @@ type RatingPlan struct {
 }
 
 // RatingPlanWithOpts is used in replicatorV1 for dispatcher
-type RatingPlanWithOpts struct {
+type RatingPlanWithAPIOpts struct {
 	*RatingPlan
-	Tenant string
-	Opts   map[string]interface{}
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 type RPRate struct {

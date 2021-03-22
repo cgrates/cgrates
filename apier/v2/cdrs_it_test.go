@@ -410,7 +410,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 
 func testV2CDRsDifferentTenants(t *testing.T) {
 	//add an attribute
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.com",
 			ID:        "ATTR_Tenant",
@@ -442,7 +442,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			Blocker: false,
 			Weight:  10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}

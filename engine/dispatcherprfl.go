@@ -113,10 +113,10 @@ type DispatcherProfile struct {
 	Hosts              DispatcherHostProfiles // dispatch to these connections
 }
 
-// DispatcherProfileWithOpts is used in replicatorV1 for dispatcher
-type DispatcherProfileWithOpts struct {
+// DispatcherProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type DispatcherProfileWithAPIOpts struct {
 	*DispatcherProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (dP *DispatcherProfile) TenantID() string {
@@ -139,9 +139,9 @@ type DispatcherHost struct {
 }
 
 // DispatcherHostWithOpts is used in replicatorV1 for dispatcher
-type DispatcherHostWithOpts struct {
+type DispatcherHostWithAPIOpts struct {
 	*DispatcherHost
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 // TenantID returns the tenant concatenated with the ID

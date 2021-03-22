@@ -2607,7 +2607,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    tenant,
 			ID:        "ApierTest",
@@ -2716,7 +2716,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    tenant,
 			ID:        "ApierTest2",

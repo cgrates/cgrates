@@ -37,7 +37,7 @@ var (
 	alsPrfCfgPath   string
 	alsPrfCfg       *config.CGRConfig
 	attrSRPC        *rpc.Client
-	alsPrf          *engine.AttributeProfileWithOpts
+	alsPrf          *engine.AttributeProfileWithAPIOpts
 	alsPrfConfigDIR string //run tests for specific configuration
 
 	sTestsAlsPrf = []func(t *testing.T){
@@ -245,7 +245,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			},
 		},
 	}
-	eAttrPrf2 := &engine.AttributeProfileWithOpts{
+	eAttrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_3",
@@ -297,7 +297,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			},
 		},
 	}
-	eAttrPrf2 := &engine.AttributeProfileWithOpts{
+	eAttrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_2",
@@ -452,7 +452,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			},
 		},
 	}
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AttributeWithNonSubstitute",
@@ -523,7 +523,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			},
 		},
 	}
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AttributeWithNonSubstitute",
@@ -604,7 +604,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			},
 		},
 	}
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AttributeWithNonSubstitute",
@@ -660,7 +660,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 }
 
 func testAttributeSProcessEventWithHeader(t *testing.T) {
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Header",
@@ -743,7 +743,7 @@ func testAttributeSGetAttPrfIDs(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrfBrokenReference(t *testing.T) {
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
@@ -776,7 +776,7 @@ func testAttributeSSetAlsPrfBrokenReference(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf(t *testing.T) {
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
@@ -872,7 +872,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf2(t *testing.T) {
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "golant",
 			ID:        "ATTR_972587832508_SESSIONAUTH",
@@ -915,7 +915,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf3(t *testing.T) {
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "golant",
 			ID:        "ATTR_972587832508_SESSIONAUTH",
@@ -946,7 +946,7 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf4(t *testing.T) {
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "golant",
 			ID:        "ATTR_972587832508_SESSIONAUTH",
@@ -984,7 +984,7 @@ func testAttributeSPing(t *testing.T) {
 }
 
 func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Search_and_replace",
@@ -1043,7 +1043,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 }
 
 func testAttributeSProcessWithMultipleRuns(t *testing.T) {
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1061,7 +1061,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	attrPrf2 := &engine.AttributeProfileWithOpts{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
@@ -1079,7 +1079,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	attrPrf3 := &engine.AttributeProfileWithOpts{
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
@@ -1155,7 +1155,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 }
 
 func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1173,7 +1173,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	attrPrf2 := &engine.AttributeProfileWithOpts{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
@@ -1191,7 +1191,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	attrPrf3 := &engine.AttributeProfileWithOpts{
+	attrPrf3 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
@@ -1419,7 +1419,7 @@ func testAttributeSKillEngine(t *testing.T) {
 //Start tests for caching
 func testAttributeSCachingMetaNone(t *testing.T) {
 	//*none option should not add attribute in cache only in Datamanager
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1436,7 +1436,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaNone,
 		},
 	}
@@ -1480,7 +1480,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 
 func testAttributeSCachingMetaLoad(t *testing.T) {
 	//*load option should add attribute in cache and in Datamanager
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1497,7 +1497,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaLoad,
 		},
 	}
@@ -1587,7 +1587,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 
 func testAttributeSCachingMetaReload1(t *testing.T) {
 	//*reload add the attributes in cache if was there before
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1604,7 +1604,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -1648,7 +1648,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 
 func testAttributeSCachingMetaReload2(t *testing.T) {
 	//add cache with *load option
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1665,7 +1665,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaLoad,
 		},
 	}
@@ -1690,7 +1690,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 
 	//add cache with *reload option
 	// should overwrite the first
-	attrPrf2 := &engine.AttributeProfileWithOpts{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1707,7 +1707,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -1731,7 +1731,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 
 func testAttributeSCachingMetaRemove(t *testing.T) {
 	//add cache with *load option
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1748,7 +1748,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaLoad,
 		},
 	}
@@ -1783,7 +1783,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 
 	// add with *remove cache option
 	// should delete it from cache
-	attrPrf2 := &engine.AttributeProfileWithOpts{
+	attrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -1800,7 +1800,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaRemove,
 		},
 	}
@@ -1835,7 +1835,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 }
 
 func testAttributeSSetAttributeWithEmptyPath(t *testing.T) {
-	eAttrPrf2 := &engine.AttributeProfileWithOpts{
+	eAttrPrf2 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_3",
@@ -1858,7 +1858,7 @@ func testAttributeSSetAttributeWithEmptyPath(t *testing.T) {
 }
 
 func testAttributeSCacheOpts(t *testing.T) {
-	attrPrf1 := &engine.AttributeProfileWithOpts{
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_WITH_OPTS",
@@ -1875,7 +1875,7 @@ func testAttributeSCacheOpts(t *testing.T) {
 			},
 			Weight: 10,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			"Method":      "SetAttributeProfile",
 			"CustomField": "somethingCustom",
 		},
@@ -1891,7 +1891,7 @@ func testAttributeSCacheOpts(t *testing.T) {
 
 func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 	var reply string
-	alsPrf = &engine.AttributeProfileWithOpts{
+	alsPrf = &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			ID:        "ApierTest1",
 			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},

@@ -138,7 +138,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -200,7 +200,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -269,7 +269,7 @@ func testAttributeSSetAlsPrfWithoutTenant(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &engine.AttributeProfileWithOpts{
+	alsPrf := &engine.AttributeProfileWithAPIOpts{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
