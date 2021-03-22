@@ -226,10 +226,10 @@ func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent) {
 	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
 		cgrEvs[i] = &utils.CGREvent{
-			Tenant: s.Tenant,
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  sr.Event,
-			Opts:   s.OptsStart,
+			Tenant:  s.Tenant,
+			ID:      utils.UUIDSha1Prefix(),
+			Event:   sr.Event,
+			APIOpts: s.OptsStart,
 		}
 	}
 	return

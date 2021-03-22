@@ -49,7 +49,7 @@ func (cS *ChargerService) Shutdown() {
 func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaOpts: cgrEv.APIOpts,
 	}
 	cpIDs, err := MatchingItemIDsForEvent(evNm,
 		cS.cfg.ChargerSCfg().StringIndexedFields,
@@ -107,7 +107,7 @@ type ChrgSProcessEventReply struct {
 func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
 	var processRuns *int
-	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
 		if v, err := utils.IfaceAsTInt64(val); err == nil {
 			processRuns = utils.IntPointer(int(v))
 		}
@@ -120,7 +120,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 		clonedEv := cgrEv.Clone()
 		clonedEv.Tenant = tnt
 		clonedEv.Event[utils.RunID] = cP.RunID
-		clonedEv.Opts[utils.Subsys] = utils.MetaChargers
+		clonedEv.APIOpts[utils.Subsys] = utils.MetaChargers
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
@@ -133,7 +133,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 		args := &AttrArgsProcessEvent{
 			AttributeIDs: cP.AttributeIDs,
 			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(clonedEv.Opts[utils.OptsContext]),
+				utils.IfaceAsString(clonedEv.APIOpts[utils.OptsContext]),
 				utils.MetaChargers)),
 			ProcessRuns: processRuns,
 			CGREvent:    clonedEv,

@@ -101,7 +101,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 			utils.EventName: "Random",
 		},
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},
@@ -174,7 +174,7 @@ func testDspResponderBroadcast(t *testing.T) {
 			utils.EventName: "Broadcast",
 		},
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
@@ -211,7 +211,7 @@ func testDspResponderInternal(t *testing.T) {
 			utils.EventName: "Internal",
 		},
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "rsp12345",
 			utils.OptsRouteID: route,
 		},

@@ -1216,7 +1216,7 @@ func testInternalReplicateITThreshold(t *testing.T) {
 				utils.AllowNegative: true,
 				utils.Disabled:      false,
 				utils.Units:         12.3},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},

@@ -50,7 +50,7 @@ var (
 					utils.AllowNegative: true,
 					utils.Disabled:      false,
 					utils.Units:         12.3},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.AccountUpdate,
 				},
 			},
@@ -66,7 +66,7 @@ var (
 					utils.Units:        12.3,
 					utils.ExpiryTime:   time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.BalanceUpdate,
 				},
 			},
@@ -86,7 +86,7 @@ var (
 					"ACC":              0.75,
 					"PDD":              "2s",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.StatUpdate,
 				},
 			},
@@ -103,7 +103,7 @@ var (
 					"ACD":              "2m45s",
 					"TCD":              "1h",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.StatUpdate,
 				},
 			},
@@ -119,7 +119,7 @@ var (
 					"ACD":              "2m45s",
 					"TCD":              "3h1s",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.StatUpdate,
 				},
 			},
@@ -134,7 +134,7 @@ var (
 					utils.ResourceID:   "RES_GRP_1",
 					utils.Usage:        10.0,
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.ResourceUpdate,
 				},
 			},
@@ -149,7 +149,7 @@ var (
 					utils.ResourceID:   "RES_GRP_1",
 					utils.Usage:        10.0,
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.ResourceUpdate,
 				},
 			},
@@ -164,7 +164,7 @@ var (
 					utils.ResourceID:   "RES_GRP_1",
 					utils.Usage:        10.0,
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.ResourceUpdate,
 				},
 			},
@@ -196,7 +196,7 @@ var (
 					utils.Route:        "SUPPL1",
 					utils.Cost:         -1.0,
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.CDR,
 				},
 			},
@@ -904,7 +904,7 @@ func testV1TSProcessAccountUpdateEvent(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SIMULATE_ACNT_UPDATE_EV",
 			Event:  acnt.AsAccountSummary().AsMapInterface(),
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},

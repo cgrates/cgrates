@@ -48,7 +48,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
-		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaOpts: cgrEv.APIOpts,
 		utils.MetaReq:  cgrEv.Event,
 	}
 

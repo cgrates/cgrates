@@ -122,7 +122,7 @@ func testRPCChargerSNoAttr(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 		},
-		Opts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
+		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
 	}
 	expErr := utils.NewErrServerError(rpcclient.ErrDisconnected).Error()
 	var rply []*engine.ChrgSProcessEventReply
@@ -145,7 +145,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 		},
-		Opts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
+		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
 	}
 
 	processedEv := []*engine.ChrgSProcessEventReply{
@@ -158,7 +158,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"Account": "1010",
 					"RunID":   "CustomerCharges",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					"*processRuns": 1.,
 					"*subsys":      "*chargers",
 				},
@@ -174,7 +174,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"RequestType": "*none",
 					"RunID":       "raw",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					"*processRuns": 1.,
 					"*subsys":      "*chargers",
 				},
@@ -190,7 +190,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 					"RunID":   "SupplierCharges",
 					"Subject": "SUPPLIER1",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					"*processRuns": 1.,
 					"*subsys":      "*chargers",
 				},

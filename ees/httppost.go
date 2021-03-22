@@ -85,7 +85,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := engine.NewEventRequest(req, httpPost.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, httpPost.dc, cgrEv.APIOpts,
 			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
 			httpPost.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,

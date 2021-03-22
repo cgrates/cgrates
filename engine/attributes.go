@@ -425,7 +425,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	}
 	attrPrf, err := alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -461,7 +461,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	args.CGREvent = args.CGREvent.Clone()
 	eNV := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},

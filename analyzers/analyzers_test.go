@@ -199,7 +199,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	t1 := time.Now()
 	if err = anz.logTrafic(0, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.EventSource: utils.MetaCDRs,
 			},
 		}, utils.Pong, nil, utils.MetaJSON, "127.0.0.1:5565",
@@ -209,7 +209,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	if err = anz.logTrafic(1, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.EventSource: utils.MetaAttributes,
 			},
 		}, utils.Pong, nil,
@@ -221,7 +221,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	if err = anz.logTrafic(2, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.EventSource: utils.MetaAttributes,
 			},
 		}, utils.Pong, nil,
@@ -233,7 +233,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 	if err = anz.logTrafic(3, utils.CoreSv1Ping,
 		&utils.CGREvent{
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.EventSource: utils.MetaAttributes,
 			},
 		}, utils.Pong, nil,

@@ -33,7 +33,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (e
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1Ping,
 			args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -46,7 +46,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -64,9 +64,9 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics, args, reply)
 }
 
@@ -76,7 +76,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1ProcessEvent,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -93,9 +93,9 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueFloatMetrics, args, reply)
 }
 
@@ -112,7 +112,7 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithAPIOpts,
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)
 }

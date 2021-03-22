@@ -218,7 +218,7 @@ func testElasticExportEvents(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.RunID:        utils.MetaDefault,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				"ExporterUsed": "ElasticExporterWithNoFields",
 			},
 		},

@@ -368,19 +368,19 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*util
 // attrSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
-	if cgrEv.Opts == nil {
-		cgrEv.Opts = make(map[string]interface{})
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = make(map[string]interface{})
 	}
-	cgrEv.Opts[utils.Subsys] = utils.MetaCDRs
+	cgrEv.APIOpts[utils.Subsys] = utils.MetaCDRs
 	var processRuns *int
-	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
 		if v, err := utils.IfaceAsTInt64(val); err == nil {
 			processRuns = utils.IntPointer(int(v))
 		}
 	}
 	attrArgs := &AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
-			utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
+			utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 			utils.MetaCDRs)),
 		CGREvent:    cgrEv,
 		ProcessRuns: processRuns,
@@ -403,10 +403,10 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	thArgs := &ThresholdsArgsProcessEvent{
 		CGREvent: cgrEv.Clone(),
 	}
-	if thArgs.Opts == nil {
-		thArgs.Opts = make(map[string]interface{})
+	if thArgs.APIOpts == nil {
+		thArgs.APIOpts = make(map[string]interface{})
 	}
-	thArgs.Opts[utils.MetaEventType] = utils.CDR
+	thArgs.APIOpts[utils.MetaEventType] = utils.CDR
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns, nil,
 		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
@@ -529,10 +529,10 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
 			for j, rtCDR := range cdrS.rateCDRWithErr(
 				&CDRWithOpts{
 					CDR:  cdr,
-					Opts: ev.Opts,
+					Opts: ev.APIOpts,
 				}) {
 				cgrEv := rtCDR.AsCGREvent()
-				cgrEv.Opts = cgrEvs[i].Opts
+				cgrEv.APIOpts = cgrEvs[i].APIOpts
 				if j == 0 { // the first CDR will replace the events we got already as a small optimization
 					cdrs[i] = rtCDR
 					cgrEvs[i] = cgrEv
@@ -705,7 +705,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithOpts, reply *string) (err error)
 		cdr.RunID = utils.MetaDefault
 	}
 	cgrEv := cdr.AsCGREvent()
-	cgrEv.Opts = cdr.Opts
+	cgrEv.APIOpts = cdr.Opts
 
 	if _, err = cdrS.processEvent(cgrEv,
 		len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 && !cdr.PreRated,
@@ -1059,7 +1059,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	for _, cdr := range cdrs {
 		cdr.Cost = -1 // the cost will be recalculated
 		cgrEv := cdr.AsCGREvent()
-		cgrEv.Opts = arg.Opts
+		cgrEv.APIOpts = arg.Opts
 		if _, err = cdrS.processEvent(cgrEv, chrgS, attrS, false,
 			true, store, true, export, thdS, statS); err != nil {
 			return utils.NewErrServerError(err)

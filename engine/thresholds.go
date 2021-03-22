@@ -88,7 +88,7 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 	}
 	var tntAcnt string
 	var acnt string
-	if utils.IfaceAsString(args.Opts[utils.MetaEventType]) == utils.AccountUpdate {
+	if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
 		acnt, _ = args.FieldAsString(utils.ID)
 	} else {
 		acnt, _ = args.FieldAsString(utils.AccountField)
@@ -224,7 +224,7 @@ func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
 func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *ThresholdsArgsProcessEvent) (ts Thresholds, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 	}
 	tIDs := utils.NewStringSet(args.ThresholdIDs)
 	if len(tIDs) == 0 {

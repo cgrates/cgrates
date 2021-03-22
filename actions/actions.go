@@ -93,7 +93,7 @@ func (aS *ActionS) schedInit() {
 		cgrEvs[i] = &utils.CGREvent{
 			Tenant: tnt,
 			Time:   utils.TimePointer(time.Now()),
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.EventType: utils.SchedulerInit,
 				utils.NodeID:    aS.cfg.GeneralCfg().NodeID,
 			},
@@ -204,7 +204,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 	var aPfs engine.ActionProfiles
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaOpts: cgrEv.APIOpts,
 	}
 	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, evNm, cgrEv.Time, aPrflIDs); err != nil {
 		return

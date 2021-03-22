@@ -1232,7 +1232,7 @@ func (dS *DispatcherReplicatorSv1) RemoveActionPlan(args *utils.StringWithAPIOpt
 }
 
 // RemAccountActionPlans
-func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemAccountActionPlans(args, reply)
 }
 

@@ -938,7 +938,7 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "2m10s",
 			},
 		},
@@ -1006,7 +1006,7 @@ func testV1RateCostForEventWithUsage(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "4h10m15s",
 			},
 		},
@@ -1053,7 +1053,7 @@ func testV1RateCostForEventWithWrongUsage(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "wrongUsage",
 			},
 		},
@@ -1105,7 +1105,7 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			},
 		},
@@ -1142,7 +1142,7 @@ func testV1RateCostForEventWithStartTime(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC).String(),
 			},
 		},
@@ -1163,7 +1163,7 @@ func testV1RateCostForEventWithWrongStartTime(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: "wrongTime",
 			},
 		},
@@ -1191,7 +1191,7 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 				utils.OptsRatesUsage:     "2m10s",
 			},
@@ -1260,7 +1260,7 @@ func testV1RateCostForEventWithOpts(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 				utils.OptsRatesUsage:     "4h10m15s",
 			},

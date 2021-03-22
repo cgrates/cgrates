@@ -2253,10 +2253,10 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	}
 	argsGetRoutes := &ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "utils.CGREvent1",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{utils.OptsRouteProfilesCount: 3},
+			Tenant:  "cgrates.org",
+			ID:      "utils.CGREvent1",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 3},
 		},
 	}
 

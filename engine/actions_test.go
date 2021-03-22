@@ -2698,7 +2698,7 @@ func TestCdrLogAction(t *testing.T) {
 			"ToR":          "*monetary",
 			"Usage":        mock.args.CGREvent.Event["Usage"],
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvent) {
 		t.Errorf("Expected: %+v \n,received: %+v", expCgrEv, mock.args.CGREvent)

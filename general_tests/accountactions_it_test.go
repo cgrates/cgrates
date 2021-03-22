@@ -204,7 +204,7 @@ func testAccActionsExecuteAction(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account": 1001,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				"BAL_NEW": true,
 				"BAL_ADD": true,
 			},
@@ -224,7 +224,7 @@ func testAccActionsExecuteAction2(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account": 1001,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				"BAL_NEW": true,
 				"BAL_ADD": true,
 			},

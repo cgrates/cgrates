@@ -145,7 +145,7 @@ func (rpS *RouteService) Shutdown() {
 func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 	}
 	rPrfIDs, err := MatchingItemIDsForEvent(evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
@@ -569,12 +569,12 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 		tnt = rpS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	if len(rpS.cgrcfg.RouteSCfg().AttributeSConns) != 0 {
-		if args.Opts == nil {
-			args.Opts = make(map[string]interface{})
+		if args.APIOpts == nil {
+			args.APIOpts = make(map[string]interface{})
 		}
-		args.Opts[utils.Subsys] = utils.MetaRoutes
+		args.APIOpts[utils.Subsys] = utils.MetaRoutes
 		var processRuns *int
-		if val, has := args.Opts[utils.OptsAttributesProcessRuns]; has {
+		if val, has := args.APIOpts[utils.OptsAttributesProcessRuns]; has {
 			if v, err := utils.IfaceAsTInt64(val); err == nil {
 				processRuns = utils.IntPointer(int(v))
 			}
@@ -590,7 +590,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().AttributeSConns, nil,
 			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
-			args.Opts = rplyEv.Opts
+			args.APIOpts = rplyEv.APIOpts
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrRouteS(err)
 		}
@@ -637,7 +637,7 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 	//construct the DP and pass it to filterS
 	nM := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 	}
 	passedRoutes := make(map[string]*Route)
 	// apply filters for event

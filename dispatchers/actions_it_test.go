@@ -66,7 +66,7 @@ func testDspActPrfPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.ActionSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "actPrf12345",
 		},
 	}, &reply); err != nil {

@@ -187,7 +187,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 				"UsageInterval":  "1s",
 				utils.Weight:     "200.0",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.Subsys: utils.MetaChargers,
 			},
 		},
@@ -354,7 +354,7 @@ func TestChargerProcessEvent(t *testing.T) {
 				"UsageInterval":  "1s",
 				utils.Weight:     "200.0",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.Subsys: utils.MetaChargers,
 			},
 		},

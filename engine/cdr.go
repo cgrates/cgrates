@@ -445,10 +445,10 @@ func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 
 func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 	return &utils.CGREvent{
-		Tenant: cdr.Tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  cdr.AsMapStringIface(),
-		Opts:   map[string]interface{}{},
+		Tenant:  cdr.Tenant,
+		ID:      utils.UUIDSha1Prefix(),
+		Event:   cdr.AsMapStringIface(),
+		APIOpts: map[string]interface{}{},
 	}
 }
 

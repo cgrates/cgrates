@@ -106,11 +106,11 @@ func (aL *actExport) execute(_ context.Context, data utils.MapStorage, _ string)
 		utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
 			EeIDs: exporterIDs,
 			CGREvent: &utils.CGREvent{
-				Tenant: aL.tnt,
-				Time:   utils.TimePointer(time.Now()),
-				ID:     utils.GenUUID(),
-				Event:  data[utils.MetaReq].(map[string]interface{}),
-				Opts:   data[utils.MetaOpts].(map[string]interface{}),
+				Tenant:  aL.tnt,
+				Time:    utils.TimePointer(time.Now()),
+				ID:      utils.GenUUID(),
+				Event:   data[utils.MetaReq].(map[string]interface{}),
+				APIOpts: data[utils.MetaOpts].(map[string]interface{}),
 			},
 		}, &rply)
 }

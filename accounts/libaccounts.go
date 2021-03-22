@@ -96,14 +96,14 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 		return nil, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	var procRuns *int
-	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
 		if v, err := utils.IfaceAsTInt64(val); err == nil {
 			procRuns = utils.IntPointer(int(v))
 		}
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.FirstNonEmpty(
-			engine.MapEvent(cgrEv.Opts).GetStringIgnoreErrors(utils.OptsContext),
+			engine.MapEvent(cgrEv.APIOpts).GetStringIgnoreErrors(utils.OptsContext),
 			utils.MetaAccounts)),
 		CGREvent:     cgrEv,
 		AttributeIDs: attrIDs,

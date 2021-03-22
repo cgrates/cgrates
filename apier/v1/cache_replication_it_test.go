@@ -144,7 +144,7 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 				utils.AccountField: "1001",
 				"OfficeGroup":      "Marketing",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply

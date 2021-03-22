@@ -1028,7 +1028,7 @@ func export(ub *Account, a *Action, acs Actions, extraData interface{}) (err err
 				utils.UpdateTime:     ub.UpdateTime,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		}

@@ -658,17 +658,17 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 				} else if strVal := utils.IfaceAsString(val); strVal != "cgrates.org" {
 					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", strVal)
 				}
-				if val, has := argConv.CGREvent.Opts["EventFieldOpt"]; !has {
+				if val, has := argConv.CGREvent.APIOpts["EventFieldOpt"]; !has {
 					return fmt.Errorf("missing EventFieldOpt from Opts")
 				} else if strVal := utils.IfaceAsString(val); strVal != "eventValue" {
 					return fmt.Errorf("Expected %+v, received %+v", "eventValue", strVal)
 				}
-				if val, has := argConv.CGREvent.Opts["Option1"]; !has {
+				if val, has := argConv.CGREvent.APIOpts["Option1"]; !has {
 					return fmt.Errorf("missing Option1 from Opts")
 				} else if strVal := utils.IfaceAsString(val); strVal != "Value1" {
 					return fmt.Errorf("Expected %+v, received %+v", "Value1", strVal)
 				}
-				if val, has := argConv.CGREvent.Opts["Option3"]; !has {
+				if val, has := argConv.CGREvent.APIOpts["Option3"]; !has {
 					return fmt.Errorf("missing Option3 from Opts")
 				} else if strVal := utils.IfaceAsString(val); strVal != "eventValue" {
 					return fmt.Errorf("Expected %+v, received %+v", "eventValue", strVal)

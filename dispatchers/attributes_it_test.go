@@ -101,7 +101,7 @@ func testDspAttrPingFailover(t *testing.T) {
 	reply = ""
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
 	}
@@ -144,7 +144,7 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 		Event: map[string]interface{}{
 			"EventName": "NonexistingHost",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
 	}
@@ -183,7 +183,7 @@ func testDspAttrPingFailover2(t *testing.T) {
 	reply = ""
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
 	}
@@ -218,7 +218,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				utils.AccountField: "1002",
 				utils.EventName:    "Event1",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -254,7 +254,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 				utils.EventName:    "Event1",
 				"Password":         "CGRateS.org",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -311,7 +311,7 @@ func testDspAttrPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "attr12345",
 		},
 	}, &reply); err != nil {
@@ -365,7 +365,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "1234",
 			},
 		},
@@ -386,7 +386,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
 		},
@@ -407,7 +407,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -454,7 +454,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 				utils.AccountField: "1001",
 				"Password":         "CGRateS.org",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -480,7 +480,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 				utils.AccountField: "1001",
 				utils.EventName:    "Event1",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -502,7 +502,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				utils.AccountField: "1002",
 				utils.EventName:    "RoundRobin",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -538,7 +538,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 				utils.EventName:    "RoundRobin",
 				"Password":         "CGRateS.org",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -593,7 +593,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				utils.EventName:    "Internal",
 				utils.AccountField: "1003",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},
@@ -610,7 +610,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 				utils.EventName:    "Internal",
 				"Password":         "CGRateS.com",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "attr12345",
 			},
 		},

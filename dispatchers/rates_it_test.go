@@ -70,7 +70,7 @@ func testDspRPrfPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.RateSv1Ping, utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "rPrf12345",
 		},
 	}, &reply); err != nil {
@@ -144,7 +144,7 @@ func testDspRPrfCostForEvent(t *testing.T) {
 				utils.Subject: "1001",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "rPrf12345",
 			}}}, &rpCost); err != nil {
 		t.Error(err)
@@ -217,7 +217,7 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 				utils.Subject: "1002",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "rPrf12345",
 			}}}, &rpCost); err != nil {
 		t.Error(err)

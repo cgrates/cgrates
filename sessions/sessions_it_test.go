@@ -150,7 +150,7 @@ func testSessionsItTerminatNonexist(t *testing.T) {
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsDebitInterval: "10s",
 			},
 		},
@@ -225,7 +225,7 @@ func testSessionsItUpdateNonexist(t *testing.T) {
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:        usage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsDebitInterval: "0s",
 			},
 		},

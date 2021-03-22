@@ -109,7 +109,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 		},
 	}
 	cgrEv := &utils.CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: "10",
 		},
 	}
@@ -231,7 +231,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
 					"extra2": "val_extra2", "extra3": "val_extra3"},
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAttributesProcessRuns: "10",
 			},
 		},
@@ -301,7 +301,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
@@ -352,7 +352,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
@@ -381,7 +381,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},
@@ -412,7 +412,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 			ID:     "voiceEvent",
 			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
 			},
 		},

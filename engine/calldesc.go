@@ -145,10 +145,10 @@ type CallDescriptor struct {
 // AsCGREvent converts the CallDescriptor into CGREvent
 func (cd *CallDescriptor) AsCGREvent(opts map[string]interface{}) *utils.CGREvent {
 	cgrEv := &utils.CGREvent{
-		Tenant: cd.Tenant,
-		ID:     utils.UUIDSha1Prefix(), // make it unique
-		Event:  make(map[string]interface{}),
-		Opts:   opts,
+		Tenant:  cd.Tenant,
+		ID:      utils.UUIDSha1Prefix(), // make it unique
+		Event:   make(map[string]interface{}),
+		APIOpts: opts,
 	}
 	for k, v := range cd.ExtraFields {
 		cgrEv.Event[k] = v

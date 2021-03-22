@@ -80,7 +80,7 @@ func testDspSupPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.RouteSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}, &reply); err != nil {
@@ -100,7 +100,7 @@ func testDspSupPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}
@@ -176,7 +176,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				utils.Usage:        "1m20s",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "sup12345",
 			},
 		},
@@ -211,7 +211,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 				utils.Usage:        "1m20s",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
 		},
@@ -261,7 +261,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				utils.Usage:        "1m20s",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "sup12345",
 			},
 		},
@@ -327,7 +327,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				utils.Usage:        "1m20s",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "sup12345",
 			},
 		},
@@ -358,7 +358,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 			utils.Usage:        "1m20s",
 		},
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "sup12345",
 		},
 	}

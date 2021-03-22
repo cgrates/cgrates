@@ -203,7 +203,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	cgrEvent.Opts = make(map[string]interface{})
+	cgrEvent.APIOpts = make(map[string]interface{})
 	cgrEvent.Time = utils.TimePointer(time.Date(2020, 8, 21, 0, 0, 0, 0, time.UTC))
 	if _, err := accnts.matchingAccountsForEvent("cgrates.org", cgrEvent,
 		[]string{}, true); err == nil || err != utils.ErrNotFound {
@@ -394,7 +394,7 @@ func TestAccountsDebit(t *testing.T) {
 			utils.AccountField: "1004",
 			utils.Usage:        "not_time_format",
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 
 	expected := "time: invalid duration \"not_time_format\""

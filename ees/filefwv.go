@@ -104,7 +104,7 @@ func (fFwv *FileFWVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := engine.NewEventRequest(req, fFwv.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, fFwv.dc, cgrEv.APIOpts,
 			fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Tenant,
 			fFwv.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(fFwv.cgrCfg.EEsCfg().Exporters[fFwv.cfgIdx].Timezone,

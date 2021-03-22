@@ -138,7 +138,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.EventName: "Event1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.Subsys: utils.MetaAny,
 		},
 	}
@@ -184,7 +184,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.EventName: "Event1",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.Subsys: utils.MetaAny,
 		},
 	}
@@ -203,7 +203,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "testDspv2",
 		Event:  map[string]interface{}{},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.Subsys:               utils.MetaAny,
 			utils.OptsDispatcherMethod: utils.DispatcherSv1GetProfileForEvent,
 		},

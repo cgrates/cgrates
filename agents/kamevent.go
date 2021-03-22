@@ -186,10 +186,10 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
-		ID:    utils.UUIDSha1Prefix(),
-		Time:  &sTime,
-		Event: kev.AsMapStringInterface(),
-		Opts:  kev.GetOptions(),
+		ID:      utils.UUIDSha1Prefix(),
+		Time:    &sTime,
+		Event:   kev.AsMapStringInterface(),
+		APIOpts: kev.GetOptions(),
 	}
 	return cgrEv, nil
 }

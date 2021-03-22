@@ -258,7 +258,7 @@ type ReplicatorSv1Interface interface {
 	RemoveSharedGroup(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveActions(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveActionPlan(id *utils.StringWithAPIOpts, reply *string) error
-	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, reply *string) error
+	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) error
 	RemoveRatingPlan(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveRatingProfile(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error

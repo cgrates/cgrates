@@ -2111,12 +2111,12 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 	return
 }
 
-// RemAccountActionPlansArgsWithOpts is used in replicatorV1 for dispatcher
-type RemAccountActionPlansArgsWithOpts struct {
-	AcntID string
-	ApIDs  []string
-	Tenant string
-	Opts   map[string]interface{}
+// RemAccountActionPlansArgsWithAPIOpts is used in replicatorV1 for dispatcher
+type RemAccountActionPlansArgsWithAPIOpts struct {
+	AcntID  string
+	ApIDs   []string
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
@@ -2131,11 +2131,11 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountActionPlansPrefix, acntID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemAccountActionPlans,
-			&RemAccountActionPlansArgsWithOpts{
+			&RemAccountActionPlansArgsWithAPIOpts{
 				AcntID: acntID,
 				ApIDs:  apIDs,
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				Opts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return

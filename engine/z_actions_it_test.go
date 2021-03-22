@@ -395,7 +395,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 				utils.Route:        "SUPPL1",
 				utils.Cost:         -1.0,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.CDR,
 			},
 		},
@@ -671,7 +671,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 			utils.Route:       "SUPPL1",
 			utils.Cost:        -1.0,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.MetaEventType: utils.CDR,
 		},
 	}

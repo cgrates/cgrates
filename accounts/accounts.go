@@ -71,7 +71,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	acntIDs []string, lked bool) (acnts utils.AccountProfilesWithWeight, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaOpts: cgrEv.APIOpts,
 	}
 	if len(acntIDs) == 0 {
 		var actIDsMp utils.StringSet

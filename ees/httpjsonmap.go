@@ -89,7 +89,7 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event), httpEE.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event), httpEE.dc, cgrEv.APIOpts,
 			httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Tenant,
 			httpEE.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(httpEE.cgrCfg.EEsCfg().Exporters[httpEE.cfgIdx].Timezone,

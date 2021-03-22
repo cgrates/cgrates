@@ -272,7 +272,7 @@ func TestCGREventClone(t *testing.T) {
 			"PddInterval":      "1s",
 			"Weight":           20.0,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			"testKey": 12,
 		},
 	}
@@ -455,7 +455,7 @@ func TestCGREventOptAsStringEmpty(t *testing.T) {
 
 func TestCGREventOptAsString(t *testing.T) {
 	ev := &CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			"testKey": 13,
 		},
 	}
@@ -506,7 +506,7 @@ func TestCGREventOptAsDuration(t *testing.T) {
 
 func TestCGREventAsDataProvider(t *testing.T) {
 	ev := &CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			"testKey1": 13,
 			"testKey2": "testString1",
 		},
@@ -517,7 +517,7 @@ func TestCGREventAsDataProvider(t *testing.T) {
 	}
 
 	expected := MapStorage{
-		MetaOpts: ev.Opts,
+		MetaOpts: ev.APIOpts,
 		MetaReq:  ev.Event,
 	}
 

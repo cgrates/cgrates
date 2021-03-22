@@ -184,11 +184,11 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 	srv.rdrEvents = make(chan *erEvent, 1)
 	srv.rdrEvents <- &erEvent{
 		cgrEvent: &utils.CGREvent{
-			Tenant: "",
-			ID:     "",
-			Time:   nil,
-			Event:  nil,
-			Opts:   nil,
+			Tenant:  "",
+			ID:      "",
+			Time:    nil,
+			Event:   nil,
+			APIOpts: nil,
 		},
 		rdrCfg: &config.EventReaderCfg{
 			ID: "",
@@ -430,11 +430,11 @@ func TestERsProcessEvent(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-		Time:   nil,
-		Event:  nil,
-		Opts:   nil,
+		Tenant:  "",
+		ID:      "",
+		Time:    nil,
+		Event:   nil,
+		APIOpts: nil,
 	}
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "unsupported reqType: <>" {
@@ -459,11 +459,11 @@ func TestERsProcessEvent2(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-		Time:   nil,
-		Event:  nil,
-		Opts:   nil,
+		Tenant:  "",
+		ID:      "",
+		Time:    nil,
+		Event:   nil,
+		APIOpts: nil,
 	}
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err != nil {
@@ -487,7 +487,7 @@ func TestERsProcessEvent3(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -514,7 +514,7 @@ func TestERsProcessEvent4(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -545,7 +545,7 @@ func TestERsProcessEvent5(t *testing.T) {
 		ID:     "",
 		Time:   nil,
 		Event:  nil,
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -572,7 +572,7 @@ func TestERsProcessEvent6(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -598,7 +598,7 @@ func TestERsProcessEvent7(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -628,7 +628,7 @@ func TestERsProcessEvent8(t *testing.T) {
 		ID:     "",
 		Time:   nil,
 		Event:  nil,
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -659,7 +659,7 @@ func TestERsProcessEvent9(t *testing.T) {
 		ID:     "",
 		Time:   nil,
 		Event:  nil,
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -693,7 +693,7 @@ func TestERsProcessEvent10(t *testing.T) {
 		ID:     "",
 		Time:   nil,
 		Event:  nil,
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}
@@ -727,7 +727,7 @@ func TestERsProcessEvent11(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Usage: time.Second,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
 		},
 	}

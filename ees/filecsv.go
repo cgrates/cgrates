@@ -115,7 +115,7 @@ func (fCsv *FileCSVee) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := engine.NewEventRequest(req, fCsv.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, fCsv.dc, cgrEv.APIOpts,
 			fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Tenant,
 			fCsv.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Timezone,

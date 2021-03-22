@@ -282,7 +282,7 @@ func (sS *StatService) storeStatQueue(sq *StatQueue) {
 func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 	}
 	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args.StatIDs, args.Time, evNm)
 	if err != nil {
@@ -291,10 +291,10 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 	if len(matchSQs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	if args.Opts == nil {
-		args.Opts = make(map[string]interface{})
+	if args.APIOpts == nil {
+		args.APIOpts = make(map[string]interface{})
 	}
-	args.Opts[utils.MetaEventType] = utils.StatUpdate
+	args.APIOpts[utils.MetaEventType] = utils.StatUpdate
 	var stsIDs []string
 	var withErrors bool
 	for _, sq := range matchSQs {
@@ -328,7 +328,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 						utils.EventType: utils.StatUpdate,
 						utils.StatID:    sq.ID,
 					},
-					Opts: args.Opts,
+					APIOpts: args.APIOpts,
 				},
 			}
 			for metricID, metric := range sq.SQMetrics {
@@ -394,7 +394,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args.StatIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 	}); err != nil {
 		return
 	}

@@ -143,7 +143,7 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
 		req := utils.MapStorage(cgrEv.Event)
-		eeReq := engine.NewEventRequest(req, eEe.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(req, eEe.dc, cgrEv.APIOpts,
 			eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
 			eEe.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,

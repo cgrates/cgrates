@@ -146,7 +146,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        initUsage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},
@@ -183,7 +183,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.Subsys:        utils.MetaSessionS,
 				utils.OptsAPIKey:    "ses12345",
 				utils.MetaEventType: utils.StatUpdate,
