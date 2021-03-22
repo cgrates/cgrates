@@ -952,7 +952,7 @@ type GetIndexesArg struct {
 	TntCtx     string
 	IdxKey     string
 	Tenant     string
-	Opts       map[string]interface{}
+	APIOpts    map[string]interface{}
 }
 
 // SetIndexesArg the API arguments needed for seting an index
@@ -961,7 +961,7 @@ type SetIndexesArg struct {
 	TntCtx     string
 	Indexes    map[string]StringSet
 	Tenant     string
-	Opts       map[string]interface{}
+	APIOpts    map[string]interface{}
 }
 
 type DurationArgs struct {

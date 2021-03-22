@@ -356,7 +356,7 @@ func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, rep
 
 // GetIndexes is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
-	engine.UpdateReplicationFilters(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.Opts[utils.RemoteHostOpt]))
+	engine.UpdateReplicationFilters(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey)
 	if err != nil {
 		return err
@@ -726,8 +726,8 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string
 	for idxKey := range args.Indexes {
 		cIDs = append(cIDs, utils.ConcatenatedKey(args.TntCtx, idxKey))
 	}
-	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, args.IdxItmType, cIDs, args.Opts); err != nil {
+	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, args.IdxItmType, cIDs, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1061,8 +1061,8 @@ func (rplSv1 *ReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, reply *str
 	if err = rplSv1.dm.DataDB().RemoveIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
