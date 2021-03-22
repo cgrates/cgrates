@@ -185,7 +185,7 @@ func testbrodcastItGetCDRs(t *testing.T) {
 		Cost:        -1,
 	}
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
+	args := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
 	if err := brodcastRPC.Call(utils.CDRsV1GetCDRs, &args, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

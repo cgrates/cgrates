@@ -161,7 +161,7 @@ func testV1FIdxdxInitDataDb(t *testing.T) {
 
 func testV1IndexClearCache(t *testing.T) {
 	var reply string
-	if err := tFIdxRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{}, &reply); err != nil {
+	if err := tFIdxRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -476,7 +476,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -579,7 +579,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",
@@ -724,7 +724,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rlsConfig = &engine.ResourceProfileWithOpts{
+	rlsConfig = &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    tenant,
 			ID:        "RCFG1",
@@ -817,7 +817,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rlsConfig = &engine.ResourceProfileWithOpts{
+	rlsConfig = &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    tenant,
 			ID:        "RCFG2",
@@ -2877,7 +2877,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 
 func testV1FIdxPopulateDatabase(t *testing.T) {
 	var result string
-	resPrf := engine.ResourceProfileWithOpts{
+	resPrf := engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: tenant,
 			ID:     "ResProfile1",
@@ -2896,7 +2896,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	resPrf = engine.ResourceProfileWithOpts{
+	resPrf = engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: tenant,
 			ID:     "ResProfile2",
@@ -2915,7 +2915,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	resPrf = engine.ResourceProfileWithOpts{
+	resPrf = engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: tenant,
 			ID:     "ResProfile3",

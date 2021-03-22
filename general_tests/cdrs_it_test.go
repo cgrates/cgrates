@@ -469,7 +469,7 @@ func testV2CDRsSetStats(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig := &engine.StatQueueProfileWithOpts{
+	statConfig := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STS_PoccessCDR",

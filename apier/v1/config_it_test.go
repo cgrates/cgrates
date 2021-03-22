@@ -220,7 +220,7 @@ func testConfigSSetConfigSessionS(t *testing.T) {
 		config.SessionSJson: exp,
 	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
@@ -311,7 +311,7 @@ func testConfigSv1GetJSONSectionWithoutTenant(t *testing.T) {
 		config.SessionSJson: exp,
 	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.SessionSJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -339,7 +339,7 @@ func testConfigSSetConfigEEsDryRun(t *testing.T) {
 	}
 
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -396,7 +396,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		config.EEsJson: exp,
 	}
 	var rpl map[string]interface{}
-	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
 		Section: config.EEsJson,
 	}, &rpl); err != nil {
 		t.Error(err)
@@ -480,7 +480,7 @@ func testConfigSSetConfigFromJSONCoreSDryRun(t *testing.T) {
 
 	expCfg := "{\"cores\":{\"caps\":0,\"caps_stats_interval\":\"0\",\"caps_strategy\":\"*busy\",\"shutdown_timeout\":\"1s\"}}"
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {
@@ -503,7 +503,7 @@ func testConfigSSetConfigFromJSONCoreS(t *testing.T) {
 	}
 
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {
@@ -528,7 +528,7 @@ func testConfigSReloadConfigCoreSDryRun(t *testing.T) {
 	}
 
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {
@@ -552,7 +552,7 @@ func testConfigSReloadConfigCoreS(t *testing.T) {
 	}
 
 	var rpl string
-	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithOpts{
+	if err := configRPC.Call(utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",
 		Section: config.CoreSCfgJson,
 	}, &rpl); err != nil {

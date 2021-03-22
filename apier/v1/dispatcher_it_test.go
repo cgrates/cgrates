@@ -223,7 +223,7 @@ func testDispatcherSGetDispatcherProfileCache(t *testing.T) {
 		t.SkipNow()
 	}
 	var rcvStats map[string]*ltcache.CacheStats
-	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
+	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)
 	} else if rcvStats[utils.CacheDispatcherProfiles].Items != 1 {
 		t.Errorf("Expecting: 1 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherProfiles])
@@ -337,7 +337,7 @@ func testDispatcherSGetDispatcherHostCache(t *testing.T) {
 		t.SkipNow()
 	}
 	var rcvStats map[string]*ltcache.CacheStats
-	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithOpts{}, &rcvStats); err != nil {
+	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)
 	} else if rcvStats[utils.CacheDispatcherHosts].Items != 0 {
 		t.Errorf("Expecting: 0 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherHosts])

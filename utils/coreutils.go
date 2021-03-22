@@ -966,7 +966,7 @@ type SetIndexesArg struct {
 
 type DurationArgs struct {
 	Duration time.Duration
-	Opts     map[string]interface{}
+	APIOpts  map[string]interface{}
 	Tenant   string
 }
 

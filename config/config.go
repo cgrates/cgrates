@@ -1612,7 +1612,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 
 // ReloadArgs the API params for V1ReloadConfig
 type ReloadArgs struct {
-	Opts    map[string]interface{}
+	APIOpts map[string]interface{}
 	Tenant  string
 	Path    string
 	Section string
@@ -1653,15 +1653,15 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error
 	return
 }
 
-// SectionWithOpts the API params for GetConfig
-type SectionWithOpts struct {
-	Opts    map[string]interface{}
+// SectionWithAPIOpts the API params for GetConfig
+type SectionWithAPIOpts struct {
+	APIOpts map[string]interface{}
 	Tenant  string
 	Section string
 }
 
 // V1GetConfig will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1782,10 +1782,10 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithOpts, reply *map[string]inter
 
 // SetConfigArgs the API params for V1SetConfig
 type SetConfigArgs struct {
-	Opts   map[string]interface{}
-	Tenant string
-	Config map[string]interface{}
-	DryRun bool
+	APIOpts map[string]interface{}
+	Tenant  string
+	Config  map[string]interface{}
+	DryRun  bool
 }
 
 // V1SetConfig reloads the sections of config
@@ -1829,7 +1829,7 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 }
 
 //V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
-func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (err error) {
+func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1951,10 +1951,10 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithOpts, reply *string) (e
 
 // SetConfigFromJSONArgs the API params for V1SetConfigFromJSON
 type SetConfigFromJSONArgs struct {
-	Opts   map[string]interface{}
-	Tenant string
-	Config string
-	DryRun bool
+	APIOpts map[string]interface{}
+	Tenant  string
+	Config  string
+	DryRun  bool
 }
 
 // V1SetConfigFromJSON reloads the sections of config

@@ -83,7 +83,7 @@ func TestGuardianSIT(t *testing.T) {
 		t.Error(err)
 	}
 	var unlockReply []string
-	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, &dispatchers.AttrRemoteUnlockWithOpts{RefID: reply}, &unlockReply); err != nil {
+	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, &dispatchers.AttrRemoteUnlockWithAPIOpts{RefID: reply}, &unlockReply); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(args.LockIDs, unlockReply) {

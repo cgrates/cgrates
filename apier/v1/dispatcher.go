@@ -621,36 +621,36 @@ func (dS *DispatcherCacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (dS *DispatcherCacheSv1) Clear(args *utils.AttrCacheIDsWithOpts,
+func (dS *DispatcherCacheSv1) Clear(args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) error {
 	return dS.dS.CacheSv1Clear(args, reply)
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (dS *DispatcherCacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithOpts,
+func (dS *DispatcherCacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
 	reply *map[string]*ltcache.CacheStats) error {
 	return dS.dS.CacheSv1GetCacheStats(args, reply)
 }
 
 // PrecacheStatus checks status of active precache processes
-func (dS *DispatcherCacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithOpts, reply *map[string]string) error {
+func (dS *DispatcherCacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, reply *map[string]string) error {
 	return dS.dS.CacheSv1PrecacheStatus(args, reply)
 }
 
 // HasGroup checks existence of a group in cache
-func (dS *DispatcherCacheSv1) HasGroup(args *utils.ArgsGetGroupWithOpts,
+func (dS *DispatcherCacheSv1) HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	reply *bool) (err error) {
 	return dS.dS.CacheSv1HasGroup(args, reply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (dS *DispatcherCacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
+func (dS *DispatcherCacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
 	reply *[]string) (err error) {
 	return dS.dS.CacheSv1GetGroupItemIDs(args, reply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithOpts,
+func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	reply *string) (err error) {
 	return dS.dS.CacheSv1RemoveGroup(args, reply)
 }
@@ -690,12 +690,12 @@ type DispatcherGuardianSv1 struct {
 }
 
 // RemoteLock will lock a key from remote
-func (dS *DispatcherGuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithOpts, reply *string) (err error) {
+func (dS *DispatcherGuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithAPIOpts, reply *string) (err error) {
 	return dS.dS.GuardianSv1RemoteLock(*attr, reply)
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlockWithOpts, reply *[]string) (err error) {
+func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error) {
 	return dS.dS.GuardianSv1RemoteUnlock(*attr, reply)
 }
 
@@ -772,11 +772,11 @@ func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.CDRsV1Ping(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) error {
+func (dS *DispatcherSCDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
 	return dS.dS.CDRsV1GetCDRs(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) error {
+func (dS *DispatcherSCDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {
 	return dS.dS.CDRsV1GetCDRsCount(args, reply)
 }
 
@@ -788,7 +788,7 @@ func (dS *DispatcherSCDRsV1) RateCDRs(args *engine.ArgRateCDRs, reply *string) e
 	return dS.dS.CDRsV1RateCDRs(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessExternalCDR(args *engine.ExternalCDRWithOpts, reply *string) error {
+func (dS *DispatcherSCDRsV1) ProcessExternalCDR(args *engine.ExternalCDRWithAPIOpts, reply *string) error {
 	return dS.dS.CDRsV1ProcessExternalCDR(args, reply)
 }
 
@@ -796,7 +796,7 @@ func (dS *DispatcherSCDRsV1) ProcessEvent(args *engine.ArgV1ProcessEvent, reply 
 	return dS.dS.CDRsV1ProcessEvent(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithOpts, reply *string) error {
+func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithAPIOpts, reply *string) error {
 	return dS.dS.CDRsV1ProcessCDR(args, reply)
 }
 
@@ -813,13 +813,13 @@ type DispatcherSServiceManagerV1 struct {
 func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.ServiceManagerV1Ping(args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error {
+func (dS *DispatcherSServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
 	return dS.dS.ServiceManagerV1StartService(*args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithOpts, reply *string) error {
+func (dS *DispatcherSServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
 	return dS.dS.ServiceManagerV1StopService(*args, reply)
 }
-func (dS *DispatcherSServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithOpts, reply *string) error {
+func (dS *DispatcherSServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
 	return dS.dS.ServiceManagerV1ServiceStatus(*args, reply)
 }
 
@@ -832,7 +832,7 @@ type DispatcherConfigSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithOpts, reply *map[string]interface{}) (err error) {
+func (dS *DispatcherConfigSv1) GetConfig(args *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	return dS.dS.ConfigSv1GetConfig(args, reply)
 }
 
@@ -847,7 +847,7 @@ func (dS *DispatcherConfigSv1) SetConfig(args *config.SetConfigArgs, reply *stri
 func (dS *DispatcherConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error) {
 	return dS.dS.ConfigSv1SetConfigFromJSON(args, reply)
 }
-func (dS *DispatcherConfigSv1) GetConfigAsJSON(args *config.SectionWithOpts, reply *string) (err error) {
+func (dS *DispatcherConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *string) (err error) {
 	return dS.dS.ConfigSv1GetConfigAsJSON(args, reply)
 }
 
@@ -1072,7 +1072,7 @@ func (dS *DispatcherReplicatorSv1) SetFilter(args *engine.FilterWithAPIOpts, rep
 }
 
 // SetStatQueueProfile
-func (dS *DispatcherReplicatorSv1) SetStatQueueProfile(args *engine.StatQueueProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetStatQueueProfile(args *engine.StatQueueProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetStatQueueProfile(args, reply)
 }
 
@@ -1087,12 +1087,12 @@ func (dS *DispatcherReplicatorSv1) SetResource(args *engine.ResourceWithAPIOpts,
 }
 
 // SetResourceProfile
-func (dS *DispatcherReplicatorSv1) SetResourceProfile(args *engine.ResourceProfileWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetResourceProfile(args *engine.ResourceProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetResourceProfile(args, reply)
 }
 
 // SetActionTriggers
-func (dS *DispatcherReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetActionTriggers(args, reply)
 }
 

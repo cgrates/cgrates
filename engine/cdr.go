@@ -562,9 +562,9 @@ func (self *UsageRecord) GetId() string {
 	return utils.Sha1(self.ToR, self.RequestType, self.Tenant, self.Category, self.Account, self.Subject, self.Destination, self.SetupTime, self.AnswerTime, self.Usage)
 }
 
-type ExternalCDRWithOpts struct {
+type ExternalCDRWithAPIOpts struct {
 	*ExternalCDR
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 type UsageRecordWithOpts struct {
@@ -572,7 +572,7 @@ type UsageRecordWithOpts struct {
 	Opts map[string]interface{}
 }
 
-type CDRWithOpts struct {
+type CDRWithAPIOpts struct {
 	*CDR
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }

@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetResource{
 		name:      "resources_profile_set",
 		rpcMethod: utils.APIerSv1SetResourceProfile,
-		rpcParams: &engine.ResourceProfileWithOpts{},
+		rpcParams: &engine.ResourceProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetResource struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ResourceProfileWithOpts
+	rpcParams *engine.ResourceProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,9 +51,9 @@ func (self *CmdSetResource) RpcMethod() string {
 
 func (self *CmdSetResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ResourceProfileWithOpts{
+		self.rpcParams = &engine.ResourceProfileWithAPIOpts{
 			ResourceProfile: new(engine.ResourceProfile),
-			Opts:            make(map[string]interface{}),
+			APIOpts:         make(map[string]interface{}),
 		}
 	}
 	return self.rpcParams

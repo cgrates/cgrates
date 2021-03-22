@@ -138,7 +138,7 @@ type SMCost struct {
 type AttrCDRSStoreSMCost struct {
 	Cost           *SMCost
 	CheckDuplicate bool
-	Opts           map[string]interface{}
+	APIOpts        map[string]interface{}
 	Tenant         string
 }
 

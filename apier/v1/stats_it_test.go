@@ -37,7 +37,7 @@ var (
 	stsV1CfgPath string
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
-	statConfig   *engine.StatQueueProfileWithOpts
+	statConfig   *engine.StatQueueProfileWithAPIOpts
 	stsV1ConfDIR string //run tests for specific configuration
 
 	evs = []*utils.CGREvent{
@@ -424,7 +424,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 func testV1STSSetStatQueueProfile(t *testing.T) {
 	var result string
 	var reply *engine.StatQueueProfile
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -576,7 +576,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 }
 
 func testV1STSProcessMetricsWithFilter(t *testing.T) {
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomStatProfile",
@@ -701,7 +701,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 }
 
 func testV1STSProcessStaticMetrics(t *testing.T) {
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StaticStatQueue",
@@ -824,7 +824,7 @@ func testV1STSStatsPing(t *testing.T) {
 }
 
 func testV1STSProcessStatWithThreshold(t *testing.T) {
-	stTh := &engine.StatQueueProfileWithOpts{
+	stTh := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatWithThreshold",
@@ -904,7 +904,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 }
 
 func testV1STSProcessCDRStat(t *testing.T) {
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatForCDR",
@@ -1039,7 +1039,7 @@ func testV1STSProcessCDRStat(t *testing.T) {
 }
 
 func testV1STSOverWriteStats(t *testing.T) {
-	initStat := &engine.StatQueueProfileWithOpts{
+	initStat := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "InitStat",
@@ -1089,7 +1089,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 	// set the new profile with other metric and make sure the statQueue is updated
-	initStat2 := &engine.StatQueueProfileWithOpts{
+	initStat2 := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "InitStat",
@@ -1131,7 +1131,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 }
 
 func testV1STSProcessStatWithThreshold2(t *testing.T) {
-	stTh := &engine.StatQueueProfileWithOpts{
+	stTh := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatWithThreshold2",
@@ -1253,7 +1253,7 @@ func BenchmarkSTSV1GetQueueStringMetrics(b *testing.B) {
 }
 
 func testV1STSGetStatQueueProfileWithoutTenant(t *testing.T) {
-	statConfig := &engine.StatQueueProfileWithOpts{
+	statConfig := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			ID:        "TEST_PROFILE10",
 			FilterIDs: []string{"FLTR_1"},
@@ -1365,7 +1365,7 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 }
 
 func testV1STSSimulateAccountUpdate(t *testing.T) {
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant: "cgrates.org",
 			ID:     "StatForAccountUpdate",
@@ -1486,7 +1486,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 	var result string
 	var reply *engine.StatQueueProfile
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "Sq1Nanao",
@@ -1549,7 +1549,7 @@ func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 func testV1STSGetStatQueueWithoutStored(t *testing.T) {
 	var result string
 	var reply *engine.StatQueueProfile
-	statConfig = &engine.StatQueueProfileWithOpts{
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          "Sq1NotStored",

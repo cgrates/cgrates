@@ -417,7 +417,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -562,7 +562,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -622,7 +622,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	//set a statQueueProfile with that filter
-	statsPrf := &engine.StatQueueProfileWithOpts{
+	statsPrf := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STATS_RES_TEST12",
@@ -886,7 +886,7 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 
 func testV1FltrChargerSuffix(t *testing.T) {
 	var reply string
-	if err := fltrRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+	if err := fltrRpc.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)

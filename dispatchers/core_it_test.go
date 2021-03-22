@@ -78,7 +78,7 @@ func testDspCoreLoad(t *testing.T) {
 	dur := &utils.DurationArgs{
 		Duration: 500 * time.Millisecond,
 		Tenant:   "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "core12345",
 			utils.OptsRouteID: "core1",
 			"EventType":       "LoadDispatcher",

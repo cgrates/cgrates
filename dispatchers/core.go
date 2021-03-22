@@ -64,12 +64,12 @@ func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CoreSv1Sleep, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }

@@ -558,7 +558,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	//verify the CDR
 	var cdrs []*engine.CDR
-	argsCDR := &utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
+	argsCDR := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -726,7 +726,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 	//verify the CDR
 	var cdrs []*engine.CDR
-	argsCDR := utils.RPCCDRsFilterWithOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
+	argsCDR := utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}}
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, &argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

@@ -827,7 +827,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats() // Make sure nothing in cache so far
 	expectedStats[utils.CacheLoadIDs].Items = 4         // we loaded the ratingprofiles
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -845,7 +845,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 8
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, \n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -882,7 +882,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 8
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -916,7 +916,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	}
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -1082,7 +1082,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheReverseDestinations].Items = 10
 	expectedStats[utils.CacheLoadIDs].Items = 8
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -1568,7 +1568,7 @@ func testApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	testApierInitDataDb(t)
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+	if err := rater.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -1577,7 +1577,7 @@ func testApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
-	err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats)
+	err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats)
 	if err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
@@ -1631,7 +1631,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheDestinations].Items = 3
 	expStats[utils.CacheLoadIDs].Items = 17
 	expStats[utils.CacheRPCConnections].Items = 2
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
@@ -1672,7 +1672,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 
-	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats); err != nil {
+	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
@@ -1787,7 +1787,7 @@ func testApierITGetCdrs(t *testing.T) {
 
 func testApierITProcessCdr(t *testing.T) {
 	var reply string
-	cdr := &engine.CDRWithOpts{
+	cdr := &engine.CDRWithAPIOpts{
 		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf",
 			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.MetaRated, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 			Destination: "1002",
@@ -1823,7 +1823,7 @@ func testApierGetCallCostLog(t *testing.T) {
 		t.Error("APIerSv1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 	tm := time.Now().Truncate(time.Millisecond).UTC()
-	cdr := &engine.CDRWithOpts{
+	cdr := &engine.CDRWithAPIOpts{
 		CDR: &engine.CDR{
 			CGRID:       "Cdr1",
 			OrderID:     123,
@@ -1961,7 +1961,7 @@ func testApierInitStorDb2(t *testing.T) {
 func testApierReloadCache2(t *testing.T) {
 	var reply string
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+	if err := rater.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
@@ -2005,7 +2005,7 @@ func testApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
 func testApierGetCacheStats2(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
-	err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithOpts), &rcvStats)
+	err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats)
 	if err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -2025,35 +2025,35 @@ func testApierLoadTariffPlanFromStorDb(t *testing.T) {
 
 func testApierStartStopServiceStatus(t *testing.T) {
 	var reply string
-	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
+	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithAPIOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.RunningCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StopService, dispatchers.ArgStartServiceWithOpts{ArgStartService: servmanager.ArgStartService{ServiceID: "INVALID"}},
+	if err := rater.Call(utils.ServiceManagerV1StopService, dispatchers.ArgStartServiceWithAPIOpts{ArgStartService: servmanager.ArgStartService{ServiceID: "INVALID"}},
 		&reply); err == nil || err.Error() != utils.UnsupportedServiceIDCaps {
 		t.Error(err)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StopService, dispatchers.ArgStartServiceWithOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
+	if err := rater.Call(utils.ServiceManagerV1StopService, dispatchers.ArgStartServiceWithAPIOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
+	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithAPIOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.StoppedCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StartService, &dispatchers.ArgStartServiceWithOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
+	if err := rater.Call(utils.ServiceManagerV1StartService, &dispatchers.ArgStartServiceWithAPIOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
+	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithAPIOpts{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.RunningCaps {

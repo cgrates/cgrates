@@ -36,7 +36,7 @@ func init() {
 type CmdGetCDRs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.RPCCDRsFilterWithOpts
+	rpcParams *utils.RPCCDRsFilterWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetCDRs) RpcMethod() string {
 
 func (self *CmdGetCDRs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.RPCCDRsFilterWithOpts{
+		self.rpcParams = &utils.RPCCDRsFilterWithAPIOpts{
 			RPCCDRsFilter: new(utils.RPCCDRsFilter),
 		}
 	}

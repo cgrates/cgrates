@@ -88,10 +88,10 @@ func testDspGrdLock(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithOpts{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithAPIOpts{
 		AttrRemoteLock: args,
 		Tenant:         "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "grd12345",
 		},
 	}, &reply); err != nil {
@@ -99,10 +99,10 @@ func testDspGrdLock(t *testing.T) {
 	}
 
 	var unlockReply []string
-	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithOpts{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithAPIOpts{
 		RefID:  reply,
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "grd12345",
 		},
 	}, &unlockReply); err != nil {

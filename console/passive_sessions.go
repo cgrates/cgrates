@@ -50,7 +50,7 @@ func (self *CmdPassiveSessions) RpcMethod() string {
 
 func (self *CmdPassiveSessions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.SessionFilter{Opts: make(map[string]interface{})}
+		self.rpcParams = &utils.SessionFilter{APIOpts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

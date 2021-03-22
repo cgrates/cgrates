@@ -315,7 +315,7 @@ func testDspSessionInit(t *testing.T) {
 
 func testDspGetSessions(t *testing.T) {
 	filtr := utils.SessionFilter{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant:  "cgrates.org",
@@ -730,7 +730,7 @@ func testDspSessionReplicate(t *testing.T) {
 	allEngine.resetStorDb(t)
 	var reply string
 	// reload cache  in order to corectly cahce the indexes
-	if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithOpts{
+	if err := allEngine.RPC.Call(utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: nil,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -773,7 +773,7 @@ func testDspSessionPassive(t *testing.T) {
 	testDspSessionUpdate2(t)
 	var repl int
 	filtr := utils.SessionFilter{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant:  "cgrates.org",
@@ -875,7 +875,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 	testDspSessionInit(t)
 	var repl int
 	filtr := utils.SessionFilter{
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 		Tenant:  "cgrates.org",
@@ -957,7 +957,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 	var repl int
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		utils.SessionFilter{
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 			Tenant:  "cgrates.org",
@@ -1018,7 +1018,7 @@ func testDspSessionSTIRAuthenticate(t *testing.T) {
 			DestinationTn:      "1002",
 			Identity:           "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
 			OriginatorTn:       "1001",
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		}, &rply); err != nil {
@@ -1040,7 +1040,7 @@ func testDspSessionSTIRIdentity(t *testing.T) {
 		PublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
 		PrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
 		OverwriteIAT:   true,
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 	}

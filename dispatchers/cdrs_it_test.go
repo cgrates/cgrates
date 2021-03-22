@@ -149,13 +149,13 @@ func testDspCDRsProcessEvent(t *testing.T) {
 
 func testDspCDRsCountCDR(t *testing.T) {
 	var reply int64
-	args := &utils.RPCCDRsFilterWithOpts{
+	args := &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -169,13 +169,13 @@ func testDspCDRsCountCDR(t *testing.T) {
 
 func testDspCDRsGetCDR(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -191,12 +191,12 @@ func testDspCDRsGetCDR(t *testing.T) {
 
 func testDspCDRsGetCDRWithoutTenant(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -212,7 +212,7 @@ func testDspCDRsGetCDRWithoutTenant(t *testing.T) {
 
 func testDspCDRsProcessCDR(t *testing.T) {
 	var reply string
-	args := &engine.CDRWithOpts{
+	args := &engine.CDRWithAPIOpts{
 		CDR: &engine.CDR{
 			Tenant:      "cgrates.org",
 			OriginID:    "testDspCDRsProcessCDR",
@@ -225,7 +225,7 @@ func testDspCDRsProcessCDR(t *testing.T) {
 			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			Usage:       2 * time.Minute,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -238,14 +238,14 @@ func testDspCDRsProcessCDR(t *testing.T) {
 
 func testDspCDRsGetCDR2(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts:  []string{"1001"},
 			RunIDs:    []string{utils.MetaDefault},
 			OriginIDs: []string{"testDspCDRsProcessCDR"},
 		},
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -261,7 +261,7 @@ func testDspCDRsGetCDR2(t *testing.T) {
 
 func testDspCDRsProcessExternalCDR(t *testing.T) {
 	var reply string
-	args := &engine.ExternalCDRWithOpts{
+	args := &engine.ExternalCDRWithAPIOpts{
 		ExternalCDR: &engine.ExternalCDR{
 			ToR:         utils.MetaVoice,
 			OriginID:    "testDspCDRsProcessExternalCDR",
@@ -278,7 +278,7 @@ func testDspCDRsProcessExternalCDR(t *testing.T) {
 			Usage:       "1s",
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -291,14 +291,14 @@ func testDspCDRsProcessExternalCDR(t *testing.T) {
 
 func testDspCDRsGetCDR3(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts:  []string{"1003"},
 			RunIDs:    []string{utils.MetaDefault},
 			OriginIDs: []string{"testDspCDRsProcessExternalCDR"},
 		},
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}
@@ -431,7 +431,7 @@ func testDspCDRsProcessEventNoAuth(t *testing.T) {
 
 func testDspCDRsCountCDRNoAuth(t *testing.T) {
 	var reply int64
-	args := &utils.RPCCDRsFilterWithOpts{
+	args := &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
@@ -448,7 +448,7 @@ func testDspCDRsCountCDRNoAuth(t *testing.T) {
 
 func testDspCDRsGetCDRNoAuth(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
@@ -467,7 +467,7 @@ func testDspCDRsGetCDRNoAuth(t *testing.T) {
 
 func testDspCDRsGetCDRNoAuthWithoutTenant(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts: []string{"1001"},
 			RunIDs:   []string{utils.MetaDefault},
@@ -485,7 +485,7 @@ func testDspCDRsGetCDRNoAuthWithoutTenant(t *testing.T) {
 
 func testDspCDRsProcessCDRNoAuth(t *testing.T) {
 	var reply string
-	args := &engine.CDRWithOpts{
+	args := &engine.CDRWithAPIOpts{
 		CDR: &engine.CDR{
 			Tenant:      "cgrates.org",
 			OriginID:    "testDspCDRsProcessCDR",
@@ -508,7 +508,7 @@ func testDspCDRsProcessCDRNoAuth(t *testing.T) {
 
 func testDspCDRsGetCDR2NoAuth(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts:  []string{"1001"},
 			RunIDs:    []string{utils.MetaDefault},
@@ -528,7 +528,7 @@ func testDspCDRsGetCDR2NoAuth(t *testing.T) {
 
 func testDspCDRsProcessExternalCDRNoAuth(t *testing.T) {
 	var reply string
-	args := &engine.ExternalCDRWithOpts{
+	args := &engine.ExternalCDRWithAPIOpts{
 		ExternalCDR: &engine.ExternalCDR{
 			ToR:         utils.MetaVoice,
 			OriginID:    "testDspCDRsProcessExternalCDR",
@@ -555,7 +555,7 @@ func testDspCDRsProcessExternalCDRNoAuth(t *testing.T) {
 
 func testDspCDRsGetCDR3NoAuth(t *testing.T) {
 	var reply []*engine.CDR
-	args := utils.RPCCDRsFilterWithOpts{
+	args := utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			Accounts:  []string{"1003"},
 			RunIDs:    []string{utils.MetaDefault},

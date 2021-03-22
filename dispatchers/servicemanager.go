@@ -40,7 +40,7 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
 	return dS.Dispatch(args, utils.MetaServiceManager, utils.ServiceManagerV1Ping, args, reply)
 }
 
-func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWithOpts,
+func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -48,17 +48,17 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1StartService, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StartService, args, reply)
 }
 
-func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWithOpts,
+func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -66,17 +66,17 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1StopService, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StopService, args, reply)
 }
 
-func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceWithOpts,
+func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -84,12 +84,12 @@ func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceW
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1ServiceStatus, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1ServiceStatus, args, reply)
 }

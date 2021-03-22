@@ -46,14 +46,14 @@ func init() {
 	// Resource
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
-	gob.Register(new(ResourceProfileWithOpts))
+	gob.Register(new(ResourceProfileWithAPIOpts))
 	gob.Register(new(ResourceWithAPIOpts))
 	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
-	gob.Register(new(StatQueueProfileWithOpts))
+	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
-	gob.Register(new(StatQueueProfileWithOpts))
+	gob.Register(new(StatQueueProfileWithAPIOpts))
 	// RouteS
 	gob.Register(new(RouteProfile))
 	gob.Register(new(RouteProfileWithAPIOpts))
@@ -309,21 +309,21 @@ func (chS *CacheS) V1RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithOpts,
+func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) (err error) {
 	chS.tCache.Clear(args.CacheIDs)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithOpts,
+func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
 	rply *map[string]*ltcache.CacheStats) (err error) {
 	cs := chS.tCache.GetCacheStats(args.CacheIDs)
 	*rply = cs
 	return
 }
 
-func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithOpts, rply *map[string]string) (err error) {
+func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) (err error) {
 	if len(args.CacheIDs) == 0 {
 		args.CacheIDs = utils.CachePartitions.AsSlice()
 	}
@@ -343,13 +343,13 @@ func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithOpts, rply *map[
 	return
 }
 
-func (chS *CacheS) V1HasGroup(args *utils.ArgsGetGroupWithOpts,
+func (chS *CacheS) V1HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	rply *bool) (err error) {
 	*rply = chS.tCache.HasGroup(args.CacheID, args.GroupID)
 	return
 }
 
-func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
+func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
 	rply *[]string) (err error) {
 	if has := chS.tCache.HasGroup(args.CacheID, args.GroupID); !has {
 		return utils.ErrNotFound
@@ -358,7 +358,7 @@ func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithOpts,
 	return
 }
 
-func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithOpts,
+func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	rply *string) (err error) {
 	chS.tCache.RemoveGroup(args.CacheID, args.GroupID, true, utils.NonTransactional)
 	*rply = utils.OK

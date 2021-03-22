@@ -122,7 +122,7 @@ func testPrecacheGetItemIDs(t *testing.T) {
 
 func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
-	args := &utils.AttrCacheIDsWithOpts{
+	args := &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: []string{},
 	}
 	dfltStats := engine.GetDefaultEmptyCacheStats()
@@ -157,7 +157,7 @@ func testPrecacheRestartEngine(t *testing.T) {
 
 func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
-	args := &utils.AttrCacheIDsWithOpts{
+	args := &utils.AttrCacheIDsWithAPIOpts{
 		CacheIDs: []string{},
 	}
 	expectedStats := &map[string]*ltcache.CacheStats{

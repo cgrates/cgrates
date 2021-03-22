@@ -547,7 +547,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 func testFltrRplStatQueueProfile(t *testing.T) {
 	stID := "ST1"
-	stPrf := &engine.StatQueueProfileWithOpts{
+	stPrf := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:      "cgrates.org",
 			ID:          stID,
@@ -740,7 +740,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 
 func testFltrRplResourceProfile(t *testing.T) {
 	resID := "RES1"
-	resPrf := &engine.ResourceProfileWithOpts{
+	resPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                resID,

@@ -90,7 +90,7 @@ type CDRsV1 struct {
 }
 
 // ProcessCDR will process a CDR in CGRateS internal format
-func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDRWithOpts, reply *string) error {
+func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDRWithAPIOpts, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessCDR(cdr, reply)
 }
 
@@ -100,7 +100,7 @@ func (cdrSv1 *CDRsV1) ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string)
 }
 
 // ProcessExternalCDR will process a CDR in external format
-func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDRWithOpts, reply *string) error {
+func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDRWithAPIOpts, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessExternalCDR(cdr, reply)
 }
 
@@ -114,11 +114,11 @@ func (cdrSv1 *CDRsV1) StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *
 	return cdrSv1.CDRs.V1StoreSessionCost(attr, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) error {
+func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {
 	return cdrSv1.CDRs.V1CountCDRs(args, reply)
 }
 
-func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) error {
+func (cdrSv1 *CDRsV1) GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error {
 	return cdrSv1.CDRs.V1GetCDRs(*args, reply)
 }
 

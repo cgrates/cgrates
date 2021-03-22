@@ -196,7 +196,7 @@ func testJSONHandleFile(t *testing.T) {
 
 func testJSONVerify(t *testing.T) {
 	var cdrs []*engine.CDR
-	args := &utils.RPCCDRsFilterWithOpts{
+	args := &utils.RPCCDRsFilterWithAPIOpts{
 		RPCCDRsFilter: &utils.RPCCDRsFilter{
 			OriginIDs: []string{"testJsonCDR"},
 		},

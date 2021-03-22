@@ -46,38 +46,38 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
 }
 
 // CDRsV1GetCDRs returns the CDRs that match the filter
-func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithOpts, reply *[]*engine.CDR) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1GetCDRs, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRs, args, reply)
 }
 
 // CDRsV1GetCDRsCount counts the cdrs that match the filter
-func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithOpts, reply *int64) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1GetCDRsCount, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRsCount, args, reply)
 }
 
@@ -88,13 +88,13 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1StoreSessionCost, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1StoreSessionCost, args, reply)
 }
 
@@ -105,30 +105,30 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1RateCDRs, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1RateCDRs, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1ProcessExternalCDR, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessExternalCDR, args, reply)
 }
 
@@ -147,20 +147,20 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithOpts, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1ProcessCDR, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tnt,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessCDR, args, reply)
 }
 

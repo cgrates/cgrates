@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetStatQueueProfileIDs(args *utils.PaginatorWithTenant
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithOpts, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -83,8 +83,8 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithOp
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	if err = apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
+	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueueProfiles,
+		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	var ttl *time.Duration
@@ -108,8 +108,8 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithOp
 		return err
 	}
 	//handle caching for StatQueues
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueues,
-		arg.TenantID(), nil, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueues,
+		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 

@@ -53,13 +53,13 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecute
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1ExecuteActions, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActions, args, reply)
 }
 
@@ -67,12 +67,12 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(args *utils.AttrsExe
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1ExecuteActionPlans, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActionPlans, args, reply)
 }

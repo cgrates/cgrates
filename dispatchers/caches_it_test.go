@@ -102,7 +102,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheDestinations].Items = 4
 	expStats[utils.CacheLoadIDs].Items = 17
 	expStats[utils.CacheRPCConnections].Items = 2
-	args := utils.AttrCacheIDsWithOpts{
+	args := utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
@@ -250,7 +250,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheReplicationHosts:      utils.MetaReady,
 	}
 
-	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithOpts{
+	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
@@ -369,7 +369,7 @@ func testDspChcRemoveItem(t *testing.T) {
 
 func testDspChcClear(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RPC.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithOpts{
+	if err := dispEngine.RPC.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
@@ -381,7 +381,7 @@ func testDspChcClear(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithOpts{
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},

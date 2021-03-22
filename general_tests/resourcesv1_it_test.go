@@ -104,7 +104,7 @@ func testV1RsRpcConn(t *testing.T) {
 }
 
 func testV1RsSetProfile(t *testing.T) {
-	rls := &engine.ResourceProfileWithOpts{
+	rls := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",

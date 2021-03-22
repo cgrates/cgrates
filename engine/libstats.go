@@ -44,10 +44,10 @@ type StatQueueProfile struct {
 	ThresholdIDs       []string // list of thresholds to be checked after changes
 }
 
-// StatQueueProfileWithOpts is used in replicatorV1 for dispatcher
-type StatQueueProfileWithOpts struct {
+// StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
+type StatQueueProfileWithAPIOpts struct {
 	*StatQueueProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (sqp *StatQueueProfile) TenantID() string {

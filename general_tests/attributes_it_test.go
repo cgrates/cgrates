@@ -557,7 +557,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	var result string
-	if err := attrRPC.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := attrRPC.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

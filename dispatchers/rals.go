@@ -42,12 +42,12 @@ func (dS *DispatcherService) RALsV1GetRatingPlansCost(args *utils.RatingPlanCost
 	tenant := dS.cfg.GeneralCfg().DefaultTenant
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RALsV1GetRatingPlansCost, tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  tenant,
-		APIOpts: args.Opts,
+		APIOpts: args.APIOpts,
 	}, utils.MetaRALs, utils.RALsV1GetRatingPlansCost, args, rpl)
 }

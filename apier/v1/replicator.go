@@ -428,12 +428,12 @@ func (rplSv1 *ReplicatorSv1) SetThreshold(th *engine.ThresholdWithAPIOpts, reply
 }
 
 // SetStatQueueProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(sq *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetStatQueueProfileDrv(sq.StatQueueProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.Opts[utils.CacheOpt]),
-		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), &sq.FilterIDs, nil, sq.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.APIOpts[utils.CacheOpt]),
+		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), &sq.FilterIDs, nil, sq.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -480,12 +480,12 @@ func (rplSv1 *ReplicatorSv1) SetTiming(tm *utils.TPTimingWithAPIOpts, reply *str
 }
 
 // SetResourceProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfileWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetResourceProfile(rs *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetResourceProfileDrv(rs.ResourceProfile); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rs.Opts[utils.CacheOpt]),
-		rs.Tenant, utils.CacheResourceProfiles, rs.TenantID(), &rs.FilterIDs, nil, rs.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rs.APIOpts[utils.CacheOpt]),
+		rs.Tenant, utils.CacheResourceProfiles, rs.TenantID(), &rs.FilterIDs, nil, rs.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -506,12 +506,12 @@ func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.ResourceWithAPIOpts, reply *
 }
 
 // SetActionTriggers is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionTriggersDrv(args.Key, args.Attrs); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActionTriggers, args.Key, nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheActionTriggers, args.Key, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
