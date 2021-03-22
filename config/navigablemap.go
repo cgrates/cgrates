@@ -185,11 +185,11 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opt
 		return
 	}
 	cgrEv = &utils.CGREvent{
-		Tenant: tnt,
-		ID:     utils.UUIDSha1Prefix(),
-		Time:   utils.TimePointer(time.Now()),
-		Event:  make(map[string]interface{}),
-		Opts:   NMAsMapInterface(opts, pathSep),
+		Tenant:  tnt,
+		ID:      utils.UUIDSha1Prefix(),
+		Time:    utils.TimePointer(time.Now()),
+		Event:   make(map[string]interface{}),
+		APIOpts: NMAsMapInterface(opts, pathSep),
 	}
 	for ; el != nil; el = el.Next() {
 		branchPath := el.Value

@@ -105,12 +105,12 @@ func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 
 func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []string, ctx string) (err error) {
 	var rplyEv engine.AttrSProcessEventReply
-	if cgrEv.Opts == nil {
-		cgrEv.Opts = make(map[string]interface{})
+	if cgrEv.APIOpts == nil {
+		cgrEv.APIOpts = make(map[string]interface{})
 	}
-	cgrEv.Opts[utils.Subsys] = utils.MetaEEs
+	cgrEv.APIOpts[utils.Subsys] = utils.MetaEEs
 	var processRuns *int
-	if val, has := cgrEv.Opts[utils.OptsAttributesProcessRuns]; has {
+	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
 		if v, err := utils.IfaceAsTInt64(val); err == nil {
 			processRuns = utils.IntPointer(int(v))
 		}
@@ -143,14 +143,14 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 	lenExpIDs := expIDs.Size()
 	cgrDp := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
-		utils.MetaOpts: cgrEv.Opts,
+		utils.MetaOpts: cgrEv.APIOpts,
 	}
 
 	var wg sync.WaitGroup
 	var withErr bool
 	var metricMapLock sync.RWMutex
 	metricsMap := make(map[string]utils.MapStorage)
-	_, hasVerbose := cgrEv.Opts[utils.OptsEEsVerbose]
+	_, hasVerbose := cgrEv.APIOpts[utils.OptsEEsVerbose]
 	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.MetaNone || // ignore *none type exporter
 			(lenExpIDs != 0 && !expIDs.Has(eeCfg.ID)) {
@@ -176,7 +176,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 				eeCfg.AttributeSIDs,
 				utils.FirstNonEmpty(
 					eeCfg.AttributeSCtx,
-					utils.IfaceAsString(cgrEv.Opts[utils.OptsContext]),
+					utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 					utils.MetaEEs)); err != nil {
 				return
 			}

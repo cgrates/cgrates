@@ -31,7 +31,7 @@ func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREvent, reply *string) (
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1Ping,
 			args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -43,7 +43,7 @@ func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes, reply
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRoutes,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -55,7 +55,7 @@ func (dS *DispatcherService) RouteSv1GetRoutesList(args *engine.ArgsGetRoutes, r
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRoutesList,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -67,7 +67,7 @@ func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREve
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RouteSv1GetRouteProfilesForEvent,
 			args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}

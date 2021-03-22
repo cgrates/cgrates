@@ -247,7 +247,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 				cgrEv := new(utils.CGREvent)
 				cgrEv.ID = utils.UUIDSha1Prefix()
 				cgrEv.Time = utils.TimePointer(time.Now())
-				cgrEv.Opts = map[string]interface{}{}
+				cgrEv.APIOpts = map[string]interface{}{}
 				for i, origCgrEv := range origCgrEvs {
 					if i == 0 {
 						cgrEv.Tenant = origCgrEv.Tenant
@@ -255,8 +255,8 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 					for key, value := range origCgrEv.Event {
 						cgrEv.Event[key] = value
 					}
-					for key, val := range origCgrEv.Opts {
-						cgrEv.Opts[key] = val
+					for key, val := range origCgrEv.APIOpts {
+						cgrEv.APIOpts[key] = val
 					}
 				}
 				rdr.rdrEvents <- &erEvent{
@@ -383,10 +383,10 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 	})
 	// compose the CGREvent from slice
 	cgrEv := &utils.CGREvent{
-		ID:    utils.UUIDSha1Prefix(),
-		Time:  utils.TimePointer(time.Now()),
-		Event: make(map[string]interface{}),
-		Opts:  make(map[string]interface{}),
+		ID:      utils.UUIDSha1Prefix(),
+		Time:    utils.TimePointer(time.Now()),
+		Event:   make(map[string]interface{}),
+		APIOpts: make(map[string]interface{}),
 	}
 	for i, origCgrEv := range origCgrEvs {
 		if i == 0 {
@@ -395,8 +395,8 @@ func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
 		for key, value := range origCgrEv.Event {
 			cgrEv.Event[key] = value
 		}
-		for key, val := range origCgrEv.Opts {
-			cgrEv.Opts[key] = val
+		for key, val := range origCgrEv.APIOpts {
+			cgrEv.APIOpts[key] = val
 		}
 	}
 	rdr.rdrEvents <- &erEvent{

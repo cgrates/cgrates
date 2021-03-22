@@ -773,7 +773,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				ID:     utils.GenUUID(),
 				Time:   utils.TimePointer(time.Now()),
 				Event:  acntSummary.AsMapInterface(),
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.MetaEventType: utils.AccountUpdate,
 				},
 			}

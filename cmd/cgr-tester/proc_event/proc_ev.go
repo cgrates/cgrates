@@ -113,7 +113,7 @@ func main() {
 						utils.Destination:   destination,
 						"PrefixDestination": destination[:3],
 					},
-					Opts: map[string]interface{}{
+					APIOpts: map[string]interface{}{
 						utils.OptsRatesUsage: usage,
 					},
 				},

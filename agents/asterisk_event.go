@@ -226,7 +226,7 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 		}
 	}
 	for k, v := range smaEv.opts {
-		resCGREv.Opts[k] = v
+		resCGREv.APIOpts[k] = v
 	}
 	*cgrEv = resCGREv
 	return nil
@@ -279,10 +279,10 @@ func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent
 	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(smaEv.Tenant(),
 			config.CgrConfig().GeneralCfg().DefaultTenant),
-		ID:    utils.UUIDSha1Prefix(),
-		Time:  &setupTime,
-		Event: smaEv.AsMapStringInterface(),
-		Opts:  smaEv.opts,
+		ID:      utils.UUIDSha1Prefix(),
+		Time:    &setupTime,
+		Event:   smaEv.AsMapStringInterface(),
+		APIOpts: smaEv.opts,
 	}
 	return
 }

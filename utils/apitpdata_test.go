@@ -665,8 +665,8 @@ func TestArgRSv1ResourceUsageCloneCase1(t *testing.T) {
 func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
 	newArgRSv1 := &ArgRSv1ResourceUsage{
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			Opts:   map[string]interface{}{},
+			Tenant:  "*req.CGRID",
+			APIOpts: map[string]interface{}{},
 		},
 		UsageID:  "randomID",
 		UsageTTL: DurationPointer(2),
@@ -682,9 +682,9 @@ func TestArgRSv1ResourceUsageCloneCase2(t *testing.T) {
 func TestArgRSv1ResourceUsageCloneCase3(t *testing.T) {
 	newArgRSv1 := &ArgRSv1ResourceUsage{
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{},
+			Tenant:  "*req.CGRID",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 		UsageID:  "randomID",
 		UsageTTL: DurationPointer(2),
@@ -1061,10 +1061,10 @@ func TestStartTimeNow(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			ID:     "",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{},
+			Tenant:  "*req.CGRID",
+			ID:      "",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	timpulet1 := time.Now()
@@ -1082,10 +1082,10 @@ func TestStartTime(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			ID:     "",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{"*ratesStartTime": "2018-01-07T17:00:10Z"},
+			Tenant:  "*req.CGRID",
+			ID:      "",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{"*ratesStartTime": "2018-01-07T17:00:10Z"},
 		},
 	}
 	if result, err := testCostEventStruct.StartTime(""); err != nil {
@@ -1099,10 +1099,10 @@ func TestStartTimeError(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			ID:     "",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{"*ratesStartTime": "start"},
+			Tenant:  "*req.CGRID",
+			ID:      "",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{"*ratesStartTime": "start"},
 		},
 	}
 	_, err := testCostEventStruct.StartTime("")
@@ -1115,10 +1115,10 @@ func TestUsageMinute(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			ID:     "",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{},
+			Tenant:  "*req.CGRID",
+			ID:      "",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	if rcv, err := testCostEventStruct.Usage(); err != nil {
@@ -1132,10 +1132,10 @@ func TestUsageError(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			ID:     "",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{"*ratesUsage": "start"},
+			Tenant:  "*req.CGRID",
+			ID:      "",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{"*ratesUsage": "start"},
 		},
 	}
 	_, err := testCostEventStruct.Usage()
@@ -1148,10 +1148,10 @@ func TestUsage(t *testing.T) {
 	testCostEventStruct := &ArgsCostForEvent{
 		RateProfileIDs: []string{"123", "456", "789"},
 		CGREvent: &CGREvent{
-			Tenant: "*req.CGRID",
-			ID:     "",
-			Event:  map[string]interface{}{},
-			Opts:   map[string]interface{}{"*ratesUsage": "2m10s"},
+			Tenant:  "*req.CGRID",
+			ID:      "",
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{"*ratesUsage": "2m10s"},
 		},
 	}
 

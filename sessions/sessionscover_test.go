@@ -1843,7 +1843,7 @@ func TestAuthEventMockCall(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Destination: "10",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.Usage: 10,
 		},
 	}
@@ -1858,7 +1858,7 @@ func TestAuthEventMockCall(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedTime, usage)
 	}
 
-	cgrEv.Opts = map[string]interface{}{
+	cgrEv.APIOpts = map[string]interface{}{
 		utils.Usage: 20,
 	}
 	expected := "RALS_ERROR:NO_MORE_DATA"
@@ -2924,7 +2924,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Usage: "invalid_usage",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsDebitInterval: "invalid_DUR_FORMAT",
 		},
 	}
@@ -2938,7 +2938,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	args.CGREvent.Opts[utils.OptsDebitInterval] = "10s"
+	args.CGREvent.APIOpts[utils.OptsDebitInterval] = "10s"
 
 	expected = "ChargerS is disabled"
 	if err := sessions.BiRPCv1InitiateSession(nil, args, rply); err == nil || err.Error() != expected {
@@ -2972,7 +2972,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Usage: "1s",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsDebitInterval: "10s",
 		},
 	}
@@ -3213,7 +3213,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 			utils.Usage:    "invalid_dur_format",
 			utils.OriginID: "TEST_ID",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsDebitInterval: "invalid_dur_format",
 		},
 	}
@@ -3224,7 +3224,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	if err := sessions.BiRPCv1UpdateSession(nil, args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	cgrEvent.Opts[utils.OptsDebitInterval] = "10s"
+	cgrEvent.APIOpts[utils.OptsDebitInterval] = "10s"
 
 	args = NewV1UpdateSessionArgs(false, []string{}, true,
 		cgrEvent, true)
@@ -3331,14 +3331,14 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	}
 	cgrEvent.Event[utils.OriginID] = "ORIGIN_ID"
 
-	cgrEvent.Opts = make(map[string]interface{})
-	cgrEvent.Opts[utils.OptsDebitInterval] = "invalid_time_format"
+	cgrEvent.APIOpts = make(map[string]interface{})
+	cgrEvent.APIOpts[utils.OptsDebitInterval] = "invalid_time_format"
 	args = NewV1TerminateSessionArgs(true, false, false, nil, false, nil, cgrEvent, true)
 	expected = "RALS_ERROR:time: invalid duration \"invalid_time_format\""
 	if err := sessions.BiRPCv1TerminateSession(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	cgrEvent.Opts[utils.OptsDebitInterval] = "1m"
+	cgrEvent.APIOpts[utils.OptsDebitInterval] = "1m"
 
 	//by this CGRID, there will be an empty session
 	cgrEvent.Event[utils.CGRID] = "CGR_ID"
@@ -3886,22 +3886,22 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	}
 
 	args.Flags = []string{utils.MetaSTIRAuthenticate}
-	args.CGREvent.Opts = make(map[string]interface{})
-	args.CGREvent.Opts[utils.OptsStirATest] = "stir;test;opts"
+	args.CGREvent.APIOpts = make(map[string]interface{})
+	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
 	expected = "*stir_authenticate: missing parts of the message header"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
 	args.Flags = []string{utils.MetaSTIRInitiate}
-	args.CGREvent.Opts = make(map[string]interface{})
-	args.CGREvent.Opts[utils.OptsStirATest] = "stir;test;opts"
+	args.CGREvent.APIOpts = make(map[string]interface{})
+	args.CGREvent.APIOpts[utils.OptsStirATest] = "stir;test;opts"
 	expected = "*stir_authenticate: open : no such file or directory"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
-	args.CGREvent.Opts[utils.OptsStirOriginatorURI] = "+407590336423;USER_ID"
+	args.CGREvent.APIOpts[utils.OptsStirOriginatorURI] = "+407590336423;USER_ID"
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
@@ -4091,13 +4091,13 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 	args.Flags = []string{utils.MetaRALs,
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInitiate),
 		utils.MetaChargers}
-	args.Opts = make(map[string]interface{})
-	args.Opts[utils.OptsDebitInterval] = "invalid_dbtitrvl_format"
+	args.APIOpts = make(map[string]interface{})
+	args.APIOpts[utils.OptsDebitInterval] = "invalid_dbtitrvl_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_dbtitrvl_format\""
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	args.Opts[utils.OptsDebitInterval] = "5s"
+	args.APIOpts[utils.OptsDebitInterval] = "5s"
 
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
 	expected = "ChargerS is disabled"
@@ -4172,7 +4172,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 				utils.Destination: "1002",
 				utils.RequestType: utils.MetaPrepaid,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsDebitInterval: "10s",
 			},
 		},
@@ -4187,12 +4187,12 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	args.Flags = []string{utils.MetaRALs,
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
 		utils.MetaChargers}
-	args.Opts[utils.OptsDebitInterval] = "invalid_format"
+	args.APIOpts[utils.OptsDebitInterval] = "invalid_format"
 	expected := "RALS_ERROR:time: invalid duration \"invalid_format\""
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	args.Opts[utils.OptsDebitInterval] = "10s"
+	args.APIOpts[utils.OptsDebitInterval] = "10s"
 
 	args.Event[utils.CGRID] = "test_id_new"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
@@ -4213,7 +4213,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	args.Flags = []string{utils.MetaRALs,
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate),
 		utils.MetaChargers}
-	delete(args.Opts, utils.OptsDebitInterval)
+	delete(args.APIOpts, utils.OptsDebitInterval)
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -4221,12 +4221,12 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	args.Flags = []string{utils.MetaRALs,
 		utils.ConcatenatedKey(utils.MetaRALs, utils.MetaTerminate),
 		utils.MetaChargers}
-	args.Opts[utils.OptsDebitInterval] = "invalid_format"
+	args.APIOpts[utils.OptsDebitInterval] = "invalid_format"
 	expected = "RALS_ERROR:time: invalid duration \"invalid_format\""
 	if err := sessions.BiRPCv1ProcessEvent(nil, args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
-	args.Opts[utils.OptsDebitInterval] = "10s"
+	args.APIOpts[utils.OptsDebitInterval] = "10s"
 
 	args.Event[utils.CGRID] = "test_id_new"
 	sessions.cgrCfg.SessionSCfg().ChargerSConns = []string{}
@@ -4414,7 +4414,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			utils.Destination: "1002",
 			utils.RequestType: utils.MetaPrepaid,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsDebitInterval: "10s",
 		},
 	}

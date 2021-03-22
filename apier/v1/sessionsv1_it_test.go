@@ -281,7 +281,7 @@ func testSSv1ItAuth(t *testing.T) {
 				utils.SetupTime:    "2018-01-07T17:00:00Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -311,7 +311,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        authUsage,
 			},
-			Opts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -393,7 +393,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -505,7 +505,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -649,7 +649,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -828,7 +828,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
+			APIOpts: map[string]interface{}{utils.Subsys: utils.MetaSessionS},
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
@@ -954,7 +954,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        0,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsDebitInterval: 30 * time.Millisecond,
 			},
 		},

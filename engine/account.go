@@ -560,7 +560,7 @@ func (acc *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bo
 						utils.BalanceID:    defaultBalance.ID,
 						utils.Units:        defaultBalance.Value,
 					},
-					Opts: map[string]interface{}{
+					APIOpts: map[string]interface{}{
 						utils.MetaEventType: utils.BalanceUpdate,
 					},
 				},
@@ -1102,7 +1102,7 @@ func (acc *Account) Publish() {
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),
 		Event:  acntSummary.AsMapInterface(),
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.MetaEventType: utils.AccountUpdate,
 		},
 	}

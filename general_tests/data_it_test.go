@@ -461,7 +461,7 @@ func testV1DataInitSession(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        initUsage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTL:         "300s",
 				utils.OptsSessionsTTLLastUsed: "0s",
 				utils.OptsSessionsTTLMaxDelay: "1800s",
@@ -508,7 +508,7 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        reqUsage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTL:         "28807s",
 				utils.OptsSessionsTTLLastUsed: "0s",
 				utils.OptsSessionsTTLMaxDelay: "1800s",
@@ -552,7 +552,7 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        reqUsage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTL:         "28807s",
 				utils.OptsSessionsTTLLastUsed: "0s",
 				utils.OptsSessionsTTLMaxDelay: "1800s",

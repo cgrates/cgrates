@@ -105,7 +105,7 @@ func testDspCDRsPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.CDRsV1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrs12345",
 		},
 	}, &reply); err != nil {
@@ -134,7 +134,7 @@ func testDspCDRsProcessEvent(t *testing.T) {
 				"fieldextr2":       "valextr2",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "cdrs12345",
 			},
 		},
@@ -329,7 +329,7 @@ func testDspCDRsV2ProcessEvent(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 				utils.Usage:        time.Minute,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "cdrsv212345",
 			},
 		},

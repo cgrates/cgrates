@@ -31,7 +31,7 @@ func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREvent, rpl *string) (
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -45,7 +45,7 @@ func (dS *DispatcherService) AccountProfilesForEvent(args *utils.ArgsAccountsFor
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1AccountProfilesForEvent, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -59,7 +59,7 @@ func (dS *DispatcherService) MaxAbstracts(args *utils.ArgsAccountsForEvent, repl
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1MaxAbstracts, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -73,7 +73,7 @@ func (dS *DispatcherService) DebitAbstracts(args *utils.ArgsAccountsForEvent, re
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1DebitAbstracts, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -87,7 +87,7 @@ func (dS *DispatcherService) MaxConcretes(args *utils.ArgsAccountsForEvent, repl
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1MaxConcretes, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -101,7 +101,7 @@ func (dS *DispatcherService) DebitConcretes(args *utils.ArgsAccountsForEvent, re
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.AccountSv1DebitConcretes, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -120,8 +120,8 @@ func (dS *DispatcherService) AccountSv1ActionSetBalance(args *utils.ArgsActSetBa
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
 	}, utils.MetaAccounts, utils.AccountSv1ActionSetBalance, args, reply)
 }
 
@@ -137,7 +137,7 @@ func (dS *DispatcherService) AccountSv1ActionRemoveBalance(args *utils.ArgsActRe
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
 	}, utils.MetaAccounts, utils.AccountSv1ActionRemoveBalance, args, reply)
 }

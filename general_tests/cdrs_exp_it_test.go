@@ -75,7 +75,7 @@ var (
 			utils.Usage:        10 * time.Second,
 			utils.Cost:         1.201,
 		},
-		Opts: map[string]interface{}{},
+		APIOpts: map[string]interface{}{},
 	}
 
 	cdrsExpEvExp = map[string]interface{}{

@@ -151,7 +151,7 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 				utils.EventType:    utils.BalanceUpdate,
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -222,7 +222,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 				utils.EventType:    utils.BalanceUpdate,
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -251,7 +251,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 				utils.BalanceID:    utils.MetaDefault,
 				utils.Units:        12.3,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -324,7 +324,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 				utils.EventType:    utils.AccountUpdate,
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -345,7 +345,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 				utils.EventType:    utils.AccountUpdate,
 				utils.AccountField: "1002",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -415,7 +415,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 				utils.AccountField: "1002",
 				utils.EventType:    utils.BalanceUpdate,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -434,7 +434,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 				utils.AccountField: "1003",
 				utils.EventType:    utils.BalanceUpdate,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -458,7 +458,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 				utils.AccountField: "1002",
 				utils.EventType:    utils.AccountUpdate,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -479,7 +479,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 				utils.AccountField: "1003",
 				utils.EventType:    utils.BalanceUpdate,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -538,7 +538,7 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 				utils.EventType:    utils.AccountUpdate,
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -622,7 +622,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 				utils.AccountField: "1001",
 				"Val":              10,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -686,7 +686,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 				utils.Usage:        45 * time.Second,
 				utils.Cost:         12.1,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -707,7 +707,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 				utils.Usage:        45 * time.Second,
 				utils.Cost:         12.1,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -785,7 +785,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 				utils.AccountField: "1003",
 				"Val":              10,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -849,7 +849,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 				utils.Usage:        45 * time.Second,
 				utils.Cost:         12.1,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},
@@ -876,7 +876,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 				utils.AccountField: "1003",
 				"Val":              10,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.BalanceUpdate,
 			},
 		},
@@ -898,7 +898,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 				utils.Usage:        45 * time.Second,
 				utils.Cost:         12.1,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},

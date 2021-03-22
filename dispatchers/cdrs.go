@@ -37,7 +37,7 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1Ping, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -58,8 +58,8 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithOpts, re
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRs, args, reply)
 }
 
@@ -76,8 +76,8 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithOpt
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRsCount, args, reply)
 }
 
@@ -93,8 +93,8 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1StoreSessionCost, args, reply)
 }
 
@@ -110,8 +110,8 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1RateCDRs, args, reply)
 }
 
@@ -127,8 +127,8 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessExternalCDR, args, reply)
 }
 
@@ -139,7 +139,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV1ProcessEvent, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -159,8 +159,8 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithOpts, reply *s
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessCDR, args, reply)
 }
 
@@ -171,7 +171,7 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CDRsV2ProcessEvent, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -191,7 +191,7 @@ func (dS *DispatcherService) CDRsV2StoreSessionCost(args *engine.ArgsV2CDRSStore
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaCDRs, utils.CDRsV2StoreSessionCost, args, reply)
 }

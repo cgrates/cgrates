@@ -200,7 +200,7 @@ func testSes2StirAuthenticate(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.Usage:        10 * time.Minute,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsStirIdentity: "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken",
 			},
 		},
@@ -211,14 +211,14 @@ func testSes2StirAuthenticate(t *testing.T) {
 		t.Error(err)
 	}
 	// altered originator
-	args.Opts[utils.OptsStirOriginatorTn] = "1005"
+	args.APIOpts[utils.OptsStirOriginatorTn] = "1005"
 	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "*stir_authenticate: wrong originatorTn" {
 		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: wrong originatorTn", err)
 	}
 
 	// altered identity
-	args.Opts[utils.OptsStirIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
+	args.APIOpts[utils.OptsStirIdentity] = "eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiL3Vzci9zaGFyZS9jZ3JhdGVzL3N0aXIvc3Rpcl9wdWJrZXkucGVtIn0.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMzg4MDIsIm9yaWciOnsidG4iOiIxMDA1In0sIm9yaWdpZCI6IjEyMzQ1NiJ9.cMEMlFnfyTu8uxfeU4RoZTamA7ifFT9Ibwrvi1_LKwL2xAU6fZ_CSIxKbtyOpNhM_sV03x7CfA_v0T4sHkifzg;info=</usr/share/cgrates/stir/stir_pubkey.pem>;ppt=shaken"
 	if err := ses2RPC.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err == nil || err.Error() != "*stir_authenticate: crypto/ecdsa: verification error" {
 		t.Errorf("Expected error :%q ,receved: %v", "*stir_authenticate: crypto/ecdsa: verification error", err)
@@ -241,7 +241,7 @@ func testSes2StirInit(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.Usage:        10 * time.Minute,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsStirPublicKeyPath:  "/usr/share/cgrates/stir/stir_pubkey.pem",
 				utils.OptsStirPrivateKeyPath: "/usr/share/cgrates/stir/stir_privatekey.pem",
 			},

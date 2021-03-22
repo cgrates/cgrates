@@ -74,7 +74,7 @@ func testDspResPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "res12345",
 		},
 	}
@@ -106,7 +106,7 @@ func testDspResPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "res12345",
 		},
 	}, &reply); err != nil {
@@ -127,7 +127,7 @@ func testDspResTestAuthKey(t *testing.T) {
 				utils.Destination:  "1002",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
 		},
@@ -151,7 +151,7 @@ func testDspResTestAuthKey2(t *testing.T) {
 				utils.Destination:  "1002",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "res12345",
 			},
 		},
@@ -185,7 +185,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "res12345",
 			},
 		},
@@ -214,7 +214,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "res12345",
 			},
 		},
@@ -235,7 +235,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "res12345",
 			},
 		},
@@ -255,7 +255,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "res12345",
 			},
 		},
@@ -275,7 +275,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "res12345",
 			},
 		},

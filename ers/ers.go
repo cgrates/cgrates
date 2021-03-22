@@ -175,7 +175,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.Opts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction for reader <%s> failed because <%s>",
 				utils.ERs, rdrCfg.ID, err.Error()))
 			err = nil // reset the error and continue the processing

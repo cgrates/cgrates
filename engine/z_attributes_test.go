@@ -240,7 +240,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	atrp, err := attrService.attributeProfileForEvent(attrEvs[0].Tenant, attrEvs[0].Context,
 		attrEvs[0].AttributeIDs, attrEvs[0].Time, utils.MapStorage{
 			utils.MetaReq:  attrEvs[0].CGREvent.Event,
-			utils.MetaOpts: attrEvs[0].Opts,
+			utils.MetaOpts: attrEvs[0].APIOpts,
 			utils.MetaVars: utils.MapStorage{
 				utils.ProcessRuns: utils.NewNMData(0),
 			},
@@ -254,7 +254,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	atrp, err = attrService.attributeProfileForEvent(attrEvs[1].Tenant, attrEvs[1].Context,
 		attrEvs[1].AttributeIDs, attrEvs[1].Time, utils.MapStorage{
 			utils.MetaReq:  attrEvs[1].CGREvent.Event,
-			utils.MetaOpts: attrEvs[1].Opts,
+			utils.MetaOpts: attrEvs[1].APIOpts,
 			utils.MetaVars: utils.MapStorage{
 				utils.ProcessRuns: utils.NewNMData(0),
 			},
@@ -269,7 +269,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	atrp, err = attrService.attributeProfileForEvent(attrEvs[2].Tenant, attrEvs[2].Context,
 		attrEvs[2].AttributeIDs, attrEvs[2].Time, utils.MapStorage{
 			utils.MetaReq:  attrEvs[2].CGREvent.Event,
-			utils.MetaOpts: attrEvs[2].Opts,
+			utils.MetaOpts: attrEvs[2].APIOpts,
 			utils.MetaVars: utils.MapStorage{
 				utils.ProcessRuns: utils.NewNMData(0),
 			},
@@ -291,7 +291,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  attrEvs[0].CGREvent.Event,
-		utils.MetaOpts: attrEvs[0].Opts,
+		utils.MetaOpts: attrEvs[0].APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -309,7 +309,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 	attrEvs[3].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	eNM := utils.MapStorage{
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
-		utils.MetaOpts: attrEvs[3].Opts,
+		utils.MetaOpts: attrEvs[3].APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -330,7 +330,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
-		utils.MetaOpts: attrEvs[3].Opts,
+		utils.MetaOpts: attrEvs[3].APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -1926,7 +1926,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -1981,12 +1981,12 @@ func TestProcessAttributeVariable(t *testing.T) {
 				"RandomField": "Val2",
 				utils.Weight:  "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2048,12 +2048,12 @@ func TestProcessAttributeComposed(t *testing.T) {
 				"RandomField2": "Concatenated",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2110,12 +2110,12 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 				"RandomField2": "1514804400",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2172,12 +2172,12 @@ func TestProcessAttributeSum(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2234,12 +2234,12 @@ func TestProcessAttributeDiff(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2296,12 +2296,12 @@ func TestProcessAttributeMultiply(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2358,12 +2358,12 @@ func TestProcessAttributeDivide(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2420,12 +2420,12 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 				"RandomField2": "5",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2482,12 +2482,12 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 				"RandomField2": "2013-12-30T15:00:01Z",
 				utils.Weight:   "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2543,12 +2543,12 @@ func TestProcessAttributePrefix(t *testing.T) {
 				"Field2":     "Val2",
 				utils.Weight: "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},
@@ -2604,12 +2604,12 @@ func TestProcessAttributeSuffix(t *testing.T) {
 				"Field2":     "Val2",
 				utils.Weight: "20.0",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eNM := utils.MapStorage{
 		utils.MetaReq:  ev.CGREvent.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: utils.NewNMData(0),
 		},

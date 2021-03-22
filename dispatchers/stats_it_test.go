@@ -76,7 +76,7 @@ func testDspStsPingFailover(t *testing.T) {
 	}
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}
@@ -117,7 +117,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 				utils.Destination:  "1002",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
 			},
 		},
@@ -162,7 +162,7 @@ func testDspStsPing(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "stat12345",
 		},
 	}, &reply); err != nil {
@@ -184,7 +184,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 				utils.Usage:        135 * time.Second,
 				utils.Cost:         123.0,
 				utils.PDD:          12 * time.Second},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
 		},
@@ -226,7 +226,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 				utils.Cost:         123.0,
 				utils.RunID:        utils.MetaDefault,
 				utils.Destination:  "1002"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
 			},
 		},
@@ -270,7 +270,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 				utils.Cost:         10.0,
 				utils.Destination:  "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "stat12345",
 			},
 		},
@@ -350,7 +350,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 					utils.Destination:  "1001",
 				},
 
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.OptsAPIKey: "stat12345",
 				},
 			},

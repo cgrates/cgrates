@@ -74,7 +74,7 @@ func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{})
 func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *utils.ArgsCostForEvent) (rtPfl *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 	}
 	if len(rPfIDs) == 0 {
 		var rPfIDMp utils.StringSet
@@ -134,7 +134,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 func (rS *RateS) rateProfileCostForEvent(rtPfl *utils.RateProfile, args *utils.ArgsCostForEvent, verbosity int) (rpCost *utils.RateProfileCost, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
-		utils.MetaOpts: args.Opts,
+		utils.MetaOpts: args.APIOpts,
 	}
 	var rtIDs utils.StringSet
 	if rtIDs, err = engine.MatchingItemIDsForEvent(

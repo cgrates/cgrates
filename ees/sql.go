@@ -163,7 +163,7 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		utils.MetaExp: utils.NewOrderedNavigableMap(),
 	}
 	req := utils.MapStorage(cgrEv.Event)
-	eeReq := engine.NewEventRequest(req, sqlEe.dc, cgrEv.Opts,
+	eeReq := engine.NewEventRequest(req, sqlEe.dc, cgrEv.APIOpts,
 		sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Tenant,
 		sqlEe.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,

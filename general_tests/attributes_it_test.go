@@ -135,7 +135,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 				utils.EventName: "VariableTest",
 				utils.ToR:       utils.MetaVoice,
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	eRply := engine.AttrSProcessEventReply{
@@ -149,7 +149,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 				utils.Category:  utils.MetaVoice,
 				utils.ToR:       utils.MetaVoice,
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -217,7 +217,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 			Event: map[string]interface{}{
 				"EventName": "AddAccountInfo",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -231,7 +231,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 				"EventName": "AddAccountInfo",
 				"Balance":   "10",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -299,7 +299,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 			Event: map[string]interface{}{
 				"EventName": "AddFullAccount",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -313,7 +313,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 				"EventName":   "AddFullAccount",
 				"FullAccount": "{\"ID\":\"cgrates.org:1001\",\"BalanceMap\":{\"*monetary\":[{\"Uuid\":\"18160631-a4ae-4078-8048-b4c6b87a36c6\",\"ID\":\"\",\"Value\":10,\"ExpirationDate\":\"0001-01-01T00:00:00Z\",\"Weight\":10,\"DestinationIDs\":{},\"RatingSubject\":\"\",\"Categories\":{},\"SharedGroups\":{},\"Timings\":null,\"TimingIDs\":{},\"Disabled\":false,\"Factor\":null,\"Blocker\":false}]},\"UnitCounters\":null,\"ActionTriggers\":null,\"AllowNegative\":false,\"Disabled\":false,\"UpdateTime\":\"2020-10-06T12:43:51.805Z\"}",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -431,7 +431,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			Event: map[string]interface{}{
 				"EventName": "AddStatEvent",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -445,7 +445,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 				"EventName": "AddStatEvent",
 				"AcdMetric": "11",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -513,7 +513,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 			Event: map[string]interface{}{
 				"EventName": "AddFullStats",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -527,7 +527,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 				"EventName":  "AddFullStats",
 				"AllMetrics": "{\"*acd\":11,\"*asr\":100,\"*tcd\":22}",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -579,7 +579,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
@@ -597,7 +597,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
@@ -659,7 +659,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			Event: map[string]interface{}{
 				"EventName": "AddResourceUsages",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -673,7 +673,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 				"EventName":           "AddResourceUsages",
 				"ResourceTotalUsages": "5",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -833,7 +833,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 				"EventName":   "AddDestinationCarrier",
 				"Destination": "+447779330921",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -848,7 +848,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -935,7 +935,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				"EventName":   "AddComposedInfo",
 				"Destination": "+447779330921",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -950,7 +950,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationCarrier": "Orange;44",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)
@@ -1019,7 +1019,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				"EventName":   "AddDestinationDetails",
 				"Destination": "+447779330921",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 
@@ -1034,7 +1034,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				"Destination":        "+447779330921",
 				"DestinationDetails": "{\"Carrier\":\"Orange\",\"CountryCode\":44,\"CountryCodeSource\":1,\"Extension\":\"\",\"GeoLocation\":\"\",\"ItalianLeadingZero\":false,\"LengthOfNationalDestinationCode\":0,\"NationalNumber\":7779330921,\"NumberOfLeadingZeros\":1,\"NumberType\":1,\"PreferredDomesticCarrierCode\":\"\",\"RawInput\":\"+447779330921\",\"Region\":\"GB\"}",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	sort.Strings(eRply.AlteredFields)

@@ -68,7 +68,7 @@ func testDspSchedPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.SchedulerSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "sched12345",
 		},
 	}, &reply); err != nil {

@@ -323,7 +323,7 @@ func testCacheRplPing(t *testing.T) {
 	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "testRoute123",
 		},
 	}, &rpl); err != nil {
@@ -364,7 +364,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "testRoute123",
 		},
 	}, &rpl); err != nil {
@@ -395,7 +395,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 	if err := dspEngine2RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "testRouteFromDispatcher2",
 		},
 	}, &rpl); err != nil {
@@ -406,7 +406,7 @@ func testCacheRplAACheckReplication(t *testing.T) {
 
 	if err := dspEngine1RPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "testRouteFromDispatcher1",
 		},
 	}, &rpl); err != nil {
@@ -470,7 +470,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 					"EventName":        "TestLoad",
 				},
 
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.OptsRouteID: "testRouteFromDispatcher1",
 				},
 			}, &rpl); err != nil {
@@ -492,7 +492,7 @@ func testCacheRplAACheckLoadReplication(t *testing.T) {
 					"EventName":        "TestLoad",
 				},
 
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.OptsRouteID: "testRouteFromDispatcher2",
 				},
 			}, &rpl); err != nil {
@@ -583,7 +583,7 @@ func testCacheRplCheckLoadReplication(t *testing.T) {
 					"EventName":        "TestLoad",
 				},
 
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.OptsRouteID: "testRoute123",
 				},
 			}, &rpl); err != nil {

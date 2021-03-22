@@ -982,7 +982,7 @@ func testV1RsAuthorizeResourcesWithOpts(t *testing.T) {
 				"Subject":     "1001",
 				"Destination": "1002",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				"CustomField": "1007",
 			},
 		},

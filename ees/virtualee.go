@@ -76,7 +76,7 @@ func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaExp: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewEventRequest(req, vEe.dc, cgrEv.Opts,
+	eeReq := engine.NewEventRequest(req, vEe.dc, cgrEv.APIOpts,
 		vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Tenant,
 		vEe.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(vEe.cgrCfg.EEsCfg().Exporters[vEe.cfgIdx].Timezone,

@@ -982,7 +982,7 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(v1authArgs.Opts)
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(v1authArgs.APIOpts)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
@@ -1008,7 +1008,7 @@ func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs, _ = utils.GetRoutePaginatorFromOpts(v1authArgs.Opts)
+	cgrArgs, _ = utils.GetRoutePaginatorFromOpts(v1authArgs.APIOpts)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
@@ -1690,7 +1690,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey:  "testkey",
 			utils.OptsRouteID: "testrouteid",
 		},
@@ -1701,7 +1701,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts(t *testing.T) {
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.Opts)
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false,
 		false, false, false, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {
@@ -1735,7 +1735,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 			utils.AccountField: "1001",
 			utils.Destination:  "1002",
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsRouteID: "testrouteid",
 		},
 	}
@@ -1745,7 +1745,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 		CGREvent:           cgrEv,
 		ForceDuration:      true,
 	}
-	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.Opts)
+	cgrArgs, _ := utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false,
 		false, false, cgrEv, cgrArgs, true, "")
 	if !reflect.DeepEqual(expected, rply) {

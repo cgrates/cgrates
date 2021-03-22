@@ -141,7 +141,7 @@ func testDspSessionPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 	}, &reply); err != nil {
@@ -161,7 +161,7 @@ func testDspSessionPingFailover(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 	}
@@ -206,7 +206,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 				utils.Usage:        authUsage,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
 		},
@@ -241,7 +241,7 @@ func testDspSessionAuthorize(t *testing.T) {
 				utils.Usage:        authUsage,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey:             "ses12345",
 				utils.OptsRouteProfilesCount: 1.,
 			},
@@ -295,7 +295,7 @@ func testDspSessionInit(t *testing.T) {
 				utils.Usage:        initUsage,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},
@@ -371,7 +371,7 @@ func testDspSessionUpdate(t *testing.T) {
 				utils.Usage:        reqUsage,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},
@@ -401,7 +401,7 @@ func testDspSessionUpdate(t *testing.T) {
 				utils.Usage:        float64(reqUsage),
 				utils.CGRID:        "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 				utils.Subsys:     utils.MetaSessionS,
 			},
@@ -442,7 +442,7 @@ func testDspSessionUpdate2(t *testing.T) {
 				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 				utils.Usage:        reqUsage,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},
@@ -475,7 +475,7 @@ func testDspSessionUpdate2(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        float64(reqUsage),
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 				utils.Subsys:     utils.MetaSessionS,
 			},
@@ -521,7 +521,7 @@ func testDspSessionTerminate(t *testing.T) {
 				utils.Usage:        10 * time.Minute,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},
@@ -552,7 +552,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
 			utils.Usage:        10 * time.Minute,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "ses12345",
 		},
 	}
@@ -591,7 +591,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 				utils.Usage:        initUsage,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},
@@ -629,7 +629,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 				utils.Subsys:     utils.MetaSessionS,
 			},
@@ -670,7 +670,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 				utils.EventName:    "Internal",
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "pse12345",
 			},
 		},
@@ -707,7 +707,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 				utils.AnswerTime:   "2018-01-07T17:00:10Z",
 				utils.Usage:        300000000000.0,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "pse12345",
 				utils.Subsys:     utils.MetaSessionS,
 			},
@@ -943,7 +943,7 @@ func testDspSessionProcessEvent3(t *testing.T) {
 				utils.Usage:        10 * time.Minute,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "pse12345",
 			},
 		},
@@ -987,7 +987,7 @@ func testDspSessionGetCost(t *testing.T) {
 				utils.Usage:       10 * time.Minute,
 			},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "ses12345",
 			},
 		},

@@ -31,7 +31,7 @@ func (dS *DispatcherService) RALsV1Ping(args *utils.CGREvent, rpl *string) (err 
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.RALsV1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -47,7 +47,7 @@ func (dS *DispatcherService) RALsV1GetRatingPlansCost(args *utils.RatingPlanCost
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tenant,
-		Opts:   args.Opts,
+		Tenant:  tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaRALs, utils.RALsV1GetRatingPlansCost, args, rpl)
 }

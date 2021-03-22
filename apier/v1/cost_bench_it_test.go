@@ -267,7 +267,7 @@ func BenchmarkCostWithRateS(b *testing.B) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "2m",
 			},
 		},
@@ -299,7 +299,7 @@ func BenchmarkCostDiffPeriodWithRateS(b *testing.B) {
 			Event: map[string]interface{}{
 				utils.Subject: "1010",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
 				utils.OptsRatesUsage:     "2h",
 			},

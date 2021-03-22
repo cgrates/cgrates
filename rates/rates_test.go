@@ -645,7 +645,7 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 			Event: map[string]interface{}{
 				utils.Subject: "1010",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
 				utils.OptsRatesUsage:     "2h",
 			},
@@ -737,7 +737,7 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: time.Date(2020, 12, 23, 59, 0, 0, 0, time.UTC),
 				utils.OptsRatesUsage:     "2h",
 			},
@@ -813,7 +813,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 			ID:     "RATE_1",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "invalidUsageFormat",
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -827,7 +827,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 			ID:     "RATE_1",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesStartTime: "invalidStartTimeFormat",
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -891,7 +891,7 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 			ID:     "RATE_1",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "100m",
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -954,7 +954,7 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 			ID:     "RATE_1",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001"},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsRatesUsage: "10000m",
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)

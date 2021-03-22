@@ -445,7 +445,7 @@ func (rS *ResourceService) processThresholds(r *Resource, opts map[string]interf
 				utils.ResourceID: r.ID,
 				utils.Usage:      r.totalUsage(),
 			},
-			Opts: opts,
+			APIOpts: opts,
 		},
 	}
 	var tIDs []string
@@ -467,7 +467,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 	var rIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 	}
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringSet{"resID":bool}
 		isCached = true
@@ -721,7 +721,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.storedResources.Add(r.TenantID())
 			rS.srMux.Unlock()
 		}
-		if err = rS.processThresholds(r, args.Opts); err != nil {
+		if err = rS.processThresholds(r, args.APIOpts); err != nil {
 			return
 		}
 	}
@@ -788,7 +788,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 				rS.storedResources.Add(r.TenantID())
 			}
 		}
-		if err = rS.processThresholds(r, args.Opts); err != nil {
+		if err = rS.processThresholds(r, args.APIOpts); err != nil {
 			return
 		}
 	}

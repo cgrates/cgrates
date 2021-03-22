@@ -31,7 +31,7 @@ func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREvent, reply *strin
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -42,7 +42,7 @@ func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREvent, reply *str
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.SchedulerSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -58,8 +58,8 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActions(args *utils.AttrsExecute
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActions, args, reply)
 }
 
@@ -72,7 +72,7 @@ func (dS *DispatcherService) SchedulerSv1ExecuteActionPlans(args *utils.AttrsExe
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaScheduler, utils.SchedulerSv1ExecuteActionPlans, args, reply)
 }

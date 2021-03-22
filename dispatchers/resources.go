@@ -32,7 +32,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREvent, rpl *string) 
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -47,7 +47,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -62,7 +62,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1AuthorizeResources, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -77,7 +77,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1AllocateResources, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -92,7 +92,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResourceSv1ReleaseResources, tnt,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
@@ -111,9 +111,9 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithAPIO
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaResources, utils.ResourceSv1GetResource, args, reply)
 }
 
@@ -129,8 +129,8 @@ func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(args *utils.Tenant
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaResources, utils.ResourceSv1GetResourceWithConfig, args, reply)
 }

@@ -275,7 +275,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	}
 	var reply string
 	arg := testCdr1.AsCGREvent()
-	arg.Opts = map[string]interface{}{"ExporterID": "http_localhost"}
+	arg.APIOpts = map[string]interface{}{"ExporterID": "http_localhost"}
 
 	// we expect that the cdr export to fail and go into the failed post directory
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,

@@ -1353,7 +1353,7 @@ func testV1STSV1GetStatQueuesForEventWithoutTenant(t *testing.T) {
 					utils.Cost:         10.0,
 					utils.Destination:  "1001",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.OptsAPIKey: "stat12345",
 				},
 			},
@@ -1443,7 +1443,7 @@ func testV1STSSimulateAccountUpdate(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "SIMULATE_ACNT_UPDATE_EV",
 			Event:  acnt.AsAccountSummary().AsMapInterface(),
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.MetaEventType: utils.AccountUpdate,
 			},
 		},

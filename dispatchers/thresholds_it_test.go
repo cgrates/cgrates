@@ -77,7 +77,7 @@ func testDspThPingFailover(t *testing.T) {
 	ev := utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}
@@ -113,7 +113,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 				utils.EventName:    "Event1",
 				utils.AccountField: "1001"},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "thr12345",
 			},
 		},
@@ -142,7 +142,7 @@ func testDspThPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "thr12345",
 		},
 	}, &reply); err != nil {
@@ -163,7 +163,7 @@ func testDspThTestAuthKey(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1002"},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "12345",
 			},
 		},
@@ -192,7 +192,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1002"},
 
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsAPIKey: "thr12345",
 			},
 		},

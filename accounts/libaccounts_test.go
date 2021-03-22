@@ -128,7 +128,7 @@ func TestProcessAttributeS(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TEST_ID1",
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAttributesProcessRuns: "20",
 		},
 	}

@@ -151,7 +151,7 @@ func TestProcessRequest(t *testing.T) {
 						"ToR":         "*voice",
 						"Usage":       "10s",
 					},
-					Opts: map[string]interface{}{},
+					APIOpts: map[string]interface{}{},
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -194,7 +194,7 @@ func TestProcessRequest(t *testing.T) {
 						"ToR":         "*voice",
 						"Usage":       "10s",
 					},
-					Opts: map[string]interface{}{},
+					APIOpts: map[string]interface{}{},
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -259,7 +259,7 @@ func TestProcessRequest(t *testing.T) {
 						"ToR":         "*voice",
 						"Usage":       "10s",
 					},
-					Opts: map[string]interface{}{},
+					APIOpts: map[string]interface{}{},
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -321,7 +321,7 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				Opts: make(map[string]interface{}),
+				APIOpts: make(map[string]interface{}),
 			}
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
@@ -361,7 +361,7 @@ func TestProcessRequest(t *testing.T) {
 						"ToR":         "*voice",
 						"Usage":       "10s",
 					},
-					Opts: map[string]interface{}{},
+					APIOpts: map[string]interface{}{},
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -402,7 +402,7 @@ func TestProcessRequest(t *testing.T) {
 						"ToR":         "*voice",
 						"Usage":       "10s",
 					},
-					Opts: map[string]interface{}{},
+					APIOpts: map[string]interface{}{},
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {

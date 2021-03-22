@@ -47,7 +47,7 @@ var (
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
-			Opts: map[string]interface{}{utils.OptsContext: "simpleauth"},
+			APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth"},
 		},
 
 		{
@@ -64,7 +64,7 @@ var (
 			Event: map[string]interface{}{
 				utils.AccountField: "1007",
 			},
-			Opts: map[string]interface{}{utils.OptsContext: "simpleauth"},
+			APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth"},
 		},
 	}
 
@@ -315,7 +315,7 @@ func testChargerSProcessEvent(t *testing.T) {
 					"Password":         "CGRateS.org",
 					"RunID":            utils.MetaDefault,
 				},
-				Opts: map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
+				APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
 			},
 		},
 	}
@@ -344,7 +344,7 @@ func testChargerSProcessEvent(t *testing.T) {
 					utils.Category:     "call",
 					utils.RunID:        utils.MetaDefault,
 				},
-				Opts: map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
+				APIOpts: map[string]interface{}{utils.OptsContext: "simpleauth", utils.Subsys: utils.MetaChargers},
 			},
 		},
 	}
@@ -518,7 +518,7 @@ func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 					"CustomField":      "WithoutAttributes",
 					"RunID":            "CustomRun",
 				},
-				Opts: map[string]interface{}{utils.Subsys: utils.MetaChargers},
+				APIOpts: map[string]interface{}{utils.Subsys: utils.MetaChargers},
 			},
 		},
 	}
@@ -580,7 +580,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 					utils.AccountField: "1002",
 					utils.RunID:        "*default",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.Subsys:                    utils.MetaChargers,
 					utils.OptsAttributesProcessRuns: 1.,
 				},
@@ -593,7 +593,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.AccountField: "1010",
 		},
-		Opts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
+		APIOpts: map[string]interface{}{utils.OptsAttributesProcessRuns: 1.},
 	}
 	var result2 []*engine.ChrgSProcessEventReply
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {

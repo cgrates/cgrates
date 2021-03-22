@@ -84,7 +84,7 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evT
 		Event: map[string]interface{}{
 			utils.APIKey: apiKey,
 		},
-		Opts: map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
+		APIOpts: map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
 	}
 	var rplyEv engine.AttrSProcessEventReply
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
@@ -112,7 +112,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
-		utils.MetaOpts: ev.Opts,
+		utils.MetaOpts: ev.APIOpts,
 	}
 	prflIDs, err := engine.MatchingItemIDsForEvent(evNm,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
@@ -194,7 +194,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	if errCh := engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
 		return utils.NewErrDispatcherS(errCh)
 	}
-	return d.Dispatch(utils.IfaceAsString(ev.Opts[utils.OptsRouteID]), subsys, serviceMethod, args, reply)
+	return d.Dispatch(utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]), subsys, serviceMethod, args, reply)
 }
 
 func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREvent,
@@ -203,7 +203,7 @@ func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREvent,
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
-	retDPfl, errDpfl := dS.dispatcherProfileForEvent(tnt, ev, utils.IfaceAsString(ev.Opts[utils.Subsys]))
+	retDPfl, errDpfl := dS.dispatcherProfileForEvent(tnt, ev, utils.IfaceAsString(ev.APIOpts[utils.Subsys]))
 	if errDpfl != nil {
 		return utils.NewErrDispatcherS(errDpfl)
 	}

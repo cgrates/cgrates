@@ -100,7 +100,7 @@ func (pstrEE *PosterJSONMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc, cgrEv.Opts,
+		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event), pstrEE.dc, cgrEv.APIOpts,
 			pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Tenant,
 			pstrEE.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(pstrEE.cgrCfg.EEsCfg().Exporters[pstrEE.cfgIdx].Timezone,

@@ -1506,7 +1506,7 @@ type ArgsCostForEvent struct {
 
 // StartTime returns the event time used to check active rate profiles
 func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
-	if tIface, has := args.Opts[OptsRatesStartTime]; has {
+	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
 		return IfaceAsTime(tIface, tmz)
 	}
 	return time.Now(), nil
@@ -1515,7 +1515,7 @@ func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error)
 // usage returns the event time used to check active rate profiles
 func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
 	// first search for the usage in opts
-	if uIface, has := args.Opts[OptsRatesUsage]; has {
+	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
 		return IfaceAsBig(uIface)
 	}
 	// if the usage is not present in opts search in event

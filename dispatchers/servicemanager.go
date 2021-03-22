@@ -33,7 +33,7 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -53,8 +53,8 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StartService, args, reply)
 }
 
@@ -71,8 +71,8 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1StopService, args, reply)
 }
 
@@ -89,7 +89,7 @@ func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceW
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.Opts,
+		Tenant:  tnt,
+		APIOpts: args.Opts,
 	}, utils.MetaServiceManager, utils.ServiceManagerV1ServiceStatus, args, reply)
 }

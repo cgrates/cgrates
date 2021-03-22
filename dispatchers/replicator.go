@@ -32,7 +32,7 @@ func (dS *DispatcherService) ReplicatorSv1Ping(args *utils.CGREvent, rpl *string
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -51,8 +51,8 @@ func (dS *DispatcherService) ReplicatorSv1GetAccount(args *utils.StringWithAPIOp
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccount, args, rpl)
 }
 
@@ -68,8 +68,8 @@ func (dS *DispatcherService) ReplicatorSv1GetDestination(args *utils.StringWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetDestination, args, rpl)
 }
 
@@ -85,8 +85,8 @@ func (dS *DispatcherService) ReplicatorSv1GetReverseDestination(args *utils.Stri
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetReverseDestination, args, rpl)
 }
 
@@ -102,9 +102,9 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueue(args *utils.TenantIDWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetStatQueue, args, reply)
 }
 
@@ -120,9 +120,9 @@ func (dS *DispatcherService) ReplicatorSv1GetFilter(args *utils.TenantIDWithAPIO
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetFilter, args, reply)
 }
 
@@ -138,9 +138,9 @@ func (dS *DispatcherService) ReplicatorSv1GetThreshold(args *utils.TenantIDWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetThreshold, args, reply)
 }
 
@@ -156,9 +156,9 @@ func (dS *DispatcherService) ReplicatorSv1GetThresholdProfile(args *utils.Tenant
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetThresholdProfile, args, reply)
 }
 
@@ -174,9 +174,9 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueueProfile(args *utils.Tenant
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetStatQueueProfile, args, reply)
 }
 
@@ -192,8 +192,8 @@ func (dS *DispatcherService) ReplicatorSv1GetTiming(args *utils.StringWithAPIOpt
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetTiming, args, rpl)
 }
 
@@ -209,9 +209,9 @@ func (dS *DispatcherService) ReplicatorSv1GetResource(args *utils.TenantIDWithAP
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetResource, args, reply)
 }
 
@@ -227,9 +227,9 @@ func (dS *DispatcherService) ReplicatorSv1GetResourceProfile(args *utils.TenantI
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetResourceProfile, args, reply)
 }
 
@@ -245,8 +245,8 @@ func (dS *DispatcherService) ReplicatorSv1GetActionTriggers(args *utils.StringWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetActionTriggers, args, rpl)
 }
 
@@ -262,8 +262,8 @@ func (dS *DispatcherService) ReplicatorSv1GetSharedGroup(args *utils.StringWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetSharedGroup, args, rpl)
 }
 
@@ -279,8 +279,8 @@ func (dS *DispatcherService) ReplicatorSv1GetActions(args *utils.StringWithAPIOp
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetActions, args, rpl)
 }
 
@@ -296,8 +296,8 @@ func (dS *DispatcherService) ReplicatorSv1GetActionPlan(args *utils.StringWithAP
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetActionPlan, args, rpl)
 }
 
@@ -313,8 +313,8 @@ func (dS *DispatcherService) ReplicatorSv1GetAllActionPlans(args *utils.StringWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAllActionPlans, args, rpl)
 }
 
@@ -330,8 +330,8 @@ func (dS *DispatcherService) ReplicatorSv1GetAccountActionPlans(args *utils.Stri
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccountActionPlans, args, rpl)
 }
 
@@ -347,8 +347,8 @@ func (dS *DispatcherService) ReplicatorSv1GetRatingPlan(args *utils.StringWithAP
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetRatingPlan, args, rpl)
 }
 
@@ -364,8 +364,8 @@ func (dS *DispatcherService) ReplicatorSv1GetRatingProfile(args *utils.StringWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetRatingProfile, args, rpl)
 }
 
@@ -381,9 +381,9 @@ func (dS *DispatcherService) ReplicatorSv1GetRouteProfile(args *utils.TenantIDWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetRouteProfile, args, reply)
 }
 
@@ -399,9 +399,9 @@ func (dS *DispatcherService) ReplicatorSv1GetAttributeProfile(args *utils.Tenant
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAttributeProfile, args, reply)
 }
 
@@ -417,9 +417,9 @@ func (dS *DispatcherService) ReplicatorSv1GetChargerProfile(args *utils.TenantID
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetChargerProfile, args, reply)
 }
 
@@ -435,9 +435,9 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherProfile(args *utils.Tenan
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetDispatcherProfile, args, reply)
 }
 
@@ -453,9 +453,9 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherHost(args *utils.TenantID
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetDispatcherHost, args, reply)
 }
 
@@ -471,9 +471,9 @@ func (dS *DispatcherService) ReplicatorSv1GetRateProfile(args *utils.TenantIDWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetRateProfile, args, reply)
 }
 
@@ -489,9 +489,9 @@ func (dS *DispatcherService) ReplicatorSv1GetActionProfile(args *utils.TenantIDW
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetActionProfile, args, reply)
 }
 
@@ -507,8 +507,8 @@ func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(args *utils.StringWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetItemLoadIDs, args, rpl)
 }
 
@@ -524,8 +524,8 @@ func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(args *engine.Thres
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.ThresholdProfile.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.ThresholdProfile.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetThresholdProfile, args, rpl)
 }
 
@@ -541,8 +541,8 @@ func (dS *DispatcherService) ReplicatorSv1SetThreshold(args *engine.ThresholdWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetThreshold, args, rpl)
 }
 
@@ -558,8 +558,8 @@ func (dS *DispatcherService) ReplicatorSv1SetDestination(args *engine.Destinatio
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetDestination, args, rpl)
 }
 
@@ -575,8 +575,8 @@ func (dS *DispatcherService) ReplicatorSv1SetAccount(args *engine.AccountWithAPI
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tenant,
-		Opts:   args.APIOpts,
+		Tenant:  tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccount, args, rpl)
 }
 
@@ -592,8 +592,8 @@ func (dS *DispatcherService) ReplicatorSv1SetReverseDestination(args *engine.Des
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetReverseDestination, args, rpl)
 }
 
@@ -609,8 +609,8 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StatQueueWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetStatQueue, args, rpl)
 }
 
@@ -626,8 +626,8 @@ func (dS *DispatcherService) ReplicatorSv1SetFilter(args *engine.FilterWithAPIOp
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetFilter, args, rpl)
 }
 
@@ -643,8 +643,8 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueueProfile(args *engine.StatQ
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetStatQueueProfile, args, rpl)
 }
 
@@ -660,8 +660,8 @@ func (dS *DispatcherService) ReplicatorSv1SetTiming(args *utils.TPTimingWithAPIO
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetTiming, args, rpl)
 }
 
@@ -677,8 +677,8 @@ func (dS *DispatcherService) ReplicatorSv1SetResource(args *engine.ResourceWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetResource, args, rpl)
 }
 
@@ -694,8 +694,8 @@ func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(args *engine.Resour
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetResourceProfile, args, rpl)
 }
 
@@ -711,8 +711,8 @@ func (dS *DispatcherService) ReplicatorSv1SetActionTriggers(args *engine.SetActi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetActionTriggers, args, rpl)
 }
 
@@ -728,8 +728,8 @@ func (dS *DispatcherService) ReplicatorSv1SetSharedGroup(args *engine.SharedGrou
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetSharedGroup, args, rpl)
 }
 
@@ -745,8 +745,8 @@ func (dS *DispatcherService) ReplicatorSv1SetActions(args *engine.SetActionsArgs
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetActions, args, rpl)
 }
 
@@ -762,8 +762,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRatingPlan(args *engine.RatingPlanW
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetRatingPlan, args, rpl)
 }
 
@@ -779,8 +779,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRatingProfile(args *engine.RatingPr
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetRatingProfile, args, rpl)
 }
 
@@ -796,8 +796,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(args *engine.RouteProf
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetRouteProfile, args, rpl)
 }
 
@@ -813,8 +813,8 @@ func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(args *engine.Attri
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetAttributeProfile, args, rpl)
 }
 
@@ -830,8 +830,8 @@ func (dS *DispatcherService) ReplicatorSv1SetChargerProfile(args *engine.Charger
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetChargerProfile, args, rpl)
 }
 
@@ -847,8 +847,8 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(args *engine.Disp
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetDispatcherProfile, args, rpl)
 }
 
@@ -864,8 +864,8 @@ func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *utils.RateProfile
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetRateProfile, args, rpl)
 }
 
@@ -881,8 +881,8 @@ func (dS *DispatcherService) ReplicatorSv1SetActionProfile(args *engine.ActionPr
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetActionProfile, args, rpl)
 }
 
@@ -898,8 +898,8 @@ func (dS *DispatcherService) ReplicatorSv1SetActionPlan(args *engine.SetActionPl
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetActionPlan, args, rpl)
 }
 
@@ -915,8 +915,8 @@ func (dS *DispatcherService) ReplicatorSv1SetAccountActionPlans(args *engine.Set
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccountActionPlans, args, rpl)
 }
 
@@ -932,8 +932,8 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(args *engine.Dispatc
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetDispatcherHost, args, rpl)
 }
 
@@ -949,8 +949,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(args *utils.TenantIDWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveThreshold, args, rpl)
 }
 
@@ -966,8 +966,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDestination(args *utils.StringWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveDestination, args, rpl)
 }
 
@@ -983,8 +983,8 @@ func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(args *utils.LoadIDsWithOpts
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.Opts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetLoadIDs, args, rpl)
 }
 
@@ -1000,8 +1000,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccount(args *utils.StringWithAP
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAccount, args, rpl)
 }
 
@@ -1017,8 +1017,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(args *utils.TenantIDWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveStatQueue, args, rpl)
 }
 
@@ -1034,8 +1034,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveFilter(args *utils.TenantIDWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveFilter, args, rpl)
 }
 
@@ -1051,8 +1051,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(args *utils.Ten
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveThresholdProfile, args, rpl)
 }
 
@@ -1068,8 +1068,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueueProfile(args *utils.Ten
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveStatQueueProfile, args, rpl)
 }
 
@@ -1085,8 +1085,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveTiming(args *utils.StringWithAPI
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveTiming, args, rpl)
 }
 
@@ -1102,8 +1102,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResource(args *utils.TenantIDWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveResource, args, rpl)
 }
 
@@ -1119,8 +1119,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(args *utils.Tena
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveResourceProfile, args, rpl)
 }
 
@@ -1136,8 +1136,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActionTriggers(args *utils.Strin
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveActionTriggers, args, rpl)
 }
 
@@ -1153,8 +1153,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveSharedGroup(args *utils.StringWi
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveSharedGroup, args, rpl)
 }
 
@@ -1170,8 +1170,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActions(args *utils.StringWithAP
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveActions, args, rpl)
 }
 
@@ -1187,25 +1187,25 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActionPlan(args *utils.StringWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveActionPlan, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.RemAccountActionPlansArgsWithOpts{}
+		args = &engine.RemAccountActionPlansArgsWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemAccountActionPlans, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.Opts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemAccountActionPlans, args, rpl)
 }
 
@@ -1221,8 +1221,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRatingPlan(args *utils.StringWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveRatingPlan, args, rpl)
 }
 
@@ -1238,8 +1238,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRatingProfile(args *utils.String
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveRatingProfile, args, rpl)
 }
 
@@ -1255,8 +1255,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRouteProfile(args *utils.TenantI
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveRouteProfile, args, rpl)
 }
 
@@ -1272,8 +1272,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(args *utils.Ten
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAttributeProfile, args, rpl)
 }
 
@@ -1289,8 +1289,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(args *utils.Tenan
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveChargerProfile, args, rpl)
 }
 
@@ -1306,8 +1306,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(args *utils.Te
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveDispatcherProfile, args, rpl)
 }
 
@@ -1323,8 +1323,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(args *utils.Tenan
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveDispatcherHost, args, rpl)
 }
 
@@ -1340,8 +1340,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(args *utils.TenantID
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveRateProfile, args, rpl)
 }
 
@@ -1357,8 +1357,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActionProfile(args *utils.Tenant
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveActionProfile, args, rpl)
 }
 
@@ -1375,8 +1375,8 @@ func (dS *DispatcherService) ReplicatorSv1GetIndexes(args *utils.GetIndexesArg, 
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetIndexes, args, reply)
 }
 
@@ -1393,8 +1393,8 @@ func (dS *DispatcherService) ReplicatorSv1SetIndexes(args *utils.SetIndexesArg, 
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetIndexes, args, reply)
 }
 
@@ -1411,8 +1411,8 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesAr
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIndexes, args, reply)
 }
 
@@ -1428,9 +1428,9 @@ func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantID
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		ID:     args.ID,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		ID:      args.ID,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccountProfile, args, reply)
 }
 
@@ -1446,8 +1446,8 @@ func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountP
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccountProfile, args, rpl)
 }
 
@@ -1463,7 +1463,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccountProfile(args *utils.Tenan
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
-		Opts:   args.APIOpts,
+		Tenant:  args.Tenant,
+		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAccountProfile, args, rpl)
 }

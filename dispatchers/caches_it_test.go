@@ -84,7 +84,7 @@ func testDspChcPing(t *testing.T) {
 
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},
 	}, &reply); err != nil {

@@ -69,7 +69,7 @@ func testDspRALsPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "rals12345",
 		},
 	}, &reply); err != nil {

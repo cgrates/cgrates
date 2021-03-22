@@ -914,12 +914,12 @@ func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithAPIOpts, reply
 }
 
 // RemAccountActionPlans is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID, args.ApIDs); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.Opts); err != nil {
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

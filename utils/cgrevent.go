@@ -24,11 +24,11 @@ import (
 
 // CGREvent is a generic event processed by CGR services
 type CGREvent struct {
-	Tenant string
-	ID     string
-	Time   *time.Time // event time
-	Event  map[string]interface{}
-	Opts   map[string]interface{}
+	Tenant  string
+	ID      string
+	Time    *time.Time // event time
+	Event   map[string]interface{}
+	APIOpts map[string]interface{}
 
 	cache map[string]interface{}
 }
@@ -58,7 +58,7 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 
 // OptAsString returns an option as string
 func (ev *CGREvent) OptAsString(optName string) (val string, err error) {
-	iface, has := ev.Opts[optName]
+	iface, has := ev.APIOpts[optName]
 	if !has {
 		return "", ErrNotFound
 	}
@@ -67,7 +67,7 @@ func (ev *CGREvent) OptAsString(optName string) (val string, err error) {
 
 // OptAsInt64 returns an option as int64
 func (ev *CGREvent) OptAsInt64(optName string) (int64, error) {
-	iface, has := ev.Opts[optName]
+	iface, has := ev.APIOpts[optName]
 	if !has {
 		return 0, ErrNotFound
 	}
@@ -156,10 +156,10 @@ func (ev *CGREvent) CacheRemove(key string) {
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
-		Tenant: ev.Tenant,
-		ID:     ev.ID,
-		Event:  make(map[string]interface{}), // a bit forced but safe
-		Opts:   make(map[string]interface{}),
+		Tenant:  ev.Tenant,
+		ID:      ev.ID,
+		Event:   make(map[string]interface{}), // a bit forced but safe
+		APIOpts: make(map[string]interface{}),
 	}
 	if ev.Time != nil {
 		clned.Time = TimePointer(*ev.Time)
@@ -167,9 +167,9 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	for k, v := range ev.Event {
 		clned.Event[k] = v
 	}
-	if ev.Opts != nil {
-		for opt, val := range ev.Opts {
-			clned.Opts[opt] = val
+	if ev.APIOpts != nil {
+		for opt, val := range ev.APIOpts {
+			clned.APIOpts[opt] = val
 		}
 	}
 	return
@@ -178,7 +178,7 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 // AsDataProvider returns the CGREvent as MapStorage with *opts and *req paths set
 func (cgrEv *CGREvent) AsDataProvider() (ev DataProvider) {
 	return MapStorage{
-		MetaOpts: cgrEv.Opts,
+		MetaOpts: cgrEv.APIOpts,
 		MetaReq:  cgrEv.Event,
 	}
 }

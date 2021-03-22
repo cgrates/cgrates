@@ -361,11 +361,11 @@ func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		return nil, err
 	}
 	cgrEv = &utils.CGREvent{
-		Tenant: fsev.GetTenant(utils.MetaDefault),
-		ID:     utils.UUIDSha1Prefix(),
-		Time:   &sTime,
-		Event:  fsev.AsMapStringInterface(timezone),
-		Opts:   fsev.GetOptions(),
+		Tenant:  fsev.GetTenant(utils.MetaDefault),
+		ID:      utils.UUIDSha1Prefix(),
+		Time:    &sTime,
+		Event:   fsev.AsMapStringInterface(timezone),
+		APIOpts: fsev.GetOptions(),
 	}
 	return cgrEv, nil
 }

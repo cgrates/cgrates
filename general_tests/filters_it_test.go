@@ -941,7 +941,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.RunID:        "Intra",
 					utils.Destination:  "999",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.Subsys: utils.MetaChargers,
 				},
 			},
@@ -978,7 +978,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 					utils.RunID:        "Inter",
 					utils.Destination:  "999",
 				},
-				Opts: map[string]interface{}{
+				APIOpts: map[string]interface{}{
 					utils.Subsys: utils.MetaChargers,
 				},
 			},
@@ -1038,7 +1038,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 				"CustomField2":    "+2007",
 				utils.Destination: "+1207",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 	}
 	cgrEv := &engine.AttrArgsProcessEvent{
@@ -1050,7 +1050,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 				"CustomField2":    "+2007",
 				utils.Destination: "+1207",
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		},
 		Context: utils.StringPointer("prefix"),
 	}

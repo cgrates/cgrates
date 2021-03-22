@@ -584,7 +584,7 @@ func testSessionsDataTTLExpired(t *testing.T) {
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:        "1024",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTLUsage: "2048", // will be charged on TTL
 			},
 		},
@@ -725,7 +725,7 @@ func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 				utils.LastUsed:     "1024",
 				utils.Usage:        "4096",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTLUsage:    "2048", // will be charged on TTL
 				utils.OptsSessionsTTLLastUsed: "1024",
 			},
@@ -865,7 +865,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 				utils.Usage:        "1024",
 				utils.LastUsed:     "1024",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTL: "0", // cancel timeout since usage 0 will not update it
 			},
 		},
@@ -914,7 +914,7 @@ func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 				utils.Usage:        "0",
 				utils.LastUsed:     "0",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTL: "1h", // cancel timeout since usage 0 will not update it
 			},
 		},
@@ -1113,7 +1113,7 @@ func testSessionsDataTTLLastUsage(t *testing.T) {
 				utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:        "1024",
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsSessionsTTLLastUsage: "2048",
 			},
 		},

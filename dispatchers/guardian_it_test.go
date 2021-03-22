@@ -70,7 +70,7 @@ func testDspGrdPing(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREvent{
 		Tenant: "cgrates.org",
 
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "grd12345",
 		},
 	}, &reply); err != nil {

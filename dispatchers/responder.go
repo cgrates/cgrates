@@ -34,7 +34,7 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREvent,
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ResponderPing, args.Tenant,
-			utils.IfaceAsString(args.Opts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
 	}
@@ -117,7 +117,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: tnt,
-		Opts:   args.APIOpts,
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
 }

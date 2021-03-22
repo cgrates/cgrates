@@ -128,7 +128,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqType == utils.MetaAuthorize ||
 		reqType == utils.MetaMessage ||
 		reqType == utils.MetaEvent {
-		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.Opts); err != nil {
+		if cgrArgs, err = utils.GetRoutePaginatorFromOpts(cgrEv.APIOpts); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> args extraction failed because <%s>",
 				utils.HTTPAgent, err.Error()))
 			err = nil // reset the error and continue the processing
