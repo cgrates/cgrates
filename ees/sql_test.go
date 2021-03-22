@@ -28,6 +28,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func TestSqlID(t *testing.T) {
@@ -153,4 +155,64 @@ func TestNewSQLeExportPathError(t *testing.T) {
 	if _, err := sqlEe.NewSQLEeUrl(cgrCfg); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
+}
+
+// type mockConnPool struct {
+// 	sqldb *sql.DB
+// }
+
+// func (mcp mockConnPool) Ping() error {
+// 	return nil
+// }
+// func (mockConnPool) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
+// 	return nil, nil
+// }
+// func (mockConnPool) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+// 	return nil, nil
+// }
+// func (mockConnPool) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+// 	return nil, nil
+// }
+// func (mockConnPool) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
+// 	return nil
+// }
+
+type mockDialect2 struct {
+	gorm.Dialector
+}
+
+func (mockDialect2) Initialize(db *gorm.DB) error { return nil }
+
+func TestOpenDBError2(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	cgrCfg := config.NewDefaultCGRConfig()
+	mckDialect := new(mockDialect2)
+	_, _, err := openDB(cgrCfg, 0, mckDialect)
+	errExpect := "invalid db"
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	logger.Default = tmp
+}
+
+type mockDialectErr struct {
+	gorm.Dialector
+}
+
+func (mockDialectErr) Initialize(db *gorm.DB) error {
+	return utils.ErrNotFound
+}
+
+func TestOpenDBError3(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	cgrCfg := config.NewDefaultCGRConfig()
+	mckDialect := new(mockDialectErr)
+	_, _, err := openDB(cgrCfg, 0, mckDialect)
+	errExpect := "NOT_FOUND"
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	logger.Default = tmp
 }
