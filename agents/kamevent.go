@@ -213,7 +213,7 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		args.GetMaxUsage = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 
@@ -273,7 +273,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		args.InitSession = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 
@@ -291,7 +291,7 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 	if !has {
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 
@@ -387,7 +387,7 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	if !has {
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 

@@ -74,7 +74,7 @@ func getFlagIDs(flag string) []string {
 	if len(flagWithIDs) <= 1 {
 		return nil
 	}
-	return strings.Split(flagWithIDs[1], utils.InfieldSep)
+	return strings.Split(flagWithIDs[1], utils.ANDSep)
 }
 
 // ProcessedStirIdentity the structure that keeps all the header information

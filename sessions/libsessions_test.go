@@ -71,7 +71,7 @@ func TestGetFlagIDs(t *testing.T) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	//normal check
-	rcv = getFlagIDs("*attributes:ATTR1;ATTR2")
+	rcv = getFlagIDs("*attributes:ATTR1&ATTR2")
 	eOut = []string{"ATTR1", "ATTR2"}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))

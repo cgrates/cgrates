@@ -412,7 +412,7 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		args.GetMaxUsage = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 
@@ -430,7 +430,7 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		args.InitSession = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 
@@ -448,7 +448,7 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		args.TerminateSession = true
 		return
 	}
-	args.ParseFlags(subsystems)
+	args.ParseFlags(subsystems, utils.InfieldSep)
 	return
 }
 
@@ -464,7 +464,7 @@ func SliceAsFsArray(slc []string) (arry string) {
 	return
 }
 
-// GetOptions returns the posible options
+// GetOptions returns the possible options
 func (fsev FSEvent) GetOptions() (mp map[string]interface{}) {
 	mp = make(map[string]interface{})
 	opts, has := fsev[VarCGROpts]

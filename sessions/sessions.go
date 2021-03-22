@@ -1819,8 +1819,8 @@ type V1AuthorizeArgs struct {
 }
 
 // ParseFlags will populate the V1AuthorizeArgs flags
-func (args *V1AuthorizeArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
+func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
+	for _, subsystem := range strings.Split(flags, sep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.GetMaxUsage = true
@@ -2116,8 +2116,8 @@ type V1InitSessionArgs struct {
 }
 
 // ParseFlags will populate the V1InitSessionArgs flags
-func (args *V1InitSessionArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
+func (args *V1InitSessionArgs) ParseFlags(flags, sep string) {
+	for _, subsystem := range strings.Split(flags, sep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.InitSession = true
@@ -2546,8 +2546,8 @@ type V1TerminateSessionArgs struct {
 }
 
 // ParseFlags will populate the V1TerminateSessionArgs flags
-func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
+func (args *V1TerminateSessionArgs) ParseFlags(flags, sep string) {
+	for _, subsystem := range strings.Split(flags, sep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.TerminateSession = true
@@ -2788,8 +2788,8 @@ type V1ProcessMessageArgs struct {
 }
 
 // ParseFlags will populate the V1ProcessMessageArgs flags
-func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
-	for _, subsystem := range strings.Split(flags, utils.FieldsSep) {
+func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
+	for _, subsystem := range strings.Split(flags, sep) {
 		switch {
 		case subsystem == utils.MetaAccounts:
 			args.Debit = true

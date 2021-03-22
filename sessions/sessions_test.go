@@ -970,14 +970,14 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 	}
 }
 
-func TestV1AuthorizeArgsParseFlags(t *testing.T) {
+func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 	v1authArgs := new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	eOut := new(V1AuthorizeArgs)
 	eOut.CGREvent = new(utils.CGREvent)
 	//empty check
 	strArg := ""
-	v1authArgs.ParseFlags(strArg)
+	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
 	}
@@ -1000,10 +1000,10 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts,*fd,*resources,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts;*fd;*resources;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
-	v1authArgs.ParseFlags(strArg)
+	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
@@ -1026,10 +1026,10 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts,*fd,*resources,,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
-	v1authArgs.ParseFlags(strArg)
+	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
@@ -1050,10 +1050,10 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts,*fd,*resources,,*dispatchers,*routes,*routes_ignore_errors,*routes_maxcost:100,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routes_ignore_errors;*routes_maxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
-	v1authArgs.ParseFlags(strArg)
+	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
@@ -1962,7 +1962,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 	eOut := new(V1InitSessionArgs)
 	//empty check
 	strArg := ""
-	v1InitSsArgs.ParseFlags(strArg)
+	v1InitSsArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1InitSsArgs)
 	}
@@ -1979,8 +1979,8 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
-	v1InitSsArgs.ParseFlags(strArg)
+	strArg = "*accounts;*resources;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
+	v1InitSsArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
@@ -1997,8 +1997,8 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,*dispatchers,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
-	v1InitSsArgs.ParseFlags(strArg)
+	strArg = "*accounts;*resources;*dispatchers;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
+	v1InitSsArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
@@ -2010,7 +2010,7 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 	eOut := new(V1TerminateSessionArgs)
 	//empty check
 	strArg := ""
-	v1TerminateSsArgs.ParseFlags(strArg)
+	v1TerminateSsArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1TerminateSsArgs)
 	}
@@ -2025,8 +2025,8 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,*routes,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
-	v1TerminateSsArgs.ParseFlags(strArg)
+	strArg = "*accounts;*resources;*routes;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
+	v1TerminateSsArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
@@ -2041,8 +2041,8 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		ForceDuration:     true,
 	}
 
-	strArg = "*accounts,*resources,,*dispatchers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
-	v1TerminateSsArgs.ParseFlags(strArg)
+	strArg = "*accounts;*resources;;*dispatchers;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
+	v1TerminateSsArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
@@ -2056,7 +2056,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	eOut.CGREvent = new(utils.CGREvent)
 	//empty check
 	strArg := ""
-	v1ProcessMsgArgs.ParseFlags(strArg)
+	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1ProcessMsgArgs)
 	}
@@ -2076,10 +2076,10 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		CGREvent:           eOut.CGREvent,
 	}
 
-	strArg = "*accounts,*resources,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts;*resources;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
-	v1ProcessMsgArgs.ParseFlags(strArg)
+	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
 	}
@@ -2101,10 +2101,10 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3,*fd"
+	strArg = "*accounts;*resources;*dispatchers;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
-	v1ProcessMsgArgs.ParseFlags(strArg)
+	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
 	}
@@ -2124,14 +2124,13 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		CGREvent:           eOut.CGREvent,
 	}
 
-	strArg = "*accounts,*resources,*dispatchers,*routes,*routes_ignore_errors,*routes_maxcost:100,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts;*resources;*dispatchers;*routes;*routes_ignore_errors;*routes_maxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
-	v1ProcessMsgArgs.ParseFlags(strArg)
+	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
 	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
 	}
-
 }
 
 func TestSessionSgetSession(t *testing.T) {
