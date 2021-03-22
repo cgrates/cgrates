@@ -20,9 +20,11 @@ package utils
 
 import (
 	"net"
-	"strconv"
 	"strings"
 )
+
+// NMType the type used for navigable Map
+type NMType byte
 
 // posible NMType
 const (
@@ -49,7 +51,7 @@ type RWDataProvider interface {
 
 // NavigableMapper is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap() NavigableMap
+	AsNavigableMap() *DataNode
 }
 
 // DPDynamicInterface returns the value of the field if the path is dynamic
@@ -70,65 +72,4 @@ func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
 	}
 	return dnVal, nil
-}
-
-// NMType the type used for navigable Map
-type NMType byte
-
-// NMInterface the basic interface
-type NMInterface interface {
-	String() string
-	Interface() interface{}
-	Field(path PathItems) (val NMInterface, err error)
-	Set(path PathItems, val NMInterface) (addedNew bool, err error)
-	Remove(path PathItems) (err error)
-	Type() NMType
-	Empty() bool
-	Len() int
-}
-
-// navMap subset of function for NM interface
-type navMap interface {
-	Field(path PathItems) (val NMInterface, err error)
-	Set(fullpath *FullPath, val NMInterface) (addedNew bool, err error)
-}
-
-// AppendNavMapVal appends value to the map
-func AppendNavMapVal(nm navMap, fldPath *FullPath, val NMInterface) (err error) {
-	var prevItm NMInterface
-	var indx int
-	if prevItm, err = nm.Field(fldPath.PathItems); err != nil {
-		if err != ErrNotFound {
-			return
-		}
-	} else {
-		indx = prevItm.Len()
-	}
-	fldPath.PathItems[len(fldPath.PathItems)-1].Index = []string{strconv.Itoa(indx)}
-	_, err = nm.Set(fldPath, val)
-	return
-}
-
-// ComposeNavMapVal compose adds value to prevision item
-func ComposeNavMapVal(nm navMap, fldPath *FullPath, val NMInterface) (err error) {
-	var prevItmSlice NMInterface
-	var indx int
-	if prevItmSlice, err = nm.Field(fldPath.PathItems); err != nil {
-		if err != ErrNotFound {
-			return
-		}
-	} else {
-		indx = prevItmSlice.Len() - 1
-		var prevItm NMInterface
-		if prevItm, err = prevItmSlice.Field(PathItems{{Index: []string{strconv.Itoa(indx)}}}); err != nil {
-			if err != ErrNotFound {
-				return
-			}
-		} else if _, err = val.Set(nil, NewNMData(IfaceAsString(prevItm.Interface())+IfaceAsString(val.Interface()))); err != nil {
-			return
-		}
-	}
-	fldPath.PathItems[len(fldPath.PathItems)-1].Index = []string{strconv.Itoa(indx)}
-	_, err = nm.Set(fldPath, val)
-	return
 }

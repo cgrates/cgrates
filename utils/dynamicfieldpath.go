@@ -28,12 +28,7 @@ func GetFullFieldPath(fldPath string, dP DataProvider) (fpath *FullPath, err err
 	if newPath, err = processFieldPath(fldPath, dP); err != nil || newPath == EmptyString {
 		return
 	}
-	fpath = &FullPath{
-		PathItems: NewPathItems(strings.Split(newPath, NestingSep)),
-		Path:      newPath,
-	}
-
-	return
+	return NewFullPath(newPath), nil
 }
 
 // replaces the dynamic path between <>
