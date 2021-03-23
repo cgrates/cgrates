@@ -1454,7 +1454,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	}
 	var result string
 	//add the second charger
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.com",
 			ID:           "CustomCharger",
@@ -1470,7 +1470,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add the second charger
-	chargerProfile2 := &v1.ChargerWithOpts{
+	chargerProfile2 := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.com",
 			ID:           "Default",

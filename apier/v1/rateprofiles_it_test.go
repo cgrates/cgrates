@@ -297,14 +297,14 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	var reply string
 	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:RP1"
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrf,
 		}, &reply); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
 	apiRPrf.FilterIDs = []string{"*string:~*req.Subject:1001"}
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)
@@ -355,7 +355,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	apiRPrfRates.Rates["RT_WEEK"].FilterIDs = []string{"*wrong:inline"}
 	expErr = "SERVER_ERROR: broken reference to filter: *wrong:inline for rate with ID: RT_WEEK"
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrfRates,
 		}, &reply); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
@@ -363,7 +363,7 @@ func testV1RatePrfSetRateProfileRates(t *testing.T) {
 	apiRPrfRates.Rates["RT_WEEK"].FilterIDs = nil
 
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfileRates,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrfRates,
 		}, &reply); err != nil {
 		t.Fatal(err)
@@ -484,7 +484,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1SetRateProfile,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)
@@ -493,7 +493,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRatesWithOpts{
+		&RemoveRPrfRatesWithAPIOpts{
 			Tenant:  "cgrates.org",
 			ID:      "SpecialRate",
 			RateIDs: []string{"RT_WEEKEND"},
@@ -557,7 +557,7 @@ func testV1RatePrfRemoveRateProfileRates(t *testing.T) {
 	}
 
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRatesWithOpts{
+		&RemoveRPrfRatesWithAPIOpts{
 			Tenant: "cgrates.org",
 			ID:     "SpecialRate",
 		}, &reply); err != nil {
@@ -633,7 +633,7 @@ func testV1RateGetRemoveRateProfileWithoutTenant(t *testing.T) {
 	if *encoding == utils.MetaGOB {
 		rateProfile.Rates["RT_WEEK"].FilterIDs = nil
 	}
-	apiRPrf := &utils.APIRateProfileWithOpts{
+	apiRPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			ID:              "RPWithoutTenant",
 			FilterIDs:       []string{"*string:~*req.Subject:1001"},
@@ -764,7 +764,7 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 			},
 		},
 	}
-	apiRPrf := &utils.APIRateProfileWithOpts{
+	apiRPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			ID:              "SpecialRate",
 			FilterIDs:       []string{"*string:~*req.Subject:1001"},
@@ -814,7 +814,7 @@ func testV1RatePrfGetRateProfileRatesWithoutTenant(t *testing.T) {
 func testV1RatePrfRemoveRateProfileRatesWithoutTenant(t *testing.T) {
 	var reply string
 	if err := ratePrfRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRatesWithOpts{ID: "SpecialRate"},
+		&RemoveRPrfRatesWithAPIOpts{ID: "SpecialRate"},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -854,7 +854,7 @@ func testV1RateCostForEventWithDefault(t *testing.T) {
 			},
 		},
 	}
-	rPrf := &utils.APIRateProfileWithOpts{
+	rPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			ID:        "DefaultRate",
 			FilterIDs: []string{"*string:~*req.Subject:1001"},

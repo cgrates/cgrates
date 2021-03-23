@@ -129,7 +129,7 @@ func testJSONRpcConn(t *testing.T) {
 func testJSONAddData(t *testing.T) {
 	var reply string
 	//add a charger
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
 			ID:     "Default",
@@ -140,7 +140,7 @@ func testJSONAddData(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}

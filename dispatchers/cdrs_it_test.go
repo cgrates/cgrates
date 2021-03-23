@@ -368,7 +368,7 @@ func testDspCDRsV2StoreSessionCost(t *testing.T) {
 			Usage:       1536,
 			CostDetails: engine.NewEventCostFromCallCost(cc, "testDspCDRsV2StoreSessionCost", utils.MetaDefault),
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cdrsv212345",
 		},
 	}

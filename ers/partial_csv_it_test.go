@@ -128,7 +128,7 @@ func testPartITRpcConn(t *testing.T) {
 
 func testPartITLoadTPFromFolder(t *testing.T) {
 	//add a default charger
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",

@@ -1818,7 +1818,7 @@ func testV1FISetRateProfileRatesIndexes(t *testing.T) {
 	}
 
 	//set in db a ratePrf with double populated rates with our filter
-	ratePrfRates := &utils.APIRateProfileWithOpts{
+	ratePrfRates := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              "RP1",
@@ -1996,7 +1996,7 @@ func testV1FISetSecondRateProfileRate(t *testing.T) {
 	}
 
 	//append a new rate in the same rate profile
-	ratePrfRates := &utils.APIRateProfileWithOpts{
+	ratePrfRates := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              "RP1",
@@ -2126,7 +2126,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 	//removing rates from db will delete the indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRatesWithOpts{ID: "RP1",
+		&RemoveRPrfRatesWithAPIOpts{ID: "RP1",
 			Tenant: tenant, RateIDs: []string{"RT_WEEK", "RT_YEAR"}},
 		&result); err != nil {
 		t.Error(err)
@@ -2190,7 +2190,7 @@ func testVF1RemoveRateProfileRates(t *testing.T) {
 
 	//no we will remove the left rate and the profile
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveRateProfileRates,
-		&RemoveRPrfRatesWithOpts{ID: "RP1",
+		&RemoveRPrfRatesWithAPIOpts{ID: "RP1",
 			Tenant: tenant, RateIDs: []string{"RT_MONTH"}},
 		&result); err != nil {
 		t.Error(err)
@@ -2244,7 +2244,7 @@ func testV1FISetRateProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//set in db a ratePrf with with our filterS
-	ratePrfRates := &utils.APIRateProfileWithOpts{
+	ratePrfRates := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              "RP2",
@@ -2419,7 +2419,7 @@ func testV1FISetSecondRateProfile(t *testing.T) {
 	}
 
 	//another rate profile
-	ratePrfRates := &utils.APIRateProfileWithOpts{
+	ratePrfRates := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              "RP3",

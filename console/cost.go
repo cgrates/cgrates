@@ -54,7 +54,7 @@ func (self *CmdGetCost) RpcMethod() string {
 
 func (self *CmdGetCost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrGetCost{Opts: make(map[string]interface{})}
+		self.rpcParams = &v1.AttrGetCost{APIOpts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }

@@ -37,7 +37,7 @@ var (
 	chargerCfgPath   string
 	chargerCfg       *config.CGRConfig
 	chargerRPC       *rpc.Client
-	chargerProfile   *ChargerWithOpts
+	chargerProfile   *ChargerWithAPIOpts
 	chargerConfigDIR string //run tests for specific configuration
 
 	chargerEvent = []*utils.CGREvent{
@@ -149,7 +149,7 @@ func testChargerSRPCConn(t *testing.T) {
 }
 
 func testChargerSLoadAddCharger(t *testing.T) {
-	chargerProfile := &ChargerWithOpts{
+	chargerProfile := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
@@ -169,7 +169,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Charger2",
@@ -189,7 +189,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ChargerNotMatching",
@@ -367,7 +367,7 @@ func testChargerSProcessEvent(t *testing.T) {
 }
 
 func testChargerSSetChargerProfile(t *testing.T) {
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
@@ -478,7 +478,7 @@ func testChargerSPing(t *testing.T) {
 
 func testChargerSProcessWithNotFoundAttribute(t *testing.T) {
 	var result string
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ChargerWithoutAttribute",
@@ -540,7 +540,7 @@ func testChargerSKillEngine(t *testing.T) {
 }
 
 func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
@@ -604,7 +604,7 @@ func testChargerSProccessEventWithProcceSRunS(t *testing.T) {
 }
 
 func testChargerSSetChargerProfileWithoutTenant(t *testing.T) {
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			ID:        "randomID",
 			FilterIDs: []string{"*string:~*req.Account:1010"},

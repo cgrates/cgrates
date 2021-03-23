@@ -463,7 +463,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 	//add a charger
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "CustomTenant",
 			ID:     "CustomCharger",
@@ -475,7 +475,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -860,7 +860,7 @@ func testV2CDRsRerate(t *testing.T) {
 		t.Error("Reply: ", reply)
 	}
 	//add a charger
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
 			ID:     "Default",
@@ -871,7 +871,7 @@ func testV2CDRsRerate(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}
@@ -1026,7 +1026,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 		t.Error("Reply: ", reply)
 	}
 	//add a charger
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant: "cgrates.org",
 			ID:     "Default",
@@ -1037,7 +1037,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
-		Opts: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
 		},
 	}

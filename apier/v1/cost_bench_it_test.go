@@ -95,7 +95,7 @@ func testCostBenchLoadFromFolder2(b *testing.B) {
 }
 
 func testCostBenchSetRateProfile(b *testing.B) {
-	rPrf := &utils.APIRateProfileWithOpts{
+	rPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			ID:        "DefaultRate",
 			FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -163,7 +163,7 @@ func testCostBenchSetRateProfile2(b *testing.B) {
 			Increment:     utils.Float64Pointer(1000000000),
 		}},
 	}
-	rPrf := &utils.APIRateProfileWithOpts{
+	rPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			ID:        "RateChristmas",
 			FilterIDs: []string{"*string:~*req.Subject:1010"},

@@ -288,9 +288,9 @@ type APIRateProfile struct {
 	Rates              map[string]*APIRate
 }
 
-type APIRateProfileWithOpts struct {
+type APIRateProfileWithAPIOpts struct {
 	*APIRateProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 func (ext *APIRate) AsRate() (rate *Rate, err error) {

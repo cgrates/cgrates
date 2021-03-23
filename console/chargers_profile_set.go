@@ -28,7 +28,7 @@ func init() {
 	c := &CmdSetChargers{
 		name:      "chargers_profile_set",
 		rpcMethod: utils.APIerSv1SetChargerProfile,
-		rpcParams: &v1.ChargerWithOpts{},
+		rpcParams: &v1.ChargerWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetChargers struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.ChargerWithOpts
+	rpcParams *v1.ChargerWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdSetChargers) RpcMethod() string {
 
 func (self *CmdSetChargers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ChargerWithOpts{ChargerProfile: new(engine.ChargerProfile)}
+		self.rpcParams = &v1.ChargerWithAPIOpts{ChargerProfile: new(engine.ChargerProfile)}
 	}
 	return self.rpcParams
 }
