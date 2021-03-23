@@ -143,10 +143,7 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 // FieldAsString is used to retrieve fields as string, primary fields are const labeled
 func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
 	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(
-		utils.MapStorage{
-			utils.MetaReq: cdr.AsMapStringIface(),
-			utils.MetaEC:  cdr.CostDetails,
-		})
+		cdr.AsMapStorage())
 	if err != nil {
 		return
 	}
@@ -156,10 +153,7 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 // FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
 	outVal, err := rsrFlds.ParseDataProvider(
-		utils.MapStorage{
-			utils.MetaReq: cdr.AsMapStringIface(),
-			utils.MetaEC:  cdr.CostDetails,
-		})
+		cdr.AsMapStorage())
 	if err != nil {
 		return ""
 	}
@@ -203,6 +197,16 @@ func (cdr *CDR) Clone() *CDR {
 	}
 
 	return cln
+}
+
+func (cdr *CDR) AsMapStorage() (mp utils.MapStorage) {
+	mp = utils.MapStorage{
+		utils.MetaReq: cdr.AsMapStringIface(),
+	}
+	if cdr.CostDetails != nil {
+		mp[utils.MetaEC] = cdr.CostDetails
+	}
+	return
 }
 
 func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
@@ -283,10 +287,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 		if cdr.CGRID != grpCDR.CGRID {
 			continue // We only care about cdrs with same primary cdr behind
 		}
-		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, utils.MapStorage{
-			utils.MetaReq: grpCDR.AsMapStringIface(),
-			utils.MetaEC:  grpCDR.CostDetails,
-		}); err != nil {
+		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, grpCDR.AsMapStorage()); err != nil {
 			return utils.EmptyString, err
 		} else if !pass {
 			continue
@@ -391,10 +392,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate, groupedCDRs []*CDR,
 	filterS *FilterS) (expRecord []string, err error) {
-	nM := utils.MapStorage{
-		utils.MetaReq: cdr.AsMapStringIface(),
-		utils.MetaEC:  cdr.CostDetails,
-	}
+	nM := cdr.AsMapStorage()
 	for _, cfgFld := range exportFields {
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
 			continue

@@ -955,9 +955,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 
 // FieldAsInterface func to implement DataProvider
 func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
-		return nil, utils.ErrNotFound
-	}
 	if ec.cache == nil {
 		ec.cache = utils.MapStorage{} // fix gob deserialization
 	}
