@@ -4305,7 +4305,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 				utils.Destination: "1002",
 				utils.RequestType: utils.MetaPrepaid,
 			},
-			Opts: map[string]interface{}{
+			APIOpts: map[string]interface{}{
 				utils.OptsDebitInterval: "10s",
 			},
 		},
