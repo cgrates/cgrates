@@ -195,13 +195,18 @@ func debitConcreteUnits(cUnits *decimal.Big,
 	acntID string, cncrtBlncs []*concreteBalance,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
-	ec = utils.NewEventCharges()
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for _, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
-		if ecCncrt, err = cB.debitConcretes(cUnits, cgrEv); err != nil {
+		if ecCncrt, err = cB.debitConcretes(new(decimal.Big).Copy(cUnits), cgrEv); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return nil, err
+		}
+		if ecCncrt == nil { // no debit performed
+			continue
+		}
+		if ec == nil {
+			ec = utils.NewEventCharges()
 		}
 		ec.Merge(ecCncrt)
 		cUnits = utils.SubstractBig(cUnits, ecCncrt.Concretes.Big)

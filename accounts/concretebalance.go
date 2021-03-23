@@ -136,7 +136,9 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 	if hasUF {
 		dbted = utils.DivideBig(dbted, uF.Factor.Big)
 	}
-
+	if dbted.Cmp(decimal.New(0, 0)) == 0 {
+		return // no event cost for 0 debit
+	}
 	ec = utils.NewEventCharges()
 	ec.Concretes = &utils.Decimal{dbted}
 	// UnitFactors
@@ -153,5 +155,5 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 	}
-	return &utils.EventCharges{Concretes: &utils.Decimal{dbted}}, nil
+	return
 }

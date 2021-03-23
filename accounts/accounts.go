@@ -159,7 +159,6 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 	} else {
 		usage = decimal.New(int64(usgEv), 0)
 	}
-	ec = utils.NewEventCharges()
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
 	for i, acnt := range acnts {
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
@@ -173,6 +172,12 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 				restoreAccounts(aS.dm, acnts, acntBkps)
 			}
 			return
+		}
+		if ecDbt == nil {
+			continue
+		}
+		if ec == nil { // no debit performed yet
+			ec = utils.NewEventCharges()
 		}
 		if store && acnt.AccountProfile.BalancesAltered(acntBkps[i]) {
 			if err = aS.dm.SetAccountProfile(acnt.AccountProfile, false); err != nil {
@@ -212,7 +217,7 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
-	ec = utils.NewEventCharges()
+
 	for _, blncOper := range blncOpers {
 		debFunc := blncOper.debitAbstracts
 		if concretes {
@@ -229,6 +234,12 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 				continue
 			}
 			return
+		}
+		if ecDbt == nil {
+			continue // no debit performed
+		}
+		if ec == nil { // first debit
+			ec = utils.NewEventCharges()
 		}
 		var used *decimal.Big
 		if concretes {

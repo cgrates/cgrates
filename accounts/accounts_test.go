@@ -429,11 +429,10 @@ func TestAccountsDebit(t *testing.T) {
 	accntsPrf[0].Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
 	cgrEvent.Event[utils.Usage] = "300ns"
-	expectedUsage := &utils.Decimal{decimal.New(0, 0)}
 	if evCh, err := accnts.accountsDebit(accntsPrf, cgrEvent, true, true); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedUsage, evCh.Concretes) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage), utils.ToJSON(evCh.Concretes))
+	} else if evCh != nil {
+		t.Errorf("received %+v", utils.ToJSON(evCh))
 	}
 
 	var err error
