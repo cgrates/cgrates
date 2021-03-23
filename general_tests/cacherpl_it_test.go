@@ -229,7 +229,7 @@ func testCacheRplAddData(t *testing.T) {
 		t.Errorf("cgr-loader failed: ")
 	}
 
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "DefaultCharger",
@@ -288,7 +288,7 @@ func testCacheRplAAAddData(t *testing.T) {
 		t.Errorf("cgr-loader failed: ")
 	}
 
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "DefaultCharger",

@@ -32,7 +32,7 @@ type AttrGetCost struct {
 	AnswerTime  string
 	Destination string
 	Usage       string
-	Opts        map[string]interface{}
+	APIOpts     map[string]interface{}
 }
 
 func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) error {
@@ -62,7 +62,7 @@ func (apierSv1 *APIerSv1) GetCost(attrs *AttrGetCost, ec *engine.EventCost) erro
 	if err := apierSv1.Responder.GetCost(
 		&engine.CallDescriptorWithAPIOpts{
 			CallDescriptor: cd,
-			APIOpts:        attrs.Opts,
+			APIOpts:        attrs.APIOpts,
 		}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}

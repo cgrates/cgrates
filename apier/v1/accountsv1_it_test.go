@@ -803,7 +803,7 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)
@@ -900,7 +900,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)
@@ -1004,7 +1004,7 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 	}
 
 	if err := acntSRPC.Call(utils.APIerSv1SetRateProfile,
-		&utils.APIRateProfileWithOpts{
+		&utils.APIRateProfileWithAPIOpts{
 			APIRateProfile: apiRPrf,
 		}, &reply); err != nil {
 		t.Fatal(err)

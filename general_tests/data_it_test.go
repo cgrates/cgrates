@@ -177,7 +177,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 	}
 	tStart := time.Now()
 	if err := dataRpc.Call(utils.APIerSv1DebitUsage,
-		&engine.UsageRecordWithOpts{UsageRecord: usageRecord}, &reply); err != nil {
+		&engine.UsageRecordWithAPIOpts{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
 	if time.Now().Sub(tStart) > 50*time.Millisecond {
@@ -315,7 +315,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 	}
 	tStart := time.Now()
 	if err := dataRpc.Call(utils.APIerSv1DebitUsage,
-		&engine.UsageRecordWithOpts{UsageRecord: usageRecord}, &reply); err != nil {
+		&engine.UsageRecordWithAPIOpts{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
 	if time.Now().Sub(tStart) > 100*time.Millisecond {

@@ -893,7 +893,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
 	}
-	chargerProfile := &v1.ChargerWithOpts{
+	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "IntraCharger",
@@ -910,7 +910,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	chargerProfile2 := &v1.ChargerWithOpts{
+	chargerProfile2 := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "InterCharger",

@@ -124,7 +124,7 @@ func testEEsRPCConn(t *testing.T) {
 
 func testEEsAddCDRs(t *testing.T) {
 	//add a default charger
-	chargerProfile := &ChargerWithOpts{
+	chargerProfile := &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",

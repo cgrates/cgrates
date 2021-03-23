@@ -568,7 +568,7 @@ func testInternalReplicateITChargerProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	chargerProfile = &ChargerWithOpts{
+	chargerProfile = &ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",

@@ -363,7 +363,7 @@ type AttrLoadTpFromStorDb struct {
 	TPid     string
 	DryRun   bool // Only simulate, no write
 	Validate bool // Run structural checks
-	Opts     map[string]interface{}
+	APIOpts  map[string]interface{}
 	Caching  *string // Caching strategy
 }
 
@@ -402,7 +402,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.Opts); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1084,7 +1084,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.Opts); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1150,7 +1150,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading cache.")
-	if err := loader.ReloadCache(caching, true, attrs.Opts); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
@@ -1202,7 +1202,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	}
 	// reload cache
 	utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading cache.")
-	if err := dbReader.ReloadCache(caching, true, attrs.Opts); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {

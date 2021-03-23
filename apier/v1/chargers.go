@@ -64,13 +64,13 @@ func (apierSv1 *APIerSv1) GetChargerProfileIDs(args *utils.PaginatorWithTenant, 
 	return nil
 }
 
-type ChargerWithOpts struct {
+type ChargerWithAPIOpts struct {
 	*engine.ChargerProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 //SetChargerProfile add/update a new Charger Profile
-func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -85,8 +85,8 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithOpts, reply *string)
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), arg.Tenant, utils.CacheChargerProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheChargerProfiles,
+		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

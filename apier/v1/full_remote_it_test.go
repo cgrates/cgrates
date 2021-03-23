@@ -596,7 +596,7 @@ func testFullRemoteITRate(t *testing.T) {
 	}
 
 	var replySet string
-	apiRPrf := &utils.APIRateProfileWithOpts{
+	apiRPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              "RP1",

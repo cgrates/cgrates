@@ -25,13 +25,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttributeWithOpts struct {
+type AttributeWithAPIOpts struct {
 	*engine.APIAttributeProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithOpts, reply *string) error {
+func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -50,8 +50,8 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithOpts, reply *str
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := APIerSv2.APIerSv1.CallCache(utils.IfaceAsString(arg.Opts[utils.CacheOpt]), alsPrf.Tenant, utils.CacheAttributeProfiles,
-		alsPrf.TenantID(), &alsPrf.FilterIDs, alsPrf.Contexts, arg.Opts); err != nil {
+	if err := APIerSv2.APIerSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), alsPrf.Tenant, utils.CacheAttributeProfiles,
+		alsPrf.TenantID(), &alsPrf.FilterIDs, alsPrf.Contexts, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -532,7 +532,7 @@ type AttrLoadTpFromFolder struct {
 	FolderPath string // Take files from folder absolute path
 	DryRun     bool   // Do not write to database but parse only
 	Validate   bool   // Run structural checks on data
-	Opts       map[string]interface{}
+	APIOpts    map[string]interface{}
 	Caching    *string
 }
 
@@ -541,7 +541,7 @@ type AttrImportTPFromFolder struct {
 	FolderPath   string
 	RunId        string
 	CsvSeparator string
-	Opts         map[string]interface{}
+	APIOpts      map[string]interface{}
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {

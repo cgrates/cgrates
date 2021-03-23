@@ -567,9 +567,9 @@ type ExternalCDRWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-type UsageRecordWithOpts struct {
+type UsageRecordWithAPIOpts struct {
 	*UsageRecord
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 type CDRWithAPIOpts struct {

@@ -39,7 +39,7 @@ func init() {
 type CmdGetMaxUsage struct {
 	name       string
 	rpcMethod  string
-	rpcParams  *engine.UsageRecordWithOpts
+	rpcParams  *engine.UsageRecordWithAPIOpts
 	clientArgs []string
 	*CommandExecuter
 }
@@ -54,7 +54,7 @@ func (self *CmdGetMaxUsage) RpcMethod() string {
 
 func (self *CmdGetMaxUsage) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.UsageRecordWithOpts)
+		self.rpcParams = new(engine.UsageRecordWithAPIOpts)
 	}
 	return self.rpcParams
 }

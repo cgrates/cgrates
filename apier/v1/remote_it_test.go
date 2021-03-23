@@ -711,7 +711,7 @@ func testInternalRemoteITGetRateProfile(t *testing.T) {
 			},
 		},
 	}
-	apiRPrf := &utils.APIRateProfileWithOpts{
+	apiRPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              "RP1",

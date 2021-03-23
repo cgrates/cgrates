@@ -1041,7 +1041,7 @@ func testFltrRplRouteProfile(t *testing.T) {
 
 func testFltrRplChargerProfile(t *testing.T) {
 	chID := "CH1"
-	chPrf := &v1.ChargerWithOpts{
+	chPrf := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           chID,
@@ -1342,7 +1342,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 
 func testFltrRplRateProfile(t *testing.T) {
 	rpID := "RP1"
-	rpPrf := &utils.APIRateProfileWithOpts{
+	rpPrf := &utils.APIRateProfileWithAPIOpts{
 		APIRateProfile: &utils.APIRateProfile{
 			Tenant:          "cgrates.org",
 			ID:              rpID,
