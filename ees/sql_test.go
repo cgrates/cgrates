@@ -157,26 +157,6 @@ func TestNewSQLeExportPathError(t *testing.T) {
 	}
 }
 
-// type mockConnPool struct {
-// 	sqldb *sql.DB
-// }
-
-// func (mcp mockConnPool) Ping() error {
-// 	return nil
-// }
-// func (mockConnPool) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-// 	return nil, nil
-// }
-// func (mockConnPool) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-// 	return nil, nil
-// }
-// func (mockConnPool) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-// 	return nil, nil
-// }
-// func (mockConnPool) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-// 	return nil
-// }
-
 type mockDialect2 struct {
 	gorm.Dialector
 }
