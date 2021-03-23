@@ -2655,12 +2655,6 @@ func TestInitCache(t *testing.T) {
 func TestEventCostFieldAsInterface(t *testing.T) {
 	eventCost := &EventCost{}
 	eventCost.initCache()
-	// empty check
-	if rcv, err := eventCost.FieldAsInterface([]string{}); err != utils.ErrNotFound {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
-	} else if rcv != nil {
-		t.Errorf("Expecting: nil, received: %+v", rcv)
-	}
 	// item found in cache
 	eventCost.cache = utils.MapStorage{"test": nil}
 	if rcv, err := eventCost.FieldAsInterface([]string{"test"}); err == nil || err != utils.ErrNotFound {
@@ -3789,5 +3783,21 @@ func TestECAsDataProvider2(t *testing.T) {
 
 	if _, err := ecDP.FieldAsInterface([]string{"Rates", "b[0]"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error:%v", err)
+	}
+}
+
+func TestECFieldAsInterfaceNilEventCost(t *testing.T) {
+	dft := config.NewDefaultCGRConfig()
+	cdr, err := NewMapEvent(map[string]interface{}{}).AsCDR(dft, "cgrates.org", "UTC")
+	if err != nil {
+		t.Fatal(err)
+	}
+	nM := cdr.AsMapStorage()
+	if _, err := nM.FieldAsInterface([]string{"*ec", "Charges[0]", "Increments[0]", "Accounting", "Balance", "ID"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error:%s, received: %v", utils.ErrNotFound.Error(), err)
+	}
+
+	if _, err := nM.FieldAsInterface([]string{"*req", "CostDetails", "Charges[0]", "Increments[0]", "Accounting", "Balance", "ID"}); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error:%s, received: %v", utils.ErrNotFound.Error(), err)
 	}
 }
