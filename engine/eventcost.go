@@ -901,9 +901,6 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 
 // FieldAsInterface func to implement DataProvider
 func (ec *EventCost) FieldAsInterface(fldPath []string) (val interface{}, err error) {
-	if len(fldPath) == 0 {
-		return nil, utils.ErrNotFound
-	}
 	if val, err = ec.cache.FieldAsInterface(fldPath); err != nil {
 		if err != utils.ErrNotFound { // item found in cache
 			return
