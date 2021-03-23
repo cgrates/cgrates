@@ -925,7 +925,7 @@ func testFltrRplResourceProfile(t *testing.T) {
 
 func testFltrRplRouteProfile(t *testing.T) {
 	rpID := "RT1"
-	rpPrf := &v1.RouteWithOpts{
+	rpPrf := &v1.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        rpID,
