@@ -28,7 +28,7 @@ func init() {
 	c := &CmdSetRoute{
 		name:      "routes_profile_set",
 		rpcMethod: utils.APIerSv1SetRouteProfile,
-		rpcParams: &v1.RouteWithOpts{},
+		rpcParams: &v1.RouteWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetRoute struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.RouteWithOpts
+	rpcParams *v1.RouteWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,9 +51,9 @@ func (self *CmdSetRoute) RpcMethod() string {
 
 func (self *CmdSetRoute) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.RouteWithOpts{
+		self.rpcParams = &v1.RouteWithAPIOpts{
 			RouteProfile: new(engine.RouteProfile),
-			Opts:         map[string]interface{}{},
+			APIOpts:      map[string]interface{}{},
 		}
 	}
 	return self.rpcParams

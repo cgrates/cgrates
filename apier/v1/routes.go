@@ -64,13 +64,13 @@ func (apierSv1 *APIerSv1) GetRouteProfileIDs(args *utils.PaginatorWithTenant, sp
 	return nil
 }
 
-type RouteWithOpts struct {
+type RouteWithAPIOpts struct {
 	*engine.RouteProfile
-	Opts map[string]interface{}
+	APIOpts map[string]interface{}
 }
 
 //SetRouteProfile add a new Route configuration
-func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -85,8 +85,8 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithOpts, reply *string) er
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.Opts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
-		args.TenantID(), &args.FilterIDs, nil, args.Opts); err != nil {
+	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheRouteProfiles,
+		args.TenantID(), &args.FilterIDs, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
