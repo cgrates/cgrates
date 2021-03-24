@@ -63,12 +63,12 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	cgrRplyNM := utils.NavigableMap{}
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	rplyNM := utils.NewOrderedNavigableMap()
-	opts := utils.NewOrderedNavigableMap()
-	reqVars := utils.NavigableMap{utils.RemoteHost: utils.NewNMData(req.RemoteAddr)}
+	opts := utils.MapStorage{}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr)}}
 	for _, reqProcessor := range ha.reqProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, &cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -167,9 +167,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
@@ -185,9 +183,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
@@ -198,9 +194,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
 			reqProcessor.Flags.Has(utils.MetaAccounts),
@@ -213,9 +207,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		var rply string
 		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, &rply)
-		if err = agReq.setCGRReply(nil, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
@@ -241,9 +233,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		rply.SetMaxUsageNeeded(evArgs.Debit)
-		if err = agReq.setCGRReply(nil, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(nil, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
 			Flags:     reqProcessor.Flags.SliceFlags(),
@@ -258,9 +248,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow CDR processing
 	}
 	// separate request so we can capture the Terminate/Event also here
@@ -269,7 +257,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		var rplyCDRs string
 		if err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
+			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		}
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

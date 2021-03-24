@@ -24,10 +24,9 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-
-	"github.com/cgrates/cgrates/sessions"
 )
 
 func TestDAsSessionSClientIface(t *testing.T) {
@@ -62,7 +61,7 @@ func TestProcessRequest(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 
-	cgrRplyNM := utils.NavigableMap{}
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply := utils.NewOrderedNavigableMap()
 	diamDP := utils.MapStorage{
 		"SessionId":   "123456",
@@ -112,14 +111,14 @@ func TestProcessRequest(t *testing.T) {
 	for _, v := range reqProcessor.ReplyFields {
 		v.ComputePath()
 	}
-	reqVars := utils.NavigableMap{
-		utils.OriginHost:  utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginHost),
-		utils.OriginRealm: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().OriginRealm),
-		utils.ProductName: utils.NewNMData(config.CgrConfig().DiameterAgentCfg().ProductName),
-		utils.MetaApp:     utils.NewNMData("appName"),
-		utils.MetaAppID:   utils.NewNMData("appID"),
-		utils.MetaCmd:     utils.NewNMData("cmdR"),
-	}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
+		utils.OriginHost:  utils.NewLeafNode(config.CgrConfig().DiameterAgentCfg().OriginHost),
+		utils.OriginRealm: utils.NewLeafNode(config.CgrConfig().DiameterAgentCfg().OriginRealm),
+		utils.ProductName: utils.NewLeafNode(config.CgrConfig().DiameterAgentCfg().ProductName),
+		utils.MetaApp:     utils.NewLeafNode("appName"),
+		utils.MetaAppID:   utils.NewLeafNode("appID"),
+		utils.MetaCmd:     utils.NewLeafNode("cmdR"),
+	}}
 
 	sS := &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
 		utils.SessionSv1RegisterInternalBiJSONConn: func(arg interface{}, rply interface{}) error {
@@ -442,7 +441,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
-	agReq := NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
+	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -467,10 +466,10 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NavigableMap{}
+	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -484,10 +483,10 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NavigableMap{}
+	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -507,10 +506,10 @@ func TestProcessRequest(t *testing.T) {
 	for _, v := range reqProcessor.ReplyFields {
 		v.ComputePath()
 	}
-	cgrRplyNM = utils.NavigableMap{}
+	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
@@ -524,10 +523,10 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
-	cgrRplyNM = utils.NavigableMap{}
+	cgrRplyNM = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply = utils.NewOrderedNavigableMap()
 
-	agReq = NewAgentRequest(diamDP, reqVars, &cgrRplyNM, rply, nil,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 

@@ -51,7 +51,7 @@ type RWDataProvider interface {
 
 // NavigableMapper is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap() *DataNode
+	AsNavigableMap() map[string]*DataNode
 }
 
 // DPDynamicInterface returns the value of the field if the path is dynamic

@@ -36,7 +36,7 @@ func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Path != nil {
 		fcTmp.Path = *jsnCfg.Path
 		fcTmp.pathSlice = strings.Split(*jsnCfg.Path, utils.NestingSep)
-		fcTmp.pathItems = utils.NewPathItems(fcTmp.pathSlice)
+		fcTmp.pathItems = utils.CompilePathSlice(fcTmp.pathSlice)
 		fcTmp.Tag = fcTmp.Path
 	}
 	fcTmp.Tag = fcTmp.Path
@@ -118,8 +118,8 @@ type FCTemplate struct {
 	RoundingDecimals *int
 	MaskDestID       string
 	MaskLen          int
-	pathItems        utils.PathItems // Field identifier
-	pathSlice        []string        // Used when we set a NMItem to not recreate this slice for every itemsc
+	pathItems        []string // Field identifier
+	pathSlice        []string // Used when we set a NMItem to not recreate this slice for every itemsc
 }
 
 // FCTemplatesFromFCTemplatesJSONCfg will build a list of FCTemplates from json
@@ -171,7 +171,7 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 		Tag:             fc.Tag,
 		Type:            fc.Type,
 		Path:            fc.Path,
-		pathItems:       fc.pathItems.Clone(),
+		pathItems:       utils.CloneSlice(fc.pathItems),
 		Value:           fc.Value.Clone(),
 		Width:           fc.Width,
 		Strip:           fc.Strip,
@@ -285,14 +285,14 @@ func (fc *FCTemplate) GetPathSlice() []string {
 }
 
 // GetPathItems returns the cached path as PathItems
-func (fc *FCTemplate) GetPathItems() utils.PathItems {
+func (fc *FCTemplate) GetPathItems() []string {
 	return fc.pathItems
 }
 
 // ComputePath used in test to populate private fields used to store the path
 func (fc *FCTemplate) ComputePath() {
 	fc.pathSlice = strings.Split(fc.Path, utils.NestingSep)
-	fc.pathItems = utils.NewPathItems(fc.pathSlice)
+	fc.pathItems = utils.CompilePathSlice(fc.pathSlice)
 }
 
 // Clone returns a deep copy of FcTemplates

@@ -172,12 +172,12 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}
 
 	for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-		iface, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
-		pathWithoutIndex := utils.GetPathWithoutIndex(el.Value.String())
+		nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
+		pathWithoutIndex := utils.GetPathWithoutIndex(strings.Join(el.Value, utils.NestingSep))
 		if pathWithoutIndex != utils.MetaRow {
 			colNames = append(colNames, pathWithoutIndex)
 		}
-		vals = append(vals, iface.Interface())
+		vals = append(vals, nmIt.Data)
 	}
 
 	sqlValues := make([]string, len(vals))

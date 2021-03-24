@@ -181,29 +181,35 @@ func (sRoutes *SortedRoutes) Digest() string {
 	return strings.Join(sRoutes.RoutesWithParams(), utils.FieldsSep)
 }
 
-func (ss *SortedRoute) AsNavigableMap() (nm utils.NavigableMap) {
-	nm = utils.NavigableMap{
-		utils.RouteID:         utils.NewNMData(ss.RouteID),
-		utils.RouteParameters: utils.NewNMData(ss.RouteParameters),
+func (ss *SortedRoute) AsNavigableMap() (nm *utils.DataNode) {
+	nm = &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.RouteID:         utils.NewLeafNode(ss.RouteID),
+			utils.RouteParameters: utils.NewLeafNode(ss.RouteParameters),
+		},
 	}
-	sd := utils.NavigableMap{}
+	sd := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	for k, d := range ss.SortingData {
-		sd[k] = utils.NewNMData(d)
+		sd.Map[k] = utils.NewLeafNode(d)
 	}
-	nm[utils.SortingData] = sd
+	nm.Map[utils.SortingData] = sd
 	return
 }
 
-func (sRoutes *SortedRoutes) AsNavigableMap() (nm utils.NavigableMap) {
-	nm = utils.NavigableMap{
-		utils.ProfileID: utils.NewNMData(sRoutes.ProfileID),
-		utils.Sorting:   utils.NewNMData(sRoutes.Sorting),
+func (sRoutes *SortedRoutes) AsNavigableMap() (nm *utils.DataNode) {
+	nm = &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.ProfileID: utils.NewLeafNode(sRoutes.ProfileID),
+			utils.Sorting:   utils.NewLeafNode(sRoutes.Sorting),
+		},
 	}
-	sr := make(utils.NMSlice, len(sRoutes.Routes))
+	sr := make([]*utils.DataNode, len(sRoutes.Routes))
 	for i, ss := range sRoutes.Routes {
 		sr[i] = ss.AsNavigableMap()
 	}
-	nm[utils.CapRoutes] = &sr
+	nm.Map[utils.CapRoutes] = &utils.DataNode{Type: utils.NMSliceType, Slice: sr}
 	return
 }
 
@@ -278,10 +284,10 @@ func (sRs SortedRoutesList) Digest() string {
 }
 
 // AsNavigableMap returns the SortedRoutesSet as NMInterface object
-func (sRs SortedRoutesList) AsNavigableMap() (nm utils.NMSlice) {
-	nm = make(utils.NMSlice, len(sRs))
+func (sRs SortedRoutesList) AsNavigableMap() (nm *utils.DataNode) {
+	nm = &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(sRs))}
 	for i, ss := range sRs {
-		nm[i] = ss.AsNavigableMap()
+		nm.Slice[i] = ss.AsNavigableMap()
 	}
 	return
 }

@@ -198,14 +198,17 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	diamDP := newDADataProvider(c, m)
-	reqVars := utils.NavigableMap{
-		utils.OriginHost:  utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
-		utils.OriginRealm: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().OriginRealm),
-		utils.ProductName: utils.NewNMData(da.cgrCfg.DiameterAgentCfg().ProductName),
-		utils.MetaApp:     utils.NewNMData(dApp.Name),
-		utils.MetaAppID:   utils.NewNMData(dApp.ID),
-		utils.MetaCmd:     utils.NewNMData(dCmd.Short + "R"),
-		utils.RemoteHost:  utils.NewNMData(c.RemoteAddr().String()),
+	reqVars := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.OriginHost:  utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
+			utils.OriginRealm: utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().OriginRealm),
+			utils.ProductName: utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().ProductName),
+			utils.MetaApp:     utils.NewLeafNode(dApp.Name),
+			utils.MetaAppID:   utils.NewLeafNode(dApp.ID),
+			utils.MetaCmd:     utils.NewLeafNode(dCmd.Short + "R"),
+			utils.RemoteHost:  utils.NewLeafNode(c.RemoteAddr().String()),
+		},
 	}
 	// build the negative error answer
 	diamErr, err := diamErr(
@@ -258,16 +261,16 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := utils.NavigableMap{}
+	cgrRplyNM := new(utils.DataNode)
+	opts := utils.MapStorage{}
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
-	opts := utils.NewOrderedNavigableMap()
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			NewAgentRequest(
-				diamDP, reqVars, &cgrRplyNM, rply, opts,
+				diamDP, reqVars, cgrRplyNM, rply, opts,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -370,9 +373,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
@@ -388,9 +389,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
@@ -401,9 +400,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
 			reqProcessor.Flags.Has(utils.MetaAccounts),
@@ -416,9 +413,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		var rply string
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1TerminateSession,
 			terminateArgs, &rply)
-		if err = agReq.setCGRReply(nil, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		msgArgs := sessions.NewV1ProcessMessageArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
@@ -445,9 +440,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		rply.SetMaxUsageNeeded(msgArgs.Debit)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
 			Flags:     reqProcessor.Flags.SliceFlags(),
@@ -462,9 +455,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow CDR processing
 	}
 	// separate request so we can capture the Terminate/Event also here
@@ -473,7 +464,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		var rplyCDRs string
 		if err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData(err.Error()))
+			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {

@@ -147,7 +147,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := utils.NavigableMap{utils.FileName: utils.NewNMData(fName)}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {

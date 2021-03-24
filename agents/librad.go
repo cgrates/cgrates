@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"fmt"
 	"net"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -31,13 +29,9 @@ import (
 func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigableMap) (err error) {
 	for el := rplNM.GetFirstElement(); el != nil; el = el.Next() {
 		val := el.Value
-		var nmIt utils.NMInterface
-		if nmIt, err = rplNM.Field(val); err != nil {
+		var cfgItm *utils.DataLeaf
+		if cfgItm, err = rplNM.Field(val); err != nil {
 			return
-		}
-		cfgItm, cast := nmIt.(*config.NMItem)
-		if !cast {
-			return fmt.Errorf("cannot cast val: %s into *config.NMItem", nmIt)
 		}
 
 		if cfgItm.Path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
@@ -117,17 +111,18 @@ func (pk *radiusDP) RemoteHost() net.Addr {
 //radauthReq is used to authorize a request based on flags
 func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequest, rpl *radigo.Packet) (bool, error) {
 	// try to get UserPassword from Vars as slice of NMItems
-	nmItems, err := aReq.Vars.FieldAsInterface([]string{utils.UserPassword})
-	if err != nil {
-		return false, err
+	nmItems, has := aReq.Vars.Map[utils.UserPassword]
+	if !has {
+		return false, utils.ErrNotFound
 	}
+	pass := nmItems.Slice[0].Value.String()
 	switch {
 	case flags.Has(utils.MetaPAP):
 		userPassAvps := req.AttributesWithName(UserPasswordAVP, utils.EmptyString)
 		if len(userPassAvps) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(UserPasswordAVP)
 		}
-		if userPassAvps[0].StringValue != (*nmItems.(*utils.NMSlice))[0].Interface() {
+		if userPassAvps[0].StringValue != pass {
 			return false, nil
 		}
 	case flags.Has(utils.MetaCHAP):
@@ -135,7 +130,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		if len(chapAVPs) == 0 {
 			return false, utils.NewErrMandatoryIeMissing(CHAPPasswordAVP)
 		}
-		return radigo.AuthenticateCHAP([]byte(utils.IfaceAsString((*nmItems.(*utils.NMSlice))[0].Interface())),
+		return radigo.AuthenticateCHAP([]byte(pass),
 			req.Authenticator[:], chapAVPs[0].RawValue), nil
 	case flags.Has(utils.MetaMSCHAPV2):
 		msChallenge := req.AttributesWithName(MSCHAPChallengeAVP, MicrosoftVendor)
@@ -150,7 +145,7 @@ func radauthReq(flags utils.FlagsWithParams, req *radigo.Packet, aReq *AgentRequ
 		vsaMSChallange := msChallenge[0].Value.(*radigo.VSA)
 
 		userName := req.AttributesWithName("User-Name", utils.EmptyString)[0].StringValue
-		passwordFromAttributes := utils.IfaceAsString((*nmItems.(*utils.NMSlice))[0].Interface())
+		passwordFromAttributes := pass
 
 		if len(vsaMSChallange.RawValue) != 16 || len(vsaMSResponde.RawValue) != 50 {
 			return false, nil

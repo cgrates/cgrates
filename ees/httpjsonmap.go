@@ -100,8 +100,7 @@ func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
-			itm := nmIt.(*config.NMItem)
-			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
+			valMp[strings.Join(nmIt.Path, utils.NestingSep)] = nmIt.String()
 		}
 		if hdr, err = httpEE.composeHeader(); err != nil {
 			return
@@ -147,8 +146,7 @@ func (httpEE *HTTPjsonMapEE) composeHeader() (hdr http.Header, err error) {
 	}
 	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value) //Safe to ignore error, since the path always exists
-		itm := nmIt.(*config.NMItem)                             //We only store nmItems in the map
-		hdr.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
+		hdr.Set(strings.Join(nmIt.Path, utils.NestingSep), nmIt.String())
 	}
 	return
 }

@@ -430,22 +430,18 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, tmz string) (err error) {
 	// write reply into message
 	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
-		val := el.Value
-		var nmIt utils.NMInterface
-		if nmIt, err = navMp.Field(val); err != nil {
+		path := el.Value
+		var nmIt *utils.DataLeaf
+		if nmIt, err = navMp.Field(path); err != nil {
 			return
 		}
-		itm, isNMItem := nmIt.(*config.NMItem)
-		if !isNMItem {
-			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
-		}
-		if itm == nil {
+		if nmIt == nil {
 			continue // all attributes, not writable to diameter packet
 		}
 		if err = messageSetAVPsWithPath(m,
-			itm.Path, utils.IfaceAsString(itm.Data),
-			itm.Config != nil && itm.Config.NewBranch, tmz); err != nil {
-			return fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
+			nmIt.Path, nmIt.String(),
+			nmIt.NewBranch, tmz); err != nil {
+			return fmt.Errorf("setting item with path: %+v got err: %s", nmIt.Path, err.Error())
 		}
 	}
 	return
@@ -466,7 +462,7 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 
 // negDiamAnswer is used to return the negative answer we need previous to
 func diamErr(m *diam.Message, resCode uint32,
-	reqVars utils.NavigableMap,
+	reqVars *utils.DataNode,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := NewAgentRequest(
@@ -502,5 +498,5 @@ func disectDiamListen(addrs string) (ipAddrs []net.IP) {
 type diamMsgData struct {
 	c    diam.Conn
 	m    *diam.Message
-	vars utils.NavigableMap
+	vars *utils.DataNode
 }

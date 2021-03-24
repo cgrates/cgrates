@@ -67,24 +67,7 @@ func TestFCTemplatePathItems(t *testing.T) {
 	fcTemplate := FCTemplate{
 		Path: "*req.Account[1].Balance[*monetary].Value",
 	}
-	expected := utils.PathItems{
-		{
-			Field: "*req",
-			Index: nil,
-		},
-		{
-			Field: "Account",
-			Index: []string{"1"},
-		},
-		{
-			Field: "Balance",
-			Index: []string{"*monetary"},
-		},
-		{
-			Field: "Value",
-			Index: nil,
-		},
-	}
+	expected := []string{"*req", "Account", "1", "Balance", "*monetary", "Value"}
 	fcTemplate.ComputePath()
 	if !reflect.DeepEqual(expected, fcTemplate.GetPathItems()) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(fcTemplate))

@@ -303,12 +303,15 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 	}
 	dp := utils.MapStorage(sipMessageIface)
 	var processed bool
-	cgrRplyNM := utils.NavigableMap{}
+	cgrRplyNM := &utils.DataNode{}
 	rplyNM := utils.NewOrderedNavigableMap()
-	opts := utils.NewOrderedNavigableMap()
-	reqVars := utils.NavigableMap{
-		utils.RemoteHost: utils.NewNMData(remoteHost),
-		method:           utils.NewNMData(sipMessage.MethodFrom(requestHeader)),
+	opts := utils.MapStorage{}
+	reqVars := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.RemoteHost: utils.NewLeafNode(remoteHost),
+			method:           utils.NewLeafNode(sipMessage.MethodFrom(requestHeader)),
+		},
 	}
 	// build the negative error answer
 	sErr, err := sipErr(
@@ -325,7 +328,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 	}
 
 	for _, reqProcessor := range sa.cfg.SIPAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dp, reqVars, &cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dp, reqVars, cgrRplyNM, rplyNM,
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -357,7 +360,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 				utils.SIPAgent, sipMessage, remoteHost))
 		return
 	}
-	if rplyNM.Len() == 0 { // if we do not populate the reply with any field we do not send any reply back
+	if rplyNM.Empty() { // if we do not populate the reply with any field we do not send any reply back
 		return
 	}
 	if err = updateSIPMsgFromNavMap(sipMessage, rplyNM); err != nil {
@@ -435,9 +438,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		evArgs := &sessions.V1ProcessEventArgs{
 			Flags:     reqProcessor.Flags.SliceFlags(),
@@ -453,9 +454,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		if err = agReq.setCGRReply(rply, err); err != nil {
-			return
-		}
+		agReq.setCGRReply(rply, err)
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err

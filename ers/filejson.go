@@ -142,7 +142,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 	}
 
 	evsPosted := 0
-	reqVars := utils.NavigableMap{utils.FileName: utils.NewNMData(fName)}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
 
 	agReq := agents.NewAgentRequest(
 		utils.MapStorage(data), reqVars,
