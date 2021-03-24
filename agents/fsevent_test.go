@@ -777,7 +777,7 @@ variable_effective_caller_id_name: Extension%201001
 variable_effective_caller_id_number: 1001
 variable_callgroup: techsupport
 variable_cgr_reqtype: *prepaid
-variable_cgr_flags: *resources,*attributes,*sessions,*routes
+variable_cgr_flags: *resources;*attributes;*sessions;*routes
 variable_user_name: 1001
 variable_domain_name: 192.168.56.202
 variable_sip_from_user_stripped: 1001
