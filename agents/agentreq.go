@@ -200,7 +200,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			} else if fullPath == nil { // no dynamic path
 				fullPath = &utils.FullPath{
-					PathItems: utils.CloneSlice(tplFld.GetPathItems()), // need to clone so me do not modify the template
+					PathItems: utils.CloneStringSlice(tplFld.GetPathItems()), // need to clone so me do not modify the template
 					Path:      tplFld.Path,
 				}
 				itmPath = tplFld.GetPathSlice()[1:]
@@ -295,14 +295,14 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 	default:
 		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathItems[0])
 	case utils.MetaVars:
-		return ar.Vars.Remove(utils.CloneSlice(fullPath.PathItems[1:]))
+		return ar.Vars.Remove(utils.CloneStringSlice(fullPath.PathItems[1:]))
 	case utils.MetaCgreq:
 		return ar.CGRRequest.Remove(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[7:],
 		})
 	case utils.MetaCgrep:
-		return ar.CGRReply.Remove(utils.CloneSlice(fullPath.PathItems[1:]))
+		return ar.CGRReply.Remove(utils.CloneStringSlice(fullPath.PathItems[1:]))
 	case utils.MetaRep:
 		return ar.Reply.Remove(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
@@ -314,7 +314,7 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 			Path:      fullPath.Path[9:],
 		})
 	case utils.MetaTmp:
-		return ar.tmp.Remove(utils.CloneSlice(fullPath.PathItems[1:]))
+		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathItems[1:]))
 	case utils.MetaOpts:
 		return ar.Opts.Remove(fullPath.PathItems[1:])
 	case utils.MetaUCH:
