@@ -24,7 +24,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/miekg/dns"
 )
@@ -156,14 +155,10 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error) {
 	msgFields := make(utils.StringSet) // work around to NMap issue
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
-		val := el.Value
-		var nmIt utils.NMInterface
-		if nmIt, err = nm.Field(val); err != nil {
+		path := el.Value
+		var cfgItm *utils.DataLeaf
+		if cfgItm, err = nm.Field(path); err != nil {
 			return
-		}
-		cfgItm, cast := nmIt.(*config.NMItem)
-		if !cast {
-			return fmt.Errorf("cannot cast val: %s into *config.NMItem", nmIt)
 		}
 		if len(cfgItm.Path) == 0 {
 			return errors.New("empty path in config item")

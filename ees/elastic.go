@@ -154,8 +154,7 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
-			itm := nmIt.(*config.NMItem)
-			valMp[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
+			valMp[strings.Join(nmIt.Path, utils.NestingSep)] = nmIt.String()
 		}
 	}
 	updateEEMetrics(eEe.dc, cgrEv.Event, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,

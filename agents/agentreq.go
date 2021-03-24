@@ -33,24 +33,24 @@ import (
 
 // NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req utils.DataProvider,
-	vars utils.NavigableMap,
-	cgrRply *utils.NavigableMap,
-	rply, opts *utils.OrderedNavigableMap,
+	vars, cgrRply *utils.DataNode,
+	rply *utils.OrderedNavigableMap,
+	opts utils.MapStorage,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
 	header, trailer utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
-		cgrRply = &utils.NavigableMap{}
+		cgrRply = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	}
 	if vars == nil {
-		vars = make(utils.NavigableMap)
+		vars = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	}
 	if rply == nil {
 		rply = utils.NewOrderedNavigableMap()
 	}
 	if opts == nil {
-		opts = utils.NewOrderedNavigableMap()
+		opts = make(utils.MapStorage)
 	}
 	ar = &AgentRequest{
 		Request:    req,
@@ -67,14 +67,10 @@ func NewAgentRequest(req utils.DataProvider,
 		Opts:       opts,
 		Cfg:        config.CgrConfig().GetDataProvider(),
 	}
-	if tntTpl != nil {
-		if tntIf, err := ar.ParseField(
-			&config.FCTemplate{Type: utils.MetaComposed,
-				Value: tntTpl}); err == nil && tntIf.(string) != "" {
-			ar.Tenant = tntIf.(string)
-		}
+	if tnt, err := tntTpl.ParseDataProvider(ar); err == nil && tnt != utils.EmptyString {
+		ar.Tenant = tnt
 	}
-	ar.Vars.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMData(config.CgrConfig().GeneralCfg().NodeID))
+	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID)
 	return
 }
 
@@ -82,9 +78,9 @@ func NewAgentRequest(req utils.DataProvider,
 // implements utils.DataProvider so we can pass it to filters
 type AgentRequest struct {
 	Request    utils.DataProvider         // request
-	Vars       utils.NavigableMap         // shared data
+	Vars       *utils.DataNode            // shared data
 	CGRRequest *utils.OrderedNavigableMap // Used in reply to access the request that was send
-	CGRReply   *utils.NavigableMap
+	CGRReply   *utils.DataNode
 	Reply      *utils.OrderedNavigableMap
 	Tenant     string
 	Timezone   string
@@ -92,8 +88,8 @@ type AgentRequest struct {
 	Header     utils.DataProvider
 	Trailer    utils.DataProvider
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
-	tmp        utils.NavigableMap         // used in case you want to store temporary items and access them later
-	Opts       *utils.OrderedNavigableMap
+	tmp        *utils.DataNode            // used in case you want to store temporary items and access them later
+	Opts       utils.MapStorage
 	Cfg        utils.DataProvider
 }
 
@@ -144,31 +140,11 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	if err != nil {
 		return
 	}
-	if nmItems, isNMItems := val.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
-		val = (*nmItems)[len(*nmItems)-1].Interface()
-	}
-	return
-}
-
-// Field implements utils.NMInterface
-func (ar *AgentRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, err error) {
-	switch fldPath[0].Field {
-	default:
-		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	case utils.MetaVars:
-		val, err = ar.Vars.Field(fldPath[1:])
-	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.Field(fldPath[1:])
-	case utils.MetaCgrep:
-		val, err = ar.CGRReply.Field(fldPath[1:])
-	case utils.MetaDiamreq:
-		val, err = ar.diamreq.Field(fldPath[1:])
-	case utils.MetaRep:
-		val, err = ar.Reply.Field(fldPath[1:])
-	case utils.MetaTmp:
-		val, err = ar.tmp.Field(fldPath[1:])
-	case utils.MetaOpts:
-		val, err = ar.Opts.Field(fldPath[1:])
+	if nmItems, isNMItems := val.([]*utils.DataNode); isNMItems { // special handling of NMItems, take the last value out of it
+		el := nmItems[len(nmItems)-1]
+		if el.Type == utils.NMDataType {
+			val = el.Value.Data
+		}
 	}
 	return
 }
@@ -184,7 +160,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 
 //SetFields will populate fields of AgentRequest out of templates
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
-	ar.tmp = utils.NavigableMap{}
+	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -224,22 +200,22 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			} else if fullPath == nil { // no dynamic path
 				fullPath = &utils.FullPath{
-					PathItems: tplFld.GetPathItems().Clone(), // need to clone so me do not modify the template
+					PathItems: utils.CloneSlice(tplFld.GetPathItems()), // need to clone so me do not modify the template
 					Path:      tplFld.Path,
 				}
 				itmPath = tplFld.GetPathSlice()[1:]
 			} else {
-				itmPath = fullPath.PathItems.Slice()[1:]
+				itmPath = fullPath.PathItems[1:]
 			}
 
-			nMItm := &config.NMItem{Data: out, Path: itmPath, Config: tplFld}
+			nMItm := &utils.DataLeaf{Data: out, Path: itmPath, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
 			switch tplFld.Type {
 			case utils.MetaComposed:
-				err = utils.ComposeNavMapVal(ar, fullPath, nMItm)
+				err = ar.Compose(fullPath, nMItm)
 			case utils.MetaGroup: // in case of *group type simply append to valSet
-				err = utils.AppendNavMapVal(ar, fullPath, nMItm)
+				err = ar.Append(fullPath, nMItm)
 			default:
-				_, err = ar.Set(fullPath, &utils.NMSlice{nMItm})
+				err = ar.SetAsSlice(fullPath, nMItm)
 			}
 			if err != nil {
 				return
@@ -253,40 +229,39 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 }
 
 // Set implements utils.NMInterface
-func (ar *AgentRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
-	switch fullPath.PathItems[0].Field {
+func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf) (err error) {
+	switch fullPath.PathItems[0] {
 	default:
-		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0])
 	case utils.MetaVars:
-		return ar.Vars.Set(fullPath.PathItems[1:], nm)
+		_, err = ar.Vars.Set(fullPath.PathItems[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		return
 	case utils.MetaCgreq:
-		return ar.CGRRequest.Set(&utils.FullPath{
+		return ar.CGRRequest.SetAsSlice(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[7:],
-		}, nm)
+		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaCgrep:
-		return ar.CGRReply.Set(fullPath.PathItems[1:], nm)
+		_, err = ar.CGRReply.Set(fullPath.PathItems[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		return
 	case utils.MetaRep:
-		return ar.Reply.Set(&utils.FullPath{
+		return ar.Reply.SetAsSlice(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[5:],
-		}, nm)
+		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaDiamreq:
-		return ar.diamreq.Set(&utils.FullPath{
+		return ar.diamreq.SetAsSlice(&utils.FullPath{
 			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[9:],
-		}, nm)
+		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaTmp:
-		return ar.tmp.Set(fullPath.PathItems[1:], nm)
+		_, err = ar.tmp.Set(fullPath.PathItems[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		return
 	case utils.MetaOpts:
-		return ar.Opts.Set(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
-			Path:      fullPath.Path[6:],
-		}, nm)
+		return ar.Opts.Set(fullPath.PathItems[1:], nm.Data)
 	case utils.MetaUCH:
-		err = engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm.Data, nil, true, utils.NonTransactional)
 	}
-	return false, err
 }
 
 // RemoveAll deletes all fields at given prefix
@@ -295,56 +270,53 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 	default:
 		return fmt.Errorf("unsupported field prefix: <%s> when set fields", prefix)
 	case utils.MetaVars:
-		ar.Vars = utils.NavigableMap{}
+		ar.Vars = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaCgreq:
 		ar.CGRRequest.RemoveAll()
 	case utils.MetaCgrep:
-		ar.CGRReply = &utils.NavigableMap{}
+		ar.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaRep:
 		ar.Reply.RemoveAll()
 	case utils.MetaDiamreq:
 		ar.diamreq.RemoveAll()
 	case utils.MetaTmp:
-		ar.tmp = utils.NavigableMap{}
+		ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaUCH:
 		engine.Cache.Clear([]string{utils.CacheUCH})
 	case utils.MetaOpts:
-		ar.Opts.RemoveAll()
+		ar.Opts = make(utils.MapStorage)
 	}
 	return nil
 }
 
 // Remove deletes the fields found at path with the given prefix
 func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
-	switch fullPath.PathItems[0].Field {
+	switch fullPath.PathItems[0] {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathItems[0].Field)
+		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathItems[0])
 	case utils.MetaVars:
-		return ar.Vars.Remove(fullPath.PathItems[1:])
+		return ar.Vars.Remove(utils.CloneSlice(fullPath.PathItems[1:]))
 	case utils.MetaCgreq:
 		return ar.CGRRequest.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:].Clone(),
+			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[7:],
 		})
 	case utils.MetaCgrep:
-		return ar.CGRReply.Remove(fullPath.PathItems[1:])
+		return ar.CGRReply.Remove(utils.CloneSlice(fullPath.PathItems[1:]))
 	case utils.MetaRep:
 		return ar.Reply.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:].Clone(),
+			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[5:],
 		})
 	case utils.MetaDiamreq:
 		return ar.diamreq.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:].Clone(),
+			PathItems: fullPath.PathItems[1:],
 			Path:      fullPath.Path[9:],
 		})
 	case utils.MetaTmp:
-		return ar.tmp.Remove(fullPath.PathItems[1:])
+		return ar.tmp.Remove(utils.CloneSlice(fullPath.PathItems[1:]))
 	case utils.MetaOpts:
-		return ar.Opts.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:].Clone(),
-			Path:      fullPath.Path[6:],
-		})
+		return ar.Opts.Remove(fullPath.PathItems[1:])
 	case utils.MetaUCH:
 		return engine.Cache.Remove(utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
 	}
@@ -508,29 +480,111 @@ func (ar *AgentRequest) ParseField(
 
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
-func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, errRply error) (err error) {
-	var nm utils.NavigableMap
-	if errRply != nil {
-		nm = utils.NavigableMap{utils.Error: utils.NewNMData(errRply.Error())}
-	} else {
-		nm = utils.NavigableMap{}
-		if rply != nil {
-			nm = rply.AsNavigableMap()
-		}
-		nm.Set(utils.PathItems{{Field: utils.Error}}, utils.NewNMData("")) // enforce empty error
+func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, err error) {
+	ar.CGRReply = &utils.DataNode{
+		Type: utils.NMMapType,
+		Map:  make(map[string]*utils.DataNode),
 	}
-	*ar.CGRReply = nm // update value so we can share CGRReply
-	return
+	var errMsg string
+	if err != nil {
+		errMsg = err.Error()
+	} else if rply != nil {
+		ar.CGRReply.Map = rply.AsNavigableMap()
+	}
+	ar.CGRReply.Map[utils.Error] = utils.NewLeafNode(errMsg)
 }
 
 func needsMaxUsage(ralsFlags utils.FlagParams) bool {
-	if len(ralsFlags) == 0 {
-		return false
+	return len(ralsFlags) != 0 &&
+		(ralsFlags.Has(utils.MetaAuthorize) ||
+			ralsFlags.Has(utils.MetaInitiate) ||
+			ralsFlags.Has(utils.MetaUpdate))
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+	switch fullPath.PathItems[0] {
+	default:
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0])
+	case utils.MetaVars:
+		_, err = ar.Vars.Append(fullPath.PathItems[1:], val)
+		return
+	case utils.MetaCgreq:
+		return ar.CGRRequest.Append(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[7:],
+		}, val)
+	case utils.MetaCgrep:
+		_, err = ar.CGRReply.Append(fullPath.PathItems[1:], val)
+		return
+	case utils.MetaRep:
+		return ar.Reply.Append(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[5:],
+		}, val)
+	case utils.MetaDiamreq:
+		return ar.diamreq.Append(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[9:],
+		}, val)
+	case utils.MetaTmp:
+		_, err = ar.tmp.Append(fullPath.PathItems[1:], val)
+		return
+	case utils.MetaOpts:
+		return ar.Opts.Set(fullPath.PathItems[1:], val.Data)
+	case utils.MetaUCH:
+		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	}
-	for _, flag := range []string{utils.MetaAuthorize, utils.MetaInitiate, utils.MetaUpdate} {
-		if ralsFlags.Has(flag) {
-			return true
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+	switch fullPath.PathItems[0] {
+	default:
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0])
+	case utils.MetaVars:
+		return ar.Vars.Compose(fullPath.PathItems[1:], val)
+	case utils.MetaCgreq:
+		return ar.CGRRequest.Compose(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[7:],
+		}, val)
+	case utils.MetaCgrep:
+		return ar.CGRReply.Compose(fullPath.PathItems[1:], val)
+	case utils.MetaRep:
+		return ar.Reply.Compose(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[5:],
+		}, val)
+	case utils.MetaDiamreq:
+		return ar.diamreq.Compose(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[9:],
+		}, val)
+	case utils.MetaTmp:
+		return ar.tmp.Compose(fullPath.PathItems[1:], val)
+	case utils.MetaOpts:
+		var prv interface{}
+		if prv, err = ar.Opts.FieldAsInterface(fullPath.PathItems[1:]); err != nil {
+			if err != utils.ErrNotFound {
+				return
+			}
+			prv = val.Data
+		} else {
+			prv = utils.IfaceAsString(prv) + utils.IfaceAsString(val.Data)
 		}
+		return ar.Opts.Set(fullPath.PathItems[1:], prv)
+
+	case utils.MetaUCH:
+		path := fullPath.Path[5:]
+		var prv interface{}
+		if prvI, ok := engine.Cache.Get(utils.CacheUCH, path); !ok {
+			prv = val.Data
+		} else {
+			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
+		}
+		return engine.Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	}
-	return false
 }

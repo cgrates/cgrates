@@ -20,64 +20,11 @@ package config
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
-
-// NMItem is an item in the NavigableMap
-type NMItem struct {
-	Path   []string    // path in map
-	Data   interface{} // value of the element
-	Config *FCTemplate // so we can store additional configuration
-}
-
-func (nmi *NMItem) String() string {
-	return utils.ToJSON(nmi)
-}
-
-// Interface returns the wraped interface
-func (nmi *NMItem) Interface() interface{} {
-	return nmi.Data
-}
-
-// Field not implemented only used in order to implement the NM interface
-func (nmi *NMItem) Field(path utils.PathItems) (val utils.NMInterface, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// Set not implemented only used in order to implement the NM interface
-// special case when the path is empty the interface should be seted
-// this is in order to modify the wraped interface
-func (nmi *NMItem) Set(path utils.PathItems, val utils.NMInterface) (added bool, err error) {
-	if len(path) != 0 {
-		return false, utils.ErrWrongPath
-	}
-	nmi.Data = val.Interface()
-	return
-}
-
-// Remove not implemented only used in order to implement the NM interface
-func (nmi *NMItem) Remove(path utils.PathItems) (err error) {
-	return utils.ErrNotImplemented
-}
-
-// Type returns the type of the NM interface
-func (nmi *NMItem) Type() utils.NMType {
-	return utils.NMDataType
-}
-
-// Empty returns true if the NM is empty(no data)
-func (nmi *NMItem) Empty() bool {
-	return nmi == nil || nmi.Data == nil
-}
-
-// Len not implemented only used in order to implement the NM interface
-func (nmi *NMItem) Len() int {
-	return 0
-}
 
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
@@ -93,13 +40,8 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		var nmIt utils.NMInterface
-		nmIt, _ = nm.Field(path) // this should never return error cause we get the path from the order
-		nmItm, isNMItem := nmIt.(*NMItem)
-		if !isNMItem {
-			return nil, fmt.Errorf("value: %+v is not []*NMItem", path)
-		}
-		if nmItm.Config != nil && nmItm.Config.NewBranch {
+		nmItm, _ := nm.Field(path) // this should never return error cause we get the path from the order
+		if nmItm.NewBranch {
 			pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
 		}
 		val := utils.IfaceAsString(nmItm.Data)
@@ -110,10 +52,10 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 				continue
 			}
 			if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
-				if nmItm.Config != nil && nmItm.Config.AttributeID != "" {
+				if nmItm.AttributeID != "" {
 					cachedElm.Attributes = append(cachedElm.Attributes,
 						&xml.Attr{
-							Name:  xml.Name{Local: nmItm.Config.AttributeID},
+							Name:  xml.Name{Local: nmItm.AttributeID},
 							Value: val,
 						})
 				} else {
@@ -127,11 +69,10 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
 				pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
 				if newElm == nil {
-					if nmItm.Config != nil &&
-						nmItm.Config.AttributeID != "" {
+					if nmItm.AttributeID != "" {
 						elm.Attributes = append(elm.Attributes,
 							&xml.Attr{
-								Name:  xml.Name{Local: nmItm.Config.AttributeID},
+								Name:  xml.Name{Local: nmItm.AttributeID},
 								Value: val,
 							})
 					} else {
@@ -151,11 +92,10 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
 				pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
 				if newElm == nil { // last element, create data inside
-					if nmItm.Config != nil &&
-						nmItm.Config.AttributeID != "" {
+					if nmItm.AttributeID != "" {
 						elm.Attributes = append(elm.Attributes,
 							&xml.Attr{
-								Name:  xml.Name{Local: nmItm.Config.AttributeID},
+								Name:  xml.Name{Local: nmItm.AttributeID},
 								Value: val,
 							})
 					} else {
@@ -176,7 +116,7 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 // NMAsCGREvent builds a CGREvent considering Time as time.Now()
 // and Event as linear map[string]interface{} with joined paths
 // treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
-func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opts *utils.OrderedNavigableMap) (cgrEv *utils.CGREvent) {
+func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opts utils.MapStorage) (cgrEv *utils.CGREvent) {
 	if nM == nil {
 		return
 	}
@@ -189,20 +129,16 @@ func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opt
 		ID:      utils.UUIDSha1Prefix(),
 		Time:    utils.TimePointer(time.Now()),
 		Event:   make(map[string]interface{}),
-		APIOpts: NMAsMapInterface(opts, pathSep),
+		APIOpts: opts,
 	}
 	for ; el != nil; el = el.Next() {
-		branchPath := el.Value
-		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
-		opath := utils.GetPathWithoutIndex(branchPath.String())
-		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
-			if nmItm.Config != nil &&
-				nmItm.Config.AttributeID != "" {
-				continue
-			}
+		val, _ := nM.Field(el.Value) // this should never return error cause we get the path from the order
+		opath := utils.GetPathWithoutIndex(strings.Join(val.Path, utils.NestingSep))
+		if val.AttributeID != "" {
+			continue
 		}
 		if _, has := cgrEv.Event[opath]; !has {
-			cgrEv.Event[opath] = val.Interface() // first item which is not an attribute will become the value
+			cgrEv.Event[opath] = val.Data // first item which is not an attribute will become the value
 		}
 	}
 	return
@@ -217,17 +153,13 @@ func NMAsMapInterface(nM *utils.OrderedNavigableMap, pathSep string) (mp map[str
 		return
 	}
 	for ; el != nil; el = el.Next() {
-		branchPath := el.Value
-		val, _ := nM.Field(branchPath) // this should never return error cause we get the path from the order
-		opath := utils.GetPathWithoutIndex(branchPath.String())
-		if nmItm, isNMItem := val.(*NMItem); isNMItem { // special case when we have added multiple items inside a key, used in agents
-			if nmItm.Config != nil &&
-				nmItm.Config.AttributeID != "" {
-				continue
-			}
+		val, _ := nM.Field(el.Value) // this should never return error cause we get the path from the order
+		opath := utils.GetPathWithoutIndex(strings.Join(val.Path, utils.NestingSep))
+		if val.AttributeID != "" {
+			continue
 		}
 		if _, has := mp[opath]; !has {
-			mp[opath] = val.Interface() // first item which is not an attribute will become the value
+			mp[opath] = val.Data // first item which is not an attribute will become the value
 		}
 	}
 	return

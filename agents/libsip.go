@@ -33,13 +33,9 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 	// write reply into message
 	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
 		val := el.Value
-		var nmIt utils.NMInterface
-		if nmIt, err = navMp.Field(val); err != nil {
+		var itm *utils.DataLeaf
+		if itm, err = navMp.Field(val); err != nil {
 			return
-		}
-		itm, isNMItem := nmIt.(*config.NMItem)
-		if !isNMItem {
-			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
 		}
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
@@ -50,7 +46,7 @@ func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap)
 }
 
 func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
-	reqVars utils.NavigableMap,
+	reqVars *utils.DataNode,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a sipingo.Message, err error) {
 	aReq := NewAgentRequest(

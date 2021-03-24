@@ -96,8 +96,7 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
-			itm := nmIt.(*config.NMItem)
-			urlVals.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
+			urlVals.Set(strings.Join(nmIt.Path, utils.NestingSep), nmIt.String())
 		}
 		if hdr, err = httpPost.composeHeader(); err != nil {
 			return
@@ -141,8 +140,7 @@ func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
 	}
 	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := eeReq.OrdNavMP[utils.MetaHdr].Field(el.Value)
-		itm := nmIt.(*config.NMItem)
-		hdr.Set(strings.Join(itm.Path, utils.NestingSep), utils.IfaceAsString(itm.Data))
+		hdr.Set(strings.Join(nmIt.Path, utils.NestingSep), nmIt.String())
 	}
 	return
 }

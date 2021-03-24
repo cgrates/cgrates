@@ -75,14 +75,8 @@ func (aL *actCDRLog) execute(_ context.Context, data utils.MapStorage, _ string)
 	reqNm := utils.MapStorage(data[utils.MetaReq].(map[string]interface{})).Clone()
 	optsMS := utils.MapStorage(data[utils.MetaOpts].(map[string]interface{})).Clone()
 
-	optsNm := utils.NewOrderedNavigableMap()
-	for key, val := range optsMS {
-		optsNm.Set(utils.NewFullPath(key, utils.NestingSep), utils.NewNMData(val))
-	}
-
 	oNm := map[string]*utils.OrderedNavigableMap{
-		utils.MetaCDR:  utils.NewOrderedNavigableMap(),
-		utils.MetaOpts: optsNm,
+		utils.MetaCDR: utils.NewOrderedNavigableMap(),
 	}
 	// construct an AgentRequest so we can build the reply and send it to CDRServer
 	cdrLogReq := engine.NewEventRequest(reqNm, nil, optsMS, nil, aL.config.GeneralCfg().DefaultTenant,
@@ -97,6 +91,6 @@ func (aL *actCDRLog) execute(_ context.Context, data utils.MapStorage, _ string)
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
 			CGREvent: *config.NMAsCGREvent(cdrLogReq.OrdNavMP[utils.MetaCDR], cdrLogReq.Tenant,
-				utils.NestingSep, cdrLogReq.OrdNavMP[utils.MetaOpts]),
+				utils.NestingSep, optsMS),
 		}, &rply)
 }

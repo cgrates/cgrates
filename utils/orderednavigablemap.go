@@ -56,7 +56,7 @@ func (onm *OrderedNavigableMap) Interface() interface{} {
 }
 
 // Field returns the item on the given path
-func (onm *OrderedNavigableMap) Field(fldPath []string) (val interface{}, err error) {
+func (onm *OrderedNavigableMap) Field(fldPath []string) (val *DataLeaf, err error) {
 	return onm.nm.Field(fldPath)
 }
 
@@ -70,6 +70,7 @@ func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
 	if fullPath.Path == EmptyString {
 		return ErrWrongPath
 	}
+	fullPath.PathItems = CloneSlice(fullPath.PathItems)
 	if err = onm.nm.Remove(fullPath.PathItems); err != nil {
 		return
 	}
@@ -131,7 +132,7 @@ func (onm *OrderedNavigableMap) SetAsSlice(fullPath *FullPath, vals []*DataNode)
 	pathItmsSet := make([][]string, len(vals))
 
 	for i := range vals {
-		pathItms := append([]string{}, fullPath.PathItems...)
+		pathItms := CloneSlice(fullPath.PathItems)
 		pathItms = append(pathItms, strconv.Itoa(i))
 		pathItmsSet[i] = pathItms
 	}
@@ -170,7 +171,7 @@ func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err
 
 // FieldAsInterface returns the interface at the path
 func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
-	return onm.nm.Field(CompilePathSlice(fldPath))
+	return onm.nm.FieldAsInterface(fldPath)
 }
 
 // RemoteHost is part of dataStorage interface
@@ -215,7 +216,7 @@ func (onm *OrderedNavigableMap) OrderedFieldsAsStrings() (flds []string) {
 
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (onm *OrderedNavigableMap) Append(fullPath *FullPath, val interface{}) (err error) {
+func (onm *OrderedNavigableMap) Append(fullPath *FullPath, val *DataLeaf) (err error) {
 	if fullPath == nil || len(fullPath.PathItems) == 0 {
 		return ErrWrongPath
 	}
@@ -230,7 +231,7 @@ func (onm *OrderedNavigableMap) Append(fullPath *FullPath, val interface{}) (err
 
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (onm *OrderedNavigableMap) Compose(fullPath *FullPath, val interface{}) (err error) {
+func (onm *OrderedNavigableMap) Compose(fullPath *FullPath, val *DataLeaf) (err error) {
 	if fullPath == nil || len(fullPath.PathItems) == 0 {
 		return ErrWrongPath
 	}

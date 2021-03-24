@@ -36,9 +36,7 @@ func CompilePathSlice(spath []string) (path []string) {
 			continue
 		}
 		path = append(path, p[:idxStart])
-		if idxVal := p[idxStart+1 : len(p)-1]; strings.Index(idxVal, IdxCombination) != -1 {
-			path = append(path, strings.Split(idxVal, IdxCombination)...)
-		}
+		path = append(path, strings.Split(p[idxStart+1:len(p)-1], IdxCombination)...)
 	}
 	return
 }
@@ -62,12 +60,34 @@ func NewDataNode(path []string) (n *DataNode) {
 	return
 }
 
+func NewLeafNode(val interface{}) *DataNode {
+	return &DataNode{
+		Type: NMDataType,
+		Value: &DataLeaf{
+			Data: val,
+		},
+	}
+}
+
 // DataNode a structure for storing data
 type DataNode struct {
 	Type  NMType               `json:"-"`
 	Map   map[string]*DataNode `json:",omitempty"`
 	Slice []*DataNode          `json:",omitempty"`
-	Value interface{}          `json:",omitempty"`
+	Value *DataLeaf            `json:",omitempty"`
+}
+
+// DataLeaf is an item in the DataNode
+type DataLeaf struct {
+	Data        interface{} // value of the element
+	Path        []string    // path in map
+	NewBranch   bool
+	AttributeID string
+	// Config *FCTemplate // so we can store additional configuration
+}
+
+func (dl *DataLeaf) String() string {
+	return IfaceAsString(dl.Data)
 }
 
 // Field returns the value found at path
@@ -75,7 +95,7 @@ type DataNode struct {
 // field1[field2][index].field3
 // should be of following form:
 // field1.field2.index.field3
-func (n *DataNode) Field(path []string) (interface{}, error) {
+func (n *DataNode) Field(path []string) (*DataLeaf, error) {
 	switch n.Type { // based on current type return the value
 	case NMDataType:
 		if len(path) != 0 { // only return if the path is empty
@@ -84,7 +104,7 @@ func (n *DataNode) Field(path []string) (interface{}, error) {
 		return n.Value, nil
 	case NMMapType:
 		if len(path) == 0 {
-			return n.Map, nil
+			return nil, ErrWrongPath
 		}
 		node, has := n.Map[path[0]]
 		if !has {
@@ -93,7 +113,7 @@ func (n *DataNode) Field(path []string) (interface{}, error) {
 		return node.Field(path[1:]) // let the next node handle the value
 	case NMSliceType:
 		if len(path) == 0 {
-			return n.Slice, nil
+			return nil, ErrWrongPath
 		}
 		idx, err := strconv.Atoi(path[0]) // convert the path to index
 		if err != nil {
@@ -111,6 +131,45 @@ func (n *DataNode) Field(path []string) (interface{}, error) {
 	return nil, ErrWrongPath
 }
 
+func (n *DataNode) FieldAsInterface(path []string) (interface{}, error) {
+	return n.fieldAsInterface(CompilePathSlice(path))
+}
+func (n *DataNode) fieldAsInterface(path []string) (interface{}, error) {
+	switch n.Type { // based on current type return the value
+	case NMDataType:
+		if len(path) != 0 { // only return if the path is empty
+			return nil, ErrNotFound
+		}
+		return n.Value.Data, nil
+	case NMMapType:
+		if len(path) == 0 {
+			return n.Map, nil
+		}
+		node, has := n.Map[path[0]]
+		if !has {
+			return nil, ErrNotFound
+		}
+		return node.fieldAsInterface(path[1:]) // let the next node handle the value
+	case NMSliceType:
+		if len(path) == 0 {
+			return n.Slice, nil
+		}
+		idx, err := strconv.Atoi(path[0]) // convert the path to index
+		if err != nil {
+			return nil, err
+		}
+		if idx < 0 { // in case the index is negative add the slice lenght
+			idx += len(n.Slice)
+		}
+		if idx < 0 || idx >= len(n.Slice) { // check if the index is in range [0,len(slice))
+			return nil, ErrNotFound
+		}
+		return n.Slice[idx].fieldAsInterface(path[1:])
+	}
+	// this is possible if the node was created but no value was assigned to it
+	return nil, ErrWrongPath
+}
+
 // Set will set the value at de specified path
 // the path should be in the same format as the path given to Field
 func (n *DataNode) Set(path []string, val interface{}) (addedNew bool, err error) {
@@ -119,14 +178,22 @@ func (n *DataNode) Set(path []string, val interface{}) (addedNew bool, err error
 		case map[string]*DataNode:
 			n.Type = NMMapType
 			n.Map = v
-			addedNew = true
 		case []*DataNode:
 			n.Type = NMSliceType
 			n.Slice = v
-			addedNew = true
+		case *DataLeaf:
+			n.Type = NMDataType
+			n.Value = v
+		case *DataNode:
+			n.Type = v.Type
+			n.Map = v.Map
+			n.Slice = v.Slice
+			n.Value = v.Value
 		default:
 			n.Type = NMDataType
-			n.Value = val
+			n.Value = &DataLeaf{
+				Data: val,
+			}
 		}
 		return
 	}
@@ -219,15 +286,25 @@ func (n *DataNode) Remove(path []string) error {
 
 // Append will append the value at de specified path
 // the path should be in the same format as the path given to Field
-func (n *DataNode) Append(path []string, val interface{}) (idx int, err error) {
+func (n *DataNode) Append(path []string, val *DataLeaf) (idx int, err error) {
 	if len(path) == 0 { // the path is empty so overwrite curent node data
-		if n.Type == NMDataType ||
-			n.Type == NMMapType {
+		switch n.Type {
+		case NMMapType:
 			return -1, ErrWrongPath
+		case NMDataType:
+			if n.Value != nil && n.Value.Data != nil {
+				return -1, ErrWrongPath
+			}
+			// is empty so make a slice to be compatible with append
+			n.Type = NMSliceType
+			n.Value = nil
+			n.Slice = []*DataNode{{Type: NMDataType, Value: val}}
+			return 0, nil
+		default:
+			n.Type = NMSliceType
+			n.Slice = append(n.Slice, &DataNode{Type: NMDataType, Value: val})
+			return len(n.Slice) - 1, nil
 		}
-		n.Type = NMSliceType
-		n.Slice = append(n.Slice, &DataNode{Type: NMDataType, Value: val})
-		return len(n.Slice) - 1, nil
 	}
 	switch n.Type {
 	case NMDataType:
@@ -264,18 +341,28 @@ func (n *DataNode) Append(path []string, val interface{}) (idx int, err error) {
 
 // Compose will set the value at de specified path
 // the path should be in the same format as the path given to Field
-func (n *DataNode) Compose(path []string, val interface{}) (err error) {
+func (n *DataNode) Compose(path []string, val *DataLeaf) (err error) {
 	if len(path) == 0 { // the path is empty so overwrite curent node data
-		if n.Type == NMDataType ||
-			n.Type == NMMapType {
+		switch n.Type {
+		case NMMapType:
 			return ErrWrongPath
+		case NMDataType:
+			if n.Value == nil || n.Value.Data == nil {
+				// is empty so make a slice to be compatible with append
+				n.Type = NMSliceType
+				n.Value = nil
+				n.Slice = []*DataNode{{Type: NMDataType, Value: val}}
+				return
+			}
+			n.Value.Data = n.Value.String() + val.String()
+		default:
+			if len(n.Slice) == 0 {
+				n.Type = NMSliceType
+				n.Slice = []*DataNode{{Type: NMDataType, Value: val}}
+				return
+			}
+			n.Slice[len(n.Slice)-1].Value.Data = n.Slice[len(n.Slice)-1].Value.String() + val.String()
 		}
-		if len(n.Slice) == 0 {
-			n.Type = NMSliceType
-			n.Slice = []*DataNode{{Type: NMDataType, Value: val}}
-			return
-		}
-		n.Slice[len(n.Slice)-1].Value = IfaceAsString(n.Slice[len(n.Slice)-1].Value) + IfaceAsString(val)
 		return
 	}
 	switch n.Type {

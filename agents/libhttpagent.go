@@ -140,9 +140,7 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	err = nil // cancel previous err
 	var slctrStr string
 	workPath := make([]string, len(fldPath))
-	for i, val := range fldPath {
-		workPath[i] = val
-	}
+	copy(workPath, fldPath)
 	for i := range workPath {
 		if sIdx := strings.Index(workPath[i], "["); sIdx != -1 {
 			slctrStr = workPath[i][sIdx:]
@@ -247,17 +245,14 @@ func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) 
 	var str, nmPath string
 	msgFields := make(map[string]string) // work around to NMap issue
 	for el := nM.GetFirstElement(); el != nil; el = el.Next() {
-		val := el.Value
-		var nmIt utils.NMInterface
-		if nmIt, err = nM.Field(val); err != nil {
+		path := el.Value
+		var nmIt *utils.DataLeaf
+		if nmIt, err = nM.Field(path); err != nil {
 			return
 		}
-		nmItem, isNMItems := nmIt.(*config.NMItem)
-		if !isNMItems {
-			return fmt.Errorf("value: %s is not *NMItem", val)
-		}
-		nmPath = strings.Join(nmItem.Path, utils.NestingSep)
-		msgFields[utils.ConcatenatedKey(nmPath, utils.IfaceAsString(nmItem.Data))] = utils.IfaceAsString(nmItem.Data)
+		nmPath = strings.Join(nmIt.Path, utils.NestingSep)
+		val := nmIt.String()
+		msgFields[utils.ConcatenatedKey(nmPath, val)] = val
 	}
 	for key, val := range msgFields {
 		str += fmt.Sprintf("%s=%s\n", strings.Split(key, utils.InInFieldSep)[0], val)

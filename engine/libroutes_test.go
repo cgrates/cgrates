@@ -1012,13 +1012,19 @@ func TestSortedRouteAsNavigableMap(t *testing.T) {
 			utils.Weight: 15.5,
 		},
 	}
-	expNavMap := utils.NavigableMap{
-		utils.RouteID:         utils.NewNMData("ROUTE1"),
-		utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER"),
-		utils.SortingData: utils.NavigableMap{
-			utils.Ratio:  utils.NewNMData(6.0),
-			utils.Load:   utils.NewNMData(10.0),
-			utils.Weight: utils.NewNMData(15.5),
+	expNavMap := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.RouteID:         utils.NewLeafNode("ROUTE1"),
+			utils.RouteParameters: utils.NewLeafNode("SORTING_PARAMETER"),
+			utils.SortingData: &utils.DataNode{
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					utils.Ratio:  utils.NewLeafNode(6.0),
+					utils.Load:   utils.NewLeafNode(10.0),
+					utils.Weight: utils.NewLeafNode(15.5),
+				},
+			},
 		},
 	}
 	if rcv := sSpls.AsNavigableMap(); !reflect.DeepEqual(rcv, expNavMap) {
@@ -1051,25 +1057,43 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 		},
 	}
 
-	expNavMap := utils.NavigableMap{
-		utils.ProfileID: utils.NewNMData("TEST_ID1"),
-		utils.Sorting:   utils.NewNMData(utils.MetaWeight),
-		utils.CapRoutes: &utils.NMSlice{
-			utils.NavigableMap{
-				utils.RouteID:         utils.NewNMData("ROUTE1"),
-				utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER"),
-				utils.SortingData: utils.NavigableMap{
-					utils.Ratio:  utils.NewNMData(6.0),
-					utils.Load:   utils.NewNMData(10.0),
-					utils.Weight: utils.NewNMData(15.5),
-				},
-			},
-			utils.NavigableMap{
-				utils.RouteID:         utils.NewNMData("ROUTE2"),
-				utils.RouteParameters: utils.NewNMData("SORTING_PARAMETER_SECOND"),
-				utils.SortingData: utils.NavigableMap{
-					utils.Ratio: utils.NewNMData(7.0),
-					utils.Load:  utils.NewNMData(10.0),
+	expNavMap := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.ProfileID: utils.NewLeafNode("TEST_ID1"),
+			utils.Sorting:   utils.NewLeafNode(utils.MetaWeight),
+			utils.CapRoutes: &utils.DataNode{
+				Type: utils.NMSliceType,
+				Slice: []*utils.DataNode{
+					&utils.DataNode{
+						Type: utils.NMMapType,
+						Map: map[string]*utils.DataNode{
+							utils.RouteID:         utils.NewLeafNode("ROUTE1"),
+							utils.RouteParameters: utils.NewLeafNode("SORTING_PARAMETER"),
+							utils.SortingData: &utils.DataNode{
+								Type: utils.NMMapType,
+								Map: map[string]*utils.DataNode{
+									utils.Ratio:  utils.NewLeafNode(6.0),
+									utils.Load:   utils.NewLeafNode(10.0),
+									utils.Weight: utils.NewLeafNode(15.5),
+								},
+							},
+						},
+					},
+					&utils.DataNode{
+						Type: utils.NMMapType,
+						Map: map[string]*utils.DataNode{
+							utils.RouteID:         utils.NewLeafNode("ROUTE2"),
+							utils.RouteParameters: utils.NewLeafNode("SORTING_PARAMETER_SECOND"),
+							utils.SortingData: &utils.DataNode{
+								Type: utils.NMMapType,
+								Map: map[string]*utils.DataNode{
+									utils.Ratio: utils.NewLeafNode(7.0),
+									utils.Load:  utils.NewLeafNode(10.0),
+								},
+							},
+						},
+					},
 				},
 			},
 		},
