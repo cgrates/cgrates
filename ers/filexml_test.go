@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/utils"
+
 	"github.com/cgrates/cgrates/config"
 )
 
@@ -43,5 +45,55 @@ func TestERSNewXMLFileER(t *testing.T) {
 	expected.conReqs = result.(*XMLFileER).conReqs
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, result)
+	}
+}
+
+func TestERSXMLFileERConfig(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
+		ID:               utils.MetaDefault,
+		Type:             utils.MetaNone,
+		RowLength:        0,
+		FieldSep:         ",",
+		HeaderDefineChar: ":",
+		RunDelay:         0,
+		ConcurrentReqs:   0,
+		SourcePath:       "/var/spool/cgrates/ers/in",
+		ProcessedPath:    "/var/spool/cgrates/ers/out",
+		Filters:          []string{},
+		Opts:             make(map[string]interface{}),
+	}
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+	result2 := result1.Config()
+	if !reflect.DeepEqual(result2, cfg.ERsCfg().Readers[0]) {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", result2, cfg.ERsCfg().Readers[0])
+	}
+}
+
+func TestERSXMLFileERServeNil(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
+		ID:               utils.MetaDefault,
+		Type:             utils.MetaNone,
+		RowLength:        0,
+		FieldSep:         ",",
+		HeaderDefineChar: ":",
+		RunDelay:         0,
+		ConcurrentReqs:   0,
+		SourcePath:       "/var/spool/cgrates/ers/in",
+		ProcessedPath:    "/var/spool/cgrates/ers/out",
+		Filters:          []string{},
+		Opts:             make(map[string]interface{}),
+	}
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+	err = result1.Serve()
+	if err != nil {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 }
