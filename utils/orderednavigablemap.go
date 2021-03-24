@@ -70,7 +70,7 @@ func (onm *OrderedNavigableMap) Remove(fullPath *FullPath) (err error) {
 	if fullPath.Path == EmptyString {
 		return ErrWrongPath
 	}
-	fullPath.PathItems = CloneSlice(fullPath.PathItems)
+	fullPath.PathItems = CloneStringSlice(fullPath.PathItems)
 	if err = onm.nm.Remove(fullPath.PathItems); err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func (onm *OrderedNavigableMap) SetAsSlice(fullPath *FullPath, vals []*DataNode)
 	pathItmsSet := make([][]string, len(vals))
 
 	for i := range vals {
-		pathItms := CloneSlice(fullPath.PathItems)
+		pathItms := CloneStringSlice(fullPath.PathItems)
 		pathItms = append(pathItms, strconv.Itoa(i))
 		pathItmsSet[i] = pathItms
 	}

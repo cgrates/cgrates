@@ -171,7 +171,6 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 		Tag:             fc.Tag,
 		Type:            fc.Type,
 		Path:            fc.Path,
-		pathItems:       utils.CloneSlice(fc.pathItems),
 		Value:           fc.Value.Clone(),
 		Width:           fc.Width,
 		Strip:           fc.Strip,
@@ -190,16 +189,13 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 		cln.RoundingDecimals = utils.IntPointer(*fc.RoundingDecimals)
 	}
 	if fc.pathSlice != nil {
-		cln.pathSlice = make([]string, len(fc.pathSlice))
-		for i, v := range fc.pathSlice {
-			cln.pathSlice[i] = v
-		}
+		cln.pathSlice = utils.CloneStringSlice(fc.pathSlice)
+	}
+	if fc.pathItems != nil {
+		cln.pathItems = utils.CloneStringSlice(fc.pathItems)
 	}
 	if fc.Filters != nil {
-		cln.Filters = make([]string, len(fc.Filters))
-		for idx, val := range fc.Filters {
-			cln.Filters[idx] = val
-		}
+		cln.Filters = utils.CloneStringSlice(fc.Filters)
 	}
 	return
 }
