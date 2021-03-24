@@ -200,3 +200,57 @@ func TestSQLReaderServeBadType(t *testing.T) {
 	}
 	logger.Default = tmp
 }
+
+func TestSQLPostCDRMySQLError(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	cfg := config.NewDefaultCGRConfig()
+	testSQLEventReader := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         nil,
+		connString:    "",
+		connType:      "",
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.MySQL,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	err := testSQLEventReader.postCDR([]interface{}{})
+	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
+	if err == nil {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
+	}
+	logger.Default = tmp
+}
+
+func TestSQLPostCDRPostgresError(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
+	cfg := config.NewDefaultCGRConfig()
+	testSQLEventReader := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         nil,
+		connString:    "",
+		connType:      "",
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	err := testSQLEventReader.postCDR([]interface{}{})
+	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
+	if err == nil {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
+	}
+	logger.Default = tmp
+}
