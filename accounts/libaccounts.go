@@ -324,8 +324,9 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		// since we are erroring, we restore the concerete balances
 		aPaid = decimal.New(0, 0)
 	}
+	ec.Abstracts = &utils.Decimal{aPaid}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
-	return &utils.EventCharges{Abstracts: &utils.Decimal{aPaid}}, nil
+	return
 }
 
 // restoreAccounts will restore the accounts in DataDB out of their backups if present
