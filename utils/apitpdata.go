@@ -69,12 +69,7 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 	if limit == 0 || limit > len(in) {
 		limit = len(in)
 	}
-	ret := in[offset:limit]
-	out = make([]string, len(ret))
-	for i, itm := range ret {
-		out[i] = itm
-	}
-	return
+	return CloneStringSlice(in[offset:limit])
 }
 
 // Clone creates a clone of the object
@@ -647,8 +642,8 @@ func (fltr *CDRsFilter) Prepare() {
 	// sort.Strings(fltr.DestinationPrefixes)
 	// sort.Strings(fltr.NotDestinationPrefixes)
 
-	sort.Sort(sort.Float64Slice(fltr.Costs))
-	sort.Sort(sort.Float64Slice(fltr.NotCosts))
+	sort.Float64s(fltr.Costs)
+	sort.Float64s(fltr.NotCosts)
 
 }
 

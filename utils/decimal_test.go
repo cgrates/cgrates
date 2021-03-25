@@ -73,7 +73,6 @@ func TestUnmarshalMarshalBinary(t *testing.T) {
 	}
 
 	dec = nil
-	expected = NewDecimal(10, 0)
 	if err := dec.UnmarshalBinary([]byte(`10`)); err != nil {
 		t.Error(err)
 	}

@@ -27,14 +27,14 @@ import (
 
 func TestPathItemListNext(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushFront(node3)
 	list.PushFront(node2)
 	list.PushFront(node1)
-	if !reflect.DeepEqual("path2", list.Front().Next().Value.String()) {
-		t.Errorf("Expecting: <path2>, received: <%+v>", list.Front().Next().Value.String())
+	if !reflect.DeepEqual("path2", strings.Join(list.Front().Next().Value, NestingSep)) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", strings.Join(list.Front().Next().Value, NestingSep))
 	}
 
 }
@@ -49,14 +49,14 @@ func TestPathItemListNextNil(t *testing.T) {
 
 func TestPathItemListPrev(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushFront(node3)
 	list.PushFront(node2)
 	list.PushFront(node1)
-	if !reflect.DeepEqual("path2", list.Back().Prev().Value.String()) {
-		t.Errorf("Expecting: <path2>, received: <%+v>", list.Back().Prev().Value.String())
+	if !reflect.DeepEqual("path2", strings.Join(list.Back().Prev().Value, NestingSep)) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", strings.Join(list.Back().Prev().Value, NestingSep))
 	}
 
 }
@@ -72,9 +72,9 @@ func TestPathItemListPrevNil(t *testing.T) {
 func TestPathItemListInit(t *testing.T) {
 	list := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushFront(node3)
 	list.PushFront(node2)
 	list.PushFront(node1)
@@ -93,9 +93,9 @@ func TestPathItemListNewPathItemList(t *testing.T) {
 
 func TestPathItemListLen(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushFront(node3)
 	list.PushFront(node2)
 	list.PushFront(node1)
@@ -106,12 +106,12 @@ func TestPathItemListLen(t *testing.T) {
 
 func TestPathItemListFront(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list.PushBack(node1)
 	list.PushBack(node2)
-	if !reflect.DeepEqual("path1", list.Front().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Front().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list.Front().Value, NestingSep))
 	}
 
 }
@@ -126,12 +126,12 @@ func TestPathItemListFrontNil(t *testing.T) {
 
 func TestPathItemListBack(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list.PushBack(node1)
 	list.PushBack(node2)
-	if !reflect.DeepEqual("path2", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path2>, received: <%+v>", list.Back().Value.String())
+	if !reflect.DeepEqual("path2", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 
 }
@@ -156,143 +156,143 @@ func TestPathItemListLazyInit(t *testing.T) {
 
 func TestPathItemListInsert(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.insert(list.Front(), list.Back())
-	if !reflect.DeepEqual("path1", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Back().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 }
 
 func TestPathItemListInsertValue(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list.PushBack(node1)
 	list.PushBack(node2)
-	list.insertValue(PathItems{{Field: "path3"}}, list.Back())
-	if !reflect.DeepEqual("path3", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path3>, received: <%+v>", list.Back().Value.String())
+	list.insertValue([]string{"path3"}, list.Back())
+	if !reflect.DeepEqual("path3", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 }
 
 func TestPathItemListRemoveLowerCase(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.remove(list.Back())
-	if !reflect.DeepEqual("path2", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path2>, received: <%+v>", list.Back().Value.String())
+	if !reflect.DeepEqual("path2", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 }
 
 func TestPathItemListRemoveUpperCase1(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.Remove(list.Front().Next())
-	if !reflect.DeepEqual("path3", list.Front().Next().Value.String()) {
-		t.Errorf("Expecting: <path3>, received: <%+v>", list.Front().Next().Value.String())
+	if !reflect.DeepEqual("path3", strings.Join(list.Front().Next().Value, NestingSep)) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", strings.Join(list.Front().Next().Value, NestingSep))
 	}
 }
 
 func TestPathItemListRemoveUpperCase2(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"pathA"})
-	node2 := NewPathItems([]string{"pathB"})
+	node1 := []string{"pathA"}
+	node2 := []string{"pathB"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
 	list1.Remove(list2.Front())
-	if !reflect.DeepEqual("pathA", list1.Front().Value.String()) {
-		t.Errorf("Expecting: <pathA>, received: <%+v>", list1.Front().Value.String())
+	if !reflect.DeepEqual("pathA", strings.Join(list1.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <pathA>, received: <%+v>", strings.Join(list1.Front().Value, NestingSep))
 	}
 
 }
 
 func TestPathItemListMoveEqual(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.move(list.Back(), list.Back())
-	if !reflect.DeepEqual("path3", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path3>, received: <%+v>", list.Back().Value.String())
+	if !reflect.DeepEqual("path3", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 }
 
 func TestPathItemListMove(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.move(list.Front(), list.Back())
-	if !reflect.DeepEqual("path3", list.Front().next.Value.String()) {
-		t.Errorf("Expecting: <path3>, received: <%+v>", list.Front().next.Value.String())
+	if !reflect.DeepEqual("path3", strings.Join(list.Front().next.Value, NestingSep)) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", strings.Join(list.Front().next.Value, NestingSep))
 	}
-	if !reflect.DeepEqual("path1", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Back().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
-	if !reflect.DeepEqual("path2", list.Front().Value.String()) {
-		t.Errorf("Expecting: <path2>, received: <%+v>", list.Front().Value.String())
+	if !reflect.DeepEqual("path2", strings.Join(list.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <path2>, received: <%+v>", strings.Join(list.Front().Value, NestingSep))
 	}
 }
 
 func TestPathItemListPushFront(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
-	list.PushFront(PathItems{{Field: "path4"}})
-	if !reflect.DeepEqual("path4", list.Front().Value.String()) {
-		t.Errorf("Expecting: <path4>, received: <%+v>", list.Front().Value.String())
+	list.PushFront([]string{"path4"})
+	if !reflect.DeepEqual("path4", strings.Join(list.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", strings.Join(list.Front().Value, NestingSep))
 	}
 }
 
 func TestPathItemListPushBack(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
-	list.PushBack(PathItems{{Field: "path4"}})
-	if !reflect.DeepEqual("path4", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path4>, received: <%+v>", list.Back().Value.String())
+	list.PushBack([]string{"path4"})
+	if !reflect.DeepEqual("path4", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 }
 
 func TestPathItemListInsertBefore(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
-	list.InsertBefore(PathItems{{Field: "path4"}}, list.Back())
-	if !reflect.DeepEqual("path4", list.Back().Prev().Value.String()) {
-		t.Errorf("Expecting: <path4>, received: <%+v>", list.Back().Prev().Value.String())
+	list.InsertBefore([]string{"path4"}, list.Back())
+	if !reflect.DeepEqual("path4", strings.Join(list.Back().Prev().Value, NestingSep)) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", strings.Join(list.Back().Prev().Value, NestingSep))
 	}
 
 }
@@ -301,11 +301,11 @@ func TestPathItemListInsertBeforeNil(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
 	var received *PathItemElement
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
-	received = list1.InsertBefore(PathItems{{Field: "path4"}}, list2.Back())
+	received = list1.InsertBefore([]string{"path4"}, list2.Back())
 	if received != nil {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", nil, received)
 	}
@@ -313,15 +313,15 @@ func TestPathItemListInsertBeforeNil(t *testing.T) {
 
 func TestPathItemListInsertAfter(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
-	list.InsertAfter(PathItems{{Field: "path4"}}, list.Front())
-	if !reflect.DeepEqual("path4", list.Front().Next().Value.String()) {
-		t.Errorf("Expecting: <path4>, received: <%+v>", list.Front().Next().Value.String())
+	list.InsertAfter([]string{"path4"}, list.Front())
+	if !reflect.DeepEqual("path4", strings.Join(list.Front().Next().Value, NestingSep)) {
+		t.Errorf("Expecting: <path4>, received: <%+v>", strings.Join(list.Front().Next().Value, NestingSep))
 	}
 }
 
@@ -329,11 +329,11 @@ func TestPathItemListInsertAfterNil(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
 	var received *PathItemElement
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
-	received = list1.InsertAfter(PathItems{{Field: "path4"}}, list2.Back())
+	received = list1.InsertAfter([]string{"path4"}, list2.Back())
 	if received != nil {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", nil, received)
 	}
@@ -342,84 +342,84 @@ func TestPathItemListInsertAfterNil(t *testing.T) {
 func TestPathItemListMoveToFrontCase1(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
 	list1.MoveToFront(list2.Back())
-	if !reflect.DeepEqual("path1", list1.Front().Value.String()) {
-		t.Errorf("Expecting: <path3>, received: <%+v>", list1.Front().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list1.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", strings.Join(list1.Front().Value, NestingSep))
 	}
 
 }
 
 func TestPathItemListMoveToFrontCase2(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.MoveToFront(list.Back())
-	if !reflect.DeepEqual("path3", list.Front().Value.String()) {
-		t.Errorf("Expecting: <path3>, received: <%+v>", list.Front().Value.String())
+	if !reflect.DeepEqual("path3", strings.Join(list.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <path3>, received: <%+v>", strings.Join(list.Front().Value, NestingSep))
 	}
 }
 
 func TestPathItemListMoveToBackCase1(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
 	list1.MoveToBack(list2.Back())
-	if !reflect.DeepEqual("path1", list1.Back().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list1.Back().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list1.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list1.Back().Value, NestingSep))
 	}
 
 }
 
 func TestPathItemListMoveToBackCase2(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.MoveToBack(list.Front())
-	if !reflect.DeepEqual("path1", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Front().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list.Front().Value, NestingSep))
 	}
 }
 
 func TestPathItemListMoveBeforeCase1(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
 	list1.MoveBefore(list2.Front(), list1.Back())
-	if !reflect.DeepEqual("path1", list1.Front().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list1.Front().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list1.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list1.Front().Value, NestingSep))
 	}
 
 }
 
 func TestPathItemListMoveBeforeCase2(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.MoveBefore(list.Front(), list.Back())
-	if !reflect.DeepEqual("path1", list.Back().Prev().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Back().Prev().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list.Back().Prev().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list.Back().Prev().Value, NestingSep))
 	}
 
 }
@@ -427,28 +427,28 @@ func TestPathItemListMoveBeforeCase2(t *testing.T) {
 func TestPathItemListMoveAfterCase1(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"pathA"})
-	node2 := NewPathItems([]string{"pathB"})
+	node1 := []string{"pathA"}
+	node2 := []string{"pathB"}
 	list1.PushBack(node1)
 	list2.PushBack(node2)
 	list1.MoveAfter(list2.Front(), list1.Back())
-	if !reflect.DeepEqual("pathA", list1.Back().Value.String()) {
-		t.Errorf("Expecting: <pathA>, received: <%+v>", list1.Back().Value.String())
+	if !reflect.DeepEqual("pathA", strings.Join(list1.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <pathA>, received: <%+v>", strings.Join(list1.Back().Value, NestingSep))
 	}
 
 }
 
 func TestPathItemListMoveAfterCase2(t *testing.T) {
 	list := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	node3 := NewPathItems([]string{"path3"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	node3 := []string{"path3"}
 	list.PushBack(node1)
 	list.PushBack(node2)
 	list.PushBack(node3)
 	list.MoveAfter(list.Front(), list.Back())
-	if !reflect.DeepEqual("path1", list.Back().Value.String()) {
-		t.Errorf("Expecting: <path1>, received: <%+v>", list.Back().Value.String())
+	if !reflect.DeepEqual("path1", strings.Join(list.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <path1>, received: <%+v>", strings.Join(list.Back().Value, NestingSep))
 	}
 
 }
@@ -456,40 +456,40 @@ func TestPathItemListMoveAfterCase2(t *testing.T) {
 func TestPathItemListPushBackList(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	nodeA := NewPathItems([]string{"pathA"})
-	nodeB := NewPathItems([]string{"pathB"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	nodeA := []string{"pathA"}
+	nodeB := []string{"pathB"}
 	list1.PushBack(node1)
 	list1.PushBack(node2)
 	list2.PushBack(nodeA)
 	list2.PushBack(nodeB)
 	list1.PushBackList(list2)
-	if !reflect.DeepEqual("pathB", list1.Back().Value.String()) {
-		t.Errorf("Expecting: <pathB>, received: <%+v>", list1.Back().Value.String())
+	if !reflect.DeepEqual("pathB", strings.Join(list1.Back().Value, NestingSep)) {
+		t.Errorf("Expecting: <pathB>, received: <%+v>", strings.Join(list1.Back().Value, NestingSep))
 	}
-	if !reflect.DeepEqual("pathA", list1.Back().Prev().Value.String()) {
-		t.Errorf("Expecting: <pathA>, received: <%+v>", list1.Back().Prev().Value.String())
+	if !reflect.DeepEqual("pathA", strings.Join(list1.Back().Prev().Value, NestingSep)) {
+		t.Errorf("Expecting: <pathA>, received: <%+v>", strings.Join(list1.Back().Prev().Value, NestingSep))
 	}
 }
 
 func TestPathItemListPushFrontList(t *testing.T) {
 	list1 := NewPathItemList()
 	list2 := NewPathItemList()
-	node1 := NewPathItems([]string{"path1"})
-	node2 := NewPathItems([]string{"path2"})
-	nodeA := NewPathItems([]string{"pathA"})
-	nodeB := NewPathItems([]string{"pathB"})
+	node1 := []string{"path1"}
+	node2 := []string{"path2"}
+	nodeA := []string{"pathA"}
+	nodeB := []string{"pathB"}
 	list1.PushBack(node1)
 	list1.PushBack(node2)
 	list2.PushBack(nodeA)
 	list2.PushBack(nodeB)
 	list1.PushFrontList(list2)
-	if !reflect.DeepEqual("pathA", list1.Front().Value.String()) {
-		t.Errorf("Expecting: <pathA>, received: <%+v>", list1.Front().Value.String())
+	if !reflect.DeepEqual("pathA", strings.Join(list1.Front().Value, NestingSep)) {
+		t.Errorf("Expecting: <pathA>, received: <%+v>", strings.Join(list1.Front().Value, NestingSep))
 	}
-	if !reflect.DeepEqual("pathB", list1.Front().Next().Value.String()) {
-		t.Errorf("Expecting: <pathB>, received: <%+v>", list1.Front().Next().Value.String())
+	if !reflect.DeepEqual("pathB", strings.Join(list1.Front().Next().Value, NestingSep)) {
+		t.Errorf("Expecting: <pathB>, received: <%+v>", strings.Join(list1.Front().Next().Value, NestingSep))
 	}
 }
 
@@ -572,11 +572,12 @@ func BenchmarkGetPathIndexSlice(b *testing.B) {
 	}
 }
 
+/*
 func BenchmarkGetPathIndexSliceSplit(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		GetPathIndexSlice(benchPath)
 	}
-}
+}*/
 func BenchmarkGetPathIndexSliceStringsIndex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		GetPathIndexSliceStringsIndex(benchPath)

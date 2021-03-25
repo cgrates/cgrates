@@ -51,6 +51,4 @@ func (rw *CgrIORecordWriter) Write(record []string) error {
 
 // Flush only to implement CgrRecordWriter
 // ToDo: make sure we properly handle this method
-func (*CgrIORecordWriter) Flush() {
-	return
-}
+func (*CgrIORecordWriter) Flush() {}

@@ -151,7 +151,9 @@ func TestLibratesRunTimes(t *testing.T) {
 	}
 	eTime = sTime.Add(24 * time.Hour)
 
-	received, err = rt.RunTimes(sTime, eTime, verbosity)
+	if received, err = rt.RunTimes(sTime, eTime, verbosity); err != nil {
+		t.Error(err)
+	}
 
 	aT1, err := time.Parse(time.RFC3339, "2022-03-12T00:00:00Z")
 	if err != nil {
@@ -166,10 +168,6 @@ func TestLibratesRunTimes(t *testing.T) {
 	aTsl := make([]time.Time, 0)
 	aTsl = append(aTsl, aT1, aT2)
 	expected = append(expected, aTsl)
-
-	if err != nil {
-		t.Errorf("\ndidn't expect error, got %v", err)
-	}
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)

@@ -117,11 +117,11 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 }
 
 func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
-	switch itm.(type) {
+	switch v := itm.(type) {
 	case time.Time:
-		return itm.(time.Time), nil
+		return v, nil
 	case string:
-		return ParseTimeDetectLayout(itm.(string), timezone)
+		return ParseTimeDetectLayout(v, timezone)
 	default:
 		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
 	}
@@ -279,17 +279,17 @@ func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 }
 
 func IfaceAsBool(itm interface{}) (b bool, err error) {
-	switch itm.(type) {
+	switch v := itm.(type) {
 	case bool:
-		return itm.(bool), nil
+		return v, nil
 	case string:
-		return strconv.ParseBool(itm.(string))
+		return strconv.ParseBool(v)
 	case int:
-		return itm.(int) > 0, nil
+		return v > 0, nil
 	case int64:
-		return itm.(int64) > 0, nil
+		return v > 0, nil
 	case float64:
-		return itm.(float64) > 0, nil
+		return v > 0, nil
 	default:
 		err = fmt.Errorf("cannot convert field: %+v to bool", itm)
 	}

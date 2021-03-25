@@ -234,8 +234,8 @@ func (n *DataNode) Set(path []string, val interface{}) (addedNew bool, err error
 
 // IsEmpty return if the node is empty/ has no data
 func (n DataNode) IsEmpty() bool {
-	return n.Value == nil ||
-		len(n.Map) == 0 ||
+	return n.Value == nil &&
+		len(n.Map) == 0 &&
 		len(n.Slice) == 0
 }
 

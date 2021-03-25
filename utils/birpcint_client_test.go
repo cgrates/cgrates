@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/cenkalti/rpc2"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestNewBiJSONrpcClient(t *testing.T) {
@@ -43,23 +42,9 @@ func TestNewBiJSONrpcClient(t *testing.T) {
 		"": func(*rpc2.Client, *struct{}, *string) error { return nil },
 	}
 
-	rcv, err = NewBiJSONrpcClient(addr, handlers)
+	_, err = NewBiJSONrpcClient(addr, handlers)
 	if err != nil {
 		t.Error(err)
 	}
 	l.Close()
-}
-
-type testBiRPCServer struct {
-	metod string
-	args  interface{}
-	reply interface{}
-}
-
-func (*testBiRPCServer) Call(string, interface{}, interface{}) error { return nil }
-func (t *testBiRPCServer) CallBiRPC(_ rpcclient.ClientConnector, metod string, args interface{}, reply interface{}) error {
-	t.metod = metod
-	t.args = args
-	t.reply = reply
-	return nil
 }

@@ -111,8 +111,7 @@ func TestDynamicWeightString(t *testing.T) {
 }
 
 func TestCloneDynamicWeights(t *testing.T) {
-	dynWeigh := DynamicWeights{}
-	dynWeigh = nil
+	var dynWeigh DynamicWeights
 	if rcv := dynWeigh.Clone(); len(rcv) != 0 {
 		t.Errorf("Expected empty slice")
 	}

@@ -733,18 +733,18 @@ type TestA struct {
 
 type TestASlice []*TestA
 
-func (_ *TestA) TestFunc() string {
+func (*TestA) TestFunc() string {
 	return "This is a test function on a structure"
 }
 
-func (_ *TestA) TestFuncWithParam(param string) string {
+func (*TestA) TestFuncWithParam(param string) string {
 	return "Invalid"
 }
 
-func (_ *TestA) TestFuncWithError() (string, error) {
+func (*TestA) TestFuncWithError() (string, error) {
 	return "TestFuncWithError", nil
 }
-func (_ *TestA) TestFuncWithError2() (string, error) {
+func (*TestA) TestFuncWithError2() (string, error) {
 	return "TestFuncWithError2", ErrPartiallyExecuted
 }
 
@@ -756,7 +756,7 @@ func TestReflectFieldMethodInterface(t *testing.T) {
 	} else if ifValue != "TestStructField" {
 		t.Errorf("Expecting: TestStructField, received: %+v", ifValue)
 	}
-	ifValue, err = ReflectFieldMethodInterface(a, "InexistentField")
+	_, err = ReflectFieldMethodInterface(a, "InexistentField")
 	if err != ErrNotFound {
 		t.Error(err)
 	}
@@ -772,7 +772,7 @@ func TestReflectFieldMethodInterface(t *testing.T) {
 	} else if ifValue != "TestFuncWithError" {
 		t.Errorf("Expecting: TestFuncWithError, received: %+v", ifValue)
 	}
-	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError2")
+	_, err = ReflectFieldMethodInterface(a, "TestFuncWithError2")
 	if err == nil || err != ErrPartiallyExecuted {
 		t.Error(err)
 	}
@@ -988,8 +988,7 @@ func TestIfaceAsDurationDefaultError(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseUInt(t *testing.T) {
-	var test uint
-	test = 127
+	var test uint = 127
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "127ns") {
 		t.Errorf("Expected <127ns> ,received: <%+v>", response)
@@ -997,8 +996,7 @@ func TestIfaceAsDurationCaseUInt(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseInt8(t *testing.T) {
-	var test int8
-	test = 127
+	var test int8 = 127
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "127ns") {
 		t.Errorf("Expected <127ns> ,received: <%+v>", response)
@@ -1006,8 +1004,7 @@ func TestIfaceAsDurationCaseInt8(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseNegInt8(t *testing.T) {
-	var test int8
-	test = -127
+	var test int8 = -127
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "-127ns") {
 		t.Errorf("Expected <-127ns> ,received: <%+v>", response)
@@ -1015,8 +1012,7 @@ func TestIfaceAsDurationCaseNegInt8(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseUInt8(t *testing.T) {
-	var test uint8
-	test = 127
+	var test uint8 = 127
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "127ns") {
 		t.Errorf("Expected <127ns> ,received: <%+v>", response)
@@ -1024,8 +1020,7 @@ func TestIfaceAsDurationCaseUInt8(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseInt16(t *testing.T) {
-	var test int16
-	test = 32767
+	var test int16 = 32767
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "32.767µs") {
 		t.Errorf("Expected <32.767µs> ,received: <%+v>", response)
@@ -1033,8 +1028,7 @@ func TestIfaceAsDurationCaseInt16(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseNegInt16(t *testing.T) {
-	var test int16
-	test = -32767
+	var test int16 = -32767
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "-32.767µs") {
 		t.Errorf("Expected <-32.767µs> ,received: <%+v>", response)
@@ -1042,8 +1036,7 @@ func TestIfaceAsDurationCaseNegInt16(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseUInt16(t *testing.T) {
-	var test uint16
-	test = 32767
+	var test uint16 = 32767
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "32.767µs") {
 		t.Errorf("Expected <32.767µs> ,received: <%+v>", response)
@@ -1051,8 +1044,7 @@ func TestIfaceAsDurationCaseUInt16(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseInt32(t *testing.T) {
-	var test int32
-	test = 2147483647
+	var test int32 = 2147483647
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "2.147483647s") {
 		t.Errorf("Expected <2.147483647s> ,received: <%+v>", response)
@@ -1060,8 +1052,7 @@ func TestIfaceAsDurationCaseInt32(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseNegInt32(t *testing.T) {
-	var test int32
-	test = -2147483647
+	var test int32 = -2147483647
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "-2.147483647s") {
 		t.Errorf("Expected <-2.147483647s> ,received: <%+v>", response)
@@ -1069,8 +1060,7 @@ func TestIfaceAsDurationCaseNegInt32(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseUInt32(t *testing.T) {
-	var test uint32
-	test = 2147483647
+	var test uint32 = 2147483647
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "2.147483647s") {
 		t.Errorf("Expected <2.147483647s> ,received: <%+v>", response)
@@ -1078,8 +1068,7 @@ func TestIfaceAsDurationCaseUInt32(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseInt64(t *testing.T) {
-	var test int64
-	test = 9223372036854775807
+	var test int64 = 9223372036854775807
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "2562047h47m16.854775807s") {
 		t.Errorf("Expected <2562047h47m16.854775807s> ,received: <%+v>", response)
@@ -1087,8 +1076,7 @@ func TestIfaceAsDurationCaseInt64(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseNegInt64(t *testing.T) {
-	var test int64
-	test = -9223372036854775807
+	var test int64 = -9223372036854775807
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "-2562047h47m16.854775807s") {
 		t.Errorf("Expected <-2562047h47m16.854775807s> ,received: <%+v>", response)
@@ -1096,8 +1084,7 @@ func TestIfaceAsDurationCaseNegInt64(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseUInt64(t *testing.T) {
-	var test uint64
-	test = 9223372036854775807
+	var test uint64 = 9223372036854775807
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "2562047h47m16.854775807s") {
 		t.Errorf("Expected <2562047h47m16.854775807s> ,received: <%+v>", response)
@@ -1105,8 +1092,7 @@ func TestIfaceAsDurationCaseUInt64(t *testing.T) {
 }
 
 func TestIfaceAsDurationCaseFloat32(t *testing.T) {
-	var test float32
-	test = 9.5555555
+	var test float32 = 9.5555555
 	response, _ := IfaceAsDuration(test)
 	if !reflect.DeepEqual(response.String(), "9ns") {
 		t.Errorf("Expected <9ns> ,received: <%+v>", response)
@@ -1114,10 +1100,8 @@ func TestIfaceAsDurationCaseFloat32(t *testing.T) {
 }
 
 func TestIfaceAsInt6432to64(t *testing.T) {
-	var test int32
-	var expected int64
-	test = 2147483647
-	expected = 2147483647
+	var test int32 = 2147483647
+	var expected int64 = 2147483647
 	response, _ := IfaceAsInt64(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1125,8 +1109,7 @@ func TestIfaceAsInt6432to64(t *testing.T) {
 }
 
 func TestIfaceAsInt64Default(t *testing.T) {
-	var test bool
-	test = true
+	var test bool = true
 	_, err := IfaceAsInt64(test)
 	if err == nil || err.Error() != "cannot convert field: true to int" {
 		t.Errorf("Expecting <cannot convert field: true to int> ,received: <%+v>", err)
@@ -1134,8 +1117,7 @@ func TestIfaceAsInt64Default(t *testing.T) {
 }
 
 func TestIfaceAsInt64Nanosecs(t *testing.T) {
-	var test time.Duration
-	test = 2147483647
+	var test time.Duration = 2147483647
 	response, _ := IfaceAsInt64(test)
 	if !reflect.DeepEqual(response, test.Nanoseconds()) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", test.Nanoseconds(), response)
@@ -1143,8 +1125,7 @@ func TestIfaceAsInt64Nanosecs(t *testing.T) {
 }
 
 func TestIfaceAsTInt64Default(t *testing.T) {
-	var test bool
-	test = true
+	var test bool = true
 	_, err := IfaceAsTInt64(test)
 	if err == nil || err.Error() != "cannot convert field<bool>: true to int" {
 		t.Errorf("Expecting <cannot convert field<bool>: true to int> ,received: <%+v>", err)
@@ -1152,8 +1133,7 @@ func TestIfaceAsTInt64Default(t *testing.T) {
 }
 
 func TestIfaceAsTInt64Nanosecs(t *testing.T) {
-	var test time.Duration
-	test = 2147483647
+	var test time.Duration = 2147483647
 	response, _ := IfaceAsTInt64(test)
 	if !reflect.DeepEqual(response, test.Nanoseconds()) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", test.Nanoseconds(), response)
@@ -1161,8 +1141,7 @@ func TestIfaceAsTInt64Nanosecs(t *testing.T) {
 }
 
 func TestIfaceAsBoolInt64(t *testing.T) {
-	var test int64
-	test = 2147483647
+	var test int64 = 2147483647
 	response, _ := IfaceAsBool(test)
 	if !reflect.DeepEqual(response, true) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", true, response)
@@ -1170,8 +1149,7 @@ func TestIfaceAsBoolInt64(t *testing.T) {
 }
 
 func TestIfaceAsBoolDefault(t *testing.T) {
-	var test uint64
-	test = 2147483647
+	var test uint64 = 2147483647
 	_, err := IfaceAsBool(test)
 	if err == nil || err.Error() != "cannot convert field: 2147483647 to bool" {
 		t.Errorf("Expecting <cannot convert field: 2147483647 to bool> ,received: <%+v>", err)
@@ -1179,10 +1157,8 @@ func TestIfaceAsBoolDefault(t *testing.T) {
 }
 
 func TestIfaceAsStringInt32(t *testing.T) {
-	var test int32
-	var expected string
-	test = 2147483647
-	expected = "2147483647"
+	var test int32 = 2147483647
+	expected := "2147483647"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1190,10 +1166,8 @@ func TestIfaceAsStringInt32(t *testing.T) {
 }
 
 func TestIfaceAsStringInt32Neg(t *testing.T) {
-	var test int32
-	var expected string
-	test = -2147483647
-	expected = "-2147483647"
+	var test int32 = -2147483647
+	expected := "-2147483647"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1201,10 +1175,8 @@ func TestIfaceAsStringInt32Neg(t *testing.T) {
 }
 
 func TestIfaceAsStringInt64Neg(t *testing.T) {
-	var test int64
-	var expected string
-	test = -9223372036854775807
-	expected = "-9223372036854775807"
+	var test int64 = -9223372036854775807
+	expected := "-9223372036854775807"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1212,10 +1184,8 @@ func TestIfaceAsStringInt64Neg(t *testing.T) {
 }
 
 func TestIfaceAsStringUInt32(t *testing.T) {
-	var test uint32
-	var expected string
-	test = 2147483647
-	expected = "2147483647"
+	var test uint32 = 2147483647
+	expected := "2147483647"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1223,10 +1193,8 @@ func TestIfaceAsStringUInt32(t *testing.T) {
 }
 
 func TestIfaceAsStringUInt64(t *testing.T) {
-	var test uint64
-	var expected string
-	test = 9223372036854775807
-	expected = "9223372036854775807"
+	var test uint64 = 9223372036854775807
+	expected := "9223372036854775807"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1234,10 +1202,8 @@ func TestIfaceAsStringUInt64(t *testing.T) {
 }
 
 func TestIfaceAsStringFloat32(t *testing.T) {
-	var test float32
-	var expected string
-	test = 2.5
-	expected = "2.5"
+	var test float32 = 2.5
+	expected := "2.5"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
@@ -1245,27 +1211,16 @@ func TestIfaceAsStringFloat32(t *testing.T) {
 }
 
 func TestIfaceAsStringFloat32Neg(t *testing.T) {
-	var test float32
-	var expected string
-	test = -2.5
-	expected = "-2.5"
+	var test float32 = -2.5
+	expected := "-2.5"
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, response)
 	}
 }
 
-func TestIfaceAsStringNMInterface(t *testing.T) {
-	var test NMInterface = NewNMData("1001")
-	response := IfaceAsString(test)
-	if !reflect.DeepEqual(response, "1001") {
-		t.Errorf("Expected <1001> ,received: <%+v>", response)
-	}
-}
-
 func TestGetBasicTypeUint(t *testing.T) {
-	var test interface{}
-	test = uint8(123)
+	var test interface{} = uint8(123)
 	valItm := reflect.ValueOf(test)
 	response := GetBasicType(test)
 	if !reflect.DeepEqual(valItm.Uint(), response) {
@@ -1389,8 +1344,7 @@ func TestEqualToError(t *testing.T) {
 }
 
 func TestIfaceAsStringDefault(t *testing.T) {
-	var test int8
-	test = 2
+	var test int8 = 2
 	response := IfaceAsString(test)
 	if !reflect.DeepEqual(response, "2") {
 		t.Errorf("Expected <2> ,received: <%+v>", response)
@@ -1606,7 +1560,7 @@ func TestReflectFieldMethodInterfaceArrayDefault(t *testing.T) {
 	}
 }
 
-func (_ *TestA) TestFuncWithParamError2() (string, string, string) {
+func (*TestA) TestFuncWithParamError2() (string, string, string) {
 	return "Invalid", "invalid2", "invalid3"
 }
 
@@ -1626,7 +1580,7 @@ func TestReflectFieldMethodInterfaceElseError2(t *testing.T) {
 	}
 }
 
-func (_ *TestA) TestFuncWithParamError3() (string, string) {
+func (*TestA) TestFuncWithParamError3() (string, string) {
 	return "Invalid", "invalid2"
 }
 

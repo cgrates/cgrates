@@ -333,7 +333,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	}
 	if nowTm, err := ParseTimeDetectLayout(MetaNow, ""); err != nil {
 		t.Error(err)
-	} else if time.Now().Sub(nowTm) > 10*time.Millisecond {
+	} else if time.Since(nowTm) > 10*time.Millisecond {
 		t.Errorf("Unexpected time parsed: %v", nowTm)
 	}
 	eamonTmStr := "31/05/2015 14:46:00"
@@ -1286,8 +1286,8 @@ func (tRPC *TestRPC) Call(args interface{}, reply interface{}) error {
 	return nil
 }
 
-func (tRPC *TestRPC) V1Error2(args interface{}, reply interface{}) (error, int) {
-	return nil, 0
+func (tRPC *TestRPC) V1Error2(args interface{}, reply interface{}) (int, error) {
+	return 0, nil
 }
 
 func (tRPC *TestRPC) V1Error3(args interface{}, reply interface{}) int {
@@ -1334,8 +1334,8 @@ func (tRPC *TestRPC2) Call(args interface{}, reply interface{}) error {
 	return nil
 }
 
-func (tRPC *TestRPC2) Error2(args interface{}, reply interface{}) (error, int) {
-	return nil, 0
+func (tRPC *TestRPC2) Error2(args interface{}, reply interface{}) (int, error) {
+	return 0, nil
 }
 
 func (tRPC *TestRPC2) Error3(args interface{}, reply interface{}) int {
