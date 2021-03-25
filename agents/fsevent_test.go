@@ -637,6 +637,48 @@ func TestSliceAsFsArray(t *testing.T) {
 	}
 }
 
+func TestSliceAsArraySortingParameter(t *testing.T) {
+	eSplrs := engine.SortedRoutesList{{
+		ProfileID: "ACNT_1003",
+		Sorting:   utils.MetaWeight,
+		Routes: []*engine.SortedRoute{
+			{
+				RouteID: "rt1",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+			},
+			{
+				RouteID: "rt2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+			},
+		},
+	}, {
+		ProfileID: "ACNT_1004",
+		Sorting:   utils.MetaWeight,
+		Routes: []*engine.SortedRoute{
+			{
+				RouteID: "RT1",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+			},
+			{
+				RouteID: "RT2",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+			},
+		},
+	}}
+	expFs := "ARRAY::4|:rt1|:rt2|:RT1|:RT2"
+	if fsArray := SliceAsFsArray(eSplrs.RoutesWithParams()); expFs != fsArray {
+		t.Errorf("Expected %+v, received %+v", expFs, fsArray)
+	}
+}
+
 // Make sure processing of the hangup event produces the same output as FS-JSON CDR
 func TestSyncFsEventWithJsonCdr(t *testing.T) {
 	body := []byte(`
