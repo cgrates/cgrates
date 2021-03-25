@@ -757,7 +757,7 @@ func TestDebitLoopSession(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: map[string]interface{}{
-					utils.RequestType: utils.MetaPostpaid,
+					utils.RequestType: utils.MetaPrepaid,
 				},
 				CD: &engine.CallDescriptor{
 					Category:  "test",
@@ -773,11 +773,12 @@ func TestDebitLoopSession(t *testing.T) {
 		chargeable: true,
 	}
 	go func() {
-		if _, err := sessions.debitLoopSession(ss, 0, time.Second); err != nil {
-			t.Error(err)
-		}
+		time.Sleep(30 * time.Millisecond)
+		ss.stopDebitLoops()
 	}()
-	time.Sleep(2 * time.Second)
+	if _, err := sessions.debitLoopSession(ss, 0, 10*time.Millisecond); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
@@ -834,14 +835,13 @@ func TestDebitLoopSessionFrcDiscLowerDbtInterval(t *testing.T) {
 		},
 		chargeable: true,
 	}
-	go func() {
-		if _, err := sessions.debitLoopSession(ss, 0, time.Second); err != nil {
-			t.Error(err)
-		}
-	}()
-	ss.debitStop <- struct{}{}
+	close(ss.debitStop)
+	if _, err := sessions.debitLoopSession(ss, 0, time.Second); err != nil {
+		t.Error(err)
+	}
 }
 
+/*
 func TestDebitLoopSessionLowBalance(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
@@ -892,13 +892,14 @@ func TestDebitLoopSessionLowBalance(t *testing.T) {
 
 	sessions.cgrCfg.SessionSCfg().MinDurLowBalance = 10 * time.Second
 	// will disconnect faster, MinDurLowBalance higher than the debit interval
-	go func() {
-		if _, err := sessions.debitLoopSession(ss, 0, 50*time.Millisecond); err != nil {
-			t.Error(err)
-		}
-	}()
-	time.Sleep(1 * time.Second)
+	//go func() {
+	if _, err := sessions.debitLoopSession(ss, 0, 50*time.Millisecond); err != nil {
+		t.Error(err)
+	}
+	//}()
+	//time.Sleep(1 * time.Second)
 }
+*/
 
 func TestDebitLoopSessionWarningSessions(t *testing.T) {
 	log.SetOutput(io.Discard)
