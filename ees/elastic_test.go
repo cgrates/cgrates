@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
+	"bytes"
+	"io"
+	"net/http"
 	"reflect"
 	"testing"
 
@@ -246,6 +249,17 @@ func TestInitCase10(t *testing.T) {
 	}
 }
 
+type mockClientErr struct{}
+
+func (mockClientErr) Perform(req *http.Request) (res *http.Response, err error) {
+	res = &http.Response{
+		StatusCode: 300,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"test":"test"}`))),
+		Header:     http.Header{},
+	}
+	return res, nil
+}
+
 func TestElasticExportEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrEv := new(utils.CGREvent)
@@ -263,6 +277,150 @@ func TestElasticExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	eEe.eClnt.Transport = new(mockClientErr)
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	if err := eEe.ExportEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+}
+
+type mockClientErr2 struct{}
+
+func (mockClientErr2) Perform(req *http.Request) (res *http.Response, err error) {
+	res = &http.Response{
+		StatusCode: 300,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
+		Header:     http.Header{},
+	}
+	return res, nil
+}
+
+func TestElasticExportEvent2(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	eEe.eClnt.Transport = new(mockClientErr2)
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	errExpect := io.EOF
+	if err := eEe.ExportEvent(cgrEv); err == nil || err != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+type mockClient struct{}
+
+func (mockClient) Perform(req *http.Request) (res *http.Response, err error) {
+	res = &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(""))),
+		Header:     http.Header{},
+	}
+	return res, nil
+}
+func TestElasticExportEvent3(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	eEe.eClnt.Transport = new(mockClient)
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
+	}
+	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
+		{
+			Path: "*exp.1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*req.field1", utils.InfieldSep),
+		},
+		{
+			Path: "*exp.2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("*req.field2", utils.InfieldSep),
+		},
+	}
+	for _, field := range cgrCfg.EEsCfg().Exporters[0].Fields {
+		field.ComputePath()
+	}
+	// errExpect := `unsupported protocol scheme ""`
+	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
+	if err := eEe.ExportEvent(cgrEv); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestElasticExportEvent4(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	// eEe.eClnt.Transport = new(mockClient)
 	cgrEv.Event = map[string]interface{}{
 		"test1": "value",
 	}
@@ -283,9 +441,28 @@ func TestElasticExportEvent(t *testing.T) {
 	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but got %q", errExpect, err)
 	}
-	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but got %q", errExpect, err)
+}
+
+func TestElasticExportEvent5(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrEv := new(utils.CGREvent)
+	newIDb := engine.NewInternalDB(nil, nil, true)
+	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
+	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
+	dc, err := newEEMetrics(utils.FirstNonEmpty(
+		"Local",
+		utils.EmptyString,
+	))
+	if err != nil {
+		t.Error(err)
+	}
+	eEe, err := NewElasticExporter(cgrCfg, 0, filterS, dc)
+	if err != nil {
+		t.Error(err)
+	}
+	// eEe.eClnt.Transport = new(mockClient)
+	cgrEv.Event = map[string]interface{}{
+		"test1": "value",
 	}
 	cgrCfg.EEsCfg().Exporters[0].Fields = []*config.FCTemplate{
 		{
@@ -303,7 +480,7 @@ func TestElasticExportEvent(t *testing.T) {
 		field.ComputePath()
 	}
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
-	errExpect = "inline parse error for string: <*wrong-type>"
+	errExpect := "inline parse error for string: <*wrong-type>"
 	if err := eEe.ExportEvent(cgrEv); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
