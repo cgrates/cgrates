@@ -635,3 +635,27 @@ func TestSQLSetURLError(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+func TestSQLSetURLError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	testSQLEventReader := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         &engine.FilterS{},
+		connString:    "",
+		connType:      "",
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	err := testSQLEventReader.setURL("*mysql://cgrates:CGRateS.org@127.0.0.1:3306", "http://user^:passwo^rd@foo.com/", nil)
+	expected := `parse "http://user^:passwo^rd@foo.com/": net/url: invalid userinfo`
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
