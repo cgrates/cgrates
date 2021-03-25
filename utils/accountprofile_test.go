@@ -453,7 +453,7 @@ func TestAPAccountProfiles(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance1": &Balance{
+					"testBalance1": {
 						ID:    "testBalance1",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},
@@ -474,7 +474,7 @@ func TestAPAccountProfiles(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance2": &Balance{
+					"testBalance2": {
 						ID:    "testBalance2",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},
@@ -510,7 +510,7 @@ func TestAPLockIDs(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance1": &Balance{
+					"testBalance1": {
 						ID:    "testBalance1",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},
@@ -531,7 +531,7 @@ func TestAPLockIDs(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance2": &Balance{
+					"testBalance2": {
 						ID:    "testBalance2",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},
@@ -567,7 +567,7 @@ func TestAPTenantIDs(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance1": &Balance{
+					"testBalance1": {
 						ID:    "testBalance1",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},
@@ -588,7 +588,7 @@ func TestAPTenantIDs(t *testing.T) {
 				},
 				Weights: nil,
 				Balances: map[string]*Balance{
-					"testBalance2": &Balance{
+					"testBalance2": {
 						ID:    "testBalance2",
 						Type:  MetaAbstract,
 						Units: &Decimal{decimal.New(0, 0)},

@@ -121,7 +121,7 @@ func TestLibRoutesUsage(t *testing.T) {
 	if answ != se.Event[Usage] {
 		t.Errorf("Expecting: %+v, received: %+v", se.Event[Usage], answ)
 	}
-	answ, err = seErr.FieldAsDuration(Usage)
+	_, err = seErr.FieldAsDuration(Usage)
 	if err != ErrNotFound {
 		t.Error(err)
 	}

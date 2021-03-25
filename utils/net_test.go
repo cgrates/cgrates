@@ -90,7 +90,7 @@ func TestDecodeServerRequest(t *testing.T) {
 	if !reflect.DeepEqual(req, rcvReq) {
 		t.Errorf("Expecting: %+v, received: %+v", req, rcvReq)
 	}
-	if !reflect.DeepEqual(err, rcvErr) {
+	if err != rcvErr {
 		t.Errorf("Expecting: %+v, received: %+v", err, rcvErr)
 	}
 }

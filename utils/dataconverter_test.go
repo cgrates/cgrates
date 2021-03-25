@@ -97,7 +97,7 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if a, err = NewDataConverter(MetaMultiply); err == nil || err != ErrMandatoryIeMissingNoCaps {
+	if _, err = NewDataConverter(MetaMultiply); err == nil || err != ErrMandatoryIeMissingNoCaps {
 		t.Error(err)
 	}
 	a, err = NewDataConverter("*multiply:3.3")
@@ -111,7 +111,7 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if a, err = NewDataConverter(MetaDivide); err == nil || err != ErrMandatoryIeMissingNoCaps {
+	if _, err = NewDataConverter(MetaDivide); err == nil || err != ErrMandatoryIeMissingNoCaps {
 		t.Error(err)
 	}
 	a, err = NewDataConverter("*divide:3.3")
@@ -125,7 +125,7 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if a, err = NewDataConverter(MetaLibPhoneNumber); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <>" {
+	if _, err = NewDataConverter(MetaLibPhoneNumber); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <>" {
 		t.Error(err)
 	}
 	a, err = NewDataConverter("*libphonenumber:US")
@@ -139,7 +139,8 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
 	}
-	if _, err := NewDataConverter("unsupported"); err == nil || err.Error() != "unsupported converter definition: <unsupported>" {
+	if _, err = NewDataConverter("unsupported"); err == nil || err.Error() != "unsupported converter definition: <unsupported>" {
+		t.Error(err)
 	}
 
 	hex, err := NewDataConverter(MetaString2Hex)
@@ -244,7 +245,6 @@ func TestNewRoundConverter(t *testing.T) {
 	} else if !reflect.DeepEqual(rcv, eOut) {
 		t.Errorf("Expected %+v received: %+v", eOut, rcv)
 	}
-	eOut = &RoundConverter{}
 	if rcv, err := NewRoundConverter("12:*middle:wrong_length"); err == nil || err.Error() != "unsupported *round converter parameters: <12:*middle:wrong_length>" {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, nil) {

@@ -651,11 +651,7 @@ func (h HierarchyPath) Clone() (cln HierarchyPath) {
 	if h == nil {
 		return
 	}
-	cln = make(HierarchyPath, len(h))
-	for i, p := range h {
-		cln[i] = p
-	}
-	return
+	return CloneStringSlice(h)
 }
 
 // Mask a number of characters in the suffix of the destination
@@ -728,7 +724,7 @@ func GetCGRVersion() (vers string, err error) {
 }
 
 func NewTenantID(tntID string) *TenantID {
-	if strings.Index(tntID, ConcatenatedKeySep) == -1 { // no :, ID without Tenant
+	if !strings.Contains(tntID, ConcatenatedKeySep) { // no :, ID without Tenant
 		return &TenantID{ID: tntID}
 	}
 	tIDSplt := strings.SplitN(tntID, ConcatenatedKeySep, 2)

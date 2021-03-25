@@ -127,7 +127,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 		}
 		return gt != rsrFltr.negative
 	}
-	return (strings.Index(val, rsrFltr.filterRule) != -1) != rsrFltr.negative // default is string index
+	return strings.Contains(val, rsrFltr.filterRule) != rsrFltr.negative // default is string index
 }
 
 func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {

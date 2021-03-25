@@ -87,7 +87,7 @@ func (sm StringMap) Slice() []string {
 func (sm StringMap) IsEmpty() bool {
 	return sm == nil ||
 		len(sm) == 0 ||
-		sm[MetaAny] == true
+		sm[MetaAny]
 }
 
 func StringMapFromSlice(s []string) StringMap {
@@ -180,15 +180,14 @@ func (fWp FlagParams) ParamValue(opt string) (ps string) {
 // Add adds the options to the flag
 func (fWp FlagParams) Add(opts []string) {
 	switch len(opts) {
-	case 0:
-	case 1:
-		fWp[opts[0]] = []string{}
 	default: // just in case we call this function with more elements than needed
 		fallthrough
 	case 2:
 		fWp[opts[0]] = strings.Split(opts[1], ANDSep)
+	case 0:
+	case 1:
+		fWp[opts[0]] = []string{}
 	}
-	return
 }
 
 // ParamsSlice returns the list of profiles for the subsystem
@@ -217,10 +216,7 @@ func (fWp FlagParams) Clone() (cln FlagParams) {
 	for flg, params := range fWp {
 		var cprm []string
 		if params != nil {
-			cprm = make([]string, len(params))
-			for i, p := range params {
-				cprm[i] = p
-			}
+			cprm = CloneStringSlice(params)
 		}
 		cln[flg] = cprm
 	}

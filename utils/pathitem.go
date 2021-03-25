@@ -89,19 +89,3 @@ func GetPathIndexString(spath string) (opath string, idx *string) {
 	opath = spath[:idxStart]
 	return opath, &idxVal
 }
-
-// GetPathIndexSlice returns the path and index as string if index present
-// path[index]=>path,[index1,index2]
-// path=>path,nil
-func GetPathIndexSlice(spath string) (opath string, idx []string) {
-	idxStart := strings.Index(spath, IdxStart)
-	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
-		return spath, nil
-	}
-	idxVal := spath[idxStart+1 : len(spath)-1]
-	opath = spath[:idxStart]
-	if strings.Index(idxVal, IdxCombination) == -1 {
-		return opath, []string{idxVal}
-	}
-	return opath, strings.Split(idxVal, IdxCombination)
-}

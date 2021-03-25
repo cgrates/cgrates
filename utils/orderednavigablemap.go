@@ -98,17 +98,6 @@ func (onm *OrderedNavigableMap) Set(fullPath *FullPath, val interface{}) (err er
 	}
 
 	path := stripIdxFromLastPathElm(fullPath.Path)
-	if !addedNew { // cleanup old references since the value is being overwritten
-		for idxPath, slcIdx := range onm.orderRef {
-			if !strings.HasPrefix(idxPath, path) {
-				continue
-			}
-			for _, el := range slcIdx {
-				onm.orderIdx.Remove(el)
-			}
-			delete(onm.orderRef, idxPath)
-		}
-	}
 	_, hasRef := onm.orderRef[path]
 	if addedNew || !hasRef {
 		onm.orderRef[path] = append(onm.orderRef[path], onm.orderIdx.PushBack(fullPath.PathItems))
@@ -147,14 +136,10 @@ func (onm *OrderedNavigableMap) SetAsSlice(fullPath *FullPath, vals []*DataNode)
 			}
 			delete(onm.orderRef, idxPath)
 		}
+
 	}
-	_, hasRef := onm.orderRef[path]
 	for _, pathItms := range pathItmsSet {
-		if addedNew || !hasRef {
-			onm.orderRef[path] = append(onm.orderRef[path], onm.orderIdx.PushBack(pathItms))
-		} else {
-			onm.orderIdx.MoveToBack(onm.orderRef[path][len(onm.orderRef[path])-1])
-		}
+		onm.orderRef[path] = append(onm.orderRef[path], onm.orderIdx.PushBack(pathItms))
 	}
 	return
 }
@@ -192,7 +177,7 @@ func (onm *OrderedNavigableMap) OrderedFields() (flds []interface{}) {
 	flds = make([]interface{}, 0, len(onm.nm.Map))
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		fld, _ := onm.Field(el.Value)
-		flds = append(flds, fld)
+		flds = append(flds, fld.Data)
 	}
 	return
 }

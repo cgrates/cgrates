@@ -302,8 +302,7 @@ func TestCloseLogger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	x := newLogger.GetSyslog()
-	x = newWriter
+	x := newWriter
 
 	newLogger.SetSyslog(x)
 	if err := newLogger.Close(); err != nil {
