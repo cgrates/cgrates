@@ -261,7 +261,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			da.aReqsLck.Unlock()
 		}()
 	}
-	cgrRplyNM := new(utils.DataNode)
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	opts := utils.MapStorage{}
 	rply := utils.NewOrderedNavigableMap() // share it among different processors
 	var processed bool

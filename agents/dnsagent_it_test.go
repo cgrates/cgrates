@@ -195,7 +195,7 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if len(rply.Answer) != 2 {
-		t.Errorf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
+		t.Fatalf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
 	}
 	if rply.Rcode != dns.RcodeSuccess {
 		t.Errorf("failed to get an valid answer\n%v", rply)
