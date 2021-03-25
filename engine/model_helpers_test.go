@@ -4955,6 +4955,74 @@ func TestAPItoModelTPRoutesCase1(t *testing.T) {
 	}
 }
 
+func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
+	tpRoute := []*utils.TPRouteProfile{
+		{
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "RoutePrf",
+			FilterIDs: []string{},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "2014-08-29T15:00:00Z",
+			},
+			Sorting:           "*lc",
+			SortingParameters: []string{},
+			Routes: []*utils.TPRoute{
+				{
+					ID:              "route1",
+					FilterIDs:       []string{},
+					AccountIDs:      []string{},
+					RatingPlanIDs:   []string{},
+					ResourceIDs:     []string{},
+					StatIDs:         []string{"Stat1", "Stat2"},
+					Weight:          10,
+					Blocker:         false,
+					RouteParameters: "SortingParam1",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	expMdl := RouteMdls{
+		{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "RoutePrf",
+			FilterIDs:          "",
+			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			Sorting:            "*lc",
+			SortingParameters:  "",
+			RouteID:            "route1",
+			RouteFilterIDs:     "",
+			RouteAccountIDs:    "",
+			RouteRatingplanIDs: "",
+			RouteResourceIDs:   "",
+			RouteStatIDs:       "Stat1;Stat2",
+			RouteWeight:        10,
+			RouteBlocker:       false,
+			RouteParameters:    "SortingParam1",
+			Weight:             20,
+		},
+	}
+	var mdl RouteMdls
+	if mdl = APItoModelTPRoutes(tpRoute[0]); !reflect.DeepEqual(mdl, expMdl) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expMdl), utils.ToJSON(mdl))
+	}
+
+	//back to route profile
+	//all the empty slices will be nil because of converting back an empty string into a slice
+	tpRoute[0].FilterIDs = nil
+	tpRoute[0].SortingParameters = nil
+	tpRoute[0].Routes[0].FilterIDs = nil
+	tpRoute[0].Routes[0].AccountIDs = nil
+	tpRoute[0].Routes[0].RatingPlanIDs = nil
+	tpRoute[0].Routes[0].ResourceIDs = nil
+	if newRcv := mdl.AsTPRouteProfile(); !reflect.DeepEqual(newRcv, tpRoute) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(tpRoute), utils.ToJSON(newRcv))
+	}
+}
+
 func TestAPItoModelTPRoutesCase2(t *testing.T) {
 	structTest := &utils.TPRouteProfile{
 		TPid:      "TP1",

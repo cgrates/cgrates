@@ -154,6 +154,7 @@ func testTpACtPrfCheckData(t *testing.T) {
 	if err != nil {
 		t.Error("Error when getting TPActionProfile from database", err)
 	}
+	actPrf[0].Actions[0].FilterIDs = nil // because of converting and empty string into a slice
 	if !reflect.DeepEqual(rcv[0], actPrf[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]))
 	}

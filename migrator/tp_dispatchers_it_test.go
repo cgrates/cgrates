@@ -143,6 +143,7 @@ func testTpDispITCheckData(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error when getting TpDispatchers ", err.Error())
 	}
+	tpDisps[0].Subsystems = nil // because of converting and empty string into a slice
 	if !reflect.DeepEqual(tpDisps[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpDisps[0]), utils.ToJSON(result[0]))
