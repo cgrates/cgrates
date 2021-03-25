@@ -159,6 +159,14 @@ func TestLoadConfig(t *testing.T) {
 		t.Errorf("Expected %v received %v", expAddrs, ldrCfg.LoaderCgrCfg().SchedulerConns)
 	}
 	expaddr := config.RPCConns{
+		utils.MetaBiJSONLocalHost: {
+			Strategy: rpcclient.PoolFirst,
+			PoolSize: 0,
+			Conns: []*config.RemoteHost{{
+				Address:   "127.0.0.1:2014",
+				Transport: rpcclient.BiRPCJSON,
+			}},
+		},
 		utils.MetaInternal: {
 			Strategy: rpcclient.PoolFirst,
 			PoolSize: 0,
