@@ -209,7 +209,7 @@ func (onm *OrderedNavigableMap) OrderedFieldsAsStrings() (flds []string) {
 	flds = make([]string, 0, len(onm.nm.Map))
 	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
 		fld, _ := onm.Field(el.Value)
-		flds = append(flds, IfaceAsString(fld))
+		flds = append(flds, fld.String())
 	}
 	return
 }
