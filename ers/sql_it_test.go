@@ -585,3 +585,53 @@ func testSQLStop2(t *testing.T) {
 	}
 
 }
+
+func TestSQLProcessMessageError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	testSQLEventReader := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         &engine.FilterS{},
+		connString:    "",
+		connType:      "",
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+
+	msgTest := map[string]interface{}{}
+	err := testSQLEventReader.processMessage(msgTest)
+	expected := "NOT_FOUND:ToR"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestSQLSetURLError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	testSQLEventReader := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         &engine.FilterS{},
+		connString:    "",
+		connType:      "",
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	err := testSQLEventReader.setURL("http://user^:passwo^rd@foo.com/", "", nil)
+	expected := `parse "http://user^:passwo^rd@foo.com/": net/url: invalid userinfo`
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}

@@ -525,8 +525,6 @@ func TestPartialCSVProcessFile2(t *testing.T) {
 	}
 }
 
-/*
-
 func TestPartialCSVServe2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
@@ -568,4 +566,3 @@ func TestPartialCSVServe2(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
 	}
 }
-*/
