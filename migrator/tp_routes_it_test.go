@@ -157,6 +157,7 @@ func testTpSplITCheckData(t *testing.T) {
 		t.Error("Error when getting TpSuppliers ", err.Error())
 	}
 	sort.Strings(result[0].FilterIDs)
+	tpSuppliers[0].SortingParameters = nil // because of converting and empty string into a slice
 	if !reflect.DeepEqual(tpSuppliers[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSuppliers[0]), utils.ToJSON(result[0]))
 	}
