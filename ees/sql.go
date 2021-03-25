@@ -65,21 +65,21 @@ type SQLEe struct {
 func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
 	var u *url.URL
 	// var err error
-	if u, err = url.Parse(strings.TrimPrefix(cgrCfg.EEsCfg().Exporters[0].ExportPath, utils.Meta)); err != nil {
+	if u, err = url.Parse(strings.TrimPrefix(cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].ExportPath, utils.Meta)); err != nil {
 		return
 	}
 	password, _ := u.User.Password()
 
 	dbname := utils.SQLDefaultDBName
-	if vals, has := cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName]; has {
+	if vals, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLDBName]; has {
 		dbname = utils.IfaceAsString(vals)
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if vals, has := cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLSSLMode]; has {
+	if vals, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLSSLMode]; has {
 		ssl = utils.IfaceAsString(vals)
 	}
 	// tableName is mandatory in opts
-	if iface, has := cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName]; !has {
+	if iface, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLTableName]; !has {
 		return nil, utils.NewErrMandatoryIeMissing(utils.SQLTableName)
 	} else {
 		sqlEe.tableName = utils.IfaceAsString(iface)
@@ -172,15 +172,12 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	}
 
 	for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-		var iface interface{}
-		if iface, err = eeReq.OrdNavMP[utils.MetaExp].FieldAsInterface(el.Value.Slice()); err != nil {
-			return
-		}
+		iface, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
 		pathWithoutIndex := utils.GetPathWithoutIndex(el.Value.String())
 		if pathWithoutIndex != utils.MetaRow {
 			colNames = append(colNames, pathWithoutIndex)
 		}
-		vals = append(vals, iface)
+		vals = append(vals, iface.Interface())
 	}
 
 	sqlValues := make([]string, len(vals))
