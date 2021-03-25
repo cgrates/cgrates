@@ -659,3 +659,31 @@ func TestSQLSetURLError2(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+/*
+func TestSQLProcessMessageError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	testSQLEventReader := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         &engine.FilterS{},
+		connString:    "",
+		connType:      "",
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	testSQLEventReader.Config().Filters = []string{"*apiban:~*req.IP:*single"}
+	msg := map[string]interface{}{}
+	err := testSQLEventReader.processMessage(msg)
+	expected := ""
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+*/
