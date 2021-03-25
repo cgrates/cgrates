@@ -115,6 +115,9 @@ func (n *DataNode) Field(path []string) (*DataLeaf, error) {
 		if len(path) == 0 {
 			return nil, ErrWrongPath
 		}
+		if path[0] == Length {
+			return &DataLeaf{Data: len(n.Slice)}, nil
+		}
 		idx, err := strconv.Atoi(path[0]) // convert the path to index
 		if err != nil {
 			return nil, err
@@ -153,6 +156,9 @@ func (n *DataNode) fieldAsInterface(path []string) (interface{}, error) {
 	case NMSliceType:
 		if len(path) == 0 {
 			return n.Slice, nil
+		}
+		if path[0] == Length {
+			return len(n.Slice), nil
 		}
 		idx, err := strconv.Atoi(path[0]) // convert the path to index
 		if err != nil {

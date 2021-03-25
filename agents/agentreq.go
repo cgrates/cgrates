@@ -481,10 +481,7 @@ func (ar *AgentRequest) ParseField(
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
 func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, err error) {
-	ar.CGRReply = &utils.DataNode{
-		Type: utils.NMMapType,
-		Map:  make(map[string]*utils.DataNode),
-	}
+	ar.CGRReply.Map = make(map[string]*utils.DataNode)
 	var errMsg string
 	if err != nil {
 		errMsg = err.Error()

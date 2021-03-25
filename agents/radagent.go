@@ -79,7 +79,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
-	cgrRplyNM := &utils.DataNode{}
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.MapStorage{}
 	var processed bool
@@ -124,7 +124,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := &utils.DataNode{}
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.MapStorage{}
 	var processed bool

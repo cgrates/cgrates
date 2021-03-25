@@ -1489,7 +1489,7 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.com",
 		Account:     "testDiamItEmulateTerminate",
-		Value:       float64(1) * float64(time.Hour),
+		Value:       float64(time.Hour),
 		BalanceType: utils.MetaVoice,
 		Balance: map[string]interface{}{
 			utils.ID:         "testDiamItEmulateTerminate",

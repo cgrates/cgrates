@@ -173,7 +173,7 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 
 	for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
-		pathWithoutIndex := utils.GetPathWithoutIndex(strings.Join(el.Value, utils.NestingSep))
+		pathWithoutIndex := strings.Join(el.Value[:len(el.Value)-1], utils.NestingSep) // remove the index path.index
 		if pathWithoutIndex != utils.MetaRow {
 			colNames = append(colNames, pathWithoutIndex)
 		}
