@@ -44,12 +44,8 @@ func NewEventRequest(req utils.DataProvider, dc, opts utils.MapStorage,
 		OrdNavMP: oNM,
 		Cfg:      config.CgrConfig().GetDataProvider(),
 	}
-	if tntTpl != nil {
-		if tntIf, err := eeR.ParseField(
-			&config.FCTemplate{Type: utils.MetaComposed,
-				Value: tntTpl}); err == nil && tntIf.(string) != "" {
-			eeR.Tenant = tntIf.(string)
-		}
+	if tnt, err := tntTpl.ParseDataProvider(eeR); err == nil && tnt != utils.EmptyString {
+		eeR.Tenant = tnt
 	}
 	return
 }
@@ -82,14 +78,17 @@ func (eeR *EventRequest) RemoteHost() net.Addr {
 func (eeR *EventRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
-		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+		dp, has := eeR.OrdNavMP[fldPath[0]]
+		if !has {
+			return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+		}
+		val, err = dp.FieldAsInterface(fldPath[1:])
 	case utils.MetaReq:
 		val, err = eeR.req.FieldAsInterface(fldPath[1:])
 	case utils.MetaUCH:
-		if cacheVal, ok := Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
-			err = utils.ErrNotFound
-		} else {
-			val = cacheVal
+		var ok bool
+		if val, ok = Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
+			return nil, utils.ErrNotFound
 		}
 	case utils.MetaDC:
 		val, err = eeR.dc.FieldAsInterface(fldPath[1:])
@@ -101,19 +100,13 @@ func (eeR *EventRequest) FieldAsInterface(fldPath []string) (val interface{}, er
 	if err != nil {
 		return
 	}
-	if nmItems, isNMItems := val.(*utils.NMSlice); isNMItems { // special handling of NMItems, take the last value out of it
-		val = (*nmItems)[len(*nmItems)-1].Interface()
+	if nmItems, isNMItems := val.(*utils.DataNode); isNMItems && nmItems.Type == utils.NMSliceType { // special handling of NMItems, take the last value out of it
+		el := nmItems.Slice[len(nmItems.Slice)-1]
+		if el.Type == utils.NMDataType {
+			val = el.Value.Data
+		}
 	}
 	return
-}
-
-// Field implements utils.NMInterface
-func (eeR *EventRequest) Field(fldPath utils.PathItems) (val utils.NMInterface, err error) {
-	nm, has := eeR.OrdNavMP[fldPath[0].Field]
-	if !has {
-		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	}
-	return nm.Field(fldPath[1:])
 }
 
 // FieldAsString implements utils.DataProvider
@@ -153,21 +146,21 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			return
 		} else if fullPath == nil { // no dynamic path
 			fullPath = &utils.FullPath{
-				PathItems: tplFld.GetPathItems().Clone(), // need to clone so me do not modify the template
+				PathItems: utils.CloneStringSlice(tplFld.GetPathItems()), // need to clone so me do not modify the template
 				Path:      tplFld.Path,
 			}
 			itmPath = tplFld.GetPathSlice()[1:]
 		} else {
-			itmPath = fullPath.PathItems.Slice()[1:]
+			itmPath = fullPath.PathItems
 		}
-		nMItm := &config.NMItem{Data: out, Path: itmPath, Config: tplFld}
+		nMItm := &utils.DataLeaf{Data: out, Path: itmPath, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
 		switch tplFld.Type {
 		case utils.MetaComposed:
-			err = utils.ComposeNavMapVal(eeR, fullPath, nMItm)
+			err = eeR.Compose(fullPath, nMItm)
 		case utils.MetaGroup: // in case of *group type simply append to valSet
-			err = utils.AppendNavMapVal(eeR, fullPath, nMItm)
+			err = eeR.Append(fullPath, nMItm)
 		default:
-			_, err = eeR.Set(fullPath, &utils.NMSlice{nMItm})
+			err = eeR.SetAsSlice(fullPath, nMItm)
 		}
 		if err != nil {
 			return
@@ -181,19 +174,22 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 }
 
 // Set implements utils.NMInterface
-func (eeR *EventRequest) Set(fullPath *utils.FullPath, nm utils.NMInterface) (added bool, err error) {
-	if fullPath.PathItems[0].Field == utils.MetaUCH {
-		err = Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm, nil, true, utils.NonTransactional)
-		return
+func (eeR *EventRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+	switch prfx := fullPath.PathItems[0]; prfx {
+	case utils.MetaUCH:
+		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+	case utils.MetaOpts:
+		return eeR.opts.Set(fullPath.PathItems[1:], val.Data)
+	default:
+		oNM, has := eeR.OrdNavMP[prfx]
+		if !has {
+			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
+		}
+		return oNM.SetAsSlice(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[len(prfx):],
+		}, []*utils.DataNode{{Type: utils.NMDataType, Value: val}})
 	}
-	oNM, has := eeR.OrdNavMP[fullPath.PathItems[0].Field]
-	if !has {
-		return false, fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0].Field)
-	}
-	return oNM.Set(&utils.FullPath{
-		PathItems: fullPath.PathItems[1:],
-		Path:      fullPath.Path[len(fullPath.PathItems[0].Field):],
-	}, nm)
 }
 
 // ParseField outputs the value based on the template item
@@ -364,4 +360,60 @@ func (eeR *EventRequest) ParseField(
 			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 	}
 	return
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (eeR *EventRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+	switch prfx := fullPath.PathItems[0]; prfx {
+	case utils.MetaUCH:
+		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+	case utils.MetaOpts:
+		return eeR.opts.Set(fullPath.PathItems[1:], val.Data)
+	default:
+		oNM, has := eeR.OrdNavMP[prfx]
+		if !has {
+			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
+		}
+		return oNM.Append(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[len(prfx):],
+		}, val)
+	}
+}
+
+// Set sets the value at the given path
+// this used with full path and the processed path to not calculate them for every set
+func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+	switch prfx := fullPath.PathItems[0]; prfx {
+	case utils.MetaUCH:
+		path := fullPath.Path[5:]
+		var prv interface{}
+		if prvI, ok := Cache.Get(utils.CacheUCH, path); !ok {
+			prv = val.Data
+		} else {
+			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
+		}
+		return Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
+	case utils.MetaOpts:
+		var prv interface{}
+		if prv, err = eeR.opts.FieldAsInterface(fullPath.PathItems[1:]); err != nil {
+			if err != utils.ErrNotFound {
+				return
+			}
+			prv = val.Data
+		} else {
+			prv = utils.IfaceAsString(prv) + utils.IfaceAsString(val.Data)
+		}
+		return eeR.opts.Set(fullPath.PathItems[1:], prv)
+	default:
+		oNM, has := eeR.OrdNavMP[prfx]
+		if !has {
+			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
+		}
+		return oNM.Compose(&utils.FullPath{
+			PathItems: fullPath.PathItems[1:],
+			Path:      fullPath.Path[len(prfx):],
+		}, val)
+	}
 }
