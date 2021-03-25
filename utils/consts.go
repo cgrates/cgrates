@@ -356,6 +356,7 @@ const (
 	MetaPostgres            = "*postgres"
 	MetaInternal            = "*internal"
 	MetaLocalHost           = "*localhost"
+	MetaBiJSONLocalHost     = "*bijson_localhost"
 	MetaRatingSubjectPrefix = "*zero"
 	OK                      = "OK"
 	MetaFileXML             = "*file_xml"
