@@ -58,7 +58,74 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 		} else { // initial
 			ec.Concretes = nEc.Concretes
 		}
+		ec.AppendChargingIntervals(ec.ChargingIntervals...)
+	}
+}
 
+// SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
+func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
+	for _, nEc := range eCs {
+		for _, cIl := range nEc.ChargingIntervals {
+			for _, cIcrm := range cIl.Increments {
+
+				nEcAcntChrg := nEc.Accounting[cIcrm.AccountChargeID]
+
+				// UnitFactors
+				if nEcAcntChrg.UnitFactorID != EmptyString {
+					if uFctID := ec.UnitFactorID(nEc.UnitFactors[nEcAcntChrg.UnitFactorID]); uFctID != EmptyString &&
+						uFctID != nEcAcntChrg.UnitFactorID {
+						nEc.UnitFactors[uFctID] = ec.UnitFactors[uFctID]
+						delete(nEc.UnitFactors, nEcAcntChrg.UnitFactorID)
+						nEcAcntChrg.UnitFactorID = uFctID
+					}
+				}
+
+				// Rating
+				if nEcAcntChrg.RatingID != EmptyString {
+					if rtID := ec.RatingID(nEc.Rating[nEcAcntChrg.RatingID]); rtID != EmptyString &&
+						rtID != nEcAcntChrg.RatingID {
+						nEc.Rating[rtID] = ec.Rating[rtID]
+						delete(nEc.Rating, nEcAcntChrg.RatingID)
+						nEcAcntChrg.RatingID = rtID
+					}
+				}
+
+				// AccountCharges
+				for i, chrgID := range nEc.Accounting[cIcrm.AccountChargeID].JoinedChargeIDs {
+					if acntChrgID := ec.AccountChargeID(nEc.Accounting[chrgID]); acntChrgID != chrgID {
+						// matched the AccountChargeID with an existing one in reference ec, replace in nEc
+						nEc.Accounting[acntChrgID] = ec.Accounting[acntChrgID]
+						delete(nEc.Accounting, chrgID)
+						nEc.Accounting[cIcrm.AccountChargeID].JoinedChargeIDs[i] = acntChrgID
+					}
+				}
+				if acntChrgID := ec.AccountChargeID(nEcAcntChrg); acntChrgID != EmptyString &&
+					acntChrgID != cIcrm.AccountChargeID {
+					// matched the AccountChargeID with an existing one in reference ec, replace in nEc
+					nEc.Accounting[acntChrgID] = ec.Accounting[cIcrm.AccountChargeID]
+					delete(nEc.Accounting, cIcrm.AccountChargeID)
+					cIcrm.AccountChargeID = acntChrgID
+				}
+
+			}
+		}
+	}
+}
+
+// AppendChargingIntervals will add new charging intervals to the  existing.
+// if possible, the existing last one in ec will be compressed
+func (ec *EventCharges) AppendChargingIntervals(cIls ...*ChargingInterval) {
+	for i, cIl := range cIls {
+		if i == 0 && len(ec.ChargingIntervals) == 0 {
+			ec.ChargingIntervals = []*ChargingInterval{cIl}
+			continue
+		}
+
+		if ec.ChargingIntervals[len(ec.ChargingIntervals)-1].CompressEquals(cIl) {
+			ec.ChargingIntervals[len(ec.ChargingIntervals)-1].CompressFactor += 1
+			continue
+		}
+		ec.ChargingIntervals = append(ec.ChargingIntervals, cIl)
 	}
 }
 
@@ -83,6 +150,36 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 	return
 }
 
+// UnitFactorID returns the ID of the matching UnitFactor within ec.UnitFactors
+func (ec *EventCharges) UnitFactorID(uF *UnitFactor) (ufID string) {
+	for ecUfID, ecUf := range ec.UnitFactors {
+		if ecUf.Equals(uF) {
+			return ecUfID
+		}
+	}
+	return
+}
+
+// RatingID returns the ID of the matching RateSInterval within ec.Rating
+func (ec *EventCharges) RatingID(rIl *RateSInterval) (rID string) {
+	for ecID, ecRtIl := range ec.Rating {
+		if ecRtIl.Equals(rIl) {
+			return ecID
+		}
+	}
+	return
+}
+
+// AccountChargeID returns the ID of the matching AccountCharge within ec.Accounting
+func (ec *EventCharges) AccountChargeID(ac *AccountCharge) (acID string) {
+	for ecID, ecAc := range ec.Accounting {
+		if ecAc.Equals(ac) {
+			return ecID
+		}
+	}
+	return
+}
+
 // ExtEventCharges is a generic EventCharges used in APIs
 type ExtEventCharges struct {
 	Abstracts *float64
@@ -94,10 +191,15 @@ type ChargingInterval struct {
 	CompressFactor int
 }
 
+// CompressEquals compares two ChargingIntervals for aproximate equality, ignoring compress field
+func (cIl *ChargingInterval) CompressEquals(nCil *ChargingInterval) (eq bool) {
+	return
+}
+
 // ChargingIncrement represents one unit charged inside an interval
 type ChargingIncrement struct {
-	Units           *Decimal
-	AccountChargeID string // Account charging information
+	Units           *Decimal // Can differ from AccountCharge due to JoinedCharging
+	AccountChargeID string   // Account charging information
 	CompressFactor  int
 }
 
@@ -111,4 +213,9 @@ type AccountCharge struct {
 	AttributeIDs    []string // list of attribute profiles matched
 	RatingID        string   // identificator in cost increments
 	JoinedChargeIDs []string // identificator of extra account charges
+}
+
+// Equals compares two AccountCharges
+func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
+	return
 }

@@ -163,6 +163,29 @@ type UnitFactor struct {
 	Factor    *Decimal
 }
 
+// Equals compares two UnitFactors
+func (uF *UnitFactor) Equals(nUf *UnitFactor) (eq bool) {
+	if uF.FilterIDs == nil && nUf.FilterIDs != nil ||
+		uF.FilterIDs != nil && nUf.FilterIDs == nil ||
+		len(uF.FilterIDs) != len(nUf.FilterIDs) {
+		return
+	}
+	for i := range uF.FilterIDs {
+		if uF.FilterIDs[i] != nUf.FilterIDs[i] {
+			return
+		}
+	}
+	if uF.Factor == nil && nUf.Factor != nil ||
+		uF.Factor != nil && nUf.Factor == nil {
+		return
+	}
+	if uF.Factor == nil && nUf == nil {
+		return true
+	}
+	return uF.Factor.Compare(nUf.Factor) == 0
+}
+
+// TenantID returns the combined Tenant:ID
 func (aP *AccountProfile) TenantID() string {
 	return ConcatenatedKey(aP.Tenant, aP.ID)
 }

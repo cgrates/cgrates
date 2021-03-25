@@ -140,6 +140,11 @@ type RateSIncrement struct {
 	cost *decimal.Big // unexported total increment cost
 }
 
+// Equals compares two RateSIntervals
+func (rIl *RateSInterval) Equals(nRil *RateSInterval) (eq bool) {
+	return // ToDo
+}
+
 // RateProfileCost is the cost returned by RateS at cost queries
 type RateProfileCost struct {
 	ID              string // RateProfileID

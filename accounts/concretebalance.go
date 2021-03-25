@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -61,10 +63,10 @@ type concreteBalance struct {
 }
 
 // debitAbstracts implements the balanceOperator interface
-func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
+func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
-
+	fmt.Printf("debitAbstracts, aUnits: %s, ev: %+v\n", aUnits, cgrEv)
 	// pass the general balance filters
 	var pass bool
 	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
@@ -79,14 +81,17 @@ func (cB *concreteBalance) debitAbstracts(usage *decimal.Big,
 		cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-
-	return maxDebitAbstractsFromConcretes(usage,
+	fmt.Printf("costIcrm: %+v\n", costIcrm)
+	if ec, err = maxDebitAbstractsFromConcretes(aUnits,
 		cB.acntID, []*concreteBalance{cB},
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,
-		costIcrm)
-
+		costIcrm); err != nil {
+		return
+	}
+	fmt.Printf("received ec: %s\n", utils.ToIJSON(ec))
+	return
 }
 
 // debitConcretes implements the balanceOperator interface
@@ -139,6 +144,7 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 	if dbted.Cmp(decimal.New(0, 0)) == 0 {
 		return // no event cost for 0 debit
 	}
+	// EventCharges
 	ec = utils.NewEventCharges()
 	ec.Concretes = &utils.Decimal{dbted}
 	// UnitFactors
@@ -155,5 +161,18 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 	}
+	ec.ChargingIntervals = []*utils.ChargingInterval{
+		{
+			Increments: []*utils.ChargingIncrement{
+				{
+					Units:           &utils.Decimal{dbted},
+					AccountChargeID: acntID,
+					CompressFactor:  1,
+				},
+			},
+			CompressFactor: 1,
+		},
+	}
+
 	return
 }

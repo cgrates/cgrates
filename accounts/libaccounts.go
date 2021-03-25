@@ -225,9 +225,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
-
 	// Init EventCharges
-	ec = utils.NewEventCharges()
 	calculateCost := costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 && costIcrm.FixedFee == nil
 	//var attrIDs []string // will be populated if attributes are processed successfully
 	// process AttributeS if needed
@@ -301,7 +299,9 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		} else { // debit for the usage succeeded
 			aPaid = new(decimal.Big).Copy(aUnits)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
+			ec = utils.NewEventCharges()
 			ec.Merge(ecDbt)
+			fmt.Printf("ecDbt: %s\n", utils.ToIJSON(ecDbt))
 			if i == 0 { // no estimation done, covering full
 				break
 			}
@@ -323,6 +323,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 	if aPaid == nil {
 		// since we are erroring, we restore the concerete balances
 		aPaid = decimal.New(0, 0)
+		ec = utils.NewEventCharges()
 	}
 	ec.Abstracts = &utils.Decimal{aPaid}
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
