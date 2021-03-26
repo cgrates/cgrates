@@ -44,66 +44,73 @@
 
   remote_user: '{{ user }}'
   tasks:
-###########################################################################################################################
-# install dependencies
-  - name: Install dependencies
-    become: yes
-    apt: name={{ dependencies }} state=present
+    ###########################################################################################################################
+    # install dependencies
+    - name: Install dependencies
+      become: yes
+      apt: name={{ dependencies }} state=present
 
-  - name: Add key for freeswitch
-    become: yes
-    apt_key: url=https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc state=present
+    - name: Add key for freeswitch
+      become: yes
+      apt_key: url=https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc state=present
 
-  - name: Add FreeSwitch apt repository (1.8) (Debian 8/Jessie)
-    become: yes
-    apt_repository:
-      repo: deb http://files.freeswitch.org/repo/deb/debian-release/ stretch main
-      state: present
-      filename: 'freeswitch'
+    - name: Add FreeSwitch apt repository (1.8) (Debian 8/Jessie)
+      become: yes
+      apt_repository:
+        repo: deb http://files.freeswitch.org/repo/deb/debian-release/ buster main
+        state: present
+        filename: 'freeswitch'
 
-  # Install FreeSwitch
-  - name: Install FreeSwitch
-    become: yes
-    apt: name={{ freeswitch_packages }} state=latest
+    - name: Add FreeSwitch apt repository (1.8) (Debian 8/Jessie)
+      become: yes
+      apt_repository:
+        repo: deb-src http://files.freeswitch.org/repo/deb/debian-release/ buster main
+        state: present
+        filename: 'freeswitch'
 
-###########################################################################################################################
-# Install Golang
-  - name: install unarchive dependencies (zypper)
-    become: yes
-    zypper:
-      name:
-        - gzip
-        - tar
-      state: present
-    when: ansible_pkg_mgr == 'zypper'
+    # Install FreeSwitch
+    - name: Install FreeSwitch
+      become: yes
+      apt: name={{ freeswitch_packages }} state=latest
 
-  - name: Install golang
-    include: go.yaml
+    ###########################################################################################################################
+    # Install Golang
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
 
-###########################################################################################################################
-# Install and config CGRateS
-  - name: Install and config CGRateS
-    include: cgrates.yaml
+    - name: Install golang
+      include: go.yaml
 
-# Configure FreeSwitch
-  - name:  Unzip FreeSWITCH config
-    become: yes
-    shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
-    args:
-      chdir: '{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc'
+    ###########################################################################################################################
+    # Install and config CGRateS
+    - name: Install and config CGRateS
+      include: cgrates.yaml
 
-  - name:  Remove FreeSWITCH default config from /etc/freesitch
-    become: yes
-    shell: 'sudo rm -rf *'
-    args:
-      chdir: '/etc/freeswitch'
+    # Configure FreeSwitch
+    - name:  Unzip FreeSWITCH config
+      become: yes
+      shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
+      args:
+        chdir: '{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc'
 
-  - name:  Copy our custom config for FreeSWITCH in /etc/freesitch
-    become: yes
-    shell: 'sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch'
-    args:
-      chdir: '/etc/freeswitch'
+    - name:  Remove FreeSWITCH default config from /etc/freeswitch
+      become: yes
+      shell: 'sudo rm -rf *'
+      args:
+        chdir: '/etc/freeswitch'
 
-# Configure PJSUA
-  - name: Config PJSUA
-    include: pjsua.yaml
+    - name:  Copy our custom config for FreeSWITCH in /etc/freeswitch
+      become: yes
+      shell: 'sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch'
+      args:
+        chdir: '/etc/freeswitch'
+
+    # Configure PJSUA
+    - name: Config PJSUA
+      include: pjsua.yaml
