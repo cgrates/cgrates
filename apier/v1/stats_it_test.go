@@ -99,6 +99,17 @@ var (
 		testV1STSRpcConn,
 		testV1STSCheckMetricsAfterRestart,
 		testV1STSStopEngine,
+		//cache test
+		testV1STSLoadConfig,
+		testV1STSInitDataDb,
+		testV1STSStartEngine,
+		testV1STSRpcConn,
+		testStatSCacheProcessEventNotFound,
+		testStatSCacheSet,
+		testStatSCacheProcessEventNotFound,
+		testStatSCacheReload,
+		testStatSCacheProcessEventFound,
+		testV1STSStopEngine,
 	}
 )
 
@@ -1649,5 +1660,76 @@ func testV1STSCheckMetricsAfterRestart(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testStatSCacheProcessEventNotFound(t *testing.T) {
+	var reply []string
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "STAT_CACHE",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        135 * time.Second,
+				utils.Cost:         123.0,
+				utils.PDD:          12 * time.Second,
+			},
+		},
+		StatIDs: []string{"STAT_CACHE"},
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+func testStatSCacheProcessEventFound(t *testing.T) {
+	var reply []string
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "STAT_CACHE",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.AnswerTime:   time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:        135 * time.Second,
+				utils.Cost:         123.0,
+				utils.PDD:          12 * time.Second,
+			},
+		},
+		StatIDs: []string{"STAT_CACHE"},
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testStatSCacheSet(t *testing.T) {
+	var result string
+	statConfig = &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "STAT_CACHE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+		t.Fatalf("Expected error: %+v, received: %+v", nil, err)
+	}
+}
+
+func testStatSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.StatsQueueProfileIDs: {"cgrates.org:STAT_CACHE"},
+		},
+	}
+	var reply string
+	if err := stsV1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
