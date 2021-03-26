@@ -710,3 +710,39 @@ func TestAPBalances(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(received))
 	}
 }
+
+func TestEqualsUnitFactor(t *testing.T) {
+	uf1 := &UnitFactor{
+		FilterIDs: []string{"*string:~*req.Account:1003"},
+		Factor:    NewDecimal(10, 0),
+	}
+	uf2 := &UnitFactor{
+		FilterIDs: []string{"*string:~*req.Account:1003"},
+		Factor:    NewDecimal(10, 0),
+	}
+	if !uf1.Equals(uf2) {
+		t.Errorf("Unexpected equal result")
+	}
+
+	uf1.FilterIDs = []string{"*string:~*req.Account:1004"}
+	if uf1.Equals(uf2) {
+		t.Errorf("Unexpected equal result")
+	}
+	uf1.FilterIDs = nil
+
+	if uf1.Equals(uf2) {
+		t.Errorf("Unexpected equal result")
+	}
+	uf1.FilterIDs = []string{"*string:~*req.Account:1003"}
+
+	uf1.Factor = NewDecimal(100, 0)
+	if uf1.Equals(uf2) {
+		t.Errorf("Unexpected equal result")
+	}
+
+	uf1.Factor = nil
+	uf2.Factor = nil
+	if !uf1.Equals(uf2) {
+		t.Errorf("Unexpected equal result")
+	}
+}
