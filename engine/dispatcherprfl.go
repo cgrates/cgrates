@@ -73,7 +73,6 @@ func (dHPrfls DispatcherHostProfiles) ReorderFromIndex(idx int) {
 		dHPrfls[i] = initConns[idx]
 		idx++
 	}
-	return
 }
 
 // Shuffle will mix the connections in place
@@ -81,7 +80,6 @@ func (dHPrfls DispatcherHostProfiles) Shuffle() {
 	rand.Shuffle(len(dHPrfls), func(i, j int) {
 		dHPrfls[i], dHPrfls[j] = dHPrfls[j], dHPrfls[i]
 	})
-	return
 }
 
 func (dHPrfls DispatcherHostProfiles) Clone() (cln DispatcherHostProfiles) {
@@ -180,7 +178,6 @@ func (dHPrflIDs DispatcherHostIDs) ReorderFromIndex(idx int) {
 		dHPrflIDs[i] = initConns[idx]
 		idx++
 	}
-	return
 }
 
 // Shuffle will mix the connections in place
@@ -188,7 +185,6 @@ func (dHPrflIDs DispatcherHostIDs) Shuffle() {
 	rand.Shuffle(len(dHPrflIDs), func(i, j int) {
 		dHPrflIDs[i], dHPrflIDs[j] = dHPrflIDs[j], dHPrflIDs[i]
 	})
-	return
 }
 
 func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {

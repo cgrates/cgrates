@@ -101,7 +101,7 @@ func TestWriteToFile(t *testing.T) {
 	//wrong path *reading
 	exportEvent = &ExportEvents{}
 	filePath = "/tmp/engine/libcdre_test/wrongpath.txt"
-	if rcv, err = NewExportEventsFromFile(filePath); err == nil || err.Error() != "open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory" {
+	if _, err = NewExportEventsFromFile(filePath); err == nil || err.Error() != "open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory" {
 		t.Errorf("Expecting: 'open /tmp/engine/libcdre_test/wrongpath.txt: no such file or directory',\nReceived: '%+v'", err)
 	}
 	//wrong path *writing

@@ -636,7 +636,7 @@ func (ms *MongoStorage) SetTPRates(tps []*utils.TPRateRALs) error {
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				_, err := ms.getCol(utils.TBLTPRates).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID})
 				if err != nil {
@@ -659,7 +659,7 @@ func (ms *MongoStorage) SetTPDestinationRates(tps []*utils.TPDestinationRate) er
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				_, err := ms.getCol(utils.TBLTPDestinationRates).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID})
 				if err != nil {
@@ -682,7 +682,7 @@ func (ms *MongoStorage) SetTPRatingPlans(tps []*utils.TPRatingPlan) error {
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				_, err := ms.getCol(utils.TBLTPRatingPlans).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID})
 				if err != nil {
@@ -726,7 +726,7 @@ func (ms *MongoStorage) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				_, err := ms.getCol(utils.TBLTPSharedGroups).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID})
 				if err != nil {
@@ -749,7 +749,7 @@ func (ms *MongoStorage) SetTPActions(tps []*utils.TPActions) error {
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				if _, err := ms.getCol(utils.TBLTPActions).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID}); err != nil {
 					return err
@@ -770,7 +770,7 @@ func (ms *MongoStorage) SetTPActionPlans(tps []*utils.TPActionPlan) error {
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				if _, err := ms.getCol(utils.TBLTPActionPlans).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID}); err != nil {
 					return err
@@ -791,7 +791,7 @@ func (ms *MongoStorage) SetTPActionTriggers(tps []*utils.TPActionTriggers) error
 	m := make(map[string]bool)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
-			if found, _ := m[tp.ID]; !found {
+			if !m[tp.ID] {
 				m[tp.ID] = true
 				if _, err := ms.getCol(utils.TBLTPActionTriggers).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID}); err != nil {
 					return err

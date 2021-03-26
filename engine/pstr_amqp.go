@@ -66,7 +66,6 @@ func (pstr *AMQPPoster) parseOpts(dialURL map[string]interface{}) {
 	if vals, has := dialURL[utils.ExchangeType]; has {
 		pstr.exchangeType = utils.IfaceAsString(vals)
 	}
-	return
 }
 
 // Post is the method being called when we need to post anything in the queue

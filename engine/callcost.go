@@ -232,7 +232,7 @@ func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
 	if bf == nil {
 		return true
 	}
-	if bf.Categories != nil && cc.Category != "" && (*bf.Categories)[cc.Category] == false {
+	if bf.Categories != nil && cc.Category != "" && !(*bf.Categories)[cc.Category] {
 		return false
 	}
 	// match destination ids

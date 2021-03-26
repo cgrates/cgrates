@@ -189,7 +189,7 @@ func TestActionPlanHourMonths(t *testing.T) {
 	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	if now.After(testTime) {
 		testTime = testTime.AddDate(0, 0, 1)
-		y, m, d = testTime.Date()
+		y, m, _ = testTime.Date()
 	}
 	if now.After(testTime) {
 		m = nextMonth.Month()
@@ -773,7 +773,7 @@ func TestActionTriggerMatchAll(t *testing.T) {
 		Weight:         utils.Float64Pointer(1.0),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		SharedGroups:   utils.StringMapPointer(utils.NewStringMap("test2")),
-	}, ExtraParameters: fmt.Sprintf(`{"UniqueID":"ZIP", "GroupID":"TEST", "ThresholdType":"TT"}`)}
+	}, ExtraParameters: `{"UniqueID":"ZIP", "GroupID":"TEST", "ThresholdType":"TT"}`}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -1550,6 +1550,9 @@ func TestActionTransactionBalanceType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -1587,6 +1590,9 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -1630,6 +1636,9 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:exp")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
@@ -1677,6 +1686,9 @@ func TestActionRemoveBalance(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:rembal")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
@@ -1730,6 +1742,9 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:rembal2")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
@@ -2356,6 +2371,9 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:zeroNegative")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
@@ -2407,6 +2425,9 @@ func TestActionSetExpiry(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	acc, err := dm.GetAccount("cgrates.org:zeroNegative")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)

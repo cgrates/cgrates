@@ -29,7 +29,6 @@ import (
 	"strings"
 
 	"github.com/antchfx/xmlquery"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -214,8 +213,8 @@ type haXMLEncoder struct {
 
 // Encode implements httpAgentReplyEncoder
 func (xE *haXMLEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) {
-	var xmlElmnts []*config.XMLElement
-	if xmlElmnts, err = config.NMAsXMLElements(nM); err != nil {
+	var xmlElmnts []*utils.XMLElement
+	if xmlElmnts, err = utils.NMAsXMLElements(nM); err != nil {
 		return
 	}
 	if len(xmlElmnts) == 0 {
@@ -246,11 +245,9 @@ func (xE *haTextPlainEncoder) Encode(nM *utils.OrderedNavigableMap) (err error) 
 	msgFields := make(map[string]string) // work around to NMap issue
 	for el := nM.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		var nmIt *utils.DataLeaf
-		if nmIt, err = nM.Field(path); err != nil {
-			return
-		}
-		nmPath = strings.Join(nmIt.Path, utils.NestingSep)
+		nmIt, _ := nM.Field(path)
+		path = path[:len(path)-1] // remove the last index
+		nmPath = strings.Join(path, utils.NestingSep)
 		val := nmIt.String()
 		msgFields[utils.ConcatenatedKey(nmPath, val)] = val
 	}

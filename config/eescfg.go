@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -252,13 +250,10 @@ func (eeC *EventExporterCfg) ComputeFields() {
 		switch field.GetPathSlice()[0] {
 		case utils.MetaHdr:
 			eeC.headerFields = append(eeC.headerFields, field)
-		case utils.MetaExp:
+		case utils.MetaExp, utils.MetaUCH:
 			eeC.contentFields = append(eeC.contentFields, field)
 		case utils.MetaTrl:
 			eeC.trailerFields = append(eeC.trailerFields, field)
-		}
-		if strings.HasPrefix(field.GetPathSlice()[0], utils.MetaUCH) { // special cache when loading fields that contains *uch in path
-			eeC.contentFields = append(eeC.contentFields, field)
 		}
 	}
 }

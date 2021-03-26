@@ -141,19 +141,15 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 			return
 		}
 		var fullPath *utils.FullPath
-		var itmPath []string
 		if fullPath, err = utils.GetFullFieldPath(tplFld.Path, eeR); err != nil {
 			return
 		} else if fullPath == nil { // no dynamic path
 			fullPath = &utils.FullPath{
-				PathItems: utils.CloneStringSlice(tplFld.GetPathItems()), // need to clone so me do not modify the template
+				PathSlice: utils.CloneStringSlice(tplFld.GetPathSlice()), // need to clone so me do not modify the template
 				Path:      tplFld.Path,
 			}
-			itmPath = tplFld.GetPathSlice()[1:]
-		} else {
-			itmPath = fullPath.PathItems
 		}
-		nMItm := &utils.DataLeaf{Data: out, Path: itmPath, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
+		nMItm := &utils.DataLeaf{Data: out, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
 		switch tplFld.Type {
 		case utils.MetaComposed:
 			err = eeR.Compose(fullPath, nMItm)
@@ -175,18 +171,18 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 
 // Set implements utils.NMInterface
 func (eeR *EventRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
-	switch prfx := fullPath.PathItems[0]; prfx {
+	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
-		return eeR.opts.Set(fullPath.PathItems[1:], val.Data)
+		return eeR.opts.Set(fullPath.PathSlice[1:], val.Data)
 	default:
 		oNM, has := eeR.OrdNavMP[prfx]
 		if !has {
 			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
 		}
 		return oNM.SetAsSlice(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[len(prfx):],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: val}})
 	}
@@ -365,18 +361,18 @@ func (eeR *EventRequest) ParseField(
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (eeR *EventRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
-	switch prfx := fullPath.PathItems[0]; prfx {
+	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
-		return eeR.opts.Set(fullPath.PathItems[1:], val.Data)
+		return eeR.opts.Set(fullPath.PathSlice[1:], val.Data)
 	default:
 		oNM, has := eeR.OrdNavMP[prfx]
 		if !has {
 			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
 		}
 		return oNM.Append(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[len(prfx):],
 		}, val)
 	}
@@ -385,7 +381,7 @@ func (eeR *EventRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
-	switch prfx := fullPath.PathItems[0]; prfx {
+	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
 		var prv interface{}
@@ -397,7 +393,7 @@ func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) 
 		return Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		var prv interface{}
-		if prv, err = eeR.opts.FieldAsInterface(fullPath.PathItems[1:]); err != nil {
+		if prv, err = eeR.opts.FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -405,14 +401,14 @@ func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) 
 		} else {
 			prv = utils.IfaceAsString(prv) + utils.IfaceAsString(val.Data)
 		}
-		return eeR.opts.Set(fullPath.PathItems[1:], prv)
+		return eeR.opts.Set(fullPath.PathSlice[1:], prv)
 	default:
 		oNM, has := eeR.OrdNavMP[prfx]
 		if !has {
 			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
 		}
 		return oNM.Compose(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[len(prfx):],
 		}, val)
 	}

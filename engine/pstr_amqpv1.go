@@ -21,7 +21,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 	"time"
 
@@ -145,12 +144,4 @@ func (pstr *AMQPv1Poster) newPosterSession() (s *amqpv1.Session, err error) {
 		pstr.client = client
 	}
 	return pstr.client.NewSession()
-}
-
-func (pstr *AMQPv1Poster) isRecoverableError(err error) bool {
-	netErr, ok := err.(net.Error)
-	return (ok && netErr.Temporary()) ||
-		err == amqpv1.ErrConnClosed ||
-		err == amqpv1.ErrLinkClosed ||
-		err == amqpv1.ErrSessionClosed
 }

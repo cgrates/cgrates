@@ -429,31 +429,31 @@ func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	)
 
 	nM := utils.NewOrderedNavigableMap()
+	path := []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}
 	itm := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data: "http://172.10.88.88/",
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
@@ -513,42 +513,42 @@ func TestUpdateDiamMsgFromNavMap2(t *testing.T) {
 	)
 
 	nM := utils.NewOrderedNavigableMap()
+	path := []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}
 	itm := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path:      []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data:      "http://172.10.88.88/",
 		NewBranch: true,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.Append(
 		&utils.FullPath{
-			Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-			PathItems: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
+			Path:      strings.Join(path, utils.NestingSep),
+			PathSlice: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		}, itm.Value)
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
 		t.Error(err)
@@ -585,40 +585,40 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 
 	nM := utils.NewOrderedNavigableMap()
 
+	path := []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"}
 	itm := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
 		Data: datatype.Enumerated(1),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data: "http://172.10.88.88/",
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
@@ -678,59 +678,59 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 
 	nM := utils.NewOrderedNavigableMap()
 
+	path := []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"}
 	itm := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
 		Data: datatype.Enumerated(1),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
 		Data: datatype.Enumerated(2),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data: "http://172.10.88.88/",
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
+	path = []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}
 	itm2 := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path:      []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
 		Data:      "http://172.10.88.88/",
 		NewBranch: true,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm, itm2})
 
+	path = []string{"Granted-Service-Unit", "CC-Time"}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{"Granted-Service-Unit", "CC-Time"},
 		Data: datatype.Unsigned32(10),
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 
 	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {

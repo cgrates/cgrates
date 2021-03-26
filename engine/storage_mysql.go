@@ -61,8 +61,8 @@ func NewMySQLStorage(host, port, name, user, password string,
 }
 
 // SetVersions will set a slice of versions, updating existing
-func (self *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	tx := self.db.Begin()
+func (msqlS *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	tx := msqlS.db.Begin()
 	if overwrite {
 		tx.Table(utils.TBLVersions).Delete(nil)
 	}
@@ -80,22 +80,22 @@ func (self *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error) 
 	return
 }
 
-func (self *MySQLStorage) extraFieldsExistsQry(field string) string {
+func (msqlS *MySQLStorage) extraFieldsExistsQry(field string) string {
 	return fmt.Sprintf(" extra_fields LIKE '%%\"%s\":%%'", field)
 }
 
-func (self *MySQLStorage) extraFieldsValueQry(field, value string) string {
+func (msqlS *MySQLStorage) extraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" extra_fields LIKE '%%\"%s\":\"%s\"%%'", field, value)
 }
 
-func (self *MySQLStorage) notExtraFieldsExistsQry(field string) string {
+func (msqlS *MySQLStorage) notExtraFieldsExistsQry(field string) string {
 	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":%%'", field)
 }
 
-func (self *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
+func (msqlS *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value)
 }
 
-func (self *MySQLStorage) GetStorageType() string {
+func (msqlS *MySQLStorage) GetStorageType() string {
 	return utils.MySQL
 }

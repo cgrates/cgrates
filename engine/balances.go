@@ -145,15 +145,15 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 }
 
 func (b *Balance) MatchCategory(category string) bool {
-	return len(b.Categories) == 0 || b.Categories[category] == true
+	return len(b.Categories) == 0 || b.Categories[category]
 }
 
 func (b *Balance) HasDestination() bool {
-	return len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.MetaAny] == false
+	return len(b.DestinationIDs) > 0 && !b.DestinationIDs[utils.MetaAny]
 }
 
 func (b *Balance) MatchDestination(destinationID string) bool {
-	return !b.HasDestination() || b.DestinationIDs[destinationID] == true
+	return !b.HasDestination() || b.DestinationIDs[destinationID]
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
@@ -186,11 +186,11 @@ func (b *Balance) Clone() *Balance {
 }
 
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destID string) {
-	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.MetaAny] == false {
+	if len(b.DestinationIDs) != 0 && !b.DestinationIDs[utils.MetaAny] {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
 			if destIDs, err := dm.GetReverseDestination(p, true, true, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
-					if b.DestinationIDs[dID] == true {
+					if b.DestinationIDs[dID] {
 						return p, dID
 					}
 				}

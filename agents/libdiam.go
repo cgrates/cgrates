@@ -431,17 +431,15 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *utils.OrderedNavigableMap, 
 	// write reply into message
 	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		var nmIt *utils.DataLeaf
-		if nmIt, err = navMp.Field(path); err != nil {
-			return
-		}
+		nmIt, _ := navMp.Field(path)
 		if nmIt == nil {
 			continue // all attributes, not writable to diameter packet
 		}
+		path = path[:len(path)-1] // remove the last index
 		if err = messageSetAVPsWithPath(m,
-			nmIt.Path, nmIt.String(),
+			path, nmIt.String(),
 			nmIt.NewBranch, tmz); err != nil {
-			return fmt.Errorf("setting item with path: %+v got err: %s", nmIt.Path, err.Error())
+			return fmt.Errorf("setting item with path: %+v got err: %s", path, err.Error())
 		}
 	}
 	return

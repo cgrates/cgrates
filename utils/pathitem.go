@@ -38,13 +38,13 @@ func stripIdxFromLastPathElm(path string) string {
 func NewFullPath(path string) *FullPath {
 	return &FullPath{
 		Path:      path,
-		PathItems: CompilePath(path),
+		PathSlice: CompilePath(path),
 	}
 }
 
 // FullPath is the path to the item with all the needed fields
 type FullPath struct {
-	PathItems []string
+	PathSlice []string
 	Path      string
 }
 
@@ -66,15 +66,6 @@ func GetPathIndex(spath string) (opath string, idx *int) {
 		return spath, nil
 	}
 	return opath, &idxVal
-}
-
-func GetPathWithoutIndex(spath string) (opath string) {
-	idxStart := strings.LastIndex(spath, IdxStart)
-	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
-		return spath
-	}
-	opath = spath[:idxStart]
-	return
 }
 
 // GetPathIndexString returns the path and index as string if index present

@@ -249,7 +249,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 	if err = agReq.SetFields(rdr.Config().Fields); err != nil {
 		return
 	}
-	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdr.rdrEvents <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),

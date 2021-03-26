@@ -89,8 +89,8 @@ func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
 // Main object holding the loaded config as section raw messages
 type CgrJsonCfg map[string]*json.RawMessage
 
-func (self CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
-	rawCfg, hasKey := self[GENERAL_JSN]
+func (jsnCfg CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[GENERAL_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -101,8 +101,8 @@ func (self CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RPCConnJsonCfg() (map[string]*RPCConnsJson, error) {
-	rawCfg, hasKey := self[RPCConnsJsonName]
+func (jsnCfg CgrJsonCfg) RPCConnJsonCfg() (map[string]*RPCConnsJson, error) {
+	rawCfg, hasKey := jsnCfg[RPCConnsJsonName]
 	if !hasKey {
 		return nil, nil
 	}
@@ -113,8 +113,8 @@ func (self CgrJsonCfg) RPCConnJsonCfg() (map[string]*RPCConnsJson, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
-	rawCfg, hasKey := self[CACHE_JSN]
+func (jsnCfg CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[CACHE_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -125,8 +125,8 @@ func (self CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
-	rawCfg, hasKey := self[LISTEN_JSN]
+func (jsnCfg CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[LISTEN_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -137,8 +137,8 @@ func (self CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) HttpJsonCfg() (*HTTPJsonCfg, error) {
-	rawCfg, hasKey := self[HTTP_JSN]
+func (jsnCfg CgrJsonCfg) HttpJsonCfg() (*HTTPJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[HTTP_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -149,8 +149,8 @@ func (self CgrJsonCfg) HttpJsonCfg() (*HTTPJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
-	rawCfg, hasKey := self[section]
+func (jsnCfg CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[section]
 	if !hasKey {
 		return nil, nil
 	}
@@ -173,8 +173,8 @@ func (jsnCfg CgrJsonCfg) FilterSJsonCfg() (*FilterSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RalsJsonCfg() (*RalsJsonCfg, error) {
-	rawCfg, hasKey := self[RALS_JSN]
+func (jsnCfg CgrJsonCfg) RalsJsonCfg() (*RalsJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[RALS_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -185,8 +185,8 @@ func (self CgrJsonCfg) RalsJsonCfg() (*RalsJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SchedulerJsonCfg() (*SchedulerJsonCfg, error) {
-	rawCfg, hasKey := self[SCHEDULER_JSN]
+func (jsnCfg CgrJsonCfg) SchedulerJsonCfg() (*SchedulerJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[SCHEDULER_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -197,8 +197,8 @@ func (self CgrJsonCfg) SchedulerJsonCfg() (*SchedulerJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
-	rawCfg, hasKey := self[CDRS_JSN]
+func (jsnCfg CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[CDRS_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -209,8 +209,8 @@ func (self CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
-	rawCfg, hasKey := self[ERsJson]
+func (jsnCfg CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
+	rawCfg, hasKey := jsnCfg[ERsJson]
 	if !hasKey {
 		return
 	}
@@ -219,8 +219,8 @@ func (self CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
 	return
 }
 
-func (self CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
-	rawCfg, hasKey := self[EEsJson]
+func (jsnCfg CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
+	rawCfg, hasKey := jsnCfg[EEsJson]
 	if !hasKey {
 		return
 	}
@@ -229,8 +229,8 @@ func (self CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
 	return
 }
 
-func (self CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
-	rawCfg, hasKey := self[SessionSJson]
+func (jsnCfg CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[SessionSJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -241,8 +241,8 @@ func (self CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
-	rawCfg, hasKey := self[FreeSWITCHAgentJSN]
+func (jsnCfg CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[FreeSWITCHAgentJSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -253,8 +253,8 @@ func (self CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error)
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
-	rawCfg, hasKey := self[KamailioAgentJSN]
+func (jsnCfg CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[KamailioAgentJSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -265,8 +265,8 @@ func (self CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
-	rawCfg, hasKey := self[AsteriskAgentJSN]
+func (jsnCfg CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[AsteriskAgentJSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -277,8 +277,8 @@ func (self CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
-	rawCfg, hasKey := self[DA_JSN]
+func (jsnCfg CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[DA_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -289,8 +289,8 @@ func (self CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
-	rawCfg, hasKey := self[RA_JSN]
+func (jsnCfg CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[RA_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -301,8 +301,8 @@ func (self CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
-	rawCfg, hasKey := self[HttpAgentJson]
+func (jsnCfg CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[HttpAgentJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -313,8 +313,8 @@ func (self CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
 	return &httpAgnt, nil
 }
 
-func (self CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
-	rawCfg, hasKey := self[DNSAgentJson]
+func (jsnCfg CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
+	rawCfg, hasKey := jsnCfg[DNSAgentJson]
 	if !hasKey {
 		return
 	}
@@ -347,8 +347,8 @@ func (cgrJsn CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
-	rawCfg, hasKey := self[RESOURCES_JSON]
+func (jsnCfg CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[RESOURCES_JSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -359,8 +359,8 @@ func (self CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
-	rawCfg, hasKey := self[STATS_JSON]
+func (jsnCfg CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[STATS_JSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -371,8 +371,8 @@ func (self CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
-	rawCfg, hasKey := self[THRESHOLDS_JSON]
+func (jsnCfg CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[THRESHOLDS_JSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -383,8 +383,8 @@ func (self CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
-	rawCfg, hasKey := self[RouteSJson]
+func (jsnCfg CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[RouteSJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -395,8 +395,8 @@ func (self CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
-	rawCfg, hasKey := self[LoaderJson]
+func (jsnCfg CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[LoaderJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -407,8 +407,8 @@ func (self CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
-	rawCfg, hasKey := self[MAILER_JSN]
+func (jsnCfg CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[MAILER_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -419,8 +419,8 @@ func (self CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
-	rawCfg, hasKey := self[SURETAX_JSON]
+func (jsnCfg CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[SURETAX_JSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -431,8 +431,8 @@ func (self CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
-	rawCfg, hasKey := self[DispatcherSJson]
+func (jsnCfg CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[DispatcherSJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -443,8 +443,8 @@ func (self CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
-	rawCfg, hasKey := self[RegistrarCJson]
+func (jsnCfg CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
+	rawCfg, hasKey := jsnCfg[RegistrarCJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -455,8 +455,8 @@ func (self CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
-	rawCfg, hasKey := self[CgrLoaderCfgJson]
+func (jsnCfg CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
+	rawCfg, hasKey := jsnCfg[CgrLoaderCfgJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -467,8 +467,8 @@ func (self CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
-	rawCfg, hasKey := self[CgrMigratorCfgJson]
+func (jsnCfg CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
+	rawCfg, hasKey := jsnCfg[CgrMigratorCfgJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -479,8 +479,8 @@ func (self CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
-	rawCfg, hasKey := self[TlsCfgJson]
+func (jsnCfg CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[TlsCfgJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -491,8 +491,8 @@ func (self CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
-	rawCfg, hasKey := self[AnalyzerCfgJson]
+func (jsnCfg CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[AnalyzerCfgJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -503,8 +503,8 @@ func (self CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
-	rawCfg, hasKey := self[ApierS]
+func (jsnCfg CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[ApierS]
 	if !hasKey {
 		return nil, nil
 	}
@@ -515,8 +515,8 @@ func (self CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
-	rawCfg, hasKey := self[RateSJson]
+func (jsnCfg CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[RateSJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -527,8 +527,8 @@ func (self CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
-	rawCfg, hasKey := self[SIPAgentJson]
+func (jsnCfg CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[SIPAgentJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -539,8 +539,8 @@ func (self CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
 	return sipAgnt, nil
 }
 
-func (self CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, error) {
-	rawCfg, hasKey := self[TemplatesJson]
+func (jsnCfg CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[TemplatesJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -551,8 +551,8 @@ func (self CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, erro
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
-	rawCfg, hasKey := self[ConfigSJson]
+func (jsnCfg CgrJsonCfg) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
+	rawCfg, hasKey := jsnCfg[ConfigSJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -563,8 +563,8 @@ func (self CgrJsonCfg) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
-	rawCfg, hasKey := self[APIBanCfgJson]
+func (jsnCfg CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[APIBanCfgJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -575,8 +575,8 @@ func (self CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
-	rawCfg, hasKey := self[CoreSCfgJson]
+func (jsnCfg CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[CoreSCfgJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -587,8 +587,8 @@ func (self CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
-	rawCfg, hasKey := self[ActionSJson]
+func (jsnCfg CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[ActionSJson]
 	if !hasKey {
 		return nil, nil
 	}
@@ -599,8 +599,8 @@ func (self CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
-	rawCfg, hasKey := self[AccountSCfgJson]
+func (jsnCfg CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[AccountSCfgJson]
 	if !hasKey {
 		return nil, nil
 	}

@@ -65,16 +65,16 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.AccountProfilesCsv:    (*TPCSVImporter).importAccountProfiles,
 }
 
-func (self *TPCSVImporter) Run() error {
-	self.csvr = NewFileCSVStorage(self.Sep, self.DirPath)
-	files, _ := os.ReadDir(self.DirPath)
+func (tpImp *TPCSVImporter) Run() error {
+	tpImp.csvr = NewFileCSVStorage(tpImp.Sep, tpImp.DirPath)
+	files, _ := os.ReadDir(tpImp.DirPath)
 	var withErrors bool
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]
 		if !hasName {
 			continue
 		}
-		if err := fHandler(self, f.Name()); err != nil {
+		if err := fHandler(tpImp, f.Name()); err != nil {
 			withErrors = true
 			utils.Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", f.Name(), err.Error()))
 		}
@@ -86,310 +86,310 @@ func (self *TPCSVImporter) Run() error {
 }
 
 // Handler importing timings from file, saved row by row to storDb
-func (self *TPCSVImporter) importTimings(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importTimings(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPTimings(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPTimings(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPTimings(tps)
+	return tpImp.StorDb.SetTPTimings(tps)
 }
 
-func (self *TPCSVImporter) importDestinations(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importDestinations(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPDestinations(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPDestinations(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPDestinations(tps)
+	return tpImp.StorDb.SetTPDestinations(tps)
 }
 
-func (self *TPCSVImporter) importRates(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importRates(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPRates(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPRates(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPRates(tps)
+	return tpImp.StorDb.SetTPRates(tps)
 }
 
-func (self *TPCSVImporter) importDestinationRates(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importDestinationRates(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPDestinationRates(self.TPid, "", nil)
+	tps, err := tpImp.csvr.GetTPDestinationRates(tpImp.TPid, "", nil)
 	if err != nil {
 		return err
 	}
 
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPDestinationRates(tps)
+	return tpImp.StorDb.SetTPDestinationRates(tps)
 }
 
-func (self *TPCSVImporter) importRatingPlans(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importRatingPlans(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPRatingPlans(self.TPid, "", nil)
+	tps, err := tpImp.csvr.GetTPRatingPlans(tpImp.TPid, "", nil)
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPRatingPlans(tps)
+	return tpImp.StorDb.SetTPRatingPlans(tps)
 }
 
-func (self *TPCSVImporter) importRatingProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importRatingProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: self.TPid})
+	tps, err := tpImp.csvr.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpImp.TPid})
 	if err != nil {
 		return err
 	}
 	loadId := utils.CSVLoad //Autogenerate rating profile id
-	if self.ImportId != "" {
-		loadId += "_" + self.ImportId
+	if tpImp.ImportId != "" {
+		loadId += "_" + tpImp.ImportId
 	}
 
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 		tps[i].LoadId = loadId
 
 	}
-	return self.StorDb.SetTPRatingProfiles(tps)
+	return tpImp.StorDb.SetTPRatingProfiles(tps)
 }
 
-func (self *TPCSVImporter) importSharedGroups(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importSharedGroups(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPSharedGroups(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPSharedGroups(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPSharedGroups(tps)
+	return tpImp.StorDb.SetTPSharedGroups(tps)
 }
 
-func (self *TPCSVImporter) importActions(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importActions(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPActions(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPActions(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPActions(tps)
+	return tpImp.StorDb.SetTPActions(tps)
 }
 
-func (self *TPCSVImporter) importActionTimings(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importActionTimings(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPActionPlans(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPActionPlans(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPActionPlans(tps)
+	return tpImp.StorDb.SetTPActionPlans(tps)
 }
 
-func (self *TPCSVImporter) importActionTriggers(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importActionTriggers(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPActionTriggers(self.TPid, "")
+	tps, err := tpImp.csvr.GetTPActionTriggers(tpImp.TPid, "")
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 	}
 
-	return self.StorDb.SetTPActionTriggers(tps)
+	return tpImp.StorDb.SetTPActionTriggers(tps)
 }
 
-func (self *TPCSVImporter) importAccountActions(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importAccountActions(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTPAccountActions(&utils.TPAccountActions{TPid: self.TPid})
+	tps, err := tpImp.csvr.GetTPAccountActions(&utils.TPAccountActions{TPid: tpImp.TPid})
 	if err != nil {
 		return err
 	}
 	loadId := utils.CSVLoad //Autogenerate rating profile id
-	if self.ImportId != "" {
-		loadId += "_" + self.ImportId
+	if tpImp.ImportId != "" {
+		loadId += "_" + tpImp.ImportId
 	}
 	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
+		tps[i].TPid = tpImp.TPid
 		tps[i].LoadId = loadId
 	}
-	return self.StorDb.SetTPAccountActions(tps)
+	return tpImp.StorDb.SetTPAccountActions(tps)
 }
 
-func (self *TPCSVImporter) importResources(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importResources(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPResources(self.TPid, "", "")
+	rls, err := tpImp.csvr.GetTPResources(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPResources(rls)
+	return tpImp.StorDb.SetTPResources(rls)
 }
 
-func (self *TPCSVImporter) importStats(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importStats(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPStats(self.TPid, "", "")
+	sts, err := tpImp.csvr.GetTPStats(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPStats(sts)
+	return tpImp.StorDb.SetTPStats(sts)
 }
 
-func (self *TPCSVImporter) importThresholds(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importThresholds(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPThresholds(self.TPid, "", "")
+	sts, err := tpImp.csvr.GetTPThresholds(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPThresholds(sts)
+	return tpImp.StorDb.SetTPThresholds(sts)
 }
 
-func (self *TPCSVImporter) importFilters(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importFilters(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPFilters(self.TPid, "", "")
+	sts, err := tpImp.csvr.GetTPFilters(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPFilters(sts)
+	return tpImp.StorDb.SetTPFilters(sts)
 }
 
-func (self *TPCSVImporter) importRoutes(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importRoutes(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPRoutes(self.TPid, "", "")
+	rls, err := tpImp.csvr.GetTPRoutes(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPRoutes(rls)
+	return tpImp.StorDb.SetTPRoutes(rls)
 }
 
-func (self *TPCSVImporter) importAttributeProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importAttributeProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPAttributes(self.TPid, "", "")
+	rls, err := tpImp.csvr.GetTPAttributes(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPAttributes(rls)
+	return tpImp.StorDb.SetTPAttributes(rls)
 }
 
-func (self *TPCSVImporter) importChargerProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importChargerProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPChargers(self.TPid, "", "")
+	rls, err := tpImp.csvr.GetTPChargers(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPChargers(rls)
+	return tpImp.StorDb.SetTPChargers(rls)
 }
 
-func (self *TPCSVImporter) importDispatcherProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importDispatcherProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	dpps, err := self.csvr.GetTPDispatcherProfiles(self.TPid, "", "")
+	dpps, err := tpImp.csvr.GetTPDispatcherProfiles(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPDispatcherProfiles(dpps)
+	return tpImp.StorDb.SetTPDispatcherProfiles(dpps)
 }
 
-func (self *TPCSVImporter) importDispatcherHosts(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importDispatcherHosts(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	dpps, err := self.csvr.GetTPDispatcherHosts(self.TPid, "", "")
+	dpps, err := tpImp.csvr.GetTPDispatcherHosts(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPDispatcherHosts(dpps)
+	return tpImp.StorDb.SetTPDispatcherHosts(dpps)
 }
 
-func (self *TPCSVImporter) importRateProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importRateProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rpps, err := self.csvr.GetTPRateProfiles(self.TPid, "", "")
+	rpps, err := tpImp.csvr.GetTPRateProfiles(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPRateProfiles(rpps)
+	return tpImp.StorDb.SetTPRateProfiles(rpps)
 }
 
-func (self *TPCSVImporter) importActionProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importActionProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rpps, err := self.csvr.GetTPActionProfiles(self.TPid, "", "")
+	rpps, err := tpImp.csvr.GetTPActionProfiles(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPActionProfiles(rpps)
+	return tpImp.StorDb.SetTPActionProfiles(rpps)
 }
 
-func (self *TPCSVImporter) importAccountProfiles(fn string) error {
-	if self.Verbose {
+func (tpImp *TPCSVImporter) importAccountProfiles(fn string) error {
+	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rpps, err := self.csvr.GetTPAccountProfiles(self.TPid, "", "")
+	rpps, err := tpImp.csvr.GetTPAccountProfiles(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPAccountProfiles(rpps)
+	return tpImp.StorDb.SetTPAccountProfiles(rpps)
 }

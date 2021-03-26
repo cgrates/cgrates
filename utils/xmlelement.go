@@ -16,14 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
 	"encoding/xml"
 	"strings"
-	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
@@ -36,7 +33,7 @@ type XMLElement struct {
 
 // NMAsXMLElements returns the values as []*XMLElement which can be later marshaled
 // considers each value returned by .Values() in the form of []*NMItem, otherwise errors
-func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err error) {
+func NMAsXMLElements(nm *OrderedNavigableMap) (ents []*XMLElement, err error) {
 	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
@@ -44,14 +41,15 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 		if nmItm.NewBranch {
 			pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
 		}
-		val := utils.IfaceAsString(nmItm.Data)
+		path = path[:len(path)-1] // remove the last index
+		val := nmItm.String()
 		var pathCached bool
-		for i := len(nmItm.Path); i > 0; i-- {
+		for i := len(path); i > 0; i-- {
 			var cachedElm *XMLElement
-			if cachedElm, pathCached = pathIdx[strings.Join(nmItm.Path[:i], "")]; !pathCached {
+			if cachedElm, pathCached = pathIdx[strings.Join(path[:i], "")]; !pathCached {
 				continue
 			}
-			if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
+			if i == len(path) { // lastElmnt, overwrite value or add attribute
 				if nmItm.AttributeID != "" {
 					cachedElm.Attributes = append(cachedElm.Attributes,
 						&xml.Attr{
@@ -65,9 +63,9 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 			}
 			// create elements in reverse order so we can append already created
 			var newElm *XMLElement
-			for j := len(nmItm.Path); j > i; j-- {
-				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
-				pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
+			for j := len(path); j > i; j-- {
+				elm := &XMLElement{XMLName: xml.Name{Local: path[j-1]}}
+				pathIdx[strings.Join(path[:j], "")] = elm
 				if newElm == nil {
 					if nmItm.AttributeID != "" {
 						elm.Attributes = append(elm.Attributes,
@@ -88,9 +86,9 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 		}
 		if !pathCached { // not an update but new element to be created
 			var newElm *XMLElement
-			for i := len(nmItm.Path); i > 0; i-- {
-				elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
-				pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
+			for i := len(path); i > 0; i-- {
+				elm := &XMLElement{XMLName: xml.Name{Local: path[i-1]}}
+				pathIdx[strings.Join(path[:i], "")] = elm
 				if newElm == nil { // last element, create data inside
 					if nmItm.AttributeID != "" {
 						elm.Attributes = append(elm.Attributes,
@@ -108,58 +106,6 @@ func NMAsXMLElements(nm *utils.OrderedNavigableMap) (ents []*XMLElement, err err
 				}
 			}
 			ents = append(ents, newElm)
-		}
-	}
-	return
-}
-
-// NMAsCGREvent builds a CGREvent considering Time as time.Now()
-// and Event as linear map[string]interface{} with joined paths
-// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
-func NMAsCGREvent(nM *utils.OrderedNavigableMap, tnt string, pathSep string, opts utils.MapStorage) (cgrEv *utils.CGREvent) {
-	if nM == nil {
-		return
-	}
-	el := nM.GetFirstElement()
-	if el == nil {
-		return
-	}
-	cgrEv = &utils.CGREvent{
-		Tenant:  tnt,
-		ID:      utils.UUIDSha1Prefix(),
-		Time:    utils.TimePointer(time.Now()),
-		Event:   make(map[string]interface{}),
-		APIOpts: opts,
-	}
-	for ; el != nil; el = el.Next() {
-		val, _ := nM.Field(el.Value) // this should never return error cause we get the path from the order
-		opath := utils.GetPathWithoutIndex(strings.Join(val.Path, utils.NestingSep))
-		if val.AttributeID != "" {
-			continue
-		}
-		if _, has := cgrEv.Event[opath]; !has {
-			cgrEv.Event[opath] = val.Data // first item which is not an attribute will become the value
-		}
-	}
-	return
-}
-
-// NMAsMapInterface builds a linear map[string]interface{} with joined paths
-// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
-func NMAsMapInterface(nM *utils.OrderedNavigableMap, pathSep string) (mp map[string]interface{}) {
-	mp = make(map[string]interface{})
-	el := nM.GetFirstElement()
-	if el == nil {
-		return
-	}
-	for ; el != nil; el = el.Next() {
-		val, _ := nM.Field(el.Value) // this should never return error cause we get the path from the order
-		opath := utils.GetPathWithoutIndex(strings.Join(val.Path, utils.NestingSep))
-		if val.AttributeID != "" {
-			continue
-		}
-		if _, has := mp[opath]; !has {
-			mp[opath] = val.Data // first item which is not an attribute will become the value
 		}
 	}
 	return

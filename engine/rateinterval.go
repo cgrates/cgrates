@@ -69,15 +69,9 @@ func (rit *RITiming) CronString() string {
 		} else {
 			hour, min, sec = "*", "*", "*"
 		}
-		if strings.HasPrefix(hour, "0") {
-			hour = hour[1:]
-		}
-		if strings.HasPrefix(min, "0") {
-			min = min[1:]
-		}
-		if strings.HasPrefix(sec, "0") {
-			sec = sec[1:]
-		}
+		hour = strings.TrimPrefix(hour, "0")
+		min = strings.TrimPrefix(min, "0")
+		sec = strings.TrimPrefix(sec, "0")
 	}
 	if len(rit.MonthDays) == 0 {
 		monthday = "*"

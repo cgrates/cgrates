@@ -58,8 +58,8 @@ type PostgresStorage struct {
 	SQLStorage
 }
 
-func (self *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	tx := self.db.Begin()
+func (poS *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+	tx := poS.db.Begin()
 	if overwrite {
 		tx.Table(utils.TBLVersions).Delete(nil)
 	}
@@ -81,22 +81,22 @@ func (self *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err erro
 	return
 }
 
-func (self *PostgresStorage) extraFieldsExistsQry(field string) string {
+func (poS *PostgresStorage) extraFieldsExistsQry(field string) string {
 	return fmt.Sprintf(" extra_fields ?'%s'", field)
 }
 
-func (self *PostgresStorage) extraFieldsValueQry(field, value string) string {
+func (poS *PostgresStorage) extraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" (extra_fields ->> '%s') = '%s'", field, value)
 }
 
-func (self *PostgresStorage) notExtraFieldsExistsQry(field string) string {
+func (poS *PostgresStorage) notExtraFieldsExistsQry(field string) string {
 	return fmt.Sprintf(" NOT extra_fields ?'%s'", field)
 }
 
-func (self *PostgresStorage) notExtraFieldsValueQry(field, value string) string {
+func (poS *PostgresStorage) notExtraFieldsValueQry(field, value string) string {
 	return fmt.Sprintf(" NOT (extra_fields ?'%s' AND (extra_fields ->> '%s') = '%s')", field, field, value)
 }
 
-func (self *PostgresStorage) GetStorageType() string {
+func (poS *PostgresStorage) GetStorageType() string {
 	return utils.Postgres
 }

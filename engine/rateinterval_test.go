@@ -772,8 +772,7 @@ func TestRateIntervalEqualError(t *testing.T) {
 	testRateInterval := &RateInterval{
 		Weight: 2,
 	}
-	testRateInterval2 := &RateInterval{}
-	testRateInterval2 = nil
+	var testRateInterval2 *RateInterval = nil
 	result := testRateInterval.Equal(testRateInterval2)
 	if !reflect.DeepEqual(result, false) {
 		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
@@ -809,8 +808,7 @@ func TestRateIntervalGetMaxCost(t *testing.T) {
 }
 
 func TestRGRateCloneNil(t *testing.T) {
-	testRate := &RGRate{}
-	testRate = nil
+	var testRate *RGRate = nil
 	result := testRate.Clone()
 	if !reflect.DeepEqual(result, testRate) {
 		t.Errorf("\nExpecting: <nil>,\n Received: <%+v>", result)

@@ -292,7 +292,7 @@ func TestASRCompress(t *testing.T) {
 }
 
 func TestASRGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -511,7 +511,7 @@ func TestACDCompress(t *testing.T) {
 }
 
 func TestACDGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -970,7 +970,7 @@ func TestTCDCompress(t *testing.T) {
 }
 
 func TestTCDGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -1241,7 +1241,7 @@ func TestACCCompress(t *testing.T) {
 }
 
 func TestACCGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -1514,7 +1514,7 @@ func TestTCCCompress(t *testing.T) {
 }
 
 func TestTCCGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -1856,7 +1856,7 @@ func TestPDDCompress(t *testing.T) {
 }
 
 func TestPDDGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -2072,7 +2072,7 @@ func TestDDCCompress(t *testing.T) {
 }
 
 func TestDDCGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -2353,7 +2353,7 @@ func TestStatSumCompress(t *testing.T) {
 }
 
 func TestStatSumGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -2632,7 +2632,7 @@ func TestStatAverageCompress(t *testing.T) {
 }
 
 func TestStatAverageGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,
@@ -2835,7 +2835,7 @@ func TestStatDistinctCompress(t *testing.T) {
 }
 
 func TestStatDistinctGetCompressFactor(t *testing.T) {
-	CF := make(map[string]int)
+	var CF map[string]int
 	expectedCF := map[string]int{
 		"EVENT_1": 1,
 		"EVENT_2": 1,

@@ -140,7 +140,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
-	reqVars := &utils.DataNode{Type:utils.NMMapType,Map:map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
+	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
 
 	for {
 		var hasHeader, hasTrailer bool
@@ -217,7 +217,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 		rdr.offset += rdr.lineLen // increase the offset
-		cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		rdr.rdrEvents <- &erEvent{
 			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
@@ -305,7 +305,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 				utils.ERs, absPath, rowNr, err.Error()))
 		return err
 	}
-	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdr.rdrEvents <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
@@ -347,7 +347,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		return err
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
-	cgrEv := config.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdr.rdrEvents <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),

@@ -82,7 +82,6 @@ func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnsJson) {
 			rC.Conns[idx].loadFromJSONCfg(jsnHaCfg) //To review if the function signature changes
 		}
 	}
-	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -147,7 +146,6 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) {
 	if jsnCfg.Tls != nil {
 		rh.TLS = *jsnCfg.Tls
 	}
-	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}

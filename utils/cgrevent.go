@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"strings"
 	"time"
 )
 
@@ -239,4 +240,37 @@ func GetRoutePaginatorFromOpts(ev map[string]interface{}) (args Paginator, err e
 type CGREventWithEeIDs struct {
 	EeIDs []string
 	*CGREvent
+}
+
+// NMAsCGREvent builds a CGREvent considering Time as time.Now()
+// and Event as linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapStorage) (cgrEv *CGREvent) {
+	if nM == nil {
+		return
+	}
+	el := nM.GetFirstElement()
+	if el == nil {
+		return
+	}
+	cgrEv = &CGREvent{
+		Tenant:  tnt,
+		ID:      UUIDSha1Prefix(),
+		Time:    TimePointer(time.Now()),
+		Event:   make(map[string]interface{}),
+		APIOpts: opts,
+	}
+	for ; el != nil; el = el.Next() {
+		path := el.Value
+		val, _ := nM.Field(path) // this should never return error cause we get the path from the order
+		if val.AttributeID != "" {
+			continue
+		}
+		path = path[:len(path)-1] // remove the last index
+		opath := strings.Join(path, NestingSep)
+		if _, has := cgrEv.Event[opath]; !has {
+			cgrEv.Event[opath] = val.Data // first item which is not an attribute will become the value
+		}
+	}
+	return
 }

@@ -32,15 +32,13 @@ import (
 func updateSIPMsgFromNavMap(m sipingo.Message, navMp *utils.OrderedNavigableMap) (err error) {
 	// write reply into message
 	for el := navMp.GetFirstElement(); el != nil; el = el.Next() {
-		val := el.Value
-		var itm *utils.DataLeaf
-		if itm, err = navMp.Field(val); err != nil {
-			return
-		}
+		path := el.Value
+		itm, _ := navMp.Field(path)
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		m[strings.Join(itm.Path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
+		path = path[:len(path)-1] // remove the last index
+		m[strings.Join(path, utils.NestingSep)] = utils.IfaceAsString(itm.Data)
 	}
 	return
 }

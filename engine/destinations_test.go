@@ -44,6 +44,9 @@ func TestDestinationStorageStore(t *testing.T) {
 	}
 	result, err := dm.GetDestination(nationale.Id,
 		true, true, utils.NonTransactional)
+	if err != nil {
+		t.Error(err)
+	}
 	if nationale.containsPrefix("0257") == 0 ||
 		nationale.containsPrefix("0256") == 0 ||
 		nationale.containsPrefix("0723") == 0 {

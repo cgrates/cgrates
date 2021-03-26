@@ -629,21 +629,21 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// DataDB sanity checks
 	if cfg.dataDbCfg.Type == utils.INTERNAL {
-		if cfg.resourceSCfg.Enabled == true && cfg.resourceSCfg.StoreInterval != -1 {
+		if cfg.resourceSCfg.Enabled && cfg.resourceSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
 		}
-		if cfg.statsCfg.Enabled == true && cfg.statsCfg.StoreInterval != -1 {
+		if cfg.statsCfg.Enabled && cfg.statsCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.StatS, cfg.statsCfg.StoreInterval)
 		}
-		if cfg.thresholdSCfg.Enabled == true && cfg.thresholdSCfg.StoreInterval != -1 {
+		if cfg.thresholdSCfg.Enabled && cfg.thresholdSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
 		}
 	}
 	for item, val := range cfg.dataDbCfg.Items {
-		if val.Remote == true && len(cfg.dataDbCfg.RmtConns) == 0 {
+		if val.Remote && len(cfg.dataDbCfg.RmtConns) == 0 {
 			return fmt.Errorf("remote connections required by: <%s>", item)
 		}
-		if val.Replicate == true && len(cfg.dataDbCfg.RplConns) == 0 {
+		if val.Replicate && len(cfg.dataDbCfg.RplConns) == 0 {
 			return fmt.Errorf("replicate connections required by: <%s>", item)
 		}
 	}

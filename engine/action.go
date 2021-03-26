@@ -275,7 +275,7 @@ func topupResetAction(ub *Account, a *Action, acs Actions, extraData interface{}
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
-		ub.BalanceMap = make(map[string]Balances, 0)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
@@ -300,7 +300,7 @@ func debitResetAction(ub *Account, a *Action, acs Actions, extraData interface{}
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
-		ub.BalanceMap = make(map[string]Balances, 0)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	return genericDebit(ub, a, true)
 }

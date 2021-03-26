@@ -40,7 +40,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			utils.Logger.Crit("Redis db name must be an integer!")
 			return
 		}
-		if port != "" && strings.Index(host, ":") == -1 {
+		if port != "" && !strings.Contains(host, ":") {
 			host += ":" + port
 		}
 		var isCluster bool

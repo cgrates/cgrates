@@ -296,7 +296,7 @@ func (acc *Account) getBalancesForPrefix(prefix, category, tor,
 		if b.IsExpiredAt(aTime) || (len(b.SharedGroups) == 0 && b.GetValue() <= 0 && !b.Blocker) {
 			continue
 		}
-		if sharedGroup != "" && b.SharedGroups[sharedGroup] == false {
+		if sharedGroup != "" && !b.SharedGroups[sharedGroup] {
 			continue
 		}
 		if !b.MatchCategory(category) {
@@ -304,7 +304,7 @@ func (acc *Account) getBalancesForPrefix(prefix, category, tor,
 		}
 		b.account = acc
 
-		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.MetaAny] == false {
+		if len(b.DestinationIDs) > 0 && !b.DestinationIDs[utils.MetaAny] {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if destIDs, err := dm.GetReverseDestination(p, true, true, utils.NonTransactional); err == nil {
 					foundResult := false
@@ -944,9 +944,6 @@ func (acc *Account) AsOldStructure() interface{} {
 		Timings        []*RITiming
 		TimingIDs      string
 		Disabled       bool
-		precision      int
-		account        *Account
-		dirty          bool
 	}
 	type Balances []*Balance
 	type UnitsCounter struct {
