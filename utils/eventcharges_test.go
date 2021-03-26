@@ -168,3 +168,200 @@ func TestECAsExtEventChargesFailConcretes(t *testing.T) {
 		t.Errorf("\nExpected: %v,\nReceived: %v", expected, err)
 	}
 }
+
+func TestEqualsAccountCharge(t *testing.T) {
+	accCharge1 := &AccountCharge{
+		AccountID:       "AccountID1",
+		BalanceID:       "BalanceID1",
+		Units:           NewDecimal(20, 0),
+		BalanceLimit:    NewDecimal(40, 0),
+		UnitFactorID:    "UF1",
+		AttributeIDs:    []string{"ID1", "ID2"},
+		RatingID:        "RatingID1",
+		JoinedChargeIDs: []string{"chID1"},
+	}
+	accCharge2 := &AccountCharge{
+		AccountID:       "AccountID1",
+		BalanceID:       "BalanceID1",
+		Units:           NewDecimal(20, 0),
+		BalanceLimit:    NewDecimal(40, 0),
+		UnitFactorID:    "UF1",
+		AttributeIDs:    []string{"ID1", "ID2"},
+		RatingID:        "RatingID1",
+		JoinedChargeIDs: []string{"chID1"},
+	}
+	if !accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are not equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+
+	// not equal for AccountID
+	accCharge1.AccountID = "test"
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge1.AccountID = "AccountID1"
+
+	accCharge2.AccountID = "test"
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge2.AccountID = "AccountID1"
+
+	// not equal for BalanceID
+	accCharge1.BalanceID = "test"
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge1.BalanceID = "AccountID1"
+
+	accCharge2.BalanceID = "test"
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge2.BalanceID = "AccountID1"
+
+	// not equal for BalanceLimit
+	accCharge1.BalanceLimit = NewDecimal(35, 0)
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge1.BalanceLimit = NewDecimal(40, 0)
+
+	accCharge2.BalanceLimit = NewDecimal(35, 0)
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge2.BalanceLimit = NewDecimal(40, 0)
+
+	// not equal for Units
+	accCharge1.Units = NewDecimal(35, 0)
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge1.Units = NewDecimal(20, 0)
+
+	accCharge2.Units = NewDecimal(35, 0)
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge2.Units = NewDecimal(20, 0)
+
+	// not equal for AttributeIDs
+	accCharge1.AttributeIDs = []string{"ID1"}
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge1.AttributeIDs = []string{"ID1", "ID2"}
+
+	accCharge2.AttributeIDs = []string{"ID1"}
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge2.AttributeIDs = []string{"ID1", "ID2"}
+
+	// not equal for JoinedChargeIDs
+	accCharge1.JoinedChargeIDs = []string{}
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge1.JoinedChargeIDs = []string{"chID1"}
+
+	accCharge2.JoinedChargeIDs = []string{}
+	if accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+	accCharge2.JoinedChargeIDs = []string{"chID1"}
+
+	//both units and BalanceLimit are nil will be equal
+	accCharge1.Units = nil
+	accCharge2.Units = nil
+	if !accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are not equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+
+	accCharge1.BalanceLimit = nil
+	accCharge2.BalanceLimit = nil
+	if !accCharge1.Equals(accCharge2) {
+		t.Errorf("Charge %+v and %+v are not equal", ToJSON(accCharge1), ToJSON(accCharge2))
+	}
+}
+
+func TestCompressEqualsChargingInterval(t *testing.T) {
+	chIn1 := &ChargingInterval{
+		Increments: []*ChargingIncrement{
+			{
+				Units:           NewDecimal(10, 0),
+				AccountChargeID: "CHARGER1",
+				CompressFactor:  1,
+			},
+		},
+		CompressFactor: 2,
+	}
+	chIn2 := &ChargingInterval{
+		Increments: []*ChargingIncrement{
+			{
+				Units:           NewDecimal(10, 0),
+				AccountChargeID: "CHARGER1",
+				CompressFactor:  1,
+			},
+		},
+		CompressFactor: 4,
+	}
+
+	// compressEquals is not looking for compress factor
+	if !chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are not equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+
+	//same thing in ChargingIncrements
+	chIn1.Increments[0].CompressFactor = 2
+	if !chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are not equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+
+	//not equals for AccountChargeID
+	chIn1.Increments[0].AccountChargeID = "Changed_Charger"
+	if chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+	chIn1.Increments[0].AccountChargeID = "CHARGER1"
+
+	chIn2.Increments[0].AccountChargeID = "Changed_Charger"
+	if chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+	chIn2.Increments[0].AccountChargeID = "CHARGER1"
+
+	//not equals for Units
+	chIn1.Increments[0].Units = NewDecimal(30, 0)
+	if chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+	chIn1.Increments[0].Units = NewDecimal(10, 0)
+
+	chIn2.Increments[0].Units = NewDecimal(30, 0)
+	if chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+	chIn2.Increments[0].Units = NewDecimal(10, 0)
+
+	//not equals by the length of increments
+	chIn1 = &ChargingInterval{
+		Increments: []*ChargingIncrement{
+			{
+				Units:           NewDecimal(10, 0),
+				AccountChargeID: "CHARGER1",
+				CompressFactor:  1,
+			},
+			{
+				Units:           NewDecimal(12, 0),
+				AccountChargeID: "CHARGER2",
+				CompressFactor:  6,
+			},
+		},
+		CompressFactor: 0,
+	}
+	if chIn1.CompressEquals(chIn2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(chIn1), ToJSON(chIn2))
+	}
+}

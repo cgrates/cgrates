@@ -1543,3 +1543,181 @@ func TestLibratesAsRateProfileNon0Len(t *testing.T) {
 		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, received)
 	}
 }
+
+func TestRatesIntervalEquals(t *testing.T) {
+	rtInt1 := &RateSInterval{
+		IntervalStart: NewDecimal(int64(10*time.Second), 0),
+		Increments: []*RateSIncrement{
+			{
+				IncrementStart:    NewDecimal(int64(time.Second), 0),
+				IntervalRateIndex: 1,
+				Rate: &Rate{
+					uID: "newID",
+				},
+				CompressFactor: 2,
+				Usage:          NewDecimal(int64(5*time.Second), 0),
+			},
+		},
+		CompressFactor: 2,
+	}
+	rtInt2 := &RateSInterval{
+		IntervalStart: NewDecimal(int64(10*time.Second), 0),
+		Increments: []*RateSIncrement{
+			{
+				IncrementStart:    NewDecimal(int64(time.Second), 0),
+				IntervalRateIndex: 1,
+				Rate: &Rate{
+					uID: "newID",
+				},
+				CompressFactor: 2,
+				Usage:          NewDecimal(int64(5*time.Second), 0),
+			},
+		},
+		CompressFactor: 2,
+	}
+
+	// equals is looking for compressFactor
+	if !rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are not equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+
+	// not equals for IntervalStart
+	rtInt1.IntervalStart = NewDecimal(int64(20*time.Second), 0)
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+	rtInt1.IntervalStart = NewDecimal(int64(10*time.Second), 0)
+
+	rtInt2.IntervalStart = NewDecimal(int64(20*time.Second), 0)
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+	rtInt2.IntervalStart = NewDecimal(int64(10*time.Second), 0)
+
+	// not equals for CompressFactor
+	rtInt1.CompressFactor = 5
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+	rtInt1.CompressFactor = 2
+
+	rtInt2.CompressFactor = 8
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+	rtInt2.CompressFactor = 2
+
+	//not equals for Increments and their length
+	rtInt1.Increments[0].Usage = NewDecimal(int64(90*time.Second), 0)
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+	rtInt1.Increments[0].Usage = NewDecimal(int64(5*time.Second), 0)
+
+	rtInt2.Increments[0].Usage = NewDecimal(int64(80*time.Second), 0)
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+	rtInt2.Increments[0].Usage = NewDecimal(int64(5*time.Second), 0)
+
+	rtInt1 = &RateSInterval{
+		IntervalStart: NewDecimal(int64(10*time.Second), 0),
+		Increments: []*RateSIncrement{
+			{
+				IncrementStart:    NewDecimal(int64(time.Second), 0),
+				IntervalRateIndex: 1,
+				Rate: &Rate{
+					uID: "newID",
+				},
+				CompressFactor: 2,
+				Usage:          NewDecimal(int64(5*time.Second), 0),
+			},
+			{
+				IncrementStart: NewDecimal(int64(time.Second), 0),
+				Usage:          NewDecimal(int64(5*time.Second), 0),
+			},
+		},
+		CompressFactor: 2,
+	}
+	if rtInt1.Equals(rtInt2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
+	}
+}
+
+func TestRatesIncrementEquals(t *testing.T) {
+	incr1 := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(time.Second), 0),
+		IntervalRateIndex: 1,
+		Rate: &Rate{
+			uID: "newID",
+		},
+		CompressFactor: 2,
+		Usage:          NewDecimal(int64(5*time.Second), 0),
+	}
+	incr2 := &RateSIncrement{
+		IncrementStart:    NewDecimal(int64(time.Second), 0),
+		IntervalRateIndex: 1,
+		Rate: &Rate{
+			uID: "newID",
+		},
+		CompressFactor: 2,
+		Usage:          NewDecimal(int64(5*time.Second), 0),
+	}
+
+	// equals is not looking for compress factor
+	if !incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are not equal", ToJSON(incr1), ToJSON(incr2))
+	}
+
+	// not equals by IncrementStart
+	incr1.IncrementStart = NewDecimal(int64(10*time.Second), 0)
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr1.IncrementStart = NewDecimal(int64(time.Second), 0)
+
+	incr2.IncrementStart = NewDecimal(int64(10*time.Second), 0)
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr2.IncrementStart = NewDecimal(int64(time.Second), 0)
+
+	// not equals by IntervalRateIndex
+	incr1.IntervalRateIndex = 5
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr1.IntervalRateIndex = 1
+
+	incr2.IntervalRateIndex = 5
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr2.IntervalRateIndex = 1
+
+	//not equals by RateUID
+	incr1.Rate.uID = "changed_uID"
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr1.Rate.uID = "newID"
+
+	incr2.Rate.uID = "changed_uID"
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr2.Rate.uID = "newID"
+
+	// not equals by CompressFactor
+	incr1.CompressFactor = 0
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr1.CompressFactor = 2
+
+	incr2.CompressFactor = 9
+	if incr1.Equals(incr2) {
+		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
+	}
+	incr2.CompressFactor = 2
+}
