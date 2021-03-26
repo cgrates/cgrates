@@ -301,7 +301,6 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
 			ec = utils.NewEventCharges()
 			ec.Merge(ecDbt)
-			fmt.Printf("ecDbt: %s\n", utils.ToIJSON(ecDbt))
 			if i == 0 { // no estimation done, covering full
 				break
 			}
