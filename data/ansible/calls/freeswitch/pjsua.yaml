@@ -1,13 +1,13 @@
 ---
 - name:  Download PJSUA
   become: yes
-  shell: 'sudo wget https://www.pjsip.org/release/2.9/pjproject-2.9.tar.bz2'
+  shell: 'wget https://github.com/pjsip/pjproject/archive/2.10.tar.gz'
   args:
     chdir: '/tmp'
 
 - name:  Unzip PJSUA
   become: yes
-  shell: 'sudo tar -xvf pjproject-2.9.tar.bz2'
+  shell: 'tar -xvf 2.10.tar.gz'
   args:
     chdir: '/tmp'
 
@@ -17,12 +17,12 @@
 
 - name:  Install PJSUA
   become: yes
-  shell: 'sudo ./configure && make dep && make && make install'
+  shell: './configure && make dep && make && make install'
   args:
-    chdir: '/tmp/pjproject-2.9'
+    chdir: '/tmp/pjproject-2.10'
 
 - name:  Copy PJSUA into /usr/bin
   become: yes
-  shell: 'sudo mv pjsua-x86_64-unknown-linux-gnu /usr/bin/pjsua'
+  shell: 'mv pjsua-x86_64-unknown-linux-gnu /usr/bin/pjsua'
   args:
-    chdir: '/tmp/pjproject-2.9/pjsip-apps/bin'
+    chdir: '/tmp/pjproject-2.10/pjsip-apps/bin'
