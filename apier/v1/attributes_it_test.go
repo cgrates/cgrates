@@ -41,52 +41,66 @@ var (
 	alsPrfConfigDIR string //run tests for specific configuration
 
 	sTestsAlsPrf = []func(t *testing.T){
+		/*
+			testAttributeSInitCfg,
+			testAttributeSInitDataDb,
+			testAttributeSResetStorDb,
+			testAttributeSStartEngine,
+			testAttributeSRPCConn,
+			testAttributeSLoadFromFolder,
+			testAttributeSGetAttributeForEvent,
+			testAttributeSGetAttributeForEventNotFound,
+			testAttributeSGetAttributeForEventWithMetaAnyContext,
+			testAttributeSProcessEvent,
+			testAttributeSProcessEventNotFound,
+			testAttributeSProcessEventMissing,
+			testAttributeSProcessEventWithNoneSubstitute,
+			testAttributeSProcessEventWithNoneSubstitute2,
+			testAttributeSProcessEventWithNoneSubstitute3,
+			testAttributeSProcessEventWithHeader,
+			testAttributeSGetAttPrfIDs,
+			testAttributeSSetAlsPrfBrokenReference,
+			testAttributeSGetAlsPrfBeforeSet,
+			testAttributeSSetAlsPrf,
+			testAttributeSUpdateAlsPrf,
+			testAttributeSRemAlsPrf,
+			testAttributeSSetAlsPrf2,
+			testAttributeSSetAlsPrf3,
+			testAttributeSSetAlsPrf4,
+			testAttributeSPing,
+			testAttributeSProcessEventWithSearchAndReplace,
+			testAttributeSProcessWithMultipleRuns,
+			testAttributeSProcessWithMultipleRuns2,
+			testAttributeSGetAttributeProfileIDsCount,
+			testAttributeSSetAttributeWithEmptyPath,
+			testAttributeSSetAlsPrfWithoutTenant,
+			testAttributeSRmvAlsPrfWithoutTenant,
+			testAttributeSKillEngine,
+			//start test for cache options
+			testAttributeSInitCfg,
+			testAttributeSInitDataDb,
+			testAttributeSResetStorDb,
+			testAttributeSStartEngine,
+			testAttributeSRPCConn,
+			testAttributeSCachingMetaNone,
+			testAttributeSCachingMetaLoad,
+			testAttributeSCachingMetaReload1,
+			testAttributeSCachingMetaReload2,
+			testAttributeSCachingMetaRemove,
+			testAttributeSCacheOpts,
+			testAttributeSKillEngine,
+		*/
+		//cache test
 		testAttributeSInitCfg,
 		testAttributeSInitDataDb,
 		testAttributeSResetStorDb,
 		testAttributeSStartEngine,
 		testAttributeSRPCConn,
-		testAttributeSLoadFromFolder,
-		testAttributeSGetAttributeForEvent,
-		testAttributeSGetAttributeForEventNotFound,
-		testAttributeSGetAttributeForEventWithMetaAnyContext,
-		testAttributeSProcessEvent,
-		testAttributeSProcessEventNotFound,
-		testAttributeSProcessEventMissing,
-		testAttributeSProcessEventWithNoneSubstitute,
-		testAttributeSProcessEventWithNoneSubstitute2,
-		testAttributeSProcessEventWithNoneSubstitute3,
-		testAttributeSProcessEventWithHeader,
-		testAttributeSGetAttPrfIDs,
-		testAttributeSSetAlsPrfBrokenReference,
-		testAttributeSGetAlsPrfBeforeSet,
-		testAttributeSSetAlsPrf,
-		testAttributeSUpdateAlsPrf,
-		testAttributeSRemAlsPrf,
-		testAttributeSSetAlsPrf2,
-		testAttributeSSetAlsPrf3,
-		testAttributeSSetAlsPrf4,
-		testAttributeSPing,
-		testAttributeSProcessEventWithSearchAndReplace,
-		testAttributeSProcessWithMultipleRuns,
-		testAttributeSProcessWithMultipleRuns2,
-		testAttributeSGetAttributeProfileIDsCount,
-		testAttributeSSetAttributeWithEmptyPath,
-		testAttributeSSetAlsPrfWithoutTenant,
-		testAttributeSRmvAlsPrfWithoutTenant,
-		testAttributeSKillEngine,
-		//start test for cache options
-		testAttributeSInitCfg,
-		testAttributeSInitDataDb,
-		testAttributeSResetStorDb,
-		testAttributeSStartEngine,
-		testAttributeSRPCConn,
-		testAttributeSCachingMetaNone,
-		testAttributeSCachingMetaLoad,
-		testAttributeSCachingMetaReload1,
-		testAttributeSCachingMetaReload2,
-		testAttributeSCachingMetaRemove,
-		testAttributeSCacheOpts,
+		testAttributeSCacheTestProcessEventNotFound,
+		testAttributeSCacheTestSetProfile,
+		testAttributeSCacheTestProcessEventNotFound,
+		testAttributeSCacheTestReload,
+		testAttributeSCacheTestProcessEventFound,
 		testAttributeSKillEngine,
 	}
 )
@@ -1940,5 +1954,88 @@ func testAttributeSRmvAlsPrfWithoutTenant(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ApierTest1"}},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testAttributeSCacheTestProcessEventNotFound(t *testing.T) {
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1007",
+				utils.Destination:  "+491511231234",
+			},
+			APIOpts: map[string]interface{}{},
+		},
+		AttributeIDs: []string{"ATTR_CACHE"},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testAttributeSCacheTestProcessEventFound(t *testing.T) {
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1007",
+				utils.Destination:  "+491511231234",
+			},
+			APIOpts: map[string]interface{}{},
+		},
+		AttributeIDs: []string{"ATTR_CACHE"},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Error(err)
+	}
+}
+
+func testAttributeSCacheTestSetProfile(t *testing.T) {
+	//*none option should not add attribute in cache only in Datamanager
+	attrPrf1 := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:       "ATTR_CACHE",
+			Contexts: []string{utils.MetaSessionS},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field1",
+					Value: config.NewRSRParsersMustCompile("Value1", utils.InfieldSep),
+				},
+			},
+			Weight: 10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+}
+
+func testAttributeSCacheTestReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.AttributeProfileIDs: {"cgrates.org:ATTR_CACHE"},
+		},
+	}
+	var reply string
+	if err := attrSRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
