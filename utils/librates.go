@@ -142,7 +142,35 @@ type RateSIncrement struct {
 
 // Equals compares two RateSIntervals
 func (rIl *RateSInterval) Equals(nRil *RateSInterval) (eq bool) {
-	return // ToDo
+	if rIl.IntervalStart == nil && nRil.IntervalStart != nil ||
+		rIl.IntervalStart != nil && nRil.IntervalStart == nil ||
+		len(rIl.Increments) != len(nRil.Increments) {
+		return
+	}
+	if rIl.IntervalStart.Compare(nRil.IntervalStart) != 0 ||
+		rIl.CompressFactor != nRil.CompressFactor {
+		return
+	}
+	for i, rtIn := range rIl.Increments {
+		if !rtIn.Equals(nRil.Increments[i]) {
+			return
+		}
+	}
+	return true
+}
+
+func (rI *RateSIncrement) Equals(rtIn *RateSIncrement) (eq bool) {
+	if rI.Usage == nil && rtIn.Usage != nil ||
+		rI.Usage != nil && rtIn.Usage == nil ||
+		rI.IncrementStart == nil && rtIn.IncrementStart != nil ||
+		rI.IncrementStart != nil && rtIn.IncrementStart == nil {
+		return
+	}
+	return rI.Usage.Compare(rtIn.Usage) == 0 &&
+		rI.IncrementStart.Compare(rtIn.IncrementStart) == 0 &&
+		rI.CompressFactor == rtIn.CompressFactor &&
+		rI.IntervalRateIndex == rtIn.IntervalRateIndex &&
+		rI.Rate.UID() == rtIn.Rate.UID()
 }
 
 // RateProfileCost is the cost returned by RateS at cost queries

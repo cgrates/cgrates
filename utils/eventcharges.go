@@ -193,7 +193,15 @@ type ChargingInterval struct {
 
 // CompressEquals compares two ChargingIntervals for aproximate equality, ignoring compress field
 func (cIl *ChargingInterval) CompressEquals(nCil *ChargingInterval) (eq bool) {
-	return
+	if len(cIl.Increments) != len(nCil.Increments) {
+		return
+	}
+	for i, chIr := range cIl.Increments {
+		if !chIr.CompressEquals(nCil.Increments[i]) {
+			return
+		}
+	}
+	return true
 }
 
 // ChargingIncrement represents one unit charged inside an interval
@@ -201,6 +209,15 @@ type ChargingIncrement struct {
 	Units           *Decimal // Can differ from AccountCharge due to JoinedCharging
 	AccountChargeID string   // Account charging information
 	CompressFactor  int
+}
+
+func (cI *ChargingIncrement) CompressEquals(chIh *ChargingIncrement) (eq bool) {
+	if cI.Units == nil && chIh.Units != nil ||
+		cI.Units != nil && chIh.Units == nil {
+		return
+	}
+	return cI.Units.Compare(chIh.Units) == 0 &&
+		cI.AccountChargeID == chIh.AccountChargeID
 }
 
 // AccountCharge represents one Account charge
@@ -217,5 +234,43 @@ type AccountCharge struct {
 
 // Equals compares two AccountCharges
 func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
-	return
+	if ac.AttributeIDs == nil && nAc.AttributeIDs != nil ||
+		ac.AttributeIDs != nil && nAc.AttributeIDs == nil ||
+		len(ac.AttributeIDs) != len(nAc.AttributeIDs) {
+		return
+	}
+	for i := range ac.AttributeIDs {
+		if ac.AttributeIDs[i] != nAc.AttributeIDs[i] {
+			return
+		}
+	}
+	if ac.JoinedChargeIDs == nil && nAc.JoinedChargeIDs != nil ||
+		ac.JoinedChargeIDs != nil && nAc.JoinedChargeIDs == nil ||
+		len(ac.JoinedChargeIDs) != len(nAc.JoinedChargeIDs) {
+		return
+	}
+	for i := range ac.JoinedChargeIDs {
+		if ac.JoinedChargeIDs[i] != nAc.JoinedChargeIDs[i] {
+			return
+		}
+	}
+	if ac.AccountID != nAc.AccountID ||
+		ac.BalanceID != nAc.BalanceID ||
+		ac.UnitFactorID != nAc.UnitFactorID ||
+		ac.RatingID != nAc.RatingID {
+		return
+	}
+	if ac.Units == nil && nAc.Units != nil ||
+		ac.Units != nil && nAc.Units == nil {
+		return
+	}
+	if ac.BalanceLimit == nil && nAc.BalanceLimit != nil ||
+		ac.BalanceLimit != nil && nAc.BalanceLimit == nil {
+		return
+	}
+	if ac.Units == nil && nAc.Units == nil ||
+		ac.BalanceLimit == nil && nAc.BalanceLimit == nil {
+		return true
+	}
+	return ac.Units.Compare(nAc.Units) == 0 && ac.BalanceLimit.Compare(nAc.BalanceLimit) == 0
 }

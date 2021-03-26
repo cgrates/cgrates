@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -66,7 +64,6 @@ type concreteBalance struct {
 func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
-	fmt.Printf("debitAbstracts, aUnits: %s, ev: %+v\n", aUnits, cgrEv)
 	// pass the general balance filters
 	var pass bool
 	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
@@ -81,7 +78,6 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 		cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-	fmt.Printf("costIcrm: %+v\n", costIcrm)
 	if ec, err = maxDebitAbstractsFromConcretes(aUnits,
 		cB.acntID, []*concreteBalance{cB},
 		cB.connMgr, cgrEv,
@@ -90,7 +86,6 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 		costIcrm); err != nil {
 		return
 	}
-	fmt.Printf("received ec: %s\n", utils.ToIJSON(ec))
 	return
 }
 

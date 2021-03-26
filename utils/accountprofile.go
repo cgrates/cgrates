@@ -179,7 +179,7 @@ func (uF *UnitFactor) Equals(nUf *UnitFactor) (eq bool) {
 		uF.Factor != nil && nUf.Factor == nil {
 		return
 	}
-	if uF.Factor == nil && nUf == nil {
+	if uF.Factor == nil && nUf.Factor == nil {
 		return true
 	}
 	return uF.Factor.Compare(nUf.Factor) == 0
