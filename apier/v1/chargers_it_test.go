@@ -88,6 +88,18 @@ var (
 		testChargerSSetChargerProfileWithoutTenant,
 		testChargerSRemChargerProfileWithoutTenant,
 		testChargerSKillEngine,
+		//cache test
+		testChargerSInitCfg,
+		testChargerSInitDataDb,
+		testChargerSResetStorDb,
+		testChargerSStartEngine,
+		testChargerSRPCConn,
+		testChargerSCacheTestGetNotFound,
+		testChargerSCacheTestSet,
+		testChargerSCacheTestGetNotFound,
+		testChargerSCacheReload,
+		testChargerSCacheTestGetFound,
+		testChargerSKillEngine,
 	}
 )
 
@@ -648,5 +660,54 @@ func testChargerSRemChargerProfileWithoutTenant(t *testing.T) {
 		&utils.TenantID{ID: "randomID"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testChargerSCacheTestGetNotFound(t *testing.T) {
+	var reply *engine.ChargerProfile
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "CHARGERS_CACHE"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+}
+
+func testChargerSCacheTestGetFound(t *testing.T) {
+	var reply *engine.ChargerProfile
+	if err := chargerRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "CHARGERS_CACHE"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testChargerSCacheTestSet(t *testing.T) {
+	chargerProfile = &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "cgrates.org",
+			ID:     "CHARGERS_CACHE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	var reply string
+	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testChargerSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.ChargerProfileIDs: {"cgrates.org:CHARGERS_CACHE"},
+		},
+	}
+	var reply string
+	if err := chargerRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
