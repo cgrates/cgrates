@@ -44,15 +44,15 @@ func TestAgReqSetFields(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: []string{utils.CGRID}},
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.MetaVoice)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, "1001")
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, "1002")
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}},
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.MetaVoice)
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, "1001")
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, "1002")
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}},
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.MetaPrepaid)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: []string{utils.Usage}}, 3*time.Minute)
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.MetaPrepaid)
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathSlice: []string{utils.Usage}}, 3*time.Minute)
 
 	cgrRply := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
 		utils.CapAttributes: {Type: utils.NMMapType, Map: map[string]*utils.DataNode{
@@ -112,18 +112,18 @@ func TestAgReqSetFields(t *testing.T) {
 	}
 
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.SetAsSlice(&utils.FullPath{Path: utils.Tenant, PathItems: []string{utils.Tenant}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "RequestedUsage", PathItems: []string{"RequestedUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "180", Path: []string{"RequestedUsage"}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "PaypalAccount", PathItems: []string{"PaypalAccount"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathItems: []string{"MaxUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120", Path: []string{"MaxUsage"}}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: utils.Tenant, PathSlice: []string{utils.Tenant}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "RequestedUsage", PathSlice: []string{"RequestedUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "180"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "PaypalAccount", PathSlice: []string{"PaypalAccount"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathSlice: []string{"MaxUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -493,7 +493,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CapMaxUsage, PathItems: []string{utils.CapMaxUsage}}, utils.NewLeafNode("120s"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CapMaxUsage, PathSlice: []string{utils.CapMaxUsage}}, utils.NewLeafNode("120s"))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
 		utils.CapMaxUsage: utils.NewLeafNode(120 * time.Second),
@@ -509,8 +509,8 @@ func TestAgReqMaxCost(t *testing.T) {
 	tplFlds[0].ComputePath()
 	eMp := utils.NewOrderedNavigableMap()
 
-	eMp.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathItems: []string{"MaxUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120", Path: []string{"MaxUsage"}}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathSlice: []string{"MaxUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -736,10 +736,10 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: []string{utils.CGRID}},
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant", Filters: []string{},
@@ -758,11 +758,11 @@ func TestAgReqEmptyFilter(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -777,8 +777,8 @@ func TestAgReqMetaExponent(t *testing.T) {
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "Value", PathItems: []string{"Value"}}, utils.NewLeafNode("2"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "Exponent", PathItems: []string{"Exponent"}}, utils.NewLeafNode("2"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "Value", PathSlice: []string{"Value"}}, utils.NewLeafNode("2"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "Exponent", PathSlice: []string{"Exponent"}}, utils.NewLeafNode("2"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "TestExpo", Filters: []string{},
@@ -788,7 +788,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 	tplFlds[0].ComputePath()
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{"TestExpo"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "200", Path: []string{"TestExpo"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "200"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -804,9 +804,9 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -825,9 +825,9 @@ func TestAgReqFieldAsNone(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(agReq.CGRReply, eMp) {
@@ -842,9 +842,9 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -863,11 +863,11 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(agReq.CGRReply, eMp) {
@@ -882,12 +882,12 @@ func TestAgReqSetField2(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 
@@ -914,15 +914,15 @@ func TestAgReqSetField2(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
 	eMp.Set([]string{"Usage"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "30s", Path: []string{"Usage"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "30s"}}})
 	eMp.Set([]string{"CalculatedUsage"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC), Path: []string{"CalculatedUsage"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -939,10 +939,10 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: []string{utils.Usage}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: 3 * time.Minute}}}})
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: utils.MetaVoice}}}})
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathSlice: []string{utils.Usage}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: 3 * time.Minute}}}})
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: utils.MetaVoice}}}})
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
 
 	path := []string{utils.MetaCgreq, utils.Usage}
 	var expVal interface{}
@@ -987,9 +987,9 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	rply := utils.NewOrderedNavigableMap()
 	rply.Set(&utils.FullPath{
 		Path:      "FirstLevel.SecondLevel.Fld1",
-		PathItems: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
+		PathSlice: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
 	cgrRply := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
-		utils.CapAttributes: &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
+		utils.CapAttributes: {Type: utils.NMMapType, Map: map[string]*utils.DataNode{
 			"PaypalAccount": utils.NewLeafNode("cgrates@paypal.com"),
 		}},
 		utils.CapMaxUsage: utils.NewLeafNode(120 * time.Second),
@@ -1011,10 +1011,10 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 	}
 
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.SetAsSlice(&utils.FullPath{Path: "Fld1", PathItems: []string{"Fld1"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Val1", Path: []string{"Fld1"}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "Fld2", PathItems: []string{"Fld2"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com", Path: []string{"Fld2"}}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "Fld1", PathSlice: []string{"Fld1"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Val1"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "Fld2", PathSlice: []string{"Fld2"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1032,7 +1032,7 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 	rply := utils.NewOrderedNavigableMap()
 	rply.Set(&utils.FullPath{
 		Path:      "FirstLevel.SecondLevel.Fld1",
-		PathItems: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
+		PathSlice: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
 	agReq := NewAgentRequest(nil, nil, nil, rply, nil, nil, "cgrates.org", "", filterS, nil, nil)
 
 	agReq.setCGRReply(nil, utils.ErrNotFound)
@@ -1070,7 +1070,7 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 	rply := utils.NewOrderedNavigableMap()
 	rply.Set(&utils.FullPath{
 		Path:      "FirstLevel.SecondLevel.Fld1",
-		PathItems: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
+		PathSlice: []string{"FirstLevel", "SecondLevel", "Fld1"}}, utils.NewLeafNode("Val1"))
 
 	myEv := myEv{
 		utils.CapAttributes: &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
@@ -1097,10 +1097,10 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.SetAsSlice(&utils.FullPath{Path: "Fld1", PathItems: []string{"Fld1"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Val1", Path: []string{"Fld1"}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "Fld2", PathItems: []string{"Fld2"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com", Path: []string{"Fld2"}}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "Fld1", PathSlice: []string{"Fld1"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "Val1"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "Fld2", PathSlice: []string{"Fld2"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1509,12 +1509,12 @@ func TestAgReqOverwrite(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 
@@ -1561,12 +1561,12 @@ func TestAgReqGroupType(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 
@@ -1604,7 +1604,7 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -1619,9 +1619,9 @@ func TestAgReqSetFieldsInTmp(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1636,7 +1636,7 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "IP", PathItems: []string{"IP"}}, utils.NewLeafNode("62.87.114.244"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "IP", PathSlice: []string{"IP"}}, utils.NewLeafNode("62.87.114.244"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "IP",
@@ -1648,7 +1648,7 @@ func TestAgReqSetFieldsIp2Hex(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{"IP"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0x3e5772f4", Path: []string{"IP"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0x3e5772f4"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1663,7 +1663,7 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "CustomField", PathItems: []string{"CustomField"}}, utils.NewLeafNode(string([]byte{0x94, 0x71, 0x02, 0x31, 0x01, 0x59})))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "CustomField", PathSlice: []string{"CustomField"}}, utils.NewLeafNode(string([]byte{0x94, 0x71, 0x02, 0x31, 0x01, 0x59})))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "CustomField",
@@ -1675,7 +1675,7 @@ func TestAgReqSetFieldsString2Hex(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{"CustomField"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0x947102310159", Path: []string{"CustomField"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "0x947102310159"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1691,18 +1691,18 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathItems: []string{utils.CGRID}},
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathItems: []string{utils.Usage}}, utils.NewLeafNode(3*time.Minute))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathSlice: []string{utils.Usage}}, utils.NewLeafNode(3*time.Minute))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
-		utils.CapAttributes: &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
+		utils.CapAttributes: {Type: utils.NMMapType, Map: map[string]*utils.DataNode{
 			"PaypalAccount": utils.NewLeafNode("cgrates@paypal.com"),
 		}},
 		utils.CapMaxUsage: utils.NewLeafNode(120 * time.Second),
@@ -1756,18 +1756,18 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 		v.ComputePath()
 	}
 	eMp := utils.NewOrderedNavigableMap()
-	eMp.SetAsSlice(&utils.FullPath{Path: utils.Tenant, PathItems: []string{utils.Tenant}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "RequestedUsage", PathItems: []string{"RequestedUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "180", Path: []string{"RequestedUsage"}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "PaypalAccount", PathItems: []string{"PaypalAccount"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"}}}})
-	eMp.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathItems: []string{"MaxUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120", Path: []string{"MaxUsage"}}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: utils.Tenant, PathSlice: []string{utils.Tenant}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "RequestedUsage", PathSlice: []string{"RequestedUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "180"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "PaypalAccount", PathSlice: []string{"PaypalAccount"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com"}}})
+	eMp.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathSlice: []string{"MaxUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -1785,14 +1785,14 @@ func TestAgReqSetFieldsWithRemove(t *testing.T) {
 		v.ComputePath()
 	}
 	eMpRemove := utils.NewOrderedNavigableMap()
-	eMpRemove.SetAsSlice(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
-	eMpRemove.SetAsSlice(&utils.FullPath{Path: "RequestedUsage", PathItems: []string{"RequestedUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "180", Path: []string{"RequestedUsage"}}}})
-	eMpRemove.SetAsSlice(&utils.FullPath{Path: "PaypalAccount", PathItems: []string{"PaypalAccount"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"}}}})
-	eMpRemove.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathItems: []string{"MaxUsage"}}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120", Path: []string{"MaxUsage"}}}})
+	eMpRemove.SetAsSlice(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
+	eMpRemove.SetAsSlice(&utils.FullPath{Path: "RequestedUsage", PathSlice: []string{"RequestedUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "180"}}})
+	eMpRemove.SetAsSlice(&utils.FullPath{Path: "PaypalAccount", PathSlice: []string{"PaypalAccount"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates@paypal.com"}}})
+	eMpRemove.SetAsSlice(&utils.FullPath{Path: "MaxUsage", PathSlice: []string{"MaxUsage"}}, []*utils.DataNode{
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "120"}}})
 
 	if err := agReq.SetFields(tplFldsRemove); err != nil {
 		t.Error(err)
@@ -1819,7 +1819,7 @@ func TestAgReqSetFieldsInCache(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	engine.NewCacheS(cfg, dm, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -1862,7 +1862,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = time.Second
 	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 
 	tplFlds := []*config.FCTemplate{
 		{Tag: "Tenant",
@@ -1986,15 +1986,15 @@ func TestAgReqDynamicPath(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE1", PathItems: []string{"Routes", "CGR_ROUTE1"}}, utils.NewLeafNode(1001))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE2", PathItems: []string{"Routes", "CGR_ROUTE2"}}, utils.NewLeafNode(1002))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: "BestRoute", PathItems: []string{"BestRoute"}}, utils.NewLeafNode("ROUTE1"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE1", PathSlice: []string{"Routes", "CGR_ROUTE1"}}, utils.NewLeafNode(1001))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "Routes.CGR_ROUTE2", PathSlice: []string{"Routes", "CGR_ROUTE2"}}, utils.NewLeafNode(1002))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "BestRoute", PathSlice: []string{"BestRoute"}}, utils.NewLeafNode("ROUTE1"))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	val1, err := config.NewRSRParsersFromSlice([]string{"~*cgreq.Routes.<CGR_;~*cgreq.BestRoute>"})
@@ -2028,17 +2028,17 @@ func TestAgReqDynamicPath(t *testing.T) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	eMp.Set([]string{utils.Destination}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{utils.Destination}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
 	eMp.Set([]string{"Usage"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "30s", Path: []string{"Usage"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "30s"}}})
 	eMp.Set([]string{"Route"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{"Route"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	eMp.Set([]string{"Route2", "CGR_ROUTE1"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002", Path: []string{"Route2", "CGR_ROUTE1"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1002"}}})
 
 	if err := agReq.SetFields(tplFlds); err != nil {
 		t.Error(err)
@@ -2054,13 +2054,13 @@ func TestAgReqRoundingDecimals(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Cost, PathItems: []string{utils.Cost}}, utils.NewLeafNode(12.12645))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Cost, PathSlice: []string{utils.Cost}}, utils.NewLeafNode(12.12645))
 
 	agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 
@@ -2120,22 +2120,22 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	}
 	eMp := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	eMp.Set([]string{utils.Tenant}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org", Path: []string{utils.Tenant}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "cgrates.org"}}})
 	eMp.Set([]string{utils.AccountField, "0", "ID"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001", Path: []string{utils.AccountField + "[0]", "ID"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1001"}}})
 	eMp.Set([]string{utils.AccountField, "1", "ID"}, []*utils.DataNode{
-		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1003", Path: []string{utils.AccountField + "[1]", "ID"}}}})
+		{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: "1003"}}})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 		// populate request, emulating the way will be done in HTTPAgent
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathItems: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathItems: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathItems: []string{utils.Destination}}, utils.NewLeafNode("1002"))
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathItems: []string{utils.AnswerTime}}, utils.NewLeafNode(
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, utils.NewLeafNode(utils.MetaVoice))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(
 			time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)))
-		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathItems: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
+		agReq.CGRRequest.Set(&utils.FullPath{Path: utils.RequestType, PathSlice: []string{utils.RequestType}}, utils.NewLeafNode(utils.MetaPrepaid))
 		agReq.CGRReply = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 
 		if err := agReq.SetFields(tplFlds); err != nil {

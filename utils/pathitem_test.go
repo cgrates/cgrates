@@ -53,20 +53,9 @@ func TestStripIdxFromLastPathElm(t *testing.T) {
 	}
 }
 
-func TestGetPathWithoutIndex(t *testing.T) {
-	expected := "field"
-	if rply := GetPathWithoutIndex("field[index]"); expected != rply {
-		t.Errorf("Expected: %s, received: %s", expected, rply)
-	}
-	expected = "field[index"
-	if rply := GetPathWithoutIndex("field[index"); expected != rply {
-		t.Errorf("Expected: %s, received: %s", expected, rply)
-	}
-}
-
 func TestNewFullPath(t *testing.T) {
 	expected := &FullPath{
-		PathItems: []string{"test", "path"},
+		PathSlice: []string{"test", "path"},
 		Path:      "test.path",
 	}
 	if rcv := NewFullPath("test.path"); !reflect.DeepEqual(rcv, expected) {

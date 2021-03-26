@@ -54,7 +54,6 @@ func writeFailedPosts(itmID string, value interface{}) {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write file <%s> because <%s>",
 			utils.CDRs, filePath, err))
 	}
-	return
 }
 
 func AddFailedPost(expPath, format, module string, ev interface{}, opts map[string]interface{}) {

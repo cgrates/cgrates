@@ -90,7 +90,7 @@ func (aL *actCDRLog) execute(_ context.Context, data utils.MapStorage, _ string)
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
-			CGREvent: *config.NMAsCGREvent(cdrLogReq.OrdNavMP[utils.MetaCDR], cdrLogReq.Tenant,
+			CGREvent: *utils.NMAsCGREvent(cdrLogReq.OrdNavMP[utils.MetaCDR], cdrLogReq.Tenant,
 				utils.NestingSep, optsMS),
 		}, &rply)
 }

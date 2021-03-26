@@ -226,7 +226,6 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) {
 	if jsonItm.Api_key != nil {
 		itm.APIKey = *jsonItm.Api_key
 	}
-	return
 }
 
 // Clone returns a deep copy of ItemOpt

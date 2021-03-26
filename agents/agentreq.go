@@ -172,7 +172,7 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 		case utils.MetaNone:
 		case utils.MetaRemove:
 			if err = ar.Remove(&utils.FullPath{
-				PathItems: tplFld.GetPathItems(),
+				PathSlice: tplFld.GetPathSlice(),
 				Path:      tplFld.Path,
 			}); err != nil {
 				return
@@ -195,20 +195,16 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				return
 			}
 			var fullPath *utils.FullPath
-			var itmPath []string
 			if fullPath, err = utils.GetFullFieldPath(tplFld.Path, ar); err != nil {
 				return
 			} else if fullPath == nil { // no dynamic path
 				fullPath = &utils.FullPath{
-					PathItems: utils.CloneStringSlice(tplFld.GetPathItems()), // need to clone so me do not modify the template
+					PathSlice: utils.CloneStringSlice(tplFld.GetPathSlice()), // need to clone so me do not modify the template
 					Path:      tplFld.Path,
 				}
-				itmPath = tplFld.GetPathSlice()[1:]
-			} else {
-				itmPath = fullPath.PathItems[1:]
 			}
 
-			nMItm := &utils.DataLeaf{Data: out, Path: itmPath, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
+			nMItm := &utils.DataLeaf{Data: out, NewBranch: tplFld.NewBranch, AttributeID: tplFld.AttributeID}
 			switch tplFld.Type {
 			case utils.MetaComposed:
 				err = ar.Compose(fullPath, nMItm)
@@ -230,35 +226,35 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 
 // Set implements utils.NMInterface
 func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf) (err error) {
-	switch fullPath.PathItems[0] {
+	switch fullPath.PathSlice[0] {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0])
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathSlice[0])
 	case utils.MetaVars:
-		_, err = ar.Vars.Set(fullPath.PathItems[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		_, err = ar.Vars.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 		return
 	case utils.MetaCgreq:
 		return ar.CGRRequest.SetAsSlice(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[7:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaCgrep:
-		_, err = ar.CGRReply.Set(fullPath.PathItems[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		_, err = ar.CGRReply.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 		return
 	case utils.MetaRep:
 		return ar.Reply.SetAsSlice(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[5:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaDiamreq:
 		return ar.diamreq.SetAsSlice(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaTmp:
-		_, err = ar.tmp.Set(fullPath.PathItems[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+		_, err = ar.tmp.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 		return
 	case utils.MetaOpts:
-		return ar.Opts.Set(fullPath.PathItems[1:], nm.Data)
+		return ar.Opts.Set(fullPath.PathSlice[1:], nm.Data)
 	case utils.MetaUCH:
 		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm.Data, nil, true, utils.NonTransactional)
 	}
@@ -291,32 +287,32 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 
 // Remove deletes the fields found at path with the given prefix
 func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
-	switch fullPath.PathItems[0] {
+	switch fullPath.PathSlice[0] {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathItems[0])
+		return fmt.Errorf("unsupported field prefix: <%s> when set fields", fullPath.PathSlice[0])
 	case utils.MetaVars:
-		return ar.Vars.Remove(utils.CloneStringSlice(fullPath.PathItems[1:]))
+		return ar.Vars.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
 	case utils.MetaCgreq:
 		return ar.CGRRequest.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[7:],
 		})
 	case utils.MetaCgrep:
-		return ar.CGRReply.Remove(utils.CloneStringSlice(fullPath.PathItems[1:]))
+		return ar.CGRReply.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
 	case utils.MetaRep:
 		return ar.Reply.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[5:],
 		})
 	case utils.MetaDiamreq:
 		return ar.diamreq.Remove(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		})
 	case utils.MetaTmp:
-		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathItems[1:]))
+		return ar.tmp.Remove(utils.CloneStringSlice(fullPath.PathSlice[1:]))
 	case utils.MetaOpts:
-		return ar.Opts.Remove(fullPath.PathItems[1:])
+		return ar.Opts.Remove(fullPath.PathSlice[1:])
 	case utils.MetaUCH:
 		return engine.Cache.Remove(utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
 	}
@@ -498,38 +494,38 @@ func needsMaxUsage(ralsFlags utils.FlagParams) bool {
 			ralsFlags.Has(utils.MetaUpdate))
 }
 
-// Set sets the value at the given path
+// Append sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
-	switch fullPath.PathItems[0] {
+	switch fullPath.PathSlice[0] {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0])
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathSlice[0])
 	case utils.MetaVars:
-		_, err = ar.Vars.Append(fullPath.PathItems[1:], val)
+		_, err = ar.Vars.Append(fullPath.PathSlice[1:], val)
 		return
 	case utils.MetaCgreq:
 		return ar.CGRRequest.Append(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[7:],
 		}, val)
 	case utils.MetaCgrep:
-		_, err = ar.CGRReply.Append(fullPath.PathItems[1:], val)
+		_, err = ar.CGRReply.Append(fullPath.PathSlice[1:], val)
 		return
 	case utils.MetaRep:
 		return ar.Reply.Append(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[5:],
 		}, val)
 	case utils.MetaDiamreq:
 		return ar.diamreq.Append(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, val)
 	case utils.MetaTmp:
-		_, err = ar.tmp.Append(fullPath.PathItems[1:], val)
+		_, err = ar.tmp.Append(fullPath.PathSlice[1:], val)
 		return
 	case utils.MetaOpts:
-		return ar.Opts.Set(fullPath.PathItems[1:], val.Data)
+		return ar.Opts.Set(fullPath.PathSlice[1:], val.Data)
 	case utils.MetaUCH:
 		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	}
@@ -538,33 +534,33 @@ func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (e
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
-	switch fullPath.PathItems[0] {
+	switch fullPath.PathSlice[0] {
 	default:
-		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathItems[0])
+		return fmt.Errorf("unsupported field prefix: <%s> when set field", fullPath.PathSlice[0])
 	case utils.MetaVars:
-		return ar.Vars.Compose(fullPath.PathItems[1:], val)
+		return ar.Vars.Compose(fullPath.PathSlice[1:], val)
 	case utils.MetaCgreq:
 		return ar.CGRRequest.Compose(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[7:],
 		}, val)
 	case utils.MetaCgrep:
-		return ar.CGRReply.Compose(fullPath.PathItems[1:], val)
+		return ar.CGRReply.Compose(fullPath.PathSlice[1:], val)
 	case utils.MetaRep:
 		return ar.Reply.Compose(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[5:],
 		}, val)
 	case utils.MetaDiamreq:
 		return ar.diamreq.Compose(&utils.FullPath{
-			PathItems: fullPath.PathItems[1:],
+			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, val)
 	case utils.MetaTmp:
-		return ar.tmp.Compose(fullPath.PathItems[1:], val)
+		return ar.tmp.Compose(fullPath.PathSlice[1:], val)
 	case utils.MetaOpts:
 		var prv interface{}
-		if prv, err = ar.Opts.FieldAsInterface(fullPath.PathItems[1:]); err != nil {
+		if prv, err = ar.Opts.FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -572,7 +568,7 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 		} else {
 			prv = utils.IfaceAsString(prv) + utils.IfaceAsString(val.Data)
 		}
-		return ar.Opts.Set(fullPath.PathItems[1:], prv)
+		return ar.Opts.Set(fullPath.PathSlice[1:], prv)
 
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]

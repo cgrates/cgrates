@@ -1015,8 +1015,8 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 		}
 		pfrOk := true
 		for i := range rcv[0].Prefixes {
-			found1, _ := prfs[rcv[0].Prefixes[i]]
-			found2, _ := prfs[rcv[1].Prefixes[i]]
+			found1 := prfs[rcv[0].Prefixes[i]]
+			found2 := prfs[rcv[1].Prefixes[i]]
 			if !found1 && !found2 {
 				pfrOk = false
 			}
@@ -1045,8 +1045,8 @@ func testStorDBitCRUDTpDestinations(t *testing.T) {
 		}
 		pfrOk := true
 		for i := range rcv[0].Prefixes {
-			found1, _ := prfs[rcv[0].Prefixes[i]]
-			found2, _ := prfs[rcv[1].Prefixes[i]]
+			found1 := prfs[rcv[0].Prefixes[i]]
+			found2 := prfs[rcv[1].Prefixes[i]]
 			if !found1 && !found2 {
 				pfrOk = false
 			}

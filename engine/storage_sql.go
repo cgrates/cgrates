@@ -184,7 +184,7 @@ func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 			for _, d := range distinct[1:] {
 				qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.Search)
 			}
-			qry += fmt.Sprintf(")")
+			qry += ")"
 		}
 		if pagination.Paginator != nil {
 			if pagination.Limit != nil { // Keep Postgres compatibility by adding offset only when limit defined
@@ -206,7 +206,10 @@ func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one
 
-		cols, err := rows.Columns()            // Get the column names; remember to check err
+		cols, err := rows.Columns() // Get the column names; remember to check err
+		if err != nil {
+			return nil, err
+		}
 		vals := make([]string, len(cols))      // Allocate enough values
 		ints := make([]interface{}, len(cols)) // Make a slice of []interface{}
 		for i := range ints {
@@ -312,7 +315,7 @@ func (sqls *SQLStorage) SetTPRates(rs []*utils.TPRateRALs) error {
 	m := make(map[string]bool)
 	tx := sqls.db.Begin()
 	for _, rate := range rs {
-		if found, _ := m[rate.ID]; !found {
+		if !m[rate.ID] {
 			m[rate.ID] = true
 			if err := tx.Where(&RateMdl{Tpid: rate.TPid, Tag: rate.ID}).Delete(RateMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -337,7 +340,7 @@ func (sqls *SQLStorage) SetTPDestinationRates(drs []*utils.TPDestinationRate) er
 	m := make(map[string]bool)
 	tx := sqls.db.Begin()
 	for _, dRate := range drs {
-		if found, _ := m[dRate.ID]; !found {
+		if !m[dRate.ID] {
 			m[dRate.ID] = true
 			if err := tx.Where(&DestinationRateMdl{Tpid: dRate.TPid, Tag: dRate.ID}).Delete(DestinationRateMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -362,7 +365,7 @@ func (sqls *SQLStorage) SetTPRatingPlans(rps []*utils.TPRatingPlan) error {
 	m := make(map[string]bool)
 	tx := sqls.db.Begin()
 	for _, rPlan := range rps {
-		if found, _ := m[rPlan.ID]; !found {
+		if !m[rPlan.ID] {
 			m[rPlan.ID] = true
 			if err := tx.Where(&RatingPlanMdl{Tpid: rPlan.TPid, Tag: rPlan.ID}).Delete(RatingPlanMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -410,7 +413,7 @@ func (sqls *SQLStorage) SetTPSharedGroups(sgs []*utils.TPSharedGroups) error {
 	m := make(map[string]bool)
 	tx := sqls.db.Begin()
 	for _, sGroup := range sgs {
-		if found, _ := m[sGroup.ID]; !found {
+		if !m[sGroup.ID] {
 			m[sGroup.ID] = true
 			if err := tx.Where(&SharedGroupMdl{Tpid: sGroup.TPid, Tag: sGroup.ID}).Delete(SharedGroupMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -435,7 +438,7 @@ func (sqls *SQLStorage) SetTPActions(acts []*utils.TPActions) error {
 	m := make(map[string]bool)
 	tx := sqls.db.Begin()
 	for _, a := range acts {
-		if found, _ := m[a.ID]; !found {
+		if !m[a.ID] {
 			m[a.ID] = true
 			if err := tx.Where(&ActionMdl{Tpid: a.TPid, Tag: a.ID}).Delete(ActionMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -461,7 +464,7 @@ func (sqls *SQLStorage) SetTPActionPlans(ats []*utils.TPActionPlan) error {
 
 	tx := sqls.db.Begin()
 	for _, aPlan := range ats {
-		if found, _ := m[aPlan.ID]; !found {
+		if !m[aPlan.ID] {
 			m[aPlan.ID] = true
 			if err := tx.Where(&ActionPlanMdl{Tpid: aPlan.TPid, Tag: aPlan.ID}).Delete(ActionPlanMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -486,7 +489,7 @@ func (sqls *SQLStorage) SetTPActionTriggers(ats []*utils.TPActionTriggers) error
 	m := make(map[string]bool)
 	tx := sqls.db.Begin()
 	for _, aTrigger := range ats {
-		if found, _ := m[aTrigger.ID]; !found {
+		if !m[aTrigger.ID] {
 			m[aTrigger.ID] = true
 			if err := tx.Where(&ActionTriggerMdl{Tpid: aTrigger.TPid, Tag: aTrigger.ID}).Delete(ActionTriggerMdl{}).Error; err != nil {
 				tx.Rollback()
@@ -513,7 +516,7 @@ func (sqls *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error
 
 	tx := sqls.db.Begin()
 	for _, aa := range aas {
-		if found, _ := m[aa.GetId()]; !found {
+		if !m[aa.GetId()] {
 			m[aa.GetId()] = true
 			if err := tx.Where(&AccountActionMdl{Tpid: aa.TPid, Loadid: aa.LoadId, Tenant: aa.Tenant, Account: aa.Account}).Delete(&AccountActionMdl{}).Error; err != nil {
 				tx.Rollback()

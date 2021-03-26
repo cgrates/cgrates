@@ -31,7 +31,7 @@ import (
 func TestNewCaps(t *testing.T) {
 	exp := &Caps{
 		strategy: utils.MetaBusy,
-		aReqs:    make(chan struct{}, 0),
+		aReqs:    make(chan struct{}),
 	}
 	cs := NewCaps(0, utils.MetaBusy)
 
@@ -74,7 +74,7 @@ func TestCapsStats(t *testing.T) {
 	stopChan = make(chan struct{}, 1)
 	go func() {
 		runtime.Gosched()
-		time.Sleep(100)
+		time.Sleep(100 * time.Nanosecond)
 		close(stopChan)
 	}()
 	cr = NewCaps(10, utils.MetaBusy)

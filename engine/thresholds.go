@@ -156,7 +156,6 @@ func (tS *ThresholdService) Shutdown() {
 	close(tS.stopBackup)
 	tS.storeThresholds()
 	utils.Logger.Info("<ThresholdS> shutdown complete")
-	return
 }
 
 // backup will regularly store resources changed to dataDB

@@ -301,7 +301,10 @@ func (rs *RedisStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error)
 }
 
 func (rs *RedisStorage) SetRatingPlanDrv(rp *RatingPlan) (err error) {
-	result, err := rs.ms.Marshal(rp)
+	var result []byte
+	if result, err = rs.ms.Marshal(rp); err != nil {
+		return
+	}
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
 	w.Write(result)

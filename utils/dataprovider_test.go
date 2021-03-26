@@ -83,7 +83,7 @@ func TestAppendNavMapVal(t *testing.T) {
 		"Field3": {Type: NMMapType, Map: map[string]*DataNode{"Field4": NewLeafNode("Val")}},
 		"Field5": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode(10), NewLeafNode(101), NewLeafNode(18)}},
 	}}
-	if err := onm.Append(&FullPath{Path: "Field5", PathItems: []string{"Field5"}}, NewLeafNode(18).Value); err != nil {
+	if err := onm.Append(&FullPath{Path: "Field5", PathSlice: []string{"Field5"}}, NewLeafNode(18).Value); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, onm.nm) {
 		t.Errorf("Expected %v ,received: %v", expected, onm.nm)
@@ -101,14 +101,14 @@ func TestComposeNavMapVal(t *testing.T) {
 		"Field5": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode(10), NewLeafNode(101)}},
 	}}
 	onm.nm = nm
-	if err := onm.Compose(&FullPath{Path: "Field4", PathItems: []string{"Field4", "10"}}, NewLeafNode(18).Value); err != ErrNotFound {
+	if err := onm.Compose(&FullPath{Path: "Field4", PathSlice: []string{"Field4", "10"}}, NewLeafNode(18).Value); err != ErrNotFound {
 		t.Error(err)
 	}
 	expected := &DataNode{Type: NMMapType, Map: map[string]*DataNode{
 		"Field4": {Type: NMSliceType, Slice: []*DataNode{}},
 		"Field5": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode(10), NewLeafNode("10118")}},
 	}}
-	if err := onm.Compose(&FullPath{Path: "Field5", PathItems: []string{"Field5"}}, NewLeafNode(18).Value); err != nil {
+	if err := onm.Compose(&FullPath{Path: "Field5", PathSlice: []string{"Field5"}}, NewLeafNode(18).Value); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)
@@ -119,7 +119,7 @@ func TestComposeNavMapVal(t *testing.T) {
 		"Field5": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode(10), NewLeafNode("10118")}},
 		"Field6": {Type: NMSliceType, Slice: []*DataNode{NewLeafNode(10)}},
 	}}
-	if err := onm.Compose(&FullPath{Path: "Field6", PathItems: []string{"Field6"}}, NewLeafNode(10).Value); err != nil {
+	if err := onm.Compose(&FullPath{Path: "Field6", PathSlice: []string{"Field6"}}, NewLeafNode(10).Value); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, nm) {
 		t.Errorf("Expected %v ,received: %v", expected, nm)

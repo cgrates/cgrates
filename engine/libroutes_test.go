@@ -1017,7 +1017,7 @@ func TestSortedRouteAsNavigableMap(t *testing.T) {
 		Map: map[string]*utils.DataNode{
 			utils.RouteID:         utils.NewLeafNode("ROUTE1"),
 			utils.RouteParameters: utils.NewLeafNode("SORTING_PARAMETER"),
-			utils.SortingData: &utils.DataNode{
+			utils.SortingData: {
 				Type: utils.NMMapType,
 				Map: map[string]*utils.DataNode{
 					utils.Ratio:  utils.NewLeafNode(6.0),
@@ -1062,15 +1062,15 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 		Map: map[string]*utils.DataNode{
 			utils.ProfileID: utils.NewLeafNode("TEST_ID1"),
 			utils.Sorting:   utils.NewLeafNode(utils.MetaWeight),
-			utils.CapRoutes: &utils.DataNode{
+			utils.CapRoutes: {
 				Type: utils.NMSliceType,
 				Slice: []*utils.DataNode{
-					&utils.DataNode{
+					{
 						Type: utils.NMMapType,
 						Map: map[string]*utils.DataNode{
 							utils.RouteID:         utils.NewLeafNode("ROUTE1"),
 							utils.RouteParameters: utils.NewLeafNode("SORTING_PARAMETER"),
-							utils.SortingData: &utils.DataNode{
+							utils.SortingData: {
 								Type: utils.NMMapType,
 								Map: map[string]*utils.DataNode{
 									utils.Ratio:  utils.NewLeafNode(6.0),
@@ -1080,12 +1080,12 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 							},
 						},
 					},
-					&utils.DataNode{
+					{
 						Type: utils.NMMapType,
 						Map: map[string]*utils.DataNode{
 							utils.RouteID:         utils.NewLeafNode("ROUTE2"),
 							utils.RouteParameters: utils.NewLeafNode("SORTING_PARAMETER_SECOND"),
-							utils.SortingData: &utils.DataNode{
+							utils.SortingData: {
 								Type: utils.NMMapType,
 								Map: map[string]*utils.DataNode{
 									utils.Ratio: utils.NewLeafNode(7.0),

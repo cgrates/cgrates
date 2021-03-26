@@ -63,7 +63,7 @@ func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 		} else {
 			w.WriteHeader(500)
 		}
-		fmt.Fprintf(w, err.Error())
+		w.Write([]byte(err.Error()))
 		return
 	}
 	switch mode := fi.Mode(); {
@@ -72,7 +72,6 @@ func HandlerConfigS(w http.ResponseWriter, r *http.Request) {
 	case mode.IsRegular():
 		handleConfigSFile(pth, w)
 	}
-	return
 }
 
 func handleConfigSFolder(path string, w http.ResponseWriter) {
@@ -80,7 +79,7 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 	cfg, err := newCGRConfigFromPathWithoutEnv(path)
 	if err != nil {
 		w.WriteHeader(500)
-		fmt.Fprintf(w, err.Error())
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -89,7 +88,6 @@ func handleConfigSFolder(path string, w http.ResponseWriter) {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
 			utils.ConfigSv1, err))
 	}
-	return
 }
 
 func handleConfigSFile(path string, w http.ResponseWriter) {
@@ -97,14 +95,13 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 	dat, err := os.ReadFile(path)
 	if err != nil {
 		w.WriteHeader(500)
-		fmt.Fprintf(w, err.Error())
+		w.Write([]byte(err.Error()))
 		return
 	}
 	if _, err := w.Write(dat); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
 			utils.ConfigSv1, err))
 	}
-	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}

@@ -299,8 +299,7 @@ func TestMapEventAsMapString(t *testing.T) {
 	if rply := mapEv.AsMapString(mpIgnore); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	var mp MapEvent
-	mp = nil
+	var mp MapEvent = nil
 	if rply := mp.AsMapString(nil); !reflect.DeepEqual(map[string]string{}, rply) {
 		t.Errorf("Expecting %+v, received: %+v", map[string]string{}, rply)
 	}
@@ -770,10 +769,8 @@ func TestMapEventGetDurationPtrOrDefault(t *testing.T) {
 }
 
 func TestMapEventCloneError(t *testing.T) {
-	testStruct := MapEvent{}
-	testStruct = nil
-	exp := MapEvent{}
-	exp = nil
+	var testStruct MapEvent = nil
+	var exp MapEvent = nil
 	result := testStruct.Clone()
 	if !reflect.DeepEqual(result, exp) {
 		t.Errorf("Expected: %+v, received: %+v", exp, result)

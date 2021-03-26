@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -35,11 +34,9 @@ func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	}
 	if jsnCfg.Path != nil {
 		fcTmp.Path = *jsnCfg.Path
-		fcTmp.pathSlice = strings.Split(*jsnCfg.Path, utils.NestingSep)
-		fcTmp.pathItems = utils.CompilePathSlice(fcTmp.pathSlice)
+		fcTmp.pathSlice = utils.CompilePath(fcTmp.Path)
 		fcTmp.Tag = fcTmp.Path
 	}
-	fcTmp.Tag = fcTmp.Path
 	if jsnCfg.Tag != nil {
 		fcTmp.Tag = *jsnCfg.Tag
 	}
@@ -118,8 +115,7 @@ type FCTemplate struct {
 	RoundingDecimals *int
 	MaskDestID       string
 	MaskLen          int
-	pathItems        []string // Field identifier
-	pathSlice        []string // Used when we set a NMItem to not recreate this slice for every itemsc
+	pathSlice        []string // Field identifier
 }
 
 // FCTemplatesFromFCTemplatesJSONCfg will build a list of FCTemplates from json
@@ -191,9 +187,6 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 	if fc.pathSlice != nil {
 		cln.pathSlice = utils.CloneStringSlice(fc.pathSlice)
 	}
-	if fc.pathItems != nil {
-		cln.pathItems = utils.CloneStringSlice(fc.pathItems)
-	}
 	if fc.Filters != nil {
 		cln.Filters = utils.CloneStringSlice(fc.Filters)
 	}
@@ -242,19 +235,19 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]interface{
 	if fc.Padding != utils.EmptyString {
 		mp[utils.PaddingCfg] = fc.Padding
 	}
-	if fc.Mandatory != false {
+	if fc.Mandatory {
 		mp[utils.MandatoryCfg] = fc.Mandatory
 	}
 	if fc.AttributeID != utils.EmptyString {
 		mp[utils.AttributeIDCfg] = fc.AttributeID
 	}
-	if fc.NewBranch != false {
+	if fc.NewBranch {
 		mp[utils.NewBranchCfg] = fc.NewBranch
 	}
 	if fc.Timezone != utils.EmptyString {
 		mp[utils.TimezoneCfg] = fc.Timezone
 	}
-	if fc.Blocker != false {
+	if fc.Blocker {
 		mp[utils.BlockerCfg] = fc.Blocker
 	}
 	if fc.Layout != time.RFC3339 {
@@ -280,15 +273,9 @@ func (fc *FCTemplate) GetPathSlice() []string {
 	return fc.pathSlice
 }
 
-// GetPathItems returns the cached path as PathItems
-func (fc *FCTemplate) GetPathItems() []string {
-	return fc.pathItems
-}
-
 // ComputePath used in test to populate private fields used to store the path
 func (fc *FCTemplate) ComputePath() {
-	fc.pathSlice = strings.Split(fc.Path, utils.NestingSep)
-	fc.pathItems = utils.CompilePathSlice(fc.pathSlice)
+	fc.pathSlice = utils.CompilePath(fc.Path)
 }
 
 // Clone returns a deep copy of FcTemplates

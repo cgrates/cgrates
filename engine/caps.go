@@ -68,7 +68,6 @@ func (cR *Caps) Allocate() (err error) {
 // Deallocate will free a channel for the API call
 func (cR *Caps) Deallocate() {
 	<-cR.aReqs
-	return
 }
 
 // NewCapsStats returns the stats for the caps

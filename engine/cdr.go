@@ -354,11 +354,13 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
 		outVal = dtFld.Format(cfgFld.Layout)
 	case utils.MetaHTTPPost:
 		var outValByte []byte
-		httpAddr, err := cfgFld.Value.ParseValue(utils.EmptyString)
+		var httpAddr string
+		httpAddr, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		if err != nil {
 			return "", err
 		}
-		jsn, err := json.Marshal(cdr)
+		var jsn []byte
+		jsn, err = json.Marshal(cdr)
 		if err != nil {
 			return "", err
 		}
@@ -525,41 +527,41 @@ type UsageRecord struct {
 	ExtraFields map[string]string
 }
 
-func (self *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*CallDescriptor, error) {
+func (uR *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
-		CgrID:               self.GetId(),
-		ToR:                 self.ToR,
-		Tenant:              self.Tenant,
-		Category:            self.Category,
-		Subject:             self.Subject,
-		Account:             self.Account,
-		Destination:         self.Destination,
+		CgrID:               uR.GetId(),
+		ToR:                 uR.ToR,
+		Tenant:              uR.Tenant,
+		Category:            uR.Category,
+		Subject:             uR.Subject,
+		Account:             uR.Account,
+		Destination:         uR.Destination,
 		DenyNegativeAccount: denyNegative,
 	}
-	timeStr := self.AnswerTime
+	timeStr := uR.AnswerTime
 	if len(timeStr) == 0 { // In case of auth, answer time will not be defined, so take it out of setup one
-		timeStr = self.SetupTime
+		timeStr = uR.SetupTime
 	}
 	if cd.TimeStart, err = utils.ParseTimeDetectLayout(timeStr, timezone); err != nil {
 		return nil, err
 	}
-	if usage, err := utils.ParseDurationWithNanosecs(self.Usage); err != nil {
+	if usage, err := utils.ParseDurationWithNanosecs(uR.Usage); err != nil {
 		return nil, err
 	} else {
 		cd.TimeEnd = cd.TimeStart.Add(usage)
 	}
-	if self.ExtraFields != nil {
+	if uR.ExtraFields != nil {
 		cd.ExtraFields = make(map[string]string)
 	}
-	for k, v := range self.ExtraFields {
+	for k, v := range uR.ExtraFields {
 		cd.ExtraFields[k] = v
 	}
 	return cd, nil
 }
 
-func (self *UsageRecord) GetId() string {
-	return utils.Sha1(self.ToR, self.RequestType, self.Tenant, self.Category, self.Account, self.Subject, self.Destination, self.SetupTime, self.AnswerTime, self.Usage)
+func (uR *UsageRecord) GetId() string {
+	return utils.Sha1(uR.ToR, uR.RequestType, uR.Tenant, uR.Category, uR.Account, uR.Subject, uR.Destination, uR.SetupTime, uR.AnswerTime, uR.Usage)
 }
 
 type ExternalCDRWithAPIOpts struct {

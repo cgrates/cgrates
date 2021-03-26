@@ -1897,9 +1897,7 @@ func TestDebitDataMoney(t *testing.T) {
 		utils.MetaData:     {&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationIDs: utils.StringMap{"NAT": true}}},
 		utils.MetaMonetary: {&Balance{Value: 160}},
 	}}
-	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
-	if err != nil {
+	if _, err := rifsBalance.debitCreditBalance(cd, false, false, true); err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
 	if rifsBalance.BalanceMap[utils.MetaData][0].GetValue() != 0 ||

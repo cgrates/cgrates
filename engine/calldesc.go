@@ -643,7 +643,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	}
 
 	// not enough credit for connect fee
-	if cc.negativeConnectFee == true {
+	if cc.negativeConnectFee {
 		return 0, nil
 	}
 

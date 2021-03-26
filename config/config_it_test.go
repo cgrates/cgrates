@@ -37,8 +37,6 @@ import (
 )
 
 var (
-	cgrConfigDIR string
-
 	cgrTests = []func(t *testing.T){
 		testNewCgrJsonCfgFromHttp,
 		testNewCGRConfigFromPath,
@@ -1142,7 +1140,7 @@ func testLoadConfigFromFolderFileNotFound(t *testing.T) {
 
 func testLoadConfigFromFolderOpenError(t *testing.T) {
 	newDir := "/tmp/testLoadConfigFromFolderOpenError"
-	if err = os.MkdirAll(newDir, 755); err != nil {
+	if err = os.MkdirAll(newDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	cfg := NewDefaultCGRConfig()
@@ -1160,7 +1158,7 @@ func testLoadConfigFromFolderOpenError(t *testing.T) {
 
 func testLoadConfigFromFolderNoConfigFound(t *testing.T) {
 	newDir := "/tmp/[]"
-	if err = os.MkdirAll(newDir, 755); err != nil {
+	if err = os.MkdirAll(newDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	cfg := NewDefaultCGRConfig()
@@ -1188,7 +1186,7 @@ func testLoadConfigFromPathInvalidArgument(t *testing.T) {
 
 func testLoadConfigFromPathValidPath(t *testing.T) {
 	newDir := "/tmp/testLoadConfigFromPathValidPath"
-	if err = os.MkdirAll(newDir, 755); err != nil {
+	if err = os.MkdirAll(newDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	cfg := NewDefaultCGRConfig()
@@ -1206,7 +1204,7 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 
 func testLoadConfigFromPathFile(t *testing.T) {
 	newDir := "/tmp/testLoadConfigFromPathFile"
-	if err = os.MkdirAll(newDir, 755); err != nil {
+	if err = os.MkdirAll(newDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	cfg := NewDefaultCGRConfig()

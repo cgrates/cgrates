@@ -28,23 +28,20 @@ import (
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
 func radReplyAppendAttributes(reply *radigo.Packet, rplNM *utils.OrderedNavigableMap) (err error) {
 	for el := rplNM.GetFirstElement(); el != nil; el = el.Next() {
-		val := el.Value
-		var cfgItm *utils.DataLeaf
-		if cfgItm, err = rplNM.Field(val); err != nil {
-			return
-		}
-
-		if cfgItm.Path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+		path := el.Value
+		cfgItm, _ := rplNM.Field(path)
+		path = path[:len(path)-1]        // remove the last index
+		if path[0] == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
 			if err = reply.SetCodeWithName(utils.IfaceAsString(cfgItm.Data)); err != nil {
 				return err
 			}
 			continue
 		}
 		var attrName, vendorName string
-		if len(cfgItm.Path) > 2 {
-			vendorName, attrName = cfgItm.Path[0], cfgItm.Path[1]
+		if len(path) > 2 {
+			vendorName, attrName = path[0], path[1]
 		} else {
-			attrName = cfgItm.Path[0]
+			attrName = path[0]
 		}
 
 		if err = reply.AddAVPWithName(attrName, utils.IfaceAsString(cfgItm.Data), vendorName); err != nil {

@@ -153,8 +153,10 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 			return
 		}
 		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
-			valMp[strings.Join(nmIt.Path, utils.NestingSep)] = nmIt.String()
+			path := el.Value
+			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(path)
+			path = path[:len(path)-1] // remove the last index
+			valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
 		}
 	}
 	updateEEMetrics(eEe.dc, cgrEv.Event, utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,

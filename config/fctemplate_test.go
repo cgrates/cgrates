@@ -69,7 +69,7 @@ func TestFCTemplatePathItems(t *testing.T) {
 	}
 	expected := []string{"*req", "Account", "1", "Balance", "*monetary", "Value"}
 	fcTemplate.ComputePath()
-	if !reflect.DeepEqual(expected, fcTemplate.GetPathItems()) {
+	if !reflect.DeepEqual(expected, fcTemplate.GetPathSlice()) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(fcTemplate))
 	}
 }

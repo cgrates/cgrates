@@ -32,8 +32,7 @@ import (
 )
 
 var (
-	dm2              *DataManager
-	dataMngConfigDIR string
+	dm2 *DataManager
 
 	sTestsDMit = []func(t *testing.T){
 		testDMitDataFlush,

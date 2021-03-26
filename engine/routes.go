@@ -55,8 +55,6 @@ type RouteProfile struct {
 	SortingParameters  []string
 	Routes             []*Route
 	Weight             float64
-
-	cache map[string]interface{}
 }
 
 // RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher

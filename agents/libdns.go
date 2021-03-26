@@ -156,15 +156,10 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 	msgFields := make(utils.StringSet) // work around to NMap issue
 	for el := nm.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		var cfgItm *utils.DataLeaf
-		if cfgItm, err = nm.Field(path); err != nil {
-			return
-		}
-		if len(cfgItm.Path) == 0 {
-			return errors.New("empty path in config item")
-		}
+		cfgItm, _ := nm.Field(path)
+		// path = path[:len(path)-1] // no need to remove the last index here as this uses only the first level
 		apnd := len(msg.Answer) == 0
-		if msgFields.Has(cfgItm.Path[0]) { // force append if the same path was already used
+		if msgFields.Has(path[0]) { // force append if the same path was already used
 			apnd = true
 		}
 		if apnd {
@@ -174,11 +169,11 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 			msgFields = make(utils.StringSet) // reset the fields inside since we have a new message
 		}
 		itmData := cfgItm.Data
-		switch cfgItm.Path[0] {
+		switch path[0] {
 		case utils.Rcode:
 			var itm int64
 			if itm, err = utils.IfaceAsInt64(itmData); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+				return fmt.Errorf("item: <%s>, err: %s", path[0], err.Error())
 			}
 			msg.Rcode = int(itm)
 		case utils.Order:
@@ -187,7 +182,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 			}
 			var itm int64
 			if itm, err = utils.IfaceAsInt64(itmData); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+				return fmt.Errorf("item: <%s>, err: %s", path[0], err.Error())
 			}
 			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Order = uint16(itm)
 		case utils.Preference:
@@ -196,7 +191,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 			}
 			var itm int64
 			if itm, err = utils.IfaceAsInt64(itmData); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+				return fmt.Errorf("item: <%s>, err: %s", path[0], err.Error())
 			}
 			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Preference = uint16(itm)
 		case utils.Flags:
@@ -221,7 +216,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *utils.OrderedNavigableMap) (err error)
 			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = utils.IfaceAsString(itmData)
 		}
 
-		msgFields.Add(cfgItm.Path[0]) // detect new branch
+		msgFields.Add(path[0]) // detect new branch
 
 	}
 	return

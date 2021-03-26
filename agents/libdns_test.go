@@ -176,24 +176,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
 
 	nM := utils.NewOrderedNavigableMap()
+	path := []string{utils.Rcode}
 	itm := &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{},
-		Data: "Val1",
-	}}
-	nM.SetAsSlice(&utils.FullPath{Path: "Path", PathItems: []string{"Path"}}, []*utils.DataNode{itm})
-	if err := updateDNSMsgFromNM(m, nM); err == nil ||
-		err.Error() != "empty path in config item" {
-		t.Error(err)
-	}
-
-	nM = utils.NewOrderedNavigableMap()
-	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Rcode},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err != nil {
 		t.Fatal(err)
@@ -203,13 +192,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Rcode}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Rcode},
 		Data: "RandomValue",
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Rcode>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
@@ -217,13 +206,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Order}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Order},
 		Data: "RandomValue",
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Order>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
@@ -231,13 +220,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Preference}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Preference},
 		Data: "RandomValue",
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `item: <Preference>, err: strconv.ParseInt: parsing "RandomValue": invalid syntax` {
@@ -247,13 +236,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	m = new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeA)
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Order}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Order},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Order> only works with NAPTR` {
@@ -261,13 +250,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Preference}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Preference},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Preference> only works with NAPTR` {
@@ -275,13 +264,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Flags}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Flags},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Flags> only works with NAPTR` {
@@ -289,13 +278,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Service}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Service},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Service> only works with NAPTR` {
@@ -303,13 +292,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Regexp}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Regexp},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Regexp> only works with NAPTR` {
@@ -317,13 +306,13 @@ func TestUpdateDNSMsgFromNM(t *testing.T) {
 	}
 
 	nM = utils.NewOrderedNavigableMap()
+	path = []string{utils.Replacement}
 	itm = &utils.DataNode{Type: utils.NMDataType, Value: &utils.DataLeaf{
-		Path: []string{utils.Replacement},
 		Data: 10,
 	}}
 	nM.SetAsSlice(&utils.FullPath{
-		Path:      strings.Join(itm.Value.Path, utils.NestingSep),
-		PathItems: itm.Value.Path,
+		Path:      strings.Join(path, utils.NestingSep),
+		PathSlice: path,
 	}, []*utils.DataNode{itm})
 	if err := updateDNSMsgFromNM(m, nM); err == nil ||
 		err.Error() != `field <Replacement> only works with NAPTR` {

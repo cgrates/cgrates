@@ -689,15 +689,13 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnLoaderCfg, err = jsnCfg.LoaderJsonCfg(); err != nil {
 		return
 	}
-	if jsnLoaderCfg != nil {
-		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
-		for _, profile := range jsnLoaderCfg {
-			loadSCfgp := NewDfltLoaderSCfg()
-			if err = loadSCfgp.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
-				return
-			}
-			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
+	// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
+	for _, profile := range jsnLoaderCfg {
+		loadSCfgp := NewDfltLoaderSCfg()
+		if err = loadSCfgp.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
+			return
 		}
+		cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use append so the loaderS profile to be loaded from multiple files
 	}
 	return
 }
@@ -843,11 +841,9 @@ func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnTemplateCfg, err = jsnCfg.TemplateSJsonCfg(); err != nil {
 		return
 	}
-	if jsnTemplateCfg != nil {
-		for k, val := range jsnTemplateCfg {
-			if cfg.templates[k], err = FCTemplatesFromFCTemplatesJSONCfg(val, cfg.generalCfg.RSRSep); err != nil {
-				return
-			}
+	for k, val := range jsnTemplateCfg {
+		if cfg.templates[k], err = FCTemplatesFromFCTemplatesJSONCfg(val, cfg.generalCfg.RSRSep); err != nil {
+			return
 		}
 	}
 	return
@@ -1572,7 +1568,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[ActionSJson] <- struct{}{}
 		}
 	}
-	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}

@@ -198,7 +198,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	}
 	var rply map[string]map[string]interface{}
 	rplyExpect := map[string]map[string]interface{}{
-		"SQLExporterFull": map[string]interface{}{},
+		"SQLExporterFull": {},
 	}
 	if err := eeS.V1ProcessEvent(cgrEv, &rply); err != nil {
 		t.Error(err)

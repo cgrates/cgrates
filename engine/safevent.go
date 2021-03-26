@@ -101,7 +101,6 @@ func (se *SafEvent) Set(fldName string, val interface{}) {
 	se.Lock()
 	se.Me[fldName] = val
 	se.Unlock()
-	return
 }
 
 // Remove will remove a field from map
@@ -109,7 +108,6 @@ func (se *SafEvent) Remove(fldName string) {
 	se.Lock()
 	delete(se.Me, fldName)
 	se.Unlock()
-	return
 }
 
 func (se *SafEvent) GetString(fldName string) (out string, err error) {

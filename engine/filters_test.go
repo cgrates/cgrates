@@ -823,8 +823,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"EmptyPtrSlice": &[]string{""},
 		"EmptyPtrMap":   &map[string]string{"": ""},
 	}
-	var testnil *struct{}
-	testnil = nil
+	var testnil *struct{} = nil
 	passEvent = map[string]interface{}{
 		"EmptyString":   "",
 		"EmptySlice":    []string{},

@@ -62,7 +62,6 @@ func (sS *StatService) Shutdown() {
 	close(sS.stopBackup)
 	sS.storeStats()
 	utils.Logger.Info("<StatS> service shutdown complete")
-	return
 }
 
 // runBackup will regularly store resources changed to dataDB

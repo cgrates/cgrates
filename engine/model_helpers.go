@@ -338,9 +338,7 @@ func APItoModelRate(r *utils.TPRateRALs) (result RateMdls) {
 
 func APItoModelRates(rs []*utils.TPRateRALs) (result RateMdls) {
 	for _, r := range rs {
-		for _, sr := range APItoModelRate(r) {
-			result = append(result, sr)
-		}
+		result = append(result, APItoModelRate(r)...)
 	}
 	return result
 }
@@ -419,12 +417,8 @@ func APItoModelDestinationRate(d *utils.TPDestinationRate) (result DestinationRa
 }
 
 func APItoModelDestinationRates(drs []*utils.TPDestinationRate) (result DestinationRateMdls) {
-	if drs != nil {
-		for _, dr := range drs {
-			for _, sdr := range APItoModelDestinationRate(dr) {
-				result = append(result, sdr)
-			}
-		}
+	for _, dr := range drs {
+		result = append(result, APItoModelDestinationRate(dr)...)
 	}
 	return result
 }
@@ -529,9 +523,7 @@ func APItoModelRatingPlan(rp *utils.TPRatingPlan) (result RatingPlanMdls) {
 
 func APItoModelRatingPlans(rps []*utils.TPRatingPlan) (result RatingPlanMdls) {
 	for _, rp := range rps {
-		for _, srp := range APItoModelRatingPlan(rp) {
-			result = append(result, srp)
-		}
+		result = append(result, APItoModelRatingPlan(rp)...)
 	}
 	return result
 }
@@ -611,9 +603,7 @@ func APItoModelRatingProfile(rp *utils.TPRatingProfile) (result RatingProfileMdl
 
 func APItoModelRatingProfiles(rps []*utils.TPRatingProfile) (result RatingProfileMdls) {
 	for _, rp := range rps {
-		for _, srp := range APItoModelRatingProfile(rp) {
-			result = append(result, srp)
-		}
+		result = append(result, APItoModelRatingProfile(rp)...)
 	}
 	return result
 }
@@ -686,9 +676,7 @@ func APItoModelSharedGroup(sgs *utils.TPSharedGroups) (result SharedGroupMdls) {
 
 func APItoModelSharedGroups(sgs []*utils.TPSharedGroups) (result SharedGroupMdls) {
 	for _, sg := range sgs {
-		for _, ssg := range APItoModelSharedGroup(sg) {
-			result = append(result, ssg)
-		}
+		result = append(result, APItoModelSharedGroup(sg)...)
 	}
 	return result
 }
@@ -787,9 +775,7 @@ func APItoModelAction(as *utils.TPActions) (result ActionMdls) {
 
 func APItoModelActions(as []*utils.TPActions) (result ActionMdls) {
 	for _, a := range as {
-		for _, sa := range APItoModelAction(a) {
-			result = append(result, sa)
-		}
+		result = append(result, APItoModelAction(a)...)
 	}
 	return result
 }
@@ -862,9 +848,7 @@ func APItoModelActionPlan(a *utils.TPActionPlan) (result ActionPlanMdls) {
 
 func APItoModelActionPlans(aps []*utils.TPActionPlan) (result ActionPlanMdls) {
 	for _, ap := range aps {
-		for _, sap := range APItoModelActionPlan(ap) {
-			result = append(result, sap)
-		}
+		result = append(result, APItoModelActionPlan(ap)...)
 	}
 	return result
 }
@@ -972,9 +956,7 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result ActionTriggerM
 
 func APItoModelActionTriggers(ts []*utils.TPActionTriggers) (result ActionTriggerMdls) {
 	for _, t := range ts {
-		for _, st := range APItoModelActionTrigger(t) {
-			result = append(result, st)
-		}
+		result = append(result, APItoModelActionTrigger(t)...)
 	}
 	return result
 }
@@ -2147,10 +2129,7 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 		if tp.Path != utils.EmptyString {
 			filterIDs := make([]string, 0)
 			if tp.AttributeFilterIDs != utils.EmptyString {
-				filterAttrSplit := strings.Split(tp.AttributeFilterIDs, utils.InfieldSep)
-				for _, filterAttr := range filterAttrSplit {
-					filterIDs = append(filterIDs, filterAttr)
-				}
+				filterIDs = append(filterIDs, strings.Split(tp.AttributeFilterIDs, utils.InfieldSep)...)
 			}
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
 				FilterIDs: filterIDs,
@@ -2370,9 +2349,7 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 		result[i] = tp
 		result[i].FilterIDs = filterMap[tntID].AsSlice()
 		result[i].AttributeIDs = make([]string, 0, len(attributeMap[tntID]))
-		for _, attributeID := range attributeMap[tntID] {
-			result[i].AttributeIDs = append(result[i].AttributeIDs, attributeID)
-		}
+		result[i].AttributeIDs = append(result[i].AttributeIDs, attributeMap[tntID]...)
 		i++
 	}
 	return
