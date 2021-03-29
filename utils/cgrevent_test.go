@@ -381,6 +381,28 @@ func TestCGREventconsumeRoutePaginatorCase1(t *testing.T) {
 	}
 }
 
+func TestCGREventOptAsInt64(t *testing.T) {
+	ev := &CGREvent{
+		APIOpts: map[string]interface{}{
+			"testKey": "13",
+		},
+	}
+
+	received, err := ev.OptAsInt64("testKey")
+	if err != nil {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", nil, err)
+	}
+	expected := int64(13)
+
+	if received != expected {
+		t.Errorf("\nExpected: %q, \nReceived: %q", expected, received)
+	}
+	errExpect := ErrNotFound
+	if _, err = ev.OptAsInt64("nonExistingKey"); err == nil || err != errExpect {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", errExpect, err)
+	}
+}
+
 func TestCGREventFieldAsInt64(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",

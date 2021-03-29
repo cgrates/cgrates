@@ -745,4 +745,9 @@ func TestEqualsUnitFactor(t *testing.T) {
 	if !uf1.Equals(uf2) {
 		t.Errorf("Unexpected equal result")
 	}
+
+	uf2.Factor = NewDecimal(10, 0)
+	if uf1.Equals(uf2) {
+		t.Errorf("Unexpected equal result")
+	}
 }
