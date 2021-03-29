@@ -64,7 +64,6 @@ var (
 		testActionSCacheTestSet,
 		testActionSCacheTestGetNotFound,
 		testActionSCacheReload,
-		testActionSCacheTestGetNotFound,
 		testActionSCacheTestGetFound,
 		testActionSKillEngine,
 	}
@@ -344,7 +343,7 @@ func testActionSKillEngine(t *testing.T) {
 }
 
 func testActionSCacheTestGetNotFound(t *testing.T) {
-	var reply *engine.ChargerProfile
+	var reply *utils.TenantIDWithAPIOpts
 	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ACTION_CACHE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -353,7 +352,7 @@ func testActionSCacheTestGetNotFound(t *testing.T) {
 }
 
 func testActionSCacheTestGetFound(t *testing.T) {
-	var reply *engine.ChargerProfile
+	var reply *utils.TenantIDWithAPIOpts
 	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ACTION_CACHE"}, &reply); err != nil {
 		t.Fatal(err)
