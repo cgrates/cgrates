@@ -574,40 +574,6 @@ func TestCmdPingRateSLow(t *testing.T) {
 	}
 }
 
-func TestCmdPingAccountSLow(t *testing.T) {
-	// commands map is initiated in init function
-	command := commands["ping"]
-	castCommand, canCast := command.(*CmdApierPing)
-	if !canCast {
-		t.Fatalf("cannot cast")
-	}
-	castCommand.item = utils.AccountSLow
-	result2 := command.RpcMethod()
-	if !reflect.DeepEqual(result2, utils.AccountSv1Ping) {
-		t.Errorf("Expected <%+v>, Received <%+v>", utils.AccountSv1Ping, result2)
-	}
-	m, ok := reflect.TypeOf(new(v1.AccountSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
-	if !ok {
-		t.Fatal("method not found")
-	}
-	if m.Type.NumIn() != 3 { // ApierSv1 is consider and we expect 3 inputs
-		t.Fatalf("invalid number of input parameters ")
-	}
-	// for coverage purpose
-	result := command.RpcParams(true)
-	if !reflect.DeepEqual(result, new(StringWrapper)) {
-		t.Errorf("Expected <%T>, Received <%T>", new(StringWrapper), result)
-	}
-	// verify the type of output parameter
-	if ok := m.Type.In(2).AssignableTo(reflect.TypeOf(command.RpcResult())); !ok {
-		t.Fatalf("cannot assign output parameter")
-	}
-	// for coverage purpose
-	if err := command.PostprocessRpcParams(); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestCmdPingActionSLow(t *testing.T) {
 	// commands map is initiated in init function
 	command := commands["ping"]

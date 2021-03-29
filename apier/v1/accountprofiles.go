@@ -21,8 +21,6 @@ package v1
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/accounts"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -129,68 +127,4 @@ func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithAPIOpts, r
 	}
 	*reply = utils.OK
 	return nil
-}
-
-// NewAccountSv1 initializes AccountSv1
-func NewAccountSv1(aS *accounts.AccountS) *AccountSv1 {
-	return &AccountSv1{aS: aS}
-}
-
-// AccountSv1 exports RPC from RLs
-type AccountSv1 struct {
-	aS *accounts.AccountS
-}
-
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (aSv1 *AccountSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)
-}
-
-// Ping return pong if the service is active
-func (aSv1 *AccountSv1) Ping(ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-// AccountProfilesForEvent returns the matching AccountProfile for Event
-func (aSv1 *AccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent,
-	aps *[]*utils.AccountProfile) (err error) {
-	return aSv1.aS.V1AccountProfilesForEvent(args, aps)
-}
-
-// MaxAbstracts returns the maximum abstracts for the event, based on matching Account
-func (aSv1 *AccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent,
-	eEc *utils.ExtEventCharges) (err error) {
-	return aSv1.aS.V1MaxAbstracts(args, eEc)
-}
-
-// DebitAbstracts performs debit for the provided event
-func (aSv1 *AccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent,
-	eEc *utils.ExtEventCharges) (err error) {
-	return aSv1.aS.V1DebitAbstracts(args, eEc)
-}
-
-// MaxConcretes returns the maximum concretes for the event, based on the matching Account
-func (aSv1 *AccountSv1) MaxConcretes(args *utils.ArgsAccountsForEvent,
-	eEc *utils.ExtEventCharges) (err error) {
-	return aSv1.aS.V1MaxConcretes(args, eEc)
-}
-
-// DebitConcretes performs debit of concrete units for the provided event
-func (aSv1 *AccountSv1) DebitConcretes(args *utils.ArgsAccountsForEvent,
-	eEc *utils.ExtEventCharges) (err error) {
-	return aSv1.aS.V1DebitConcretes(args, eEc)
-}
-
-// ActionSetBalance performs a set balance action
-func (aSv1 *AccountSv1) ActionSetBalance(args *utils.ArgsActSetBalance,
-	eEc *string) (err error) {
-	return aSv1.aS.V1ActionSetBalance(args, eEc)
-}
-
-// ActionRemoveBalance removes a balance from an account
-func (aSv1 *AccountSv1) ActionRemoveBalance(args *utils.ArgsActRemoveBalances,
-	eEc *string) (err error) {
-	return aSv1.aS.V1ActionRemoveBalance(args, eEc)
 }
