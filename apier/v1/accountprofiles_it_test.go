@@ -49,7 +49,6 @@ var (
 		testAccountSRPCConn,
 		testAccountSLoadFromFolder,
 		testAccountSGetAccountProfile,
-		testAccountSPing,
 		testAccountSSettAccountProfile,
 		testAccountSGetAccountProfileIDs,
 		testAccountSGetAccountProfileIDsCount,
@@ -212,15 +211,6 @@ func testAccountSGetAccountProfile(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(eAcnt, reply) {
 		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(eAcnt), utils.ToJSON(reply))
-	}
-}
-
-func testAccountSPing(t *testing.T) {
-	var resp string
-	if err := accSRPC.Call(utils.AccountSv1Ping, new(utils.CGREvent), &resp); err != nil {
-		t.Error(err)
-	} else if resp != utils.Pong {
-		t.Error("Unexpected reply returned", resp)
 	}
 }
 
