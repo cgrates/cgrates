@@ -229,6 +229,18 @@ var (
 		testV1TSProcessAccountUpdateEvent,
 		testV1TSResetThresholdsWithoutTenant,
 		testV1TSStopEngine,
+		//cache test
+		testV1TSLoadConfig,
+		testV1TSInitDataDb,
+		testV1TSResetStorDb,
+		testV1TSStartEngine,
+		testV1TSRpcConn,
+		testThresholdSCacheProcessEventNotFound,
+		testThresholdSCacheSet,
+		testThresholdSCacheProcessEventNotFound,
+		testThresholdSCacheReload,
+		testThresholdSCacheProcessEventFound,
+		testV1TSStopEngine,
 	}
 )
 
@@ -954,5 +966,71 @@ func testV1TSResetThresholdsWithoutTenant(t *testing.T) {
 	reply.Snooze = expectedThreshold.Snooze
 	if !reflect.DeepEqual(expectedThreshold, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedThreshold), utils.ToJSON(reply))
+	}
+}
+
+func testThresholdSCacheProcessEventNotFound(t *testing.T) {
+	var ids []string
+	thEvent := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THRESHOLD_CACHE"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "THRESHOLD_CACHE",
+			Event: map[string]interface{}{
+				"CustomEv": "SnoozeEv",
+			},
+		},
+	}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testThresholdSCacheProcessEventFound(t *testing.T) {
+	var ids []string
+	thEvent := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THRESHOLD_CACHE"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "THRESHOLD_CACHE",
+			Event: map[string]interface{}{
+				"CustomEv": "SnoozeEv",
+			},
+		},
+	}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	}
+}
+
+func testThresholdSCacheSet(t *testing.T) {
+	var result string
+	tPrfl = &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "THRESHOLD_CACHE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testThresholdSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.ThresholdProfileIDs: {"cgrates.org:THRESHOLD_CACHE"},
+		},
+	}
+	var reply string
+	if err := tSv1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
