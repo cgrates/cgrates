@@ -1724,3 +1724,18 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 		}
 	}
 }
+
+func TestTenantIDConcatenated(t *testing.T) {
+	tnt := &TenantID{
+		Tenant: "cgrates.org",
+		ID:     "1",
+	}
+	tntOpts := &TenantIDWithAPIOpts{
+		TenantID: tnt,
+	}
+	rcvExpect := "cgrates.org:1"
+	concTnt := tntOpts.TenantIDConcatenated()
+	if concTnt != rcvExpect {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", rcvExpect, concTnt)
+	}
+}
