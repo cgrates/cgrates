@@ -28,8 +28,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/scheduler"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -330,7 +328,6 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 				Weight:    20.0,
 			},
 		},
-		ReloadScheduler: true,
 	}
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &hourlyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
@@ -346,7 +343,6 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 				Weight:    20.0,
 			},
 		},
-		ReloadScheduler: true,
 	}
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &dailyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
@@ -362,7 +358,6 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 				Weight:    20.0,
 			},
 		},
-		ReloadScheduler: true,
 	}
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &weeklyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
@@ -378,49 +373,11 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 				Weight:    20.0,
 			},
 		},
-		ReloadScheduler: true,
 	}
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, &monthlyAP, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
-	}
-	var rply []*scheduler.ScheduledAction
-	if err := apierRPC.Call(utils.APIerSv1GetScheduledActions,
-		scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
-		t.Error("Unexpected error: ", err)
-	} else {
-		for _, schedAct := range rply {
-			switch schedAct.ActionPlanID {
-			case "AP_WEEKLY":
-				t1 := time.Now().AddDate(0, 0, 7)
-				if schedAct.NextRunTime.Before(t1.Add(-2*time.Second)) ||
-					schedAct.NextRunTime.After(t1.Add(time.Second)) {
-					t.Errorf("Expected the nextRuntime to be after 1 week,but received: <%+v>", utils.ToJSON(schedAct))
-				}
-			case "AP_DAILY":
-				t1 := time.Now().AddDate(0, 0, 1)
-				if schedAct.NextRunTime.Before(t1.Add(-2*time.Second)) ||
-					schedAct.NextRunTime.After(t1.Add(time.Second)) {
-					t.Errorf("Expected the nextRuntime to be after 1 day,but received: <%+v>", utils.ToJSON(schedAct))
-				}
-			case "AP_HOURLY":
-				if schedAct.NextRunTime.Before(time.Now().Add(59*time.Minute+58*time.Second)) ||
-					schedAct.NextRunTime.After(time.Now().Add(time.Hour+time.Second)) {
-					t.Errorf("Expected the nextRuntime to be after 1 hour,but received: <%+v>", utils.ToJSON(schedAct))
-				}
-			case "AP_MONTHLY":
-				// *monthly needs to mach exactly the day
-				tnow := time.Now()
-				expected := tnow.AddDate(0, 1, 0)
-				expected = time.Date(expected.Year(), expected.Month(), tnow.Day(), tnow.Hour(),
-					tnow.Minute(), tnow.Second(), 0, schedAct.NextRunTime.Location())
-				if schedAct.NextRunTime.Before(expected.Add(-time.Second)) ||
-					schedAct.NextRunTime.After(expected.Add(time.Second)) {
-					t.Errorf("Expected the nextRuntime to be after 1 month,but received: <%+v>", utils.ToJSON(schedAct))
-				}
-			}
-		}
 	}
 }
 

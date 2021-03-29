@@ -162,7 +162,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.ralsCfg = new(RalsCfg)
 	cfg.ralsCfg.MaxComputedUsage = make(map[string]time.Duration)
 	cfg.ralsCfg.BalanceRatingSubject = make(map[string]string)
-	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -308,7 +307,6 @@ type CGRConfig struct {
 	httpCfg          *HTTPCfg          // HTTP config
 	filterSCfg       *FilterSCfg       // FilterS config
 	ralsCfg          *RalsCfg          // Rals config
-	schedulerCfg     *SchedulerCfg     // Scheduler config
 	cdrsCfg          *CdrsCfg          // Cdrs config
 	sessionSCfg      *SessionSCfg      // SessionS config
 	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
@@ -399,7 +397,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadRPCConns,
 		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
-		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
+		cfg.loadFilterSCfg, cfg.loadRalSCfg,
 		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
@@ -537,15 +535,6 @@ func (cfg *CGRConfig) loadRalSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.ralsCfg.loadFromJSONCfg(jsnRALsCfg)
-}
-
-// loadSchedulerCfg loads the Scheduler section of the configuration
-func (cfg *CGRConfig) loadSchedulerCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnSchedCfg *SchedulerJsonCfg
-	if jsnSchedCfg, err = jsnCfg.SchedulerJsonCfg(); err != nil {
-		return
-	}
-	return cfg.schedulerCfg.loadFromJSONCfg(jsnSchedCfg)
 }
 
 // loadCdrsCfg loads the Cdrs section of the configuration
@@ -1029,13 +1018,6 @@ func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 	return cfg.migratorCgrCfg
 }
 
-// SchedulerCfg returns the config for Scheduler
-func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
-	cfg.lks[SCHEDULER_JSN].Lock()
-	defer cfg.lks[SCHEDULER_JSN].Unlock()
-	return cfg.schedulerCfg
-}
-
 // DataDbCfg returns the config for DataDb
 func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
 	cfg.lks[DATADB_JSN].Lock()
@@ -1270,7 +1252,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		LISTEN_JSN:         cfg.loadListenCfg,
 		TlsCfgJson:         cfg.loadTLSCgrCfg,
 		HTTP_JSN:           cfg.loadHTTPCfg,
-		SCHEDULER_JSN:      cfg.loadSchedulerCfg,
 		CACHE_JSN:          cfg.loadCacheCfg,
 		FilterSjsn:         cfg.loadFilterSCfg,
 		RALS_JSN:           cfg.loadRalSCfg,
@@ -1467,7 +1448,7 @@ func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string)
 // reloadSections sends a signal to the reload channel for the needed sections
 // the list of sections should be always valid because we load the config first with this list
 func (cfg *CGRConfig) reloadSections(sections ...string) {
-	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
+	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS, AccountSCfgJson,
@@ -1510,8 +1491,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		case CoreSCfgJson: // nothing to reload
 		case HTTP_JSN:
 			cfg.rldChans[HTTP_JSN] <- struct{}{}
-		case SCHEDULER_JSN:
-			cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
 		case RALS_JSN:
 			cfg.rldChans[RALS_JSN] <- struct{}{}
 		case CDRS_JSN:
@@ -1585,7 +1564,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		HTTP_JSN:           cfg.httpCfg.AsMapInterface(),
 		FilterSjsn:         cfg.filterSCfg.AsMapInterface(),
 		RALS_JSN:           cfg.ralsCfg.AsMapInterface(),
-		SCHEDULER_JSN:      cfg.schedulerCfg.AsMapInterface(),
 		CDRS_JSN:           cfg.cdrsCfg.AsMapInterface(),
 		SessionSJson:       cfg.sessionSCfg.AsMapInterface(),
 		FreeSWITCHAgentJSN: cfg.fsAgentCfg.AsMapInterface(separator),
@@ -1712,8 +1690,6 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		mp = cfg.FilterSCfg().AsMapInterface()
 	case RALS_JSN:
 		mp = cfg.RalsCfg().AsMapInterface()
-	case SCHEDULER_JSN:
-		mp = cfg.SchedulerCfg().AsMapInterface()
 	case CDRS_JSN:
 		mp = cfg.CdrsCfg().AsMapInterface()
 	case SessionSJson:
@@ -1882,8 +1858,6 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		mp = cfg.FilterSCfg().AsMapInterface()
 	case RALS_JSN:
 		mp = cfg.RalsCfg().AsMapInterface()
-	case SCHEDULER_JSN:
-		mp = cfg.SchedulerCfg().AsMapInterface()
 	case CDRS_JSN:
 		mp = cfg.CdrsCfg().AsMapInterface()
 	case SessionSJson:
@@ -2019,7 +1993,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		httpCfg:          cfg.httpCfg.Clone(),
 		filterSCfg:       cfg.filterSCfg.Clone(),
 		ralsCfg:          cfg.ralsCfg.Clone(),
-		schedulerCfg:     cfg.schedulerCfg.Clone(),
 		cdrsCfg:          cfg.cdrsCfg.Clone(),
 		sessionSCfg:      cfg.sessionSCfg.Clone(),
 		fsAgentCfg:       cfg.fsAgentCfg.Clone(),

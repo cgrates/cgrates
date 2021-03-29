@@ -56,7 +56,7 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs *AttrLoadRatingProfile, reply *st
 	}
 	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
 		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
-		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
+		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionConns,
 		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -86,7 +86,7 @@ func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *
 	}
 	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
 		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
-		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
+		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionConns,
 		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -98,9 +98,9 @@ func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	sched := apiv2.SchedulerService.GetScheduler()
-	if sched != nil {
-		sched.Reload()
+	acts := apiv2.ActionService.GetAction()
+	if acts != nil {
+		//acts.Reload()
 	}
 	*reply = utils.OK
 	return nil
@@ -120,7 +120,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	}
 	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apiv2.Config.GeneralCfg().DefaultTimezone,
-		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().SchedulerConns,
+		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionConns,
 		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -152,7 +152,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apiv2.Config.ApierCfg().SchedulerConns) != 0 {
+	if len(apiv2.Config.ApierCfg().ActionConns) != 0 {
 		utils.Logger.Info("APIerSv2.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)

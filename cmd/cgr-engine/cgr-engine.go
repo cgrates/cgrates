@@ -644,9 +644,6 @@ func main() {
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
 		internalRouteSChan, connManager, anz, srvDep)
 
-	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
-		server, internalSchedulerSChan, connManager, anz, srvDep)
-
 	rals := services.NewRalService(cfg, cacheS, server,
 		internalRALsChan, internalResponderChan,
 		shdChan, connManager, anz, srvDep)

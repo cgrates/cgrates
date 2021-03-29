@@ -129,15 +129,6 @@ type RalsJsonCfg struct {
 	Dynaprepaid_actionplans    *[]string
 }
 
-// Scheduler config section
-type SchedulerJsonCfg struct {
-	Enabled          *bool
-	Cdrs_conns       *[]string
-	Thresholds_conns *[]string
-	Stats_conns      *[]string
-	Filters          *[]string
-}
-
 // Cdrs config section
 type CdrsJsonCfg struct {
 	Enabled              *bool
