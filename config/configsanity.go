@@ -501,33 +501,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// Scheduler check connection with CDR Server
-	if cfg.schedulerCfg.Enabled {
-		for _, connID := range cfg.schedulerCfg.CDRsConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.cdrsCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.CDRs, utils.SchedulerS)
-			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SchedulerS, connID)
-			}
-		}
-		for _, connID := range cfg.schedulerCfg.ThreshSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.SchedulerS)
-			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SchedulerS, connID)
-			}
-		}
-		for _, connID := range cfg.schedulerCfg.StatSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.SchedulerS)
-			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SchedulerS, connID)
-			}
-		}
-	}
 	// EventReader sanity checks
 	if cfg.ersCfg.Enabled {
 		for _, connID := range cfg.ersCfg.SessionSConns {
@@ -678,8 +651,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.APIerSv1, connID)
 		}
 	}
-	for _, connID := range cfg.apier.SchedulerConns {
-		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.schedulerCfg.Enabled {
+	for _, connID := range cfg.apier.ActionConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.actionSCfg.Enabled {
 			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SchedulerS, utils.APIerSv1)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {

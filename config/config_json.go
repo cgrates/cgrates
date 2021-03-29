@@ -31,7 +31,6 @@ const (
 	STORDB_JSN         = "stor_db"
 	FilterSjsn         = "filters"
 	RALS_JSN           = "rals"
-	SCHEDULER_JSN      = "schedulers"
 	CDRS_JSN           = "cdrs"
 	SessionSJson       = "sessions"
 	FreeSWITCHAgentJSN = "freeswitch_agent"
@@ -71,7 +70,7 @@ const (
 )
 
 var (
-	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
+	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN,
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
@@ -179,18 +178,6 @@ func (jsnCfg CgrJsonCfg) RalsJsonCfg() (*RalsJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(RalsJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) SchedulerJsonCfg() (*SchedulerJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SCHEDULER_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(SchedulerJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

@@ -31,24 +31,17 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
-	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SchedulerGeter used to avoid ciclic dependency
-type SchedulerGeter interface {
-	GetScheduler() *scheduler.Scheduler
-}
-
 type APIerSv1 struct {
-	StorDb           engine.LoadStorage // we should consider keeping only one of StorDB type
-	CdrDb            engine.CdrStorage
-	DataManager      *engine.DataManager
-	Config           *config.CGRConfig
-	Responder        *engine.Responder
-	SchedulerService SchedulerGeter  // Need to have them capitalize so we can export in V2
-	FilterS          *engine.FilterS //Used for CDR Exporter
-	ConnMgr          *engine.ConnManager
+	StorDb      engine.LoadStorage // we should consider keeping only one of StorDB type
+	CdrDb       engine.CdrStorage
+	DataManager *engine.DataManager
+	Config      *config.CGRConfig
+	Responder   *engine.Responder
+	FilterS     *engine.FilterS //Used for CDR Exporter
+	ConnMgr     *engine.ConnManager
 
 	StorDBChan    chan engine.StorDB
 	ResponderChan chan *engine.Responder
@@ -261,7 +254,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone, apierSv1.Config.ApierCfg().CachesConns,
-		apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -293,7 +286,7 @@ func (apierSv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *strin
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -317,7 +310,7 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply 
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -347,7 +340,7 @@ func (apierSv1 *APIerSv1) LoadSharedGroup(attrs *AttrLoadSharedGroup, reply *str
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -374,7 +367,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -405,7 +398,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionConns) != 0 {
 		utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		if err := dbReader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -579,130 +572,10 @@ type V1TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	for _, action := range attrs.Actions {
-		requiredFields := []string{"Identifier", "Weight"}
-		if action.BalanceType != utils.EmptyString { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
-			requiredFields = append(requiredFields, "Units")
-		}
-		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), action.Identifier, missing)
-		}
-	}
-	if !attrs.Overwrite {
-		if exists, err := apierSv1.DataManager.HasData(utils.ActionPrefix, attrs.ActionsId, ""); err != nil {
-			return utils.NewErrServerError(err)
-		} else if exists {
-			return utils.ErrExists
-		}
-	}
-	storeActions := make(engine.Actions, len(attrs.Actions))
-	for idx, apiAct := range attrs.Actions {
-		var blocker *bool
-		if apiAct.BalanceBlocker != utils.EmptyString {
-			if x, err := strconv.ParseBool(apiAct.BalanceBlocker); err == nil {
-				blocker = &x
-			} else {
-				return err
-			}
-		}
-
-		var disabled *bool
-		if apiAct.BalanceDisabled != utils.EmptyString {
-			if x, err := strconv.ParseBool(apiAct.BalanceDisabled); err == nil {
-				disabled = &x
-			} else {
-				return err
-			}
-		}
-		a := &engine.Action{
-			Id:               attrs.ActionsId,
-			ActionType:       apiAct.Identifier,
-			Weight:           apiAct.Weight,
-			ExpirationString: apiAct.ExpiryTime,
-			ExtraParameters:  apiAct.ExtraParameters,
-			Filter:           apiAct.Filter,
-			Balance: &engine.BalanceFilter{ // TODO: update this part
-				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
-				ID:             utils.StringPointer(apiAct.BalanceId),
-				Type:           utils.StringPointer(apiAct.BalanceType),
-				Value:          &utils.ValueFormula{Static: apiAct.Units},
-				Weight:         apiAct.BalanceWeight,
-				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
-				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
-				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
-				Categories:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Categories)),
-				TimingIDs:      utils.StringMapPointer(utils.ParseStringMap(apiAct.TimingTags)),
-				Blocker:        blocker,
-				Disabled:       disabled,
-			},
-		}
-		storeActions[idx] = a
-	}
-	if err := apierSv1.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	//CacheReload
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.ActionIDs: {attrs.ActionsId}},
-		}, reply); err != nil {
-		return err
-	}
-	//generate a loadID for CacheActions and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// Retrieves actions attached to specific ActionsId within cache
-func (apierSv1 *APIerSv1) GetActions(actsId *string, reply *[]*utils.TPAction) error {
-	if len(*actsId) == 0 {
-		return fmt.Errorf("%s ActionsId: %s", utils.ErrMandatoryIeMissing.Error(), *actsId)
-	}
-	acts := make([]*utils.TPAction, 0)
-	engActs, err := apierSv1.DataManager.GetActions(*actsId, false, utils.NonTransactional)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	for _, engAct := range engActs {
-		act := &utils.TPAction{
-			Identifier:      engAct.ActionType,
-			ExpiryTime:      engAct.ExpirationString,
-			ExtraParameters: engAct.ExtraParameters,
-			Filter:          engAct.Filter,
-			Weight:          engAct.Weight,
-		}
-		bf := engAct.Balance
-		if bf != nil {
-			act.BalanceType = bf.GetType()
-			act.Units = strconv.FormatFloat(bf.GetValue(), 'f', -1, 64)
-			act.DestinationIds = bf.GetDestinationIDs().String()
-			act.RatingSubject = bf.GetRatingSubject()
-			act.SharedGroups = bf.GetSharedGroups().String()
-			act.BalanceWeight = strconv.FormatFloat(bf.GetWeight(), 'f', -1, 64)
-			act.TimingTags = bf.GetTimingIDs().String()
-			act.BalanceId = bf.GetID()
-			act.Categories = bf.GetCategories().String()
-			act.BalanceBlocker = strconv.FormatBool(bf.GetBlocker())
-			act.BalanceDisabled = strconv.FormatBool(bf.GetDisabled())
-		}
-		acts = append(acts, act)
-	}
-	*reply = acts
-	return nil
-}
-
 type AttrSetActionPlan struct {
-	Id              string            // Profile id
-	ActionPlan      []*AttrActionPlan // Set of actions this Actions profile will perform
-	Overwrite       bool              // If previously defined, will be overwritten
-	ReloadScheduler bool              // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
+	Id         string            // Profile id
+	ActionPlan []*AttrActionPlan // Set of actions this Actions profile will perform
+	Overwrite  bool              // If previously defined, will be overwritten
 }
 
 type AttrActionPlan struct {
@@ -817,13 +690,6 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
 	if err != nil {
 		return err
-	}
-	if attrs.ReloadScheduler {
-		sched := apierSv1.SchedulerService.GetScheduler()
-		if sched == nil {
-			return errors.New(utils.SchedulerNotRunningCaps)
-		}
-		sched.Reload()
 	}
 	//generate a loadID for CacheActionPlans and store it in database
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionPlans: time.Now().UnixNano()}); err != nil {
@@ -1014,7 +880,7 @@ func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, repl
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1026,10 +892,6 @@ func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, repl
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	sched := apierSv1.SchedulerService.GetScheduler()
-	if sched != nil {
-		sched.Reload()
-	}
 	*reply = utils.OK
 	return nil
 }
@@ -1053,7 +915,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath),
 		"", apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1087,7 +949,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionConns) != 0 {
 		utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -1119,7 +981,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1153,7 +1015,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionConns) != 0 {
 		utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -1173,7 +1035,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1205,7 +1067,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().SchedulerConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionConns) != 0 {
 		utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading scheduler.")
 		if err := dbReader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)

@@ -92,9 +92,9 @@ func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *strin
 	case utils.MetaScheduler:
 		// stop the service using the config
 		srvMngr.Lock()
-		srvMngr.cfg.SchedulerCfg().Enabled = true
+		srvMngr.cfg.ActionSCfg().Enabled = true
 		srvMngr.Unlock()
-		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
+		srvMngr.cfg.GetReloadChan(config.ActionSJson) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -111,9 +111,9 @@ func (srvMngr *ServiceManager) V1StopService(args ArgStartService, reply *string
 	case utils.MetaScheduler:
 		// stop the service using the config
 		srvMngr.Lock()
-		srvMngr.cfg.SchedulerCfg().Enabled = false
+		srvMngr.cfg.ActionSCfg().Enabled = false
 		srvMngr.Unlock()
-		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
+		srvMngr.cfg.GetReloadChan(config.ActionSJson) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -198,8 +198,6 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.ResourceS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJson):
 			go srvMngr.reloadService(utils.RouteS)
-		case <-srvMngr.GetConfig().GetReloadChan(config.SCHEDULER_JSN):
-			go srvMngr.reloadService(utils.SchedulerS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
 			go srvMngr.reloadService(utils.RALService)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ApierS):

@@ -46,7 +46,6 @@ type Balance struct {
 	Factor         ValueFactor
 	Blocker        bool
 	precision      int
-	account        *Account // used to store ub reference for shared balances
 	dirty          bool
 }
 
