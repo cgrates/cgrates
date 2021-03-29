@@ -37,8 +37,7 @@ var csvr *TpReader
 func init() {
 	var err error
 	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSVSep,
-		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
-		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
+		DestinationsCSVContent, TimingsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
@@ -69,15 +68,6 @@ func init() {
 	}
 	if err := csvr.LoadActions(); err != nil {
 		log.Print("error in LoadActions:", err)
-	}
-	if err := csvr.LoadActionPlans(); err != nil {
-		log.Print("error in LoadActionPlans:", err)
-	}
-	if err := csvr.LoadActionTriggers(); err != nil {
-		log.Print("error in LoadActionTriggers:", err)
-	}
-	if err := csvr.LoadAccountActions(); err != nil {
-		log.Print("error in LoadAccountActions:", err)
 	}
 	if err := csvr.LoadFilters(); err != nil {
 		log.Print("error in LoadFilter:", err)

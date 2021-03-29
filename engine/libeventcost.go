@@ -100,7 +100,7 @@ func (cIl *ChargingInterval) Cost() float64 {
 		for _, incr := range cIl.Increments {
 			cost += incr.Cost * float64(incr.CompressFactor)
 		}
-		cost = utils.Round(cost, globalRoundingDecimals, utils.MetaRoundingMiddle)
+		cost = utils.Round(cost, 6, utils.MetaRoundingMiddle)
 		cIl.cost = &cost
 	}
 	return *cIl.cost
@@ -109,7 +109,7 @@ func (cIl *ChargingInterval) Cost() float64 {
 // TotalCost returns the cost of charges
 func (cIl *ChargingInterval) TotalCost() float64 {
 	return utils.Round((cIl.Cost() * float64(cIl.CompressFactor)),
-		globalRoundingDecimals, utils.MetaRoundingMiddle)
+		6, utils.MetaRoundingMiddle)
 }
 
 // Clone returns a new instance of ChargingInterval with independent data

@@ -526,6 +526,7 @@ func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
+		// rates.V1CostForEvent
 		cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
 			config.CgrConfig().GeneralCfg().DefaultTimezone)
 		if err != nil {

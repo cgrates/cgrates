@@ -47,12 +47,6 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	HasDataDrv(string, string, string) (bool, error)
-	GetRatingPlanDrv(string) (*RatingPlan, error)
-	SetRatingPlanDrv(*RatingPlan) error
-	RemoveRatingPlanDrv(key string) (err error)
-	GetRatingProfileDrv(string) (*RatingProfile, error)
-	SetRatingProfileDrv(*RatingProfile) error
-	RemoveRatingProfileDrv(string) error
 	GetDestinationDrv(string, string) (*Destination, error)
 	SetDestinationDrv(*Destination, string) error
 	RemoveDestinationDrv(string, string) error
@@ -62,25 +56,8 @@ type DataDB interface {
 	GetActionsDrv(string) (Actions, error)
 	SetActionsDrv(string, Actions) error
 	RemoveActionsDrv(string) error
-	GetSharedGroupDrv(string) (*SharedGroup, error)
-	SetSharedGroupDrv(*SharedGroup) error
-	RemoveSharedGroupDrv(id string) (err error)
-	GetActionTriggersDrv(string) (ActionTriggers, error)
-	SetActionTriggersDrv(string, ActionTriggers) error
-	RemoveActionTriggersDrv(string) error
-	GetActionPlanDrv(string, bool, string) (*ActionPlan, error)
-	SetActionPlanDrv(string, *ActionPlan, bool, string) error
-	RemoveActionPlanDrv(key string, transactionID string) error
-	GetAllActionPlansDrv() (map[string]*ActionPlan, error)
-	GetAccountActionPlansDrv(acntID string, skipCache bool,
-		transactionID string) (apIDs []string, err error)
-	SetAccountActionPlansDrv(acntID string, apIDs []string, overwrite bool) (err error)
-	RemAccountActionPlansDrv(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	GetAccountDrv(string) (*Account, error)
-	SetAccountDrv(*Account) error
-	RemoveAccountDrv(string) error
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error
@@ -169,15 +146,7 @@ type LoadReader interface {
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
-	GetTPRates(string, string) ([]*utils.TPRateRALs, error)
-	GetTPDestinationRates(string, string, *utils.Paginator) ([]*utils.TPDestinationRate, error)
-	GetTPRatingPlans(string, string, *utils.Paginator) ([]*utils.TPRatingPlan, error)
-	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
-	GetTPSharedGroups(string, string) ([]*utils.TPSharedGroups, error)
 	GetTPActions(string, string) ([]*utils.TPActions, error)
-	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
-	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
-	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
@@ -196,15 +165,7 @@ type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
 	SetTPTimings([]*utils.ApierTPTiming) error
 	SetTPDestinations([]*utils.TPDestination) error
-	SetTPRates([]*utils.TPRateRALs) error
-	SetTPDestinationRates([]*utils.TPDestinationRate) error
-	SetTPRatingPlans([]*utils.TPRatingPlan) error
-	SetTPRatingProfiles([]*utils.TPRatingProfile) error
-	SetTPSharedGroups([]*utils.TPSharedGroups) error
 	SetTPActions([]*utils.TPActions) error
-	SetTPActionPlans([]*utils.TPActionPlan) error
-	SetTPActionTriggers([]*utils.TPActionTriggers) error
-	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResources([]*utils.TPResourceProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error

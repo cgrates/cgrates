@@ -624,81 +624,6 @@ func (attr *AttrActionPlan) getRITiming(dm *engine.DataManager) (timing *engine.
 	return
 }
 
-func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	for _, at := range attrs.ActionPlan {
-		requiredFields := []string{"ActionsId", "Time", "Weight"}
-		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), at.ActionsId, missing)
-		}
-	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		var prevAccountIDs utils.StringMap
-		if prevAP, err := apierSv1.DataManager.GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return 0, utils.NewErrServerError(err)
-		} else if err == nil && !attrs.Overwrite {
-			return 0, utils.ErrExists
-		} else if prevAP != nil {
-			prevAccountIDs = prevAP.AccountIDs
-		}
-		ap := &engine.ActionPlan{
-			Id: attrs.Id,
-		}
-		for _, apiAtm := range attrs.ActionPlan {
-			if exists, err := apierSv1.DataManager.HasData(utils.ActionPrefix, apiAtm.ActionsId, ""); err != nil {
-				return 0, utils.NewErrServerError(err)
-			} else if !exists {
-				return 0, fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
-			}
-			timing, err := apiAtm.getRITiming(apierSv1.DataManager)
-			if err != nil {
-				return 0, err
-			}
-			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
-				Uuid:      utils.GenUUID(),
-				Weight:    apiAtm.Weight,
-				Timing:    &engine.RateInterval{Timing: timing},
-				ActionsID: apiAtm.ActionsId,
-			})
-		}
-		if err := apierSv1.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-			return 0, utils.NewErrServerError(err)
-		}
-		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-				ArgsCache: map[string][]string{utils.ActionPlanIDs: {ap.Id}},
-			}, reply); err != nil {
-			return 0, err
-		}
-		for acntID := range prevAccountIDs {
-			if err := apierSv1.DataManager.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
-				return 0, utils.NewErrServerError(err)
-			}
-		}
-		if len(prevAccountIDs) != 0 {
-			sl := prevAccountIDs.Slice()
-			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
-				}, reply); err != nil {
-				return 0, err
-			}
-		}
-		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
-	if err != nil {
-		return err
-	}
-	//generate a loadID for CacheActionPlans and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionPlans: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
 func verifyFormat(tStr string) bool {
 	if tStr == utils.EmptyString ||
 		tStr == utils.MetaASAP {
@@ -869,29 +794,6 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
 		return err
 	}
-	*reply = utils.OK
-	return nil
-}
-
-// Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadAccountActions(attrs *utils.TPAccountActions, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
-		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, dbReader.LoadAccountActionsFiltered(attrs)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
-	// Need to do it before scheduler otherwise actions to run will be unknown
 	*reply = utils.OK
 	return nil
 }

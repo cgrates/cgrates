@@ -155,10 +155,6 @@ func (b *Balance) MatchDestination(destinationID string) bool {
 	return !b.HasDestination() || b.DestinationIDs[destinationID]
 }
 
-func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
-	return b.HardMatchFilter(at.Balance, false)
-}
-
 func (b *Balance) Clone() *Balance {
 	if b == nil {
 		return nil
@@ -760,7 +756,6 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 	savedAccounts := make(map[string]*Account)
 	for _, b := range bc {
 		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == nil {
-			dm.SetAccount(b.account)
 			savedAccounts[b.account.ID] = b.account
 		}
 	}

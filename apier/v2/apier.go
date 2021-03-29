@@ -30,7 +30,6 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -77,33 +76,6 @@ func (apiv2 *APIerSv2) LoadRatingProfile(attrs *AttrLoadRatingProfile, reply *st
 type AttrLoadAccountActions struct {
 	TPid             string
 	AccountActionsId string
-}
-
-// Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (apiv2 *APIerSv2) LoadAccountActions(attrs *AttrLoadAccountActions, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
-		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
-		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionConns,
-		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
-	tpAa.SetAccountActionsId(attrs.AccountActionsId)
-	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, dbReader.LoadAccountActionsFiltered(tpAa)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	acts := apiv2.ActionService.GetAction()
-	if acts != nil {
-		//acts.Reload()
-	}
-	*reply = utils.OK
-	return nil
 }
 
 func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
