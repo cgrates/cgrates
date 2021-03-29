@@ -34,7 +34,6 @@ import (
 func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *cores.Server,
-	actService *ActionService,
 	responderService *ResponderService,
 	internalAPIerSv1Chan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
@@ -46,7 +45,6 @@ func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 		storDB:           storDB,
 		filterSChan:      filterSChan,
 		server:           server,
-		actService:       actService,
 		responderService: responderService,
 		connMgr:          connMgr,
 		APIerSv1Chan:     make(chan *v1.APIerSv1, 1),
@@ -63,7 +61,6 @@ type APIerSv1Service struct {
 	storDB           *StorDBService
 	filterSChan      chan *engine.FilterS
 	server           *cores.Server
-	actService       *ActionService
 	responderService *ResponderService
 	connMgr          *engine.ConnManager
 
@@ -101,14 +98,13 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	defer apiService.Unlock()
 
 	apiService.api = &v1.APIerSv1{
-		DataManager:   datadb,
-		CdrDb:         stordb,
-		StorDb:        stordb,
-		Config:        apiService.cfg,
-		ActionService: apiService.actService,
-		FilterS:       filterS,
-		ConnMgr:       apiService.connMgr,
-		StorDBChan:    storDBChan,
+		DataManager: datadb,
+		CdrDb:       stordb,
+		StorDb:      stordb,
+		Config:      apiService.cfg,
+		FilterS:     filterS,
+		ConnMgr:     apiService.connMgr,
+		StorDBChan:  storDBChan,
 
 		Responder:     apiService.responderService.GetResponder(), // if already started use it
 		ResponderChan: respChan,                                   // if not wait in listenAndServe

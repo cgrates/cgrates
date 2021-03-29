@@ -64,26 +64,6 @@ func (dbM *DataDBMock) HasDataDrv(string, string, string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRatingPlanDrv(string) (*RatingPlan, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetRatingPlanDrv(*RatingPlan) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveRatingPlanDrv(key string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetRatingProfileDrv(string) (*RatingProfile, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetRatingProfileDrv(*RatingProfile) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) GetDestinationDrv(string, string) (*Destination, error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -117,59 +97,6 @@ func (dbM *DataDBMock) SetActionsDrv(string, Actions) error {
 }
 
 func (dbM *DataDBMock) RemoveActionsDrv(string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetSharedGroupDrv(string) (*SharedGroup, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetSharedGroupDrv(*SharedGroup) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveSharedGroupDrv(id string) (err error) {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetActionTriggersDrv(string) (ActionTriggers, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetActionTriggersDrv(string, ActionTriggers) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveActionTriggersDrv(string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetActionPlanDrv(string, bool, string) (*ActionPlan, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetActionPlanDrv(string, *ActionPlan, bool, string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveActionPlanDrv(key string, transactionID string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetAllActionPlansDrv() (map[string]*ActionPlan, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetAccountActionPlansDrv(acntID string, skipCache bool,
-	transactionID string) (apIDs []string, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetAccountActionPlansDrv(acntID string, apIDs []string, overwrite bool) (err error) {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
 	return utils.ErrNotImplemented
 }
 

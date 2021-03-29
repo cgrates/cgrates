@@ -47,21 +47,19 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
 		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
 
-	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
-		CacheRatingProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
+	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
+		CacheActions, CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
-		CacheRatingProfilesTmp, CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
+		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
 		CacheActionProfilesFilterIndexes, CacheAccountProfilesFilterIndexes, CacheReverseFilterIndexes,
-		CacheActionPlans, CacheAccountActionPlans, CacheAccountProfiles, CacheAccounts})
+		CacheAccountProfiles})
 
-	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
-		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
-		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
-		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
+	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPActions,
+		CacheTBLTPResources, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccountProfiles})
 
@@ -71,13 +69,7 @@ var (
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:                 DestinationPrefix,
 		CacheReverseDestinations:          ReverseDestinationPrefix,
-		CacheRatingPlans:                  RatingPlanPrefix,
-		CacheRatingProfiles:               RatingProfilePrefix,
 		CacheActions:                      ActionPrefix,
-		CacheActionPlans:                  ActionPlanPrefix,
-		CacheAccountActionPlans:           AccountActionPlansPrefix,
-		CacheActionTriggers:               ActionTriggerPrefix,
-		CacheSharedGroups:                 SharedGroupPrefix,
 		CacheResourceProfiles:             ResourceProfilesPrefix,
 		CacheResources:                    ResourcesPrefix,
 		CacheTimings:                      TimingsPrefix,
@@ -106,7 +98,6 @@ var (
 		CacheAccountProfilesFilterIndexes: AccountProfileFilterIndexPrfx,
 
 		CacheLoadIDs:              LoadIDPrefix,
-		CacheAccounts:             AccountPrefix,
 		CacheRateFilterIndexes:    RateFilterIndexPrfx,
 		CacheReverseFilterIndexes: FilterIndexPrfx,
 		MetaAPIBan:                MetaAPIBan, // special case as it is not in a DB
@@ -148,44 +139,30 @@ var (
 	AccountableRequestTypes = NewStringSet([]string{MetaPrepaid, MetaPostpaid, MetaPseudoPrepaid})
 
 	CacheStorDBPartitions = map[string]string{
-		TBLTPTimings:          CacheTBLTPTimings,
-		TBLTPDestinations:     CacheTBLTPDestinations,
-		TBLTPRates:            CacheTBLTPRates,
-		TBLTPDestinationRates: CacheTBLTPDestinationRates,
-		TBLTPRatingPlans:      CacheTBLTPRatingPlans,
-		TBLTPRatingProfiles:   CacheTBLTPRatingProfiles,
-		TBLTPSharedGroups:     CacheTBLTPSharedGroups,
-		TBLTPActions:          CacheTBLTPActions,
-		TBLTPActionPlans:      CacheTBLTPActionPlans,
-		TBLTPActionTriggers:   CacheTBLTPActionTriggers,
-		TBLTPAccountActions:   CacheTBLTPAccountActions,
-		TBLTPResources:        CacheTBLTPResources,
-		TBLTPStats:            CacheTBLTPStats,
-		TBLTPThresholds:       CacheTBLTPThresholds,
-		TBLTPFilters:          CacheTBLTPFilters,
-		SessionCostsTBL:       CacheSessionCostsTBL,
-		CDRsTBL:               CacheCDRsTBL,
-		TBLTPRoutes:           CacheTBLTPRoutes,
-		TBLTPAttributes:       CacheTBLTPAttributes,
-		TBLTPChargers:         CacheTBLTPChargers,
-		TBLTPDispatchers:      CacheTBLTPDispatchers,
-		TBLTPDispatcherHosts:  CacheTBLTPDispatcherHosts,
-		TBLTPRateProfiles:     CacheTBLTPRateProfiles,
-		TBLTPActionProfiles:   CacheTBLTPActionProfiles,
-		TBLTPAccountProfiles:  CacheTBLTPAccountProfiles,
+		TBLTPTimings:         CacheTBLTPTimings,
+		TBLTPDestinations:    CacheTBLTPDestinations,
+		TBLTPActions:         CacheTBLTPActions,
+		TBLTPResources:       CacheTBLTPResources,
+		TBLTPStats:           CacheTBLTPStats,
+		TBLTPThresholds:      CacheTBLTPThresholds,
+		TBLTPFilters:         CacheTBLTPFilters,
+		SessionCostsTBL:      CacheSessionCostsTBL,
+		CDRsTBL:              CacheCDRsTBL,
+		TBLTPRoutes:          CacheTBLTPRoutes,
+		TBLTPAttributes:      CacheTBLTPAttributes,
+		TBLTPChargers:        CacheTBLTPChargers,
+		TBLTPDispatchers:     CacheTBLTPDispatchers,
+		TBLTPDispatcherHosts: CacheTBLTPDispatcherHosts,
+		TBLTPRateProfiles:    CacheTBLTPRateProfiles,
+		TBLTPActionProfiles:  CacheTBLTPActionProfiles,
+		TBLTPAccountProfiles: CacheTBLTPAccountProfiles,
 	}
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds   = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 	ArgCacheToPrefix = map[string]string{
 		DestinationIDs:        DestinationPrefix,
 		ReverseDestinationIDs: ReverseDestinationPrefix,
-		RatingPlanIDs:         RatingPlanPrefix,
-		RatingProfileIDs:      RatingProfilePrefix,
 		ActionIDs:             ActionPrefix,
-		ActionPlanIDs:         ActionPlanPrefix,
-		AccountActionPlanIDs:  AccountActionPlansPrefix,
-		ActionTriggerIDs:      ActionTriggerPrefix,
-		SharedGroupIDs:        SharedGroupPrefix,
 		ResourceProfileIDs:    ResourceProfilesPrefix,
 		ResourceIDs:           ResourcesPrefix,
 		StatsQueueIDs:         StatQueuePrefix,
@@ -219,13 +196,7 @@ var (
 	ArgCacheToInstance = map[string]string{
 		DestinationIDs:        CacheDestinations,
 		ReverseDestinationIDs: CacheReverseDestinations,
-		RatingPlanIDs:         CacheRatingPlans,
-		RatingProfileIDs:      CacheRatingProfiles,
 		ActionIDs:             CacheActions,
-		ActionPlanIDs:         CacheActionPlans,
-		AccountActionPlanIDs:  CacheAccountActionPlans,
-		ActionTriggerIDs:      CacheActionTriggers,
-		SharedGroupIDs:        CacheSharedGroups,
 		ResourceProfileIDs:    CacheResourceProfiles,
 		ResourceIDs:           CacheResources,
 		StatsQueueIDs:         CacheStatQueues,
@@ -378,18 +349,9 @@ const (
 	MetaVoice                 = "*voice"
 	ACD                       = "ACD"
 	TasksKey                  = "tasks"
-	ActionPlanPrefix          = "apl_"
-	AccountActionPlansPrefix  = "aap_"
-	ActionTriggerPrefix       = "atr_"
-	RatingPlanPrefix          = "rpl_"
-	RatingProfilePrefix       = "rpf_"
 	ActionPrefix              = "act_"
-	SharedGroupPrefix         = "shg_"
-	AccountPrefix             = "acc_"
 	DestinationPrefix         = "dst_"
 	ReverseDestinationPrefix  = "rds_"
-	DerivedChargersPrefix     = "dcs_"
-	UsersPrefix               = "usr_"
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
 	ThresholdPrefix           = "thd_"
@@ -1242,7 +1204,6 @@ const (
 const (
 	ReplicatorSv1                        = "ReplicatorSv1"
 	ReplicatorSv1Ping                    = "ReplicatorSv1.Ping"
-	ReplicatorSv1GetAccount              = "ReplicatorSv1.GetAccount"
 	ReplicatorSv1GetDestination          = "ReplicatorSv1.GetDestination"
 	ReplicatorSv1GetReverseDestination   = "ReplicatorSv1.GetReverseDestination"
 	ReplicatorSv1GetStatQueue            = "ReplicatorSv1.GetStatQueue"
@@ -1253,14 +1214,7 @@ const (
 	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
-	ReplicatorSv1GetActionTriggers       = "ReplicatorSv1.GetActionTriggers"
-	ReplicatorSv1GetSharedGroup          = "ReplicatorSv1.GetSharedGroup"
 	ReplicatorSv1GetActions              = "ReplicatorSv1.GetActions"
-	ReplicatorSv1GetActionPlan           = "ReplicatorSv1.GetActionPlan"
-	ReplicatorSv1GetAllActionPlans       = "ReplicatorSv1.GetAllActionPlans"
-	ReplicatorSv1GetAccountActionPlans   = "ReplicatorSv1.GetAccountActionPlans"
-	ReplicatorSv1GetRatingPlan           = "ReplicatorSv1.GetRatingPlan"
-	ReplicatorSv1GetRatingProfile        = "ReplicatorSv1.GetRatingProfile"
 	ReplicatorSv1GetRouteProfile         = "ReplicatorSv1.GetRouteProfile"
 	ReplicatorSv1GetAttributeProfile     = "ReplicatorSv1.GetAttributeProfile"
 	ReplicatorSv1GetChargerProfile       = "ReplicatorSv1.GetChargerProfile"
@@ -1272,7 +1226,6 @@ const (
 	ReplicatorSv1GetItemLoadIDs          = "ReplicatorSv1.GetItemLoadIDs"
 	ReplicatorSv1SetThresholdProfile     = "ReplicatorSv1.SetThresholdProfile"
 	ReplicatorSv1SetThreshold            = "ReplicatorSv1.SetThreshold"
-	ReplicatorSv1SetAccount              = "ReplicatorSv1.SetAccount"
 	ReplicatorSv1SetDestination          = "ReplicatorSv1.SetDestination"
 	ReplicatorSv1SetReverseDestination   = "ReplicatorSv1.SetReverseDestination"
 	ReplicatorSv1SetStatQueue            = "ReplicatorSv1.SetStatQueue"
@@ -1281,13 +1234,7 @@ const (
 	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile      = "ReplicatorSv1.SetResourceProfile"
-	ReplicatorSv1SetActionTriggers       = "ReplicatorSv1.SetActionTriggers"
-	ReplicatorSv1SetSharedGroup          = "ReplicatorSv1.SetSharedGroup"
 	ReplicatorSv1SetActions              = "ReplicatorSv1.SetActions"
-	ReplicatorSv1SetActionPlan           = "ReplicatorSv1.SetActionPlan"
-	ReplicatorSv1SetAccountActionPlans   = "ReplicatorSv1.SetAccountActionPlans"
-	ReplicatorSv1SetRatingPlan           = "ReplicatorSv1.SetRatingPlan"
-	ReplicatorSv1SetRatingProfile        = "ReplicatorSv1.SetRatingProfile"
 	ReplicatorSv1SetRouteProfile         = "ReplicatorSv1.SetRouteProfile"
 	ReplicatorSv1SetAttributeProfile     = "ReplicatorSv1.SetAttributeProfile"
 	ReplicatorSv1SetChargerProfile       = "ReplicatorSv1.SetChargerProfile"
@@ -1299,7 +1246,6 @@ const (
 	ReplicatorSv1SetLoadIDs              = "ReplicatorSv1.SetLoadIDs"
 	ReplicatorSv1RemoveThreshold         = "ReplicatorSv1.RemoveThreshold"
 	ReplicatorSv1RemoveDestination       = "ReplicatorSv1.RemoveDestination"
-	ReplicatorSv1RemoveAccount           = "ReplicatorSv1.RemoveAccount"
 	ReplicatorSv1RemoveStatQueue         = "ReplicatorSv1.RemoveStatQueue"
 	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
@@ -1307,13 +1253,7 @@ const (
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
-	ReplicatorSv1RemoveActionTriggers    = "ReplicatorSv1.RemoveActionTriggers"
-	ReplicatorSv1RemoveSharedGroup       = "ReplicatorSv1.RemoveSharedGroup"
 	ReplicatorSv1RemoveActions           = "ReplicatorSv1.RemoveActions"
-	ReplicatorSv1RemoveActionPlan        = "ReplicatorSv1.RemoveActionPlan"
-	ReplicatorSv1RemAccountActionPlans   = "ReplicatorSv1.RemAccountActionPlans"
-	ReplicatorSv1RemoveRatingPlan        = "ReplicatorSv1.RemoveRatingPlan"
-	ReplicatorSv1RemoveRatingProfile     = "ReplicatorSv1.RemoveRatingProfile"
 	ReplicatorSv1RemoveRouteProfile      = "ReplicatorSv1.RemoveRouteProfile"
 	ReplicatorSv1RemoveAttributeProfile  = "ReplicatorSv1.RemoveAttributeProfile"
 	ReplicatorSv1RemoveChargerProfile    = "ReplicatorSv1.RemoveChargerProfile"
@@ -1361,39 +1301,14 @@ const (
 	APIerSv1GetRatingProfileIDs         = "APIerSv1.GetRatingProfileIDs"
 	APIerSv1SetDataDBVersions           = "APIerSv1.SetDataDBVersions"
 	APIerSv1SetStorDBVersions           = "APIerSv1.SetStorDBVersions"
-	APIerSv1GetAccountActionPlan        = "APIerSv1.GetAccountActionPlan"
-	APIerSv1ComputeActionPlanIndexes    = "APIerSv1.ComputeActionPlanIndexes"
 	APIerSv1GetActions                  = "APIerSv1.GetActions"
-	APIerSv1GetActionPlan               = "APIerSv1.GetActionPlan"
-	APIerSv1GetActionPlanIDs            = "APIerSv1.GetActionPlanIDs"
-	APIerSv1GetRatingPlanIDs            = "APIerSv1.GetRatingPlanIDs"
-	APIerSv1GetRatingPlan               = "APIerSv1.GetRatingPlan"
-	APIerSv1RemoveRatingPlan            = "APIerSv1.RemoveRatingPlan"
 	APIerSv1GetDestination              = "APIerSv1.GetDestination"
 	APIerSv1RemoveDestination           = "APIerSv1.RemoveDestination"
 	APIerSv1GetReverseDestination       = "APIerSv1.GetReverseDestination"
-	APIerSv1AddBalance                  = "APIerSv1.AddBalance"
-	APIerSv1DebitBalance                = "APIerSv1.DebitBalance"
-	APIerSv1SetAccount                  = "APIerSv1.SetAccount"
-	APIerSv1GetAccountsCount            = "APIerSv1.GetAccountsCount"
 	APIerSv1GetDataDBVersions           = "APIerSv1.GetDataDBVersions"
 	APIerSv1GetStorDBVersions           = "APIerSv1.GetStorDBVersions"
 	APIerSv1GetCDRs                     = "APIerSv1.GetCDRs"
-	APIerSv1GetTPAccountActions         = "APIerSv1.GetTPAccountActions"
-	APIerSv1SetTPAccountActions         = "APIerSv1.SetTPAccountActions"
-	APIerSv1GetTPAccountActionsByLoadId = "APIerSv1.GetTPAccountActionsByLoadId"
-	APIerSv1GetTPAccountActionLoadIds   = "APIerSv1.GetTPAccountActionLoadIds"
-	APIerSv1GetTPAccountActionIds       = "APIerSv1.GetTPAccountActionIds"
-	APIerSv1RemoveTPAccountActions      = "APIerSv1.RemoveTPAccountActions"
-	APIerSv1GetTPActionPlan             = "APIerSv1.GetTPActionPlan"
-	APIerSv1SetTPActionPlan             = "APIerSv1.SetTPActionPlan"
-	APIerSv1GetTPActionPlanIds          = "APIerSv1.GetTPActionPlanIds"
-	APIerSv1SetTPActionTriggers         = "APIerSv1.SetTPActionTriggers"
-	APIerSv1GetTPActionTriggers         = "APIerSv1.GetTPActionTriggers"
-	APIerSv1RemoveTPActionTriggers      = "APIerSv1.RemoveTPActionTriggers"
-	APIerSv1GetTPActionTriggerIds       = "APIerSv1.GetTPActionTriggerIds"
 	APIerSv1GetTPActions                = "APIerSv1.GetTPActions"
-	APIerSv1RemoveTPActionPlan          = "APIerSv1.RemoveTPActionPlan"
 	APIerSv1GetTPAttributeProfile       = "APIerSv1.GetTPAttributeProfile"
 	APIerSv1SetTPAttributeProfile       = "APIerSv1.SetTPAttributeProfile"
 	APIerSv1GetTPAttributeProfileIds    = "APIerSv1.GetTPAttributeProfileIds"
@@ -1896,46 +1811,32 @@ const (
 
 // Table Name
 const (
-	TBLTPTimings          = "tp_timings"
-	TBLTPDestinations     = "tp_destinations"
-	TBLTPRates            = "tp_rates"
-	TBLTPDestinationRates = "tp_destination_rates"
-	TBLTPRatingPlans      = "tp_rating_plans"
-	TBLTPRatingProfiles   = "tp_rating_profiles"
-	TBLTPSharedGroups     = "tp_shared_groups"
-	TBLTPActions          = "tp_actions"
-	TBLTPActionPlans      = "tp_action_plans"
-	TBLTPActionTriggers   = "tp_action_triggers"
-	TBLTPAccountActions   = "tp_account_actions"
-	TBLTPResources        = "tp_resources"
-	TBLTPStats            = "tp_stats"
-	TBLTPThresholds       = "tp_thresholds"
-	TBLTPFilters          = "tp_filters"
-	SessionCostsTBL       = "session_costs"
-	CDRsTBL               = "cdrs"
-	TBLTPRoutes           = "tp_routes"
-	TBLTPAttributes       = "tp_attributes"
-	TBLTPChargers         = "tp_chargers"
-	TBLVersions           = "versions"
-	OldSMCosts            = "sm_costs"
-	TBLTPDispatchers      = "tp_dispatcher_profiles"
-	TBLTPDispatcherHosts  = "tp_dispatcher_hosts"
-	TBLTPRateProfiles     = "tp_rate_profiles"
-	TBLTPActionProfiles   = "tp_action_profiles"
-	TBLTPAccountProfiles  = "tp_account_profiles"
+	TBLTPTimings         = "tp_timings"
+	TBLTPDestinations    = "tp_destinations"
+	TBLTPActions         = "tp_actions"
+	TBLTPResources       = "tp_resources"
+	TBLTPStats           = "tp_stats"
+	TBLTPThresholds      = "tp_thresholds"
+	TBLTPFilters         = "tp_filters"
+	SessionCostsTBL      = "session_costs"
+	CDRsTBL              = "cdrs"
+	TBLTPRoutes          = "tp_routes"
+	TBLTPAttributes      = "tp_attributes"
+	TBLTPChargers        = "tp_chargers"
+	TBLVersions          = "versions"
+	OldSMCosts           = "sm_costs"
+	TBLTPDispatchers     = "tp_dispatcher_profiles"
+	TBLTPDispatcherHosts = "tp_dispatcher_hosts"
+	TBLTPRateProfiles    = "tp_rate_profiles"
+	TBLTPActionProfiles  = "tp_action_profiles"
+	TBLTPAccountProfiles = "tp_account_profiles"
 )
 
 // Cache Name
 const (
 	CacheDestinations                 = "*destinations"
 	CacheReverseDestinations          = "*reverse_destinations"
-	CacheRatingPlans                  = "*rating_plans"
-	CacheRatingProfiles               = "*rating_profiles"
 	CacheActions                      = "*actions"
-	CacheActionPlans                  = "*action_plans"
-	CacheAccountActionPlans           = "*account_action_plans"
-	CacheActionTriggers               = "*action_triggers"
-	CacheSharedGroups                 = "*shared_groups"
 	CacheResources                    = "*resources"
 	CacheResourceProfiles             = "*resource_profiles"
 	CacheTimings                      = "*timings"
@@ -1975,42 +1876,32 @@ const (
 	CacheLoadIDs                      = "*load_ids"
 	CacheRPCConnections               = "*rpc_connections"
 	CacheCDRIDs                       = "*cdr_ids"
-	CacheRatingProfilesTmp            = "*tmp_rating_profiles"
 	CacheUCH                          = "*uch"
 	CacheSTIR                         = "*stir"
 	CacheEventCharges                 = "*event_charges"
 	CacheReverseFilterIndexes         = "*reverse_filter_indexes"
-	CacheAccounts                     = "*accounts"
 	CacheVersions                     = "*versions"
 	CacheCapsEvents                   = "*caps_events"
 	CacheReplicationHosts             = "*replication_hosts"
 
 	// storDB
-	CacheTBLTPTimings          = "*tp_timings"
-	CacheTBLTPDestinations     = "*tp_destinations"
-	CacheTBLTPRates            = "*tp_rates"
-	CacheTBLTPDestinationRates = "*tp_destination_rates"
-	CacheTBLTPRatingPlans      = "*tp_rating_plans"
-	CacheTBLTPRatingProfiles   = "*tp_rating_profiles"
-	CacheTBLTPSharedGroups     = "*tp_shared_groups"
-	CacheTBLTPActions          = "*tp_actions"
-	CacheTBLTPActionPlans      = "*tp_action_plans"
-	CacheTBLTPActionTriggers   = "*tp_action_triggers"
-	CacheTBLTPAccountActions   = "*tp_account_actions"
-	CacheTBLTPResources        = "*tp_resources"
-	CacheTBLTPStats            = "*tp_stats"
-	CacheTBLTPThresholds       = "*tp_thresholds"
-	CacheTBLTPFilters          = "*tp_filters"
-	CacheSessionCostsTBL       = "*session_costs"
-	CacheCDRsTBL               = "*cdrs"
-	CacheTBLTPRoutes           = "*tp_routes"
-	CacheTBLTPAttributes       = "*tp_attributes"
-	CacheTBLTPChargers         = "*tp_chargers"
-	CacheTBLTPDispatchers      = "*tp_dispatcher_profiles"
-	CacheTBLTPDispatcherHosts  = "*tp_dispatcher_hosts"
-	CacheTBLTPRateProfiles     = "*tp_rate_profiles"
-	CacheTBLTPActionProfiles   = "*tp_action_profiles"
-	CacheTBLTPAccountProfiles  = "*tp_account_profiles"
+	CacheTBLTPTimings         = "*tp_timings"
+	CacheTBLTPDestinations    = "*tp_destinations"
+	CacheTBLTPActions         = "*tp_actions"
+	CacheTBLTPResources       = "*tp_resources"
+	CacheTBLTPStats           = "*tp_stats"
+	CacheTBLTPThresholds      = "*tp_thresholds"
+	CacheTBLTPFilters         = "*tp_filters"
+	CacheSessionCostsTBL      = "*session_costs"
+	CacheCDRsTBL              = "*cdrs"
+	CacheTBLTPRoutes          = "*tp_routes"
+	CacheTBLTPAttributes      = "*tp_attributes"
+	CacheTBLTPChargers        = "*tp_chargers"
+	CacheTBLTPDispatchers     = "*tp_dispatcher_profiles"
+	CacheTBLTPDispatcherHosts = "*tp_dispatcher_hosts"
+	CacheTBLTPRateProfiles    = "*tp_rate_profiles"
+	CacheTBLTPActionProfiles  = "*tp_action_profiles"
+	CacheTBLTPAccountProfiles = "*tp_account_profiles"
 )
 
 // Prefix for indexing

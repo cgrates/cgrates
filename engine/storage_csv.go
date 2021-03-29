@@ -44,65 +44,47 @@ type CSVStorage struct {
 	sep       rune
 	generator func() csvReaderCloser
 	// file names
-	destinationsFn           []string
-	ratesFn                  []string
-	destinationratesFn       []string
-	timingsFn                []string
-	destinationratetimingsFn []string
-	ratingprofilesFn         []string
-	sharedgroupsFn           []string
-	actionsFn                []string
-	actiontimingsFn          []string
-	actiontriggersFn         []string
-	accountactionsFn         []string
-	resProfilesFn            []string
-	statsFn                  []string
-	thresholdsFn             []string
-	filterFn                 []string
-	routeProfilesFn          []string
-	attributeProfilesFn      []string
-	chargerProfilesFn        []string
-	dispatcherProfilesFn     []string
-	dispatcherHostsFn        []string
-	rateProfilesFn           []string
-	actionProfilesFn         []string
-	accountProfilesFn        []string
+	destinationsFn       []string
+	timingsFn            []string
+	actionsFn            []string
+	resProfilesFn        []string
+	statsFn              []string
+	thresholdsFn         []string
+	filterFn             []string
+	routeProfilesFn      []string
+	attributeProfilesFn  []string
+	chargerProfilesFn    []string
+	dispatcherProfilesFn []string
+	dispatcherHostsFn    []string
+	rateProfilesFn       []string
+	actionProfilesFn     []string
+	accountProfilesFn    []string
 }
 
 // NewCSVStorage creates a CSV storege that takes the data from the paths specified
 func NewCSVStorage(sep rune,
-	destinationsFn, timingsFn, ratesFn, destinationratesFn,
-	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
+	destinationsFn, timingsFn, actionsFn,
 	resProfilesFn, statsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn,
 	rateProfilesFn, actionProfilesFn, accountProfilesFn []string) *CSVStorage {
 	return &CSVStorage{
-		sep:                      sep,
-		generator:                NewCsvFile,
-		destinationsFn:           destinationsFn,
-		timingsFn:                timingsFn,
-		ratesFn:                  ratesFn,
-		destinationratesFn:       destinationratesFn,
-		destinationratetimingsFn: destinationratetimingsFn,
-		ratingprofilesFn:         ratingprofilesFn,
-		sharedgroupsFn:           sharedgroupsFn,
-		actionsFn:                actionsFn,
-		actiontimingsFn:          actiontimingsFn,
-		actiontriggersFn:         actiontriggersFn,
-		accountactionsFn:         accountactionsFn,
-		resProfilesFn:            resProfilesFn,
-		statsFn:                  statsFn,
-		thresholdsFn:             thresholdsFn,
-		filterFn:                 filterFn,
-		routeProfilesFn:          routeProfilesFn,
-		attributeProfilesFn:      attributeProfilesFn,
-		chargerProfilesFn:        chargerProfilesFn,
-		dispatcherProfilesFn:     dispatcherProfilesFn,
-		dispatcherHostsFn:        dispatcherHostsFn,
-		rateProfilesFn:           rateProfilesFn,
-		actionProfilesFn:         actionProfilesFn,
-		accountProfilesFn:        accountProfilesFn,
+		sep:                  sep,
+		generator:            NewCsvFile,
+		destinationsFn:       destinationsFn,
+		timingsFn:            timingsFn,
+		actionsFn:            actionsFn,
+		resProfilesFn:        resProfilesFn,
+		statsFn:              statsFn,
+		thresholdsFn:         thresholdsFn,
+		filterFn:             filterFn,
+		routeProfilesFn:      routeProfilesFn,
+		attributeProfilesFn:  attributeProfilesFn,
+		chargerProfilesFn:    chargerProfilesFn,
+		dispatcherProfilesFn: dispatcherProfilesFn,
+		dispatcherHostsFn:    dispatcherHostsFn,
+		rateProfilesFn:       rateProfilesFn,
+		actionProfilesFn:     actionProfilesFn,
+		accountProfilesFn:    accountProfilesFn,
 	}
 }
 
@@ -114,15 +96,7 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 	}
 	destinationsPaths := appendName(allFoldersPath, utils.DestinationsCsv)
 	timingsPaths := appendName(allFoldersPath, utils.TimingsCsv)
-	ratesPaths := appendName(allFoldersPath, utils.RatesCsv)
-	destinationRatesPaths := appendName(allFoldersPath, utils.DestinationRatesCsv)
-	ratingPlansPaths := appendName(allFoldersPath, utils.RatingPlansCsv)
-	ratingProfilesPaths := appendName(allFoldersPath, utils.RatingProfilesCsv)
-	sharedGroupsPaths := appendName(allFoldersPath, utils.SharedGroupsCsv)
 	actionsPaths := appendName(allFoldersPath, utils.ActionsCsv)
-	actionPlansPaths := appendName(allFoldersPath, utils.ActionPlansCsv)
-	actionTriggersPaths := appendName(allFoldersPath, utils.ActionTriggersCsv)
-	accountActionsPaths := appendName(allFoldersPath, utils.AccountActionsCsv)
 	resourcesPaths := appendName(allFoldersPath, utils.ResourcesCsv)
 	statsPaths := appendName(allFoldersPath, utils.StatsCsv)
 	thresholdsPaths := appendName(allFoldersPath, utils.ThresholdsCsv)
@@ -138,15 +112,7 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 	return NewCSVStorage(sep,
 		destinationsPaths,
 		timingsPaths,
-		ratesPaths,
-		destinationRatesPaths,
-		ratingPlansPaths,
-		ratingProfilesPaths,
-		sharedGroupsPaths,
 		actionsPaths,
-		actionPlansPaths,
-		actionTriggersPaths,
-		accountActionsPaths,
 		resourcesPaths,
 		statsPaths,
 		thresholdsPaths,
@@ -164,16 +130,11 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 
 // NewStringCSVStorage creates a csv storage from strings
 func NewStringCSVStorage(sep rune,
-	destinationsFn, timingsFn, ratesFn, destinationratesFn,
-	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
+	destinationsFn, timingsFn, actionsFn,
 	resProfilesFn, statsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn,
 	rateProfilesFn, actionProfilesFn, accountProfilesFn string) *CSVStorage {
-	c := NewCSVStorage(sep, []string{destinationsFn}, []string{timingsFn},
-		[]string{ratesFn}, []string{destinationratesFn}, []string{destinationratetimingsFn},
-		[]string{ratingprofilesFn}, []string{sharedgroupsFn}, []string{actionsFn},
-		[]string{actiontimingsFn}, []string{actiontriggersFn}, []string{accountactionsFn},
+	c := NewCSVStorage(sep, []string{destinationsFn}, []string{timingsFn}, []string{actionsFn},
 		[]string{resProfilesFn}, []string{statsFn}, []string{thresholdsFn}, []string{filterFn},
 		[]string{routeProfilesFn}, []string{attributeProfilesFn}, []string{chargerProfilesFn},
 		[]string{dispatcherProfilesFn}, []string{dispatcherHostsFn}, []string{rateProfilesFn},
@@ -201,15 +162,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 	c := NewCSVStorage(sep,
 		getIfExist(utils.Destinations),
 		getIfExist(utils.Timings),
-		getIfExist(utils.Rates),
-		getIfExist(utils.DestinationRates),
-		getIfExist(utils.RatingPlans),
-		getIfExist(utils.RatingProfiles),
-		getIfExist(utils.SharedGroups),
 		getIfExist(utils.Actions),
-		getIfExist(utils.ActionPlans),
-		getIfExist(utils.ActionTriggers),
-		getIfExist(utils.AccountActions),
 		getIfExist(utils.Resources),
 		getIfExist(utils.Stats),
 		getIfExist(utils.Thresholds),
@@ -338,15 +291,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	c := NewCSVStorage(sep,
 		destinationsPaths,
 		timingsPaths,
-		ratesPaths,
-		destinationRatesPaths,
-		ratingPlansPaths,
-		ratingProfilesPaths,
-		sharedGroupsPaths,
 		actionsPaths,
-		actionPlansPaths,
-		actionTriggersPaths,
-		accountActionsPaths,
 		resourcesPaths,
 		statsPaths,
 		thresholdsPaths,
@@ -451,69 +396,6 @@ func (csvs *CSVStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestinati
 	return tpDests.AsTPDestinations(), nil
 }
 
-func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRateRALs, error) {
-	var tpRates RateMdls
-	if err := csvs.proccesData(RateMdl{}, csvs.ratesFn, func(tp interface{}) {
-		r := tp.(RateMdl)
-		r.Tpid = tpid
-		tpRates = append(tpRates, r)
-	}); err != nil {
-		return nil, err
-	}
-	return tpRates.AsTPRates()
-}
-
-func (csvs *CSVStorage) GetTPDestinationRates(tpid, id string, p *utils.Paginator) ([]*utils.TPDestinationRate, error) {
-	var tpDestinationRates DestinationRateMdls
-	if err := csvs.proccesData(DestinationRateMdl{}, csvs.destinationratesFn, func(tp interface{}) {
-		dr := tp.(DestinationRateMdl)
-		dr.Tpid = tpid
-		tpDestinationRates = append(tpDestinationRates, dr)
-	}); err != nil {
-		return nil, err
-	}
-	return tpDestinationRates.AsTPDestinationRates(), nil
-}
-
-func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([]*utils.TPRatingPlan, error) {
-	var tpRatingPlans RatingPlanMdls
-	if err := csvs.proccesData(RatingPlanMdl{}, csvs.destinationratetimingsFn, func(tp interface{}) {
-		rp := tp.(RatingPlanMdl)
-		rp.Tpid = tpid
-		tpRatingPlans = append(tpRatingPlans, rp)
-	}); err != nil {
-		return nil, err
-	}
-	return tpRatingPlans.AsTPRatingPlans(), nil
-}
-
-func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
-	var tpRatingProfiles RatingProfileMdls
-	if err := csvs.proccesData(RatingProfileMdl{}, csvs.ratingprofilesFn, func(tp interface{}) {
-		rpf := tp.(RatingProfileMdl)
-		if filter != nil {
-			rpf.Tpid = filter.TPid
-			rpf.Loadid = filter.LoadId
-		}
-		tpRatingProfiles = append(tpRatingProfiles, rpf)
-	}); err != nil {
-		return nil, err
-	}
-	return tpRatingProfiles.AsTPRatingProfiles(), nil
-}
-
-func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
-	var tpSharedGroups SharedGroupMdls
-	if err := csvs.proccesData(SharedGroupMdl{}, csvs.sharedgroupsFn, func(tp interface{}) {
-		sg := tp.(SharedGroupMdl)
-		sg.Tpid = tpid
-		tpSharedGroups = append(tpSharedGroups, sg)
-	}); err != nil {
-		return nil, err
-	}
-	return tpSharedGroups.AsTPSharedGroups(), nil
-}
-
 func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
 	var tpActions ActionMdls
 	if err := csvs.proccesData(ActionMdl{}, csvs.actionsFn, func(tp interface{}) {
@@ -524,45 +406,6 @@ func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error
 		return nil, err
 	}
 	return tpActions.AsTPActions(), nil
-}
-
-func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
-	var tpActionPlans ActionPlanMdls
-	if err := csvs.proccesData(ActionPlanMdl{}, csvs.actiontimingsFn, func(tp interface{}) {
-		ap := tp.(ActionPlanMdl)
-		ap.Tpid = tpid
-		tpActionPlans = append(tpActionPlans, ap)
-	}); err != nil {
-		return nil, err
-	}
-	return tpActionPlans.AsTPActionPlans(), nil
-}
-
-func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
-	var tpActionTriggers ActionTriggerMdls
-	if err := csvs.proccesData(ActionTriggerMdl{}, csvs.actiontriggersFn, func(tp interface{}) {
-		at := tp.(ActionTriggerMdl)
-		at.Tpid = tpid
-		tpActionTriggers = append(tpActionTriggers, at)
-	}); err != nil {
-		return nil, err
-	}
-	return tpActionTriggers.AsTPActionTriggers(), nil
-}
-
-func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
-	var tpAccountActions AccountActionMdls
-	if err := csvs.proccesData(AccountActionMdl{}, csvs.accountactionsFn, func(tp interface{}) {
-		aa := tp.(AccountActionMdl)
-		if filter != nil {
-			aa.Tpid = filter.TPid
-			aa.Loadid = filter.LoadId
-		}
-		tpAccountActions = append(tpAccountActions, aa)
-	}); err != nil {
-		return nil, err
-	}
-	return tpAccountActions.AsTPAccountActions(), nil
 }
 
 func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {

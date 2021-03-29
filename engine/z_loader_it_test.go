@@ -169,15 +169,6 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadActions(); err != nil {
 		t.Error("Failed loading actions: ", err.Error())
 	}
-	if err = loader.LoadActionPlans(); err != nil {
-		t.Error("Failed loading action timings: ", err.Error())
-	}
-	if err = loader.LoadActionTriggers(); err != nil {
-		t.Error("Failed loading action triggers: ", err.Error())
-	}
-	if err = loader.LoadAccountActions(); err != nil {
-		t.Error("Failed loading account actions: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -247,15 +238,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadActions(); err != nil {
 		t.Error("Failed loading actions: ", err.Error())
-	}
-	if err = loader.LoadActionPlans(); err != nil {
-		t.Error("Failed loading action timings: ", err.Error())
-	}
-	if err = loader.LoadActionTriggers(); err != nil {
-		t.Error("Failed loading action triggers: ", err.Error())
-	}
-	if err = loader.LoadAccountActions(); err != nil {
-		t.Error("Failed loading account actions: ", err.Error())
 	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
@@ -548,15 +530,6 @@ func testLoaderITLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadActions(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading actions: ", err.Error())
 	}
-	if err := loader.LoadActionPlans(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading action timings: ", err.Error())
-	}
-	if err := loader.LoadActionTriggers(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading action triggers: ", err.Error())
-	}
-	if err := loader.LoadAccountActions(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading account actions: ", err.Error())
-	}
 }
 
 func testLoaderITLoadIndividualProfiles(t *testing.T) {
@@ -587,19 +560,6 @@ func testLoaderITLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 
-	// Load account actions
-	if aas, err := storDb.GetTPAccountActions(&utils.TPAccountActions{TPid: utils.TestSQL, LoadId: loadId}); err != nil {
-		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
-	} else if len(aas) == 0 {
-		t.Error("No account actions")
-	} else {
-
-		for _, a := range aas {
-			if err := loader.LoadAccountActionsFiltered(a); err != nil {
-				t.Fatalf("Could not load account actions with id: %s, error: %s", a.GetId(), err.Error())
-			}
-		}
-	}
 }
 
 /*

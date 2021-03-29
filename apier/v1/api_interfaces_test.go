@@ -79,11 +79,6 @@ func TestGuardianSv1Interface(t *testing.T) {
 	_ = GuardianSv1Interface(NewGuardianSv1())
 }
 
-func TestSchedulerSv1Interface(t *testing.T) {
-	_ = SchedulerSv1Interface(NewDispatcherSchedulerSv1(nil))
-	_ = SchedulerSv1Interface(NewSchedulerSv1(nil, nil))
-}
-
 func TestCDRsV1Interface(t *testing.T) {
 	_ = CDRsV1Interface(NewDispatcherSCDRsV1(nil))
 	_ = CDRsV1Interface(NewCDRsV1(nil))

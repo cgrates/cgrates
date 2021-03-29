@@ -648,7 +648,7 @@ func main() {
 		internalRALsChan, internalResponderChan,
 		shdChan, connManager, anz, srvDep)
 
-	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, schS, rals.GetResponder(),
+	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, rals.GetResponder(),
 		internalAPIerSv1Chan, connManager, anz, srvDep)
 
 	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz, srvDep)
@@ -661,7 +661,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
 
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, schS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
