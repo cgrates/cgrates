@@ -54,6 +54,19 @@ var (
 		testActionSUpdateActionProfile,
 		testActionSRemoveActionProfile,
 		testActionSKillEngine,
+		//cache test
+		testActionSInitCfg,
+		testActionSInitDataDb,
+		testActionSResetStorDb,
+		testActionSStartEngine,
+		testActionSRPCConn,
+		testActionSCacheTestGetNotFound,
+		testActionSCacheTestSet,
+		testActionSCacheTestGetNotFound,
+		testActionSCacheReload,
+		testActionSCacheTestGetNotFound,
+		testActionSCacheTestGetFound,
+		testActionSKillEngine,
 	}
 )
 
@@ -327,5 +340,60 @@ func testActionSRemoveActionProfile(t *testing.T) {
 func testActionSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testActionSCacheTestGetNotFound(t *testing.T) {
+	var reply *engine.ChargerProfile
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ACTION_CACHE"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+}
+
+func testActionSCacheTestGetFound(t *testing.T) {
+	var reply *engine.ChargerProfile
+	if err := actSRPC.Call(utils.APIerSv1GetActionProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ACTION_CACHE"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testActionSCacheTestSet(t *testing.T) {
+	actPrf = &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "ACTION_CACHE",
+			Actions: []*engine.APAction{
+				{
+					ID:      "ACTION_CACHE",
+					Diktats: []*engine.APDiktat{{}},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	var reply string
+	if err := actSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func testActionSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.ActionProfileIDs: {"cgrates.org:ACTION_CACHE"},
+		},
+	}
+	var reply string
+	if err := actSRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
