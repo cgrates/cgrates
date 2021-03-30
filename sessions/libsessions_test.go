@@ -349,27 +349,3 @@ func TestGetDerivedEvents(t *testing.T) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 }
-
-func TestGetDerivedMaxUsage(t *testing.T) {
-	max := map[string]time.Duration{
-		utils.MetaDefault: time.Second,
-		"CustomRoute":     time.Hour,
-	}
-
-	exp := map[string]time.Duration{
-		utils.MetaRaw:     time.Second,
-		utils.MetaDefault: time.Second,
-		"CustomRoute":     time.Hour,
-	}
-
-	if rply := getDerivedMaxUsage(max, true); !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expected %s received %s", utils.ToJSON(exp), utils.ToJSON(rply))
-	}
-
-	exp = map[string]time.Duration{
-		utils.MetaRaw: time.Second,
-	}
-	if rply := getDerivedMaxUsage(max, false); !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expected %s received %s", utils.ToJSON(exp), utils.ToJSON(rply))
-	}
-}

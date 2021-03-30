@@ -430,9 +430,6 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	return
 }
 
-func (sS *SessionS) pause(sr *SRun, dur time.Duration) {
-}
-
 // debitLoopSession will periodically debit sessions, ie: automatic prepaid
 // threadSafe since it will run into it's own goroutine
 func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
@@ -517,20 +514,6 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			continue
 		}
 	}
-}
-
-// refundSession will refund the extra usage debitted by the end of session
-// not thread-safe so the locks need to be done in a layer above
-// rUsage represents the amount of usage to be refunded
-func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration) (err error) {
-	return
-}
-
-// storeSCost will post the session cost to CDRs
-// not thread safe, need to be handled in a layer above
-func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
-
-	return
 }
 
 // disconnectSession will send disconnect from SessionS to clients
@@ -733,9 +716,6 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 		f, err := sS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
-			if err == utils.ErrNotFound {
-				err = utils.ErrPrefixNotFound(fltrID)
-			}
 			continue
 		}
 		if f.ActivationInterval != nil &&
@@ -964,26 +944,6 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREvent, resID, clntConnID string,
 		return
 	}
 	s.SRuns = make([]*SRun, len(chrgrs))
-	for i, chrgr := range chrgrs {
-		me := engine.MapEvent(chrgr.CGREvent.Event)
-		startTime := me.GetTimeIgnoreErrors(utils.AnswerTime,
-			sS.cgrCfg.GeneralCfg().DefaultTimezone)
-		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
-			startTime = s.EventStart.GetTimeIgnoreErrors(utils.SetupTime,
-				sS.cgrCfg.GeneralCfg().DefaultTimezone)
-		}
-		category := me.GetStringIgnoreErrors(utils.Category)
-		if len(category) == 0 {
-			category = sS.cgrCfg.GeneralCfg().DefaultCategory
-		}
-		subject := me.GetStringIgnoreErrors(utils.Subject)
-		if len(subject) == 0 {
-			subject = me.GetStringIgnoreErrors(utils.AccountField)
-		}
-		s.SRuns[i] = &SRun{
-			Event: me,
-		}
-	}
 	return
 }
 
@@ -1277,7 +1237,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 	}
 
 	var reqMaxUsage time.Duration
-	if reqMaxUsage, err = updtEv.GetDuration(utils.Usage); err != nil {
+	if _, err = updtEv.GetDuration(utils.Usage); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -1629,7 +1589,6 @@ func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 		}
 	}
 	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
-	return
 }
 
 // V1AuthorizeReply are options available in auth reply
@@ -2598,7 +2557,6 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
 		}
 	}
 	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
-	return
 }
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API

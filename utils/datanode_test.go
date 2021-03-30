@@ -187,7 +187,7 @@ func TestFieldAsInterface(t *testing.T) {
 	///
 	testPath = []string{"path"}
 	dn.Map = map[string]*DataNode{
-		"notPath": &DataNode{
+		"notPath": {
 			Type: 1,
 		},
 	}
@@ -235,7 +235,7 @@ func TestSet(t *testing.T) {
 	dn := new(DataNode)
 	testPath := make([]string, 0)
 	val1 := map[string]*DataNode{
-		"test": &DataNode{
+		"test": {
 			Type: 1,
 		},
 	}

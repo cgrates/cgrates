@@ -265,29 +265,6 @@ func (sr *SRun) Clone() (clsr *SRun) {
 	return
 }
 
-// debitReserve attempty to debit from ExtraDuration and returns remaining duration
-// if lastUsage is not nil, the ExtraDuration is corrected
-func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur time.Duration) {
-	if lastUsage != nil &&
-		sr.LastUsage != *lastUsage {
-		diffUsage := sr.LastUsage - *lastUsage
-		sr.ExtraDuration += diffUsage
-		sr.TotalUsage -= sr.LastUsage
-		sr.TotalUsage += *lastUsage
-		sr.LastUsage = *lastUsage
-	}
-	// debit from reserved
-	if sr.ExtraDuration >= dur {
-		sr.ExtraDuration -= dur
-		sr.LastUsage = dur
-		sr.TotalUsage += dur
-	} else {
-		rDur = dur - sr.ExtraDuration
-		sr.ExtraDuration = 0
-	}
-	return
-}
-
 // updateSRuns updates the SRuns event with the alterable fields (is not thread safe)
 func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.StringSet) {
 	if alterableFields.Size() == 0 {
