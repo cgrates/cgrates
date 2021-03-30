@@ -84,7 +84,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		"thresholds_conns": ["*internal:*thresholds","*conn1"],					
 		"stats_conns": ["*internal:*stats","*conn1"],						
 		"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file"],
-		"actions_conns": ["*internal:*scheduler","*conn1"],		
+		"actions_conns": ["*internal:*actions","*conn1"],		
         "ees_conns": ["*internal:*ees","*conn1"],
 	},
 }`

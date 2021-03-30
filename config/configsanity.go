@@ -651,7 +651,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.APIerSv1, connID)
 		}
 	}
-	for _, connID := range cfg.apier.ActionsConns {
+	for _, connID := range cfg.apier.ActionSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.actionSCfg.Enabled {
 			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SchedulerS, utils.APIerSv1)
 		}
