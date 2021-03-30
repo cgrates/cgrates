@@ -112,7 +112,7 @@ type SessionSCfg struct {
 	TerminateAttempts   int
 	AlterableFields     utils.StringSet
 	MinDurLowBalance    time.Duration
-	SchedulerConns      []string
+	ActionsConns        []string
 	STIRCfg             *STIRcfg
 	DefaultUsage        map[string]time.Duration
 }
@@ -289,13 +289,13 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Scheduler_conns != nil {
-		scfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
-		for idx, connID := range *jsnCfg.Scheduler_conns {
+	if jsnCfg.Actions_conns != nil {
+		scfg.ActionsConns = make([]string, len(*jsnCfg.Actions_conns))
+		for idx, connID := range *jsnCfg.Actions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.SchedulerConns[idx] = connID
+			scfg.ActionsConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
+				scfg.ActionsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -440,15 +440,15 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.CDRsConnsCfg] = CDRsConns
 	}
-	if scfg.SchedulerConns != nil {
-		schedulerConns := make([]string, len(scfg.SchedulerConns))
-		for i, item := range scfg.SchedulerConns {
-			schedulerConns[i] = item
+	if scfg.ActionsConns != nil {
+		actionConns := make([]string, len(scfg.ActionsConns))
+		for i, item := range scfg.ActionsConns {
+			actionConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
-				schedulerConns[i] = utils.MetaInternal
+				actionConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.ActionSConnsCfg] = schedulerConns
+		initialMP[utils.ActionSConnsCfg] = actionConns
 	}
 	return
 }
@@ -541,10 +541,10 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 			cln.ReplicationConns[i] = con
 		}
 	}
-	if scfg.SchedulerConns != nil {
-		cln.SchedulerConns = make([]string, len(scfg.SchedulerConns))
-		for i, con := range scfg.SchedulerConns {
-			cln.SchedulerConns[i] = con
+	if scfg.ActionsConns != nil {
+		cln.ActionsConns = make([]string, len(scfg.ActionsConns))
+		for i, con := range scfg.ActionsConns {
+			cln.ActionsConns[i] = con
 		}
 	}
 

@@ -48,7 +48,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
-		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		ExtraFields:      RSRParsers{},
 	}
@@ -84,7 +84,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		"thresholds_conns": ["*internal:*thresholds","*conn1"],					
 		"stats_conns": ["*internal:*stats","*conn1"],						
 		"online_cdr_exports":["http_localhost", "amqp_localhost", "http_test_file"],
-		"scheduler_conns": ["*internal:*scheduler","*conn1"],		
+		"actions_conns": ["*internal:*scheduler","*conn1"],		
         "ees_conns": ["*internal:*ees","*conn1"],
 	},
 }`

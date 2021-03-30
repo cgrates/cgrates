@@ -229,7 +229,7 @@ type SessionSJsonCfg struct {
 	Terminate_attempts     *int
 	Alterable_fields       *[]string
 	Min_dur_low_balance    *string
-	Scheduler_conns        *[]string
+	Actions_conns          *[]string
 	Stir                   *STIRJsonCfg
 	Default_usage          *map[string]string
 }

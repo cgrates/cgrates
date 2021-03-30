@@ -149,15 +149,7 @@ const CGRATES_CFG_JSON = `
 		"*cdrs": {"remote":false, "replicate":false}, 		
 		"*tp_timings":{"remote":false, "replicate":false}, 					
 		"*tp_destinations": {"remote":false, "replicate":false},
-		"*tp_rates": {"remote":false, "replicate":false}, 
-		"*tp_destination_rates": {"remote":false, "replicate":false}, 
-		"*tp_rating_plans":{"remote":false, "replicate":false}, 
-		"*tp_rating_profiles":{"remote":false, "replicate":false}, 
-		"*tp_shared_groups": {"remote":false, "replicate":false}, 
-		"*tp_actions":{"remote":false, "replicate":false}, 
-		"*tp_action_plans":{"remote":false, "replicate":false}, 
-		"*tp_action_triggers":{"remote":false, "replicate":false}, 
-		"*tp_account_actions": {"remote":false, "replicate":false}, 
+		"*tp_actions":{"remote":false, "replicate":false},
 		"*tp_resources":{"remote":false, "replicate":false}, 
 		"*tp_stats":{"remote":false, "replicate":false}, 
 		"*tp_thresholds": {"remote":false, "replicate":false}, 
@@ -228,13 +220,7 @@ const CGRATES_CFG_JSON = `
 	"partitions": {
 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// destination caching
 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// reverse destinations index caching
-		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// rating plans caching
-		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// rating profiles caching
 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// actions caching
-		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// action plans caching
-		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// account action plans index caching
-		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// action triggers caching
-		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// shared groups caching
 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// timings caching
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control resources caching
@@ -282,21 +268,13 @@ const CGRATES_CFG_JSON = `
 		
 		// only for *internal database
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing
-		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for account storing
 		// internal storDB tabels
 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 		
 		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					
 		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_rating_plans":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_rating_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_actions":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_action_plans":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_action_triggers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
+
 		"*tp_resources":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_stats":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
@@ -986,7 +964,7 @@ const CGRATES_CFG_JSON = `
 "apiers": {
 	"enabled": false,
 	"caches_conns":["*internal"],
-	"scheduler_conns": [],					// connections to SchedulerS for reloads
+	"actions_conns": [],					// connections to ActionS for reloads
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 	"ees_conns": [],						// connections to EEs
 },

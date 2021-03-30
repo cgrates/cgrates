@@ -32,7 +32,6 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 		Disable_reverse:  utils.BoolPointer(true),
 		Field_separator:  utils.StringPointer(";"),
 		Caches_conns:     &[]string{utils.MetaInternal},
-		Actions_conns:    &[]string{utils.MetaInternal},
 		Gapi_credentials: &json.RawMessage{12, 13, 60},
 		Gapi_token:       &json.RawMessage{13, 16},
 	}
@@ -62,7 +61,7 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		"disable_reverse": false,
 		"field_separator": ",",
 		"caches_conns":["*internal","*localhost"],
-		"scheduler_conns": ["*internal","*localhost"],
+		"actions_conns": ["*internal","*localhost"],
 		"gapi_credentials": ".gapi/credentials.json",
 		"gapi_token": ".gapi/token.json"
 	},

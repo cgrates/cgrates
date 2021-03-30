@@ -133,6 +133,7 @@ func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
 	}
 }
 
+/*
 func TestAddTmpCaches(t *testing.T) {
 	cfgJSON := &CacheJsonCfg{
 		Partitions: &map[string]*CacheParamJsonCfg{
@@ -155,6 +156,8 @@ func TestAddTmpCaches(t *testing.T) {
 			utils.ToJSON(json.cacheCfg.Partitions[utils.CacheRatingProfilesTmp]))
 	}
 }
+
+*/
 
 func TestCachesCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
