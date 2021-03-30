@@ -215,7 +215,6 @@ type ReplicatorSv1Interface interface {
 	RemoveTiming(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-	RemoveActions(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error

@@ -37,10 +37,6 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		Remote_conns:          &[]string{"*conn1"},
 		Replication_conns:     &[]string{"*conn1"},
 		Items: &map[string]*ItemOptJson{
-			utils.MetaSessionsCosts: {
-				Remote:    utils.BoolPointer(true),
-				Replicate: utils.BoolPointer(true),
-			},
 			utils.MetaCDRs: {
 				Remote:    utils.BoolPointer(true),
 				Replicate: utils.BoolPointer(false),
@@ -65,10 +61,6 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		RmtConns:            []string{"*conn1"},
 		RplConns:            []string{"*conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaSessionsCosts: {
-				Remote:    true,
-				Replicate: true,
-			},
 			utils.MetaCDRs: {
 				Remote:    true,
 				Replicate: false,
@@ -86,9 +78,6 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected.Items[utils.MetaSessionsCosts], jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]) {
-		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Items[utils.MetaSessionsCosts]),
-			utils.ToJSON(jsonCfg.storDbCfg.Items[utils.MetaSessionsCosts]))
 	} else if !reflect.DeepEqual(expected.Opts, jsonCfg.storDbCfg.Opts) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Opts), utils.ToJSON(jsonCfg.storDbCfg.Opts))
 	} else if !reflect.DeepEqual(expected.RplConns, jsonCfg.storDbCfg.RplConns) {
@@ -276,10 +265,6 @@ func TestStorDbCfgClone(t *testing.T) {
 		RmtConns:            []string{"*conn1"},
 		RplConns:            []string{"*conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaSessionsCosts: {
-				Remote:    true,
-				Replicate: true,
-			},
 			utils.MetaCDRs: {
 				Remote:    true,
 				Replicate: false,

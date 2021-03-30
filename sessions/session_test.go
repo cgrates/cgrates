@@ -83,16 +83,12 @@ func TestSessionClone(t *testing.T) {
 		DebitInterval: 18,
 		SRuns: []*SRun{
 			{Event: engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
 				NextAutoDebit: &tTime,
 			},
 			{Event: engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test2"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
 				ExtraDuration: 4,
 				LastUsage:     5,
 				TotalUsage:    6,
@@ -109,16 +105,12 @@ func TestSessionClone(t *testing.T) {
 		DebitInterval: 18,
 		SRuns: []*SRun{
 			{Event: engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
 				NextAutoDebit: &tTime,
 			},
 			{Event: engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test2"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
 				ExtraDuration: 4,
 				LastUsage:     5,
 				TotalUsage:    6,
@@ -498,14 +490,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 		SRuns: []*SRun{{
 			Event:      engine.NewMapEvent(ev),
 			TotalUsage: 2 * time.Second,
-			CD: &engine.CallDescriptor{
-				LoopIndex:     10,
-				DurationIndex: 3 * time.Second,
-				MaxRate:       11,
-				MaxRateUnit:   30 * time.Second,
-				MaxCostSoFar:  20,
-			}},
-		},
+		}},
 	}
 	exp := []*ExternalSession{{
 		CGRID:    "RandomCGRID",
@@ -582,15 +567,8 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{{
-			Event:      engine.NewMapEvent(ev),
-			TotalUsage: 2 * time.Second,
-			CD: &engine.CallDescriptor{
-				LoopIndex:     10,
-				DurationIndex: 3 * time.Second,
-				MaxRate:       11,
-				MaxRateUnit:   30 * time.Second,
-				MaxCostSoFar:  20,
-			},
+			Event:         engine.NewMapEvent(ev),
+			TotalUsage:    2 * time.Second,
 			NextAutoDebit: &tTime,
 		}},
 	}
@@ -651,8 +629,6 @@ func TestSessiontotalUsage(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event:         engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    5,
@@ -660,8 +636,6 @@ func TestSessiontotalUsage(t *testing.T) {
 			},
 			{
 				Event:         engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test2"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
 				ExtraDuration: 4,
 				LastUsage:     5,
 				TotalUsage:    6,
@@ -744,13 +718,6 @@ func TestUpdateSRuns(t *testing.T) {
 		SRuns: []*SRun{{
 			Event:      engine.NewMapEvent(ev),
 			TotalUsage: 2 * time.Second,
-			CD: &engine.CallDescriptor{
-				LoopIndex:     10,
-				DurationIndex: 3 * time.Second,
-				MaxRate:       11,
-				MaxRateUnit:   30 * time.Second,
-				MaxCostSoFar:  20,
-			},
 		}},
 	}
 	updEv := map[string]interface{}{

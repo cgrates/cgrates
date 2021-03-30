@@ -106,7 +106,6 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 			}
 		}
 	}
-	return
 }
 
 // Shutdown is called by engine to clear states
@@ -605,7 +604,6 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) 
 					utils.SessionS, sCln.CGRID, err.Error()))
 		}
 	}
-	return
 }
 
 // registerSession will register an active or passive Session
@@ -697,7 +695,6 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
 		}
 	}
-	return
 }
 
 // unindexASession removes an active or passive session from indexes

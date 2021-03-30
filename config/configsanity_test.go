@@ -1207,13 +1207,13 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.CacheRateProfiles: {
+			utils.CacheAccountProfiles: {
 				Limit: 1,
 			},
 		},
 	}
 	expected := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
-	cfg.cacheCfg.Partitions[utils.CacheRateProfiles].Limit = 0
+	cfg.cacheCfg.Partitions[utils.CacheAccountProfiles].Limit = 0
 	cfg.resourceSCfg.Enabled = true
 	expected = "<ResourceS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
