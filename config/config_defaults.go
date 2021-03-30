@@ -89,11 +89,7 @@ const CGRATES_CFG_JSON = `
 		"*destinations": {"remote":false, "replicate":false}, 
 		"*rating_plans": {"remote":false, "replicate":false}, 
 		"*rating_profiles":{"remote":false, "replicate":false}, 
-		"*actions":{"remote":false, "replicate":false}, 
-		"*action_plans": {"remote":false, "replicate":false}, 
-		"*account_action_plans":{"remote":false, "replicate":false}, 
-		"*action_triggers":{"remote":false, "replicate":false}, 
-		"*shared_groups":{"remote":false, "replicate":false}, 
+		"*actions":{"remote":false, "replicate":false},
 		"*timings": {"remote":false, "replicate":false}, 
 		"*resource_profiles":{"remote":false, "replicate":false}, 
 		"*resources":{"remote":false, "replicate":false}, 
@@ -149,7 +145,6 @@ const CGRATES_CFG_JSON = `
 		"*cdrs": {"remote":false, "replicate":false}, 		
 		"*tp_timings":{"remote":false, "replicate":false}, 					
 		"*tp_destinations": {"remote":false, "replicate":false},
-		"*tp_actions":{"remote":false, "replicate":false},
 		"*tp_resources":{"remote":false, "replicate":false}, 
 		"*tp_stats":{"remote":false, "replicate":false}, 
 		"*tp_thresholds": {"remote":false, "replicate":false}, 
@@ -220,7 +215,6 @@ const CGRATES_CFG_JSON = `
 	"partitions": {
 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// destination caching
 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// reverse destinations index caching
-		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// actions caching
 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// timings caching
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control resources caching
@@ -273,7 +267,6 @@ const CGRATES_CFG_JSON = `
 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 		
 		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					
 		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-		"*tp_actions":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 
 		"*tp_resources":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_stats":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
@@ -333,7 +326,7 @@ const CGRATES_CFG_JSON = `
 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
-	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 	"ees_conns": [],						// connections to EventExporter
 },
 
@@ -443,7 +436,7 @@ const CGRATES_CFG_JSON = `
 		"publickey_path": "",				// the path to the public key 
 		"privatekey_path": "",				// the path to the private key
 	},
-	"scheduler_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
+	"actions_conns": [],					// connections to SchedulerS in case of *dynaprepaid request
 },
 
 
@@ -890,7 +883,7 @@ const CGRATES_CFG_JSON = `
 	"disable_reverse": false,						// disable reverse computing
 	"field_separator": ",",							// separator used in case of csv files
 	"caches_conns":["*localhost"],
-	"scheduler_conns": ["*localhost"],
+	"actions_conns": ["*localhost"],
 	"gapi_credentials": ".gapi/credentials.json", 	// the path to the credentials for google API or the credentials.json file content
 	"gapi_token": ".gapi/token.json" 				// the path to the token for google API or the token.json file content
 },

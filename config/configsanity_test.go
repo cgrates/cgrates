@@ -1306,12 +1306,12 @@ func TestConfigSanityAPIer(t *testing.T) {
 	}
 	cfg.apier.AttributeSConns = []string{utils.MetaInternal}
 	cfg.attributeSCfg.Enabled = true
-	cfg.apier.ActionsConns = []string{utils.MetaInternal}
+	cfg.apier.ActionSConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <APIerSv1> component" {
 		t.Error(err)
 	}
-	cfg.apier.ActionsConns = []string{"test"}
+	cfg.apier.ActionSConns = []string{"test"}
 	expected = "<APIerSv1> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)

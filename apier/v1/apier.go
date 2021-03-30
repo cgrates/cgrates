@@ -176,7 +176,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone, apierSv1.Config.ApierCfg().CachesConns,
-		apierSv1.Config.ApierCfg().ActionsConns,
+		apierSv1.Config.ApierCfg().ActionSConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -210,7 +210,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionsConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionSConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -235,7 +235,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().ActionsConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionSConns) != 0 {
 		utils.Logger.Info("APIerSv1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		if err := dbReader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -351,7 +351,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath),
 		"", apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionsConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionSConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -379,7 +379,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().ActionsConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionSConns) != 0 {
 		utils.Logger.Info("APIerSv1.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -411,7 +411,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionsConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionSConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -439,7 +439,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().ActionsConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionSConns) != 0 {
 		utils.Logger.Info("APIerSv1.RemoveTPFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -459,7 +459,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionsConns,
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionSConns,
 		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -485,7 +485,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	if err := dbReader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apierSv1.Config.ApierCfg().ActionsConns) != 0 {
+	if len(apierSv1.Config.ApierCfg().ActionSConns) != 0 {
 		utils.Logger.Info("APIerSv1.RemoveTPFromStorDB, reloading scheduler.")
 		if err := dbReader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)

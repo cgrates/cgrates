@@ -35,7 +35,7 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	expected := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		ActionsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+		ActionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
@@ -75,7 +75,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
        "attributes_conns": ["*internal:*attributes", "*conn1"],
        "ees_conns": ["*internal:*ees", "*conn1"],
        "caches_conns": ["*internal:*caches", "*conn1"],
-       "actions_conns": ["*internal:*scheduler", "*conn1"],
+       "actions_conns": ["*internal:*actions", "*conn1"],
     },
 }`
 	expectedMap := map[string]interface{}{
@@ -96,7 +96,7 @@ func TestApierCfgClone(t *testing.T) {
 	sa := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		ActionsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+		ActionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
@@ -107,7 +107,7 @@ func TestApierCfgClone(t *testing.T) {
 	if rcv.CachesConns[1] = ""; sa.CachesConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ActionsConns[1] = ""; sa.ActionsConns[1] != "*conn1" {
+	if rcv.ActionSConns[1] = ""; sa.ActionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.AttributeSConns[1] = ""; sa.AttributeSConns[1] != "*conn1" {

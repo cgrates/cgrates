@@ -223,6 +223,9 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 
+			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPTimings: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
@@ -242,6 +245,9 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPRoutes: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+				Replicate: utils.BoolPointer(false)},
+			utils.CacheTBLTPStats: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPAttributes: {Limit: utils.IntPointer(-1),
@@ -1808,7 +1814,7 @@ func TestDfLoaderCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expected1: %s, received: %+v", utils.ToJSON(*eCfg), utils.ToJSON(cfg))
+		t.Errorf("Expected: %s, received: %+v", utils.ToJSON(*eCfg), utils.ToJSON(cfg))
 	}
 }
 
