@@ -172,19 +172,6 @@ type TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-type AttrGetAccount struct {
-	Tenant  string
-	Account string
-}
-
-type AttrGetAccounts struct {
-	Tenant     string
-	AccountIDs []string
-	Offset     int // Set the item offset
-	Limit      int // Limit number of items retrieved
-	Filter     map[string]bool
-}
-
 type AttrGetAccountsCount struct {
 	Tenant string
 }
@@ -261,7 +248,6 @@ func (fltr *AttrGetCdrs) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err
 type AttrLoadTpFromFolder struct {
 	FolderPath string // Take files from folder absolute path
 	DryRun     bool   // Do not write to database but parse only
-	Validate   bool   // Run structural checks on data
 	APIOpts    map[string]interface{}
 	Caching    *string
 }

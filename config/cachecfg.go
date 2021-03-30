@@ -130,14 +130,6 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 	return
 }
 
-// AddTmpCaches adds all the temporary caches configuration needed
-func (cCfg *CacheCfg) AddTmpCaches() {
-	cCfg.Partitions[utils.CacheRatingProfilesTmp] = &CacheParamCfg{
-		Limit: -1,
-		TTL:   time.Minute,
-	}
-}
-
 // AsMapInterface returns the config as a map[string]interface{}
 func (cCfg *CacheCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = make(map[string]interface{})

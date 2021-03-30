@@ -644,11 +644,7 @@ func main() {
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
 		internalRouteSChan, connManager, anz, srvDep)
 
-	rals := services.NewRalService(cfg, cacheS, server,
-		internalRALsChan, internalResponderChan,
-		shdChan, connManager, anz, srvDep)
-
-	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server, rals.GetResponder(),
+	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server,
 		internalAPIerSv1Chan, connManager, anz, srvDep)
 
 	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz, srvDep)
@@ -661,7 +657,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
 
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
@@ -700,8 +696,6 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.GuardianSv1, internalGuardianSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, internalLoaderSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, internalResourceSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.Responder, internalResponderChan)
-	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, internalSchedulerSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, internalStatSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, internalRouteSChan)
@@ -709,7 +703,6 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
-	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ActionSv1, internalActionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.EeSv1, internalEEsChan)

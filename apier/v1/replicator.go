@@ -42,17 +42,6 @@ func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args interface{}, reply 
 	return utils.APIerRPCCall(rplSv1, serviceMethod, args, reply)
 }
 
-// GetAccount is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error {
-	engine.UpdateReplicationFilters(utils.AccountPrefix, args.Arg, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.GetAccount(args.Arg)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
 // GetDestination is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetDestination(key *utils.StringWithAPIOpts, reply *engine.Destination) error {
 	engine.UpdateReplicationFilters(utils.DestinationPrefix, key.Arg, utils.IfaceAsString(key.APIOpts[utils.RemoteHostOpt]))
@@ -158,96 +147,6 @@ func (rplSv1 *ReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts, reply
 func (rplSv1 *ReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
 	engine.UpdateReplicationFilters(utils.ResourceProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceProfileDrv(tntID.Tenant, tntID.ID)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
-// GetActionTriggers is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
-	engine.UpdateReplicationFilters(utils.ActionTriggerPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetActionTriggersDrv(id.Arg)
-	if err != nil {
-		return err
-	}
-	*reply = rcv
-	return nil
-}
-
-// GetSharedGroup is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
-	engine.UpdateReplicationFilters(utils.SharedGroupPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetSharedGroupDrv(id.Arg)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
-// GetActions is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error {
-	engine.UpdateReplicationFilters(utils.ActionPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetActionsDrv(id.Arg)
-	if err != nil {
-		return err
-	}
-	*reply = rcv
-	return nil
-}
-
-// GetActionPlan is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
-	engine.UpdateReplicationFilters(utils.ActionPlanPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id.Arg, true, utils.NonTransactional)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
-// GetAllActionPlans is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAllActionPlans(id *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
-	rcv, err := rplSv1.dm.DataDB().GetAllActionPlansDrv()
-	if err != nil {
-		return err
-	}
-	for _, ap := range rcv {
-		engine.UpdateReplicationFilters(utils.ActionPlanPrefix, ap.Id, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	}
-	*reply = rcv
-	return nil
-}
-
-// GetAccountActionPlans is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error {
-	engine.UpdateReplicationFilters(utils.AccountActionPlansPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id.Arg, false, utils.NonTransactional)
-	if err != nil {
-		return err
-	}
-	*reply = rcv
-	return nil
-}
-
-// GetRatingPlan is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
-	engine.UpdateReplicationFilters(utils.RatingPlanPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetRatingPlanDrv(id.Arg)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
-// GetRatingProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
-	engine.UpdateReplicationFilters(utils.RatingProfilePrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetRatingProfileDrv(id.Arg)
 	if err != nil {
 		return err
 	}
@@ -363,16 +262,6 @@ func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[st
 	}
 	*reply = indx
 	return nil
-}
-
-// SetAccount is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccount(acc *engine.AccountWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetAccountDrv(acc.Account); err != nil {
-		return
-	}
-	// the account doesn't have cache
-	*reply = utils.OK
-	return
 }
 
 // SetDestination is the replication method coresponding to the dataDb driver method
@@ -505,71 +394,6 @@ func (rplSv1 *ReplicatorSv1) SetResource(rs *engine.ResourceWithAPIOpts, reply *
 	return
 }
 
-// SetActionTriggers is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetActionTriggersDrv(args.Key, args.Attrs); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActionTriggers, args.Key, nil, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetSharedGroup is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetSharedGroupDrv(shg.SharedGroup); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(shg.APIOpts[utils.CacheOpt]),
-		shg.Tenant, utils.CacheSharedGroups, shg.Id, nil, nil, shg.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetActions is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetActionsDrv(args.Key, args.Acs); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActions, args.Key, nil, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetRatingPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetRatingPlanDrv(rp.RatingPlan); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.APIOpts[utils.CacheOpt]),
-		rp.Tenant, utils.CacheRatingPlans, rp.Id, nil, nil, rp.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetRatingProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRatingProfile(rp *engine.RatingProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetRatingProfileDrv(rp.RatingProfile); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rp.APIOpts[utils.CacheOpt]),
-		rp.Tenant, utils.CacheRatingProfiles, rp.Id, nil, nil, rp.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
 // SetRouteProfile is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRouteProfileDrv(sp.RouteProfile); err != nil {
@@ -616,32 +440,6 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileW
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dpp.APIOpts[utils.CacheOpt]),
 		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), &dpp.FilterIDs, dpp.Subsystems, dpp.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetActionPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheActionPlans, args.Key, nil, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetAccountActionPlans is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -760,16 +558,6 @@ func (rplSv1 *ReplicatorSv1) RemoveDestination(id *utils.StringWithAPIOpts, repl
 	return
 }
 
-// RemoveAccount is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveAccount(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveAccountDrv(id.Arg); err != nil {
-		return
-	}
-	// the account doesn't have cache
-	*reply = utils.OK
-	return
-}
-
 // RemoveStatQueue is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().RemStatQueueDrv(args.Tenant, args.ID); err != nil {
@@ -855,97 +643,6 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOp
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
 		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveActionTriggers is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActionTriggers(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveActionTriggersDrv(id.Arg); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
-		id.Tenant, utils.CacheActionTriggers, id.Arg, nil, nil, id.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveSharedGroup is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveSharedGroup(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveSharedGroupDrv(id.Arg); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
-		id.Tenant, utils.CacheSharedGroups, id.Arg, nil, nil, id.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveActions is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActions(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveActionsDrv(id.Arg); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
-		id.Tenant, utils.CacheActions, id.Arg, nil, nil, id.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveActionPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveActionPlanDrv(id.Arg, utils.NonTransactional); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
-		id.Tenant, utils.CacheActionPlans, id.Arg, nil, nil, id.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemAccountActionPlans is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID, args.ApIDs); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAccountActionPlans, args.AcntID, nil, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveRatingPlan is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRatingPlan(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveRatingPlanDrv(id.Arg); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
-		id.Tenant, utils.CacheRatingPlans, id.Arg, nil, nil, id.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveRatingProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveRatingProfile(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveRatingProfileDrv(id.Arg); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
-		id.Tenant, utils.CacheRatingProfiles, id.Arg, nil, nil, id.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
