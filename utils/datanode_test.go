@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -304,21 +305,217 @@ func TestRemovePath(t *testing.T) {
 	}
 
 	///
-	dn.Type = NMSliceType
-	if err := dn.Remove(testPath); err != nil {
-		t.Error(err)
-	}
-
-	///
 	dn.Slice = []*DataNode{
 		{
 			Value: &DataLeaf{
 				Data: "testValue",
 			},
 		},
+		{},
 	}
-	testPath = []string{"0", "path", "test"}
+	dn.Type = NMSliceType
+	rcvExpect := "0"
+	if err := dn.Remove(testPath); err != nil {
+		t.Error(err)
+	} else if testPath[0] != rcvExpect {
+		t.Errorf("Expected %s but received %s", rcvExpect, testPath[0])
+	}
+
+	testPath = []string{"1", "path", "test"} // reminder: look at this again
+	if err := dn.Remove(testPath); err != nil {
+		t.Error(err)
+	}
+
+	///
+	dn.Type = 3
 	if err := dn.Remove(testPath); err == nil || err != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestAppend1(t *testing.T) {
+	var errExpect error
+	dn := new(DataNode)
+	testPath := make([]string, 0)
+	dn.Type = NMMapType
+	val1 := &DataLeaf{
+		AttributeID: "ID",
+	}
+	errExpect = ErrWrongPath
+	if _, err := dn.Append(testPath, val1); err == nil || err != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	///
+	dn.Type = NMDataType
+	if _, err := dn.Append(testPath, val1); err != nil {
+		t.Error(err)
+	}
+
+	///
+	dn.Value = &DataLeaf{
+		Data: "testValue",
+	}
+	dn.Type = NMDataType
+	if _, err := dn.Append(testPath, val1); err == nil || err != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+func TestAppend2(t *testing.T) {
+	dn := new(DataNode)
+	dn.Type = NMDataType
+	testPath := []string{"0", "testPath"}
+	val1 := &DataLeaf{
+		Data: "data",
+	}
+	if rcv, err := dn.Append(testPath, val1); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
+	} else if rcv != -1 {
+		t.Errorf("Expected %v but received %v", -1, rcv)
+	}
+
+	///
+	dn.Type = NMMapType
+	dn.Slice = nil
+	dn.Map = map[string]*DataNode{}
+	dnExpect := NewDataNode(testPath)
+
+	if _, err := dn.Append(testPath, val1); err != nil {
+		t.Error(err)
+	}
+	fmt.Println(ToJSON(dn.Map["0"]))
+	fmt.Println(ToJSON(dnExpect))
+
+	///
+	dn.Type = NMSliceType
+	if rcv, err := dn.Append(testPath, val1); err != nil {
+		t.Error(err)
+	} else if rcv == -1 {
+		t.Error(err)
+	}
+
+	///
+	testPath = []string{"notIntAscii", "path"}
+	errExpectStr := `strconv.Atoi: parsing "notIntAscii": invalid syntax`
+	if rcv, err := dn.Append(testPath, val1); err == nil || err.Error() != errExpectStr {
+		t.Errorf("Expected %v but received %v", errExpectStr, err)
+	} else if rcv != -1 {
+		t.Errorf("Expected %v but received %v", -1, rcv)
+	}
+
+	///
+	testPath = []string{"-2", "path"}
+	if rcv, err := dn.Append(testPath, val1); err != ErrNotFound {
+		t.Errorf("Expected %v but received %v", ErrNotFound, err)
+	} else if rcv != -1 {
+		t.Errorf("Expected %v but received %v", -1, rcv)
+	}
+
+	///
+	testPath = []string{"0", "testPath"}
+	if rcv, err := dn.Append(testPath, val1); err != nil {
+		t.Error(err)
+	} else if rcv == -1 {
+		t.Errorf("Expected %v but received %v", -1, rcv)
+	}
+
+	///
+	dn.Type = 3
+	if rcv, err := dn.Append(testPath, val1); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
+	} else if rcv != -1 {
+		t.Errorf("Expected %v but received %v", -1, rcv)
+	}
+}
+
+func TestCompose(t *testing.T) {
+	dn := new(DataNode)
+	testPath := make([]string, 0)
+	val := &DataLeaf{
+		Data: "test",
+	}
+	dn.Type = NMMapType
+	if err := dn.Compose(testPath, val); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
+	}
+
+	///
+	dn.Type = NMDataType
+	dn.Value = val
+	if err := dn.Compose(testPath, val); err != nil {
+		t.Error(err)
+	}
+
+	///
+	dn.Type = 3
+	if err := dn.Compose(testPath, val); err != nil {
+		t.Error(err)
+	}
+
+	///
+	dn.Type = NMDataType
+	testPath = []string{"0", "testPath"}
+	if err := dn.Compose(testPath, val); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
+	}
+
+	///
+	dn.Type = NMSliceType
+	testPath = []string{"notIntAscii", "path"}
+	errExpectStr := `strconv.Atoi: parsing "notIntAscii": invalid syntax`
+	if err := dn.Compose(testPath, val); err == nil || err.Error() != errExpectStr {
+		t.Errorf("Expected %v but received %v", errExpectStr, err)
+	}
+
+	///
+	dn.Slice = nil
+	testPath = []string{"0", "testPath"}
+	if err := dn.Compose(testPath, val); err != nil {
+		t.Error(err)
+	}
+	if err := dn.Compose(testPath, val); err != nil {
+		t.Error(err)
+	}
+
+	///
+	dn.Type = 3
+	if err := dn.Compose(testPath, val); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
+	}
+}
+
+func TestCompose2(t *testing.T) {
+	dn := new(DataNode)
+	dn.Type = NMDataType
+	val := &DataLeaf{
+		Data: "test",
+	}
+	testPath := []string{"0", "testPath"}
+	if err := dn.Compose(testPath, val); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
+	}
+
+	///
+	dn.Type = NMSliceType
+	testPath = []string{"notIntAscii", "path"}
+	errExpectStr := `strconv.Atoi: parsing "notIntAscii": invalid syntax`
+	if err := dn.Compose(testPath, val); err == nil || err.Error() != errExpectStr {
+		t.Errorf("Expected %v but received %v", errExpectStr, err)
+	}
+
+	///
+	dn.Slice = nil
+	testPath = []string{"0", "testPath"}
+	if err := dn.Compose(testPath, val); err != nil {
+		t.Error(err)
+	}
+	if err := dn.Compose(testPath, val); err != nil {
+		t.Error(err)
+	}
+
+	///
+	dn.Type = 3
+	if err := dn.Compose(testPath, val); err != ErrWrongPath {
+		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
 	}
 }
