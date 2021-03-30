@@ -38,10 +38,9 @@ func init() {
 	var err error
 	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSVSep,
 		DestinationsCSVContent, TimingsCSVContent,
-		ActionsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent), testTPID, "", nil, nil, false)
+		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountProfileCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
