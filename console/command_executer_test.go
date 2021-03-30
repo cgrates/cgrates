@@ -277,18 +277,18 @@ func TestGetFormatedSliceResultCase2(t *testing.T) {
 
 func TestCommandExecuterUsage(t *testing.T) {
 	testStruct := &CommandExecuter{}
-	testStruct.command = commands["accounts"]
+	testStruct.command = commands["accounts_profile"]
 	result := testStruct.Usage()
-	expected := "\n\tUsage: accounts Tenant=\"\" AccountIDs=null Offset=0 Limit=0 Filter=null \n"
+	expected := "\n\tUsage: accounts_profile APIOpts=null \n"
 	if !reflect.DeepEqual(expected, result) {
-		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)
+		t.Errorf("Expected <%+q>, Received <%+q>", expected, result)
 	}
 
 }
 
 func TestCommandExecuterLocalExecute(t *testing.T) {
 	testStruct := &CommandExecuter{}
-	testStruct.command = commands["accounts"]
+	testStruct.command = commands["accounts_profile"]
 	result := testStruct.LocalExecute()
 	expected := utils.EmptyString
 	if !reflect.DeepEqual(expected, result) {
@@ -350,9 +350,9 @@ func TestCommandExecuterLocalFromArgsCase2(t *testing.T) {
 
 func TestCommandExecuterClientArgs(t *testing.T) {
 	testStruct := &CommandExecuter{}
-	testStruct.command = commands["accounts"]
+	testStruct.command = commands["accounts_profile"]
 	result := testStruct.clientArgs(testStruct.command.RpcParams(true))
-	expected := []string{"AccountIDs", "Filter", "Limit", "Offset", "Tenant"}
+	expected := []string{"APIOpts", "ID", "Tenant"}
 	sort.Strings(result)
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expected <%+v>, Received <%+v>", expected, result)

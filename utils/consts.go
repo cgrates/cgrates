@@ -1357,7 +1357,6 @@ const (
 	APIerSv1GetLoadIDs                  = "APIerSv1.GetLoadIDs"
 	APIerSv1GetLoadTimes                = "APIerSv1.GetLoadTimes"
 	APIerSv1GetAttributeProfileIDsCount = "APIerSv1.GetAttributeProfileIDsCount"
-	APIerSv1GetMaxUsage                 = "APIerSv1.GetMaxUsage"
 	APIerSv1GetTPActionProfile          = "APIerSv1.GetTPActionProfile"
 	APIerSv1SetTPActionProfile          = "APIerSv1.SetTPActionProfile"
 	APIerSv1GetTPActionProfileIDs       = "APIerSv1.GetTPActionProfileIDs"
