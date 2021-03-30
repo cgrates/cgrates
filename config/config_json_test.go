@@ -229,12 +229,6 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheTBLTPDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPStats: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPThresholds: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
@@ -358,10 +352,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Remote:    utils.BoolPointer(false),
 			},
 			utils.MetaActions: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.MetaAccountActionPlans: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},

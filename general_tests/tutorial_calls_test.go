@@ -20,24 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
-import (
-	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
-	"os"
-	"path"
-	"reflect"
-	"sort"
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 var tutorialCallsCfg *config.CGRConfig
 var tutorialCallsRpc *rpc.Client
 var tutorialCallsPjSuaListener *os.File
@@ -852,3 +835,4 @@ func testCallStopFS(t *testing.T) {
 		t.Errorf("Unsuported format")
 	}
 }
+*/

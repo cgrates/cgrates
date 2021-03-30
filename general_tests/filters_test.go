@@ -43,15 +43,15 @@ func TestFilterPassDestinations(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	internalAPIerSv1Chan <- &v1.APIerSv1{DataManager: dm}
 	engine.SetConnManager(connMgr)
-	cd := &engine.CallDescriptor{
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "dan",
-		Destination:   "+4986517174963",
-		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second,
-		ExtraFields:   map[string]string{"navigation": "off"},
+	cd := &utils.MapStorage{
+		utils.Category:      "call",
+		utils.Tenant:        "cgrates.org",
+		utils.Subject:       "dan",
+		utils.Destination:   "+4986517174963",
+		utils.TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		utils.TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		utils.DurationIndex: 132 * time.Second,
+		utils.ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf, err := engine.NewFilterRule(utils.MetaDestinations, "~Destination", []string{"DE"})
 	if err != nil {

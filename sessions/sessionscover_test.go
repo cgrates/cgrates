@@ -18,23 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessions
 
-import (
-	"bytes"
-	"fmt"
-	"io"
-	"log"
-	"os"
-	"reflect"
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
-)
-
+/*
 func TestSetSTerminator(t *testing.T) {
 	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
@@ -252,8 +236,6 @@ func TestForceSTerminatorManualTermination(t *testing.T) {
 		DebitInterval: 18,
 		SRuns: []*SRun{
 			{Event: engine.NewMapEvent(nil),
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
@@ -294,8 +276,6 @@ func TestForceSTerminatorPostCDRs(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaPostpaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
@@ -332,8 +312,6 @@ func TestForceSTerminatorReleaseSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaPostpaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
@@ -382,8 +360,6 @@ func TestForceSTerminatorClientCall(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaPostpaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
@@ -416,8 +392,6 @@ func TestDebitSession(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaPostpaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     2,
 				TotalUsage:    3,
@@ -467,17 +441,17 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 	engine.Cache.Clear(nil)
 	testMock1 := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
-				callCost := new(engine.CallCost)
-				callCost.Timespans = []*engine.TimeSpan{
-					{
-						TimeStart: time.Date(2020, 07, 21, 5, 0, 0, 0, time.UTC),
-						TimeEnd:   time.Date(2020, 07, 21, 10, 0, 0, 0, time.UTC),
-					},
-				}
-				*(reply.(*engine.CallCost)) = *callCost
-				return nil
-			},
+			// utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+			// 	callCost := new(engine.CallCost)
+			// 	callCost.Timespans = []*engine.TimeSpan{
+			// 		{
+			// 			TimeStart: time.Date(2020, 07, 21, 5, 0, 0, 0, time.UTC),
+			// 			TimeEnd:   time.Date(2020, 07, 21, 10, 0, 0, 0, time.UTC),
+			// 		},
+			// 	}
+			// 	*(reply.(*engine.CallCost)) = *callCost
+			// 	return nil
+			// },
 		},
 	}
 
@@ -502,11 +476,6 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaPostpaid,
 				},
-				CD: &engine.CallDescriptor{
-					Category:  "test",
-					LoopIndex: 12,
-				},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: time.Minute,
 				LastUsage:     time.Minute,
 				TotalUsage:    3 * time.Minute,
@@ -523,7 +492,6 @@ func TestDebitSessionResponderMaxDebit(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", time.Minute, maxDur)
 	}
 
-	ss.SRuns[0].EventCost = nil
 	if _, err := sessions.debitSession(ss, 0, 5*time.Minute,
 		utils.DurationPointer(time.Minute)); err != nil {
 		t.Error(err)
@@ -540,12 +508,12 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	sMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
-				return utils.ErrAccountNotFound
-			},
-			utils.SchedulerSv1ExecuteActionPlans: func(args interface{}, reply interface{}) error {
-				return nil
-			},
+			// utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+			// 	return utils.ErrAccountNotFound
+			// },
+			// utils.SchedulerSv1ExecuteActionPlans: func(args interface{}, reply interface{}) error {
+			// 	return nil
+			// },
 		},
 	}
 
@@ -553,11 +521,11 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 	internalRpcChan <- sMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	cfg.SessionSCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)}
+	// cfg.SessionSCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}
 	data := engine.NewInternalDB(nil, nil, true)
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      internalRpcChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): internalRpcChan})
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):    internalRpcChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions): internalRpcChan})
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions := NewSessionS(cfg, dm, connMgr)
 
@@ -570,8 +538,8 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaDynaprepaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				// CD:            &engine.CallDescriptor{Category: "test"},
+				// EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     time.Minute,
 				TotalUsage:    3 * time.Minute,
@@ -589,14 +557,14 @@ func TestDebitSessionResponderMaxDebitError(t *testing.T) {
 	}
 
 	engine.Cache.Clear(nil)
-	sMock.calls[utils.SchedulerSv1ExecuteActionPlans] = func(args interface{}, reply interface{}) error {
-		return utils.ErrNotImplemented
-	}
+	// sMock.calls[utils.SchedulerSv1ExecuteActionPlans] = func(args interface{}, reply interface{}) error {
+	// return utils.ErrNotImplemented
+	// }
 	newInternalRpcChan := make(chan rpcclient.ClientConnector, 1)
 	newInternalRpcChan <- sMock
 	connMgr = engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      internalRpcChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): internalRpcChan})
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):    internalRpcChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions): internalRpcChan})
 	dm = engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions = NewSessionS(cfg, dm, connMgr)
 
@@ -626,8 +594,8 @@ func TestInitSessionDebitLoops(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaPrepaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				// CD:            &engine.CallDescriptor{Category: "test"},
+				// EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     time.Minute,
 				TotalUsage:    3 * time.Minute,
@@ -657,7 +625,7 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
 	cfg.SessionSCfg().TerminateAttempts = 1
 	cfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	cfg.SessionSCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)}
+	// cfg.SessionSCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
@@ -673,8 +641,8 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.RequestType: utils.MetaDynaprepaid,
 				},
-				CD:            &engine.CallDescriptor{Category: "test"},
-				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				// CD:            &engine.CallDescriptor{Category: "test"},
+				// EventCost:     &engine.EventCost{CGRID: "testCGRID"},
 				ExtraDuration: 1,
 				LastUsage:     time.Minute,
 				TotalUsage:    3 * time.Minute,
@@ -694,19 +662,19 @@ func TestDebitLoopSessionErrorDebiting(t *testing.T) {
 	engine.Cache.Clear(nil)
 	sMock := &testMockClients{
 		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
-				return utils.ErrAccountNotFound
-			},
-			utils.SchedulerSv1ExecuteActionPlans: func(args interface{}, reply interface{}) error {
-				return utils.ErrUnauthorizedDestination
-			},
+			// utils.ResponderMaxDebit: func(args interface{}, reply interface{}) error {
+			// 	return utils.ErrAccountNotFound
+			// },
+			// utils.SchedulerSv1ExecuteActionPlans: func(args interface{}, reply interface{}) error {
+			// 	return utils.ErrUnauthorizedDestination
+			// },
 		},
 	}
 	internalRpcChan := make(chan rpcclient.ClientConnector, 1)
 	internalRpcChan <- sMock
 	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):      internalRpcChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler): internalRpcChan})
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):    internalRpcChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions): internalRpcChan})
 	dm = engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	sessions = NewSessionS(cfg, dm, connMgr)
 
@@ -899,7 +867,7 @@ func TestDebitLoopSessionLowBalance(t *testing.T) {
 	//}()
 	//time.Sleep(1 * time.Second)
 }
-*/
+* /
 
 func TestDebitLoopSessionWarningSessions(t *testing.T) {
 	log.SetOutput(io.Discard)
@@ -4487,6 +4455,6 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			fmt.Printf("%T and %T \n", expectedVal.EventCost.Cost, reply.EventCost.Cost)
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedVal), utils.ToJSON(reply))
 		}
-
-	*/
+	* /
 }
+*/

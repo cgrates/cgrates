@@ -133,32 +133,6 @@ func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
 	}
 }
 
-/*
-func TestAddTmpCaches(t *testing.T) {
-	cfgJSON := &CacheJsonCfg{
-		Partitions: &map[string]*CacheParamJsonCfg{
-			utils.CacheRatingProfilesTmp: {
-				Limit: utils.IntPointer(-1),
-				Ttl:   utils.StringPointer(time.Minute.String()),
-			},
-		},
-	}
-	expected := &CacheCfg{
-		Partitions: map[string]*CacheParamCfg{},
-	}
-	expected.AddTmpCaches()
-	json := NewDefaultCGRConfig()
-	if err = json.cacheCfg.loadFromJSONCfg(cfgJSON); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected.Partitions[utils.CacheRatingProfilesTmp],
-		json.cacheCfg.Partitions[utils.CacheRatingProfilesTmp]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected.Partitions[utils.CacheRatingProfilesTmp]),
-			utils.ToJSON(json.cacheCfg.Partitions[utils.CacheRatingProfilesTmp]))
-	}
-}
-
-*/
-
 func TestCachesCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"caches":{

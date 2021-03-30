@@ -171,9 +171,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sEv,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -240,9 +237,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv2,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -261,9 +255,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv3,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -486,9 +477,6 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -544,9 +532,6 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv2,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -611,9 +596,6 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv3,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -704,9 +686,6 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -765,9 +744,6 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv2,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -832,7 +808,6 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv3,
-				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -1858,9 +1833,6 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sEv,
-				CD: &engine.CallDescriptor{
-					RunID: "RunID",
-				},
 			},
 		},
 	}
@@ -1897,17 +1869,11 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	session.SRuns = []*SRun{
 		{
 			Event: sEv,
-			CD: &engine.CallDescriptor{
-				RunID: "RunID",
-			},
 		},
 		{
 			Event: engine.NewMapEvent(map[string]interface{}{
 				utils.EventName: "TEST_EVENT",
 				utils.ToR:       "*voice"}),
-			CD: &engine.CallDescriptor{
-				RunID: "RunID2",
-			},
 		},
 	}
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
@@ -2160,9 +2126,6 @@ func TestSessionSgetSession(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sSEv,
-				CD: &engine.CallDescriptor{
-					RunID: utils.MetaDefault,
-				},
 			},
 		},
 	}
@@ -2213,15 +2176,9 @@ func TestSessionSfilterSessions(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sEv,
-				CD: &engine.CallDescriptor{
-					RunID: "RunID",
-				},
 			},
 			{
 				Event: sr2,
-				CD: &engine.CallDescriptor{
-					RunID: "RunID2",
-				},
 			},
 		},
 	}
@@ -2389,15 +2346,9 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		SRuns: []*SRun{
 			{
 				Event: sEv,
-				CD: &engine.CallDescriptor{
-					RunID: "RunID",
-				},
 			},
 			{
 				Event: sr2,
-				CD: &engine.CallDescriptor{
-					RunID: "RunID2",
-				},
 			},
 		},
 	}

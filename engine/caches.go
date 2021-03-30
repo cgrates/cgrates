@@ -94,7 +94,6 @@ func init() {
 	gob.Register(time.Time{})
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
-	gob.Register(BalanceSummaries{})
 
 	gob.Register(new(utils.ArgCacheReplicateSet))
 	gob.Register(new(utils.ArgCacheReplicateRemove))

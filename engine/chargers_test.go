@@ -27,6 +27,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var err error
+
 func TestChargerSetChargerProfiles(t *testing.T) {
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
