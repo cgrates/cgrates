@@ -28,7 +28,6 @@ import (
 )
 
 func TestV1StatsAsStats(t *testing.T) {
-	tim := time.Date(0001, time.January, 1, 2, 0, 0, 0, time.UTC)
 	var filters []*engine.FilterRule
 	v1Sts := &v1Stat{
 		Id:              "test",      // Config id, unique per config instance
@@ -55,22 +54,6 @@ func TestV1StatsAsStats(t *testing.T) {
 		RatedAccount:    []string{},
 		RatedSubject:    []string{},
 		CostInterval:    []float64{},
-		Triggers: engine.ActionTriggers{&engine.ActionTrigger{
-			ID: "TestB",
-			Balance: &engine.BalanceFilter{
-				ID:             utils.StringPointer("TESTB"),
-				Timings:        []*engine.RITiming{},
-				ExpirationDate: utils.TimePointer(tim),
-				Type:           utils.StringPointer(utils.MetaMonetary),
-			},
-			ExpirationDate:    tim,
-			LastExecutionTime: tim,
-			ActivationDate:    tim,
-			ThresholdType:     utils.TriggerMaxBalance,
-			ThresholdValue:    2,
-			ActionsID:         "TEST_ACTIONS",
-			Executed:          true,
-		}},
 	}
 
 	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})

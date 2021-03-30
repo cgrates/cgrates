@@ -777,13 +777,6 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		ArgsCache: map[string][]string{
 			DestinationIDs:             nil,
 			ReverseDestinationIDs:      nil,
-			RatingPlanIDs:              nil,
-			RatingProfileIDs:           nil,
-			ActionIDs:                  nil,
-			ActionPlanIDs:              nil,
-			AccountActionPlanIDs:       nil,
-			ActionTriggerIDs:           nil,
-			SharedGroupIDs:             nil,
 			ResourceProfileIDs:         nil,
 			ResourceIDs:                nil,
 			StatsQueueIDs:              nil,

@@ -91,9 +91,6 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheReverseDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheActions: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheTimings: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -232,9 +229,6 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheTBLTPDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPActions: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
@@ -367,19 +361,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
-			utils.MetaActionPlans: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
 			utils.MetaAccountActionPlans: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.MetaActionTriggers: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.MetaSharedGroups: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
@@ -492,10 +474,6 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Remote:    utils.BoolPointer(false),
 			},
 			utils.CacheTBLTPDestinations: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPActions: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},

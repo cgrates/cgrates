@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -129,9 +128,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 }
 
 func TestDZ1ExecuteActions(t *testing.T) {
-	scheduler.NewScheduler(dataDB, config.CgrConfig(),
-		engine.NewFilterS(config.CgrConfig(), nil, dataDB)).Reload()
-	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
+	time.Sleep(10 * time.Millisecond)
 	if acnt, err := dataDB.GetAccount("cgrates.org:12344"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {

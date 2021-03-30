@@ -424,19 +424,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
-	eSchedulerCfg := &SchedulerCfg{
-		Enabled:      false,
-		CDRsConns:    []string{},
-		ThreshSConns: []string{},
-		StatSConns:   []string{},
-		Filters:      []string{},
-	}
-	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.schedulerCfg, eSchedulerCfg)
-	}
-}
-
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eCdrsCfg := &CdrsCfg{
 		Enabled:         false,
@@ -447,7 +434,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		AttributeSConns: []string{},
 		ThresholdSConns: []string{},
 		StatSConns:      []string{},
-		ActionSConns:    []string{},
+		ActionsConns:    []string{},
 		EEsConns:        []string{},
 		ExtraFields:     RSRParsers{},
 	}
@@ -509,7 +496,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		ActionsConns: []string{},
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -529,20 +516,6 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			utils.CacheDestinations: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheReverseDestinations: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheRatingPlans: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheRatingProfiles: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheActions: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheActionPlans: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheAccountActionPlans: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheActionTriggers: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheSharedGroups: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheTimings: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
@@ -630,29 +603,9 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 
 			utils.CacheVersions: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheAccounts: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheTBLTPTimings: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheTBLTPDestinations: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPRates: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPDestinationRates: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPRatingPlans: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPRatingProfiles: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPSharedGroups: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPActions: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPActionPlans: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPActionTriggers: {Limit: -1,
-				TTL: 0, StaticTTL: false, Precache: false},
-			utils.CacheTBLTPAccountActions: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
 			utils.CacheTBLTPResources: {Limit: -1,
 				TTL: 0, StaticTTL: false, Precache: false},
@@ -1276,24 +1229,6 @@ func TestLoadRalSCfgError(t *testing.T) {
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.loadRalSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestLoadSchedulerCfgError(t *testing.T) {
-	cfgJSONStr := `{
-	"schedulers": {
-       "filters": "randomFilter",
-    },
-}`
-	expected := "json: cannot unmarshal string into Go struct field SchedulerJsonCfg.Filters of type []string"
-	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
-	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if err := cgrConfig.loadSchedulerCfg(cgrCfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -2183,7 +2118,7 @@ func TestSessionSConfig(t *testing.T) {
 		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
 		AlterableFields:     utils.StringSet{},
-		SchedulerConns:      []string{},
+		ActionsConns:        []string{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -2344,24 +2279,6 @@ func TestDispatcherSConfig(t *testing.T) {
 	}
 }
 
-func TestSchedulerConfig(t *testing.T) {
-	expected := &SchedulerCfg{
-		Enabled:      false,
-		CDRsConns:    []string{},
-		ThreshSConns: []string{},
-		StatSConns:   []string{},
-		Filters:      []string{},
-	}
-	cgrConfig := NewDefaultCGRConfig()
-	if err != nil {
-		t.Error(err)
-	}
-	newConfig := cgrConfig.SchedulerCfg()
-	if !reflect.DeepEqual(expected, newConfig) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
-	}
-}
-
 func TestAnalyzerConfig(t *testing.T) {
 	expected := &AnalyzerSCfg{
 		Enabled:         false,
@@ -2384,7 +2301,7 @@ func TestApierConfig(t *testing.T) {
 	expected := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		SchedulerConns:  []string{},
+		ActionsConns:    []string{},
 		AttributeSConns: []string{},
 		EEsConns:        []string{},
 	}
@@ -3748,7 +3665,7 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-		SchedulerConns:  []string{},
+		ActionsConns:    []string{},
 		AttributeSConns: []string{},
 		EEsConns:        []string{},
 	}
@@ -4137,25 +4054,6 @@ func TestV1GetConfigRals(t *testing.T) {
 	}
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: RALS_JSN}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-	}
-}
-
-func TestV1GetConfigScheduler(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		SCHEDULER_JSN: map[string]interface{}{
-			utils.EnabledCfg:      false,
-			utils.CDRsConnsCfg:    []string{},
-			utils.ThreshSConnsCfg: []string{},
-			utils.StatSConnsCfg:   []string{},
-			utils.FiltersCfg:      []string{},
-		},
-	}
-	cfgCgr := NewDefaultCGRConfig()
-	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
@@ -5227,17 +5125,6 @@ func TestV1GetConfigAsJSONRals(t *testing.T) {
 	}
 }
 
-func TestV1GetConfigAsJSONScheduler(t *testing.T) {
-	var reply string
-	expected := `{"schedulers":{"cdrs_conns":[],"enabled":false,"filters":[],"stats_conns":[],"thresholds_conns":[]}}`
-	cfgCgr := NewDefaultCGRConfig()
-	if err := cfgCgr.V1GetConfigAsJSON(&SectionWithAPIOpts{Section: SCHEDULER_JSN}, &reply); err != nil {
-		t.Error(err)
-	} else if expected != reply {
-		t.Errorf("Expected %+v \n, received %+v", expected, reply)
-	}
-}
-
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
 	expected := `{"cdrs":{"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":[],"rals_conns":[],"scheduler_conns":[],"session_cost_retries":5,"stats_conns":[],"store_cdrs":true,"thresholds_conns":[]}}`
@@ -5941,14 +5828,14 @@ func TestLoadConfigFromHTTP(t *testing.T) {
 }
 
 func TestReloadSections(t *testing.T) {
-	subsystemsThatNeedDataDB := utils.NewStringSet([]string{SCHEDULER_JSN,
+	subsystemsThatNeedDataDB := utils.NewStringSet([]string{
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{RALS_JSN, CDRS_JSN, ApierS})
 	cfgCgr := NewDefaultCGRConfig()
 
-	for _, section := range []string{RPCConnsJsonName, HTTP_JSN, SCHEDULER_JSN, RALS_JSN, CDRS_JSN, ERsJson,
+	for _, section := range []string{RPCConnsJsonName, HTTP_JSN, RALS_JSN, CDRS_JSN, ERsJson,
 		SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson,
 		DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON, RouteSJson,
 		LoaderJson, DispatcherSJson, ApierS, EEsJson, SIPAgentJson, RateSJson, RegistrarCJson, AnalyzerCfgJson} {
@@ -6106,9 +5993,6 @@ func TestCGRConfigClone(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.ralsCfg, rcv.ralsCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.ralsCfg), utils.ToJSON(rcv.ralsCfg))
-	}
-	if !reflect.DeepEqual(cfg.schedulerCfg, rcv.schedulerCfg) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.schedulerCfg), utils.ToJSON(rcv.schedulerCfg))
 	}
 	if !reflect.DeepEqual(cfg.cdrsCfg, rcv.cdrsCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.cdrsCfg), utils.ToJSON(rcv.cdrsCfg))

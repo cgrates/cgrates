@@ -813,47 +813,6 @@ func TestConfigSanityRouteS(t *testing.T) {
 
 }
 
-func TestConfigSanityScheduler(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
-	cfg.schedulerCfg.Enabled = true
-
-	cfg.schedulerCfg.CDRsConns = []string{utils.MetaInternal}
-	expected := "<CDRs> not enabled but requested by <SchedulerS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.schedulerCfg.CDRsConns = []string{"test"}
-	expected = "<SchedulerS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.schedulerCfg.CDRsConns = []string{}
-
-	cfg.schedulerCfg.ThreshSConns = []string{utils.MetaInternal}
-	expected = "<ThresholdS> not enabled but requested by <SchedulerS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.schedulerCfg.ThreshSConns = []string{"test"}
-	expected = "<SchedulerS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.schedulerCfg.ThreshSConns = []string{}
-
-	cfg.schedulerCfg.StatSConns = []string{utils.MetaInternal}
-	expected = "<Stats> not enabled but requested by <SchedulerS> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.schedulerCfg.StatSConns = []string{"test"}
-	expected = "<SchedulerS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.schedulerCfg.StatSConns = []string{}
-}
-
 func TestConfigSanityEventReader(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ersCfg = &ERsCfg{
@@ -1248,13 +1207,13 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.CacheAccounts: {
+			utils.CacheRateProfiles: {
 				Limit: 1,
 			},
 		},
 	}
 	expected := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
-	cfg.cacheCfg.Partitions[utils.CacheAccounts].Limit = 0
+	cfg.cacheCfg.Partitions[utils.CacheRateProfiles].Limit = 0
 	cfg.resourceSCfg.Enabled = true
 	expected = "<ResourceS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1347,12 +1306,12 @@ func TestConfigSanityAPIer(t *testing.T) {
 	}
 	cfg.apier.AttributeSConns = []string{utils.MetaInternal}
 	cfg.attributeSCfg.Enabled = true
-	cfg.apier.SchedulerConns = []string{utils.MetaInternal}
+	cfg.apier.ActionsConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <APIerSv1> component" {
 		t.Error(err)
 	}
-	cfg.apier.SchedulerConns = []string{"test"}
+	cfg.apier.ActionsConns = []string{"test"}
 	expected = "<APIerSv1> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)

@@ -57,7 +57,7 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:         false,
 		utils.CachesConnsCfg:     sls,
-		utils.ActionsConnsCfg:    sls,
+		utils.ActionSConnsCfg:    sls,
 		utils.AttributeSConnsCfg: sls,
 		utils.EEsConnsCfg:        sls,
 	}
@@ -81,7 +81,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 	expectedMap := map[string]interface{}{
 		utils.EnabledCfg:         true,
 		utils.CachesConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.ActionsConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.ActionSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
 	}
