@@ -280,22 +280,3 @@ func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[
 		utils.MetaRaw: events[utils.MetaRaw],
 	}
 }
-
-// getDerivedMaxUsage returns only the *raw MaxUsage if derivedReply flag is not specified
-func getDerivedMaxUsage(maxUsages map[string]time.Duration, derivedReply bool) (out map[string]time.Duration) {
-	if derivedReply {
-		out = maxUsages
-	} else {
-		out = make(map[string]time.Duration)
-	}
-	var maxUsage time.Duration
-	var maxUsageSet bool // so we know if we have set the 0 on purpose
-	for _, rplyMaxUsage := range maxUsages {
-		if !maxUsageSet || rplyMaxUsage < maxUsage {
-			maxUsage = rplyMaxUsage
-			maxUsageSet = true
-		}
-	}
-	out[utils.MetaRaw] = maxUsage
-	return
-}
