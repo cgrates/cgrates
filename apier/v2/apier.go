@@ -58,7 +58,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	}
 	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apiv2.Config.GeneralCfg().DefaultTimezone,
-		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionConns,
+		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionsConns,
 		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -84,7 +84,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	if err := loader.ReloadCache(caching, true, attrs.APIOpts); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(apiv2.Config.ApierCfg().ActionConns) != 0 {
+	if len(apiv2.Config.ApierCfg().ActionsConns) != 0 {
 		utils.Logger.Info("APIerSv2.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)

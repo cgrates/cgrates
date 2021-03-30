@@ -84,7 +84,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Terminate_attempts:    utils.IntPointer(6),
 		Alterable_fields:      &[]string{},
 		Min_dur_low_balance:   utils.StringPointer("1"),
-		Scheduler_conns:       &[]string{utils.MetaInternal, "*conn1"},
+		Actions_conns:         &[]string{utils.MetaInternal, "*conn1"},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),
@@ -114,7 +114,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		TerminateAttempts:   6,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    1,
-		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -252,7 +252,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		TerminateAttempts:   5,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    0,
-		SchedulerConns:      []string{},
+		ActionsConns:        []string{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -415,7 +415,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				"publickey_path": "",
 				"privatekey_path": "",
 			},
-			"scheduler_conns": ["*internal:*scheduler", "*conn1"],
+			"actions_conns": ["*internal:*actions", "*conn1"],
 		},
 	}`
 	eMap := map[string]interface{}{
@@ -896,7 +896,7 @@ func TestSessionSCfgClone(t *testing.T) {
 		TerminateAttempts:   6,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    1,
-		SchedulerConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
 		SessionTTLLastUsed:  utils.DurationPointer(time.Second),
 		SessionTTLUsage:     utils.DurationPointer(time.Second),

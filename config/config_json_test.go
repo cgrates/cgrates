@@ -91,25 +91,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheReverseDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheRatingPlans: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheRatingProfiles: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheActions: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheActionPlans: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheAccountActionPlans: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheActionTriggers: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheSharedGroups: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheTimings: {Limit: utils.IntPointer(-1),
@@ -243,9 +225,6 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheVersions: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-			utils.CacheAccounts: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
 
 			utils.CacheTBLTPTimings: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
@@ -253,31 +232,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheTBLTPDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPRates: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPDestinationRates: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPRatingPlans: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPRatingProfiles: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPSharedGroups: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPActions: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPActionPlans: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPActionTriggers: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPAccountActions: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
@@ -540,35 +495,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
-			utils.CacheTBLTPRates: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPDestinationRates: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPRatingPlans: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPRatingProfiles: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPSharedGroups: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
 			utils.CacheTBLTPActions: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPActionTriggers: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPAccountActions: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
@@ -589,10 +516,6 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 				Remote:    utils.BoolPointer(false),
 			},
 			utils.CacheSessionCostsTBL: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPActionPlans: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
@@ -682,25 +605,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfSchedulerJsonCfg(t *testing.T) {
-	eCfg := &SchedulerJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Cdrs_conns:       &[]string{},
-		Thresholds_conns: &[]string{},
-		Stats_conns:      &[]string{},
-		Filters:          &[]string{},
-	}
-	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
-	if err != nil {
-		t.Error(err)
-	}
-	if cfg, err := dfCgrJSONCfg.SchedulerJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
-	}
-}
-
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
 		Enabled:              utils.BoolPointer(false),
@@ -762,7 +666,7 @@ func TestSmgJsonCfg(t *testing.T) {
 			Privatekey_path:     utils.StringPointer(""),
 			Publickey_path:      utils.StringPointer(""),
 		},
-		Scheduler_conns: &[]string{},
+		Actions_conns: &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

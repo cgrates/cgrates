@@ -35,7 +35,7 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 	expected := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		SchedulerConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
@@ -57,7 +57,7 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.EnabledCfg:         false,
 		utils.CachesConnsCfg:     sls,
-		utils.ActionSConnsCfg:    sls,
+		utils.ActionsConnsCfg:    sls,
 		utils.AttributeSConnsCfg: sls,
 		utils.EEsConnsCfg:        sls,
 	}
@@ -75,13 +75,13 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
        "attributes_conns": ["*internal:*attributes", "*conn1"],
        "ees_conns": ["*internal:*ees", "*conn1"],
        "caches_conns": ["*internal:*caches", "*conn1"],
-       "scheduler_conns": ["*internal:*scheduler", "*conn1"],
+       "actions_conns": ["*internal:*scheduler", "*conn1"],
     },
 }`
 	expectedMap := map[string]interface{}{
 		utils.EnabledCfg:         true,
 		utils.CachesConnsCfg:     []string{utils.MetaInternal, "*conn1"},
-		utils.ActionSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.ActionsConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
 	}
@@ -96,7 +96,7 @@ func TestApierCfgClone(t *testing.T) {
 	sa := &ApierCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
-		SchedulerConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
@@ -107,7 +107,7 @@ func TestApierCfgClone(t *testing.T) {
 	if rcv.CachesConns[1] = ""; sa.CachesConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.SchedulerConns[1] = ""; sa.SchedulerConns[1] != "*conn1" {
+	if rcv.ActionsConns[1] = ""; sa.ActionsConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.AttributeSConns[1] = ""; sa.AttributeSConns[1] != "*conn1" {

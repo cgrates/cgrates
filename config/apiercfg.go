@@ -26,7 +26,7 @@ import (
 type ApierCfg struct {
 	Enabled         bool
 	CachesConns     []string // connections towards Cache
-	ActionConns     []string // connections towards Scheduler
+	ActionsConns    []string // connections towards Scheduler
 	AttributeSConns []string // connections towards AttributeS
 	EEsConns        []string // connections towards EEs
 }
@@ -49,12 +49,11 @@ func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Actions_conns != nil {
-		aCfg.ActionConns = make([]string, len(*jsnCfg.Actions_conns))
+		aCfg.ActionsConns = make([]string, len(*jsnCfg.Actions_conns))
 		for idx, conn := range *jsnCfg.Actions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			aCfg.ActionConns[idx] = conn
 			if conn == utils.MetaInternal {
-				aCfg.ActionConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
+				aCfg.ActionsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -96,15 +95,15 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		}
 		initialMap[utils.CachesConnsCfg] = cachesConns
 	}
-	if aCfg.ActionConns != nil {
-		schedulerConns := make([]string, len(aCfg.ActionConns))
-		for i, item := range aCfg.ActionConns {
-			schedulerConns[i] = item
+	if aCfg.ActionsConns != nil {
+		actionsConns := make([]string, len(aCfg.ActionsConns))
+		for i, item := range aCfg.ActionsConns {
+			actionsConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
-				schedulerConns[i] = utils.MetaInternal
+				actionsConns[i] = utils.MetaInternal
 			}
 		}
-		initialMap[utils.ActionSConnsCfg] = schedulerConns
+		initialMap[utils.ActionSConnsCfg] = actionsConns
 	}
 	if aCfg.AttributeSConns != nil {
 		attributeSConns := make([]string, len(aCfg.AttributeSConns))
@@ -140,10 +139,10 @@ func (aCfg ApierCfg) Clone() (cln *ApierCfg) {
 			cln.CachesConns[i] = k
 		}
 	}
-	if aCfg.ActionConns != nil {
-		cln.ActionConns = make([]string, len(aCfg.ActionConns))
-		for i, k := range aCfg.ActionConns {
-			cln.ActionConns[i] = k
+	if aCfg.ActionsConns != nil {
+		cln.ActionsConns = make([]string, len(aCfg.ActionsConns))
+		for i, k := range aCfg.ActionsConns {
+			cln.ActionsConns[i] = k
 		}
 	}
 	if aCfg.AttributeSConns != nil {
