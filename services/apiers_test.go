@@ -41,15 +41,13 @@ func TestApiersCoverage(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cfg.ThresholdSCfg().Enabled = true
-	cfg.SchedulerCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server, schS, new(ResponderService),
+	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
 	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
 	if apiSv1.IsRunning() {
