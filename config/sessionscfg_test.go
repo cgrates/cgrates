@@ -373,7 +373,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.PublicKeyPathCfg:      "",
 			utils.PrivateKeyPathCfg:     "",
 		},
-		utils.SchedulerConnsCfg: []string{},
+		utils.ActionSConnsCfg: []string{},
 		utils.DefaultUsageCfg: map[string]string{
 			utils.MetaAny:   "3h0m0s",
 			utils.MetaVoice: "3h0m0s",
@@ -447,7 +447,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.PublicKeyPathCfg:      "",
 			utils.PrivateKeyPathCfg:     "",
 		},
-		utils.SchedulerConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.ActionSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.DefaultUsageCfg: map[string]string{
 			utils.MetaAny:   "3h0m0s",
 			utils.MetaVoice: "3h0m0s",

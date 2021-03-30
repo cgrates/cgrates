@@ -48,13 +48,13 @@ func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Scheduler_conns != nil {
-		aCfg.ActionConns = make([]string, len(*jsnCfg.Scheduler_conns))
-		for idx, conn := range *jsnCfg.Scheduler_conns {
+	if jsnCfg.Actions_conns != nil {
+		aCfg.ActionConns = make([]string, len(*jsnCfg.Actions_conns))
+		for idx, conn := range *jsnCfg.Actions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			aCfg.ActionConns[idx] = conn
 			if conn == utils.MetaInternal {
-				aCfg.ActionConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+				aCfg.ActionConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -100,11 +100,11 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		schedulerConns := make([]string, len(aCfg.ActionConns))
 		for i, item := range aCfg.ActionConns {
 			schedulerConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
 				schedulerConns[i] = utils.MetaInternal
 			}
 		}
-		initialMap[utils.SchedulerConnsCfg] = schedulerConns
+		initialMap[utils.ActionSConnsCfg] = schedulerConns
 	}
 	if aCfg.AttributeSConns != nil {
 		attributeSConns := make([]string, len(aCfg.AttributeSConns))

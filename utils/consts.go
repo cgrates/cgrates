@@ -47,8 +47,7 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
 		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
 
-	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
-		CacheActions, CacheTimings,
+	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
@@ -58,7 +57,7 @@ var (
 		CacheActionProfilesFilterIndexes, CacheAccountProfilesFilterIndexes, CacheReverseFilterIndexes,
 		CacheAccountProfiles})
 
-	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPActions,
+	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations,
 		CacheTBLTPResources, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccountProfiles})
@@ -69,7 +68,6 @@ var (
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:                 DestinationPrefix,
 		CacheReverseDestinations:          ReverseDestinationPrefix,
-		CacheActions:                      ActionPrefix,
 		CacheResourceProfiles:             ResourceProfilesPrefix,
 		CacheResources:                    ResourcesPrefix,
 		CacheTimings:                      TimingsPrefix,
@@ -141,7 +139,6 @@ var (
 	CacheStorDBPartitions = map[string]string{
 		TBLTPTimings:         CacheTBLTPTimings,
 		TBLTPDestinations:    CacheTBLTPDestinations,
-		TBLTPActions:         CacheTBLTPActions,
 		TBLTPResources:       CacheTBLTPResources,
 		TBLTPStats:           CacheTBLTPStats,
 		TBLTPThresholds:      CacheTBLTPThresholds,
@@ -162,7 +159,6 @@ var (
 	ArgCacheToPrefix = map[string]string{
 		DestinationIDs:        DestinationPrefix,
 		ReverseDestinationIDs: ReverseDestinationPrefix,
-		ActionIDs:             ActionPrefix,
 		ResourceProfileIDs:    ResourceProfilesPrefix,
 		ResourceIDs:           ResourcesPrefix,
 		StatsQueueIDs:         StatQueuePrefix,
@@ -196,7 +192,6 @@ var (
 	ArgCacheToInstance = map[string]string{
 		DestinationIDs:        CacheDestinations,
 		ReverseDestinationIDs: CacheReverseDestinations,
-		ActionIDs:             CacheActions,
 		ResourceProfileIDs:    CacheResourceProfiles,
 		ResourceIDs:           CacheResources,
 		StatsQueueIDs:         CacheStatQueues,
@@ -348,8 +343,6 @@ const (
 
 	MetaVoice                 = "*voice"
 	ACD                       = "ACD"
-	TasksKey                  = "tasks"
-	ActionPrefix              = "act_"
 	DestinationPrefix         = "dst_"
 	ReverseDestinationPrefix  = "rds_"
 	ResourcesPrefix           = "res_"
@@ -457,8 +450,6 @@ const (
 	RunningCaps              = "RUNNING"
 	StoppedCaps              = "STOPPED"
 	SchedulerNotRunningCaps  = "SCHEDULLER_NOT_RUNNING"
-	MetaScheduler            = "*scheduler"
-	MetaSessionsCosts        = "*sessions_costs"
 	MetaRALs                 = "*rals"
 	MetaReplicator           = "*replicator"
 	MetaRerate               = "*rerate"
@@ -600,9 +591,7 @@ const (
 	RatingProfile            = "RatingProfile"
 	MetaRatingPlans          = "*rating_plans"
 	MetaRatingProfiles       = "*rating_profiles"
-	MetaUsers                = "*users"
 	MetaSubscribers          = "*subscribers"
-	MetaDerivedChargersV     = "*derivedchargers"
 	MetaStorDB               = "*stordb"
 	MetaDataDB               = "*datadb"
 	MetaWeight               = "*weight"
@@ -948,8 +937,6 @@ const (
 	MetaAccounts            = "*accounts"
 	MetaAccountActionPlans  = "*account_action_plans"
 	MetaReverseDestinations = "*reverse_destinations"
-	MetaActionPlans         = "*action_plans"
-	MetaActionTriggers      = "*action_triggers"
 	MetaActions             = "*actions"
 	MetaResourceProfile     = "*resource_profiles"
 	MetaStatQueueProfiles   = "*statqueue_profiles"
@@ -962,7 +949,6 @@ const (
 	MetaRateProfiles        = "*rate_profiles"
 	MetaRateProfileRates    = "*rate_profile_rates"
 	MetaChargerProfiles     = "*charger_profiles"
-	MetaSharedGroups        = "*shared_groups"
 	MetaThresholds          = "*thresholds"
 	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
@@ -1080,22 +1066,13 @@ const (
 const (
 	MetaSetVersions         = "*set_versions"
 	MetaEnsureIndexes       = "*ensure_indexes"
-	MetaTpRatingPlans       = "*tp_rating_plans"
 	MetaTpFilters           = "*tp_filters"
-	MetaTpDestinationRates  = "*tp_destination_rates"
-	MetaTpActionTriggers    = "*tp_action_triggers"
-	MetaTpAccountActions    = "*tp_account_actions"
-	MetaTpActionPlans       = "*tp_action_plans"
-	MetaTpActions           = "*tp_actions"
 	MetaTpThresholds        = "*tp_thresholds"
 	MetaTpRoutes            = "*tp_Routes"
 	MetaTpStats             = "*tp_stats"
-	MetaTpSharedGroups      = "*tp_shared_groups"
-	MetaTpRatingProfiles    = "*tp_rating_profiles"
 	MetaTpActionProfiles    = "*tp_action_profiles"
 	MetaTpRateProfiles      = "*tp_rate_profiles"
 	MetaTpResources         = "*tp_resources"
-	MetaTpRates             = "*tp_rates"
 	MetaTpTimings           = "*tp_timings"
 	MetaTpDestinations      = "*tp_destinations"
 	MetaTpChargers          = "*tp_chargers"
@@ -1594,21 +1571,6 @@ const (
 	SessionSv1Sleep                      = "SessionSv1.Sleep"
 )
 
-// Responder APIs
-const (
-	Responder                            = "Responder"
-	ResponderDebit                       = "Responder.Debit"
-	ResponderRefundIncrements            = "Responder.RefundIncrements"
-	ResponderGetMaxSessionTime           = "Responder.GetMaxSessionTime"
-	ResponderMaxDebit                    = "Responder.MaxDebit"
-	ResponderRefundRounding              = "Responder.RefundRounding"
-	ResponderGetCost                     = "Responder.GetCost"
-	ResponderGetCostOnRatingPlans        = "Responder.GetCostOnRatingPlans"
-	ResponderGetMaxSessionTimeOnAccounts = "Responder.GetMaxSessionTimeOnAccounts"
-	ResponderShutdown                    = "Responder.Shutdown"
-	ResponderPing                        = "Responder.Ping"
-)
-
 // DispatcherS APIs
 const (
 	DispatcherSv1                   = "DispatcherSv1"
@@ -1736,14 +1698,6 @@ const (
 	TimingsCsv            = "Timings.csv"
 	DestinationsCsv       = "Destinations.csv"
 	RatesCsv              = "Rates.csv"
-	DestinationRatesCsv   = "DestinationRates.csv"
-	RatingPlansCsv        = "RatingPlans.csv"
-	RatingProfilesCsv     = "RatingProfiles.csv"
-	SharedGroupsCsv       = "SharedGroups.csv"
-	ActionsCsv            = "Actions.csv"
-	ActionPlansCsv        = "ActionPlans.csv"
-	ActionTriggersCsv     = "ActionTriggers.csv"
-	AccountActionsCsv     = "AccountActions.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
@@ -1762,7 +1716,6 @@ const (
 const (
 	TBLTPTimings         = "tp_timings"
 	TBLTPDestinations    = "tp_destinations"
-	TBLTPActions         = "tp_actions"
 	TBLTPResources       = "tp_resources"
 	TBLTPStats           = "tp_stats"
 	TBLTPThresholds      = "tp_thresholds"
@@ -1785,7 +1738,6 @@ const (
 const (
 	CacheDestinations                 = "*destinations"
 	CacheReverseDestinations          = "*reverse_destinations"
-	CacheActions                      = "*actions"
 	CacheResources                    = "*resources"
 	CacheResourceProfiles             = "*resource_profiles"
 	CacheTimings                      = "*timings"
@@ -1836,7 +1788,6 @@ const (
 	// storDB
 	CacheTBLTPTimings         = "*tp_timings"
 	CacheTBLTPDestinations    = "*tp_destinations"
-	CacheTBLTPActions         = "*tp_actions"
 	CacheTBLTPResources       = "*tp_resources"
 	CacheTBLTPStats           = "*tp_stats"
 	CacheTBLTPThresholds      = "*tp_thresholds"
@@ -2278,7 +2229,7 @@ const (
 	DataPathCfg        = "data_path"
 	DisableReverseCfg  = "disable_reverse"
 	CachesConnsCfg     = "caches_conns"
-	SchedulerConnsCfg  = "scheduler_conns"
+	ActionSConnsCfg    = "actions_conns"
 	GapiCredentialsCfg = "gapi_credentials"
 	GapiTokenCfg       = "gapi_token"
 )
@@ -2477,13 +2428,6 @@ const (
 const (
 	DestinationIDs                = "DestinationIDs"
 	ReverseDestinationIDs         = "ReverseDestinationIDs"
-	RatingPlanIDs                 = "RatingPlanIDs"
-	RatingProfileIDs              = "RatingProfileIDs"
-	ActionIDs                     = "ActionIDs"
-	ActionPlanIDs                 = "ActionPlanIDs"
-	AccountActionPlanIDs          = "AccountActionPlanIDs"
-	ActionTriggerIDs              = "ActionTriggerIDs"
-	SharedGroupIDs                = "SharedGroupIDs"
 	ResourceProfileIDs            = "ResourceProfileIDs"
 	ResourceIDs                   = "ResourceIDs"
 	StatsQueueIDs                 = "StatsQueueIDs"

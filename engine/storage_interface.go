@@ -53,11 +53,6 @@ type DataDB interface {
 	RemoveReverseDestinationDrv(string, string, string) error
 	SetReverseDestinationDrv(string, []string, string) error
 	GetReverseDestinationDrv(string, string) ([]string, error)
-	GetActionsDrv(string) (Actions, error)
-	SetActionsDrv(string, Actions) error
-	RemoveActionsDrv(string) error
-	PushTask(*Task) error
-	PopTask() (*Task, error)
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error
@@ -126,10 +121,6 @@ type StorDB interface {
 type CdrStorage interface {
 	Storage
 	SetCDR(*CDR, bool) error
-	SetSMCost(smc *SMCost) error
-	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
-	RemoveSMCost(*SMCost) error
-	RemoveSMCosts(qryFltr *utils.SMCostFilter) error
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
@@ -146,7 +137,6 @@ type LoadReader interface {
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
-	GetTPActions(string, string) ([]*utils.TPActions, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
@@ -165,7 +155,6 @@ type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
 	SetTPTimings([]*utils.ApierTPTiming) error
 	SetTPDestinations([]*utils.TPDestination) error
-	SetTPActions([]*utils.TPActions) error
 	SetTPResources([]*utils.TPResourceProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error

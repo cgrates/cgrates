@@ -141,7 +141,7 @@ type CdrsJsonCfg struct {
 	Thresholds_conns     *[]string
 	Stats_conns          *[]string
 	Online_cdr_exports   *[]string
-	Scheduler_conns      *[]string
+	Actions_conns        *[]string
 	Ees_conns            *[]string
 }
 
@@ -547,7 +547,7 @@ type LoaderCfgJson struct {
 	Disable_reverse  *bool
 	Field_separator  *string
 	Caches_conns     *[]string
-	Scheduler_conns  *[]string
+	Actions_conns    *[]string
 	Gapi_credentials *json.RawMessage
 	Gapi_token       *json.RawMessage
 }
@@ -604,7 +604,7 @@ type AnalyzerSJsonCfg struct {
 type ApierJsonCfg struct {
 	Enabled          *bool
 	Caches_conns     *[]string
-	Scheduler_conns  *[]string
+	Actions_conns    *[]string
 	Attributes_conns *[]string
 	Ees_conns        *[]string
 }

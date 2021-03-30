@@ -68,18 +68,3 @@ func (iDBMig *internalStorDBMigrator) renameV1SMCosts() (err error) {
 func (iDBMig *internalStorDBMigrator) createV1SMCosts() (err error) {
 	return utils.ErrNotImplemented
 }
-
-//get
-func (iDBMig *internalStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-//set
-func (iDBMig *internalStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	return utils.ErrNotImplemented
-}
-
-//remove
-func (iDBMig *internalStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	return utils.ErrNotImplemented
-}

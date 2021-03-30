@@ -49,18 +49,6 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 	fullIDs := Cache.GetItemIDs(utils.CacheStorDBPartitions[table], tpid)
 	idSet := make(utils.StringSet)
 	for _, fullID := range fullIDs {
-		switch table {
-		// in case of account action <loadid:tenant:account> and rating profile <loadid:tenant:category:subject>
-		// the retutned value may be only the loadID
-		case utils.TBLTPAccountActions, utils.TBLTPRatingProfiles:
-			if len(distinct) == 1 { // special case when to return only the loadID
-				sliceID := strings.Split(fullID[len(tpid)+1:], utils.ConcatenatedKeySep)
-				idSet.Add(sliceID[0])
-				continue
-			}
-		// in the rest of the cases we return all ID every time
-		default:
-		}
 		idSet.Add(fullID[len(tpid)+1:])
 	}
 	ids = idSet.AsSlice()
@@ -102,26 +90,6 @@ func (iDB *InternalDB) GetTPDestinations(tpid, id string) (dsts []*utils.TPDesti
 	}
 
 	if len(dsts) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (iDB *InternalDB) GetTPActions(tpid, id string) (actions []*utils.TPActions, err error) {
-	key := tpid
-	if id != utils.EmptyString {
-		key += utils.ConcatenatedKeySep + id
-	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPActions, key)
-	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPActions, id)
-		if !ok || x == nil {
-			return nil, utils.ErrNotFound
-		}
-		actions = append(actions, x.(*utils.TPActions))
-
-	}
-	if len(actions) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	return
@@ -407,16 +375,7 @@ func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (er
 	}
 	key := tpid
 	if args != nil {
-		if table == utils.TBLTPAccountActions {
-			key += utils.ConcatenatedKeySep + args["loadid"] +
-				utils.ConcatenatedKeySep + args["tenant"] +
-				utils.ConcatenatedKeySep + args["account"]
-		} else if table == utils.TBLTPRatingProfiles {
-			key += utils.ConcatenatedKeySep + args["loadid"] +
-				utils.ConcatenatedKeySep + args["tenant"] +
-				utils.ConcatenatedKeySep + args["category"] +
-				utils.ConcatenatedKeySep + args["subject"]
-		} else if tag, has := args["tag"]; has {
+		if tag, has := args["tag"]; has {
 			key += utils.ConcatenatedKeySep + tag
 		} else if id, has := args["id"]; has {
 			key += utils.ConcatenatedKeySep + args["tenant"] +
@@ -447,17 +406,6 @@ func (iDB *InternalDB) SetTPDestinations(dests []*utils.TPDestination) (err erro
 	}
 	for _, destination := range dests {
 		Cache.SetWithoutReplicate(utils.CacheTBLTPDestinations, utils.ConcatenatedKey(destination.TPid, destination.ID), destination, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return
-}
-
-func (iDB *InternalDB) SetTPActions(acts []*utils.TPActions) (err error) {
-	if len(acts) == 0 {
-		return nil
-	}
-	for _, action := range acts {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPActions, utils.ConcatenatedKey(action.TPid, action.ID), action, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -642,94 +590,6 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 
 	return
-}
-
-func (iDB *InternalDB) RemoveSMCost(smc *SMCost) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheSessionCostsTBL, utils.ConcatenatedKey(smc.CGRID, smc.RunID, smc.OriginHost, smc.OriginID),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
-	var smMpIDs utils.StringMap
-	// Apply string filter
-	for _, fltrSlc := range []struct {
-		key string
-		ids []string
-	}{
-		{utils.CGRID, qryFltr.CGRIDs},
-		{utils.RunID, qryFltr.RunIDs},
-		{utils.OriginID, qryFltr.OriginIDs},
-		{utils.OriginHost, qryFltr.OriginHosts},
-		{utils.CostSource, qryFltr.CostSources},
-	} {
-		if len(fltrSlc.ids) == 0 {
-			continue
-		}
-		grpMpIDs := make(utils.StringMap)
-		for _, id := range fltrSlc.ids {
-			grpIDs := Cache.tCache.GetGroupItemIDs(utils.CacheSessionCostsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-			for _, id := range grpIDs {
-				grpMpIDs[id] = true
-			}
-		}
-		if len(grpMpIDs) == 0 {
-			return utils.ErrNotFound
-		}
-		if smMpIDs == nil {
-			smMpIDs = grpMpIDs
-		} else {
-			for id := range smMpIDs {
-				if !grpMpIDs.HasKey(id) {
-					delete(smMpIDs, id)
-					if len(smMpIDs) == 0 {
-						return utils.ErrNotFound
-					}
-				}
-			}
-		}
-	}
-
-	if smMpIDs == nil {
-		smMpIDs = utils.StringMapFromSlice(Cache.GetItemIDs(utils.CacheSessionCostsTBL, utils.EmptyString))
-	}
-
-	// check for Not filters
-	for _, fltrSlc := range []struct {
-		key string
-		ids []string
-	}{
-		{utils.CGRID, qryFltr.NotCGRIDs},
-		{utils.RunID, qryFltr.NotRunIDs},
-		{utils.OriginID, qryFltr.NotOriginIDs},
-		{utils.OriginHost, qryFltr.NotOriginHosts},
-		{utils.CostSource, qryFltr.NotCostSources},
-	} {
-		if len(fltrSlc.ids) == 0 {
-			continue
-		}
-		for _, id := range fltrSlc.ids {
-			grpIDs := Cache.tCache.GetGroupItemIDs(utils.CacheCDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-			for _, id := range grpIDs {
-				if smMpIDs.HasKey(id) {
-					delete(smMpIDs, id)
-					if len(smMpIDs) == 0 {
-						return utils.ErrNotFound
-					}
-				}
-			}
-		}
-	}
-
-	if len(smMpIDs) == 0 {
-		return utils.ErrNotFound
-	}
-
-	for key := range smMpIDs {
-		Cache.RemoveWithoutReplicate(utils.CacheSessionCostsTBL, key,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return nil
 }
 
 // GetCDRs returns the CDRs from  DB based on given filters
@@ -1176,75 +1036,4 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		return nil, 0, nil
 	}
 	return
-}
-
-func (iDB *InternalDB) GetSMCosts(cgrid, runid, originHost, originIDPrfx string) (smCosts []*SMCost, err error) {
-	var smMpIDs utils.StringMap
-	for _, fltrSlc := range []struct {
-		key string
-		id  string
-	}{
-		{utils.CGRID, cgrid},
-		{utils.RunID, runid},
-		{utils.OriginHost, originHost},
-	} {
-		if fltrSlc.id == utils.EmptyString {
-			continue
-		}
-		grpMpIDs := make(utils.StringMap)
-
-		grpIDs := Cache.tCache.GetGroupItemIDs(utils.CacheSessionCostsTBL, utils.ConcatenatedKey(fltrSlc.key, fltrSlc.id))
-		for _, id := range grpIDs {
-			grpMpIDs[id] = true
-		}
-
-		if len(grpMpIDs) == 0 {
-			return nil, utils.ErrNotFound
-		}
-		if smMpIDs == nil {
-			smMpIDs = grpMpIDs
-		} else {
-			for id := range smMpIDs {
-				if !grpMpIDs.HasKey(id) {
-					delete(smMpIDs, id)
-					if len(smMpIDs) == 0 {
-						return nil, utils.ErrNotFound
-					}
-				}
-			}
-		}
-	}
-	if smMpIDs == nil {
-		smMpIDs = utils.StringMapFromSlice(Cache.GetItemIDs(utils.CacheSessionCostsTBL, utils.EmptyString))
-	}
-	if len(smMpIDs) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	for key := range smMpIDs {
-		x, ok := Cache.Get(utils.CacheSessionCostsTBL, key)
-		if !ok || x == nil {
-			return nil, utils.ErrNotFound
-		}
-		smCost := x.(*SMCost)
-		if originIDPrfx != utils.EmptyString && !strings.HasPrefix(smCost.OriginID, originIDPrfx) {
-			continue
-		}
-		smCosts = append(smCosts, smCost)
-	}
-	return
-}
-
-func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
-	if smCost.CostDetails == nil {
-		return nil
-	}
-	idxs := make(utils.StringSet)
-	idxs.Add(utils.ConcatenatedKey(utils.CGRID, smCost.CGRID))
-	idxs.Add(utils.ConcatenatedKey(utils.RunID, smCost.RunID))
-	idxs.Add(utils.ConcatenatedKey(utils.OriginHost, smCost.OriginHost))
-	idxs.Add(utils.ConcatenatedKey(utils.OriginID, smCost.OriginID))
-	idxs.Add(utils.ConcatenatedKey(utils.CostSource, smCost.CostSource))
-	Cache.SetWithoutReplicate(utils.CacheSessionCostsTBL, utils.ConcatenatedKey(smCost.CGRID, smCost.RunID, smCost.OriginHost, smCost.OriginID), smCost, idxs.AsSlice(),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return err
 }

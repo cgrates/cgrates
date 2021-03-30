@@ -42,7 +42,6 @@ type TPCSVImporter struct {
 var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.TimingsCsv:            (*TPCSVImporter).importTimings,
 	utils.DestinationsCsv:       (*TPCSVImporter).importDestinations,
-	utils.ActionsCsv:            (*TPCSVImporter).importActions,
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
@@ -106,21 +105,6 @@ func (tpImp *TPCSVImporter) importDestinations(fn string) error {
 	}
 
 	return tpImp.StorDb.SetTPDestinations(tps)
-}
-
-func (tpImp *TPCSVImporter) importActions(fn string) error {
-	if tpImp.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
-	tps, err := tpImp.csvr.GetTPActions(tpImp.TPid, "")
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = tpImp.TPid
-	}
-
-	return tpImp.StorDb.SetTPActions(tps)
 }
 
 func (tpImp *TPCSVImporter) importResources(fn string) error {

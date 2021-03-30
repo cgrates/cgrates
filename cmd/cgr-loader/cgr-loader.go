@@ -109,7 +109,7 @@ var (
 	toStorDB      = cgrLoaderFlags.Bool(utils.ToStorDBcgr, false, "Import the tariff plan from files to storDb")
 	cacheSAddress = cgrLoaderFlags.String(utils.CacheSAddress, dfltCfg.LoaderCgrCfg().CachesConns[0],
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
-	schedulerAddress = cgrLoaderFlags.String(utils.SchedulerAddress, dfltCfg.LoaderCgrCfg().SchedulerConns[0], "")
+	schedulerAddress = cgrLoaderFlags.String(utils.SchedulerAddress, dfltCfg.LoaderCgrCfg().ActionSConns[0], "")
 	rpcEncoding      = cgrLoaderFlags.String(utils.RpcEncodingCgr, rpcclient.JSONrpc, "RPC encoding used <*gob|*json>")
 )
 
@@ -237,11 +237,11 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		}
 	}
 
-	if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0] {
+	if *schedulerAddress != dfltCfg.LoaderCgrCfg().ActionSConns[0] {
 		if *schedulerAddress == utils.EmptyString {
-			ldrCfg.LoaderCgrCfg().SchedulerConns = []string{}
+			ldrCfg.LoaderCgrCfg().ActionSConns = []string{}
 		} else {
-			ldrCfg.LoaderCgrCfg().SchedulerConns = []string{*schedulerAddress}
+			ldrCfg.LoaderCgrCfg().ActionSConns = []string{*schedulerAddress}
 			if _, has := ldrCfg.RPCConns()[*schedulerAddress]; !has {
 				ldrCfg.RPCConns()[*schedulerAddress] = &config.RPCConn{
 					Strategy: rpcclient.PoolFirst,
@@ -363,7 +363,7 @@ func main() {
 	if tpReader, err = engine.NewTpReader(dataDB, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
-		ldrCfg.LoaderCgrCfg().SchedulerConns, false); err != nil {
+		ldrCfg.LoaderCgrCfg().ActionSConns, false); err != nil {
 		log.Fatal(err)
 	}
 	if err = tpReader.LoadAll(); err != nil {
@@ -393,7 +393,7 @@ func main() {
 		log.Fatal("Could not reload cache: ", err)
 	}
 
-	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 {
+	if len(ldrCfg.LoaderCgrCfg().ActionSConns) != 0 {
 		if err = tpReader.ReloadScheduler(*verbose); err != nil {
 			log.Fatal("Could not reload scheduler: ", err)
 		}

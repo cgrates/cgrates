@@ -123,38 +123,3 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	}
 	return
 }
-
-// SMCost stores one Cost coming from SM
-type SMCost struct {
-	CGRID       string
-	RunID       string
-	OriginHost  string
-	OriginID    string
-	CostSource  string
-	Usage       time.Duration
-	CostDetails *EventCost
-}
-
-type AttrCDRSStoreSMCost struct {
-	Cost           *SMCost
-	CheckDuplicate bool
-	APIOpts        map[string]interface{}
-	Tenant         string
-}
-
-type ArgsV2CDRSStoreSMCost struct {
-	Cost           *V2SMCost
-	CheckDuplicate bool
-	APIOpts        map[string]interface{}
-	Tenant         string
-}
-
-type V2SMCost struct {
-	CGRID       string
-	RunID       string
-	OriginHost  string
-	OriginID    string
-	CostSource  string
-	Usage       time.Duration
-	CostDetails *EventCost
-}

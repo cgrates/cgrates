@@ -262,11 +262,6 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 			if cdr.Cost, err = utils.IfaceAsFloat64(v); err != nil {
 				return nil, err
 			}
-		case utils.CostDetails:
-			if cdr.CostDetails, err = IfaceAsEventCost(v); err != nil {
-				return nil, err
-			}
-			cdr.CostDetails.initCache()
 		case utils.ExtraInfo:
 			cdr.ExtraInfo = utils.IfaceAsString(v)
 		case utils.OrderID:

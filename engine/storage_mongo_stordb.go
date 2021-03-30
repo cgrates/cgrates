@@ -269,33 +269,6 @@ func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
-	filter := bson.M{"tpid": tpid}
-	if id != "" {
-		filter["id"] = id
-	}
-	var results []*utils.TPActions
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPActions).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var el utils.TPActions
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
-			}
-			results = append(results, &el)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
 func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) error {
 	if len(table) == 0 { // Remove tpid out of all tables
 		return ms.query(func(sctx mongo.SessionContext) error {
@@ -375,27 +348,6 @@ func (ms *MongoStorage) SetTPDestinations(tpDsts []*utils.TPDestination) (err er
 	})
 }
 
-func (ms *MongoStorage) SetTPActions(tps []*utils.TPActions) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tps {
-			if !m[tp.ID] {
-				m[tp.ID] = true
-				if _, err := ms.getCol(utils.TBLTPActions).DeleteMany(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID}); err != nil {
-					return err
-				}
-			}
-			if _, err := ms.getCol(utils.TBLTPActions).InsertOne(sctx, tp); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
 func (ms *MongoStorage) SetTPResources(tpRLs []*utils.TPResourceProfile) (err error) {
 	if len(tpRLs) == 0 {
 		return
@@ -425,81 +377,6 @@ func (ms *MongoStorage) SetTPRStats(tps []*utils.TPStatProfile) (err error) {
 			}
 		}
 		return nil
-	})
-}
-
-func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
-	if smc.CostDetails == nil {
-		return nil
-	}
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(utils.SessionCostsTBL).InsertOne(sctx, smc)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
-	remParams := bson.M{}
-	if smc != nil {
-		remParams = bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}
-	}
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(utils.SessionCostsTBL).DeleteMany(sctx, remParams)
-		return err
-	})
-}
-
-func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) (smcs []*SMCost, err error) {
-	filter := bson.M{}
-	if cgrid != "" {
-		filter[CGRIDLow] = cgrid
-	}
-	if runid != "" {
-		filter[RunIDLow] = runid
-	}
-	if originHost != "" {
-		filter[OriginHostLow] = originHost
-	}
-	if originIDPrefix != "" {
-		filter[OriginIDLow] = bsonx.Regex(fmt.Sprintf("^%s", originIDPrefix), "")
-	}
-	err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.SessionCostsTBL).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var smCost SMCost
-			err := cur.Decode(&smCost)
-			if err != nil {
-				return err
-			}
-			clone := smCost
-			clone.CostDetails.initCache()
-			smcs = append(smcs, &clone)
-		}
-		if len(smcs) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return smcs, err
-}
-
-func (ms *MongoStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
-	filters := bson.M{
-		CGRIDLow:      bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
-		RunIDLow:      bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
-		OriginHostLow: bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
-		OriginIDLow:   bson.M{"$in": qryFltr.OriginIDs, "$nin": qryFltr.NotOriginIDs},
-		CostSourceLow: bson.M{"$in": qryFltr.CostSources, "$nin": qryFltr.NotCostSources},
-		UsageLow:      bson.M{"$gte": qryFltr.Usage.Min, "$lt": qryFltr.Usage.Max},
-		CreatedAtLow:  bson.M{"$gte": qryFltr.CreatedAt.Begin, "$lt": qryFltr.CreatedAt.End},
-	}
-	ms.cleanEmptyFilters(filters)
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(utils.SessionCostsTBL).DeleteMany(sctx, filters)
-		return err
 	})
 }
 
@@ -735,7 +612,6 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				return err
 			}
 			clone := cdr
-			clone.CostDetails.initCache()
 			cdrs = append(cdrs, &clone)
 		}
 		if len(cdrs) == 0 {

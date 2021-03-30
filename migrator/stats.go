@@ -55,7 +55,6 @@ type v1Stat struct {
 	RatedAccount    []string        // CDRFieldFilter on RatedAccounts
 	RatedSubject    []string        // CDRFieldFilter on RatedSubjects
 	CostInterval    []float64       // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
-	Triggers        engine.ActionTriggers
 }
 
 type v1Stats []*v1Stat
@@ -126,14 +125,6 @@ func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.Stat
 		return nil, nil, nil, err
 	}
 	if v1Sts.Id != utils.EmptyString {
-		if len(v1Sts.Triggers) != 0 {
-			for _, Trigger := range v1Sts.Triggers {
-				if err := m.SasThreshold(Trigger); err != nil {
-					return nil, nil, nil, err
-
-				}
-			}
-		}
 		if filter, v2Stats, sts, err = v1Sts.AsStatQP(); err != nil {
 			return nil, nil, nil, err
 		}
@@ -409,11 +400,6 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	}
 	if v1Sts.SaveInterval != 0 {
 		stq.Stored = true
-	}
-	if len(v1Sts.Triggers) != 0 {
-		for i := range v1Sts.Triggers {
-			stq.ThresholdIDs = append(stq.ThresholdIDs, v1Sts.Triggers[i].ID)
-		}
 	}
 	sq = &engine.StatQueue{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,

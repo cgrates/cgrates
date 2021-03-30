@@ -38,7 +38,6 @@ type BalanceFilter struct {
 	Categories     *utils.StringMap
 	SharedGroups   *utils.StringMap
 	TimingIDs      *utils.StringMap
-	Timings        []*RITiming
 	Disabled       *bool
 	Factor         *ValueFactor
 	Blocker        *bool
@@ -120,7 +119,6 @@ func (bp *BalanceFilter) CreateBalance() *Balance {
 		RatingSubject:  bp.GetRatingSubject(),
 		Categories:     bp.GetCategories(),
 		SharedGroups:   bp.GetSharedGroups(),
-		Timings:        bp.Timings,
 		TimingIDs:      bp.GetTimingIDs(),
 		Disabled:       bp.GetDisabled(),
 		Factor:         bp.GetFactor(),
@@ -174,12 +172,6 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 	if bf.TimingIDs != nil {
 		result.TimingIDs = utils.StringMapPointer(bf.TimingIDs.Clone())
 	}
-	if bf.Timings != nil {
-		result.Timings = make([]*RITiming, len(bf.Timings))
-		for i, rit := range bf.Timings {
-			result.Timings[i] = rit.Clone()
-		}
-	}
 	if bf.Disabled != nil {
 		result.Disabled = new(bool)
 		*result.Disabled = *bf.Disabled
@@ -226,12 +218,6 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if !b.TimingIDs.IsEmpty() {
 		bf.TimingIDs = &b.TimingIDs
 	}
-	if len(b.Timings) != 0 {
-		bf.Timings = make([]*RITiming, len(b.Timings))
-		for i, timing := range b.Timings {
-			bf.Timings[i] = timing
-		}
-	}
 	if len(b.Factor) != 0 {
 		bf.Factor = &b.Factor
 	}
@@ -241,7 +227,6 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if b.Blocker {
 		bf.Blocker = &b.Blocker
 	}
-	bf.Timings = b.Timings
 	return bf
 }
 
@@ -399,12 +384,6 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	}
 	if bf.TimingIDs != nil {
 		b.TimingIDs = *bf.TimingIDs
-	}
-	if bf.Timings != nil && len(bf.Timings) != 0 {
-		b.Timings = make([]*RITiming, len(bf.Timings))
-		for i, timing := range bf.Timings {
-			b.Timings[i] = timing
-		}
 	}
 	if bf.Weight != nil {
 		b.Weight = *bf.Weight

@@ -143,8 +143,8 @@ func TestLoadConfig(t *testing.T) {
 	if !reflect.DeepEqual(ldrCfg.LoaderCgrCfg().CachesConns, []string{}) {
 		t.Errorf("Expected %v received %v", []string{}, ldrCfg.LoaderCgrCfg().CachesConns)
 	}
-	if !reflect.DeepEqual(ldrCfg.LoaderCgrCfg().SchedulerConns, []string{}) {
-		t.Errorf("Expected %v received %v", []string{}, ldrCfg.LoaderCgrCfg().SchedulerConns)
+	if !reflect.DeepEqual(ldrCfg.LoaderCgrCfg().ActionSConns, []string{}) {
+		t.Errorf("Expected %v received %v", []string{}, ldrCfg.LoaderCgrCfg().ActionSConns)
 	}
 	*cacheSAddress = "127.0.0.1"
 	*schedulerAddress = "127.0.0.2"
@@ -155,8 +155,8 @@ func TestLoadConfig(t *testing.T) {
 		t.Errorf("Expected %v received %v", expAddrs, ldrCfg.LoaderCgrCfg().CachesConns)
 	}
 	expAddrs = []string{"127.0.0.2"}
-	if !reflect.DeepEqual(ldrCfg.LoaderCgrCfg().SchedulerConns, expAddrs) {
-		t.Errorf("Expected %v received %v", expAddrs, ldrCfg.LoaderCgrCfg().SchedulerConns)
+	if !reflect.DeepEqual(ldrCfg.LoaderCgrCfg().ActionSConns, expAddrs) {
+		t.Errorf("Expected %v received %v", expAddrs, ldrCfg.LoaderCgrCfg().ActionSConns)
 	}
 	expaddr := config.RPCConns{
 		utils.MetaBiJSONLocalHost: {

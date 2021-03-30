@@ -713,7 +713,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Thresholds_conns:     &[]string{},
 		Stats_conns:          &[]string{},
 		Online_cdr_exports:   &[]string{},
-		Scheduler_conns:      &[]string{},
+		Actions_conns:        &[]string{},
 		Ees_conns:            &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -1925,7 +1925,7 @@ func TestDfLoaderCfg(t *testing.T) {
 		Disable_reverse:  utils.BoolPointer(false),
 		Field_separator:  utils.StringPointer(","),
 		Caches_conns:     &[]string{utils.MetaLocalHost},
-		Scheduler_conns:  &[]string{utils.MetaLocalHost},
+		Actions_conns:    &[]string{utils.MetaLocalHost},
 		Gapi_credentials: &cred,
 		Gapi_token:       &tok,
 	}
@@ -2024,7 +2024,7 @@ func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Caches_conns:     &[]string{utils.MetaInternal},
-		Scheduler_conns:  &[]string{},
+		Actions_conns:    &[]string{},
 		Attributes_conns: &[]string{},
 		Ees_conns:        &[]string{},
 	}

@@ -86,7 +86,6 @@ type SessionSv1Interface interface {
 	ProcessCDR(cgrEv *utils.CGREvent, rply *string) error
 	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
 	ProcessEvent(args *sessions.V1ProcessEventArgs, rply *sessions.V1ProcessEventReply) error
-	GetCost(args *sessions.V1ProcessEventArgs, rply *sessions.V1GetCostReply) error
 	GetActiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetActiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	ForceDisconnect(args *utils.SessionFilter, rply *string) error
@@ -100,16 +99,6 @@ type SessionSv1Interface interface {
 
 	STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) error
 	STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) error
-}
-
-type ResponderInterface interface {
-	GetCost(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
-	Debit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
-	MaxDebit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
-	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *float64) (err error)
-	GetMaxSessionTime(arg *engine.CallDescriptorWithAPIOpts, reply *time.Duration) (err error)
-	Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err error)
-	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type CacheSv1Interface interface {
@@ -149,16 +138,12 @@ type CDRsV1Interface interface {
 	ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error
 	ProcessExternalCDR(cdr *engine.ExternalCDRWithAPIOpts, reply *string) error
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error
-	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
 	GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error
 	GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts, reply *[]*engine.CDR) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
 type ServiceManagerV1Interface interface {
-	StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
-	StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
-	ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
@@ -214,7 +199,6 @@ type ReplicatorSv1Interface interface {
 	SetTiming(tm *utils.TPTimingWithAPIOpts, reply *string) error
 	SetResource(rs *engine.ResourceWithAPIOpts, reply *string) error
 	SetResourceProfile(rs *engine.ResourceProfileWithAPIOpts, reply *string) error
-	SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error
 	SetRouteProfile(sp *engine.RouteProfileWithAPIOpts, reply *string) error
 	SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) error
 	SetChargerProfile(cp *engine.ChargerProfileWithAPIOpts, reply *string) error

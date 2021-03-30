@@ -86,37 +86,37 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 			t.Hits > t.tPrfl.MaxHits) {
 		return
 	}
-	var tntAcnt string
-	var acnt string
-	if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
-		acnt, _ = args.FieldAsString(utils.ID)
-	} else {
-		acnt, _ = args.FieldAsString(utils.AccountField)
-	}
-	if acnt != utils.EmptyString {
-		tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
-	}
+	// var tntAcnt string
+	// var acnt string
+	// if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
+	// 	acnt, _ = args.FieldAsString(utils.ID)
+	// } else {
+	// 	acnt, _ = args.FieldAsString(utils.AccountField)
+	// }
+	// if acnt != utils.EmptyString {
+	// 	tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
+	// }
 
-	for _, actionSetID := range t.tPrfl.ActionIDs {
-		at := &ActionTiming{
-			Uuid:      utils.GenUUID(),
-			ActionsID: actionSetID,
-			ExtraData: args.CGREvent,
-		}
-		if tntAcnt != utils.EmptyString {
-			at.accountIDs = utils.NewStringMap(tntAcnt)
-		}
-		if t.tPrfl.Async {
-			go func() {
-				if errExec := at.Execute(nil, nil); errExec != nil {
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-				}
-			}()
-		} else if errExec := at.Execute(nil, nil); errExec != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-			err = utils.ErrPartiallyExecuted
-		}
-	}
+	// for _, actionSetID := range t.tPrfl.ActionIDs {
+	// at := &ActionTiming{
+	// 	Uuid:      utils.GenUUID(),
+	// 	ActionsID: actionSetID,
+	// 	ExtraData: args.CGREvent,
+	// }
+	// if tntAcnt != utils.EmptyString {
+	// 	at.accountIDs = utils.NewStringMap(tntAcnt)
+	// }
+	// if t.tPrfl.Async {
+	// 	go func() {
+	// 		if errExec := at.Execute(nil, nil); errExec != nil {
+	// 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+	// 		}
+	// 	}()
+	// } else if errExec := at.Execute(nil, nil); errExec != nil {
+	// 	utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
+	// 	err = utils.ErrPartiallyExecuted
+	// }
+	// }
 	return
 }
 

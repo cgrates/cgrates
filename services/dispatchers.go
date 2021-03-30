@@ -115,17 +115,11 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.ChargerSv1,
 		v1.NewDispatcherChargerSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.Responder,
-		v1.NewDispatcherResponder(dspS.dspS))
-
 	dspS.server.RpcRegisterName(utils.CacheSv1,
 		v1.NewDispatcherCacheSv1(dspS.dspS))
 
 	dspS.server.RpcRegisterName(utils.GuardianSv1,
 		v1.NewDispatcherGuardianSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.SchedulerSv1,
-		v1.NewDispatcherSchedulerSv1(dspS.dspS))
 
 	dspS.server.RpcRegisterName(utils.CDRsV1,
 		v1.NewDispatcherSCDRsV1(dspS.dspS))
@@ -135,9 +129,6 @@ func (dspS *DispatcherService) Start() (err error) {
 
 	dspS.server.RpcRegisterName(utils.CoreSv1,
 		v1.NewDispatcherCoreSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.RALsV1,
-		v1.NewDispatcherRALsV1(dspS.dspS))
 
 	dspS.server.RpcRegisterName(utils.ReplicatorSv1,
 		v1.NewDispatcherReplicatorSv1(dspS.dspS))

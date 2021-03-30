@@ -55,13 +55,6 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 			return nil, err
 		}
 	}
-	if len(extCdr.CostDetails) != 0 {
-		cdr.CostDetails = &EventCost{}
-		if err = json.Unmarshal([]byte(extCdr.CostDetails), cdr.CostDetails); err != nil {
-			return nil, err
-		}
-		cdr.CostDetails.initCache()
-	}
 	if extCdr.ExtraFields != nil {
 		cdr.ExtraFields = make(map[string]string)
 	}
@@ -94,7 +87,6 @@ type CDR struct {
 	PreRated    bool              // Mark the CDR as rated so we do not process it during rating
 	CostSource  string            // The source of this cost
 	Cost        float64           //
-	CostDetails *EventCost        // Attach the cost details to CDR when possible
 }
 
 // AddDefaults will add missing information based on other fields
@@ -120,11 +112,6 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 	if cdr.Subject == utils.EmptyString {
 		cdr.Subject = cdr.Account
 	}
-}
-
-func (cdr *CDR) CostDetailsJson() string {
-	mrshled, _ := json.Marshal(cdr.CostDetails)
-	return string(mrshled)
 }
 
 func (cdr *CDR) ComputeCGRID() {
@@ -187,7 +174,6 @@ func (cdr *CDR) Clone() *CDR {
 		PreRated:    cdr.PreRated,
 		CostSource:  cdr.CostSource,
 		Cost:        cdr.Cost,
-		CostDetails: cdr.CostDetails.Clone(),
 	}
 	if cdr.ExtraFields != nil {
 		cln.ExtraFields = make(map[string]string, len(cdr.ExtraFields))
@@ -202,9 +188,6 @@ func (cdr *CDR) Clone() *CDR {
 func (cdr *CDR) AsMapStorage() (mp utils.MapStorage) {
 	mp = utils.MapStorage{
 		utils.MetaReq: cdr.AsMapStringIface(),
-	}
-	if cdr.CostDetails != nil {
-		mp[utils.MetaEC] = cdr.CostDetails
 	}
 	return
 }
@@ -235,9 +218,6 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
 	mp[utils.PreRated] = cdr.PreRated
 	mp[utils.CostSource] = cdr.CostSource
 	mp[utils.Cost] = cdr.Cost
-	if cdr.CostDetails != nil {
-		mp[utils.CostDetails] = cdr.CostDetails
-	}
 	return
 }
 
@@ -268,7 +248,6 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		ExtraFields: cdr.ExtraFields,
 		CostSource:  cdr.CostSource,
 		Cost:        cdr.Cost,
-		CostDetails: cdr.CostDetailsJson(),
 		ExtraInfo:   cdr.ExtraInfo,
 		PreRated:    cdr.PreRated,
 	}
@@ -437,7 +416,6 @@ func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 	cdrSQL.ExtraFields = utils.ToJSON(cdr.ExtraFields)
 	cdrSQL.CostSource = cdr.CostSource
 	cdrSQL.Cost = cdr.Cost
-	cdrSQL.CostDetails = utils.ToJSON(cdr.CostDetails)
 	cdrSQL.ExtraInfo = cdr.ExtraInfo
 	cdrSQL.CreatedAt = time.Now()
 	return
@@ -476,11 +454,6 @@ func NewCDRFromSQL(cdrSQL *CDRsql) (cdr *CDR, err error) {
 	cdr.ExtraInfo = cdrSQL.ExtraInfo
 	if cdrSQL.ExtraFields != "" {
 		if err = json.Unmarshal([]byte(cdrSQL.ExtraFields), &cdr.ExtraFields); err != nil {
-			return nil, err
-		}
-	}
-	if cdrSQL.CostDetails != "" {
-		if err = json.Unmarshal([]byte(cdrSQL.CostDetails), &cdr.CostDetails); err != nil {
 			return nil, err
 		}
 	}
@@ -525,39 +498,6 @@ type UsageRecord struct {
 	AnswerTime  string
 	Usage       string
 	ExtraFields map[string]string
-}
-
-func (uR *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*CallDescriptor, error) {
-	var err error
-	cd := &CallDescriptor{
-		CgrID:               uR.GetId(),
-		ToR:                 uR.ToR,
-		Tenant:              uR.Tenant,
-		Category:            uR.Category,
-		Subject:             uR.Subject,
-		Account:             uR.Account,
-		Destination:         uR.Destination,
-		DenyNegativeAccount: denyNegative,
-	}
-	timeStr := uR.AnswerTime
-	if len(timeStr) == 0 { // In case of auth, answer time will not be defined, so take it out of setup one
-		timeStr = uR.SetupTime
-	}
-	if cd.TimeStart, err = utils.ParseTimeDetectLayout(timeStr, timezone); err != nil {
-		return nil, err
-	}
-	if usage, err := utils.ParseDurationWithNanosecs(uR.Usage); err != nil {
-		return nil, err
-	} else {
-		cd.TimeEnd = cd.TimeStart.Add(usage)
-	}
-	if uR.ExtraFields != nil {
-		cd.ExtraFields = make(map[string]string)
-	}
-	for k, v := range uR.ExtraFields {
-		cd.ExtraFields[k] = v
-	}
-	return cd, nil
 }
 
 func (uR *UsageRecord) GetId() string {

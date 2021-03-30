@@ -90,9 +90,9 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// split the field name in 3 parts
 		// fieldNameType (~*accounts), accountID(1001) and queried part (BalanceMap.*monetary[0].Value)
 
-		var account Account
-		if err = connMgr.Call(dDP.apiConns, nil, utils.APIerSv2GetAccount,
-			&utils.AttrGetAccount{Tenant: dDP.tenant, Account: fldPath[1]}, &account); err != nil {
+		var account utils.AccountProfile
+		if err = connMgr.Call(dDP.apiConns, nil, utils.APIerSv1GetAccountProfile,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &account); err != nil {
 			return
 		}
 		//construct dataProvider from account and set it further
@@ -131,18 +131,6 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		}
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
-	case utils.MetaAsm:
-		// sample of fieldName ~*asm.BalanceSummaries.HolidayBalance.Value
-		stringReq, err := dDP.initialDP.FieldAsString([]string{utils.MetaReq})
-		if err != nil {
-			return nil, err
-		}
-		acntSummary, err := NewAccountSummaryFromJSON(stringReq)
-		if err != nil {
-			return nil, err
-		}
-		dDP.cache.Set(fldPath[:1], acntSummary)
-		return acntSummary.FieldAsInterface(fldPath[1:])
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
 	}
 	return nil, utils.ErrNotFound

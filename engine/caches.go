@@ -71,9 +71,6 @@ func init() {
 	gob.Register(new(ActionProfile))
 	gob.Register(new(ActionProfileWithAPIOpts))
 
-	// CDRs
-	gob.Register(new(EventCost))
-
 	// StatMetrics
 	gob.Register(new(StatASR))
 	gob.Register(new(StatACD))
@@ -107,7 +104,6 @@ func init() {
 
 // NewCacheS initializes the Cache service and executes the precaching
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
-	cfg.CacheCfg().AddTmpCaches()
 	tCache := cfg.CacheCfg().AsTransCacheConfig()
 	if len(cfg.CacheCfg().ReplicationConns) != 0 {
 		var reply string
