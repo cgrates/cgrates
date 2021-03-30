@@ -160,13 +160,6 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 		if sr.NextAutoDebit != nil {
 			aSs[i].NextAutoDebit = *sr.NextAutoDebit
 		}
-		if sr.CD != nil {
-			aSs[i].LoopIndex = sr.CD.LoopIndex
-			aSs[i].DurationIndex = sr.CD.DurationIndex
-			aSs[i].MaxRate = sr.CD.MaxRate
-			aSs[i].MaxRateUnit = sr.CD.MaxRateUnit
-			aSs[i].MaxCostSoFar = sr.CD.MaxCostSoFar
-		}
 	}
 	s.RUnlock()
 	return
@@ -197,13 +190,7 @@ func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalS
 	if sr.NextAutoDebit != nil {
 		aS.NextAutoDebit = *sr.NextAutoDebit
 	}
-	if sr.CD != nil {
-		aS.LoopIndex = sr.CD.LoopIndex
-		aS.DurationIndex = sr.CD.DurationIndex
-		aS.MaxRate = sr.CD.MaxRate
-		aS.MaxRateUnit = sr.CD.MaxRateUnit
-		aS.MaxCostSoFar = sr.CD.MaxCostSoFar
-	}
+
 	return
 }
 
@@ -256,9 +243,7 @@ func (s *Session) stopDebitLoops() {
 
 // SRun is one billing run for the Session
 type SRun struct {
-	Event     engine.MapEvent        // Event received from ChargerS
-	CD        *engine.CallDescriptor // initial CD used for debits, updated on each debit
-	EventCost *engine.EventCost
+	Event engine.MapEvent // Event received from ChargerS
 
 	ExtraDuration time.Duration // keeps the current duration debited on top of what has been asked
 	LastUsage     time.Duration // last requested Duration
@@ -273,12 +258,6 @@ func (sr *SRun) Clone() (clsr *SRun) {
 		ExtraDuration: sr.ExtraDuration,
 		LastUsage:     sr.LastUsage,
 		TotalUsage:    sr.TotalUsage,
-	}
-	if sr.CD != nil {
-		clsr.CD = sr.CD.Clone()
-	}
-	if sr.EventCost != nil {
-		clsr.EventCost = sr.EventCost.Clone()
 	}
 	if sr.NextAutoDebit != nil {
 		clsr.NextAutoDebit = utils.TimePointer(*sr.NextAutoDebit)

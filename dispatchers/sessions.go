@@ -162,18 +162,6 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1GetCost(args *sessions.V1ProcessEventArgs,
-	reply *sessions.V1GetCostReply) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.SessionSv1GetCost, args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1GetCost, args, reply)
-}
-
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,
 	reply *[]*sessions.ExternalSession) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant

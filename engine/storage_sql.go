@@ -21,7 +21,6 @@ package engine
 import (
 	"bytes"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -99,11 +98,9 @@ func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 
 func (sqls *SQLStorage) IsDBEmpty() (resp bool, err error) {
 	tbls := []string{
-		utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
-		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
-		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
-		utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
+		utils.TBLTPTimings, utils.TBLTPDestinations,
+		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL,
 		utils.TBLVersions, utils.TBLTPRoutes, utils.TBLTPAttributes, utils.TBLTPChargers,
 		utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts,
 	}
@@ -123,29 +120,23 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	var err error
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
-		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+
+		for _, clNm := range []string{
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
-			utils.TBLTPRates,
-			utils.TBLTPDestinationRates,
-			utils.TBLTPRatingPlans,
-			utils.TBLTPRatingProfiles,
-			utils.TBLTPSharedGroups,
-			utils.TBLTPActions,
-			utils.TBLTPActionTriggers,
-			utils.TBLTPAccountActions,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
 			utils.TBLTPFilters,
-			utils.TBLTPActionPlans,
 			utils.TBLTPRoutes,
 			utils.TBLTPAttributes,
 			utils.TBLTPChargers,
 			utils.TBLTPDispatchers,
 			utils.TBLTPDispatcherHosts,
-		)
+		} {
+			qryStr += fmt.Sprintf("UNION (SELECT tpid FROM %s)", clNm)
+		}
+		qryStr = strings.TrimPrefix(qryStr, "UNION ")
 	}
 	rows, err = sqls.Db.Query(qryStr)
 	if err != nil {
@@ -236,11 +227,9 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	tx := sqls.db.Begin()
 
 	if len(table) == 0 { // Remove tpid out of all tables
-		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
-			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRatingProfiles,
-			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
-			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
+		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
+			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+			utils.TBLTPFilters, utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts, utils.TBLTPAccountProfiles,
 			utils.TBLTPActionProfiles, utils.TBLTPRateProfiles} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
@@ -299,31 +288,6 @@ func (sqls *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 		}
 		for _, d := range APItoModelDestination(dst) {
 			if err := tx.Create(&d).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPActions(acts []*utils.TPActions) error {
-	if len(acts) == 0 {
-		return nil //Nothing to set
-	}
-	m := make(map[string]bool)
-	tx := sqls.db.Begin()
-	for _, a := range acts {
-		if !m[a.ID] {
-			m[a.ID] = true
-			if err := tx.Where(&ActionMdl{Tpid: a.TPid, Tag: a.ID}).Delete(ActionMdl{}).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-		for _, sa := range APItoModelAction(a) {
-			if err := tx.Create(&sa).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -593,150 +557,6 @@ func (sqls *SQLStorage) SetTPAccountProfiles(tpAps []*utils.TPAccountProfile) er
 	}
 	tx.Commit()
 	return nil
-}
-
-func (sqls *SQLStorage) SetSMCost(smc *SMCost) error {
-	if smc.CostDetails == nil {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	cd := &SessionCostsSQL{
-		Cgrid:       smc.CGRID,
-		RunID:       smc.RunID,
-		OriginHost:  smc.OriginHost,
-		OriginID:    smc.OriginID,
-		CostSource:  smc.CostSource,
-		CostDetails: utils.ToJSON(smc.CostDetails),
-		Usage:       smc.Usage.Nanoseconds(),
-		CreatedAt:   time.Now(),
-	}
-	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)
-		tx.Rollback()
-		return tx.Error
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) RemoveSMCost(smc *SMCost) error {
-	tx := sqls.db.Begin()
-	var rmParam *SessionCostsSQL
-	if smc != nil {
-		rmParam = &SessionCostsSQL{Cgrid: smc.CGRID,
-			RunID: smc.RunID}
-	}
-	if err := tx.Where(rmParam).Delete(SessionCostsSQL{}).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
-	q := sqls.db.Table(utils.SessionCostsTBL).Select("*")
-	// Add filters, use in to replace the high number of ORs
-	if len(qryFltr.CGRIDs) != 0 {
-		q = q.Where("cgrid in (?)", qryFltr.CGRIDs)
-	}
-	if len(qryFltr.NotCGRIDs) != 0 {
-		q = q.Where("cgrid not in (?)", qryFltr.NotCGRIDs)
-	}
-	if len(qryFltr.RunIDs) != 0 {
-		q = q.Where("run_id in (?)", qryFltr.RunIDs)
-	}
-	if len(qryFltr.NotRunIDs) != 0 {
-		q = q.Where("run_id not in (?)", qryFltr.NotRunIDs)
-	}
-	if len(qryFltr.OriginIDs) != 0 {
-		q = q.Where("origin_id in (?)", qryFltr.OriginIDs)
-	}
-	if len(qryFltr.NotOriginIDs) != 0 {
-		q = q.Where("origin_id not in (?)", qryFltr.NotOriginIDs)
-	}
-	if len(qryFltr.OriginHosts) != 0 {
-		q = q.Where("origin_host in (?)", qryFltr.OriginHosts)
-	}
-	if len(qryFltr.NotOriginHosts) != 0 {
-		q = q.Where("origin_host not in (?)", qryFltr.NotOriginHosts)
-	}
-	if len(qryFltr.CostSources) != 0 {
-		q = q.Where("costsource in (?)", qryFltr.CostSources)
-	}
-	if len(qryFltr.NotCostSources) != 0 {
-		q = q.Where("costsource not in (?)", qryFltr.NotCostSources)
-	}
-	if qryFltr.CreatedAt.Begin != nil {
-		q = q.Where("created_at >= ?", qryFltr.CreatedAt.Begin)
-	}
-	if qryFltr.CreatedAt.End != nil {
-		q = q.Where("created_at < ?", qryFltr.CreatedAt.End)
-	}
-	if qryFltr.Usage.Min != nil {
-		if sqls.db.Dialector.Name() == utils.MySQL { // MySQL needs escaping for usage
-			q = q.Where("`usage` >= ?", qryFltr.Usage.Min.Nanoseconds())
-		} else {
-			q = q.Where("usage >= ?", qryFltr.Usage.Min.Nanoseconds())
-		}
-	}
-	if qryFltr.Usage.Max != nil {
-		if sqls.db.Dialector.Name() == utils.MySQL { // MySQL needs escaping for usage
-			q = q.Where("`usage` < ?", qryFltr.Usage.Max.Nanoseconds())
-		} else {
-			q = q.Where("usage < ?", qryFltr.Usage.Max.Nanoseconds())
-		}
-	}
-	if err := q.Delete(nil).Error; err != nil {
-		q.Rollback()
-		return err
-	}
-	return nil
-}
-
-// GetSMCosts is used to retrieve one or multiple SMCosts based on filter
-func (sqls *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) ([]*SMCost, error) {
-	var smCosts []*SMCost
-	filter := &SessionCostsSQL{}
-	if cgrid != "" {
-		filter.Cgrid = cgrid
-	}
-	if runid != "" {
-		filter.RunID = runid
-	}
-	if originHost != "" {
-		filter.OriginHost = originHost
-	}
-	q := sqls.db.Where(filter)
-	if originIDPrefix != "" {
-		q = sqls.db.Where(filter).Where(fmt.Sprintf("origin_id LIKE '%s%%'", originIDPrefix))
-	}
-	results := make([]*SessionCostsSQL, 0)
-	if err := q.Find(&results).Error; err != nil {
-		return nil, err
-	}
-	for _, result := range results {
-		if len(result.CostDetails) == 0 {
-			continue
-		}
-		smc := &SMCost{
-			CGRID:       result.Cgrid,
-			RunID:       result.RunID,
-			OriginHost:  result.OriginHost,
-			OriginID:    result.OriginID,
-			CostSource:  result.CostSource,
-			Usage:       time.Duration(result.Usage),
-			CostDetails: new(EventCost),
-		}
-		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {
-			return nil, err
-		}
-		smc.CostDetails.initCache()
-		smCosts = append(smCosts, smc)
-	}
-	if len(smCosts) == 0 {
-		return smCosts, utils.ErrNotFound
-	}
-	return smCosts, nil
 }
 
 func (sqls *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
@@ -1026,7 +846,6 @@ func (sqls *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		if cdr, err := NewCDRFromSQL(result); err != nil {
 			return nil, 0, err
 		} else {
-			cdr.CostDetails.initCache()
 			cdrs = append(cdrs, cdr)
 		}
 	}
@@ -1065,22 +884,6 @@ func (sqls *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 		return ts, utils.ErrNotFound
 	}
 	return ts, nil
-}
-
-func (sqls *SQLStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
-	var tpActions ActionMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("tag = ?", id)
-	}
-	if err := q.Find(&tpActions).Error; err != nil {
-		return nil, err
-	}
-	as := tpActions.AsTPActions()
-	if len(as) == 0 {
-		return as, utils.ErrNotFound
-	}
-	return as, nil
 }
 
 func (sqls *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {

@@ -39,7 +39,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/bson/bsonrw"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
@@ -325,18 +324,10 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		}
 		//StorDB
 	case utils.TBLTPTimings, utils.TBLTPDestinations,
-		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-		utils.TBLTPSharedGroups, utils.TBLTPActions,
-		utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
 		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
 		utils.TBLTPRoutes, utils.TBLTPThresholds:
 		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
-			return
-		}
-	case utils.TBLTPRatingProfiles:
-		if err = ms.enusureIndex(col, true, "tpid", "tenant",
-			"category", "subject", "loadid"); err != nil {
 			return
 		}
 	case utils.CDRsTBL:
@@ -388,11 +379,8 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	}
 	if ms.storageType == utils.StorDB {
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
-			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPActions,
-			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 			utils.TBLTPStats, utils.TBLTPResources,
-			utils.TBLTPRatingProfiles, utils.CDRsTBL, utils.SessionCostsTBL} {
+			utils.CDRsTBL, utils.SessionCostsTBL} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
 			}
@@ -436,24 +424,6 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
 		colName = ColDst
 	case utils.ReverseDestinationPrefix:
 		colName = ColRds
-	case utils.ActionPrefix:
-		colName = ColAct
-	case utils.ActionPlanPrefix:
-		colName = ColApl
-	case utils.AccountActionPlansPrefix:
-		colName = ColAAp
-	case utils.TasksKey:
-		colName = ColTsk
-	case utils.ActionTriggerPrefix:
-		colName = ColAtr
-	case utils.RatingPlanPrefix:
-		colName = ColRpl
-	case utils.RatingProfilePrefix:
-		colName = ColRpf
-	case utils.AccountPrefix:
-		colName = ColAcc
-	case utils.SharedGroupPrefix:
-		colName = ColShg
 	case utils.LoadInstKey:
 		colName = ColLht
 	case utils.VersionPrefix:
@@ -594,23 +564,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField(sctx, ColDst, utils.DestinationPrefix, subject, "key")
 		case utils.ReverseDestinationPrefix:
 			result, err = ms.getField(sctx, ColRds, utils.ReverseDestinationPrefix, subject, "key")
-		case utils.RatingPlanPrefix:
-			result, err = ms.getField(sctx, ColRpl, utils.RatingPlanPrefix, subject, "key")
-		case utils.RatingProfilePrefix:
-			if strings.HasPrefix(prefix[keyLen:], utils.MetaOut) {
-				subject = fmt.Sprintf("^\\%s", prefix[keyLen:]) // rewrite the id cause it start with * from `*out`
-			}
-			result, err = ms.getField(sctx, ColRpf, utils.RatingProfilePrefix, subject, "id")
-		case utils.ActionPrefix:
-			result, err = ms.getField(sctx, ColAct, utils.ActionPrefix, subject, "key")
-		case utils.ActionPlanPrefix:
-			result, err = ms.getField(sctx, ColApl, utils.ActionPlanPrefix, subject, "key")
-		case utils.ActionTriggerPrefix:
-			result, err = ms.getField(sctx, ColAtr, utils.ActionTriggerPrefix, subject, "key")
-		case utils.SharedGroupPrefix:
-			result, err = ms.getField(sctx, ColShg, utils.SharedGroupPrefix, subject, "id")
-		case utils.AccountPrefix:
-			result, err = ms.getField(sctx, ColAcc, utils.AccountPrefix, subject, "id")
 		case utils.ResourceProfilesPrefix:
 			result, err = ms.getField2(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, tntID)
 		case utils.ResourcesPrefix:
@@ -619,8 +572,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
 			result, err = ms.getField2(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
-		case utils.AccountActionPlansPrefix:
-			result, err = ms.getField(sctx, ColAAp, utils.AccountActionPlansPrefix, subject, "key")
 		case utils.TimingsPrefix:
 			result, err = ms.getField(sctx, ColTmg, utils.TimingsPrefix, subject, "id")
 		case utils.FilterPrefix:
@@ -685,16 +636,6 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 		switch category {
 		case utils.DestinationPrefix:
 			count, err = ms.getCol(ColDst).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.RatingPlanPrefix:
-			count, err = ms.getCol(ColRpl).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.RatingProfilePrefix:
-			count, err = ms.getCol(ColRpf).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.ActionPrefix:
-			count, err = ms.getCol(ColAct).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.ActionPlanPrefix:
-			count, err = ms.getCol(ColApl).CountDocuments(sctx, bson.M{"key": subject})
-		case utils.AccountPrefix:
-			count, err = ms.getCol(ColAcc).CountDocuments(sctx, bson.M{"id": subject})
 		case utils.ResourcesPrefix:
 			count, err = ms.getCol(ColRes).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ResourceProfilesPrefix:
@@ -841,50 +782,6 @@ func (ms *MongoStorage) SetReverseDestinationDrv(destID string, prefixes []strin
 	return nil
 }
 
-func (ms *MongoStorage) GetActionsDrv(key string) (as Actions, err error) {
-	var result struct {
-		Key   string
-		Value Actions
-	}
-	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColAct).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&result); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	as = result.Value
-	return
-}
-
-func (ms *MongoStorage) SetActionsDrv(key string, as Actions) error {
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColAct).UpdateOne(sctx, bson.M{"key": key},
-			bson.M{"$set": struct {
-				Key   string
-				Value Actions
-			}{Key: key, Value: as}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveActionsDrv(key string) error {
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(ColAct).DeleteOne(sctx, bson.M{"key": key})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	})
-}
-
 // Limit will only retrieve the last n items out of history, newest first
 func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
@@ -988,33 +885,6 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 		return errCh
 	}
 	return err
-}
-
-func (ms *MongoStorage) PushTask(t *Task) error {
-	return ms.query(func(sctx mongo.SessionContext) error {
-		_, err := ms.getCol(ColTsk).InsertOne(sctx, bson.M{"_id": primitive.NewObjectID(), "task": t})
-		return err
-	})
-}
-
-func (ms *MongoStorage) PopTask() (t *Task, err error) {
-	v := struct {
-		ID   primitive.ObjectID `bson:"_id"`
-		Task *Task
-	}{}
-	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColTsk).FindOneAndDelete(sctx, bson.D{})
-		if err := cur.Decode(&v); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return v.Task, nil
 }
 
 func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {

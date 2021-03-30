@@ -491,7 +491,6 @@ func main() {
 	internalStatSChan := make(chan rpcclient.ClientConnector, 1)
 	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)
 	internalRouteSChan := make(chan rpcclient.ClientConnector, 1)
-	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalRALsChan := make(chan rpcclient.ClientConnector, 1)
 	internalResponderChan := make(chan rpcclient.ClientConnector, 1)
 	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
@@ -515,7 +514,6 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          internalStatSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
@@ -523,10 +521,8 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        internalActionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       internalAccountSChan,
 

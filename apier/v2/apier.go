@@ -102,22 +102,6 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	return nil
 }
 
-type AttrGetActionsCount struct{}
-
-// GetActionsCount sets in reply var the total number of actions registered for the received tenant
-// returns ErrNotFound in case of 0 actions
-func (apiv2 *APIerSv2) GetActionsCount(attr *AttrGetActionsCount, reply *int) (err error) {
-	var actionKeys []string
-	if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ActionPrefix); err != nil {
-		return err
-	}
-	*reply = len(actionKeys)
-	if len(actionKeys) == 0 {
-		return utils.ErrNotFound
-	}
-	return nil
-}
-
 type AttrGetDestinations struct {
 	DestinationIDs []string
 }

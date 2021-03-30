@@ -35,7 +35,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		Thresholds_conns:     &[]string{utils.MetaInternal, "*conn1"},
 		Stats_conns:          &[]string{utils.MetaInternal, "*conn1"},
 		Online_cdr_exports:   &[]string{"randomVal"},
-		Scheduler_conns:      &[]string{utils.MetaInternal, "*conn1"},
+		Actions_conns:        &[]string{utils.MetaInternal, "*conn1"},
 		Ees_conns:            &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &CdrsCfg{
@@ -48,7 +48,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
-		SchedulerConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		ExtraFields:      RSRParsers{},
 	}
@@ -99,7 +99,7 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.ThresholdSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 		utils.StatSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.OnlineCDRExportsCfg: []string{"http_localhost", "amqp_localhost", "http_test_file"},
-		utils.SchedulerConnsCfg:   []string{utils.MetaInternal, "*conn1"},
+		utils.ActionSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -129,7 +129,7 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.ThresholdSConnsCfg:  []string{},
 		utils.StatSConnsCfg:       []string{},
 		utils.OnlineCDRExportsCfg: []string{},
-		utils.SchedulerConnsCfg:   []string{},
+		utils.ActionSConnsCfg:     []string{},
 		utils.EEsConnsCfg:         []string{"conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -149,7 +149,7 @@ func TestCdrsCfgClone(t *testing.T) {
 		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		SchedulerConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
+		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
 		ExtraFields:      RSRParsers{},
@@ -173,7 +173,7 @@ func TestCdrsCfgClone(t *testing.T) {
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.SchedulerConns[1] = ""; ban.SchedulerConns[1] != "*conn1" {
+	if rcv.ActionSConns[1] = ""; ban.ActionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.EEsConns[1] = ""; ban.EEsConns[1] != "*conn1" {

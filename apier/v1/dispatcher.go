@@ -467,12 +467,6 @@ func (dS *DispatcherSessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 	return dS.dS.SessionSv1ProcessEvent(args, reply)
 }
 
-// GetCost implements SessionSv1GetCost
-func (dS *DispatcherSessionSv1) GetCost(args *sessions.V1ProcessEventArgs,
-	reply *sessions.V1GetCostReply) (err error) {
-	return dS.dS.SessionSv1GetCost(args, reply)
-}
-
 // TerminateSession implements SessionSv1TerminateSession
 func (dS *DispatcherSessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
 	reply *string) (err error) {
@@ -709,10 +703,6 @@ func (dS *DispatcherSCDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, 
 	return dS.dS.CDRsV1GetCDRsCount(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) error {
-	return dS.dS.CDRsV1StoreSessionCost(args, reply)
-}
-
 func (dS *DispatcherSCDRsV1) RateCDRs(args *engine.ArgRateCDRs, reply *string) error {
 	return dS.dS.CDRsV1RateCDRs(args, reply)
 }
@@ -741,15 +731,6 @@ type DispatcherSServiceManagerV1 struct {
 // Ping used to detreminate if component is active
 func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.ServiceManagerV1Ping(args, reply)
-}
-func (dS *DispatcherSServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
-	return dS.dS.ServiceManagerV1StartService(*args, reply)
-}
-func (dS *DispatcherSServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
-	return dS.dS.ServiceManagerV1StopService(*args, reply)
-}
-func (dS *DispatcherSServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) error {
-	return dS.dS.ServiceManagerV1ServiceStatus(*args, reply)
 }
 
 func NewDispatcherConfigSv1(dps *dispatchers.DispatcherService) *DispatcherConfigSv1 {
@@ -950,11 +931,6 @@ func (dS *DispatcherReplicatorSv1) SetResource(args *engine.ResourceWithAPIOpts,
 // SetResourceProfile
 func (dS *DispatcherReplicatorSv1) SetResourceProfile(args *engine.ResourceProfileWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetResourceProfile(args, reply)
-}
-
-// SetActions
-func (dS *DispatcherReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActions(args, reply)
 }
 
 // SetRouteProfile

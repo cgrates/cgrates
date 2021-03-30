@@ -18,7 +18,5 @@ go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_L
 cc=$?
 go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_LOG'" github.com/cgrates/cgrates/cmd/cgr-migrator
 cm=$?
-go install -ldflags "-X 'github.com/cgrates/cgrates/utils.GitLastLog=$GIT_LAST_LOG'" github.com/cgrates/cgrates/cmd/cgr-tester
-ct=$?
 
-exit $cr || $cl || $cc || $cm || $ct
+exit $cr || $cl || $cc || $cm

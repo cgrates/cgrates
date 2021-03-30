@@ -32,7 +32,6 @@ import (
 
 // InternalDB is used as a DataDB and a StorDB
 type InternalDB struct {
-	tasks               []*Task
 	mu                  sync.RWMutex
 	stringIndexedFields []string
 	prefixIndexedFields []string
@@ -183,8 +182,7 @@ func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
 
 func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error) {
 	switch category {
-	case utils.DestinationPrefix, utils.RatingPlanPrefix, utils.RatingProfilePrefix,
-		utils.ActionPrefix, utils.ActionPlanPrefix, utils.AccountPrefix:
+	case utils.DestinationPrefix:
 		return Cache.HasItem(utils.CachePrefixToInstance[category], subject), nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
@@ -259,77 +257,6 @@ func (iDB *InternalDB) GetReverseDestinationDrv(prefix, transactionID string) (i
 		}
 	}
 	return nil, utils.ErrNotFound
-}
-
-func (iDB *InternalDB) GetActionsDrv(id string) (acts Actions, err error) {
-	if x, ok := Cache.Get(utils.CacheActions, id); ok && x != nil {
-		return x.(Actions), err
-	}
-	return nil, utils.ErrNotFound
-}
-
-func (iDB *InternalDB) SetActionsDrv(id string, acts Actions) (err error) {
-	Cache.SetWithoutReplicate(utils.CacheActions, id, acts, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveActionsDrv(id string) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheActions, id,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) PushTask(t *Task) (err error) {
-	iDB.mu.Lock()
-	iDB.tasks = append(iDB.tasks, t)
-	iDB.mu.Unlock()
-	return
-}
-
-func (iDB *InternalDB) PopTask() (t *Task, err error) {
-	iDB.mu.Lock()
-	if len(iDB.tasks) > 0 {
-		t = iDB.tasks[0]
-		iDB.tasks[0] = nil
-		iDB.tasks = iDB.tasks[1:]
-	} else {
-		err = utils.ErrNotFound
-	}
-	iDB.mu.Unlock()
-	return
-}
-
-func (iDB *InternalDB) GetAccountDrv(id string) (acc *Account, err error) {
-	if x, ok := Cache.Get(utils.CacheAccounts, id); ok && x != nil {
-		return x.(*Account).Clone(), nil
-	}
-	return nil, utils.ErrNotFound
-}
-
-func (iDB *InternalDB) SetAccountDrv(acc *Account) (err error) {
-	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were cleaned it makes
-	// sense to write empty balance map
-	if len(acc.BalanceMap) == 0 {
-		if ac, err := iDB.GetAccountDrv(acc.ID); err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = acc.ActionTriggers
-			ac.UnitCounters = acc.UnitCounters
-			ac.AllowNegative = acc.AllowNegative
-			ac.Disabled = acc.Disabled
-			acc = ac
-		}
-	}
-	acc.UpdateTime = time.Now()
-	Cache.SetWithoutReplicate(utils.CacheAccounts, acc.ID, acc, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveAccountDrv(id string) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheAccounts, id,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
 }
 
 func (iDB *InternalDB) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {

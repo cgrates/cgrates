@@ -32,7 +32,7 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 		Disable_reverse:  utils.BoolPointer(true),
 		Field_separator:  utils.StringPointer(";"),
 		Caches_conns:     &[]string{utils.MetaInternal},
-		Scheduler_conns:  &[]string{utils.MetaInternal},
+		Actions_conns:    &[]string{utils.MetaInternal},
 		Gapi_credentials: &json.RawMessage{12, 13, 60},
 		Gapi_token:       &json.RawMessage{13, 16},
 	}
@@ -42,7 +42,7 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 		DisableReverse:  true,
 		FieldSeparator:  rune(';'),
 		CachesConns:     []string{"*internal:*caches"},
-		SchedulerConns:  []string{"*internal:*scheduler"},
+		ActionSConns:    []string{"*internal:*scheduler"},
 		GapiCredentials: json.RawMessage{12, 13, 60},
 		GapiToken:       json.RawMessage{13, 16},
 	}
@@ -73,7 +73,7 @@ func TestLoaderCgrCfgAsMapInterface(t *testing.T) {
 		utils.DisableReverseCfg:  false,
 		utils.FieldSepCfg:        ",",
 		utils.CachesConnsCfg:     []string{"*internal", "*localhost"},
-		utils.SchedulerConnsCfg:  []string{"*internal", "*localhost"},
+		utils.ActionSConnsCfg:    []string{"*internal", "*localhost"},
 		utils.GapiCredentialsCfg: json.RawMessage(`".gapi/credentials.json"`),
 		utils.GapiTokenCfg:       json.RawMessage(`".gapi/token.json"`),
 	}
@@ -91,7 +91,7 @@ func TestLoaderCgrCfgClone(t *testing.T) {
 		DisableReverse:  true,
 		FieldSeparator:  rune(';'),
 		CachesConns:     []string{"*internal:*caches"},
-		SchedulerConns:  []string{"*internal:*scheduler"},
+		ActionSConns:    []string{"*internal:*scheduler"},
 		GapiCredentials: json.RawMessage{12, 13, 60},
 		GapiToken:       json.RawMessage{13, 16},
 	}
@@ -102,7 +102,7 @@ func TestLoaderCgrCfgClone(t *testing.T) {
 	if rcv.CachesConns[0] = ""; ban.CachesConns[0] != "*internal:*caches" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.SchedulerConns[0] = ""; ban.SchedulerConns[0] != "*internal:*scheduler" {
+	if rcv.ActionSConns[0] = ""; ban.ActionSConns[0] != "*internal:*scheduler" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.GapiCredentials[0] = 0; ban.GapiCredentials[0] != 12 {

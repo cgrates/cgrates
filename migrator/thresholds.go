@@ -23,29 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-type v2ActionTrigger struct {
-	ID                string // original csv tag
-	UniqueID          string // individual id
-	ThresholdType     string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *balance_expired
-	ThresholdValue    float64
-	Recurrent         bool          // reset excuted flag each run
-	MinSleep          time.Duration // Minimum duration between two executions in case of recurrent triggers
-	ExpirationDate    time.Time
-	ActivationDate    time.Time
-	Balance           *engine.BalanceFilter //filtru
-	Weight            float64
-	ActionsID         string
-	MinQueuedItems    int // Trigger actions only if this number is hit (stats only) MINHITS
-	Executed          bool
-	LastExecutionTime time.Time
-}
-
-type v2ActionTriggers []*v2ActionTrigger
 
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
@@ -96,19 +76,6 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		}
 		if err := m.dmIN.DataManager().RemoveThresholdProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
-		}
-	}
-	return
-}
-
-func (m *Migrator) migrateV2ActionTriggers() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
-	var v2ACT *v2ActionTrigger
-	if v2ACT, err = m.dmIN.getV2ActionTrigger(); err != nil {
-		return
-	}
-	if v2ACT.ID != "" {
-		if thp, th, filter, err = v2ACT.AsThreshold(); err != nil {
-			return
 		}
 	}
 	return
@@ -171,9 +138,6 @@ func (m *Migrator) migrateThresholds() (err error) {
 					return
 				}
 			case 1:
-				if v3, th, filter, err = m.migrateV2ActionTriggers(); err != nil && err != utils.ErrNoMoreData {
-					return
-				}
 				version = 3
 			case 2:
 				if v3, err = m.migrateV2Thresholds(); err != nil && err != utils.ErrNoMoreData {
@@ -227,184 +191,6 @@ func (m *Migrator) migrateThresholds() (err error) {
 		return
 	}
 	return m.ensureIndexesDataDB(engine.ColTps)
-}
-
-func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
-	var filterIDS []string
-	var filters []*engine.FilterRule
-	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
-		//TO DO:
-		// if v2ATR.Balance.ExpirationDate != nil { //MetaLess
-		// 	x, err := engine.NewRequestFilter(utils.MetaTimings, "ExpirationDate", v2ATR.Balance.ExpirationDate)
-		// 	if err != nil {
-		// 		return nil, nil, err
-		// 	}
-		// 	filters = append(filters, x)
-		// }
-		// if v2ATR.Balance.Weight != nil { //MetaLess /MetaRSRFields
-		// 	x, err := engine.NewRequestFilter(utils.MetaLessOrEqual, "Weight", []string{strconv.FormatFloat(*v2ATR.Balance.Weight, 'f', 6, 64)})
-		// 	if err != nil {
-		// 		return nil, nil, err
-		// 	}
-		// 	filters = append(filters, x)
-		// }
-		if v2ATR.Balance.DestinationIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.RatingSubject != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.Categories != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.SharedGroups != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.TimingIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-
-		filter = &engine.Filter{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     *v2ATR.Balance.ID,
-			Rules:  filters}
-		filterIDS = append(filterIDS, filter.ID)
-
-	}
-	thp = &engine.ThresholdProfile{
-		ID:     v2ATR.ID,
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		Weight: v2ATR.Weight,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: v2ATR.ActivationDate,
-			ExpiryTime:     v2ATR.ExpirationDate},
-		FilterIDs: []string{},
-		MinSleep:  v2ATR.MinSleep,
-	}
-	th = &engine.Threshold{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     v2ATR.ID,
-	}
-	return thp, th, filter, nil
-}
-
-func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
-	var vrs engine.Versions
-	if m.dmOut.DataManager().DataDB() == nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.NoStorDBConnection,
-			"no connection to datadb")
-	}
-	if v2ATR.ID != "" {
-		thp, th, filter, err := AsThreshold2(*v2ATR)
-		if err != nil {
-			return err
-		}
-		if filter != nil {
-			if err := m.dmOut.DataManager().SetFilter(filter, true); err != nil {
-				return err
-			}
-		}
-		if err := m.dmOut.DataManager().SetThreshold(th, 0, true); err != nil {
-			return err
-		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(thp, true); err != nil {
-			return err
-		}
-		m.stats[utils.Thresholds]++
-	}
-	// All done, update version wtih current one
-	vrs = engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
-	}
-	return
-}
-
-func AsThreshold2(v2ATR engine.ActionTrigger) (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
-	var filterIDS []string
-	var filters []*engine.FilterRule
-	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
-		if v2ATR.Balance.DestinationIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.RatingSubject != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.Categories != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.SharedGroups != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		if v2ATR.Balance.TimingIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewFilterRule(utils.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
-		filter = &engine.Filter{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     *v2ATR.Balance.ID,
-			Rules:  filters}
-		filterIDS = append(filterIDS, filter.ID)
-	}
-	th = &engine.Threshold{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     v2ATR.ID,
-	}
-
-	thp = &engine.ThresholdProfile{
-		ID:                 v2ATR.ID,
-		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
-		Weight:             v2ATR.Weight,
-		ActivationInterval: &utils.ActivationInterval{ActivationTime: v2ATR.ActivationDate, ExpiryTime: v2ATR.ExpirationDate},
-		FilterIDs:          filterIDS,
-		MinSleep:           v2ATR.MinSleep,
-	}
-
-	return thp, th, filter, nil
 }
 
 type v2Threshold struct {

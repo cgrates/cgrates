@@ -261,105 +261,6 @@ func APItoModelTimings(ts []*utils.ApierTPTiming) (result TimingMdls) {
 	return result
 }
 
-type ActionMdls []ActionMdl
-
-func (tps ActionMdls) AsMapTPActions() (result map[string]*utils.TPActions) {
-	result = make(map[string]*utils.TPActions)
-	for _, tp := range tps {
-		as := &utils.TPActions{
-			TPid: tp.Tpid,
-			ID:   tp.Tag,
-		}
-		a := &utils.TPAction{
-			Identifier:      tp.Action,
-			BalanceId:       tp.BalanceTag,
-			BalanceType:     tp.BalanceType,
-			Units:           tp.Units,
-			ExpiryTime:      tp.ExpiryTime,
-			Filter:          tp.Filter,
-			TimingTags:      tp.TimingTags,
-			DestinationIds:  tp.DestinationTags,
-			RatingSubject:   tp.RatingSubject,
-			Categories:      tp.Categories,
-			SharedGroups:    tp.SharedGroups,
-			BalanceWeight:   tp.BalanceWeight,
-			BalanceBlocker:  tp.BalanceBlocker,
-			BalanceDisabled: tp.BalanceDisabled,
-			ExtraParameters: tp.ExtraParameters,
-			Weight:          tp.Weight,
-		}
-		if existing, exists := result[as.ID]; !exists {
-			as.Actions = []*utils.TPAction{a}
-			result[as.ID] = as
-		} else {
-			existing.Actions = append(existing.Actions, a)
-		}
-	}
-	return
-}
-
-func (tps ActionMdls) AsTPActions() (result []*utils.TPActions) {
-	for _, tp := range tps.AsMapTPActions() {
-		result = append(result, tp)
-	}
-	return result
-}
-
-func MapTPActions(s []*utils.TPActions) map[string][]*utils.TPAction {
-	result := make(map[string][]*utils.TPAction)
-	for _, e := range s {
-		for _, a := range e.Actions {
-			if _, found := result[e.ID]; !found {
-				result[e.ID] = []*utils.TPAction{a}
-			} else {
-				result[e.ID] = append(result[e.ID], a)
-			}
-		}
-	}
-	return result
-}
-
-func APItoModelAction(as *utils.TPActions) (result ActionMdls) {
-	if as != nil {
-		for _, a := range as.Actions {
-			result = append(result, ActionMdl{
-				Tpid:            as.TPid,
-				Tag:             as.ID,
-				Action:          a.Identifier,
-				BalanceTag:      a.BalanceId,
-				BalanceType:     a.BalanceType,
-				Units:           a.Units,
-				ExpiryTime:      a.ExpiryTime,
-				Filter:          a.Filter,
-				TimingTags:      a.TimingTags,
-				DestinationTags: a.DestinationIds,
-				RatingSubject:   a.RatingSubject,
-				Categories:      a.Categories,
-				SharedGroups:    a.SharedGroups,
-				BalanceWeight:   a.BalanceWeight,
-				BalanceBlocker:  a.BalanceBlocker,
-				BalanceDisabled: a.BalanceDisabled,
-				ExtraParameters: a.ExtraParameters,
-				Weight:          a.Weight,
-			})
-		}
-		if len(as.Actions) == 0 {
-			result = append(result, ActionMdl{
-				Tpid: as.TPid,
-				Tag:  as.ID,
-			})
-		}
-	}
-	return
-}
-
-func APItoModelActions(as []*utils.TPActions) (result ActionMdls) {
-	for _, a := range as {
-		result = append(result, APItoModelAction(a)...)
-	}
-	return result
-}
-
 type ResourceMdls []*ResourceMdl
 
 // CSVHeader return the header for csv fields as a slice of string
@@ -815,7 +716,7 @@ type ThresholdMdls []*ThresholdMdl
 func (tps ThresholdMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
-		utils.Blocker, utils.Weight, utils.ActionIDs, utils.Async}
+		utils.Blocker, utils.Weight, utils.ActionProfileIDs, utils.Async}
 }
 
 func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {

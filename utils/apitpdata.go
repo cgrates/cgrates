@@ -146,32 +146,6 @@ type AttrSetDestination struct {
 	Overwrite bool
 }
 
-type TPActions struct {
-	TPid    string      // Tariff plan id
-	ID      string      // Actions id
-	Actions []*TPAction // Set of actions this Actions profile will perform
-}
-
-type TPAction struct {
-	Identifier      string // Identifier mapped in the code
-	BalanceId       string // Balance identification string (account scope)
-	BalanceUuid     string // Balance identification string (global scope)
-	BalanceType     string // Type of balance the action will operate on
-	Units           string // Number of units to add/deduct
-	ExpiryTime      string // Time when the units will expire
-	Filter          string // The condition on balances that is checked before the action
-	TimingTags      string // Timing when balance is active
-	DestinationIds  string // Destination profile id
-	RatingSubject   string // Reference a rate subject defined in RatingProfiles
-	Categories      string // category filter for balances
-	SharedGroups    string // Reference to a shared group
-	BalanceWeight   string // Balance weight
-	ExtraParameters string
-	BalanceBlocker  string
-	BalanceDisabled string
-	Weight          float64 // Action's weight
-}
-
 type AttrGetAccountsCount struct {
 	Tenant string
 }
@@ -540,60 +514,9 @@ func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, e
 	return
 }
 
-type AttrSetActions struct {
-	ActionsId string      // Actions id
-	Overwrite bool        // If previously defined, will be overwritten
-	Actions   []*TPAction // Set of actions this Actions profile will perform
-}
-
-type AttrExecuteAction struct {
-	Tenant    string
-	Account   string
-	ActionsId string
-}
-
-type AttrSetAccount struct {
-	Tenant           string
-	Account          string
-	ActionPlanID     string
-	ActionTriggersID string
-	ExtraOptions     map[string]bool
-	ReloadScheduler  bool
-}
-
-type AttrRemoveAccount struct {
-	Tenant          string
-	Account         string
-	ReloadScheduler bool
-}
-
 type AttrGetCallCost struct {
 	CgrId string // Unique id of the CDR
 	RunId string // Run Id
-}
-
-type AttrSetBalance struct {
-	Tenant          string
-	Account         string
-	BalanceType     string
-	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
-	Cdrlog          bool
-}
-
-type AttrSetBalances struct {
-	Tenant   string
-	Account  string
-	Balances []*AttrBalance
-}
-
-type AttrBalance struct {
-	BalanceType     string
-	Value           float64
-	Balance         map[string]interface{}
-	ActionExtraData *map[string]interface{}
-	Cdrlog          bool
 }
 
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
@@ -1024,13 +947,6 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		ArgsCache: map[string][]string{
 			DestinationIDs:             nil,
 			ReverseDestinationIDs:      nil,
-			RatingPlanIDs:              nil,
-			RatingProfileIDs:           nil,
-			ActionIDs:                  nil,
-			ActionPlanIDs:              nil,
-			AccountActionPlanIDs:       nil,
-			ActionTriggerIDs:           nil,
-			SharedGroupIDs:             nil,
 			ResourceProfileIDs:         nil,
 			ResourceIDs:                nil,
 			StatsQueueIDs:              nil,

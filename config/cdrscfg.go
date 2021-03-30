@@ -34,7 +34,7 @@ type CdrsCfg struct {
 	ThresholdSConns  []string
 	StatSConns       []string
 	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
-	SchedulerConns   []string
+	ActionSConns     []string
 	EEsConns         []string
 }
 
@@ -110,13 +110,13 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg.Online_cdr_exports != nil {
 		cdrscfg.OnlineCDRExports = append(cdrscfg.OnlineCDRExports, *jsnCdrsCfg.Online_cdr_exports...)
 	}
-	if jsnCdrsCfg.Scheduler_conns != nil {
-		cdrscfg.SchedulerConns = make([]string, len(*jsnCdrsCfg.Scheduler_conns))
-		for idx, connID := range *jsnCdrsCfg.Scheduler_conns {
+	if jsnCdrsCfg.Actions_conns != nil {
+		cdrscfg.ActionSConns = make([]string, len(*jsnCdrsCfg.Actions_conns))
+		for idx, connID := range *jsnCdrsCfg.Actions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			cdrscfg.SchedulerConns[idx] = connID
+			cdrscfg.ActionSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				cdrscfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+				cdrscfg.ActionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -204,15 +204,15 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.StatSConnsCfg] = statSConns
 	}
-	if cdrscfg.SchedulerConns != nil {
-		schedulerConns := make([]string, len(cdrscfg.SchedulerConns))
-		for i, item := range cdrscfg.SchedulerConns {
+	if cdrscfg.ActionSConns != nil {
+		schedulerConns := make([]string, len(cdrscfg.ActionSConns))
+		for i, item := range cdrscfg.ActionSConns {
 			schedulerConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
 				schedulerConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.SchedulerConnsCfg] = schedulerConns
+		initialMP[utils.ActionSConnsCfg] = schedulerConns
 	}
 	if cdrscfg.EEsConns != nil {
 		eesConns := make([]string, len(cdrscfg.EEsConns))
@@ -271,10 +271,10 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 			cln.OnlineCDRExports[i] = con
 		}
 	}
-	if cdrscfg.SchedulerConns != nil {
-		cln.SchedulerConns = make([]string, len(cdrscfg.SchedulerConns))
-		for i, con := range cdrscfg.SchedulerConns {
-			cln.SchedulerConns[i] = con
+	if cdrscfg.ActionSConns != nil {
+		cln.ActionSConns = make([]string, len(cdrscfg.ActionSConns))
+		for i, con := range cdrscfg.ActionSConns {
+			cln.ActionSConns[i] = con
 		}
 	}
 	if cdrscfg.EEsConns != nil {

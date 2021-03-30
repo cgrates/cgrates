@@ -47,7 +47,6 @@ type GlobalVarS struct {
 
 // Start should handle the sercive start
 func (gv *GlobalVarS) Start() (err error) {
-	engine.SetRoundingDecimals(gv.cfg.GeneralCfg().RoundingDecimals)
 	engine.SetFailedPostCacheTTL(gv.cfg.GeneralCfg().FailedPostsTTL)
 	return gv.initHTTPTransport()
 }

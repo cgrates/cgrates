@@ -447,7 +447,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		AttributeSConns: []string{},
 		ThresholdSConns: []string{},
 		StatSConns:      []string{},
-		SchedulerConns:  []string{},
+		ActionSConns:    []string{},
 		EEsConns:        []string{},
 		ExtraFields:     RSRParsers{},
 	}
@@ -3608,7 +3608,7 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		DisableReverse:  false,
 		FieldSeparator:  rune(utils.CSVSep),
 		CachesConns:     []string{utils.MetaLocalHost},
-		SchedulerConns:  []string{utils.MetaLocalHost},
+		ActionSConns:    []string{utils.MetaLocalHost},
 		GapiCredentials: json.RawMessage(`".gapi/credentials.json"`),
 		GapiToken:       json.RawMessage(`".gapi/token.json"`),
 	}
@@ -4176,7 +4176,7 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.ThresholdSConnsCfg:  []string{},
 			utils.StatSConnsCfg:       []string{},
 			utils.OnlineCDRExportsCfg: []string{},
-			utils.SchedulerConnsCfg:   []string{},
+			utils.ActionSConnsCfg:     []string{},
 			utils.EEsConnsCfg:         []string{},
 		},
 	}
@@ -4203,7 +4203,7 @@ func TestV1GetConfigSessionS(t *testing.T) {
 			utils.StatSConnsCfg:          []string{},
 			utils.RouteSConnsCfg:         []string{},
 			utils.AttributeSConnsCfg:     []string{},
-			utils.SchedulerConnsCfg:      []string{},
+			utils.ActionSConnsCfg:        []string{},
 			utils.ReplicationConnsCfg:    []string{},
 			utils.DebitIntervalCfg:       "0",
 			utils.StoreSCostsCfg:         false,
@@ -4648,7 +4648,7 @@ func TestV1GetConfigSectionLoader(t *testing.T) {
 			utils.DisableReverseCfg:  false,
 			utils.FieldSepCfg:        ",",
 			utils.CachesConnsCfg:     []string{"*localhost"},
-			utils.SchedulerConnsCfg:  []string{"*localhost"},
+			utils.ActionSConnsCfg:    []string{"*localhost"},
 			utils.GapiCredentialsCfg: json.RawMessage(`".gapi/credentials.json"`),
 			utils.GapiTokenCfg:       json.RawMessage(`".gapi/token.json"`),
 		},
@@ -4706,7 +4706,7 @@ func TestV1GetConfigSectionApierS(t *testing.T) {
 		ApierS: map[string]interface{}{
 			utils.EnabledCfg:         false,
 			utils.CachesConnsCfg:     []string{utils.MetaInternal},
-			utils.SchedulerConnsCfg:  []string{},
+			utils.ActionSConnsCfg:    []string{},
 			utils.AttributeSConnsCfg: []string{},
 			utils.EEsConnsCfg:        []string{},
 		},

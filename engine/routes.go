@@ -193,19 +193,19 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 		utils.Destination, utils.SetupTime}); err != nil {
 		return
 	}
-	var acnt, subj, dst string
-	if acnt, err = ev.FieldAsString(utils.AccountField); err != nil {
-		return
-	}
-	if subj, err = ev.FieldAsString(utils.Subject); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		subj = acnt
-	}
-	if dst, err = ev.FieldAsString(utils.Destination); err != nil {
-		return
-	}
+	// var acnt , subj, dst string
+	// if acnt, err = ev.FieldAsString(utils.AccountField); err != nil {
+	// return
+	// }
+	// if subj, err = ev.FieldAsString(utils.Subject); err != nil {
+	// 	if err != utils.ErrNotFound {
+	// 		return
+	// 	}
+	// 	subj = acnt
+	// }
+	// if dst, err = ev.FieldAsString(utils.Destination); err != nil {
+	// 	return
+	// }
 	var sTime time.Time
 	if sTime, err = ev.FieldAsTime(utils.SetupTime, rpS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
@@ -223,17 +223,17 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 	var acntCost map[string]interface{}
 	var initialUsage time.Duration
 	if len(acntIDs) != 0 {
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
-			&utils.GetMaxSessionTimeOnAccountsArgs{
-				Tenant:      ev.Tenant,
-				Subject:     subj,
-				Destination: dst,
-				SetupTime:   sTime,
-				Usage:       usage,
-				AccountIDs:  acntIDs,
-			}, &acntCost); err != nil {
-			return nil, err
-		}
+		// if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
+		// 	&utils.GetMaxSessionTimeOnAccountsArgs{
+		// 		Tenant:      ev.Tenant,
+		// 		Subject:     subj,
+		// 		Destination: dst,
+		// 		SetupTime:   sTime,
+		// 		Usage:       usage,
+		// 		AccountIDs:  acntIDs,
+		// 	}, &acntCost); err != nil {
+		// 	return nil, err
+		// }
 		if ifaceMaxUsage, has := acntCost[utils.CapMaxUsage]; has {
 			if accountMaxUsage, err = utils.IfaceAsDuration(ifaceMaxUsage); err != nil {
 				return nil, err
@@ -256,18 +256,18 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 
 	if accountMaxUsage == 0 || accountMaxUsage < initialUsage {
 		var rpCost map[string]interface{}
-		if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
-			&utils.GetCostOnRatingPlansArgs{
-				Tenant:        ev.Tenant,
-				Account:       acnt,
-				Subject:       subj,
-				Destination:   dst,
-				SetupTime:     sTime,
-				Usage:         usage,
-				RatingPlanIDs: rpIDs,
-			}, &rpCost); err != nil {
-			return nil, err
-		}
+		// if err := rpS.connMgr.Call(rpS.cgrcfg.RouteSCfg().RALsConns, nil, utils.ResponderGetCostOnRatingPlans,
+		// 	&utils.GetCostOnRatingPlansArgs{
+		// 		Tenant:        ev.Tenant,
+		// 		Account:       acnt,
+		// 		Subject:       subj,
+		// 		Destination:   dst,
+		// 		SetupTime:     sTime,
+		// 		Usage:         usage,
+		// 		RatingPlanIDs: rpIDs,
+		// 	}, &rpCost); err != nil {
+		// 	return nil, err
+		// }
 		for k, v := range rpCost { // do not overwrite the return map
 			costData[k] = v
 		}
@@ -526,17 +526,17 @@ func (attr *ArgsGetRoutes) asOptsGetRoutes() (opts *optsGetRoutes, err error) {
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-		// rates.V1CostForEvent
-		cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
-			config.CgrConfig().GeneralCfg().DefaultTimezone)
-		if err != nil {
-			return nil, err
-		}
-		cc, err := cd.GetCost()
-		if err != nil {
-			return nil, err
-		}
-		opts.maxCost = cc.Cost
+		// ToDoNext: rates.V1CostForEvent
+		// cd, err := NewCallDescriptorFromCGREvent(attr.CGREvent,
+		// 	config.CgrConfig().GeneralCfg().DefaultTimezone)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// cc, err := cd.GetCost()
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// opts.maxCost = cc.Cost
 	} else if attr.MaxCost != "" {
 		if opts.maxCost, err = strconv.ParseFloat(attr.MaxCost,
 			64); err != nil {

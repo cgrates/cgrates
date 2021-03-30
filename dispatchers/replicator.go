@@ -529,23 +529,6 @@ func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(args *engine.Resour
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetResourceProfile, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetActions(args *engine.SetActionsArgsWithAPIOpts, rpl *string) (err error) {
-	if args == nil {
-		args = &engine.SetActionsArgsWithAPIOpts{}
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1SetActions, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&utils.CGREvent{
-		Tenant:  args.Tenant,
-		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1SetActions, args, rpl)
-}
-
 func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(args *engine.RouteProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
 		args = &engine.RouteProfileWithAPIOpts{}

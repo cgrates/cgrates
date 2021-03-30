@@ -88,38 +88,6 @@ func (dbM *DataDBMock) GetReverseDestinationDrv(string, string) ([]string, error
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionsDrv(string) (Actions, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetActionsDrv(string, Actions) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveActionsDrv(string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) PushTask(*Task) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) PopTask() (*Task, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetAccountDrv(string) (*Account, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetAccountDrv(*Account) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveAccountDrv(string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) GetResourceProfileDrv(string, string) (*ResourceProfile, error) {
 	return nil, utils.ErrNotImplemented
 }

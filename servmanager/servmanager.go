@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package servmanager
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -79,68 +78,6 @@ func (srvMngr *ServiceManager) Call(serviceMethod string, args interface{}, repl
 		return utils.ErrServerError
 	}
 	return err
-}
-
-// ArgStartService are passed to Start/StopService/Status RPC methods
-type ArgStartService struct {
-	ServiceID string
-}
-
-// V1StartService starts a service with ID
-func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *string) (err error) {
-	switch args.ServiceID {
-	case utils.MetaScheduler:
-		// stop the service using the config
-		srvMngr.Lock()
-		srvMngr.cfg.ActionSCfg().Enabled = true
-		srvMngr.Unlock()
-		srvMngr.cfg.GetReloadChan(config.ActionSJson) <- struct{}{}
-	default:
-		err = errors.New(utils.UnsupportedServiceIDCaps)
-	}
-	if err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return
-}
-
-// V1StopService shuts-down a service with ID
-func (srvMngr *ServiceManager) V1StopService(args ArgStartService, reply *string) (err error) {
-	switch args.ServiceID {
-	case utils.MetaScheduler:
-		// stop the service using the config
-		srvMngr.Lock()
-		srvMngr.cfg.ActionSCfg().Enabled = false
-		srvMngr.Unlock()
-		srvMngr.cfg.GetReloadChan(config.ActionSJson) <- struct{}{}
-	default:
-		err = errors.New(utils.UnsupportedServiceIDCaps)
-	}
-	if err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return
-}
-
-// V1ServiceStatus  returns the service status
-func (srvMngr *ServiceManager) V1ServiceStatus(args ArgStartService, reply *string) error {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	var running bool
-	switch args.ServiceID {
-	case utils.MetaScheduler:
-		running = srvMngr.subsystems[utils.SchedulerS].IsRunning()
-	default:
-		return errors.New(utils.UnsupportedServiceIDCaps)
-	}
-	if running {
-		*reply = utils.RunningCaps
-	} else {
-		*reply = utils.StoppedCaps
-	}
-	return nil
 }
 
 // GetConfig returns the Configuration

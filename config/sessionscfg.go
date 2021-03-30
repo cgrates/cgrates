@@ -295,7 +295,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			scfg.SchedulerConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+				scfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -444,11 +444,11 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		schedulerConns := make([]string, len(scfg.SchedulerConns))
 		for i, item := range scfg.SchedulerConns {
 			schedulerConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
 				schedulerConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.SchedulerConnsCfg] = schedulerConns
+		initialMP[utils.ActionSConnsCfg] = schedulerConns
 	}
 	return
 }

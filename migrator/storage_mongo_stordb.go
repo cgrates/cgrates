@@ -96,35 +96,3 @@ func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
 	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
 		bson.D{{Key: "create", Value: utils.OldSMCosts}, {Key: "size", Value: 1024}, {Key: "capped", Value: true}}).Err()
 }
-
-//get
-func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
-	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Find(v1ms.mgoDB.GetContext(), bson.D{})
-		if err != nil {
-			return nil, err
-		}
-	}
-	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
-		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
-		v1ms.cursor = nil
-		return nil, utils.ErrNoMoreData
-	}
-	v2Cost = new(v2SessionsCost)
-	if err := (*v1ms.cursor).Decode(v2Cost); err != nil {
-		return nil, err
-	}
-	return v2Cost, nil
-}
-
-//set
-func (v1ms *mongoStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).InsertOne(v1ms.mgoDB.GetContext(), v2Cost)
-	return
-}
-
-//remove
-func (v1ms *mongoStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).DeleteMany(v1ms.mgoDB.GetContext(), bson.D{})
-	return
-}

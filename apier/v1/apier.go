@@ -25,7 +25,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -551,75 +550,6 @@ func (apierSv1 *APIerSv1) GetLoadHistory(attrs *utils.Paginator, reply *[]*utils
 	return nil
 }
 
-type AttrRemoveActions struct {
-	ActionIDs []string
-}
-
-func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) error {
-	if attr.ActionIDs == nil {
-		err := utils.ErrNotFound
-		*reply = err.Error()
-		return err
-	}
-	// The check could lead to very long execution time. So we decided to leave it at the user's risck.'
-	/*
-		stringMap := utils.NewStringMap(attr.ActionIDs...)
-		keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionTriggerPrefix, true)
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-		for _, key := range keys {
-			getAttrs, err := apiv1.DataManager.DataDB().GetActionTriggers(key[len(utils.ActionTriggerPrefix):])
-			if err != nil {
-				*reply = err.Error()
-				return err
-			}
-			for _, atr := range getAttrs {
-				if _, found := stringMap[atr.ActionsID]; found {
-					// found action trigger referencing action; abort
-					err := fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
-					*reply = err.Error()
-					return err
-				}
-			}
-		}
-		allAplsMap, err := apiv1.DataManager.GetAllActionPlans()
-		if err != nil && err != utils.ErrNotFound {
-			*reply = err.Error()
-			return err
-		}
-		for _, apl := range allAplsMap {
-			for _, atm := range apl.ActionTimings {
-				if _, found := stringMap[atm.ActionsID]; found {
-					err := fmt.Errorf("action %s refenced by action plan %s", atm.ActionsID, apl.Id)
-					*reply = err.Error()
-					return err
-				}
-			}
-		}
-	*/
-	for _, aID := range attr.ActionIDs {
-		if err := apierSv1.DataManager.RemoveActions(aID, utils.NonTransactional); err != nil {
-			*reply = err.Error()
-			return err
-		}
-	}
-	//CacheReload
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.ActionIDs: attr.ActionIDs},
-		}, reply); err != nil {
-		return err
-	}
-	//generate a loadID for CacheActions and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
 type ArgsReplyFailedPosts struct {
 	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
 	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
@@ -705,21 +635,6 @@ func (apierSv1 *APIerSv1) GetLoadTimes(args *LoadTimeArgs, reply *map[string]str
 		*reply = provMp
 	}
 	return
-}
-
-func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err error) {
-	if apierSv1.DataManager.DataDB().GetStorageType() != utils.Redis {
-		return utils.ErrNotImplemented
-	}
-	redisDB, can := apierSv1.DataManager.DataDB().(*engine.RedisStorage)
-	if !can {
-		return fmt.Errorf("Storage type %s could not be cated to <*engine.RedisStorage>", apierSv1.DataManager.DataDB().GetStorageType())
-	}
-	if err = redisDB.RebbuildActionPlanKeys(); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
 }
 
 // ListenAndServe listen for storbd reload

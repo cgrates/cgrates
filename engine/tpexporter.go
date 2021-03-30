@@ -108,18 +108,6 @@ func (tpExp *TPExporter) Run() error {
 		}
 	}
 
-	storDataActions, err := tpExp.storDb.GetTPActions(tpExp.tpID, "")
-	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpActions))
-		withError = true
-	}
-	for _, sd := range storDataActions {
-		sdModels := APItoModelAction(sd)
-		for _, sdModel := range sdModels {
-			toExportMap[utils.ActionsCsv] = append(toExportMap[utils.ActionsCsv], sdModel)
-		}
-	}
-
 	storDataResources, err := tpExp.storDb.GetTPResources(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpResources))

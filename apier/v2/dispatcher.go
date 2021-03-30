@@ -33,10 +33,6 @@ type DispatcherSCDRsV2 struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherSCDRsV2) StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
-	return dS.dS.CDRsV2StoreSessionCost(args, reply)
-}
-
 func (dS *DispatcherSCDRsV2) ProcessEvent(args *engine.ArgV1ProcessEvent, reply *[]*utils.EventWithFlags) error {
 	return dS.dS.CDRsV2ProcessEvent(args, reply)
 }

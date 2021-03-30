@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,18 +29,6 @@ func NewServiceManagerV1(sm *servmanager.ServiceManager) *ServiceManagerV1 {
 
 type ServiceManagerV1 struct {
 	sm *servmanager.ServiceManager // Need to have them capitalize so we can export in V2
-}
-
-func (servManager *ServiceManagerV1) StartService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
-	return servManager.sm.V1StartService(args.ArgStartService, reply)
-}
-
-func (servManager *ServiceManagerV1) StopService(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
-	return servManager.sm.V1StopService(args.ArgStartService, reply)
-}
-
-func (servManager *ServiceManagerV1) ServiceStatus(args *dispatchers.ArgStartServiceWithAPIOpts, reply *string) (err error) {
-	return servManager.sm.V1ServiceStatus(args.ArgStartService, reply)
 }
 
 // Ping return pong if the service is active

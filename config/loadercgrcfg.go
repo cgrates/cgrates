@@ -29,9 +29,9 @@ type LoaderCgrCfg struct {
 	TpID            string
 	DataPath        string
 	DisableReverse  bool
-	FieldSeparator  rune // The separator to use when reading csvs
-	CachesConns     []string
-	SchedulerConns  []string
+	FieldSeparator  rune     // The separator to use when reading csvs
+	CachesConns     []string // ToDoNext: add actions conn
+	ActionSConns    []string
 	GapiCredentials json.RawMessage
 	GapiToken       json.RawMessage
 }
@@ -63,13 +63,13 @@ func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Scheduler_conns != nil {
-		ld.SchedulerConns = make([]string, len(*jsnCfg.Caches_conns))
-		for idx, conn := range *jsnCfg.Caches_conns {
+	if jsnCfg.Actions_conns != nil {
+		ld.ActionSConns = make([]string, len(*jsnCfg.Actions_conns))
+		for idx, conn := range *jsnCfg.Actions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			ld.SchedulerConns[idx] = conn
+			ld.ActionSConns[idx] = conn
 			if conn == utils.MetaInternal {
-				ld.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+				ld.ActionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -100,15 +100,15 @@ func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.CachesConnsCfg] = cacheSConns
 	}
-	if ld.SchedulerConns != nil {
-		schedulerSConns := make([]string, len(ld.SchedulerConns))
-		for i, item := range ld.SchedulerConns {
+	if ld.ActionSConns != nil {
+		schedulerSConns := make([]string, len(ld.ActionSConns))
+		for i, item := range ld.ActionSConns {
 			schedulerSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler) {
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
 				schedulerSConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.SchedulerConnsCfg] = schedulerSConns
+		initialMP[utils.ActionSConnsCfg] = schedulerSConns
 	}
 	if ld.GapiCredentials != nil {
 		initialMP[utils.GapiCredentialsCfg] = ld.GapiCredentials
@@ -136,10 +136,10 @@ func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
 			cln.CachesConns[i] = k
 		}
 	}
-	if ld.SchedulerConns != nil {
-		cln.SchedulerConns = make([]string, len(ld.SchedulerConns))
-		for i, k := range ld.SchedulerConns {
-			cln.SchedulerConns[i] = k
+	if ld.ActionSConns != nil {
+		cln.ActionSConns = make([]string, len(ld.ActionSConns))
+		for i, k := range ld.ActionSConns {
+			cln.ActionSConns[i] = k
 		}
 	}
 	return

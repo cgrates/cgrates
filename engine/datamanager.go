@@ -23,7 +23,6 @@ import (
 	"github.com/cgrates/baningo"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 var (
@@ -45,13 +44,6 @@ var (
 	cachePrefixMap = utils.StringSet{
 		utils.DestinationPrefix:             {},
 		utils.ReverseDestinationPrefix:      {},
-		utils.RatingPlanPrefix:              {},
-		utils.RatingProfilePrefix:           {},
-		utils.ActionPrefix:                  {},
-		utils.ActionPlanPrefix:              {},
-		utils.AccountActionPlansPrefix:      {},
-		utils.ActionTriggerPrefix:           {},
-		utils.SharedGroupPrefix:             {},
 		utils.ResourceProfilesPrefix:        {},
 		utils.TimingsPrefix:                 {},
 		utils.ResourcesPrefix:               {},
@@ -171,8 +163,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetDestination(dataID, false, true, utils.NonTransactional)
 		case utils.ReverseDestinationPrefix:
 			_, err = dm.GetReverseDestination(dataID, false, true, utils.NonTransactional)
-		case utils.ActionPrefix:
-			_, err = dm.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1541,105 +1531,6 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 			utils.ReplicatorSv1RemoveResourceProfile,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
-	if !skipCache {
-		if x, err := Cache.GetCloned(utils.CacheActions, key); err != nil {
-			if err != ltcache.ErrNotFound {
-				return nil, err
-			}
-		} else if x == nil {
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(Actions), nil
-		}
-	}
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	as, err = dm.DataDB().GetActionsDrv(key)
-	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetActions, &utils.StringWithAPIOpts{
-					Arg:    key,
-					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &as); err == nil {
-				err = dm.dataDB.SetActionsDrv(key, as)
-			}
-		}
-		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound {
-				if errCh := Cache.Set(utils.CacheActions, key, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return nil, errCh
-				}
-			}
-			return nil, err
-		}
-	}
-	if errCh := Cache.Set(utils.CacheActions, key, as, nil,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return nil, errCh
-	}
-	return
-}
-
-//SetActionsArgsWithOpts is used to send the key and the Actions to replicator
-type SetActionsArgsWithAPIOpts struct {
-	Key     string
-	Acs     Actions
-	Tenant  string
-	APIOpts map[string]interface{}
-}
-
-func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
-		return
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
-		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.ActionPrefix, key, // this are used to get the host IDs from cache
-			utils.ReplicatorSv1SetActions,
-			&SetActionsArgsWithAPIOpts{
-				Key:    key,
-				Acs:    as,
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if err = dm.DataDB().RemoveActionsDrv(key); err != nil {
-		return
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
-		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.ActionPrefix, key, // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveActions,
-			&utils.StringWithAPIOpts{
-				Arg:    key,
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}

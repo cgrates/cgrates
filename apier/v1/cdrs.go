@@ -23,32 +23,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Retrieves the callCost out of CGR logDb
-func (apierSv1 *APIerSv1) GetEventCost(attrs *utils.AttrGetCallCost, reply *engine.EventCost) error {
-	if attrs.CgrId == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing("CgrId")
-	}
-	if attrs.RunId == utils.EmptyString {
-		attrs.RunId = utils.MetaDefault
-	}
-	cdrFltr := &utils.CDRsFilter{
-		CGRIDs: []string{attrs.CgrId},
-		RunIDs: []string{attrs.RunId},
-	}
-	if cdrs, _, err := apierSv1.CdrDb.GetCDRs(cdrFltr, false); err != nil {
-		if err != utils.ErrNotFound {
-			err = utils.NewErrServerError(err)
-		}
-		return err
-	} else if len(cdrs) == 0 ||
-		cdrs[0].CostDetails == nil { // to avoid nil pointer dereference
-		return utils.ErrNotFound
-	} else {
-		*reply = *cdrs[0].CostDetails
-	}
-	return nil
-}
-
 // Retrieves CDRs based on the filters
 func (apierSv1 *APIerSv1) GetCDRs(attrs *utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apierSv1.Config.GeneralCfg().DefaultTimezone)
@@ -107,11 +81,6 @@ func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDRWithAPIOpts, rep
 // RateCDRs can re-/rate remotely CDRs
 func (cdrSv1 *CDRsV1) RateCDRs(arg *engine.ArgRateCDRs, reply *string) error {
 	return cdrSv1.CDRs.V1RateCDRs(arg, reply)
-}
-
-// StoreSMCost will store
-func (cdrSv1 *CDRsV1) StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error {
-	return cdrSv1.CDRs.V1StoreSessionCost(attr, reply)
 }
 
 func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithAPIOpts, reply *int64) error {

@@ -421,7 +421,7 @@ func testCGRConfigReloadCDRs(t *testing.T) {
 		StatSConns:      []string{},
 		SMCostRetries:   5,
 		StoreCdrs:       true,
-		SchedulerConns:  []string{},
+		ActionSConns:    []string{},
 		EEsConns:        []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.CdrsCfg()) {

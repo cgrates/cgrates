@@ -144,7 +144,6 @@ type v1Cdrs struct {
 	Rated       bool              // Mark the CDR as rated so we do not process it during rating
 	CostSource  string            // The source of this cost
 	Cost        float64
-	CostDetails *engine.CallCost // Attach the cost details to CDR when possible
 }
 
 func (v1Cdr *v1Cdrs) V1toV2Cdr() (cdr *engine.CDR) {
@@ -171,7 +170,6 @@ func (v1Cdr *v1Cdrs) V1toV2Cdr() (cdr *engine.CDR) {
 		PreRated:    v1Cdr.Rated,
 		CostSource:  v1Cdr.CostSource,
 		Cost:        v1Cdr.Cost,
-		CostDetails: engine.NewEventCostFromCallCost(v1Cdr.CostDetails, v1Cdr.CGRID, v1Cdr.RunID),
 	}
 	if v1Cdr.ExtraFields != nil {
 		for key, value := range v1Cdr.ExtraFields {
@@ -207,11 +205,6 @@ func NewV1CDRFromCDRSql(cdrSql *engine.CDRsql) (cdr *v1Cdrs, err error) {
 			return nil, err
 		}
 	}
-	if cdrSql.CostDetails != "" {
-		if err = json.Unmarshal([]byte(cdrSql.CostDetails), &cdr.CostDetails); err != nil {
-			return nil, err
-		}
-	}
 	return
 }
 
@@ -235,7 +228,6 @@ func (cdr *v1Cdrs) AsCDRsql() (cdrSql *engine.CDRsql) {
 	cdrSql.ExtraFields = utils.ToJSON(cdr.ExtraFields)
 	cdrSql.CostSource = cdr.CostSource
 	cdrSql.Cost = cdr.Cost
-	cdrSql.CostDetails = utils.ToJSON(cdr.CostDetails)
 	cdrSql.ExtraInfo = cdr.ExtraInfo
 	cdrSql.CreatedAt = time.Now()
 	return
