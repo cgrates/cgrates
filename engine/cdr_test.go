@@ -251,28 +251,6 @@ func TestFormatCost(t *testing.T) {
 	}
 }
 
-func TestCDRAsExternalCDR(t *testing.T) {
-	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
-		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		Source: utils.UnitTest, RequestType: utils.MetaRated,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:      utils.MetaDefault, Usage: 10 * time.Second, Cost: 1.01,
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
-	expectOutCdr := &ExternalCDR{
-		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
-		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		Source: utils.UnitTest, RequestType: utils.MetaRated,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.MetaDefault,
-		Usage: "10s", Cost: 1.01, CostDetails: "null",
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
-	if cdrOut := storCdr.AsExternalCDR(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
-		t.Errorf("Expected: %+v, received: %+v", expectOutCdr, cdrOut)
-	}
-}
-
 func TestCDRAsMapStringIface(t *testing.T) {
 	cdr := &CDR{
 		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),

@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"fmt"
 	"reflect"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 
@@ -31,7 +28,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -133,6 +129,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	}
 }
 
+/*
 func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
@@ -449,7 +446,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 }
-
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil)
@@ -944,6 +940,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
 	}
 }
+*/
 
 func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
 	v1authArgs := new(V1AuthorizeArgs)
@@ -1798,6 +1795,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 
 }
 
+/*
 func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
@@ -1970,6 +1968,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 	}
 
 }
+*/
 
 func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 	v1TerminateSsArgs := new(V1TerminateSessionArgs)
@@ -2140,6 +2139,7 @@ func TestSessionSgetSession(t *testing.T) {
 
 }
 
+/*
 func TestSessionSfilterSessions(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
@@ -2309,7 +2309,6 @@ func TestSessionSfilterSessions(t *testing.T) {
 		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
 	}
 }
-
 func TestSessionSfilterSessionsCount(t *testing.T) {
 	sSCfg := config.NewDefaultCGRConfig()
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringSet{
@@ -2401,6 +2400,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
 	}
 }
+*/
 
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
 	sS := new(SessionS)
@@ -2506,6 +2506,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}
 }
 
+/*
 type mockConnWarnDisconnect1 struct {
 	*testRPCClientConnection
 }
@@ -2635,3 +2636,4 @@ func TestBiJClntID(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 }
+*/

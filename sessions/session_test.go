@@ -450,6 +450,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 
 }
 
+/*
 func TestSessionAsExternalSessions2(t *testing.T) {
 	startEv := map[string]interface{}{
 		utils.EventName:    "TEST_EVENT",
@@ -607,7 +608,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 	}
 
 }
-
+*/
 func TestSessiontotalUsage(t *testing.T) {
 	//empty check
 	session := new(Session)
