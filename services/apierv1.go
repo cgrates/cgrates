@@ -34,35 +34,32 @@ import (
 func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *cores.Server,
-	responderService *ResponderService,
 	internalAPIerSv1Chan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *APIerSv1Service {
 	return &APIerSv1Service{
-		connChan:         internalAPIerSv1Chan,
-		cfg:              cfg,
-		dm:               dm,
-		storDB:           storDB,
-		filterSChan:      filterSChan,
-		server:           server,
-		responderService: responderService,
-		connMgr:          connMgr,
-		APIerSv1Chan:     make(chan *v1.APIerSv1, 1),
-		anz:              anz,
-		srvDep:           srvDep,
+		connChan:     internalAPIerSv1Chan,
+		cfg:          cfg,
+		dm:           dm,
+		storDB:       storDB,
+		filterSChan:  filterSChan,
+		server:       server,
+		connMgr:      connMgr,
+		APIerSv1Chan: make(chan *v1.APIerSv1, 1),
+		anz:          anz,
+		srvDep:       srvDep,
 	}
 }
 
 // APIerSv1Service implements Service interface
 type APIerSv1Service struct {
 	sync.RWMutex
-	cfg              *config.CGRConfig
-	dm               *DataDBService
-	storDB           *StorDBService
-	filterSChan      chan *engine.FilterS
-	server           *cores.Server
-	responderService *ResponderService
-	connMgr          *engine.ConnManager
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	storDB      *StorDBService
+	filterSChan chan *engine.FilterS
+	server      *cores.Server
+	connMgr     *engine.ConnManager
 
 	api      *v1.APIerSv1
 	connChan chan rpcclient.ClientConnector
@@ -92,8 +89,6 @@ func (apiService *APIerSv1Service) Start() (err error) {
 	apiService.storDB.RegisterSyncChan(storDBChan)
 	stordb := <-storDBChan
 
-	respChan := make(chan *engine.Responder, 1)
-	apiService.responderService.RegisterSyncChan(apiService.ServiceName(), respChan)
 	apiService.Lock()
 	defer apiService.Unlock()
 
@@ -105,9 +100,6 @@ func (apiService *APIerSv1Service) Start() (err error) {
 		FilterS:     filterS,
 		ConnMgr:     apiService.connMgr,
 		StorDBChan:  storDBChan,
-
-		Responder:     apiService.responderService.GetResponder(), // if already started use it
-		ResponderChan: respChan,                                   // if not wait in listenAndServe
 	}
 
 	go apiService.api.ListenAndServe(apiService.stopChan)
@@ -137,7 +129,6 @@ func (apiService *APIerSv1Service) Shutdown() (err error) {
 	close(apiService.stopChan)
 	apiService.api = nil
 	<-apiService.connChan
-	apiService.responderService.UnregisterSyncChan(apiService.ServiceName())
 	apiService.Unlock()
 	return
 }

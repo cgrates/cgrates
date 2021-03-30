@@ -106,7 +106,6 @@ type ResponderInterface interface {
 	GetCost(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
 	Debit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
 	MaxDebit(arg *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) (err error)
-	RefundIncrements(arg *engine.CallDescriptorWithAPIOpts, reply *engine.Account) (err error)
 	RefundRounding(arg *engine.CallDescriptorWithAPIOpts, reply *float64) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithAPIOpts, reply *time.Duration) (err error)
 	Shutdown(arg *utils.TenantWithAPIOpts, reply *string) (err error)
@@ -163,11 +162,6 @@ type ServiceManagerV1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
 }
 
-type RALsV1Interface interface {
-	GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error
-	Ping(ign *utils.CGREvent, reply *string) error
-}
-
 type ConfigSv1Interface interface {
 	GetConfig(section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error)
 	ReloadConfig(section *config.ReloadArgs, reply *string) (err error)
@@ -193,7 +187,6 @@ type RateProfileSv1Interface interface {
 
 type ReplicatorSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
-	GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error
 	GetDestination(key *utils.StringWithAPIOpts, reply *engine.Destination) error
 	GetReverseDestination(key *utils.StringWithAPIOpts, reply *[]string) error
 	GetStatQueue(tntID *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) error
@@ -204,14 +197,6 @@ type ReplicatorSv1Interface interface {
 	GetTiming(id *utils.StringWithAPIOpts, reply *utils.TPTiming) error
 	GetResource(tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
 	GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error
-	GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error
-	GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error
-	GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error
-	GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error
-	GetAllActionPlans(_ *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error
-	GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error
-	GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error
-	GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error
 	GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error
 	GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error
 	GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error
@@ -221,7 +206,6 @@ type ReplicatorSv1Interface interface {
 	GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) error
 	SetThreshold(th *engine.ThresholdWithAPIOpts, reply *string) error
-	SetAccount(acc *engine.AccountWithAPIOpts, reply *string) error
 	SetDestination(dst *engine.DestinationWithAPIOpts, reply *string) error
 	SetReverseDestination(dst *engine.DestinationWithAPIOpts, reply *string) error
 	SetStatQueue(ssq *engine.StatQueueWithAPIOpts, reply *string) error
@@ -230,23 +214,16 @@ type ReplicatorSv1Interface interface {
 	SetTiming(tm *utils.TPTimingWithAPIOpts, reply *string) error
 	SetResource(rs *engine.ResourceWithAPIOpts, reply *string) error
 	SetResourceProfile(rs *engine.ResourceProfileWithAPIOpts, reply *string) error
-	SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error
-	SetSharedGroup(shg *engine.SharedGroupWithAPIOpts, reply *string) error
 	SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error
-	SetRatingPlan(rp *engine.RatingPlanWithAPIOpts, reply *string) error
-	SetRatingProfile(rp *engine.RatingProfileWithAPIOpts, reply *string) error
 	SetRouteProfile(sp *engine.RouteProfileWithAPIOpts, reply *string) error
 	SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) error
 	SetChargerProfile(cp *engine.ChargerProfileWithAPIOpts, reply *string) error
 	SetDispatcherProfile(dpp *engine.DispatcherProfileWithAPIOpts, reply *string) error
 	SetRateProfile(dpp *utils.RateProfileWithAPIOpts, reply *string) error
-	SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) error
-	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error
 	SetDispatcherHost(dpp *engine.DispatcherHostWithAPIOpts, reply *string) error
 	RemoveThreshold(args *utils.TenantIDWithAPIOpts, reply *string) error
 	SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) error
 	RemoveDestination(id *utils.StringWithAPIOpts, reply *string) error
-	RemoveAccount(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveStatQueue(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveFilter(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
@@ -254,13 +231,7 @@ type ReplicatorSv1Interface interface {
 	RemoveTiming(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveResource(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-	RemoveActionTriggers(id *utils.StringWithAPIOpts, reply *string) error
-	RemoveSharedGroup(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveActions(id *utils.StringWithAPIOpts, reply *string) error
-	RemoveActionPlan(id *utils.StringWithAPIOpts, reply *string) error
-	RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) error
-	RemoveRatingPlan(id *utils.StringWithAPIOpts, reply *string) error
-	RemoveRatingProfile(id *utils.StringWithAPIOpts, reply *string) error
 	RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error

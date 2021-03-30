@@ -20,7 +20,6 @@ package v1
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -30,7 +29,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,12 +37,10 @@ type APIerSv1 struct {
 	CdrDb       engine.CdrStorage
 	DataManager *engine.DataManager
 	Config      *config.CGRConfig
-	Responder   *engine.Responder
 	FilterS     *engine.FilterS //Used for CDR Exporter
 	ConnMgr     *engine.ConnManager
 
-	StorDBChan    chan engine.StorDB
-	ResponderChan chan *engine.Responder
+	StorDBChan chan engine.StorDB
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
@@ -139,26 +135,6 @@ func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string
 	return
 }
 
-// ComputeAccountActionPlans will rebuild complete reverse accountActions data
-func (apierSv1 *APIerSv1) ComputeAccountActionPlans(ignr *string, reply *string) (err error) {
-	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-func (apierSv1 *APIerSv1) GetSharedGroup(sgId *string, reply *engine.SharedGroup) error {
-	if sg, err := apierSv1.DataManager.GetSharedGroup(*sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
-		return err
-	} else {
-		if sg != nil {
-			*reply = *sg
-		}
-	}
-	return nil
-}
-
 func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -183,59 +159,6 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 			ArgsCache: map[string][]string{utils.ReverseDestinationIDs: dest.Prefixes,
 				utils.DestinationIDs: {attrs.Id}},
 		}, reply); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-func (apierSv1 *APIerSv1) GetRatingPlan(rplnId *string, reply *engine.RatingPlan) error {
-	rpln, err := apierSv1.DataManager.GetRatingPlan(*rplnId, false, utils.NonTransactional)
-	if err != nil {
-		if err.Error() == utils.ErrNotFound.Error() {
-			return err
-		}
-		return utils.NewErrServerError(err)
-	}
-	*reply = *rpln
-	return nil
-}
-
-func (apierSv1 *APIerSv1) RemoveRatingPlan(ID *string, reply *string) error {
-	if len(*ID) == 0 {
-		return utils.NewErrMandatoryIeMissing("ID")
-	}
-	err := apierSv1.DataManager.RemoveRatingPlan(*ID, utils.NonTransactional)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.RatingPlanIDs: {*ID}},
-		}, reply); err != nil {
-		return err
-	}
-	//generate a loadID for CacheRatingPlans and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingPlans: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
-func (apierSv1 *APIerSv1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	at := &engine.ActionTiming{
-		ActionsID: attr.ActionsId,
-	}
-	tnt := attr.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	if attr.Account != "" {
-		at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(tnt, attr.Account): true})
-	}
-	if err := at.Execute(nil, nil); err != nil {
-		*reply = err.Error()
 		return err
 	}
 	*reply = utils.OK
@@ -274,90 +197,11 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	return nil
 }
 
-type AttrLoadRatingPlan struct {
-	TPid         string
-	RatingPlanId string
-}
-
-// Process dependencies and load a specific rating plan from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadRatingPlan(attrs *AttrLoadRatingPlan, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
-		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
-		return utils.NewErrServerError(err)
-	} else if !loaded {
-		return utils.ErrNotFound
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// Process dependencies and load a specific rating profile from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadRatingProfile(attrs *utils.TPRatingProfile, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	if attrs.Tenant == utils.EmptyString {
-		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
-		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := dbReader.LoadRatingProfilesFiltered(attrs); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	if err = dbReader.ReloadCache(config.CgrConfig().GeneralCfg().DefaultCaching, true, make(map[string]interface{})); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
-type AttrLoadSharedGroup struct {
-	TPid          string
-	SharedGroupId string
-}
-
-// Load destinations from storDb into dataDb.
-func (apierSv1 *APIerSv1) LoadSharedGroup(attrs *AttrLoadSharedGroup, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
-		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().ActionConns,
-		apierSv1.Config.DataDbCfg().Type == utils.INTERNAL)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
 type AttrLoadTpFromStorDb struct {
-	TPid     string
-	DryRun   bool // Only simulate, no write
-	Validate bool // Run structural checks
-	APIOpts  map[string]interface{}
-	Caching  *string // Caching strategy
+	TPid    string
+	DryRun  bool // Only simulate, no write
+	APIOpts map[string]interface{}
+	Caching *string // Caching strategy
 }
 
 // Loads complete data in a TP from storDb
@@ -374,12 +218,6 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(attrs *AttrLoadTpFromStorDb, 
 	}
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	if attrs.Validate {
-		if !dbReader.IsValid() {
-			*reply = utils.OK
-			return errors.New("invalid data")
-		}
 	}
 	if attrs.DryRun {
 		*reply = utils.OK
@@ -440,106 +278,6 @@ func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFr
 	return nil
 }
 
-// SetRatingProfile sets a specific rating profile working with data directly in the DataDB without involving storDb
-func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{"ToR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	for _, rpa := range attrs.RatingPlanActivations {
-		if missing := utils.MissingStructFields(rpa, []string{"ActivationTimes", "RatingPlanId"}); len(missing) != 0 {
-			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ErrMandatoryIeMissing.Error(), missing)
-		}
-	}
-	tnt := attrs.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	keyID := utils.ConcatenatedKey(utils.MetaOut,
-		tnt, attrs.Category, attrs.Subject)
-	var rpfl *engine.RatingProfile
-	if !attrs.Overwrite {
-		if rpfl, err = apierSv1.DataManager.GetRatingProfile(keyID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return utils.NewErrServerError(err)
-		}
-	}
-	if rpfl == nil {
-		rpfl = &engine.RatingProfile{Id: keyID, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
-	}
-	for _, ra := range attrs.RatingPlanActivations {
-		at, err := utils.ParseTimeDetectLayout(ra.ActivationTime,
-			apierSv1.Config.GeneralCfg().DefaultTimezone)
-		if err != nil {
-			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ErrServerError.Error(), ra.ActivationTime))
-		}
-		if exists, err := apierSv1.DataManager.HasData(utils.RatingPlanPrefix,
-			ra.RatingPlanId, ""); err != nil {
-			return utils.NewErrServerError(err)
-		} else if !exists {
-			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ErrNotFound.Error(), ra.RatingPlanId))
-		}
-		rpfl.RatingPlanActivations = append(rpfl.RatingPlanActivations,
-			&engine.RatingPlanActivation{
-				ActivationTime: at,
-				RatingPlanId:   ra.RatingPlanId,
-				FallbackKeys: utils.FallbackSubjKeys(tnt,
-					attrs.Category, ra.FallbackSubjects)})
-	}
-	if err := apierSv1.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	//CacheReload
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.RatingProfileIDs: {rpfl.Id}},
-		}, reply); err != nil {
-		return err
-	}
-	//generate a loadID for CacheRatingProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
-// GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRatingProfileIDs(args *utils.PaginatorWithTenant, rsPrfIDs *[]string) error {
-	tnt := args.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	prfx := utils.RatingProfilePrefix + "*out:" + tnt + utils.ConcatenatedKeySep
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
-	if err != nil {
-		return err
-	}
-	if len(keys) == 0 {
-		return utils.ErrNotFound
-	}
-	retIDs := make([]string, len(keys))
-	for i, key := range keys {
-		retIDs[i] = key[len(prfx):]
-	}
-	*rsPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
-}
-
-func (apierSv1 *APIerSv1) GetRatingProfile(attrs *utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
-	if missing := utils.MissingStructFields(attrs, []string{utils.Category, utils.Subject}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if attrs.Tenant == utils.EmptyString {
-		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	if rpPrf, err := apierSv1.DataManager.GetRatingProfile(attrs.GetID(),
-		false, utils.NonTransactional); err != nil {
-		return utils.APIErrorHandler(err)
-	} else {
-		*reply = *rpPrf
-	}
-	return
-}
-
 // Deprecated attrs
 type V1AttrSetActions struct {
 	ActionsId string        // Actions id
@@ -572,58 +310,6 @@ type V1TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-type AttrSetActionPlan struct {
-	Id         string            // Profile id
-	ActionPlan []*AttrActionPlan // Set of actions this Actions profile will perform
-	Overwrite  bool              // If previously defined, will be overwritten
-}
-
-type AttrActionPlan struct {
-	ActionsId string  // Actions id
-	TimingID  string  // timingID is used to specify the ID of the timing for a corner case ( e.g. *monthly_estimated )
-	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
-	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported
-	MonthDays string  // semicolon separated list of month's days this timing is valid on, *any or empty supported
-	WeekDays  string  // semicolon separated list of week day names this timing is valid on *any or empty supported
-	Time      string  // String representing the time this timing starts on, *asap supported
-	Weight    float64 // Binding's weight
-}
-
-func (attr *AttrActionPlan) getRITiming(dm *engine.DataManager) (timing *engine.RITiming, err error) {
-	if dfltTiming, isDefault := checkDefaultTiming(attr.Time); isDefault {
-		return dfltTiming, nil
-	}
-	timing = new(engine.RITiming)
-
-	if attr.TimingID != utils.EmptyString &&
-		!strings.HasPrefix(attr.TimingID, utils.Meta) { // in case of dynamic timing
-		if dbTiming, err := dm.GetTiming(attr.TimingID, false, utils.NonTransactional); err != nil {
-			if err != utils.ErrNotFound { // if not found let the user to populate all the timings values
-				return nil, err
-			}
-		} else {
-			timing.ID = dbTiming.ID
-			timing.Years = dbTiming.Years
-			timing.Months = dbTiming.Months
-			timing.MonthDays = dbTiming.MonthDays
-			timing.WeekDays = dbTiming.WeekDays
-			timing.StartTime = dbTiming.StartTime
-			timing.EndTime = dbTiming.EndTime
-		}
-	}
-	timing.ID = attr.TimingID
-	timing.Years.Parse(attr.Years, ";")
-	timing.Months.Parse(attr.Months, ";")
-	timing.MonthDays.Parse(attr.MonthDays, ";")
-	timing.WeekDays.Parse(attr.WeekDays, ";")
-	if !verifyFormat(attr.Time) {
-		err = fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), attr.Time)
-		return
-	}
-	timing.StartTime = attr.Time
-	return
-}
-
 func verifyFormat(tStr string) bool {
 	if tStr == utils.EmptyString ||
 		tStr == utils.MetaASAP {
@@ -645,157 +331,6 @@ func verifyFormat(tStr string) bool {
 		}
 	}
 	return true
-}
-
-// checkDefaultTiming will check the tStr if it's of the the default timings ( the same as in TPReader )
-// and will compute it properly
-func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
-	startTime := time.Now().Format("15:04:05")
-	switch tStr {
-	case utils.MetaEveryMinute:
-		return &engine.RITiming{
-			ID:        utils.MetaEveryMinute,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{},
-			StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(time.Now().Second())),
-			EndTime:   "",
-		}, true
-	case utils.MetaHourly:
-		return &engine.RITiming{
-			ID:        utils.MetaHourly,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{},
-			StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(time.Now().Minute()), strconv.Itoa(time.Now().Second())),
-			EndTime:   "",
-		}, true
-	case utils.MetaDaily:
-		return &engine.RITiming{
-			ID:        utils.MetaDaily,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{},
-			StartTime: startTime,
-			EndTime:   ""}, true
-	case utils.MetaWeekly:
-		return &engine.RITiming{
-			ID:        utils.MetaWeekly,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{time.Now().Weekday()},
-			StartTime: startTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaMonthly:
-		return &engine.RITiming{
-			ID:        utils.MetaMonthly,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{time.Now().Day()},
-			WeekDays:  utils.WeekDays{},
-			StartTime: startTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaMonthlyEstimated:
-		return &engine.RITiming{
-			ID:        utils.MetaMonthlyEstimated,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{time.Now().Day()},
-			WeekDays:  utils.WeekDays{},
-			StartTime: startTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaMonthEnd:
-		return &engine.RITiming{
-			ID:        utils.MetaMonthEnd,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{-1},
-			WeekDays:  utils.WeekDays{},
-			StartTime: startTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaYearly:
-		return &engine.RITiming{
-			ID:        utils.MetaYearly,
-			Years:     utils.Years{},
-			Months:    utils.Months{time.Now().Month()},
-			MonthDays: utils.MonthDays{time.Now().Day()},
-			WeekDays:  utils.WeekDays{},
-			StartTime: startTime,
-			EndTime:   "",
-		}, true
-	default:
-		return nil, false
-	}
-}
-
-type AttrGetActionPlan struct {
-	ID string
-}
-
-func (apierSv1 *APIerSv1) GetActionPlan(attr *AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
-	var result []*engine.ActionPlan
-	if attr.ID == "" || attr.ID == "*" {
-		result = make([]*engine.ActionPlan, 0)
-		aplsMap, err := apierSv1.DataManager.GetAllActionPlans()
-		if err != nil {
-			return err
-		}
-		for _, apls := range aplsMap {
-			result = append(result, apls)
-		}
-	} else {
-		apls, err := apierSv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		result = append(result, apls)
-	}
-	*reply = result
-	return nil
-}
-
-func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *string) (err error) {
-	if missing := utils.MissingStructFields(attr, []string{"ID"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		var prevAccountIDs utils.StringMap
-		if prevAP, err := apierSv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return 0, err
-		} else if prevAP != nil {
-			prevAccountIDs = prevAP.AccountIDs
-		}
-		if err := apierSv1.DataManager.RemoveActionPlan(attr.ID, utils.NonTransactional); err != nil {
-			return 0, err
-		}
-		for acntID := range prevAccountIDs {
-			if err := apierSv1.DataManager.RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
-				return 0, utils.NewErrServerError(err)
-			}
-		}
-		if len(prevAccountIDs) != 0 {
-			sl := prevAccountIDs.Slice()
-			if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: sl},
-				}, reply); err != nil {
-				return 0, err
-			}
-		}
-		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
 }
 
 func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolder, reply *string) error {
@@ -829,12 +364,6 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFo
 	if attrs.DryRun {
 		*reply = utils.OK
 		return nil // Mission complete, no errors
-	}
-
-	if attrs.Validate {
-		if !loader.IsValid() {
-			return errors.New("invalid data")
-		}
 	}
 
 	// write data intro Database
@@ -897,12 +426,6 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(attrs *utils.AttrLoadTpFromFolder, 
 		return nil // Mission complete, no errors
 	}
 
-	if attrs.Validate {
-		if !loader.IsValid() {
-			return errors.New("invalid data")
-		}
-	}
-
 	// remove data from Database
 	if err := loader.RemoveFromDatabase(false, false); err != nil {
 		return utils.NewErrServerError(err)
@@ -944,12 +467,6 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(attrs *AttrLoadTpFromStorDb, reply 
 	}
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	if attrs.Validate {
-		if !dbReader.IsValid() {
-			*reply = utils.OK
-			return errors.New("invalid data")
-		}
 	}
 	if attrs.DryRun {
 		*reply = utils.OK
@@ -1004,35 +521,6 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 		result += arrp.Subject
 	}
 	return
-}
-
-func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, reply *string) error {
-	if attr.Tenant == utils.EmptyString {
-		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
-		(attr.Category != "" && attr.Tenant == "") {
-		return utils.ErrMandatoryIeMissing
-	}
-	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, apierSv1.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
-	if err != nil {
-		*reply = err.Error()
-		return utils.NewErrServerError(err)
-	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
-		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
-			ArgsCache: map[string][]string{utils.RatingProfileIDs: {attr.GetId()}},
-		}, reply); err != nil {
-		return err
-	}
-	//generate a loadID for CacheActionPlans and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
 }
 
 func (apierSv1 *APIerSv1) GetLoadHistory(attrs *utils.Paginator, reply *[]*utils.LoadInstance) error {
@@ -1234,42 +722,6 @@ func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err
 	return nil
 }
 
-// GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetActionPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
-	prfx := utils.ActionPlanPrefix
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix)
-	if err != nil {
-		return err
-	}
-	if len(keys) == 0 {
-		return utils.ErrNotFound
-	}
-	retIDs := make([]string, len(keys))
-	for i, key := range keys {
-		retIDs[i] = key[len(prfx):]
-	}
-	*attrPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
-}
-
-// GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetRatingPlanIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
-	prfx := utils.RatingPlanPrefix
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(utils.RatingPlanPrefix)
-	if err != nil {
-		return err
-	}
-	if len(keys) == 0 {
-		return utils.ErrNotFound
-	}
-	retIDs := make([]string, len(keys))
-	for i, key := range keys {
-		retIDs[i] = key[len(prfx):]
-	}
-	*attrPrfIDs = args.PaginateStringSlice(retIDs)
-	return nil
-}
-
 // ListenAndServe listen for storbd reload
 func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ApierS))
@@ -1283,8 +735,6 @@ func (apierSv1 *APIerSv1) ListenAndServe(stopChan chan struct{}) {
 			}
 			apierSv1.CdrDb = stordb
 			apierSv1.StorDb = stordb
-		case resp := <-apierSv1.ResponderChan:
-			apierSv1.Responder = resp
 		}
 	}
 }

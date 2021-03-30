@@ -89,11 +89,6 @@ func TestServiceManagerV1Interface(t *testing.T) {
 	_ = ServiceManagerV1Interface(NewServiceManagerV1(nil))
 }
 
-func TestRALsV1Interface(t *testing.T) {
-	_ = RALsV1Interface(NewDispatcherRALsV1(nil))
-	_ = RALsV1Interface(NewRALsV1())
-}
-
 func TestConfigSv1Interface(t *testing.T) {
 	_ = ConfigSv1Interface(NewDispatcherConfigSv1(nil))
 	_ = ConfigSv1Interface(NewConfigSv1(nil))

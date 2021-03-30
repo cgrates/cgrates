@@ -71,10 +71,6 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.DispatcherSv1Ping
 	case utils.AnalyzerSLow:
 		return utils.AnalyzerSv1Ping
-	case utils.SchedulerSLow:
-		return utils.SchedulerSv1Ping
-	case utils.RALsLow:
-		return utils.RALsV1Ping
 	case utils.ReplicatorLow:
 		return utils.ReplicatorSv1Ping
 	case utils.ApierSLow:

@@ -539,48 +539,6 @@ func (dS *DispatcherSessionSv1) STIRIdentity(args *sessions.V1STIRIdentityArgs, 
 	return dS.dS.SessionSv1STIRIdentity(args, reply)
 }
 
-func NewDispatcherResponder(dps *dispatchers.DispatcherService) *DispatcherResponder {
-	return &DispatcherResponder{dS: dps}
-}
-
-// Exports RPC from RLs
-type DispatcherResponder struct {
-	dS *dispatchers.DispatcherService
-}
-
-func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
-	return dS.dS.ResponderGetCost(args, reply)
-}
-
-func (dS *DispatcherResponder) Debit(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
-	return dS.dS.ResponderDebit(args, reply)
-}
-
-func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptorWithAPIOpts, reply *engine.CallCost) error {
-	return dS.dS.ResponderMaxDebit(args, reply)
-}
-
-func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptorWithAPIOpts, reply *engine.Account) error {
-	return dS.dS.ResponderRefundIncrements(args, reply)
-}
-
-func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithAPIOpts, reply *float64) error {
-	return dS.dS.ResponderRefundRounding(args, reply)
-}
-
-func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptorWithAPIOpts, reply *time.Duration) error {
-	return dS.dS.ResponderGetMaxSessionTime(args, reply)
-}
-
-func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.ResponderShutdown(args, reply)
-}
-
-// Ping used to detreminate if component is active
-func (dS *DispatcherResponder) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.ResponderPing(args, reply)
-}
-
 func NewDispatcherCacheSv1(dps *dispatchers.DispatcherService) *DispatcherCacheSv1 {
 	return &DispatcherCacheSv1{dS: dps}
 }
@@ -702,35 +660,6 @@ func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlock
 // Ping used to detreminate if component is active
 func (dS *DispatcherGuardianSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.GuardianSv1Ping(args, reply)
-}
-
-func NewDispatcherSchedulerSv1(dps *dispatchers.DispatcherService) *DispatcherSchedulerSv1 {
-	return &DispatcherSchedulerSv1{dS: dps}
-}
-
-// Exports RPC from SchedulerSv1
-type DispatcherSchedulerSv1 struct {
-	dS *dispatchers.DispatcherService
-}
-
-// Reload reloads scheduler instructions
-func (dS *DispatcherSchedulerSv1) Reload(attr *utils.CGREvent, reply *string) (err error) {
-	return dS.dS.SchedulerSv1Reload(attr, reply)
-}
-
-// Ping used to detreminate if component is active
-func (dS *DispatcherSchedulerSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.SchedulerSv1Ping(args, reply)
-}
-
-// ExecuteActions execute an actionPlan or multiple actionsPlans between a time interval
-func (dS *DispatcherSchedulerSv1) ExecuteActions(args *utils.AttrsExecuteActions, reply *string) error {
-	return dS.dS.SchedulerSv1ExecuteActions(args, reply)
-}
-
-// ExecuteActionPlans execute multiple actionPlans one by one
-func (dS *DispatcherSchedulerSv1) ExecuteActionPlans(args *utils.AttrsExecuteActionPlans, reply *string) (err error) {
-	return dS.dS.SchedulerSv1ExecuteActionPlans(args, reply)
 }
 
 func NewDispatcherSv1(dS *dispatchers.DispatcherService) *DispatcherSv1 {
@@ -873,24 +802,6 @@ func (dS *DispatcherCoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error
 	return dS.dS.CoreSv1Sleep(arg, reply)
 }
 
-func NewDispatcherRALsV1(dps *dispatchers.DispatcherService) *DispatcherRALsV1 {
-	return &DispatcherRALsV1{dS: dps}
-}
-
-// Exports RPC from RLs
-type DispatcherRALsV1 struct {
-	dS *dispatchers.DispatcherService
-}
-
-func (dS *DispatcherRALsV1) GetRatingPlansCost(args *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
-	return dS.dS.RALsV1GetRatingPlansCost(args, reply)
-}
-
-// Ping used to detreminate if component is active
-func (dS *DispatcherRALsV1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.RALsV1Ping(args, reply)
-}
-
 type DispatcherReplicatorSv1 struct {
 	dS *dispatchers.DispatcherService
 }
@@ -902,11 +813,6 @@ func NewDispatcherReplicatorSv1(dps *dispatchers.DispatcherService) *DispatcherR
 // Ping used to detreminate if component is active
 func (dS *DispatcherReplicatorSv1) Ping(args *utils.CGREvent, reply *string) error {
 	return dS.dS.ReplicatorSv1Ping(args, reply)
-}
-
-// GetAccount
-func (dS *DispatcherReplicatorSv1) GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error {
-	return dS.dS.ReplicatorSv1GetAccount(args, reply)
 }
 
 // GetDestination
@@ -957,46 +863,6 @@ func (dS *DispatcherReplicatorSv1) GetResource(tntID *utils.TenantIDWithAPIOpts,
 // GetResourceProfile
 func (dS *DispatcherReplicatorSv1) GetResourceProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
 	return dS.dS.ReplicatorSv1GetResourceProfile(tntID, reply)
-}
-
-// GetActionTriggers
-func (dS *DispatcherReplicatorSv1) GetActionTriggers(id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
-	return dS.dS.ReplicatorSv1GetActionTriggers(id, reply)
-}
-
-// GetSharedGroup
-func (dS *DispatcherReplicatorSv1) GetSharedGroup(id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error {
-	return dS.dS.ReplicatorSv1GetSharedGroup(id, reply)
-}
-
-// GetActions
-func (dS *DispatcherReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engine.Actions) error {
-	return dS.dS.ReplicatorSv1GetActions(id, reply)
-}
-
-// GetActionPlan
-func (dS *DispatcherReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
-	return dS.dS.ReplicatorSv1GetActionPlan(id, reply)
-}
-
-// GetAllActionPlans
-func (dS *DispatcherReplicatorSv1) GetAllActionPlans(args *utils.StringWithAPIOpts, reply *map[string]*engine.ActionPlan) error {
-	return dS.dS.ReplicatorSv1GetAllActionPlans(args, reply)
-}
-
-// GetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error {
-	return dS.dS.ReplicatorSv1GetAccountActionPlans(id, reply)
-}
-
-// GetRatingPlan
-func (dS *DispatcherReplicatorSv1) GetRatingPlan(id *utils.StringWithAPIOpts, reply *engine.RatingPlan) error {
-	return dS.dS.ReplicatorSv1GetRatingPlan(id, reply)
-}
-
-// GetRatingProfile
-func (dS *DispatcherReplicatorSv1) GetRatingProfile(id *utils.StringWithAPIOpts, reply *engine.RatingProfile) error {
-	return dS.dS.ReplicatorSv1GetRatingProfile(id, reply)
 }
 
 // GetRouteProfile
@@ -1051,11 +917,6 @@ func (dS *DispatcherReplicatorSv1) SetDestination(args *engine.DestinationWithAP
 	return dS.dS.ReplicatorSv1SetDestination(args, reply)
 }
 
-// SetAccount
-func (dS *DispatcherReplicatorSv1) SetAccount(args *engine.AccountWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAccount(args, reply)
-}
-
 // SetReverseDestination
 func (dS *DispatcherReplicatorSv1) SetReverseDestination(args *engine.DestinationWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetReverseDestination(args, reply)
@@ -1091,29 +952,9 @@ func (dS *DispatcherReplicatorSv1) SetResourceProfile(args *engine.ResourceProfi
 	return dS.dS.ReplicatorSv1SetResourceProfile(args, reply)
 }
 
-// SetActionTriggers
-func (dS *DispatcherReplicatorSv1) SetActionTriggers(args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActionTriggers(args, reply)
-}
-
-// SetSharedGroup
-func (dS *DispatcherReplicatorSv1) SetSharedGroup(args *engine.SharedGroupWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetSharedGroup(args, reply)
-}
-
 // SetActions
 func (dS *DispatcherReplicatorSv1) SetActions(args *engine.SetActionsArgsWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetActions(args, reply)
-}
-
-// SetRatingPlan
-func (dS *DispatcherReplicatorSv1) SetRatingPlan(args *engine.RatingPlanWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetRatingPlan(args, reply)
-}
-
-// SetRatingProfile
-func (dS *DispatcherReplicatorSv1) SetRatingProfile(args *engine.RatingProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetRatingProfile(args, reply)
 }
 
 // SetRouteProfile
@@ -1141,16 +982,6 @@ func (dS *DispatcherReplicatorSv1) SetRateProfile(args *utils.RateProfileWithAPI
 	return dS.dS.ReplicatorSv1SetRateProfile(args, reply)
 }
 
-// SetActionPlan
-func (dS *DispatcherReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActionPlan(args, reply)
-}
-
-// SetAccountActionPlans
-func (dS *DispatcherReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAccountActionPlans(args, reply)
-}
-
 // SetDispatcherHost
 func (dS *DispatcherReplicatorSv1) SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetDispatcherHost(args, reply)
@@ -1169,11 +1000,6 @@ func (dS *DispatcherReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, re
 // RemoveDestination
 func (dS *DispatcherReplicatorSv1) RemoveDestination(args *utils.StringWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveDestination(args, reply)
-}
-
-// RemoveAccount
-func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveAccount(args, reply)
 }
 
 // RemoveStatQueue
@@ -1209,41 +1035,6 @@ func (dS *DispatcherReplicatorSv1) RemoveResource(args *utils.TenantIDWithAPIOpt
 // RemoveResourceProfile
 func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveResourceProfile(args, reply)
-}
-
-// RemoveActionTriggers
-func (dS *DispatcherReplicatorSv1) RemoveActionTriggers(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActionTriggers(args, reply)
-}
-
-// RemoveSharedGroup
-func (dS *DispatcherReplicatorSv1) RemoveSharedGroup(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveSharedGroup(args, reply)
-}
-
-// RemoveActions
-func (dS *DispatcherReplicatorSv1) RemoveActions(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActions(args, reply)
-}
-
-// RemoveActionPlan
-func (dS *DispatcherReplicatorSv1) RemoveActionPlan(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActionPlan(args, reply)
-}
-
-// RemAccountActionPlans
-func (dS *DispatcherReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemAccountActionPlans(args, reply)
-}
-
-// RemoveRatingPlan
-func (dS *DispatcherReplicatorSv1) RemoveRatingPlan(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveRatingPlan(args, reply)
-}
-
-// RemoveRatingProfile
-func (dS *DispatcherReplicatorSv1) RemoveRatingProfile(args *utils.StringWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveRatingProfile(args, reply)
 }
 
 // RemoveRouteProfile
