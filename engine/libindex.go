@@ -713,26 +713,6 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				}); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
-		case utils.CacheActionProfilesFilterIndexes:
-			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
-				removeIndexKeys, indx); err != nil {
-				return
-			}
-			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					acp, e := dm.GetActionProfile(tnt, id, true, false, utils.NonTransactional)
-					if e != nil {
-						return nil, e
-					}
-					fltrIDs := make([]string, len(acp.FilterIDs))
-					for i, fltrID := range acp.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
-					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
-				return utils.APIErrorHandler(err)
-			}
 		case utils.CacheRateProfilesFilterIndexes:
 			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {

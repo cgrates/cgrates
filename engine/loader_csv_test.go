@@ -42,7 +42,7 @@ func init() {
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountProfileCSVContent), testTPID, "", nil, nil, false)
+		DispatcherHostCSVContent, RateProfileCSVContent, AccountProfileCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
@@ -108,9 +108,6 @@ func init() {
 	}
 	if err := csvr.LoadRateProfiles(); err != nil {
 		log.Print("error in LoadRateProfiles:", err)
-	}
-	if err := csvr.LoadActionProfiles(); err != nil {
-		log.Print("error in LoadActionProfiles: ", err)
 	}
 	if err := csvr.LoadAccountProfiles(); err != nil {
 		log.Print("error in LoadActionProfiles: ", err)
@@ -1476,94 +1473,6 @@ func TestLoadRateProfiles(t *testing.T) {
 	}
 }
 
-func TestLoadActionProfiles(t *testing.T) {
-	expected := &utils.TPActionProfile{
-		TPid:     testTPID,
-		Tenant:   "cgrates.org",
-		ID:       "ONE_TIME_ACT",
-		Weight:   10,
-		Schedule: utils.MetaASAP,
-		Targets: []*utils.TPActionTarget{
-			{
-				TargetType: utils.MetaAccounts,
-				TargetIDs:  []string{"1001", "1002"},
-			},
-		},
-		Actions: []*utils.TPAPAction{
-			{
-				ID:   "TOPUP",
-				TTL:  "0s",
-				Type: "*add_balance",
-				Diktats: []*utils.TPAPDiktat{{
-					Path:  "*balance.TestBalance.Value",
-					Value: "10",
-				}},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_DATA",
-				TTL:  "0s",
-				Type: "*set_balance",
-				Diktats: []*utils.TPAPDiktat{{
-					Path:  "*balance.TestDataBalance.Type",
-					Value: "*data",
-				}},
-			},
-			{
-				ID:   "TOPUP_TEST_DATA",
-				TTL:  "0s",
-				Type: "*add_balance",
-				Diktats: []*utils.TPAPDiktat{{
-					Path:  "*balance.TestDataBalance.Value",
-					Value: "1024",
-				}},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_VOICE",
-				TTL:  "0s",
-				Type: "*set_balance",
-				Diktats: []*utils.TPAPDiktat{{
-					Path:  "*balance.TestVoiceBalance.Type",
-					Value: "*voice",
-				}},
-			},
-			{
-				ID:   "TOPUP_TEST_VOICE",
-				TTL:  "0s",
-				Type: "*add_balance",
-				Diktats: []*utils.TPAPDiktat{{
-					Path:  "*balance.TestVoiceBalance.Value",
-					Value: "15m15s",
-				}, {
-					Path:  "*balance.TestVoiceBalance2.Value",
-					Value: "15m15s",
-				}},
-			},
-		},
-	}
-
-	if len(csvr.actionProfiles) != 1 {
-		t.Fatalf("Failed to load ActionProfiles: %s", utils.ToJSON(csvr.actionProfiles))
-	}
-	actPrfKey := utils.TenantID{
-		Tenant: "cgrates.org",
-		ID:     "ONE_TIME_ACT",
-	}
-	sort.Slice(expected.Actions, func(i, j int) bool {
-		return false
-	})
-	sort.Slice(expected.Targets[0].TargetIDs, func(i, j int) bool {
-		return expected.Targets[0].TargetIDs[i] < expected.Targets[0].TargetIDs[j]
-	})
-	sort.Slice(csvr.actionProfiles[actPrfKey].Targets[0].TargetIDs, func(i, j int) bool {
-		return csvr.actionProfiles[actPrfKey].Targets[0].TargetIDs[i] < csvr.actionProfiles[actPrfKey].Targets[0].TargetIDs[j]
-	})
-
-	if !reflect.DeepEqual(csvr.actionProfiles[actPrfKey], expected) {
-		t.Errorf("Expecting: %+v,\n received: %+v",
-			utils.ToJSON(expected), utils.ToJSON(csvr.actionProfiles[actPrfKey]))
-	}
-}
-
 func TestLoadDispatcherHosts(t *testing.T) {
 	eDispatcherHosts := &utils.TPDispatcherHost{
 		TPid:   testTPID,
@@ -1611,61 +1520,5 @@ func TestLoadThresholds(t *testing.T) {
 	}
 	if len(csvr.thresholds) != len(eThresholds) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
-	}
-}
-
-func TestLoadAccountProfiles(t *testing.T) {
-	expected := &utils.TPAccountProfile{
-		TPid:    testTPID,
-		Tenant:  "cgrates.org",
-		ID:      "1001",
-		Weights: ";20",
-		Balances: map[string]*utils.TPAccountBalance{
-			"MonetaryBalance": {
-				ID:      "MonetaryBalance",
-				Weights: ";10",
-				Type:    utils.MetaMonetary,
-				CostIncrement: []*utils.TPBalanceCostIncrement{
-					{
-						FilterIDs:    []string{"fltr1", "fltr2"},
-						Increment:    utils.Float64Pointer(1.3),
-						FixedFee:     utils.Float64Pointer(2.3),
-						RecurrentFee: utils.Float64Pointer(3.3),
-					},
-				},
-				AttributeIDs: []string{"attr1", "attr2"},
-				UnitFactors: []*utils.TPBalanceUnitFactor{
-					{
-						FilterIDs: []string{"fltr1", "fltr2"},
-						Factor:    100,
-					},
-					{
-						FilterIDs: []string{"fltr3"},
-						Factor:    200,
-					},
-				},
-				Units: 14,
-			},
-			"VoiceBalance": {
-				ID:      "VoiceBalance",
-				Weights: ";10",
-				Type:    utils.MetaVoice,
-				Units:   3600000000000,
-			},
-		},
-		ThresholdIDs: []string{utils.MetaNone},
-	}
-
-	if len(csvr.accountProfiles) != 1 {
-		t.Fatalf("Failed to load ActionProfiles: %s", utils.ToJSON(csvr.actionProfiles))
-	}
-	accPrfKey := utils.TenantID{
-		Tenant: "cgrates.org",
-		ID:     "1001",
-	}
-	sort.Strings(csvr.accountProfiles[accPrfKey].Balances["MonetaryBalance"].AttributeIDs)
-	if !reflect.DeepEqual(csvr.accountProfiles[accPrfKey], expected) {
-		t.Errorf("Expecting: %+v,\n received: %+v",
-			utils.ToJSON(expected), utils.ToJSON(csvr.accountProfiles[accPrfKey]))
 	}
 }

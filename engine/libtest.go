@@ -288,16 +288,6 @@ cgrates.org,RP1,,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
 cgrates.org,RP1,,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,0.089,0.06,1m,1s
 cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,0.0564,0.06,1m,1s
 `
-	ActionProfileCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,10,*asap,*accounts,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
-`
-
 	AccountProfileCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
 cgrates.org,1001,,,;20,,MonetaryBalance,,;10,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3,attr1;attr2,,*none
@@ -558,8 +548,6 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheReverseFilterIndexes:         {},
 		utils.MetaAPIBan:                        {},
 		utils.CacheCapsEvents:                   {},
-		utils.CacheActionProfiles:               {},
-		utils.CacheActionProfilesFilterIndexes:  {},
 		utils.CacheAccountProfiles:              {},
 		utils.CacheAccountProfilesFilterIndexes: {},
 		utils.CacheReplicationHosts:             {},
@@ -589,47 +577,44 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheTBLTPDispatchers:      {},
 		utils.CacheTBLTPDispatcherHosts:  {},
 		utils.CacheTBLTPRateProfiles:     {},
-		utils.CacheTBLTPActionProfiles:   {},
 		utils.CacheTBLTPAccountProfiles:  {},
 	}
 }
 
 func GetDefaultEmptyArgCachePrefix() map[string][]string {
 	return map[string][]string{
-		utils.DestinationPrefix:             nil,
-		utils.ReverseDestinationPrefix:      nil,
-		utils.RatingPlanPrefix:              nil,
-		utils.RatingProfilePrefix:           nil,
-		utils.ActionPrefix:                  nil,
-		utils.ActionPlanPrefix:              nil,
-		utils.AccountActionPlansPrefix:      nil,
-		utils.ActionTriggerPrefix:           nil,
-		utils.SharedGroupPrefix:             nil,
-		utils.ResourceProfilesPrefix:        nil,
-		utils.ResourcesPrefix:               nil,
-		utils.StatQueuePrefix:               nil,
-		utils.StatQueueProfilePrefix:        nil,
-		utils.ThresholdPrefix:               nil,
-		utils.ThresholdProfilePrefix:        nil,
-		utils.FilterPrefix:                  nil,
-		utils.RouteProfilePrefix:            nil,
-		utils.AttributeProfilePrefix:        nil,
-		utils.ChargerProfilePrefix:          nil,
-		utils.DispatcherProfilePrefix:       nil,
-		utils.DispatcherHostPrefix:          nil,
-		utils.RateProfilePrefix:             nil,
-		utils.ActionProfilePrefix:           nil,
-		utils.TimingsPrefix:                 nil,
-		utils.AttributeFilterIndexes:        nil,
-		utils.ResourceFilterIndexes:         nil,
-		utils.StatFilterIndexes:             nil,
-		utils.ThresholdFilterIndexes:        nil,
-		utils.RouteFilterIndexes:            nil,
-		utils.ChargerFilterIndexes:          nil,
-		utils.DispatcherFilterIndexes:       nil,
-		utils.RateProfilesFilterIndexPrfx:   nil,
-		utils.RateFilterIndexPrfx:           nil,
-		utils.ActionProfilesFilterIndexPrfx: nil,
-		utils.FilterIndexPrfx:               nil,
+		utils.DestinationPrefix:           nil,
+		utils.ReverseDestinationPrefix:    nil,
+		utils.RatingPlanPrefix:            nil,
+		utils.RatingProfilePrefix:         nil,
+		utils.ActionPrefix:                nil,
+		utils.ActionPlanPrefix:            nil,
+		utils.AccountActionPlansPrefix:    nil,
+		utils.ActionTriggerPrefix:         nil,
+		utils.SharedGroupPrefix:           nil,
+		utils.ResourceProfilesPrefix:      nil,
+		utils.ResourcesPrefix:             nil,
+		utils.StatQueuePrefix:             nil,
+		utils.StatQueueProfilePrefix:      nil,
+		utils.ThresholdPrefix:             nil,
+		utils.ThresholdProfilePrefix:      nil,
+		utils.FilterPrefix:                nil,
+		utils.RouteProfilePrefix:          nil,
+		utils.AttributeProfilePrefix:      nil,
+		utils.ChargerProfilePrefix:        nil,
+		utils.DispatcherProfilePrefix:     nil,
+		utils.DispatcherHostPrefix:        nil,
+		utils.RateProfilePrefix:           nil,
+		utils.TimingsPrefix:               nil,
+		utils.AttributeFilterIndexes:      nil,
+		utils.ResourceFilterIndexes:       nil,
+		utils.StatFilterIndexes:           nil,
+		utils.ThresholdFilterIndexes:      nil,
+		utils.RouteFilterIndexes:          nil,
+		utils.ChargerFilterIndexes:        nil,
+		utils.DispatcherFilterIndexes:     nil,
+		utils.RateProfilesFilterIndexPrfx: nil,
+		utils.RateFilterIndexPrfx:         nil,
+		utils.FilterIndexPrfx:             nil,
 	}
 }

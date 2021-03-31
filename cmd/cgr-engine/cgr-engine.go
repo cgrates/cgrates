@@ -680,7 +680,6 @@ func main() {
 		services.NewRateService(cfg, cacheS, filterSChan, dmService,
 			server, internalRateSChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
-		services.NewActionService(cfg, dmService, cacheS, filterSChan, connManager, server, internalActionSChan, anz, srvDep),
 		services.NewAccountService(cfg, dmService, cacheS, filterSChan, connManager, server, internalAccountSChan, anz, srvDep),
 	)
 	srvManager.StartServices()

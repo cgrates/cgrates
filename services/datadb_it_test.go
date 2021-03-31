@@ -179,9 +179,6 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaAccountProfiles: {
 				Replicate: false,
 				Remote:    false},
@@ -246,7 +243,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
 		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -355,9 +351,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
 		},
@@ -486,9 +479,6 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 
@@ -540,7 +530,6 @@ func TestDataDBStartVersion(t *testing.T) {
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
 		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -603,7 +592,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
 		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -712,9 +700,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
 		},
@@ -771,7 +756,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
 		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -880,9 +864,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
 		},
@@ -1028,9 +1009,6 @@ func TestDataDBReloadError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
 		},

@@ -57,7 +57,6 @@ type TpReader struct {
 	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
 	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
 	rateProfiles       map[utils.TenantID]*utils.TPRateProfile
-	actionProfiles     map[utils.TenantID]*utils.TPActionProfile
 	accountProfiles    map[utils.TenantID]*utils.TPAccountProfile
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
@@ -108,7 +107,6 @@ func (tpr *TpReader) Init() {
 	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
 	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
 	tpr.rateProfiles = make(map[utils.TenantID]*utils.TPRateProfile)
-	tpr.actionProfiles = make(map[utils.TenantID]*utils.TPActionProfile)
 	tpr.accountProfiles = make(map[utils.TenantID]*utils.TPAccountProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1307,26 +1305,6 @@ func (tpr *TpReader) LoadRateProfilesFiltered(tag string) (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadActionProfiles() error {
-	return tpr.LoadActionProfilesFiltered("")
-}
-
-func (tpr *TpReader) LoadActionProfilesFiltered(tag string) (err error) {
-	aps, err := tpr.lr.GetTPActionProfiles(tpr.tpid, "", tag)
-	if err != nil {
-		return err
-	}
-	mapActionProfiles := make(map[utils.TenantID]*utils.TPActionProfile)
-	for _, ap := range aps {
-		if err = verifyInlineFilterS(ap.FilterIDs); err != nil {
-			return
-		}
-		mapActionProfiles[utils.TenantID{Tenant: ap.Tenant, ID: ap.ID}] = ap
-	}
-	tpr.actionProfiles = mapActionProfiles
-	return nil
-}
-
 func (tpr *TpReader) LoadAccountProfiles() error {
 	return tpr.LoadAccountProfilesFiltered("")
 }
@@ -1413,9 +1391,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadRateProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
-	if err = tpr.LoadActionProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadAccountProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1883,25 +1858,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	}
 
 	if verbose {
-		log.Print("ActionProfiles:")
-	}
-	for _, tpAP := range tpr.actionProfiles {
-		var ap *ActionProfile
-		if ap, err = APItoActionProfile(tpAP, tpr.timezone); err != nil {
-			return
-		}
-		if err = tpr.dm.SetActionProfile(ap, true); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", ap.TenantID())
-		}
-	}
-	if len(tpr.actionProfiles) != 0 {
-		loadIDs[utils.CacheActionProfiles] = loadID
-	}
-
-	if verbose {
 		log.Print("AccountProfiles:")
 	}
 	for _, tpAP := range tpr.accountProfiles {
@@ -2018,8 +1974,6 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("DispatcherHosts: ", len(tpr.dispatcherHosts))
 	// Rate profiles
 	log.Print("RateProfiles: ", len(tpr.rateProfiles))
-	// Action profiles
-	log.Print("ActionProfiles: ", len(tpr.actionProfiles))
 }
 
 // GetLoadedIds returns the identities loaded for a specific category, useful for cache reloads
@@ -2175,14 +2129,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.rateProfiles))
 		i := 0
 		for k := range tpr.rateProfiles {
-			keys[i] = k.TenantID()
-			i++
-		}
-		return keys, nil
-	case utils.ActionProfilePrefix:
-		keys := make([]string, len(tpr.actionProfiles))
-		i := 0
-		for k := range tpr.actionProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2424,19 +2370,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 
 	if verbose {
-		log.Print("ActionProfiles:")
-	}
-	for _, tpAp := range tpr.actionProfiles {
-		if err = tpr.dm.RemoveActionProfile(tpAp.Tenant, tpAp.ID,
-			utils.NonTransactional, true); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", utils.ConcatenatedKey(tpAp.Tenant, tpAp.ID))
-		}
-	}
-
-	if verbose {
 		log.Print("AccountProfiles:")
 	}
 	for _, tpAp := range tpr.accountProfiles {
@@ -2555,9 +2488,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.rateProfiles) != 0 {
 		loadIDs[utils.CacheRateProfiles] = loadID
 	}
-	if len(tpr.actionProfiles) != 0 {
-		loadIDs[utils.CacheActionProfiles] = loadID
-	}
 	if len(tpr.accountProfiles) != 0 {
 		loadIDs[utils.CacheAccountProfiles] = loadID
 	}
@@ -2597,7 +2527,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	dppIDs, _ := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
 	dphIDs, _ := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
 	ratePrfIDs, _ := tpr.GetLoadedIds(utils.RateProfilePrefix)
-	actionPrfIDs, _ := tpr.GetLoadedIds(utils.ActionProfilePrefix)
 	aps, _ := tpr.GetLoadedIds(utils.ActionPlanPrefix)
 	accountPrfIDs, _ := tpr.GetLoadedIds(utils.AccountProfilePrefix)
 
@@ -2627,7 +2556,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 			utils.DispatcherProfileIDs:  dppIDs,
 			utils.DispatcherHostIDs:     dphIDs,
 			utils.RateProfileIDs:        ratePrfIDs,
-			utils.ActionProfileIDs:      actionPrfIDs,
 		},
 	}
 
@@ -2682,9 +2610,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	if len(ratePrfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheRateProfilesFilterIndexes)
 		cacheIDs = append(cacheIDs, utils.CacheRateFilterIndexes)
-	}
-	if len(actionPrfIDs) != 0 {
-		cacheIDs = append(cacheIDs, utils.CacheActionProfilesFilterIndexes)
 	}
 	if len(accountPrfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheAccountProfilesFilterIndexes)

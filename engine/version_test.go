@@ -93,7 +93,6 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.Subscribers: 1, utils.Destinations: 1, utils.ReverseDestinations: 1,
 		utils.RatingPlan: 1, utils.RatingProfile: 1, utils.Chargers: 2,
 		utils.Dispatchers: 2, utils.LoadIDsVrs: 1, utils.RateProfiles: 1,
-		utils.ActionProfiles: 1,
 	}
 	expVersStorDB := Versions{
 		utils.CostDetails: 2, utils.SessionSCosts: 3, utils.CDRs: 2,
@@ -104,7 +103,7 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.TpResources: 1, utils.TpRates: 1, utils.TpTiming: 1,
 		utils.TpResource: 1, utils.TpDestinations: 1, utils.TpRatingPlan: 1,
 		utils.TpRatingProfile: 1, utils.TpChargers: 1, utils.TpDispatchers: 1,
-		utils.TpRateProfiles: 1, utils.TpActionProfiles: 1,
+		utils.TpRateProfiles: 1,
 	}
 	if vrs := CurrentDBVersions(utils.Mongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {
 		t.Errorf("Expectred %+v, received %+v", expVersDataDB, vrs)

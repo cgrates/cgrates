@@ -60,7 +60,6 @@ var (
 		testExpVerifyStats,
 		testExpVerifyRoutes,
 		testExpVerifyRateProfiles,
-		testExpVerifyActionProfiles,
 		testExpVerifyAccountProfiles,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
@@ -422,90 +421,6 @@ func testExpVerifyRateProfiles(t *testing.T) {
 	if !reflect.DeepEqual(splPrf, reply) {
 		t.Errorf("Expecting: %+v,\n received: %+v",
 			utils.ToJSON(splPrf), utils.ToJSON(reply))
-	}
-}
-
-func testExpVerifyActionProfiles(t *testing.T) {
-	var reply *engine.ActionProfile
-	actPrf := &engine.ActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ONE_TIME_ACT",
-		FilterIDs: []string{},
-		Weight:    10,
-		Schedule:  utils.MetaASAP,
-		Targets: map[string]utils.StringSet{
-			utils.MetaAccounts: {"1001": {}, "1002": {}},
-		},
-		Actions: []*engine.APAction{
-			{
-				ID:   "TOPUP",
-				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Units,
-					Value: "10",
-				}},
-			},
-
-			{
-				ID:   "SET_BALANCE_TEST_DATA",
-				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
-					Value: utils.MetaData,
-				}},
-			},
-			{
-				ID:   "TOPUP_TEST_DATA",
-				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Units,
-					Value: "1024",
-				}},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_VOICE",
-				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
-					Value: utils.MetaVoice,
-				}},
-			},
-			{
-				ID:   "TOPUP_TEST_VOICE",
-				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Units,
-					Value: "15m15s",
-				}},
-			},
-			{
-				ID:   "SET_BALANCE_TEST_FILTERS",
-				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Filters,
-					Value: "*string:~*req.CustomField:500",
-				}},
-			},
-			{
-				ID:   "TOPUP_REM_VOICE",
-				Type: utils.MetaRemBalance,
-				Diktats: []*engine.APDiktat{{
-					Path: "TestVoiceBalance2",
-				}},
-			},
-		},
-	}
-	if *encoding == utils.MetaGOB {
-		actPrf.FilterIDs = nil
-		for _, act := range actPrf.Actions {
-			act.FilterIDs = nil
-		}
-	}
-	if err := expRpc.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}}, &reply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(actPrf, reply) {
-		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(actPrf), utils.ToJSON(reply))
 	}
 }
 

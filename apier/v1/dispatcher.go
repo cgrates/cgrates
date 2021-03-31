@@ -1306,21 +1306,6 @@ func (dS *DispatcherReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWith
 	return dS.dS.ReplicatorSv1RemoveAccountProfile(args, reply)
 }
 
-// GetActionProfile .
-func (dS *DispatcherReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error {
-	return dS.dS.ReplicatorSv1GetActionProfile(tntID, reply)
-}
-
-// SetActionProfile .
-func (dS *DispatcherReplicatorSv1) SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetActionProfile(args, reply)
-}
-
-//  RemoveActionProfile .
-func (dS *DispatcherReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveActionProfile(args, reply)
-}
-
 func NewDispatcherRateSv1(dps *dispatchers.DispatcherService) *DispatcherRateSv1 {
 	return &DispatcherRateSv1{dR: dps}
 }

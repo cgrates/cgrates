@@ -132,9 +132,6 @@ type DataDB interface {
 	GetRateProfileDrv(string, string) (*utils.RateProfile, error)
 	SetRateProfileDrv(*utils.RateProfile) error
 	RemoveRateProfileDrv(string, string) error
-	GetActionProfileDrv(string, string) (*ActionProfile, error)
-	SetActionProfileDrv(*ActionProfile) error
-	RemoveActionProfileDrv(string, string) error
 	GetAccountProfileDrv(string, string) (*utils.AccountProfile, error)
 	SetAccountProfileDrv(profile *utils.AccountProfile) error
 	RemoveAccountProfileDrv(string, string) error
@@ -188,7 +185,6 @@ type LoadReader interface {
 	GetTPDispatcherProfiles(string, string, string) ([]*utils.TPDispatcherProfile, error)
 	GetTPDispatcherHosts(string, string, string) ([]*utils.TPDispatcherHost, error)
 	GetTPRateProfiles(string, string, string) ([]*utils.TPRateProfile, error)
-	GetTPActionProfiles(string, string, string) ([]*utils.TPActionProfile, error)
 	GetTPAccountProfiles(string, string, string) ([]*utils.TPAccountProfile, error)
 }
 
@@ -215,7 +211,6 @@ type LoadWriter interface {
 	SetTPDispatcherProfiles([]*utils.TPDispatcherProfile) error
 	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
 	SetTPRateProfiles([]*utils.TPRateProfile) error
-	SetTPActionProfiles([]*utils.TPActionProfile) error
 	SetTPAccountProfiles([]*utils.TPAccountProfile) error
 }
 

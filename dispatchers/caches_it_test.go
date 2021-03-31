@@ -214,8 +214,6 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheEventCharges:                 utils.MetaReady,
 		utils.CacheReverseFilterIndexes:         utils.MetaReady,
 		utils.CacheCapsEvents:                   utils.MetaReady,
-		utils.CacheActionProfiles:               utils.MetaReady,
-		utils.CacheActionProfilesFilterIndexes:  utils.MetaReady,
 		utils.CacheAccountProfilesFilterIndexes: utils.MetaReady,
 		utils.CacheAccountProfiles:              utils.MetaReady,
 
@@ -245,7 +243,6 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheTBLTPDispatcherHosts:  utils.MetaReady,
 		utils.CacheTBLTPRateProfiles:     utils.MetaReady,
 		utils.MetaAPIBan:                 utils.MetaReady,
-		utils.CacheTBLTPActionProfiles:   utils.MetaReady,
 		utils.CacheTBLTPAccountProfiles:  utils.MetaReady,
 		utils.CacheReplicationHosts:      utils.MetaReady,
 	}

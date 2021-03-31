@@ -24,9 +24,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
-	"strconv"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -45,12 +43,9 @@ var (
 		testAccActionsResetStorDb,
 		testAccActionsStartEngine,
 		testAccActionsRPCConn,
-		testAccActionsSetActionProfile,
 		testAccActionsExecuteAction,
-		testAccActionsSetActionProfile,
 		testAccActionsExecuteAction2,
 		testAccActionsGetAccountAfterActions,
-		testAccActionsSetActionProfile2,
 		testAccActionsExecuteAction3,
 		testAccActionsGetAccountAfterRemActions,
 		testAccActionsKillEngine,
@@ -110,89 +105,6 @@ func testAccActionsRPCConn(t *testing.T) {
 	accSRPC, err = newRPCClient(accPrfCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
-	}
-}
-
-func testAccActionsSetActionProfile(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CREATE_ACC",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    0,
-			Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-			Schedule:  utils.MetaASAP,
-			Actions: []*engine.APAction{
-				{
-					ID:        "SET_NEW_BAL",
-					FilterIDs: []string{"*exists:*opts.BAL_NEW:"},
-					Type:      utils.MetaSetBalance,
-					Diktats: []*engine.APDiktat{
-						{
-							Path:  "*account.ThresholdIDs",
-							Value: utils.MetaNone,
-						},
-						{
-							Path:  "*balance.MONETARY.Type",
-							Value: utils.MetaConcrete,
-						},
-						{
-							Path:  "*balance.MONETARY.Units",
-							Value: "1048576",
-						},
-						{
-							Path:  "*balance.MONETARY.Weights",
-							Value: "`;0`",
-						},
-						{
-							Path:  "*balance.MONETARY.CostIncrements",
-							Value: "`*string:~*req.ToR:*data;1024;0;0.01`",
-						},
-					},
-				},
-				{
-					ID:        "SET_ADD_BAL",
-					FilterIDs: []string{"*exists:*opts.BAL_ADD:"},
-					Type:      utils.MetaAddBalance,
-					Diktats: []*engine.APDiktat{
-						{
-							Path:  "*balance.VOICE.Type",
-							Value: utils.MetaAbstract,
-						},
-						{
-							Path:  "*balance.VOICE.Units",
-							Value: strconv.FormatInt((3 * time.Hour).Nanoseconds(), 10),
-						},
-						{
-							Path:  "*balance.VOICE.FilterIDs",
-							Value: "`*string:~*req.ToR:*voice`",
-						},
-						{
-							Path:  "*balance.VOICE.Weights",
-							Value: "`;2`",
-						},
-						{
-							Path:  "*balance.VOICE.CostIncrements",
-							Value: "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
-						},
-					},
-				},
-			},
-		},
-		APIOpts: map[string]interface{}{},
-	}
-	var reply string
-	if err := accSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
-	}
-	var result *engine.ActionProfile
-	if err := accSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: actPrf.Tenant, ID: actPrf.ID}}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(actPrf.ActionProfile, result) {
-		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, result)
 	}
 }
 
@@ -276,47 +188,6 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, result) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(accPrf), utils.ToJSON(result))
-	}
-}
-
-func testAccActionsSetActionProfile2(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
-			Tenant:    "cgrates.org",
-			ID:        "REM_ACC",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Weight:    0,
-			Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-			Schedule:  utils.MetaASAP,
-			Actions: []*engine.APAction{
-				{
-					ID:   "REM_BAL",
-					Type: utils.MetaRemBalance,
-					Diktats: []*engine.APDiktat{
-						{
-							Path: "MONETARY",
-						},
-						{
-							Path: "VOICE",
-						},
-					},
-				},
-			},
-		},
-		APIOpts: map[string]interface{}{},
-	}
-	var reply string
-	if err := accSRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
-	}
-	var result *engine.ActionProfile
-	if err := accSRPC.Call(utils.APIerSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: actPrf.Tenant, ID: actPrf.ID}}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(actPrf.ActionProfile, result) {
-		t.Errorf("Expecting : %+v, received: %+v", actPrf.ActionProfile, result)
 	}
 }
 

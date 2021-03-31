@@ -275,10 +275,6 @@ type ReplicatorSv1Interface interface {
 	GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error
 	SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error
 	RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-
-	GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error
-	SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error
-	RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 }
 
 type ActionSv1Interface interface {

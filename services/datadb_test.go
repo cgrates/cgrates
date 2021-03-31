@@ -144,9 +144,6 @@ func TestDataDBCoverage(t *testing.T) {
 			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaActionProfiles: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 	db.oldDBCfg = oldcfg
