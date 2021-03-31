@@ -406,10 +406,6 @@ func (dbM *DataDBMock) RemoveActionProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAccountProfileDrv(string, string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) SetVersions(vrs Versions, overwrite bool) (err error) {
 	return utils.ErrNotImplemented
 }

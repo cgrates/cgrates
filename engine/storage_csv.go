@@ -66,7 +66,6 @@ type CSVStorage struct {
 	dispatcherHostsFn        []string
 	rateProfilesFn           []string
 	actionProfilesFn         []string
-	accountProfilesFn        []string
 }
 
 // NewCSVStorage creates a CSV storege that takes the data from the paths specified
@@ -686,18 +685,6 @@ func (csvs *CSVStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.T
 		return nil, err
 	}
 	return tpDPPs.AsTPActionProfile(), nil
-}
-
-func (csvs *CSVStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.TPAccountProfile, error) {
-	var tpDPPs AccountProfileMdls
-	if err := csvs.proccesData(AccountProfileMdl{}, csvs.accountProfilesFn, func(tp interface{}) {
-		dpp := tp.(AccountProfileMdl)
-		dpp.Tpid = tpid
-		tpDPPs = append(tpDPPs, &dpp)
-	}); err != nil {
-		return nil, err
-	}
-	return tpDPPs.AsTPAccountProfile()
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

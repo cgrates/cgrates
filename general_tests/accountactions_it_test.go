@@ -49,10 +49,8 @@ var (
 		testAccActionsExecuteAction,
 		testAccActionsSetActionProfile,
 		testAccActionsExecuteAction2,
-		testAccActionsGetAccountAfterActions,
 		testAccActionsSetActionProfile2,
 		testAccActionsExecuteAction3,
-		testAccActionsGetAccountAfterRemActions,
 		testAccActionsKillEngine,
 	}
 )
@@ -237,48 +235,6 @@ func testAccActionsExecuteAction2(t *testing.T) {
 	}
 }
 
-func testAccActionsGetAccountAfterActions(t *testing.T) {
-	accPrf := &utils.AccountProfile{
-		Tenant: "cgrates.org",
-		ID:     "1001",
-		Balances: map[string]*utils.Balance{
-			"MONETARY": {
-				ID:      "MONETARY",
-				Weights: utils.DynamicWeights{{}},
-				Type:    utils.MetaConcrete,
-				Units:   utils.NewDecimalFromFloat64(1048576),
-				CostIncrements: []*utils.CostIncrement{{
-					FilterIDs:    []string{"*string:~*req.ToR:*data"},
-					Increment:    utils.NewDecimalFromFloat64(1024),
-					FixedFee:     utils.NewDecimalFromFloat64(0),
-					RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-				}},
-			},
-			"VOICE": {
-				ID:        "VOICE",
-				FilterIDs: []string{"*string:~*req.ToR:*voice"},
-				Weights:   utils.DynamicWeights{{Weight: 2}},
-				Type:      utils.MetaAbstract,
-				Units:     utils.NewDecimalFromFloat64(2 * 10800000000000),
-				CostIncrements: []*utils.CostIncrement{{
-					FilterIDs:    []string{"*string:~*req.ToR:*voice"},
-					Increment:    utils.NewDecimalFromFloat64(1000000000),
-					FixedFee:     utils.NewDecimalFromFloat64(0),
-					RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-				}},
-			},
-		},
-		ThresholdIDs: []string{utils.MetaNone},
-	}
-	var result *utils.AccountProfile
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(accPrf, result) {
-		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(accPrf), utils.ToJSON(result))
-	}
-}
-
 func testAccActionsSetActionProfile2(t *testing.T) {
 	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
@@ -334,22 +290,6 @@ func testAccActionsExecuteAction3(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
-	}
-}
-
-func testAccActionsGetAccountAfterRemActions(t *testing.T) {
-	accPrf := &utils.AccountProfile{
-		Tenant:       "cgrates.org",
-		ID:           "1001",
-		Balances:     map[string]*utils.Balance{},
-		ThresholdIDs: []string{utils.MetaNone},
-	}
-	var result *utils.AccountProfile
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(accPrf, result) {
-		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(accPrf), utils.ToJSON(result))
 	}
 }
 

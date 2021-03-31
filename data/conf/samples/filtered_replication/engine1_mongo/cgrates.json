@@ -54,7 +54,6 @@
 		"*load_ids":{"remote":true,"replicate":false},
 		"*indexes":{"remote":true, "replicate":false}, 
 		"*action_profiles":{"remote":true,"replicate":false},
-		"*account_profiles":{"remote":true,"replicate":false},
 	},
 },
 

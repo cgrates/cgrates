@@ -44,7 +44,6 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitFlush,
 	testStorDBitIsDBEmpty,
 	testStorDBitCRUDVersions,
-	testStorDBitCRUDTPAccountProfiles,
 	testStorDBitCRUDTPActionProfiles,
 	testStorDBitCRUDTPDispatcherProfiles,
 	testStorDBitCRUDTPDispatcherHosts,
@@ -146,82 +145,6 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 		} else if test != false {
 			t.Errorf("Expecting: false got :%+v", test)
 		}
-	}
-}
-
-func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
-	//READ
-	if _, err := storDB.GetTPAccountProfiles("sub_ID1", utils.EmptyString, "TEST_ID1"); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//WRITE
-	var actPrf = []*utils.TPAccountProfile{
-		{
-			TPid:    testTPID,
-			Tenant:  "cgrates.org",
-			ID:      "1001",
-			Weights: ";20",
-			Balances: map[string]*utils.TPAccountBalance{
-				"MonetaryBalance": {
-					ID:      "MonetaryBalance",
-					Weights: ";10",
-					Type:    utils.MetaMonetary,
-					CostIncrement: []*utils.TPBalanceCostIncrement{
-						{
-							FilterIDs:    []string{"fltr1", "fltr2"},
-							Increment:    utils.Float64Pointer(1.3),
-							FixedFee:     utils.Float64Pointer(2.3),
-							RecurrentFee: utils.Float64Pointer(3.3),
-						},
-					},
-					AttributeIDs: []string{"attr1", "attr2"},
-					UnitFactors: []*utils.TPBalanceUnitFactor{
-						{
-							FilterIDs: []string{"fltr1", "fltr2"},
-							Factor:    100,
-						},
-						{
-							FilterIDs: []string{"fltr3"},
-							Factor:    200,
-						},
-					},
-					Units: 14,
-				},
-			},
-			ThresholdIDs: []string{utils.MetaNone},
-		},
-	}
-	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {
-		t.Error(err)
-	}
-
-	//READ
-	rcv, err := storDB.GetTPAccountProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	sort.Strings(rcv[0].Balances["MonetaryBalance"].AttributeIDs)
-	if !(reflect.DeepEqual(rcv[0], actPrf[0])) {
-		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]))
-	}
-
-	//UPDATE AND READ
-	actPrf[0].FilterIDs = []string{"*string:~*req.Account:1007"}
-	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {
-		t.Error(err)
-	} else if rcv, err := storDB.GetTPAccountProfiles(actPrf[0].TPid,
-		utils.EmptyString, utils.EmptyString); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(rcv[0], actPrf[0])) {
-		t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n", utils.ToJSON(actPrf[0]), utils.ToJSON(rcv[0]))
-	}
-
-	//REMOVE AND READ
-	if err := storDB.RemTpData(utils.EmptyString, actPrf[0].TPid, nil); err != nil {
-		t.Error(err)
-	} else if _, err := storDB.GetTPActionProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
 	}
 }
 

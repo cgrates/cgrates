@@ -55,7 +55,6 @@
 		"*rate_profiles":{"remote":false,"replicate":true},
 		"*load_ids":{"remote":false,"replicate":true},
 		"*action_profiles":{"remote":false,"replicate":true},
-		"*account_profiles":{"remote":false,"replicate":true},
 	},
 },
 
