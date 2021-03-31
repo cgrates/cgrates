@@ -5732,7 +5732,7 @@ func TestCallOnCGRConfig(t *testing.T) {
 }
 
 func TestLoadCfgFromJSONWithLocksInvalidSeciton(t *testing.T) {
-	expected := "Invalid section: <invalidSection>"
+	expected := "Invalid section: <invalidSection> "
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.loadCfgWithLocks("/random/path", "invalidSection"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
