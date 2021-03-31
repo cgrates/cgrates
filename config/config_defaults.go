@@ -107,7 +107,6 @@ const CGRATES_CFG_JSON = `
 		"*charger_profiles": {"remote":false, "replicate":false}, 
 		"*dispatcher_profiles":{"remote":false, "replicate":false}, 
 		"*dispatcher_hosts":{"remote":false, "replicate":false}, 
-		"*rate_profiles":{"remote":false, "replicate":false},
 		"*action_profiles":{"remote":false, "replicate":false},
 		"*load_ids":{"remote":false, "replicate":false}, 
 		"*indexes":{"remote":false, "replicate":false}, 
@@ -167,7 +166,6 @@ const CGRATES_CFG_JSON = `
 		"*versions": {"remote":false, "replicate":false}, 
 		"*tp_dispatcher_profiles":{"remote":false, "replicate":false}, 
 		"*tp_dispatcher_hosts":{"remote":false, "replicate":false}, 
-		"*tp_rate_profiles":{"remote":false, "replicate":false}, 
 		"*tp_action_profiles":{"remote":false, "replicate":false},
 	},
 },
@@ -257,7 +255,6 @@ const CGRATES_CFG_JSON = `
 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
-		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
@@ -266,8 +263,6 @@ const CGRATES_CFG_JSON = `
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control attribute filter indexes caching
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control charger filter indexes caching
 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control dispatcher filter indexes caching
-		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
-		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control action profile filter indexes caching
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
@@ -312,7 +307,6 @@ const CGRATES_CFG_JSON = `
 		"*tp_chargers":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_dispatcher_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 		"*tp_action_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 	},
 	"replication_conns": [],
@@ -800,30 +794,6 @@ const CGRATES_CFG_JSON = `
 				],
 			},
 			{
-				"type": "*rate_profiles",						// data source type
-				"file_name": "RateProfiles.csv",				// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
-					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
-					{"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~*req.5"},
-					{"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~*req.6"},
-					{"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~*req.7"},
-					{"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~*req.8"},
-					{"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~*req.9"},
-					{"tag": "RateActivationTimes", "path": "RateActivationTimes", "type": "*variable", "value": "~*req.10"},
-					{"tag": "RateWeight", "path": "RateWeight", "type": "*variable", "value": "~*req.11"},
-					{"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~*req.12"},
-					{"tag": "RateIntervalStart", "path": "RateIntervalStart", "type": "*variable", "value": "~*req.13"},
-					{"tag": "RateFixedFee", "path": "RateFixedFee", "type": "*variable", "value": "~*req.14"},
-                    {"tag": "RateRecurrentFee", "path": "RateRecurrentFee", "type": "*variable", "value": "~*req.15"},
-					{"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~*req.16"},
-					{"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~*req.17"},
-				],
-			},
-			{
 				"type": "*action_profiles",						// data source type
 				"file_name": "ActionProfiles.csv",				// file name in the tp_in_dir
 				"fields": [
@@ -845,7 +815,6 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ActionValue", "path": "ActionValue", "type": "*variable", "value": "~*req.15"},
 				],
 			},
-		
 		],
 	},
 ],

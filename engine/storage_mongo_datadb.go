@@ -76,7 +76,6 @@ const (
 	ColCpp  = "charger_profiles"
 	ColDpp  = "dispatcher_profiles"
 	ColDph  = "dispatcher_hosts"
-	ColRpp  = "rate_profiles"
 	ColApp  = "action_profiles"
 	ColLID  = "load_ids"
 )
@@ -315,7 +314,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp:
+	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
 			return
 		}
@@ -379,7 +378,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
 			ColRpl, ColDst, ColRds, ColLht, ColIndx, ColRsP, ColRes, ColSqs, ColSqp,
-			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColRpp, ColApp,
+			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp,
 			ColRpf, ColShg, ColAcc} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return

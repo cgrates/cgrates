@@ -37,9 +37,6 @@
 	"partitions": {
 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": true},
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": true},
-		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": true},
-		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": true},
-		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": true}
 	},
 	"replication_conns": ["connCache"]
 },

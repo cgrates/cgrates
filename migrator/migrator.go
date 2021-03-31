@@ -219,9 +219,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			if err := m.migrateThresholds(); err != nil {
 				log.Print("ERROR: ", utils.MetaThresholds, " ", err)
 			}
-			if err := m.migrateRouteProfiles(); err != nil {
-				log.Print("ERROR: ", utils.MetaRoutes, " ", err)
-			}
 			if err := m.migrateAttributeProfile(); err != nil {
 				log.Print("ERROR: ", utils.MetaAttributes, " ", err)
 			}

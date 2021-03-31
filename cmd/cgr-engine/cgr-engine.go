@@ -677,8 +677,6 @@ func main() {
 		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, internalEEsChan, anz, srvDep),
-		services.NewRateService(cfg, cacheS, filterSChan, dmService,
-			server, internalRateSChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewActionService(cfg, dmService, cacheS, filterSChan, connManager, server, internalActionSChan, anz, srvDep),
 	)
