@@ -50,7 +50,6 @@
 		"*charger_profiles": {"remote":true,"replicate":false},
 		"*dispatcher_profiles":{"remote":true,"replicate":false},
 		"*dispatcher_hosts":{"remote":true,"replicate":false},
-		"*rate_profiles":{"remote":true,"replicate":false},
 		"*load_ids":{"remote":true,"replicate":false},
 		"*indexes":{"remote":true, "replicate":false}, 
 		"*action_profiles":{"remote":true,"replicate":false},

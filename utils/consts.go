@@ -1924,7 +1924,6 @@ const (
 	CacheTBLTPChargers         = "*tp_chargers"
 	CacheTBLTPDispatchers      = "*tp_dispatcher_profiles"
 	CacheTBLTPDispatcherHosts  = "*tp_dispatcher_hosts"
-	CacheTBLTPActionProfiles   = "*tp_action_profiles"
 )
 
 // Prefix for indexing

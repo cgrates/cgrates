@@ -59,7 +59,6 @@ var (
 		testExpVerifyResources,
 		testExpVerifyStats,
 		testExpVerifyRoutes,
-		testExpVerifyRateProfiles,
 		testExpVerifyActionProfiles,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
@@ -360,67 +359,6 @@ func testExpVerifyRoutes(t *testing.T) {
 	if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
 		t.Errorf("Expecting: %+v \n or %+v \n,\n received: %+v",
 			utils.ToJSON(splPrf), utils.ToJSON(splPrf2), utils.ToJSON(reply))
-	}
-}
-
-func testExpVerifyRateProfiles(t *testing.T) {
-	var reply *utils.RateProfile
-	minDecimal, err := utils.NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-
-	splPrf := &utils.RateProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "RT_SPECIAL_1002",
-		FilterIDs:          []string{"*string:~*req.Account:1002"},
-		ActivationInterval: nil,
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		MinCost:         utils.NewDecimal(0, 0),
-		MaxCost:         utils.NewDecimal(0, 0),
-		MaxCostStrategy: utils.MetaMaxCostFree,
-		Rates: map[string]*utils.Rate{
-			"RT_ALWAYS": {
-				ID:              "RT_ALWAYS",
-				FilterIDs:       nil,
-				ActivationTimes: "* * * * *",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				Blocker: false,
-				IntervalRates: []*utils.IntervalRate{
-					{
-						IntervalStart: utils.NewDecimal(int64(0*time.Second), 0),
-						RecurrentFee:  utils.NewDecimal(1, 2),
-						Unit:          minDecimal,
-						Increment:     secDecimal,
-						FixedFee:      utils.NewDecimal(0, 0),
-					},
-				},
-			},
-		},
-	}
-
-	if *encoding == utils.MetaGOB {
-		splPrf.FilterIDs = nil
-	}
-	if err := expRpc.Call(utils.APIerSv1GetRateProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RT_SPECIAL_1002"}}, &reply); err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v,\n received: %+v",
-			utils.ToJSON(splPrf), utils.ToJSON(reply))
 	}
 }
 

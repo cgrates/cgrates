@@ -1291,24 +1291,6 @@ func (dS *DispatcherReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithA
 	return dS.dS.ReplicatorSv1RemoveActionProfile(args, reply)
 }
 
-func NewDispatcherRateSv1(dps *dispatchers.DispatcherService) *DispatcherRateSv1 {
-	return &DispatcherRateSv1{dR: dps}
-}
-
-// Exports RPC from RLs
-type DispatcherRateSv1 struct {
-	dR *dispatchers.DispatcherService
-}
-
-// Ping implements RateSv1Ping
-func (dR *DispatcherRateSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dR.dR.RateSv1Ping(args, reply)
-}
-
-func (dR *DispatcherRateSv1) CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) error {
-	return dR.dR.RateSv1CostForEvent(args, rpCost)
-}
-
 func NewDispatcherActionSv1(dps *dispatchers.DispatcherService) *DispatcherActionSv1 {
 	return &DispatcherActionSv1{dR: dps}
 }

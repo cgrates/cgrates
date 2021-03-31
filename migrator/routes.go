@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -137,67 +136,6 @@ func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 	return
 }
 
-func (m *Migrator) migrateRouteProfiles() (err error) {
-	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.ActionTriggers); err != nil {
-		return
-	}
-	routeVersion, has := vrs[utils.Routes]
-	if !has {
-		if vrs[utils.RQF] != current[utils.RQF] {
-			return fmt.Errorf("please migrate the filters before migrating the routes")
-		}
-		if err = m.migrateFromSupplierToRoute(); err != nil {
-			return
-		}
-	}
-	migrated := true
-	var v2 *engine.RouteProfile
-	for {
-		version := routeVersion
-		for {
-			switch version {
-			default:
-				return fmt.Errorf("Unsupported version %v", version)
-			case current[utils.Routes]:
-				migrated = false
-				if m.sameDataDB {
-					break
-				}
-				if err = m.migrateCurrentRouteProfile(); err != nil {
-					return err
-				}
-			case 1:
-				if v2, err = m.migrateV1ToV2Routes(); err != nil && err != utils.ErrNoMoreData {
-					return
-				} else if err == utils.ErrNoMoreData {
-					break
-				}
-				version = 2
-			}
-			if version == current[utils.Routes] || err == utils.ErrNoMoreData {
-				break
-			}
-		}
-		if err == utils.ErrNoMoreData || !migrated {
-			break
-		}
-		if !m.dryRun {
-			if err = m.dmIN.DataManager().SetRouteProfile(v2, true); err != nil {
-				return
-			}
-		}
-		m.stats[utils.Routes]++
-	}
-	// All done, update version wtih current one
-	if err = m.setVersions(utils.Routes); err != nil {
-		return
-	}
-
-	return m.ensureIndexesDataDB(engine.ColRts)
-}
-
 func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 	route = &engine.RouteProfile{
 		Tenant:             spp.Tenant,
@@ -221,19 +159,6 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 			Blocker:         supl.Blocker,
 			RouteParameters: supl.SupplierParameters,
 		}
-	}
-	return
-}
-
-func (m *Migrator) migrateV1ToV2Routes() (v4Cpp *engine.RouteProfile, err error) {
-	v4Cpp, err = m.dmIN.getV1RouteProfile()
-	if err != nil {
-		return nil, err
-	} else if v4Cpp == nil {
-		return nil, errors.New("Dispatcher NIL")
-	}
-	if v4Cpp.FilterIDs, err = migrateInlineFilterV4(v4Cpp.FilterIDs); err != nil {
-		return nil, err
 	}
 	return
 }

@@ -54,7 +54,6 @@ var (
 		testInternalReplicateITSetAccount,
 		testInternalReplicateITActionTrigger,
 		testInternalReplicateITThreshold,
-		testInternalReplicateITRateProfile,
 		testInternalReplicateITLoadIds,
 
 		testInternalReplicateITKillEngine,
@@ -1333,113 +1332,6 @@ func testInternalReplicateITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
-}
-
-func testInternalReplicateITRateProfile(t *testing.T) {
-	//set
-	rPrf := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-			},
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				ActivationTimes: "* * * * 0,6",
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-			},
-		},
-	}
-
-	apiRPrf := &utils.APIRateProfile{
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weights:         ";0",
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.APIRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-			},
-			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weights:         ";10",
-				ActivationTimes: "* * * * 0,6",
-			},
-			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weights:         ";30",
-				ActivationTimes: "* * 24 12 *",
-			},
-		},
-	}
-	var result string
-	if err := internalRPC.Call(utils.APIerSv1SetRateProfile, apiRPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	// check
-	var reply *utils.RateProfile
-	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", rPrf, reply)
-	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(rPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", rPrf, reply)
-	}
-	//remove
-	if err := internalRPC.Call(utils.APIerSv1RemoveRateProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
-		Tenant: rPrf.Tenant, ID: rPrf.ID}}, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	//check again
-	if err := engineOneRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
-	}
-	if err := engineTwoRPC.Call(utils.APIerSv1GetRateProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rPrf.Tenant, ID: rPrf.ID}}, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v received: %+v", utils.ErrNotFound, err)
-	}
 }
 
 func testInternalReplicateITLoadIds(t *testing.T) {

@@ -145,9 +145,6 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.CDRsV2,
 		v2.NewDispatcherSCDRsV2(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.RateSv1,
-		v1.NewDispatcherRateSv1(dspS.dspS))
-
 	dspS.server.RpcRegisterName(utils.ActionSv1,
 		v1.NewDispatcherActionSv1(dspS.dspS))
 

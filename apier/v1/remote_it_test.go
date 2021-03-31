@@ -73,7 +73,6 @@ var (
 		testInternalRemoteITGetChargerProfile,
 		testInternalRemoteITGetDispatcherProfile,
 		testInternalRemoteITGetDispatcherHost,
-		testInternalRemoteITGetRateProfile,
 
 		testInternalReplicationSetThreshold,
 		testInternalMatchThreshold,
@@ -660,98 +659,6 @@ func testInternalRemoteITGetDispatcherHost(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dispatcherHost.DispatcherHost, dsp) {
 		t.Errorf("Expecting : %+v, received: %+v", dispatcherHost.DispatcherHost, dsp)
-	}
-}
-
-func testInternalRemoteITGetRateProfile(t *testing.T) {
-	var rcv *utils.RateProfile
-	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
-		&rcv); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-
-	rPrf := &utils.RateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.Rate{
-			"RT_WEEK": {
-				ID: "RT_WEEK",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 0,
-					},
-				},
-				ActivationTimes: "* * * * 1-5",
-			},
-			"RT_WEEKEND": {
-				ID: "RT_WEEKEND",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				ActivationTimes: "* * * * 0,6",
-			},
-			"RT_CHRISTMAS": {
-				ID: "RT_CHRISTMAS",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 30,
-					},
-				},
-				ActivationTimes: "* * 24 12 *",
-			},
-		},
-	}
-	apiRPrf := &utils.APIRateProfileWithAPIOpts{
-		APIRateProfile: &utils.APIRateProfile{
-			Tenant:          "cgrates.org",
-			ID:              "RP1",
-			FilterIDs:       []string{"*string:~*req.Subject:1001"},
-			Weights:         ";0",
-			MaxCostStrategy: "*free",
-			Rates: map[string]*utils.APIRate{
-				"RT_WEEK": {
-					ID:              "RT_WEEK",
-					Weights:         ";0",
-					ActivationTimes: "* * * * 1-5",
-				},
-				"RT_WEEKEND": {
-					ID:              "RT_WEEKEND",
-					Weights:         ";10",
-					ActivationTimes: "* * * * 0,6",
-				},
-				"RT_CHRISTMAS": {
-					ID:              "RT_CHRISTMAS",
-					Weights:         ";30",
-					ActivationTimes: "* * 24 12 *",
-				},
-			},
-		},
-	}
-	var reply string
-	if err := engineTwoRPC.Call(utils.APIerSv1SetRateProfile,
-		apiRPrf, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
-	}
-
-	var rPfrg *utils.RateProfile
-	if err := internalRPC.Call(utils.APIerSv1GetRateProfile,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}},
-		&rPfrg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rPrf, rPfrg) {
-		t.Errorf("Expecting : %+v, received: %+v", rPrf, rPfrg)
 	}
 }
 
