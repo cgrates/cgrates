@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
-	"fmt"
 	"io"
 	"net/rpc"
 	"os"
@@ -50,8 +49,6 @@ var (
 		testLoaderStartEngine,
 		testLoaderRPCConn,
 		testLoaderPopulateData,
-		testLoaderMoveFilesMatchingFiles,
-		testLoaderMoveFilesRenameError,
 		testProcessFile,
 		testProcessFileLockFolder,
 		testProcessFileUnableToOpen,
@@ -408,58 +405,6 @@ func testLoaderVerifyOutDirForCustomSep(t *testing.T) {
 		t.Error(err)
 	} else if customAttributes != string(outContent1) {
 		t.Errorf("Expecting: %q, received: %q", customAttributes, string(outContent1))
-	}
-}
-
-func testLoaderMoveFilesMatchingFiles(t *testing.T) {
-	flPath := "/tmp/TestLoaderMoveFilesMatchingFiles"
-	ldr := &Loader{
-		tpInDir:      flPath,
-		tpOutDir:     "/tmp",
-		lockFilename: "ActionProfiles.csv",
-	}
-	if err := os.MkdirAll(flPath, 0777); err != nil {
-		t.Error(err)
-	}
-	newFile, err := os.Create(path.Join(flPath, "ActionProfiles.csv"))
-	if err != nil {
-		t.Error(err)
-	}
-	newFile.Close()
-
-	if err := ldr.moveFiles(); err != nil {
-		t.Error(err)
-	}
-
-	if err := os.Remove(path.Join(flPath, "ActionProfiles.csv")); err != nil {
-		t.Error(err)
-	} else if err := os.Remove(flPath); err != nil {
-		t.Error(err)
-	}
-}
-
-func testLoaderMoveFilesRenameError(t *testing.T) {
-	flPath := "/tmp/testLoaderMoveFilesRenameError"
-	if err := os.MkdirAll(flPath, 0777); err != nil {
-		t.Error(err)
-	}
-	ldr := &Loader{
-		tpInDir:      flPath,
-		tpOutDir:     flPath,
-		lockFilename: "ActionProfiles.lks",
-	}
-	filepath := path.Join(flPath, "ActionProfiles")
-	if err := os.MkdirAll(filepath, 0777); err != nil {
-		t.Error(err)
-	}
-
-	expected := fmt.Sprintf("rename %s %s: file exists", filepath, filepath)
-	if err := ldr.moveFiles(); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-
-	if err := os.Remove(filepath); err != nil {
-		t.Error(err)
 	}
 }
 

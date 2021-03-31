@@ -5882,69 +5882,6 @@ func TestCGRConfigClone(t *testing.T) {
 	}
 }
 
-func TestActionSConfig(t *testing.T) {
-	expected := &ActionSCfg{
-		Enabled:             false,
-		EEsConns:            []string{},
-		CDRsConns:           []string{},
-		ThresholdSConns:     []string{},
-		StatSConns:          []string{},
-		AccountSConns:       []string{},
-		IndexedSelects:      true,
-		Tenants:             &[]string{},
-		StringIndexedFields: nil,
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		NestedFields:        false,
-	}
-	cgrConfig := NewDefaultCGRConfig()
-	newConfig := cgrConfig.ActionSCfg()
-	if !reflect.DeepEqual(expected, newConfig) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
-	}
-}
-
-func TestV1GetConfigSectionActionSJson(t *testing.T) {
-	var reply map[string]interface{}
-	expected := map[string]interface{}{
-		ActionSJson: map[string]interface{}{
-			utils.EnabledCfg:             false,
-			utils.EEsConnsCfg:            []string{},
-			utils.CDRsConnsCfg:           []string{},
-			utils.ThresholdSConnsCfg:     []string{},
-			utils.StatSConnsCfg:          []string{},
-			utils.AccountSConnsCfg:       []string{},
-			utils.Tenants:                []string{},
-			utils.IndexedSelectsCfg:      true,
-			utils.PrefixIndexedFieldsCfg: []string{},
-			utils.SuffixIndexedFieldsCfg: []string{},
-			utils.NestedFieldsCfg:        false,
-		},
-	}
-	cfgCgr := NewDefaultCGRConfig()
-	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: ActionSJson}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-	}
-}
-
-func TestLoadActionSCfgError(t *testing.T) {
-	cfgJSONStr := `{
-      "actions": { 
-            "string_indexed_fields": "*req.index",
-	  }
-    }`
-	expected := "json: cannot unmarshal string into Go struct field ActionSJsonCfg.String_indexed_fields of type []string"
-	cgrConfig := NewDefaultCGRConfig()
-
-	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if err := cgrConfig.loadActionSCfg(cgrCfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestLoadAccountSCfgError(t *testing.T) {
 	cfgJSONStr := `{
 "accounts": {								

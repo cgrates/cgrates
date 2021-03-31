@@ -125,12 +125,6 @@
 },
 
 
-"actions": {
-	"enabled": true,
-	"accounts_conns": ["*localhost"]
-},
-
-
 "accounts": {
 	"enabled": true
 },

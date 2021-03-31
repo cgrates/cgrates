@@ -470,38 +470,6 @@ CREATE TABLE tp_dispatcher_hosts (
 );
 
 --
--- Table structure for table `tp_action_profiles`
---
-
-
-DROP TABLE IF EXISTS tp_action_profiles;
-CREATE TABLE tp_action_profiles (
-  `pk` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` varchar(64) NOT NULL,
-  `tenant` varchar(64) NOT NULL,
-  `id` varchar(64) NOT NULL,
-  `filter_ids` varchar(64) NOT NULL,
-  `activation_interval` varchar(64) NOT NULL,
-  `weight` decimal(8,2) NOT NULL,
-  `schedule` varchar(64) NOT NULL,
-  `target_type` varchar(64) NOT NULL,
-  `target_ids` varchar(64) NOT NULL,
-  `action_id` varchar(64) NOT NULL,
-  `action_filter_ids` varchar(64) NOT NULL,
-  `action_blocker` BOOLEAN NOT NULL,
-  `action_ttl` varchar(64) NOT NULL,
-  `action_type` varchar(64) NOT NULL,
-  `action_opts` varchar(256) NOT NULL,
-  `action_path` varchar(64) NOT NULL,
-  `action_value` varchar(64) NOT NULL,
-  `created_at` TIMESTAMP,
-  PRIMARY KEY (`pk`),
-  KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_action_profiles` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`action_id` )
-);
-
---
 -- Table structure for table `versions`
 --
 

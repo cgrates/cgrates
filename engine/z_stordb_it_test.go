@@ -587,7 +587,7 @@ func testStorDBitCRUDTPAttributes(t *testing.T) {
 		},
 	}
 	if err := storDB.SetTPAttributes(tpAProfile); err != nil {
-		t.Errorf("Unable to set TPActionProfile:%s", err)
+		t.Errorf("Unable to set TPAttributeProfile:%s", err)
 	}
 
 	//READ

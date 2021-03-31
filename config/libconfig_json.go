@@ -670,22 +670,6 @@ type CoreSJsonCfg struct {
 	Shutdown_timeout    *string
 }
 
-// Action service config section
-type ActionSJsonCfg struct {
-	Enabled               *bool
-	Cdrs_conns            *[]string
-	Ees_conns             *[]string
-	Thresholds_conns      *[]string
-	Stats_conns           *[]string
-	Accounts_conns        *[]string
-	Tenants               *[]string
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-}
-
 // Account service config section
 type AccountSJsonCfg struct {
 	Enabled               *bool

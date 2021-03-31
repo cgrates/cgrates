@@ -51,7 +51,7 @@
 		"*dispatcher_hosts":{"remote":true,"replicate":false},
 		"*load_ids":{"remote":true,"replicate":false},
 		"*indexes":{"remote":true, "replicate":false}, 
-		"*action_profiles":{"remote":true,"replicate":false},
+		"*files":{"remote":true,"replicate":false},
 	},
 },
 

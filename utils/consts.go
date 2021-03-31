@@ -886,7 +886,6 @@ const (
 	StatsNA               = -1.0
 	InvalidUsage          = -1
 	InvalidDuration       = time.Duration(-1)
-	ActionS               = "ActionS"
 	Schedule              = "Schedule"
 	ActionFilterIDs       = "ActionFilterIDs"
 	ActionBlocker         = "ActionBlocker"
@@ -1023,7 +1022,6 @@ const (
 	EEsLow         = "ees"
 	RateSLow       = "rates"
 	AccountSLow    = "accounts"
-	ActionSLow     = "actions"
 )
 
 // Actions
