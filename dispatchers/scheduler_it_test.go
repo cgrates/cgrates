@@ -28,10 +28,10 @@ import (
 
 var sTestsDspSched = []func(t *testing.T){
 	testDspSchedPing,
+	testDspSchedPingEmptyCGREventWIthArgDispatcher,
 }
 
 //Test start here
-
 func TestDspSchedulerS(t *testing.T) {
 	var config1, config2, config3 string
 	switch *dbType {
@@ -76,5 +76,14 @@ func testDspSchedPing(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspSchedPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
+	expected := "MANDATORY_IE_MISSING: [APIKey]"
+	var reply string
+	if err := dispEngine.RPC.Call(utils.SchedulerSv1Ping,
+		&utils.CGREventWithArgDispatcher{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

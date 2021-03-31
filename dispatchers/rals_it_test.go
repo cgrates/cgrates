@@ -29,6 +29,7 @@ import (
 
 var sTestsDspRALs = []func(t *testing.T){
 	testDspRALsPing,
+	testDspRALsPingEmptyCGREventWIthArgDispatcher,
 	testDspRALsGetRatingPlanCost,
 }
 
@@ -77,6 +78,15 @@ func testDspRALsPing(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspRALsPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
+	var reply string
+	expected := "MANDATORY_IE_MISSING: [APIKey]"
+	if err := dispEngine.RPC.Call(utils.RALsV1Ping,
+		&utils.CGREventWithArgDispatcher{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 

@@ -31,6 +31,7 @@ import (
 var (
 	sTestsDspCDRs = []func(t *testing.T){
 		testDspCDRsPing,
+		testDspCDRsPingEmptyCGREventWIthArgDispatcher,
 		testDspCDRsProcessEvent,
 		testDspCDRsCountCDR,
 		testDspCDRsGetCDR,
@@ -110,6 +111,15 @@ func testDspCDRsPing(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspCDRsPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
+	expected := "MANDATORY_IE_MISSING: [APIKey]"
+	var reply string
+	if err := dispEngine.RPC.Call(utils.CDRsV1Ping,
+		&utils.CGREventWithArgDispatcher{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
