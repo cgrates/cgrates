@@ -495,7 +495,7 @@ func testSessionSRplActivateSessions(t *testing.T) {
 	var aSessions []*ExternalSession
 	var reply string
 	// Activate first session (with ID: ede927f8e42318a8db02c0f74adc2d9e16770339)
-	args := &utils.SessionIDsWithArgsDispatcher{
+	args := &utils.SessionIDsWithAPIOpts{
 		IDs: []string{"ede927f8e42318a8db02c0f74adc2d9e16770339"},
 	}
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1ActivateSessions, args, &reply); err != nil {
@@ -524,7 +524,7 @@ func testSessionSRplActivateSessions(t *testing.T) {
 	// 	t.Errorf("Expecting: 1 session, received: %+v sessions", len(aSessions))
 	// }
 	//activate the second session (with ID: 3b0417028f8cefc0e02ddbd37a6dda6fbef4f5e0)
-	args = &utils.SessionIDsWithArgsDispatcher{
+	args = &utils.SessionIDsWithAPIOpts{
 		IDs: []string{"3b0417028f8cefc0e02ddbd37a6dda6fbef4f5e0"},
 	}
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1ActivateSessions, args, &reply); err != nil {

@@ -67,7 +67,7 @@ func (apierSv1 *APIerSv1) GetTPAccountProfileIDs(attrs *AttrGetTPAccountProfileI
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountProfiles,
-		utils.TPDistinctIds{"tenant", "id"}, nil, &attrs.PaginatorWithSearch)
+		[]string{"tenant", "id"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)

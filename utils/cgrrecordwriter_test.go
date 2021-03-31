@@ -25,9 +25,9 @@ import (
 	"testing"
 )
 
-func TestNewCgrIORecordWriter(t *testing.T) {
+func TestNewNopFlushWriter(t *testing.T) {
 	var args io.Writer
-	rcv := NewCgrIORecordWriter(args)
+	rcv := NewNopFlushWriter(args)
 	eOut := &CgrIORecordWriter{w: args}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting %+v, received %+v", eOut, rcv)
@@ -41,7 +41,7 @@ func (*writer2) Write(p []byte) (n int, err error) { return 0, ErrNoMoreData }
 func TestWrite(t *testing.T) {
 	//empty check
 	args := new(bytes.Buffer)
-	rw := NewCgrIORecordWriter(args)
+	rw := NewNopFlushWriter(args)
 	record := []string{"test1", "test2"}
 	err := rw.Write(record)
 	if err != nil {
@@ -53,7 +53,7 @@ func TestWrite(t *testing.T) {
 	}
 	//err check
 	args2 := &writer2{}
-	rw = NewCgrIORecordWriter(args2)
+	rw = NewNopFlushWriter(args2)
 	record = []string{"test1", "test2"}
 	err = rw.Write(record)
 	if err != ErrNoMoreData {

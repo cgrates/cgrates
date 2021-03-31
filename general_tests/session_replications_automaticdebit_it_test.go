@@ -294,7 +294,7 @@ func testSessionSRplActivateSlave(t *testing.T) {
 	}
 	// activate sessions on slave
 	var rplActivate string
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1ActivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &rplActivate); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1ActivateSessions, &utils.SessionIDsWithAPIOpts{}, &rplActivate); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(7 * time.Millisecond)

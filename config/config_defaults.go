@@ -292,28 +292,6 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"rals": {
-	"enabled": false,						// enable Rating/Accounting service: <true|false>
-	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	"stats_conns": [],						// connections to StatS for account/balance updates, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"caches_conns":["*internal"],			// connections to CacheS for account/balance updates
-	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
-	"remove_expired":true,					// enables automatic removal of expired balances
-	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
-		"*any": "189h",
-		"*voice": "72h",
-		"*data": "107374182400",
-		"*sms": "10000",
-		"*mms": "10000"
-	},
-	"max_increments": 1000000,
-	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
-		"*any": "*zero1ns",
-		"*voice": "*zero1s"
-	},
-	"dynaprepaid_actionplans": [],			// actionPlans to be executed in case of *dynaprepaid request type
-},
-
 
 "cdrs": {									// CDRs config
 	"enabled": false,						// start the CDR Server:  <true|false>

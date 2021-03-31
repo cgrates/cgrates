@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,13 +26,6 @@ import (
 
 	"github.com/ericlagergren/decimal"
 )
-
-// Used to extract ids from stordb
-type TPDistinctIds []string
-
-func (tpdi TPDistinctIds) String() string {
-	return strings.Join(tpdi, FieldsSep)
-}
 
 type PaginatorWithSearch struct {
 	*Paginator
@@ -146,10 +138,6 @@ type AttrSetDestination struct {
 	Overwrite bool
 }
 
-type AttrGetAccountsCount struct {
-	Tenant string
-}
-
 type AttrGetCdrs struct {
 	CgrIds          []string // If provided, it will filter based on the cgrids present in list
 	MediationRunIds []string // If provided, it will filter on mediation runid
@@ -232,18 +220,6 @@ type AttrImportTPFromFolder struct {
 	RunId        string
 	CsvSeparator string
 	APIOpts      map[string]interface{}
-}
-
-func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
-	accountSplt := strings.Split(accountKey, ConcatenatedKeySep)
-	if len(accountSplt) != 2 {
-		return nil, fmt.Errorf("Unsupported format for TenantAccount: %s", accountKey)
-	}
-	return &TenantAccount{accountSplt[0], accountSplt[1]}, nil
-}
-
-type TenantAccount struct {
-	Tenant, Account string
 }
 
 type AttrDirExportTP struct {
@@ -514,11 +490,6 @@ func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, e
 	return
 }
 
-type AttrGetCallCost struct {
-	CgrId string // Unique id of the CDR
-	RunId string // Run Id
-}
-
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
 type TPResourceProfile struct {
 	TPid               string
@@ -533,12 +504,6 @@ type TPResourceProfile struct {
 	Stored             bool
 	Weight             float64  // Weight to sort the ResourceLimits
 	ThresholdIDs       []string // Thresholds to check after changing Limit
-}
-
-// TPActivationInterval represents an activation interval for an item
-type TPActivationInterval struct {
-	ActivationTime string
-	ExpiryTime     string
 }
 
 type ArgRSv1ResourceUsage struct {
@@ -604,6 +569,12 @@ type ArgsComputeFilterIndexes struct {
 	RateS       bool
 	AccountS    bool
 	ActionS     bool
+}
+
+// TPActivationInterval represents an activation interval for an item
+type TPActivationInterval struct {
+	ActivationTime string
+	ExpiryTime     string
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
@@ -792,135 +763,10 @@ type TPDispatcherHostConn struct {
 	TLS       bool
 }
 
-type UsageInterval struct {
-	Min *time.Duration
-	Max *time.Duration
-}
-
-type TimeInterval struct {
-	Begin *time.Time
-	End   *time.Time
-}
-
 type AttrRemoteLock struct {
 	ReferenceID string        // reference ID for this lock if available
 	LockIDs     []string      // List of IDs to obtain lock for
 	Timeout     time.Duration // Automatically unlock on timeout
-}
-
-type SMCostFilter struct { //id cu litere mare
-	CGRIDs         []string
-	NotCGRIDs      []string
-	RunIDs         []string
-	NotRunIDs      []string
-	OriginHosts    []string
-	NotOriginHosts []string
-	OriginIDs      []string
-	NotOriginIDs   []string
-	CostSources    []string
-	NotCostSources []string
-	Usage          UsageInterval
-	CreatedAt      TimeInterval
-}
-
-func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
-	values []string, timezone string) (smcf *SMCostFilter, err error) {
-	switch fieldName {
-	case MetaScPrefix + CGRID:
-		switch fieldType {
-		case MetaString:
-			smcFilter.CGRIDs = append(smcFilter.CGRIDs, values...)
-		case MetaNotString:
-			smcFilter.NotCGRIDs = append(smcFilter.NotCGRIDs, values...)
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	case MetaScPrefix + RunID:
-		switch fieldType {
-		case MetaString:
-			smcFilter.RunIDs = append(smcFilter.RunIDs, values...)
-		case MetaNotString:
-			smcFilter.NotRunIDs = append(smcFilter.NotRunIDs, values...)
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	case MetaScPrefix + OriginHost:
-		switch fieldType {
-		case MetaString:
-			smcFilter.OriginHosts = append(smcFilter.OriginHosts, values...)
-		case MetaNotString:
-			smcFilter.NotOriginHosts = append(smcFilter.NotOriginHosts, values...)
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	case MetaScPrefix + OriginID:
-		switch fieldType {
-		case MetaString:
-			smcFilter.OriginIDs = append(smcFilter.OriginIDs, values...)
-		case MetaNotString:
-			smcFilter.NotOriginIDs = append(smcFilter.NotOriginIDs, values...)
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	case MetaScPrefix + CostSource:
-		switch fieldType {
-		case MetaString:
-			smcFilter.CostSources = append(smcFilter.CostSources, values...)
-		case MetaNotString:
-			smcFilter.NotCostSources = append(smcFilter.NotCostSources, values...)
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	case MetaScPrefix + Usage:
-		switch fieldType {
-		case MetaGreaterOrEqual:
-			var minUsage time.Duration
-			minUsage, err = ParseDurationWithNanosecs(values[0])
-			if err != nil {
-				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Duration ", fieldType, fieldName)
-				break
-			}
-			smcFilter.Usage.Min = &minUsage
-		case MetaLessThan:
-			var maxUsage time.Duration
-			maxUsage, err = ParseDurationWithNanosecs(values[0])
-			if err != nil {
-				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Duration ", fieldType, fieldName)
-				break
-			}
-			smcFilter.Usage.Max = &maxUsage
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	case MetaScPrefix + CreatedAt:
-		switch fieldType {
-		case MetaGreaterOrEqual:
-			var start time.Time
-			start, err = ParseTimeDetectLayout(values[0], timezone)
-			if err != nil {
-				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Time ", fieldType, fieldName)
-				break
-			}
-			if !start.IsZero() {
-				smcFilter.CreatedAt.Begin = &start
-			}
-		case MetaLessThan:
-			var end time.Time
-			end, err = ParseTimeDetectLayout(values[0], timezone)
-			if err != nil {
-				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Time ", fieldType, fieldName)
-				break
-			}
-			if !end.IsZero() {
-				smcFilter.CreatedAt.End = &end
-			}
-		default:
-			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
-		}
-	default:
-		err = fmt.Errorf("FieldName: %q not supported", fieldName)
-	}
-	return smcFilter, err
 }
 
 type RPCCDRsFilterWithAPIOpts struct {
@@ -1015,36 +861,10 @@ type SessionFilter struct {
 	APIOpts map[string]interface{}
 }
 
-type RatingPlanCostArg struct {
-	RatingPlanIDs []string
-	Destination   string
-	SetupTime     string
-	Usage         string
-	APIOpts       map[string]interface{}
-}
-type SessionIDsWithArgsDispatcher struct {
+type SessionIDsWithAPIOpts struct {
 	IDs     []string
 	Tenant  string
 	APIOpts map[string]interface{}
-}
-
-type GetCostOnRatingPlansArgs struct {
-	Account       string
-	Subject       string
-	Destination   string
-	Tenant        string
-	SetupTime     time.Time
-	Usage         time.Duration
-	RatingPlanIDs []string
-}
-
-type GetMaxSessionTimeOnAccountsArgs struct {
-	Subject     string
-	Destination string
-	Tenant      string
-	SetupTime   time.Time
-	Usage       time.Duration
-	AccountIDs  []string
 }
 
 type ArgExportToFolder struct {
@@ -1077,21 +897,6 @@ type ArgCacheReplicateRemove struct {
 	ItemID  string
 	APIOpts map[string]interface{}
 	Tenant  string
-}
-
-type AttrsExecuteActions struct {
-	ActionPlanID string
-	TimeStart    time.Time
-	TimeEnd      time.Time // replay the action timings between the two dates
-	APIOpts      map[string]interface{}
-	Tenant       string
-}
-
-type AttrsExecuteActionPlans struct {
-	ActionPlanIDs []string
-	Tenant        string
-	AccountID     string
-	APIOpts       map[string]interface{}
 }
 
 type TPRateProfile struct {

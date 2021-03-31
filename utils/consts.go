@@ -450,7 +450,6 @@ const (
 	RunningCaps              = "RUNNING"
 	StoppedCaps              = "STOPPED"
 	SchedulerNotRunningCaps  = "SCHEDULLER_NOT_RUNNING"
-	MetaRALs                 = "*rals"
 	MetaReplicator           = "*replicator"
 	MetaRerate               = "*rerate"
 	MetaRefund               = "*refund"
@@ -542,7 +541,6 @@ const (
 	Dispatchers           = "Dispatchers"
 	StatS                 = "Stats"
 	LoadIDsVrs            = "LoadIDs"
-	RALService            = "RALs"
 	GlobalVarS            = "GlobalVarS"
 	CostSource            = "CostSource"
 	ExtraInfo             = "ExtraInfo"
@@ -924,6 +922,7 @@ const (
 	BalanceIDs            = "BalanceIDs"
 	MetaCostIncrement     = "*costIncrement"
 	Length                = "Length"
+	MIN_PREFIX_MATCH      = 1
 )
 
 // Migrator Action
@@ -1006,7 +1005,6 @@ const (
 	AnalyzerSLow   = "analyzers"
 	SchedulerSLow  = "schedulers"
 	LoaderSLow     = "loaders"
-	RALsLow        = "rals"
 	ReplicatorLow  = "replicator"
 	ApierSLow      = "apiers"
 	EEsLow         = "ees"
@@ -1984,14 +1982,10 @@ const (
 
 // RalsCfg
 const (
-	EnabledCfg                 = "enabled"
-	ThresholdSConnsCfg         = "thresholds_conns"
-	CacheSConnsCfg             = "caches_conns"
-	RpSubjectPrefixMatchingCfg = "rp_subject_prefix_matching"
-	RemoveExpiredCfg           = "remove_expired"
-	MaxComputedUsageCfg        = "max_computed_usage"
-	BalanceRatingSubjectCfg    = "balance_rating_subject"
-	MaxIncrementsCfg           = "max_increments"
+	EnabledCfg         = "enabled"
+	ThresholdSConnsCfg = "thresholds_conns"
+	CacheSConnsCfg     = "caches_conns"
+	RemoveExpiredCfg   = "remove_expired"
 )
 
 // SchedulerCfg

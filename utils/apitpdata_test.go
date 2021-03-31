@@ -19,23 +19,11 @@ package utils
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/ericlagergren/decimal"
 )
-
-func TestTPDistinctIdsString(t *testing.T) {
-	eIn1 := []string{"1", "2", "3", "4"}
-	eIn2 := TPDistinctIds(eIn1)
-	expected := strings.Join(eIn1, FieldsSep)
-	received := eIn2.String()
-
-	if !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, received)
-	}
-}
 
 func TestPaginatorPaginateStringSlice(t *testing.T) {
 	//len(in)=0
@@ -212,38 +200,6 @@ func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
-	}
-}
-
-func TestNewTAFromAccountKey(t *testing.T) {
-	//check with empty string
-	eOut := &TenantAccount{
-		Tenant:  "",
-		Account: "",
-	}
-	rcv, err := NewTAFromAccountKey(":")
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
-	}
-	//check with test string
-	eOut = &TenantAccount{
-		Tenant:  "cgrates.org",
-		Account: "1001",
-	}
-	rcv, err = NewTAFromAccountKey("cgrates.org:1001")
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
-	}
-	//check with wrong TenantAccount
-	_, err = NewTAFromAccountKey("")
-	if err == nil {
-		t.Errorf("Unsupported format not processed")
 	}
 }
 
@@ -528,189 +484,6 @@ func TestActivationIntervalIsActiveAtTime(t *testing.T) {
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if rcv {
 		t.Errorf("ActivationTimes > ExpiryTime. Expecting 0 ")
-	}
-}
-
-func TestAppendToSMCostFilter(t *testing.T) {
-	var err error
-	smfltr := new(SMCostFilter)
-	expected := &SMCostFilter{
-		CGRIDs: []string{"CGRID1", "CGRID2"},
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, MetaScPrefix+CGRID, []string{"CGRID1", "CGRID2"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	expected.NotCGRIDs = []string{"CGRID3", "CGRID4"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*notstring", MetaScPrefix+CGRID, []string{"CGRID3", "CGRID4"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	expected.RunIDs = []string{"RunID1", "RunID2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, MetaScPrefix+RunID, []string{"RunID1", "RunID2"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	expected.NotRunIDs = []string{"RunID3", "RunID4"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*notstring", MetaScPrefix+RunID, []string{"RunID3", "RunID4"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	expected.OriginHosts = []string{"OriginHost1", "OriginHost2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, MetaScPrefix+OriginHost, []string{"OriginHost1", "OriginHost2"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	expected.NotOriginHosts = []string{"OriginHost3", "OriginHost4"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*notstring", MetaScPrefix+OriginHost, []string{"OriginHost3", "OriginHost4"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	expected.OriginIDs = []string{"OriginID1", "OriginID2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, MetaScPrefix+OriginID, []string{"OriginID1", "OriginID2"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	expected.NotOriginIDs = []string{"OriginID3", "OriginID4"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*notstring", MetaScPrefix+OriginID, []string{"OriginID3", "OriginID4"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	expected.CostSources = []string{"CostSource1", "CostSource2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, MetaScPrefix+CostSource, []string{"CostSource1", "CostSource2"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	expected.NotCostSources = []string{"CostSource3", "CostSource4"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*notstring", MetaScPrefix+CostSource, []string{"CostSource3", "CostSource4"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+CGRID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.CGRID\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.CGRID\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+RunID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.RunID\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.RunID\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+OriginHost, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.OriginHost\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.OriginHost\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+OriginID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.OriginID\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.OriginID\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+CostSource, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.CostSource\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.CostSource\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, CGRID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FieldName: \"CGRID\" not supported" {
-		t.Errorf("Expected error: FieldName: \"CGRID\" not supported ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", CGRID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FieldName: \"CGRID\" not supported" {
-		t.Errorf("Expected error: FieldName: \"CGRID\" not supported ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-
-	}
-	expected.Usage.Min = DurationPointer(time.Second)
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*gte", MetaScPrefix+Usage, []string{"1s", "2s"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	expected.Usage.Max = DurationPointer(3 * time.Second)
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*lt", MetaScPrefix+Usage, []string{"3s", "4s"}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*gte", MetaScPrefix+Usage, []string{"one second"}, ""); err == nil || err.Error() != "Error when converting field: \"*gte\"  value: \"~*sc.Usage\" in time.Duration " {
-		t.Errorf("Expected error: Error when converting field: \"*gte\"  value: \"~*sc.Usage\" in time.Duration ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*lt", MetaScPrefix+Usage, []string{"one second"}, ""); err == nil || err.Error() != "Error when converting field: \"*lt\"  value: \"~*sc.Usage\" in time.Duration " {
-		t.Errorf("Expected error: Error when converting field: \"*lt\"  value: \"~*sc.Usage\" in time.Duration ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+Usage, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.Usage\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.Usage\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	now := time.Now().UTC().Round(time.Second)
-	strNow := now.Format("2006-01-02T15:04:05")
-
-	expected.CreatedAt.Begin = &now
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*gte", MetaScPrefix+CreatedAt, []string{strNow}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	expected.CreatedAt.End = &now
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*lt", MetaScPrefix+CreatedAt, []string{strNow}, ""); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*gte", MetaScPrefix+CreatedAt, []string{time.Now().String()}, ""); err == nil || err.Error() != "Error when converting field: \"*gte\"  value: \"~*sc.CreatedAt\" in time.Time " {
-		t.Errorf("Expected error: Error when converting field: \"*gte\"  value: \"~*sc.CreatedAt\" in time.Time ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*lt", MetaScPrefix+CreatedAt, []string{time.Now().String()}, ""); err == nil || err.Error() != "Error when converting field: \"*lt\"  value: \"~*sc.CreatedAt\" in time.Time " {
-		t.Errorf("Expected error: Error when converting field: \"*lt\"  value: \"~*sc.CreatedAt\" in time.Time ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
-	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", MetaScPrefix+CreatedAt, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~*sc.CreatedAt\"" {
-		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~*sc.CreatedAt\" ,received %v", err)
-	}
-	if !reflect.DeepEqual(smfltr, expected) {
-		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
 	}
 }
 

@@ -31,7 +31,7 @@ func (m *Migrator) migrateCurrentTPDispatchers() (err error) {
 
 	for _, tpid := range tpids {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPDispatchers,
-			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+			[]string{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func (m *Migrator) migrateCurrentTPDispatcherHosts() (err error) {
 
 	for _, tpid := range tpids {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPDispatcherHosts,
-			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+			[]string{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

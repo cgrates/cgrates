@@ -31,7 +31,7 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 
 	for _, tpid := range tpids {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPResources,
-			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+			[]string{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

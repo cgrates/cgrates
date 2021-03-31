@@ -70,7 +70,6 @@ func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
-	utils.RegisterRpcParams(utils.EmptyString, rcvr)
 	rpc.Register(rcvr)
 	s.Lock()
 	s.rpcEnabled = true
@@ -78,7 +77,6 @@ func (s *Server) RpcRegister(rcvr interface{}) {
 }
 
 func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
-	utils.RegisterRpcParams(name, rcvr)
 	rpc.RegisterName(name, rcvr)
 	s.Lock()
 	s.rpcEnabled = true

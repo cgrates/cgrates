@@ -434,9 +434,10 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if msgArgs.Debit {
+		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		// } else
+		if msgArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		rply.SetMaxUsageNeeded(msgArgs.Debit)
@@ -450,11 +451,12 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1ProcessEventReply)
 		err = da.connMgr.Call(da.cgrCfg.DiameterAgentCfg().SessionSConns, da, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
+		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		// } else
+		// if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
+		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
+		// }
 		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow CDR processing
 	}

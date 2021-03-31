@@ -44,7 +44,7 @@ func (iDB *InternalDB) GetTpIds(colName string) (ids []string, err error) {
 	return tpIDs.AsSlice(), nil
 }
 
-func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct []string,
 	filters map[string]string, paginator *utils.PaginatorWithSearch) (ids []string, err error) {
 	fullIDs := Cache.GetItemIDs(utils.CacheStorDBPartitions[table], tpid)
 	idSet := make(utils.StringSet)

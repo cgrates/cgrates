@@ -274,7 +274,7 @@ func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 }
 
 func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
-	args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
 			return
@@ -285,7 +285,7 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 }
 
 func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
-	args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
 			return

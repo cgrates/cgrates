@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]s
 	if missing := utils.MissingStructFields(attrs, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, []string{utils.TenantCfg, utils.IDCfg},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {

@@ -94,8 +94,8 @@ type SessionSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
 	ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error
 	SetPassiveSession(args *sessions.Session, reply *string) error
-	ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
-	DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error
+	ActivateSessions(args *utils.SessionIDsWithAPIOpts, reply *string) error
+	DeactivateSessions(args *utils.SessionIDsWithAPIOpts, reply *string) error
 
 	STIRAuthenticate(args *sessions.V1STIRAuthenticateArgs, reply *string) error
 	STIRIdentity(args *sessions.V1STIRIdentityArgs, reply *string) error
@@ -124,13 +124,6 @@ type GuardianSv1Interface interface {
 	RemoteLock(attr *dispatchers.AttrRemoteLockWithAPIOpts, reply *string) (err error)
 	RemoteUnlock(refID *dispatchers.AttrRemoteUnlockWithAPIOpts, reply *[]string) (err error)
 	Ping(ign *utils.CGREvent, reply *string) error
-}
-
-type SchedulerSv1Interface interface {
-	Reload(arg *utils.CGREvent, reply *string) error
-	Ping(ign *utils.CGREvent, reply *string) error
-	ExecuteActions(attr *utils.AttrsExecuteActions, reply *string) error
-	ExecuteActionPlans(attr *utils.AttrsExecuteActionPlans, reply *string) error
 }
 
 type CDRsV1Interface interface {

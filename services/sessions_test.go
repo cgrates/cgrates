@@ -35,7 +35,6 @@ import (
 func TestSessionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().Enabled = true
-	cfg.RalsCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil

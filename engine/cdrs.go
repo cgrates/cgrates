@@ -526,15 +526,15 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
-	if flgs.Has(utils.MetaRALs) {
-		ralS = flgs.GetBool(utils.MetaRALs)
-	}
+	// if flgs.Has(utils.MetaRALs) {
+	// 	ralS = flgs.GetBool(utils.MetaRALs)
+	// }
 	var reRate bool
-	if flgs.Has(utils.MetaRerate) {
-		if reRate = flgs.GetBool(utils.MetaRerate); reRate {
-			ralS = true
-		}
-	}
+	// if flgs.Has(utils.MetaRerate) {
+	// 	if reRate = flgs.GetBool(utils.MetaRerate); reRate {
+	// 		ralS = true
+	// 	}
+	// }
 	var refund bool
 	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)
@@ -601,16 +601,16 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
-	if flgs.Has(utils.MetaRALs) {
-		ralS = flgs.GetBool(utils.MetaRALs)
-	}
+	// if flgs.Has(utils.MetaRALs) {
+	// 	ralS = flgs.GetBool(utils.MetaRALs)
+	// }
 	var reRate bool
-	if flgs.Has(utils.MetaRerate) {
-		reRate = flgs.GetBool(utils.MetaRerate)
-		if reRate {
-			ralS = true
-		}
-	}
+	// if flgs.Has(utils.MetaRerate) {
+	// reRate = flgs.GetBool(utils.MetaRerate)
+	// if reRate {
+	// ralS = true
+	// }
+	// }
 	var refund bool
 	if flgs.Has(utils.MetaRefund) {
 		refund = flgs.GetBool(utils.MetaRefund)

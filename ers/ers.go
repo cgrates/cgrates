@@ -265,9 +265,10 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if evArgs.Debit {
+		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		// } else
+		if evArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 	case utils.MetaEvent:

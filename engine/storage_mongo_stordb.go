@@ -79,7 +79,7 @@ func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 	return tpids, nil
 }
 
-func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct []string,
 	filter map[string]string, pag *utils.PaginatorWithSearch) ([]string, error) {
 	findMap := bson.M{}
 	if tpid != "" {
@@ -120,7 +120,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	}
 	fop.SetProjection(selectors)
 
-	distinctIds := make(utils.StringMap)
+	distinctIds := make(utils.StringSet)
 	if err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(table).Find(sctx, findMap, fop)
 		if err != nil {
@@ -144,13 +144,13 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 					id += utils.ConcatenatedKeySep
 				}
 			}
-			distinctIds[id] = true
+			distinctIds.Add(id)
 		}
 		return cur.Close(sctx)
 	}); err != nil {
 		return nil, err
 	}
-	return distinctIds.Slice(), nil
+	return distinctIds.AsSlice(), nil
 }
 
 func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {

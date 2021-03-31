@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetTPRateProfileIds(attrs *AttrGetTPRateProfileIds, re
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, []string{utils.TenantCfg, utils.IDCfg},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {

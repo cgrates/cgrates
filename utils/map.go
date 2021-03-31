@@ -23,126 +23,15 @@ import (
 	"strings"
 )
 
-type StringMap map[string]bool
-
-func NewStringMap(s ...string) StringMap {
-	result := make(StringMap)
-	for _, v := range s {
-		v = strings.TrimSpace(v)
-		if v != EmptyString {
-			if strings.HasPrefix(v, NegativePrefix) {
-				result[v[1:]] = false
-			} else {
-				result[v] = true
-			}
-		}
-	}
-	return result
-}
-
-func ParseStringMap(s string) StringMap {
-	if s == MetaZero {
-		return make(StringMap)
-	}
-	return StringMapFromSlice(strings.Split(s, InfieldSep))
-}
-
-func (sm StringMap) Equal(om StringMap) bool {
-	if sm == nil && om != nil {
-		return false
-	}
-	if len(sm) != len(om) {
-		return false
-	}
-	for key := range sm {
-		if !om[key] {
-			return false
-		}
-	}
-	return true
-}
-
-func (sm StringMap) Includes(om StringMap) bool {
-	if len(sm) < len(om) {
-		return false
-	}
-	for key := range om {
-		if !sm[key] {
-			return false
-		}
-	}
-	return true
-}
-
-func (sm StringMap) Slice() []string {
-	result := make([]string, len(sm))
-	i := 0
-	for k := range sm {
-		result[i] = k
-		i++
-	}
-	return result
-}
-
-func (sm StringMap) IsEmpty() bool {
-	return sm == nil ||
-		len(sm) == 0 ||
-		sm[MetaAny]
-}
-
-func StringMapFromSlice(s []string) StringMap {
-	result := make(StringMap, len(s))
-	for _, v := range s {
-		v = strings.TrimSpace(v)
-		if v != EmptyString {
-			if strings.HasPrefix(v, NegativePrefix) {
-				result[v[1:]] = false
-			} else {
-				result[v] = true
-			}
-		}
-	}
-	return result
-}
-
-func (sm StringMap) Copy(o StringMap) {
-	for k, v := range o {
-		sm[k] = v
-	}
-}
-
-func (sm StringMap) Clone() StringMap {
-	result := make(StringMap, len(sm))
-	result.Copy(sm)
-	return result
-}
-
-func (sm StringMap) String() string {
-	return strings.Join(sm.Slice(), InfieldSep)
-}
-
-func (sm StringMap) GetOne() string {
-	for key := range sm {
-		return key
-	}
-	return EmptyString
-}
-
-func (sm StringMap) HasKey(key string) (has bool) {
-	_, has = sm[key]
-	return
-}
-
-func MapStringToInt64(in map[string]string) (out map[string]int64, err error) {
-	mapout := make(map[string]int64, len(in))
+func MapStringToInt64(in map[string]string) (mapout map[string]int64, err error) {
+	mapout = make(map[string]int64, len(in))
 	for key, val := range in {
-		x, err := strconv.Atoi(val)
+		mapout[key], err = strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		mapout[key] = int64(x)
 	}
-	return mapout, nil
+	return
 }
 
 // FlagsWithParamsFromSlice construct a  FlagsWithParams from the given slice

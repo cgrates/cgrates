@@ -71,7 +71,7 @@ func (apierSv1 *APIerSv1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply 
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPThresholds,
-		utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg}, nil, &attrs.PaginatorWithSearch)
+		[]string{utils.TenantCfg, utils.IDCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)

@@ -29,7 +29,7 @@ func (m *Migrator) migrateCurrentTPDestinations() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPDestinations, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPDestinations, []string{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

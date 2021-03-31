@@ -21,7 +21,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 var (
@@ -63,7 +62,6 @@ var (
 	ErrJsonIncompleteComment         = errors.New("JSON_INCOMPLETE_COMMENT")
 	ErrNotEnoughParameters           = errors.New("NotEnoughParameters")
 	ErrNotConnected                  = errors.New("NOT_CONNECTED")
-	RalsErrorPrfx                    = "RALS_ERROR"
 	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
 	RateSErrPrfx                     = "RATES_ERROR"
 	ErrUnsupportedFormat             = errors.New("UNSUPPORTED_FORMAT")
@@ -161,18 +159,9 @@ func NewErrServerError(err error) error {
 	return fmt.Errorf("SERVER_ERROR: %s", err)
 }
 
-func NewErrServiceNotOperational(serv string) error {
-	return fmt.Errorf("SERVICE_NOT_OPERATIONAL: %s", serv)
-}
-
 func NewErrNotConnected(serv string) error {
 	return fmt.Errorf("NOT_CONNECTED: %s", serv)
 }
-
-func NewErrRALs(err error) error {
-	return fmt.Errorf("%s:%s", RalsErrorPrfx, err)
-}
-
 func NewErrResourceS(err error) error {
 	return fmt.Errorf("RESOURCES_ERROR:%s", err)
 }
@@ -222,22 +211,6 @@ func APIErrorHandler(errIn error) (err error) {
 	cgrErr.ActivateAPIError()
 	return cgrErr
 }
-
-func NewErrStringCast(valIface interface{}) error {
-	return fmt.Errorf("cannot cast value: %v to string", valIface)
-}
-
-func NewErrFldStringCast(fldName string, valIface interface{}) error {
-	return fmt.Errorf("cannot cast field: %s with value: %v to string", fldName, valIface)
-}
-
-func ErrHasPrefix(err error, prfx string) (has bool) {
-	if err == nil {
-		return
-	}
-	return strings.HasPrefix(err.Error(), prfx)
-}
-
 func ErrPrefix(err error, reason string) error {
 	return fmt.Errorf("%s:%s", err.Error(), reason)
 }
@@ -256,10 +229,6 @@ func ErrEnvNotFound(key string) error {
 
 func ErrPathNotReachable(path string) error {
 	return fmt.Errorf("path:%+q is not reachable", path)
-}
-
-func ErrNotConvertibleTF(from, to string) error {
-	return fmt.Errorf("%s : from: %s to:%s", ErrNotConvertibleNoCaps.Error(), from, to)
 }
 
 // NewSTIRError returns a error with a *stir_authorize prefix

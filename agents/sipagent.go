@@ -449,11 +449,12 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1ProcessEventReply)
 		err = sa.connMgr.Call(sa.cfg.SIPAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
+		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		// } else
+		// if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
+		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
+		// }
 		agReq.setCGRReply(rply, err)
 	}
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {

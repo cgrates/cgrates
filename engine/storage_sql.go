@@ -161,7 +161,7 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 }
 
 // ToDo: TEST
-func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct []string,
 	filters map[string]string, pagination *utils.PaginatorWithSearch) ([]string, error) {
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {

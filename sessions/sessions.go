@@ -368,7 +368,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 			}
 			if unratedReqs.HasField( // order additional rating for unrated request types
 				engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
-				argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
+				// argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
 			}
 			argsProc.SetCloneable(true)
 			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil,
@@ -1378,7 +1378,7 @@ func (sS *SessionS) chargeEvent(cgrEv *utils.CGREvent, forceDuration bool) (maxU
 				fmt.Sprintf("<%s> error when force-ending charged event: <%s>, err: <%s>",
 					utils.SessionS, cgrID, errEnd.Error()))
 		}
-		err = utils.NewErrRALs(err)
+		// err = utils.NewErrRALs(err)
 		return
 	}
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
@@ -2009,7 +2009,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
 		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
-				return utils.NewErrRALs(err)
+				return err //utils.NewErrRALs(err)
 			}
 		}
 		s, err := sS.initSession(args.CGREvent, sS.biJClntID(clnt), originID, dbtItvl,
@@ -2025,7 +2025,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		} else {
 			var sRunsUsage map[string]time.Duration
 			if sRunsUsage, err = sS.updateSession(s, nil, args.APIOpts, false); err != nil {
-				return utils.NewErrRALs(err)
+				return err //utils.NewErrRALs(err)
 			}
 
 			var maxUsage time.Duration
@@ -2221,7 +2221,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
 		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
-				return utils.NewErrRALs(err)
+				return err //utils.NewErrRALs(err)
 			}
 		}
 		cgrID := GetSetCGRID(ev)
@@ -2237,7 +2237,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 		}
 		var sRunsUsage map[string]time.Duration
 		if sRunsUsage, err = sS.updateSession(s, ev, args.APIOpts, false); err != nil {
-			return utils.NewErrRALs(err)
+			return err //utils.NewErrRALs(err)
 		}
 		var maxUsage time.Duration
 		var maxUsageSet bool // so we know if we have set the 0 on purpose
@@ -2352,7 +2352,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
 		if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 			if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
-				return utils.NewErrRALs(err)
+				return err //utils.NewErrRALs(err)
 			}
 		}
 		var s *Session
@@ -2372,7 +2372,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			isMsg = true
 			if s, err = sS.initSession(args.CGREvent, sS.biJClntID(clnt), ev.GetStringIgnoreErrors(utils.OriginID),
 				dbtItvl, isMsg, args.ForceDuration); err != nil {
-				return utils.NewErrRALs(err)
+				return err //utils.NewErrRALs(err)
 			}
 			if _, err = sS.updateSession(s, ev, opts, isMsg); err != nil {
 				return err
@@ -2390,7 +2390,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
 			ev.GetTimePtrIgnoreErrors(utils.AnswerTime, utils.EmptyString),
 			isMsg); err != nil {
-			return utils.NewErrRALs(err)
+			return err //utils.NewErrRALs(err)
 		}
 	}
 	if args.ReleaseResources {
@@ -2472,7 +2472,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 		cgrEv.Event[utils.Source] = utils.MetaSessionS
 	}
 
-	return sS.processCDR(cgrEv, []string{utils.MetaRALs}, rply, false)
+	return sS.processCDR(cgrEv, []string{ /*utils.MetaRALs*/ }, rply, false)
 }
 
 // NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
@@ -3142,7 +3142,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// 		case ralsOpts.Has(utils.MetaInitiate):
 	// 			if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 	// 				if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
-	// 					return utils.NewErrRALs(err)
+	// 					return err //utils.NewErrRALs(err)
 	// 				}
 	// 			}
 	// 			s, err := sS.initSession(args.CGREvent, sS.biJClntID(clnt), originID, dbtItvl, false,
@@ -3159,14 +3159,14 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// 					sRunsMaxUsage[sr.CD.RunID] = sS.cgrCfg.SessionSCfg().GetDefaultUsage(ev.GetStringIgnoreErrors(utils.ToR))
 	// 				}
 	// 			} else if sRunsMaxUsage, err = sS.updateSession(s, nil, args.APIOpts, false); err != nil {
-	// 				return utils.NewErrRALs(err)
+	// 				return err //utils.NewErrRALs(err)
 	// 			}
 	// 			rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
 	// 			//check for update session
 	// 		case ralsOpts.Has(utils.MetaUpdate):
 	// 			if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 	// 				if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
-	// 					return utils.NewErrRALs(err)
+	// 					return err //utils.NewErrRALs(err)
 	// 				}
 	// 			}
 	// 			s := sS.getRelocateSession(GetSetCGRID(ev),
@@ -3181,14 +3181,14 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// 			}
 	// 			var sRunsMaxUsage map[string]time.Duration
 	// 			if sRunsMaxUsage, err = sS.updateSession(s, ev, args.APIOpts, false); err != nil {
-	// 				return utils.NewErrRALs(err)
+	// 				return err //utils.NewErrRALs(err)
 	// 			}
 	// 			rply.MaxUsage = getDerivedMaxUsage(sRunsMaxUsage, ralsOpts.Has(utils.MetaDerivedReply))
 	// 			// check for terminate session
 	// 		case ralsOpts.Has(utils.MetaTerminate):
 	// 			if opts.HasField(utils.OptsDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 	// 				if dbtItvl, err = opts.GetDuration(utils.OptsDebitInterval); err != nil {
-	// 					return utils.NewErrRALs(err)
+	// 					return err //utils.NewErrRALs(err)
 	// 				}
 	// 			}
 	// 			s := sS.getRelocateSession(GetSetCGRID(ev),
@@ -3210,7 +3210,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	// 				ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
 	// 				ev.GetTimePtrIgnoreErrors(utils.AnswerTime, utils.EmptyString),
 	// 				false); err != nil {
-	// 				return utils.NewErrRALs(err)
+	// 				return err //utils.NewErrRALs(err)
 	// 			}
 	// 		}
 	// 	}
@@ -3295,7 +3295,7 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.ClientConne
 // BiRPCv1ActivateSessions is called to activate a list/all sessions
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.ClientConnector,
-	sIDs *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if len(sIDs.IDs) == 0 {
 		sS.pSsMux.RLock()
 		i := 0
@@ -3321,7 +3321,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.ClientConnector,
 // BiRPCv1DeactivateSessions is called to deactivate a list/all active sessios
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
-	sIDs *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if len(sIDs.IDs) == 0 {
 		sS.aSsMux.RLock()
 		i := 0
@@ -3382,7 +3382,7 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *stri
 		}
 		argsProc.SetCloneable(clnb)
 		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
-			argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
+			// argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 		}
 		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 			argsProc, rply); err != nil {
@@ -3775,10 +3775,10 @@ func (sS *SessionS) Handlers() map[string]interface{} {
 		utils.SessionSv1SetPassiveSession: func(clnt *rpc2.Client, args *Session, rply *string) (err error) {
 			return sS.BiRPCv1SetPassiveSession(clnt, args, rply)
 		},
-		utils.SessionSv1ActivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithArgsDispatcher, rply *string) (err error) {
+		utils.SessionSv1ActivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithAPIOpts, rply *string) (err error) {
 			return sS.BiRPCv1ActivateSessions(clnt, args, rply)
 		},
-		utils.SessionSv1DeactivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithArgsDispatcher, rply *string) (err error) {
+		utils.SessionSv1DeactivateSessions: func(clnt *rpc2.Client, args *utils.SessionIDsWithAPIOpts, rply *string) (err error) {
 			return sS.BiRPCv1DeactivateSessions(clnt, args, rply)
 		},
 		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args *utils.SessionFilter, rply *string) (err error) {

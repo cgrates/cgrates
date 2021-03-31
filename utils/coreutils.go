@@ -25,7 +25,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha1"
-	"encoding/gob"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -300,16 +299,6 @@ func monthlyEstimated(t1 time.Time) (time.Time, error) {
 	return tAfter, nil
 }
 
-// RoundDuration returns a number equal or larger than the amount that exactly
-// is divisible to whole
-func RoundDuration(whole, amount time.Duration) time.Duration {
-	a, w := float64(amount), float64(whole)
-	if math.Mod(a, w) == 0 {
-		return amount
-	}
-	return time.Duration((w - math.Mod(a, w)) + a)
-}
-
 func SplitPrefix(prefix string, minLength int) []string {
 	length := int(math.Max(float64(len(prefix)-(minLength-1)), 0))
 	subs := make([]string, length)
@@ -330,20 +319,14 @@ func SplitSuffix(suffix string) []string {
 	return subs
 }
 
-func CopyHour(src, dest time.Time) time.Time {
-	if src.Hour() == 0 && src.Minute() == 0 && src.Second() == 0 {
-		return src
-	}
-	return time.Date(dest.Year(), dest.Month(), dest.Day(), src.Hour(), src.Minute(), src.Second(), src.Nanosecond(), src.Location())
-}
-
 // Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
 func ParseDurationWithSecs(durStr string) (d time.Duration, err error) {
 	if durStr == "" {
 		return
 	}
-	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
-		durStr += "s"
+	var sc float64
+	if sc, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		return time.Duration(sc * float64(time.Second)), nil
 	}
 	return time.ParseDuration(durStr)
 }
@@ -354,39 +337,11 @@ func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
 		return
 	}
 	if durStr == MetaUnlimited {
-		durStr = "-1"
+		return -1, nil
 	}
-	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
-		durStr += "ns"
-	}
-	return time.ParseDuration(durStr)
-}
-
-// returns the minimum duration between the two
-func MinDuration(d1, d2 time.Duration) time.Duration {
-	if d1 < d2 {
-		return d1
-	}
-	return d2
-}
-
-// ParseZeroRatingSubject will parse the subject in the balance
-// returns duration if able to extract it from subject
-// returns error if not able to parse duration (ie: if ratingSubject is standard one)
-func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]string) (time.Duration, error) {
-	rateSubj = strings.TrimSpace(rateSubj)
-	if rateSubj == "" || rateSubj == MetaAny {
-		var hasToR bool
-		if rateSubj, hasToR = defaultRateSubj[tor]; !hasToR {
-			rateSubj = defaultRateSubj[MetaAny]
-		}
-	}
-	if !strings.HasPrefix(rateSubj, MetaRatingSubjectPrefix) {
-		return 0, errors.New("malformed rating subject: " + rateSubj)
-	}
-	durStr := rateSubj[len(MetaRatingSubjectPrefix):]
-	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // No time unit, postpend
-		durStr += "ns"
+	var sc float64
+	if sc, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		return time.Duration(sc), nil
 	}
 	return time.ParseDuration(durStr)
 }
@@ -397,10 +352,6 @@ func ConcatenatedKey(keyVals ...string) string {
 
 func SplitConcatenatedKey(key string) []string {
 	return strings.Split(key, ConcatenatedKeySep)
-}
-
-func InfieldJoin(vals ...string) string {
-	return strings.Join(vals, InfieldSep)
 }
 
 func InfieldSplit(val string) []string {
@@ -468,10 +419,6 @@ func Fib() func() int {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
-	if str == MetaZero {
-		str = EmptyString
-		return &str
-	}
 	return &str
 }
 
@@ -489,10 +436,6 @@ func Float64Pointer(f float64) *float64 {
 
 func BoolPointer(b bool) *bool {
 	return &b
-}
-
-func StringMapPointer(sm StringMap) *StringMap {
-	return &sm
 }
 
 func MapStringStringPointer(mp map[string]string) *map[string]string {
@@ -515,17 +458,6 @@ func ToIJSON(v interface{}) string {
 func ToJSON(v interface{}) string {
 	b, _ := json.Marshal(v)
 	return string(b)
-}
-
-// Simple object cloner, b should be a pointer towards a value into which we want to decode
-func Clone(a, b interface{}) error {
-	buff := new(bytes.Buffer)
-	enc := gob.NewEncoder(buff)
-	dec := gob.NewDecoder(buff)
-	if err := enc.Encode(a); err != nil {
-		return err
-	}
-	return dec.Decode(b)
 }
 
 // Used as generic function logic for various fields
@@ -609,10 +541,6 @@ func SizeFmt(num float64, suffix string) string {
 	return fmt.Sprintf("%.1f%s%s", num, "Yi", suffix)
 }
 
-func TimeIs0h(t time.Time) bool {
-	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
-}
-
 func ParseHierarchyPath(path string, sep string) HierarchyPath {
 	if sep == EmptyString {
 		for _, sep = range []string{"/", NestingSep} {
@@ -669,19 +597,6 @@ func MaskSuffix(dest string, maskLen int) string {
 	return dest
 }
 
-// Sortable Int64Slice
-type Int64Slice []int64
-
-func (slc Int64Slice) Len() int {
-	return len(slc)
-}
-func (slc Int64Slice) Swap(i, j int) {
-	slc[i], slc[j] = slc[j], slc[i]
-}
-func (slc Int64Slice) Less(i, j int) bool {
-	return slc[i] < slc[j]
-}
-
 func GetCGRVersion() (vers string, err error) {
 	vers = fmt.Sprintf("%s@%s", CGRateS, Version)
 	if GitLastLog == "" {
@@ -731,16 +646,6 @@ func NewTenantID(tntID string) *TenantID {
 	return &TenantID{Tenant: tIDSplt[0], ID: tIDSplt[1]}
 }
 
-type PaginatorWithTenant struct {
-	Tenant string
-	Paginator
-}
-
-type TenantWithAPIOpts struct {
-	Tenant  string
-	APIOpts map[string]interface{}
-}
-
 type TenantID struct {
 	Tenant string
 	ID     string
@@ -755,8 +660,14 @@ func (tID *TenantID) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
 
-func (tID *TenantIDWithAPIOpts) TenantIDConcatenated() string {
-	return ConcatenatedKey(tID.Tenant, tID.ID)
+type PaginatorWithTenant struct {
+	Tenant string
+	Paginator
+}
+
+type TenantWithAPIOpts struct {
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 // RPCCall is a generic method calling RPC on a struct instance
@@ -886,30 +797,6 @@ func GetUrlRawArguments(dialURL string) (out map[string]string) {
 	return
 }
 
-// WarnExecTime is used when we need to meassure the execution of specific functions
-// and warn when the total duration is higher than expected
-// should be usually called with defer, ie: defer WarnExecTime(time.Now(), "MyTestFunc", 2*time.Second)
-func WarnExecTime(startTime time.Time, logID string, maxDur time.Duration) {
-	totalDur := time.Since(startTime)
-	if totalDur > maxDur {
-		Logger.Warning(fmt.Sprintf("<%s> execution took: <%s>", logID, totalDur))
-	}
-}
-
-// endchan := LongExecTimeDetector("mesaj", 5*time.Second)
-// defer func() { close(endchan) }()
-func LongExecTimeDetector(logID string, maxDur time.Duration) (endchan chan struct{}) {
-	endchan = make(chan struct{}, 1)
-	go func() {
-		select {
-		case <-time.After(maxDur):
-			Logger.Warning(fmt.Sprintf("<%s> execution more than: <%s>", logID, maxDur))
-		case <-endchan:
-		}
-	}()
-	return
-}
-
 type StringWithAPIOpts struct {
 	APIOpts map[string]interface{}
 	Tenant  string
@@ -925,7 +812,6 @@ func CastRPCErr(err error) error {
 	return err
 }
 
-// RandomInteger returns a random integer between min and max values
 func RandomInteger(min, max int) int {
 	return math_rand.Intn(max-min) + min
 }
@@ -982,7 +868,6 @@ func AESEncrypt(txt, encKey string) (encrypted string, err error) {
 
 // AESDecrypt will decrypt the provided encrypted txt using the encKey and AES algorithm
 func AESDecrypt(encrypted string, encKey string) (txt string, err error) {
-
 	key, _ := hex.DecodeString(encKey)
 	enc, _ := hex.DecodeString(encrypted)
 

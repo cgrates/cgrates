@@ -135,8 +135,6 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.ResourceS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RouteSJson):
 			go srvMngr.reloadService(utils.RouteS)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
-			go srvMngr.reloadService(utils.RALService)
 		case <-srvMngr.GetConfig().GetReloadChan(config.ApierS):
 			go func() {
 				srvMngr.reloadService(utils.APIerSv1)

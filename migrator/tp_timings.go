@@ -31,7 +31,7 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 
 	for _, tpid := range tpids {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPTimings,
-			utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+			[]string{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

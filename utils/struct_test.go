@@ -20,7 +20,6 @@ package utils
 import (
 	"math/cmplx"
 	"reflect"
-	"sort"
 	"testing"
 )
 
@@ -79,28 +78,6 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 	}
 }
 
-func TestMissingMapFields(t *testing.T) {
-	var attr = map[string]interface{}{
-		Tenant:            "cgrates.org",
-		AccountField:      "1001",
-		"Type":            MetaPrepaid,
-		"ActionTimingsID": "*asap",
-	}
-	if missing := MissingMapFields(attr,
-		[]string{"Tenant", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
-		t.Error("Found missing field on correct struct", missing)
-	}
-	attr["ActionTimingsID"] = ""
-	delete(attr, "Type")
-	expected := []string{"ActionTimingsID", "Type"}
-	missing := MissingMapFields(attr,
-		[]string{"Tenant", "Account", "Type", "ActionTimingsID"})
-	sort.Strings(missing)
-	if !reflect.DeepEqual(expected, missing) {
-		t.Errorf("Expected %s ,received: %s", expected, missing)
-	}
-}
-
 func TestMissingStructFieldsAppend(t *testing.T) {
 	var attr = struct {
 		Tenant          string
@@ -110,28 +87,6 @@ func TestMissingStructFieldsAppend(t *testing.T) {
 	}{"", "", MetaPrepaid, ""}
 	missing := MissingStructFields(&attr,
 		[]string{"Tenant", "Account", "Type", "ActionTimingsID"})
-	if len(missing) == 0 {
-		t.Error("Required missing field not found")
-	}
-}
-
-func TestMissingMapFieldsTrim(t *testing.T) {
-	var attr = map[string]interface{}{
-		"Tenant":  "cgrates.org",
-		"Account": "1001",
-	}
-	if missing := MissingMapFields(attr,
-		[]string{"Tenant", "Account"}); len(missing) != 0 {
-		t.Error("Found missing field on correct struct", missing)
-	}
-}
-
-func TestMissingMapFieldsMissing(t *testing.T) {
-	var attr = map[string]interface{}{
-		"Tenant":  0,
-		"Account": 0,
-	}
-	missing := MissingMapFields(attr, []string{"Tenant", "Account"})
 	if len(missing) == 0 {
 		t.Error("Required missing field not found")
 	}

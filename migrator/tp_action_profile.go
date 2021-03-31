@@ -32,7 +32,7 @@ func (m *Migrator) migrateCurrentTPActionProfiles() (err error) {
 
 	for _, tpid := range tpIds {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPActionProfiles,
-			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+			[]string{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
