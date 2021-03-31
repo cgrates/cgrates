@@ -60,7 +60,6 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ChargersCsv:           (*TPCSVImporter).importChargerProfiles,
 	utils.DispatcherProfilesCsv: (*TPCSVImporter).importDispatcherProfiles,
 	utils.DispatcherHostsCsv:    (*TPCSVImporter).importDispatcherHosts,
-	utils.ActionProfilesCsv:     (*TPCSVImporter).importActionProfiles,
 }
 
 func (tpImp *TPCSVImporter) Run() error {
@@ -357,15 +356,4 @@ func (tpImp *TPCSVImporter) importDispatcherHosts(fn string) error {
 		return err
 	}
 	return tpImp.StorDb.SetTPDispatcherHosts(dpps)
-}
-
-func (tpImp *TPCSVImporter) importActionProfiles(fn string) error {
-	if tpImp.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
-	rpps, err := tpImp.csvr.GetTPActionProfiles(tpImp.TPid, "", "")
-	if err != nil {
-		return err
-	}
-	return tpImp.StorDb.SetTPActionProfiles(rpps)
 }

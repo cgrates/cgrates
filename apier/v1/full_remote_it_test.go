@@ -56,7 +56,6 @@ var (
 		testFullRemoteITFilter,
 		testFullRemoteITCharger,
 		testFullRemoteITDispatcher,
-		testFullRemoteITAction,
 		testFullRemoteITKillEngine,
 	}
 )
@@ -581,63 +580,6 @@ func testFullRemoteITDispatcher(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(dispatcherProfile.DispatcherProfile), utils.ToJSON(reply))
-	}
-}
-
-func testFullRemoteITAction(t *testing.T) {
-	// verify for not found in internal
-	var reply *engine.ActionProfile
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
-		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Fatal(err)
-	}
-
-	var replySet string
-	actPrf = &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "ACT_1",
-			Actions: []*engine.APAction{
-				{
-					ID:      "test_action_id",
-					Diktats: []*engine.APDiktat{{}},
-				},
-				{
-					ID:      "test_action_id2",
-					Diktats: []*engine.APDiktat{{}},
-				},
-			},
-		},
-		APIOpts: map[string]interface{}{},
-	}
-	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &replySet); err != nil {
-		t.Error(err)
-	} else if replySet != utils.OK {
-		t.Error("Unexpected reply returned", replySet)
-	}
-
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
-		&reply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(reply))
-	}
-	// update the threshold profile and verify it to be updated
-	actPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetActionProfile, actPrf, &replySet); err != nil {
-		t.Error(err)
-	} else if replySet != utils.OK {
-		t.Error("Unexpected reply returned", replySet)
-	}
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetActionProfile,
-		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACT_1"}},
-		&reply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(actPrf.ActionProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(reply))
 	}
 }
 

@@ -1247,30 +1247,6 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.LoadIDs)
 }
 
-func (rs *RedisStorage) GetActionProfileDrv(tenant, id string) (ap *ActionProfile, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redis_GET, utils.ActionProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrNotFound
-		return
-	}
-	err = rs.ms.Unmarshal(values, &ap)
-	return
-}
-
-func (rs *RedisStorage) SetActionProfileDrv(ap *ActionProfile) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(ap); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redis_SET, utils.ActionProfilePrefix+utils.ConcatenatedKey(ap.Tenant, ap.ID), string(result))
-}
-
-func (rs *RedisStorage) RemoveActionProfileDrv(tenant, id string) (err error) {
-	return rs.Cmd(nil, redis_DEL, utils.ActionProfilePrefix+utils.ConcatenatedKey(tenant, id))
-}
-
 // GetIndexesDrv retrieves Indexes from dataDB
 func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)

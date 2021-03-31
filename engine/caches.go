@@ -64,9 +64,6 @@ func init() {
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithAPIOpts))
-	// ActionProfiles
-	gob.Register(new(ActionProfile))
-	gob.Register(new(ActionProfileWithAPIOpts))
 
 	// CDRs
 	gob.Register(new(EventCost))

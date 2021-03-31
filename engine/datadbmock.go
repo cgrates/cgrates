@@ -382,18 +382,6 @@ func (dbM *DataDBMock) RemoveDispatcherHostDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionProfileDrv(string, string) (*ActionProfile, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetActionProfileDrv(*ActionProfile) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveActionProfileDrv(string, string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) SetVersions(vrs Versions, overwrite bool) (err error) {
 	return utils.ErrNotImplemented
 }

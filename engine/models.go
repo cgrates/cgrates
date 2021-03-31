@@ -509,30 +509,3 @@ type DispatcherHostMdl struct {
 func (DispatcherHostMdl) TableName() string {
 	return utils.TBLTPDispatcherHosts
 }
-
-type ActionProfileMdl struct {
-	PK                 uint `gorm:"primary_key"`
-	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	Weight             float64 `index:"4" re:"\d+\.?\d*"`
-	Schedule           string  `index:"5" re:""`
-	TargetType         string  `index:"6" re:""`
-	TargetIDs          string  `index:"7" re:""`
-	ActionID           string  `index:"8" re:""`
-	ActionFilterIDs    string  `index:"9" re:""`
-	ActionBlocker      bool    `index:"10" re:""`
-	ActionTTL          string  `index:"11" re:""`
-	ActionType         string  `index:"12" re:""`
-	ActionOpts         string  `index:"13" re:""`
-	ActionPath         string  `index:"14" re:""`
-	ActionValue        string  `index:"15" re:""`
-
-	CreatedAt time.Time
-}
-
-func (ActionProfileMdl) TableName() string {
-	return utils.TBLTPActionProfiles
-}

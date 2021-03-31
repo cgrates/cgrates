@@ -23,8 +23,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 // Used to extract ids from stordb
@@ -1452,70 +1450,4 @@ type ArgExportCDRs struct {
 	ExporterIDs []string // exporterIDs is used to said which exporter are using to export the cdrs
 	Verbose     bool     // verbose is used to inform the user about the positive and negative exported cdrs
 	RPCCDRsFilter
-}
-
-// ArgsCostForEvent arguments used for process event
-type ArgsCostForEvent struct {
-	RateProfileIDs []string
-	*CGREvent
-}
-
-// StartTime returns the event time used to check active rate profiles
-func (args *ArgsCostForEvent) StartTime(tmz string) (sTime time.Time, err error) {
-	if tIface, has := args.APIOpts[OptsRatesStartTime]; has {
-		return IfaceAsTime(tIface, tmz)
-	}
-	return time.Now(), nil
-}
-
-// usage returns the event time used to check active rate profiles
-func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
-	// first search for the usage in opts
-	if uIface, has := args.APIOpts[OptsRatesUsage]; has {
-		return IfaceAsBig(uIface)
-	}
-	// if the usage is not present in opts search in event
-	if uIface, has := args.Event[Usage]; has {
-		return IfaceAsBig(uIface)
-	}
-	// if the usage is not found in the event populate with default value and overwrite the NOT_FOUND error with nil
-	return decimal.New(int64(time.Minute), 0), nil
-}
-
-type TPActionProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	Weight             float64
-	Schedule           string
-	Targets            []*TPActionTarget
-	Actions            []*TPAPAction
-}
-
-type TPActionTarget struct {
-	TargetType string
-	TargetIDs  []string
-}
-
-type TPAPAction struct {
-	ID        string
-	FilterIDs []string
-	Blocker   bool
-	TTL       string
-	Type      string
-	Opts      string
-	Diktats   []*TPAPDiktat
-}
-
-type TPAPDiktat struct {
-	Path  string
-	Value string
-}
-
-// ArgActionSv1ScheduleActions is used in ActionSv1 methods
-type ArgActionSv1ScheduleActions struct {
-	*CGREvent
-	ActionProfileIDs []string
 }

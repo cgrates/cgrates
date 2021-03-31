@@ -259,14 +259,4 @@ type ReplicatorSv1Interface interface {
 	GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error
 	SetIndexes(args *utils.SetIndexesArg, reply *string) error
 	RemoveIndexes(args *utils.GetIndexesArg, reply *string) error
-
-	GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error
-	SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error
-	RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-}
-
-type ActionSv1Interface interface {
-	ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
-	ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
-	Ping(ign *utils.CGREvent, reply *string) error
 }
