@@ -639,38 +639,6 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.ActionProfileIDs] = ids
 			}
 		}
-	case utils.MetaAccountProfiles:
-		cacheIDs = []string{utils.CacheAccountProfilesFilterIndexes}
-		for _, lDataSet := range lds {
-			acpsModels := make(engine.AccountProfileMdls, len(lDataSet))
-			for i, ld := range lDataSet {
-				acpsModels[i] = new(engine.AccountProfileMdl)
-				if err = utils.UpdateStructWithIfaceMap(acpsModels[i], ld); err != nil {
-					return
-				}
-			}
-			accountTPModels, err := acpsModels.AsTPAccountProfile()
-			if err != nil {
-				return err
-			}
-			for _, tpAcp := range accountTPModels {
-				acp, err := engine.APItoAccountProfile(tpAcp, ldr.timezone)
-				if err != nil {
-					return err
-				}
-				if ldr.dryRun {
-					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: AccountProfiles: %s",
-							utils.LoaderS, ldr.ldrID, utils.ToJSON(acp)))
-					continue
-				}
-				// get IDs so we can reload in cache
-				ids = append(ids, acp.TenantID())
-				if err := ldr.dm.SetAccountProfile(acp, true); err != nil {
-					return err
-				}
-			}
-		}
 	}
 
 	if len(ldr.cacheConns) != 0 {
@@ -1008,23 +976,6 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					return err
 				}
 				cacheArgs[utils.ActionProfileIDs] = ids
-			}
-		}
-	case utils.MetaAccountProfiles:
-		cacheIDs = []string{utils.CacheAccountProfiles, utils.CacheAccountProfilesFilterIndexes}
-		for tntID := range lds {
-			if ldr.dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: AccountProfileIDs: %s",
-						utils.LoaderS, ldr.ldrID, tntID))
-			} else {
-				tntIDStruct := utils.NewTenantID(tntID)
-				// get IDs so we can reload in cache
-				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveAccountProfile(tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
-					return err
-				}
 			}
 		}
 	}

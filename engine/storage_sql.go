@@ -241,7 +241,7 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
 			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
-			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts, utils.TBLTPAccountProfiles,
+			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts,
 			utils.TBLTPActionProfiles, utils.TBLTPRateProfiles} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()

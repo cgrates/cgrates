@@ -406,14 +406,6 @@ func (dbM *DataDBMock) RemoveActionProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountProfileDrv(string, string) (*utils.AccountProfile, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetAccountProfileDrv(profile *utils.AccountProfile) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) RemoveAccountProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }

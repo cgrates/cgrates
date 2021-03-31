@@ -40,7 +40,6 @@ var (
 		utils.RateFilterIndexPrfx:           {},
 		utils.ActionPlanIndexes:             {},
 		utils.FilterIndexPrfx:               {},
-		utils.AccountProfileFilterIndexPrfx: {},
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.DestinationPrefix:             {},
@@ -289,19 +288,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 				return
 			}
 			_, err = dm.GetIndexes(utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
-		case utils.AccountProfileFilterIndexPrfx:
-			var tntCtx, idxKey string
-			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
-				return
-			}
-			_, err = dm.GetIndexes(utils.CacheAccountProfilesFilterIndexes, tntCtx, idxKey, false, true)
-		case utils.FilterIndexPrfx:
-			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
-			if idx < 0 {
-				err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", dataID)
-				return
-			}
-			_, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		case utils.MetaAPIBan:
@@ -3621,107 +3607,6 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (brokenReferenc
 				return id
 			}
 		}
-	}
-	return
-}
-
-func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.AccountProfile, err error) {
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	ap, err = dm.dataDB.GetAccountProfileDrv(tenant, id)
-	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetAccountProfile,
-				&utils.TenantIDWithAPIOpts{
-					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &ap); err == nil {
-				err = dm.dataDB.SetAccountProfileDrv(ap)
-			}
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	return
-}
-
-func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex bool) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if withIndex {
-		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
-			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, ap.TenantID())
-		}
-	}
-	oldRpp, err := dm.GetAccountProfile(ap.Tenant, ap.ID)
-	if err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	if err = dm.DataDB().SetAccountProfileDrv(ap); err != nil {
-		return err
-	}
-	if withIndex {
-		var oldFiltersIDs *[]string
-		if oldRpp != nil {
-			oldFiltersIDs = &oldRpp.FilterIDs
-		}
-		if err := updatedIndexes(dm, utils.CacheAccountProfilesFilterIndexes, ap.Tenant,
-			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
-			return err
-		}
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
-		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.AccountProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1SetAccountProfile,
-			&utils.AccountProfileWithAPIOpts{
-				AccountProfile: ap,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) RemoveAccountProfile(tenant, id string,
-	transactionID string, withIndex bool) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	oldRpp, err := dm.GetAccountProfile(tenant, id)
-	if err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	if err = dm.DataDB().RemoveAccountProfileDrv(tenant, id); err != nil {
-		return
-	}
-	if oldRpp == nil {
-		return utils.ErrNotFound
-	}
-	if withIndex {
-		if err = removeItemFromFilterIndex(dm, utils.CacheAccountProfilesFilterIndexes,
-			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
-			return
-		}
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountProfiles]; itm.Replicate {
-		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.AccountProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveAccountProfile,
-			&utils.TenantIDWithAPIOpts{
-				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
 }

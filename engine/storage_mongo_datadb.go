@@ -79,7 +79,6 @@ const (
 	ColRpp  = "rate_profiles"
 	ColApp  = "action_profiles"
 	ColLID  = "load_ids"
-	ColAnp  = "account_profiles"
 )
 
 var (
@@ -316,7 +315,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp, ColAnp:
+	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColDph, ColRpp, ColApp:
 		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
 			return
 		}
@@ -381,7 +380,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 		for _, col := range []string{ColAct, ColApl, ColAAp, ColAtr,
 			ColRpl, ColDst, ColRds, ColLht, ColIndx, ColRsP, ColRes, ColSqs, ColSqp,
 			ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColDpp, ColRpp, ColApp,
-			ColRpf, ColShg, ColAcc, ColAnp} {
+			ColRpf, ColShg, ColAcc} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
 				return
 			}
@@ -642,8 +641,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColRpp, utils.RateProfilePrefix, subject, tntID)
 		case utils.ActionProfilePrefix:
 			result, err = ms.getField2(sctx, ColApp, utils.ActionProfilePrefix, subject, tntID)
-		case utils.AccountProfilePrefix:
-			result, err = ms.getField2(sctx, ColAnp, utils.AccountProfilePrefix, subject, tntID)
 		case utils.DispatcherHostPrefix:
 			result, err = ms.getField2(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
@@ -664,8 +661,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionPlanIndexes, "key")
 		case utils.ActionProfilesFilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionProfilesFilterIndexPrfx, "key")
-		case utils.AccountProfileFilterIndexPrfx:
-			result, err = ms.getField3(sctx, ColIndx, utils.AccountProfileFilterIndexPrfx, "key")
 		case utils.RateProfilesFilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.RateProfilesFilterIndexPrfx, "key")
 		case utils.RateFilterIndexPrfx:
@@ -724,8 +719,6 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColRpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ActionProfilePrefix:
 			count, err = ms.getCol(ColApp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
-		case utils.AccountProfilePrefix:
-			count, err = ms.getCol(ColAnp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		default:
 			err = fmt.Errorf("unsupported category in HasData: %s", category)
 		}
@@ -2207,42 +2200,6 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	//inside bson.RegEx add carrot to match the prefix (optimization)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColIndx).DeleteMany(sctx, bson.M{"key": bsonx.Regex("^"+regexKey, utils.EmptyString)})
-		return err
-	})
-}
-
-func (ms *MongoStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.AccountProfile, err error) {
-	ap = new(utils.AccountProfile)
-	err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColAnp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if err := cur.Decode(ap); err != nil {
-			ap = nil
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	})
-	return
-}
-
-func (ms *MongoStorage) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColAnp).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
-			bson.M{"$set": ap},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveAccountProfileDrv(tenant, id string) (err error) {
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(ColAnp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
 		return err
 	})
 }

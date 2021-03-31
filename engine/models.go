@@ -588,7 +588,3 @@ type AccountProfileMdl struct {
 	ThresholdIDs          string  `index:"16" re:""`
 	CreatedAt             time.Time
 }
-
-func (AccountProfileMdl) TableName() string {
-	return utils.TBLTPAccountProfiles
-}
