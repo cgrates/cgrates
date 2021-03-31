@@ -932,17 +932,15 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 }
 
 type ArgsComputeFilterIndexIDs struct {
-	Tenant           string
-	Context          string
-	AttributeIDs     []string
-	ResourceIDs      []string
-	StatIDs          []string
-	RouteIDs         []string
-	ThresholdIDs     []string
-	ChargerIDs       []string
-	DispatcherIDs    []string
-	RateProfileIDs   []string
-	ActionProfileIDs []string
+	Tenant        string
+	Context       string
+	AttributeIDs  []string
+	ResourceIDs   []string
+	StatIDs       []string
+	RouteIDs      []string
+	ThresholdIDs  []string
+	ChargerIDs    []string
+	DispatcherIDs []string
 }
 
 type ArgsComputeFilterIndexes struct {
@@ -955,9 +953,6 @@ type ArgsComputeFilterIndexes struct {
 	ThresholdS  bool
 	ChargerS    bool
 	DispatcherS bool
-	RateS       bool
-	AccountS    bool
-	ActionS     bool
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
@@ -1299,39 +1294,37 @@ type ArgsGetCacheItemWithAPIOpts struct {
 func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 	return &AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
-			DestinationIDs:             nil,
-			ReverseDestinationIDs:      nil,
-			RatingPlanIDs:              nil,
-			RatingProfileIDs:           nil,
-			ActionIDs:                  nil,
-			ActionPlanIDs:              nil,
-			AccountActionPlanIDs:       nil,
-			ActionTriggerIDs:           nil,
-			SharedGroupIDs:             nil,
-			ResourceProfileIDs:         nil,
-			ResourceIDs:                nil,
-			StatsQueueIDs:              nil,
-			StatsQueueProfileIDs:       nil,
-			ThresholdIDs:               nil,
-			ThresholdProfileIDs:        nil,
-			FilterIDs:                  nil,
-			RouteProfileIDs:            nil,
-			AttributeProfileIDs:        nil,
-			ChargerProfileIDs:          nil,
-			DispatcherProfileIDs:       nil,
-			DispatcherHostIDs:          nil,
-			RateProfileIDs:             nil,
-			TimingIDs:                  nil,
-			AttributeFilterIndexIDs:    nil,
-			ResourceFilterIndexIDs:     nil,
-			StatFilterIndexIDs:         nil,
-			ThresholdFilterIndexIDs:    nil,
-			RouteFilterIndexIDs:        nil,
-			ChargerFilterIndexIDs:      nil,
-			DispatcherFilterIndexIDs:   nil,
-			RateProfilesFilterIndexIDs: nil,
-			RateFilterIndexIDs:         nil,
-			FilterIndexIDs:             nil,
+			DestinationIDs:           nil,
+			ReverseDestinationIDs:    nil,
+			RatingPlanIDs:            nil,
+			RatingProfileIDs:         nil,
+			ActionIDs:                nil,
+			ActionPlanIDs:            nil,
+			AccountActionPlanIDs:     nil,
+			ActionTriggerIDs:         nil,
+			SharedGroupIDs:           nil,
+			ResourceProfileIDs:       nil,
+			ResourceIDs:              nil,
+			StatsQueueIDs:            nil,
+			StatsQueueProfileIDs:     nil,
+			ThresholdIDs:             nil,
+			ThresholdProfileIDs:      nil,
+			FilterIDs:                nil,
+			RouteProfileIDs:          nil,
+			AttributeProfileIDs:      nil,
+			ChargerProfileIDs:        nil,
+			DispatcherProfileIDs:     nil,
+			DispatcherHostIDs:        nil,
+			TimingIDs:                nil,
+			AttributeFilterIndexIDs:  nil,
+			ResourceFilterIndexIDs:   nil,
+			StatFilterIndexIDs:       nil,
+			ThresholdFilterIndexIDs:  nil,
+			RouteFilterIndexIDs:      nil,
+			ChargerFilterIndexIDs:    nil,
+			DispatcherFilterIndexIDs: nil,
+			RateFilterIndexIDs:       nil,
+			FilterIndexIDs:           nil,
 		},
 	}
 }
@@ -1453,36 +1446,6 @@ type AttrsExecuteActionPlans struct {
 	Tenant        string
 	AccountID     string
 	APIOpts       map[string]interface{}
-}
-
-type TPRateProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	Weights            string
-	MinCost            float64
-	MaxCost            float64
-	MaxCostStrategy    string
-	Rates              map[string]*TPRate
-}
-
-type TPRate struct {
-	ID              string   // RateID
-	FilterIDs       []string // RateFilterIDs
-	ActivationTimes string
-	Weights         string // RateWeight will decide the winner per interval start
-	Blocker         bool   // RateBlocker will make this rate recurrent, deactivating further intervals
-	IntervalRates   []*TPIntervalRate
-}
-
-type TPIntervalRate struct {
-	IntervalStart string
-	FixedFee      float64
-	RecurrentFee  float64 // RateValue
-	Unit          string
-	Increment     string
 }
 
 type ArgExportCDRs struct {

@@ -197,7 +197,6 @@ func TestStorDBReloadVersion1(t *testing.T) {
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
-		utils.TpRateProfiles:     1,
 		utils.TpActionProfiles:   1,
 	}, true)
 
@@ -277,7 +276,6 @@ func TestStorDBReloadVersion2(t *testing.T) {
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
-		utils.TpRateProfiles:     1,
 		utils.TpActionProfiles:   1,
 	}, true)
 
@@ -354,7 +352,6 @@ func TestStorDBReloadVersion3(t *testing.T) {
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
-		utils.TpRateProfiles:     1,
 		utils.TpActionProfiles:   1,
 	}, true)
 

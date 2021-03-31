@@ -241,8 +241,7 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
 			utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPActionPlans, utils.TBLTPRoutes, utils.TBLTPAttributes,
-			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts,
-			utils.TBLTPActionProfiles, utils.TBLTPRateProfiles} {
+			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -723,28 +722,6 @@ func (sqls *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 		if err := tx.Create(APItoModelTPDispatcherHost(dpp)).Error; err != nil {
 			tx.Rollback()
 			return err
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPRateProfiles(tpDPPs []*utils.TPRateProfile) error {
-	if len(tpDPPs) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, dpp := range tpDPPs {
-		// Remove previous
-		if err := tx.Where(&RateProfileMdl{Tpid: dpp.TPid, ID: dpp.ID}).Delete(RateProfileMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPRateProfile(dpp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
 		}
 	}
 	tx.Commit()
@@ -1589,25 +1566,6 @@ func (sqls *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 		return nil, err
 	}
 	arls := dpps.AsTPDispatcherHosts()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {
-	var dpps RateProfileMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls := dpps.AsTPRateProfile()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}

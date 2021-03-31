@@ -637,8 +637,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColCpp, utils.ChargerProfilePrefix, subject, tntID)
 		case utils.DispatcherProfilePrefix:
 			result, err = ms.getField2(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, tntID)
-		case utils.RateProfilePrefix:
-			result, err = ms.getField2(sctx, ColRpp, utils.RateProfilePrefix, subject, tntID)
 		case utils.ActionProfilePrefix:
 			result, err = ms.getField2(sctx, ColApp, utils.ActionProfilePrefix, subject, tntID)
 		case utils.DispatcherHostPrefix:
@@ -659,12 +657,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColIndx, utils.DispatcherFilterIndexes, "key")
 		case utils.ActionPlanIndexes:
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionPlanIndexes, "key")
-		case utils.ActionProfilesFilterIndexPrfx:
-			result, err = ms.getField3(sctx, ColIndx, utils.ActionProfilesFilterIndexPrfx, "key")
-		case utils.RateProfilesFilterIndexPrfx:
-			result, err = ms.getField3(sctx, ColIndx, utils.RateProfilesFilterIndexPrfx, "key")
-		case utils.RateFilterIndexPrfx:
-			result, err = ms.getField3(sctx, ColIndx, utils.RateFilterIndexPrfx, "key")
 		case utils.FilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.FilterIndexPrfx, "key")
 		default:
@@ -715,8 +707,6 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColDpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherHostPrefix:
 			count, err = ms.getCol(ColDph).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
-		case utils.RateProfilePrefix:
-			count, err = ms.getCol(ColRpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ActionProfilePrefix:
 			count, err = ms.getCol(ColApp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		default:
@@ -2004,42 +1994,6 @@ func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 func (ms *MongoStorage) RemoveLoadIDsDrv() (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColLID).DeleteMany(sctx, bson.M{})
-		return err
-	})
-}
-
-func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
-	rpp = new(utils.RateProfile)
-	err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if err := cur.Decode(rpp); err != nil {
-			rpp = nil
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	})
-	return
-}
-
-func (ms *MongoStorage) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColRpp).UpdateOne(sctx, bson.M{"tenant": rpp.Tenant, "id": rpp.ID},
-			bson.M{"$set": rpp},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveRateProfileDrv(tenant, id string) (err error) {
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(ColRpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
 		return err
 	})
 }

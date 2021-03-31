@@ -563,28 +563,6 @@ func (iDB *InternalDB) GetTPDispatcherHosts(tpid, tenant, id string) (dpps []*ut
 	return
 }
 
-func (iDB *InternalDB) GetTPRateProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPRateProfile, err error) {
-	key := tpid
-	if tenant != utils.EmptyString {
-		key += utils.ConcatenatedKeySep + tenant
-	}
-	if id != utils.EmptyString {
-		key += utils.ConcatenatedKeySep + id
-	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPRateProfiles, key)
-	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPRateProfiles, id)
-		if !ok || x == nil {
-			return nil, utils.ErrNotFound
-		}
-		tpPrfs = append(tpPrfs, x.(*utils.TPRateProfile))
-	}
-	if len(tpPrfs) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
 func (iDB *InternalDB) GetTPActionProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPActionProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
@@ -853,17 +831,6 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 	}
 	for _, dpp := range dpps {
 		Cache.SetWithoutReplicate(utils.CacheTBLTPDispatcherHosts, utils.ConcatenatedKey(dpp.TPid, dpp.Tenant, dpp.ID), dpp, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return
-}
-
-func (iDB *InternalDB) SetTPRateProfiles(tpPrfs []*utils.TPRateProfile) (err error) {
-	if len(tpPrfs) == 0 {
-		return nil
-	}
-	for _, tpPrf := range tpPrfs {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPRateProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return

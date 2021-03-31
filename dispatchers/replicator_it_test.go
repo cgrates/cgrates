@@ -53,7 +53,6 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplRatingPlan,
 	testDspRplRatingProfile,
 	testDspRplDestination,
-	testDspRplRateProfile,
 	testDspRplActionProfile,
 }
 
@@ -1467,94 +1466,6 @@ func testDspRplLoadIDs(t *testing.T) {
 
 	// Start engine 1
 	allEngine.startEngine(t)
-}
-
-func testDspRplRateProfile(t *testing.T) {
-	// Set RateProfile
-	var replyStr string
-	rPrf := &utils.RateProfileWithAPIOpts{
-		RateProfile: &utils.RateProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 0,
-				},
-			},
-			MaxCostStrategy: "*free",
-			Rates: map[string]*utils.Rate{
-				"FIRST_GI": {
-					ID:        "FIRST_GI",
-					FilterIDs: []string{"*gi:~*req.Usage:0"},
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 0,
-						},
-					},
-					Blocker: false,
-				},
-				"SECOND_GI": {
-					ID:        "SECOND_GI",
-					FilterIDs: []string{"*gi:~*req.Usage:1m"},
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					Blocker: false,
-				},
-			},
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "repl12345",
-		},
-	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetRateProfile, rPrf, &replyStr); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.SetRateProfile: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-	// Get RateProfile
-	var reply *utils.RateProfile
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "RP1",
-		},
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "repl12345",
-		},
-	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.GetRateProfile: ", err)
-	} else if !reflect.DeepEqual(rPrf.RateProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v, ", rPrf.RateProfile, reply)
-	}
-	// Stop engine 1
-	allEngine.stopEngine(t)
-
-	// Get RateProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
-	}
-
-	// Start engine 1
-	allEngine.startEngine(t)
-
-	// Remove RateProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveRateProfile, args, &replyStr); err != nil {
-		t.Error(err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-
-	// Get RateProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetRateProfile, args, &reply); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
-	}
 }
 
 func testDspRplActionProfile(t *testing.T) {

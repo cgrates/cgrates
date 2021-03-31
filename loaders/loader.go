@@ -574,41 +574,6 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.DispatcherHostIDs] = ids
 			}
 		}
-	case utils.MetaRateProfiles:
-		cacheIDs = []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}
-		for _, lDataSet := range lds {
-			rpMdls := make(engine.RateProfileMdls, len(lDataSet))
-			for i, ld := range lDataSet {
-				rpMdls[i] = new(engine.RateProfileMdl)
-				if err = utils.UpdateStructWithIfaceMap(rpMdls[i], ld); err != nil {
-					return
-				}
-			}
-			for _, tpRpl := range rpMdls.AsTPRateProfile() {
-				rpl, err := engine.APItoRateProfile(tpRpl, ldr.timezone)
-				if err != nil {
-					return err
-				}
-				if ldr.dryRun {
-					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: RateProfile: %s",
-							utils.LoaderS, ldr.ldrID, utils.ToJSON(rpl)))
-					continue
-				}
-				// get IDs so we can reload in cache
-				ids = append(ids, rpl.TenantID())
-				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
-					if err := ldr.dm.SetRateProfileRates(rpl, true); err != nil {
-						return err
-					}
-				} else {
-					if err := ldr.dm.SetRateProfile(rpl, true); err != nil {
-						return err
-					}
-				}
-				cacheArgs[utils.RateProfileIDs] = ids
-			}
-		}
 	case utils.MetaActionProfiles:
 		cacheIDs = []string{utils.CacheActionProfilesFilterIndexes}
 		for _, lDataSet := range lds {
@@ -928,36 +893,6 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					return err
 				}
 				cacheArgs[utils.DispatcherHostIDs] = ids
-			}
-		}
-	case utils.MetaRateProfiles:
-		cacheIDs = []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}
-		for tntID, ldData := range lds {
-			if ldr.dryRun {
-				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: RateProfileIDs: %s",
-						utils.LoaderS, ldr.ldrID, tntID))
-			} else {
-				tntIDStruct := utils.NewTenantID(tntID)
-				// get IDs so we can reload in cache
-				ids = append(ids, tntID)
-				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
-					rateIDs, err := ldData[0].GetRateIDs()
-					if err != nil {
-						return err
-					}
-					if err := ldr.dm.RemoveRateProfileRates(tntIDStruct.Tenant,
-						tntIDStruct.ID, rateIDs, true); err != nil {
-						return err
-					}
-				} else {
-					if err := ldr.dm.RemoveRateProfile(tntIDStruct.Tenant,
-						tntIDStruct.ID, utils.NonTransactional, true); err != nil {
-						return err
-					}
-				}
-
-				cacheArgs[utils.RateProfileIDs] = ids
 			}
 		}
 	case utils.MetaActionProfiles:

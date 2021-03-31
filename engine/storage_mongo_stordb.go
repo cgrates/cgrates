@@ -1529,55 +1529,6 @@ func (ms *MongoStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) (
 	})
 }
 
-func (ms *MongoStorage) GetTPRateProfiles(tpid, tenant, id string) ([]*utils.TPRateProfile, error) {
-	filter := bson.M{"tpid": tpid}
-	if id != "" {
-		filter["id"] = id
-	}
-	if tenant != "" {
-		filter["tenant"] = tenant
-	}
-	var results []*utils.TPRateProfile
-	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPRateProfiles).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var tp utils.TPRateProfile
-			err := cur.Decode(&tp)
-			if err != nil {
-				return err
-			}
-			results = append(results, &tp)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
-func (ms *MongoStorage) SetTPRateProfiles(tpDPPs []*utils.TPRateProfile) (err error) {
-	if len(tpDPPs) == 0 {
-		return
-	}
-
-	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tpDPPs {
-			_, err = ms.getCol(utils.TBLTPRateProfiles).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
-				bson.M{"$set": tp},
-				options.Update().SetUpsert(true),
-			)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
 func (ms *MongoStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.TPActionProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {

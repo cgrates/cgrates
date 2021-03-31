@@ -320,18 +320,6 @@ func (tpExp *TPExporter) Run() error {
 		toExportMap[utils.DispatcherHostsCsv] = append(toExportMap[utils.DispatcherHostsCsv], APItoModelTPDispatcherHost(sd))
 	}
 
-	storDataRateProfiles, err := tpExp.storDb.GetTPRateProfiles(tpExp.tpID, "", "")
-	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpRateProfiles))
-		withError = true
-	}
-	for _, sd := range storDataRateProfiles {
-		sdModels := APItoModelTPRateProfile(sd)
-		for _, sdModel := range sdModels {
-			toExportMap[utils.RateProfilesCsv] = append(toExportMap[utils.RateProfilesCsv], sdModel)
-		}
-	}
-
 	storDataActionProfiles, err := tpExp.storDb.GetTPActionProfiles(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpActionProfiles))

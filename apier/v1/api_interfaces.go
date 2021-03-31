@@ -182,15 +182,6 @@ type CoreSv1Interface interface {
 	Sleep(arg *utils.DurationArgs, reply *string) error
 }
 
-type RateSv1Interface interface {
-	Ping(ign *utils.CGREvent, reply *string) error
-	CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) error
-}
-
-type RateProfileSv1Interface interface {
-	Ping(ign *utils.CGREvent, reply *string) error
-}
-
 type ReplicatorSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
 	GetAccount(args *utils.StringWithAPIOpts, reply *engine.Account) error
@@ -216,7 +207,6 @@ type ReplicatorSv1Interface interface {
 	GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error
 	GetChargerProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error
 	GetDispatcherProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error
-	GetRateProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error
 	GetDispatcherHost(tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error
 	GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error
 	SetThresholdProfile(th *engine.ThresholdProfileWithAPIOpts, reply *string) error
@@ -239,7 +229,6 @@ type ReplicatorSv1Interface interface {
 	SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) error
 	SetChargerProfile(cp *engine.ChargerProfileWithAPIOpts, reply *string) error
 	SetDispatcherProfile(dpp *engine.DispatcherProfileWithAPIOpts, reply *string) error
-	SetRateProfile(dpp *utils.RateProfileWithAPIOpts, reply *string) error
 	SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) error
 	SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) error
 	SetDispatcherHost(dpp *engine.DispatcherHostWithAPIOpts, reply *string) error
@@ -266,7 +255,6 @@ type ReplicatorSv1Interface interface {
 	RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, reply *string) error
-	RemoveRateProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
 
 	GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error
 	SetIndexes(args *utils.SetIndexesArg, reply *string) error
