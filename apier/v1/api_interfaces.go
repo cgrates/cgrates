@@ -272,10 +272,6 @@ type ReplicatorSv1Interface interface {
 	SetIndexes(args *utils.SetIndexesArg, reply *string) error
 	RemoveIndexes(args *utils.GetIndexesArg, reply *string) error
 
-	GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error
-	SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error
-	RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
-
 	GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error
 	SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error
 	RemoveActionProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
@@ -285,15 +281,4 @@ type ActionSv1Interface interface {
 	ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
 	ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) error
 	Ping(ign *utils.CGREvent, reply *string) error
-}
-
-type AccountSv1Interface interface {
-	Ping(ign *utils.CGREvent, reply *string) error
-	AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) error
-	MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
-	DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
-	ActionSetBalance(args *utils.ArgsActSetBalance, eEc *string) (err error)
-	MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error)
-	DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error)
-	ActionRemoveBalance(args *utils.ArgsActRemoveBalances, eEc *string) (err error)
 }

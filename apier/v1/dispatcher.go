@@ -1291,21 +1291,6 @@ func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, repl
 	return dS.dS.ReplicatorSv1RemoveIndexes(args, reply)
 }
 
-// GetAccountProfile .
-func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
-	return dS.dS.ReplicatorSv1GetAccountProfile(tntID, reply)
-}
-
-// SetAccountProfile .
-func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAccountProfile(args, reply)
-}
-
-// RemoveAccountProfile .
-func (dS *DispatcherReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveAccountProfile(args, reply)
-}
-
 // GetActionProfile .
 func (dS *DispatcherReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error {
 	return dS.dS.ReplicatorSv1GetActionProfile(tntID, reply)
@@ -1367,37 +1352,4 @@ func NewDispatcherAccountSv1(dps *dispatchers.DispatcherService) *DispatcherAcco
 // Exports RPC from RLs
 type DispatcherAccountSv1 struct {
 	dR *dispatchers.DispatcherService
-}
-
-// Ping implements AccountSv1Ping
-func (dR *DispatcherAccountSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dR.dR.AccountSv1Ping(args, reply)
-}
-
-func (dR *DispatcherAccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) error {
-	return dR.dR.AccountProfilesForEvent(args, aps)
-}
-
-func (dR *DispatcherAccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
-	return dR.dR.MaxAbstracts(args, eEc)
-}
-
-func (dR *DispatcherAccountSv1) DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
-	return dR.dR.DebitAbstracts(args, eEc)
-}
-
-func (dR *DispatcherAccountSv1) MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
-	return dR.dR.MaxConcretes(args, eEc)
-}
-
-func (dR *DispatcherAccountSv1) DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {
-	return dR.dR.DebitConcretes(args, eEc)
-}
-
-func (dR *DispatcherAccountSv1) ActionSetBalance(args *utils.ArgsActSetBalance, eEc *string) (err error) {
-	return dR.dR.AccountSv1ActionSetBalance(args, eEc)
-}
-
-func (dR *DispatcherAccountSv1) ActionRemoveBalance(args *utils.ArgsActRemoveBalances, eEc *string) (err error) {
-	return dR.dR.AccountSv1ActionRemoveBalance(args, eEc)
 }

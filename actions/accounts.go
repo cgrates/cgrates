@@ -20,7 +20,6 @@ package actions
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -46,35 +45,7 @@ func (aL *actSetBalance) cfg() *engine.APAction {
 
 // execute implements actioner interface
 func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AccountSConns) == 0 {
-		return fmt.Errorf("no connection with AccountS")
-	}
-
-	args := &utils.ArgsActSetBalance{
-		Tenant:    aL.tnt,
-		AccountID: trgID,
-		Reset:     aL.reset,
-		Diktats:   make([]*utils.BalDiktat, len(aL.cfg().Diktats)),
-		APIOpts:   aL.cfg().Opts,
-	}
-	for i, actD := range aL.cfg().Diktats {
-		var val string
-		var rsr config.RSRParsers
-		if rsr, err = actD.RSRValues(aL.config.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		if val, err = rsr.ParseDataProvider(data); err != nil {
-			return
-		}
-
-		args.Diktats[i] = &utils.BalDiktat{
-			Path:  actD.Path,
-			Value: val,
-		}
-	}
-	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().AccountSConns, nil,
-		utils.AccountSv1ActionSetBalance, args, &rply)
+	return
 }
 
 // actRemBalance will remove multiple balances from account
@@ -95,20 +66,5 @@ func (aL *actRemBalance) cfg() *engine.APAction {
 
 // execute implements actioner interface
 func (aL *actRemBalance) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
-	if len(aL.config.ActionSCfg().AccountSConns) == 0 {
-		return fmt.Errorf("no connection with AccountS")
-	}
-
-	args := &utils.ArgsActRemoveBalances{
-		Tenant:     aL.tnt,
-		AccountID:  trgID,
-		BalanceIDs: make([]string, len(aL.cfg().Diktats)),
-		APIOpts:    aL.cfg().Opts,
-	}
-	for i, actD := range aL.cfg().Diktats {
-		args.BalanceIDs[i] = actD.Path
-	}
-	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().AccountSConns, nil,
-		utils.AccountSv1ActionRemoveBalance, args, &rply)
+	return
 }

@@ -1537,7 +1537,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	if len(arg.Items) == 0 {
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers,
 			utils.MetaDispatcherHosts, utils.MetaFilters, utils.MetaResources, utils.MetaStats,
-			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccountProfiles}
+			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRateProfiles, utils.MetaActionProfiles}
 	}
 	if _, err := os.Stat(arg.Path); os.IsNotExist(err) {
 		os.Mkdir(arg.Path, os.ModeDir)
@@ -1959,42 +1959,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				}
 			}
 			csvWriter.Flush()
-		case utils.MetaAccountProfiles:
-			prfx := utils.AccountProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
-			if err != nil {
-				return err
-			}
-			if len(keys) == 0 {
-				continue
-			}
-			f, err := os.Create(path.Join(arg.Path, utils.AccountProfilesCsv))
-			if err != nil {
-				return err
-			}
-			defer f.Close()
 
-			csvWriter := csv.NewWriter(f)
-			csvWriter.Comma = utils.CSVSep
-			//write the header of the file
-			if err := csvWriter.Write(engine.AccountProfileMdls{}.CSVHeader()); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				accPrf, err := apierSv1.DataManager.GetAccountProfile(tntID[0], tntID[1])
-				if err != nil {
-					return err
-				}
-				for _, model := range engine.APItoModelTPAccountProfile(engine.AccountProfileToAPI(accPrf)) {
-					if record, err := engine.CsvDump(model); err != nil {
-						return err
-					} else if err := csvWriter.Write(record); err != nil {
-						return err
-					}
-				}
-			}
-			csvWriter.Flush()
 		}
 	}
 	*reply = utils.OK

@@ -25,9 +25,8 @@ import (
 // NewEventChargers instantiates the EventChargers in a central place
 func NewEventCharges() (ec *EventCharges) {
 	ec = &EventCharges{
-		Accounting:  make(map[string]*AccountCharge),
-		UnitFactors: make(map[string]*UnitFactor),
-		Rating:      make(map[string]*RateSInterval),
+		Accounting: make(map[string]*AccountCharge),
+		Rating:     make(map[string]*RateSInterval),
 	}
 	return
 }
@@ -38,11 +37,9 @@ type EventCharges struct {
 	Concretes *Decimal // total concrete units charged
 
 	ChargingIntervals []*ChargingInterval
-	Accounts          []*AccountProfile
 
-	Accounting  map[string]*AccountCharge
-	UnitFactors map[string]*UnitFactor
-	Rating      map[string]*RateSInterval
+	Accounting map[string]*AccountCharge
+	Rating     map[string]*RateSInterval
 }
 
 // Merge will merge the event charges into existing
@@ -69,16 +66,6 @@ func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 			for _, cIcrm := range cIl.Increments {
 
 				nEcAcntChrg := nEc.Accounting[cIcrm.AccountChargeID]
-
-				// UnitFactors
-				if nEcAcntChrg.UnitFactorID != EmptyString {
-					if uFctID := ec.UnitFactorID(nEc.UnitFactors[nEcAcntChrg.UnitFactorID]); uFctID != EmptyString &&
-						uFctID != nEcAcntChrg.UnitFactorID {
-						nEc.UnitFactors[uFctID] = ec.UnitFactors[uFctID]
-						delete(nEc.UnitFactors, nEcAcntChrg.UnitFactorID)
-						nEcAcntChrg.UnitFactorID = uFctID
-					}
-				}
 
 				// Rating
 				if nEcAcntChrg.RatingID != EmptyString {
@@ -147,16 +134,6 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 		}
 	}
 	// add here code for the rest of the fields
-	return
-}
-
-// UnitFactorID returns the ID of the matching UnitFactor within ec.UnitFactors
-func (ec *EventCharges) UnitFactorID(uF *UnitFactor) (ufID string) {
-	for ecUfID, ecUf := range ec.UnitFactors {
-		if ecUf.Equals(uF) {
-			return ecUfID
-		}
-	}
 	return
 }
 

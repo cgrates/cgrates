@@ -55,55 +55,53 @@ var (
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
 		CacheRatingProfilesTmp, CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
-		CacheActionProfilesFilterIndexes, CacheAccountProfilesFilterIndexes, CacheReverseFilterIndexes,
-		CacheActionPlans, CacheAccountActionPlans, CacheAccountProfiles, CacheAccounts})
+		CacheActionProfilesFilterIndexes, CacheReverseFilterIndexes,
+		CacheActionPlans, CacheAccountActionPlans, CacheAccounts})
 
 	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
 		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
 		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
 		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
-		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccountProfiles})
+		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles})
 
 	// CachePartitions enables creation of cache partitions
 	CachePartitions = JoinStringSet(extraDBPartition, dataDBPartition, storDBPartition)
 
 	CacheInstanceToPrefix = map[string]string{
-		CacheDestinations:                 DestinationPrefix,
-		CacheReverseDestinations:          ReverseDestinationPrefix,
-		CacheRatingPlans:                  RatingPlanPrefix,
-		CacheRatingProfiles:               RatingProfilePrefix,
-		CacheActions:                      ActionPrefix,
-		CacheActionPlans:                  ActionPlanPrefix,
-		CacheAccountActionPlans:           AccountActionPlansPrefix,
-		CacheActionTriggers:               ActionTriggerPrefix,
-		CacheSharedGroups:                 SharedGroupPrefix,
-		CacheResourceProfiles:             ResourceProfilesPrefix,
-		CacheResources:                    ResourcesPrefix,
-		CacheTimings:                      TimingsPrefix,
-		CacheStatQueueProfiles:            StatQueueProfilePrefix,
-		CacheStatQueues:                   StatQueuePrefix,
-		CacheThresholdProfiles:            ThresholdProfilePrefix,
-		CacheThresholds:                   ThresholdPrefix,
-		CacheFilters:                      FilterPrefix,
-		CacheRouteProfiles:                RouteProfilePrefix,
-		CacheAttributeProfiles:            AttributeProfilePrefix,
-		CacheChargerProfiles:              ChargerProfilePrefix,
-		CacheDispatcherProfiles:           DispatcherProfilePrefix,
-		CacheDispatcherHosts:              DispatcherHostPrefix,
-		CacheRateProfiles:                 RateProfilePrefix,
-		CacheActionProfiles:               ActionProfilePrefix,
-		CacheAccountProfiles:              AccountProfilePrefix,
-		CacheResourceFilterIndexes:        ResourceFilterIndexes,
-		CacheStatFilterIndexes:            StatFilterIndexes,
-		CacheThresholdFilterIndexes:       ThresholdFilterIndexes,
-		CacheRouteFilterIndexes:           RouteFilterIndexes,
-		CacheAttributeFilterIndexes:       AttributeFilterIndexes,
-		CacheChargerFilterIndexes:         ChargerFilterIndexes,
-		CacheDispatcherFilterIndexes:      DispatcherFilterIndexes,
-		CacheRateProfilesFilterIndexes:    RateProfilesFilterIndexPrfx,
-		CacheActionProfilesFilterIndexes:  ActionProfilesFilterIndexPrfx,
-		CacheAccountProfilesFilterIndexes: AccountProfileFilterIndexPrfx,
+		CacheDestinations:                DestinationPrefix,
+		CacheReverseDestinations:         ReverseDestinationPrefix,
+		CacheRatingPlans:                 RatingPlanPrefix,
+		CacheRatingProfiles:              RatingProfilePrefix,
+		CacheActions:                     ActionPrefix,
+		CacheActionPlans:                 ActionPlanPrefix,
+		CacheAccountActionPlans:          AccountActionPlansPrefix,
+		CacheActionTriggers:              ActionTriggerPrefix,
+		CacheSharedGroups:                SharedGroupPrefix,
+		CacheResourceProfiles:            ResourceProfilesPrefix,
+		CacheResources:                   ResourcesPrefix,
+		CacheTimings:                     TimingsPrefix,
+		CacheStatQueueProfiles:           StatQueueProfilePrefix,
+		CacheStatQueues:                  StatQueuePrefix,
+		CacheThresholdProfiles:           ThresholdProfilePrefix,
+		CacheThresholds:                  ThresholdPrefix,
+		CacheFilters:                     FilterPrefix,
+		CacheRouteProfiles:               RouteProfilePrefix,
+		CacheAttributeProfiles:           AttributeProfilePrefix,
+		CacheChargerProfiles:             ChargerProfilePrefix,
+		CacheDispatcherProfiles:          DispatcherProfilePrefix,
+		CacheDispatcherHosts:             DispatcherHostPrefix,
+		CacheRateProfiles:                RateProfilePrefix,
+		CacheActionProfiles:              ActionProfilePrefix,
+		CacheResourceFilterIndexes:       ResourceFilterIndexes,
+		CacheStatFilterIndexes:           StatFilterIndexes,
+		CacheThresholdFilterIndexes:      ThresholdFilterIndexes,
+		CacheRouteFilterIndexes:          RouteFilterIndexes,
+		CacheAttributeFilterIndexes:      AttributeFilterIndexes,
+		CacheChargerFilterIndexes:        ChargerFilterIndexes,
+		CacheDispatcherFilterIndexes:     DispatcherFilterIndexes,
+		CacheRateProfilesFilterIndexes:   RateProfilesFilterIndexPrfx,
+		CacheActionProfilesFilterIndexes: ActionProfilesFilterIndexPrfx,
 
 		CacheLoadIDs:              LoadIDPrefix,
 		CacheAccounts:             AccountPrefix,
@@ -113,18 +111,17 @@ var (
 	}
 	CachePrefixToInstance map[string]string    // will be built on init
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
-		CacheThresholdFilterIndexes:       ThresholdProfilePrefix,
-		CacheResourceFilterIndexes:        ResourceProfilesPrefix,
-		CacheStatFilterIndexes:            StatQueueProfilePrefix,
-		CacheRouteFilterIndexes:           RouteProfilePrefix,
-		CacheAttributeFilterIndexes:       AttributeProfilePrefix,
-		CacheChargerFilterIndexes:         ChargerProfilePrefix,
-		CacheDispatcherFilterIndexes:      DispatcherProfilePrefix,
-		CacheRateProfilesFilterIndexes:    RateProfilePrefix,
-		CacheRateFilterIndexes:            RatePrefix,
-		CacheActionProfilesFilterIndexes:  ActionProfilePrefix,
-		CacheAccountProfilesFilterIndexes: AccountProfilePrefix,
-		CacheReverseFilterIndexes:         FilterPrefix,
+		CacheThresholdFilterIndexes:      ThresholdProfilePrefix,
+		CacheResourceFilterIndexes:       ResourceProfilesPrefix,
+		CacheStatFilterIndexes:           StatQueueProfilePrefix,
+		CacheRouteFilterIndexes:          RouteProfilePrefix,
+		CacheAttributeFilterIndexes:      AttributeProfilePrefix,
+		CacheChargerFilterIndexes:        ChargerProfilePrefix,
+		CacheDispatcherFilterIndexes:     DispatcherProfilePrefix,
+		CacheRateProfilesFilterIndexes:   RateProfilePrefix,
+		CacheRateFilterIndexes:           RatePrefix,
+		CacheActionProfilesFilterIndexes: ActionProfilePrefix,
+		CacheReverseFilterIndexes:        FilterPrefix,
 	}
 
 	CacheInstanceToCacheIndex = map[string]string{
@@ -172,7 +169,6 @@ var (
 		TBLTPDispatcherHosts:  CacheTBLTPDispatcherHosts,
 		TBLTPRateProfiles:     CacheTBLTPRateProfiles,
 		TBLTPActionProfiles:   CacheTBLTPActionProfiles,
-		TBLTPAccountProfiles:  CacheTBLTPAccountProfiles,
 	}
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds   = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
@@ -201,19 +197,18 @@ var (
 		RateProfileIDs:        RateProfilePrefix,
 		ActionProfileIDs:      ActionProfilePrefix,
 
-		TimingIDs:                     TimingsPrefix,
-		AttributeFilterIndexIDs:       AttributeFilterIndexes,
-		ResourceFilterIndexIDs:        ResourceFilterIndexes,
-		StatFilterIndexIDs:            StatFilterIndexes,
-		ThresholdFilterIndexIDs:       ThresholdFilterIndexes,
-		RouteFilterIndexIDs:           RouteFilterIndexes,
-		ChargerFilterIndexIDs:         ChargerFilterIndexes,
-		DispatcherFilterIndexIDs:      DispatcherFilterIndexes,
-		RateProfilesFilterIndexIDs:    RateProfilesFilterIndexPrfx,
-		RateFilterIndexIDs:            RateFilterIndexPrfx,
-		ActionProfilesFilterIndexIDs:  ActionProfilesFilterIndexPrfx,
-		AccountProfilesFilterIndexIDs: AccountProfileFilterIndexPrfx,
-		FilterIndexIDs:                FilterIndexPrfx,
+		TimingIDs:                    TimingsPrefix,
+		AttributeFilterIndexIDs:      AttributeFilterIndexes,
+		ResourceFilterIndexIDs:       ResourceFilterIndexes,
+		StatFilterIndexIDs:           StatFilterIndexes,
+		ThresholdFilterIndexIDs:      ThresholdFilterIndexes,
+		RouteFilterIndexIDs:          RouteFilterIndexes,
+		ChargerFilterIndexIDs:        ChargerFilterIndexes,
+		DispatcherFilterIndexIDs:     DispatcherFilterIndexes,
+		RateProfilesFilterIndexIDs:   RateProfilesFilterIndexPrfx,
+		RateFilterIndexIDs:           RateFilterIndexPrfx,
+		ActionProfilesFilterIndexIDs: ActionProfilesFilterIndexPrfx,
+		FilterIndexIDs:               FilterIndexPrfx,
 	}
 	CacheInstanceToArg map[string]string
 	ArgCacheToInstance = map[string]string{
@@ -241,19 +236,18 @@ var (
 		RateProfileIDs:        CacheRateProfiles,
 		ActionProfileIDs:      CacheActionProfiles,
 
-		TimingIDs:                     CacheTimings,
-		AttributeFilterIndexIDs:       CacheAttributeFilterIndexes,
-		ResourceFilterIndexIDs:        CacheResourceFilterIndexes,
-		StatFilterIndexIDs:            CacheStatFilterIndexes,
-		ThresholdFilterIndexIDs:       CacheThresholdFilterIndexes,
-		RouteFilterIndexIDs:           CacheRouteFilterIndexes,
-		ChargerFilterIndexIDs:         CacheChargerFilterIndexes,
-		DispatcherFilterIndexIDs:      CacheDispatcherFilterIndexes,
-		RateProfilesFilterIndexIDs:    CacheRateProfilesFilterIndexes,
-		RateFilterIndexIDs:            CacheRateFilterIndexes,
-		FilterIndexIDs:                CacheReverseFilterIndexes,
-		ActionProfilesFilterIndexIDs:  CacheActionProfilesFilterIndexes,
-		AccountProfilesFilterIndexIDs: CacheAccountProfilesFilterIndexes,
+		TimingIDs:                    CacheTimings,
+		AttributeFilterIndexIDs:      CacheAttributeFilterIndexes,
+		ResourceFilterIndexIDs:       CacheResourceFilterIndexes,
+		StatFilterIndexIDs:           CacheStatFilterIndexes,
+		ThresholdFilterIndexIDs:      CacheThresholdFilterIndexes,
+		RouteFilterIndexIDs:          CacheRouteFilterIndexes,
+		ChargerFilterIndexIDs:        CacheChargerFilterIndexes,
+		DispatcherFilterIndexIDs:     CacheDispatcherFilterIndexes,
+		RateProfilesFilterIndexIDs:   CacheRateProfilesFilterIndexes,
+		RateFilterIndexIDs:           CacheRateFilterIndexes,
+		FilterIndexIDs:               CacheReverseFilterIndexes,
+		ActionProfilesFilterIndexIDs: CacheActionProfilesFilterIndexes,
 	}
 	ConcurrentReqsLimit    int
 	ConcurrentReqsStrategy string
@@ -405,7 +399,6 @@ const (
 	DispatcherProfilePrefix   = "dpp_"
 	RateProfilePrefix         = "rtp_"
 	ActionProfilePrefix       = "acp_"
-	AccountProfilePrefix      = "anp_"
 	DispatcherHostPrefix      = "dph_"
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
@@ -565,7 +558,6 @@ const (
 	DispatcherHosts          = "DispatcherHosts"
 	RateProfiles             = "RateProfiles"
 	ActionProfiles           = "ActionProfiles"
-	AccountProfilesString    = "AccountProfiles"
 	MetaEveryMinute          = "*every_minute"
 	MetaHourly               = "*hourly"
 	ID                       = "ID"
@@ -1005,7 +997,6 @@ const (
 	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
 	MetaActionProfiles      = "*action_profiles"
-	MetaAccountProfiles     = "*account_profiles"
 	MetaLoadIDs             = "*load_ids"
 )
 
@@ -1176,7 +1167,6 @@ const (
 	TpDispatcherHosts    = "TpDispatcherHosts"
 	TpRateProfiles       = "TpRateProfiles"
 	TpActionProfiles     = "TpActionProfiles"
-	TpAccountProfiles    = "TpAccountProfiles"
 )
 
 // Dispatcher Const
@@ -1268,7 +1258,6 @@ const (
 	ReplicatorSv1GetRateProfile          = "ReplicatorSv1.GetRateProfile"
 	ReplicatorSv1GetActionProfile        = "ReplicatorSv1.GetActionProfile"
 	ReplicatorSv1GetDispatcherHost       = "ReplicatorSv1.GetDispatcherHost"
-	ReplicatorSv1GetAccountProfile       = "ReplicatorSv1.GetAccountProfile"
 	ReplicatorSv1GetItemLoadIDs          = "ReplicatorSv1.GetItemLoadIDs"
 	ReplicatorSv1SetThresholdProfile     = "ReplicatorSv1.SetThresholdProfile"
 	ReplicatorSv1SetThreshold            = "ReplicatorSv1.SetThreshold"
@@ -1294,7 +1283,6 @@ const (
 	ReplicatorSv1SetDispatcherProfile    = "ReplicatorSv1.SetDispatcherProfile"
 	ReplicatorSv1SetRateProfile          = "ReplicatorSv1.SetRateProfile"
 	ReplicatorSv1SetActionProfile        = "ReplicatorSv1.SetActionProfile"
-	ReplicatorSv1SetAccountProfile       = "ReplicatorSv1.SetAccountProfile"
 	ReplicatorSv1SetDispatcherHost       = "ReplicatorSv1.SetDispatcherHost"
 	ReplicatorSv1SetLoadIDs              = "ReplicatorSv1.SetLoadIDs"
 	ReplicatorSv1RemoveThreshold         = "ReplicatorSv1.RemoveThreshold"
@@ -1321,7 +1309,6 @@ const (
 	ReplicatorSv1RemoveRateProfile       = "ReplicatorSv1.RemoveRateProfile"
 	ReplicatorSv1RemoveActionProfile     = "ReplicatorSv1.RemoveActionProfile"
 	ReplicatorSv1RemoveDispatcherHost    = "ReplicatorSv1.RemoveDispatcherHost"
-	ReplicatorSv1RemoveAccountProfile    = "ReplicatorSv1.RemoveAccountProfile"
 	ReplicatorSv1GetIndexes              = "ReplicatorSv1.GetIndexes"
 	ReplicatorSv1SetIndexes              = "ReplicatorSv1.SetIndexes"
 	ReplicatorSv1RemoveIndexes           = "ReplicatorSv1.RemoveIndexes"
@@ -1501,15 +1488,6 @@ const (
 	APIerSv1SetTPRateProfile            = "APIerSv1.SetTPRateProfile"
 	APIerSv1GetTPRateProfileIds         = "APIerSv1.GetTPRateProfileIds"
 	APIerSv1RemoveTPRateProfile         = "APIerSv1.RemoveTPRateProfile"
-	APIerSv1SetAccountProfile           = "APIerSv1.SetAccountProfile"
-	APIerSv1GetAccountProfile           = "APIerSv1.GetAccountProfile"
-	APIerSv1GetAccountProfileIDs        = "APIerSv1.GetAccountProfileIDs"
-	APIerSv1RemoveAccountProfile        = "APIerSv1.RemoveAccountProfile"
-	APIerSv1GetAccountProfileIDsCount   = "APIerSv1.GetAccountProfileIDsCount"
-	APIerSv1GetTPAccountProfileIDs      = "APIerSv1.GetTPAccountProfileIDs"
-	APIerSv1GetTPAccountProfile         = "APIerSv1.GetTPAccountProfile"
-	APIerSv1SetTPAccountProfile         = "APIerSv1.SetTPAccountProfile"
-	APIerSv1RemoveTPAccountProfile      = "APIerSv1.RemoveTPAccountProfile"
 )
 
 // APIerSv1 TP APIs
@@ -1585,15 +1563,14 @@ const (
 )
 
 const (
-	AccountSv1                        = "AccountSv1"
-	AccountSv1Ping                    = "AccountSv1.Ping"
-	AccountSv1AccountProfilesForEvent = "AccountSv1.AccountProfilesForEvent"
-	AccountSv1MaxAbstracts            = "AccountSv1.MaxAbstracts"
-	AccountSv1DebitAbstracts          = "AccountSv1.DebitAbstracts"
-	AccountSv1MaxConcretes            = "AccountSv1.MaxConcretes"
-	AccountSv1DebitConcretes          = "AccountSv1.DebitConcretes"
-	AccountSv1ActionSetBalance        = "AccountSv1.ActionSetBalance"
-	AccountSv1ActionRemoveBalance     = "AccountSv1.ActionRemoveBalance"
+	AccountSv1                    = "AccountSv1"
+	AccountSv1Ping                = "AccountSv1.Ping"
+	AccountSv1MaxAbstracts        = "AccountSv1.MaxAbstracts"
+	AccountSv1DebitAbstracts      = "AccountSv1.DebitAbstracts"
+	AccountSv1MaxConcretes        = "AccountSv1.MaxConcretes"
+	AccountSv1DebitConcretes      = "AccountSv1.DebitConcretes"
+	AccountSv1ActionSetBalance    = "AccountSv1.ActionSetBalance"
+	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
 )
 
 const (
@@ -1891,7 +1868,6 @@ const (
 	DispatcherHostsCsv    = "DispatcherHosts.csv"
 	RateProfilesCsv       = "RateProfiles.csv"
 	ActionProfilesCsv     = "ActionProfiles.csv"
-	AccountProfilesCsv    = "AccountProfiles.csv"
 )
 
 // Table Name
@@ -1922,68 +1898,65 @@ const (
 	TBLTPDispatcherHosts  = "tp_dispatcher_hosts"
 	TBLTPRateProfiles     = "tp_rate_profiles"
 	TBLTPActionProfiles   = "tp_action_profiles"
-	TBLTPAccountProfiles  = "tp_account_profiles"
 )
 
 // Cache Name
 const (
-	CacheDestinations                 = "*destinations"
-	CacheReverseDestinations          = "*reverse_destinations"
-	CacheRatingPlans                  = "*rating_plans"
-	CacheRatingProfiles               = "*rating_profiles"
-	CacheActions                      = "*actions"
-	CacheActionPlans                  = "*action_plans"
-	CacheAccountActionPlans           = "*account_action_plans"
-	CacheActionTriggers               = "*action_triggers"
-	CacheSharedGroups                 = "*shared_groups"
-	CacheResources                    = "*resources"
-	CacheResourceProfiles             = "*resource_profiles"
-	CacheTimings                      = "*timings"
-	CacheEventResources               = "*event_resources"
-	CacheStatQueueProfiles            = "*statqueue_profiles"
-	CacheStatQueues                   = "*statqueues"
-	CacheThresholdProfiles            = "*threshold_profiles"
-	CacheThresholds                   = "*thresholds"
-	CacheFilters                      = "*filters"
-	CacheRouteProfiles                = "*route_profiles"
-	CacheAttributeProfiles            = "*attribute_profiles"
-	CacheChargerProfiles              = "*charger_profiles"
-	CacheDispatcherProfiles           = "*dispatcher_profiles"
-	CacheDispatcherHosts              = "*dispatcher_hosts"
-	CacheDispatchers                  = "*dispatchers"
-	CacheDispatcherRoutes             = "*dispatcher_routes"
-	CacheDispatcherLoads              = "*dispatcher_loads"
-	CacheRateProfiles                 = "*rate_profiles"
-	CacheActionProfiles               = "*action_profiles"
-	CacheAccountProfiles              = "*account_profiles"
-	CacheResourceFilterIndexes        = "*resource_filter_indexes"
-	CacheStatFilterIndexes            = "*stat_filter_indexes"
-	CacheThresholdFilterIndexes       = "*threshold_filter_indexes"
-	CacheRouteFilterIndexes           = "*route_filter_indexes"
-	CacheAttributeFilterIndexes       = "*attribute_filter_indexes"
-	CacheChargerFilterIndexes         = "*charger_filter_indexes"
-	CacheDispatcherFilterIndexes      = "*dispatcher_filter_indexes"
-	CacheDiameterMessages             = "*diameter_messages"
-	CacheRPCResponses                 = "*rpc_responses"
-	CacheClosedSessions               = "*closed_sessions"
-	CacheRateProfilesFilterIndexes    = "*rate_profile_filter_indexes"
-	CacheActionProfilesFilterIndexes  = "*action_profile_filter_indexes"
-	CacheAccountProfilesFilterIndexes = "*account_profile_filter_indexes"
-	CacheRateFilterIndexes            = "*rate_filter_indexes"
-	MetaPrecaching                    = "*precaching"
-	MetaReady                         = "*ready"
-	CacheLoadIDs                      = "*load_ids"
-	CacheRPCConnections               = "*rpc_connections"
-	CacheCDRIDs                       = "*cdr_ids"
-	CacheRatingProfilesTmp            = "*tmp_rating_profiles"
-	CacheUCH                          = "*uch"
-	CacheSTIR                         = "*stir"
-	CacheEventCharges                 = "*event_charges"
-	CacheReverseFilterIndexes         = "*reverse_filter_indexes"
-	CacheAccounts                     = "*accounts"
-	CacheVersions                     = "*versions"
-	CacheCapsEvents                   = "*caps_events"
-	CacheReplicationHosts             = "*replication_hosts"
+	CacheDestinations                = "*destinations"
+	CacheReverseDestinations         = "*reverse_destinations"
+	CacheRatingPlans                 = "*rating_plans"
+	CacheRatingProfiles              = "*rating_profiles"
+	CacheActions                     = "*actions"
+	CacheActionPlans                 = "*action_plans"
+	CacheAccountActionPlans          = "*account_action_plans"
+	CacheActionTriggers              = "*action_triggers"
+	CacheSharedGroups                = "*shared_groups"
+	CacheResources                   = "*resources"
+	CacheResourceProfiles            = "*resource_profiles"
+	CacheTimings                     = "*timings"
+	CacheEventResources              = "*event_resources"
+	CacheStatQueueProfiles           = "*statqueue_profiles"
+	CacheStatQueues                  = "*statqueues"
+	CacheThresholdProfiles           = "*threshold_profiles"
+	CacheThresholds                  = "*thresholds"
+	CacheFilters                     = "*filters"
+	CacheRouteProfiles               = "*route_profiles"
+	CacheAttributeProfiles           = "*attribute_profiles"
+	CacheChargerProfiles             = "*charger_profiles"
+	CacheDispatcherProfiles          = "*dispatcher_profiles"
+	CacheDispatcherHosts             = "*dispatcher_hosts"
+	CacheDispatchers                 = "*dispatchers"
+	CacheDispatcherRoutes            = "*dispatcher_routes"
+	CacheDispatcherLoads             = "*dispatcher_loads"
+	CacheRateProfiles                = "*rate_profiles"
+	CacheActionProfiles              = "*action_profiles"
+	CacheResourceFilterIndexes       = "*resource_filter_indexes"
+	CacheStatFilterIndexes           = "*stat_filter_indexes"
+	CacheThresholdFilterIndexes      = "*threshold_filter_indexes"
+	CacheRouteFilterIndexes          = "*route_filter_indexes"
+	CacheAttributeFilterIndexes      = "*attribute_filter_indexes"
+	CacheChargerFilterIndexes        = "*charger_filter_indexes"
+	CacheDispatcherFilterIndexes     = "*dispatcher_filter_indexes"
+	CacheDiameterMessages            = "*diameter_messages"
+	CacheRPCResponses                = "*rpc_responses"
+	CacheClosedSessions              = "*closed_sessions"
+	CacheRateProfilesFilterIndexes   = "*rate_profile_filter_indexes"
+	CacheActionProfilesFilterIndexes = "*action_profile_filter_indexes"
+	CacheRateFilterIndexes           = "*rate_filter_indexes"
+	MetaPrecaching                   = "*precaching"
+	MetaReady                        = "*ready"
+	CacheLoadIDs                     = "*load_ids"
+	CacheRPCConnections              = "*rpc_connections"
+	CacheCDRIDs                      = "*cdr_ids"
+	CacheRatingProfilesTmp           = "*tmp_rating_profiles"
+	CacheUCH                         = "*uch"
+	CacheSTIR                        = "*stir"
+	CacheEventCharges                = "*event_charges"
+	CacheReverseFilterIndexes        = "*reverse_filter_indexes"
+	CacheAccounts                    = "*accounts"
+	CacheVersions                    = "*versions"
+	CacheCapsEvents                  = "*caps_events"
+	CacheReplicationHosts            = "*replication_hosts"
 
 	// storDB
 	CacheTBLTPTimings          = "*tp_timings"
@@ -2010,7 +1983,6 @@ const (
 	CacheTBLTPDispatcherHosts  = "*tp_dispatcher_hosts"
 	CacheTBLTPRateProfiles     = "*tp_rate_profiles"
 	CacheTBLTPActionProfiles   = "*tp_action_profiles"
-	CacheTBLTPAccountProfiles  = "*tp_account_profiles"
 )
 
 // Prefix for indexing
@@ -2026,7 +1998,6 @@ const (
 	RateProfilesFilterIndexPrfx   = "rpi_"
 	RateFilterIndexPrfx           = "rri_"
 	ActionProfilesFilterIndexPrfx = "aci_"
-	AccountProfileFilterIndexPrfx = "ani_"
 	FilterIndexPrfx               = "fii_"
 )
 
@@ -2635,43 +2606,42 @@ const (
 
 // ArgCache constats
 const (
-	DestinationIDs                = "DestinationIDs"
-	ReverseDestinationIDs         = "ReverseDestinationIDs"
-	RatingPlanIDs                 = "RatingPlanIDs"
-	RatingProfileIDs              = "RatingProfileIDs"
-	ActionIDs                     = "ActionIDs"
-	ActionPlanIDs                 = "ActionPlanIDs"
-	AccountActionPlanIDs          = "AccountActionPlanIDs"
-	ActionTriggerIDs              = "ActionTriggerIDs"
-	SharedGroupIDs                = "SharedGroupIDs"
-	ResourceProfileIDs            = "ResourceProfileIDs"
-	ResourceIDs                   = "ResourceIDs"
-	StatsQueueIDs                 = "StatsQueueIDs"
-	StatsQueueProfileIDs          = "StatsQueueProfileIDs"
-	ThresholdIDs                  = "ThresholdIDs"
-	ThresholdProfileIDs           = "ThresholdProfileIDs"
-	FilterIDs                     = "FilterIDs"
-	RouteProfileIDs               = "RouteProfileIDs"
-	AttributeProfileIDs           = "AttributeProfileIDs"
-	ChargerProfileIDs             = "ChargerProfileIDs"
-	DispatcherProfileIDs          = "DispatcherProfileIDs"
-	DispatcherHostIDs             = "DispatcherHostIDs"
-	DispatcherRoutesIDs           = "DispatcherRoutesIDs"
-	RateProfileIDs                = "RateProfileIDs"
-	ActionProfileIDs              = "ActionProfileIDs"
-	TimingIDs                     = "TimingIDs"
-	AttributeFilterIndexIDs       = "AttributeFilterIndexIDs"
-	ResourceFilterIndexIDs        = "ResourceFilterIndexIDs"
-	StatFilterIndexIDs            = "StatFilterIndexIDs"
-	ThresholdFilterIndexIDs       = "ThresholdFilterIndexIDs"
-	RouteFilterIndexIDs           = "RouteFilterIndexIDs"
-	ChargerFilterIndexIDs         = "ChargerFilterIndexIDs"
-	DispatcherFilterIndexIDs      = "DispatcherFilterIndexIDs"
-	RateProfilesFilterIndexIDs    = "RateProfilesFilterIndexIDs"
-	RateFilterIndexIDs            = "RateFilterIndexIDs"
-	ActionProfilesFilterIndexIDs  = "ActionProfilesFilterIndexIDs"
-	AccountProfilesFilterIndexIDs = "AccountProfilesFilterIndexIDs"
-	FilterIndexIDs                = "FilterIndexIDs"
+	DestinationIDs               = "DestinationIDs"
+	ReverseDestinationIDs        = "ReverseDestinationIDs"
+	RatingPlanIDs                = "RatingPlanIDs"
+	RatingProfileIDs             = "RatingProfileIDs"
+	ActionIDs                    = "ActionIDs"
+	ActionPlanIDs                = "ActionPlanIDs"
+	AccountActionPlanIDs         = "AccountActionPlanIDs"
+	ActionTriggerIDs             = "ActionTriggerIDs"
+	SharedGroupIDs               = "SharedGroupIDs"
+	ResourceProfileIDs           = "ResourceProfileIDs"
+	ResourceIDs                  = "ResourceIDs"
+	StatsQueueIDs                = "StatsQueueIDs"
+	StatsQueueProfileIDs         = "StatsQueueProfileIDs"
+	ThresholdIDs                 = "ThresholdIDs"
+	ThresholdProfileIDs          = "ThresholdProfileIDs"
+	FilterIDs                    = "FilterIDs"
+	RouteProfileIDs              = "RouteProfileIDs"
+	AttributeProfileIDs          = "AttributeProfileIDs"
+	ChargerProfileIDs            = "ChargerProfileIDs"
+	DispatcherProfileIDs         = "DispatcherProfileIDs"
+	DispatcherHostIDs            = "DispatcherHostIDs"
+	DispatcherRoutesIDs          = "DispatcherRoutesIDs"
+	RateProfileIDs               = "RateProfileIDs"
+	ActionProfileIDs             = "ActionProfileIDs"
+	TimingIDs                    = "TimingIDs"
+	AttributeFilterIndexIDs      = "AttributeFilterIndexIDs"
+	ResourceFilterIndexIDs       = "ResourceFilterIndexIDs"
+	StatFilterIndexIDs           = "StatFilterIndexIDs"
+	ThresholdFilterIndexIDs      = "ThresholdFilterIndexIDs"
+	RouteFilterIndexIDs          = "RouteFilterIndexIDs"
+	ChargerFilterIndexIDs        = "ChargerFilterIndexIDs"
+	DispatcherFilterIndexIDs     = "DispatcherFilterIndexIDs"
+	RateProfilesFilterIndexIDs   = "RateProfilesFilterIndexIDs"
+	RateFilterIndexIDs           = "RateFilterIndexIDs"
+	ActionProfilesFilterIndexIDs = "ActionProfilesFilterIndexIDs"
+	FilterIndexIDs               = "FilterIndexIDs"
 )
 
 // Poster and Event reader constants

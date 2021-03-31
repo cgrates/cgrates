@@ -332,17 +332,6 @@ func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPIOpts, 
 	return nil
 }
 
-// GetAccountProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
-	engine.UpdateReplicationFilters(utils.AccountProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetAccountProfileDrv(tntID.Tenant, tntID.ID)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
 // GetItemLoadIDs is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
 	engine.UpdateReplicationFilters(utils.LoadIDPrefix, itemID.Arg, utils.IfaceAsString(itemID.APIOpts[utils.RemoteHostOpt]))
@@ -687,19 +676,6 @@ func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithAPIOp
 	return
 }
 
-// SetAccountProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetAccountProfileDrv(acp.AccountProfile); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.APIOpts[utils.CacheOpt]),
-		acp.Tenant, utils.CacheAccountProfiles, acp.TenantID(), &acp.FilterIDs, nil, acp.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
 // SetLoadIDs is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetLoadIDsDrv(args.LoadIDs); err != nil {
@@ -1024,19 +1000,6 @@ func (rplSv1 *ReplicatorSv1) RemoveActionProfile(args *utils.TenantIDWithAPIOpts
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
 		args.Tenant, utils.CacheActionProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveAccountProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveAccountProfileDrv(args.Tenant, args.ID); err != nil {
-		return
-	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheAccountProfiles, args.TenantID.TenantID(), nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
