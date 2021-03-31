@@ -37,6 +37,7 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrGetAttrRoundRobin,
 
 	testDspAttrPing,
+	testDspAttrPingEmptyCGREventWIthArgDispatcher,
 	testDspAttrTestMissingArgDispatcher,
 	testDspAttrTestMissingApiKey,
 	testDspAttrTestUnknownApiKey,
@@ -323,6 +324,15 @@ func testDspAttrPing(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspAttrPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
+	expected := "MANDATORY_IE_MISSING: [APIKey]"
+	var reply string
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping,
+		&utils.CGREventWithArgDispatcher{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 

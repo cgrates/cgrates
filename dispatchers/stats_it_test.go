@@ -35,6 +35,7 @@ var sTestsDspSts = []func(t *testing.T){
 	testDspStsGetStatFailover,
 
 	testDspStsPing,
+	testDspStsPingEmptyCGREventWIthArgDispatcher,
 	testDspStsTestAuthKey,
 	testDspStsTestAuthKey2,
 	testDspStsTestAuthKey3,
@@ -171,6 +172,15 @@ func testDspStsPing(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
+	}
+}
+
+func testDspStsPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
+	expected := "MANDATORY_IE_MISSING: [APIKey]"
+	var reply string
+	if err := dispEngine.RPC.Call(utils.StatSv1Ping,
+		&utils.CGREventWithArgDispatcher{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 

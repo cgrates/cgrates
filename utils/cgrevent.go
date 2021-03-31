@@ -224,7 +224,10 @@ type CGREvents struct {
 }
 
 func NewCGREventWithArgDispatcher() *CGREventWithArgDispatcher {
-	return new(CGREventWithArgDispatcher)
+	return &CGREventWithArgDispatcher{
+		CGREvent:      new(CGREvent),
+		ArgDispatcher: new(ArgDispatcher),
+	}
 }
 
 type CGREventWithArgDispatcher struct {

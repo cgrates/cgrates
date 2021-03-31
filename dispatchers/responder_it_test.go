@@ -34,6 +34,7 @@ var sTestsDspRsp = []func(t *testing.T){
 	testDspResponderRandom,
 	testDspResponderBroadcast,
 	testDspResponderInternal,
+	testDspResponderPingEmptyCGREventWIthArgDispatcher,
 }
 
 //Test start here
@@ -244,5 +245,14 @@ func testDspResponderInternal(t *testing.T) {
 	}
 	if strRply := reply[utils.NodeID].(string); strRply != "DispatcherS1" {
 		t.Errorf("Expected: DispatcherS1 , received: %s", strRply)
+	}
+}
+
+func testDspResponderPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
+	expected := "MANDATORY_IE_MISSING: [APIKey]"
+	var reply string
+	if err := dispEngine.RPC.Call(utils.ResponderPing,
+		&utils.CGREventWithArgDispatcher{}, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

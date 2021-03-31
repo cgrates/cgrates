@@ -447,11 +447,14 @@ func TestCGREventConsumeArgs(t *testing.T) {
 }
 
 func TestNewCGREventWithArgDispatcher(t *testing.T) {
-	eOut := new(CGREventWithArgDispatcher)
-	rcv := NewCGREventWithArgDispatcher()
+	exp := &CGREventWithArgDispatcher{
+		CGREvent:      new(CGREvent),
+		ArgDispatcher: new(ArgDispatcher),
+	}
+	eOut := NewCGREventWithArgDispatcher()
 
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	if !reflect.DeepEqual(eOut, exp) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, exp)
 	}
 }
 

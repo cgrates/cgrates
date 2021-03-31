@@ -26,6 +26,13 @@ import (
 )
 
 func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	if args == nil || (args.CGREvent == nil && args.ArgDispatcher == nil) {
+		args = utils.NewCGREventWithArgDispatcher()
+	} else if args.CGREvent == nil {
+		args.CGREvent = new(utils.CGREvent)
+	} else if args.ArgDispatcher == nil {
+		args.ArgDispatcher = new(utils.ArgDispatcher)
+	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
