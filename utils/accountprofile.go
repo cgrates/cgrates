@@ -43,9 +43,8 @@ func (ap *AccountProfile) BalancesAltered(abb AccountBalancesBackup) (altred boo
 		return true
 	}
 	for blncID, blnc := range ap.Balances {
-		if bkpVal, has := abb[blncID]; !has {
-			return true
-		} else if blnc.Units.Big.Cmp(bkpVal) != 0 {
+		if bkpVal, has := abb[blncID]; !has ||
+			blnc.Units.Big.Cmp(bkpVal) != 0 {
 			return true
 		}
 	}
@@ -142,7 +141,7 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 	return
 }
 
-//Clone return a copy of the UnitFactor
+// Clone return a copy of the UnitFactor
 func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
 	untFct = new(UnitFactor)
 	if uF.FilterIDs != nil {
@@ -322,16 +321,6 @@ func (apWws AccountProfilesWithWeight) LockIDs() (lkIDs []string) {
 	return
 }
 
-func (apWws AccountProfilesWithWeight) TenantIDs() (tntIDs []string) {
-	if apWws != nil {
-		tntIDs = make([]string, len(apWws))
-		for i, apWw := range apWws {
-			tntIDs[i] = apWw.AccountProfile.TenantID()
-		}
-	}
-	return
-}
-
 // BalanceWithWeight attaches static Weight to Balance
 type BalanceWithWeight struct {
 	*Balance
@@ -372,12 +361,6 @@ type AccountProfileWithAPIOpts struct {
 type ArgsAccountsForEvent struct {
 	*CGREvent
 	AccountIDs []string
-}
-
-type ReplyMaxUsage struct {
-	AccountID string
-	MaxUsage  time.Duration
-	Cost      *EventCharges
 }
 
 // APIAccountProfile represents one APIAccount on a Tenant

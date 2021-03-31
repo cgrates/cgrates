@@ -71,7 +71,7 @@ func (apierSv1 *APIerSv1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string)
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPStats,
-		utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg}, nil, &attrs.PaginatorWithSearch)
+		[]string{utils.TenantCfg, utils.IDCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)

@@ -30,7 +30,7 @@ func (m *Migrator) migrateCurrentTPfilters() (err error) {
 	}
 	for _, tpid := range tpids {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPFilters,
-			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+			[]string{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

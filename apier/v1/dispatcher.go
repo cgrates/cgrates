@@ -514,11 +514,11 @@ func (dS *DispatcherSessionSv1) SetPassiveSession(args *sessions.Session,
 	return dS.dS.SessionSv1SetPassiveSession(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
+func (dS *DispatcherSessionSv1) ActivateSessions(args *utils.SessionIDsWithAPIOpts, reply *string) error {
 	return dS.dS.SessionSv1ActivateSessions(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
+func (dS *DispatcherSessionSv1) DeactivateSessions(args *utils.SessionIDsWithAPIOpts, reply *string) error {
 	return dS.dS.SessionSv1DeactivateSessions(args, reply)
 }
 

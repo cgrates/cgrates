@@ -115,20 +115,6 @@ type FilterSJsonCfg struct {
 	Apiers_conns    *[]string
 }
 
-// Rater config section
-type RalsJsonCfg struct {
-	Enabled                    *bool
-	Thresholds_conns           *[]string
-	Stats_conns                *[]string
-	CacheS_conns               *[]string
-	Rp_subject_prefix_matching *bool
-	Remove_expired             *bool
-	Max_computed_usage         *map[string]string
-	Max_increments             *int
-	Balance_rating_subject     *map[string]string
-	Dynaprepaid_actionplans    *[]string
-}
-
 // Cdrs config section
 type CdrsJsonCfg struct {
 	Enabled              *bool

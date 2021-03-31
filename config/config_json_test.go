@@ -546,38 +546,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfRalsJsonCfg(t *testing.T) {
-	eCfg := &RalsJsonCfg{
-		Enabled:                    utils.BoolPointer(false),
-		Thresholds_conns:           &[]string{},
-		Stats_conns:                &[]string{},
-		CacheS_conns:               &[]string{utils.MetaInternal},
-		Rp_subject_prefix_matching: utils.BoolPointer(false),
-		Remove_expired:             utils.BoolPointer(true),
-		Max_computed_usage: &map[string]string{
-			utils.MetaAny:   "189h",
-			utils.MetaVoice: "72h",
-			utils.MetaData:  "107374182400",
-			utils.MetaSMS:   "10000",
-			utils.MetaMMS:   "10000",
-		},
-		Max_increments: utils.IntPointer(1000000),
-		Balance_rating_subject: &map[string]string{
-			utils.MetaAny:   "*zero1ns",
-			utils.MetaVoice: "*zero1s",
-		},
-		Dynaprepaid_actionplans: &[]string{},
-	}
-	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
-	if err != nil {
-		t.Error(err)
-	}
-	if cfg, err := dfCgrJSONCfg.RalsJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Received: %+v", cfg)
-	}
-}
+
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{

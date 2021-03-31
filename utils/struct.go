@@ -42,33 +42,6 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 	return missing
 }
 
-// MissingMapFields detects missing field values based on mandatory field names from a map[string]interface{}
-func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
-	missing := []string{}
-	for _, fieldName := range mandatories {
-		if fldval, has := s[fieldName]; !has {
-			missing = append(missing, fieldName)
-		} else {
-			fld := reflect.ValueOf(fldval)
-			// sanitize the string fields before checking
-			if fld.Kind() == reflect.String {
-				str := strings.TrimSpace(fld.String())
-				s[fieldName] = str
-				if len(str) == 0 {
-					missing = append(missing, fieldName)
-				}
-				continue
-				//fld.SetString(strings.TrimSpace(fld.String()))
-			}
-			if ((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
-				(fld.Kind() == reflect.Int && fld.Int() == 0) {
-				missing = append(missing, fieldName)
-			}
-		}
-	}
-	return missing
-}
-
 // UpdateStructWithIfaceMap will update struct fields with values coming from map
 // if map values are not matching the ones in struct convertion is being attempted
 // ToDo: add here more fields

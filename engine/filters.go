@@ -486,7 +486,7 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-	for _, p := range utils.SplitPrefix(dst, 1) {
+	for _, p := range utils.SplitPrefix(dst, utils.MIN_PREFIX_MATCH) {
 		var destIDs []string
 		if err = connMgr.Call(config.CgrConfig().FilterSCfg().ApierSConns, nil, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
 			continue

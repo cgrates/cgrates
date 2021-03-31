@@ -507,7 +507,7 @@ func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {
 }
 
 func (csvs *CSVStorage) GetTpTableIds(tpid, table string,
-	distinct utils.TPDistinctIds, filters map[string]string, p *utils.PaginatorWithSearch) ([]string, error) {
+	distinct []string, filters map[string]string, p *utils.PaginatorWithSearch) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 

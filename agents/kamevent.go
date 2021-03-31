@@ -240,7 +240,7 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	}
 	if authArgs.GetMaxUsage {
 		if authReply.MaxUsage != nil {
-			kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.MetaRoundingMiddle))
+			kar.MaxUsage = authReply.MaxUsage.Seconds()
 		} else {
 			kar.MaxUsage = 0
 		}
@@ -326,7 +326,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 		kar.ResourceAllocation = *procEvReply.ResourceAllocation
 	}
 	if procEvArgs.Debit {
-		kar.MaxUsage = int(utils.Round(procEvReply.MaxUsage.Seconds(), 0, utils.MetaRoundingMiddle))
+		kar.MaxUsage = procEvReply.MaxUsage.Seconds()
 	}
 	if procEvArgs.GetRoutes && procEvReply.RouteProfiles != nil {
 		kar.Routes = procEvReply.RouteProfiles.Digest()
@@ -399,8 +399,8 @@ type KamReply struct {
 	TransactionLabel   string // Original transaction label
 	Attributes         string
 	ResourceAllocation string
-	MaxUsage           int    // Maximum session time in case of success, -1 for unlimited
-	Routes             string // List of routes, comma separated
+	MaxUsage           float64 // Maximum session time in case of success, -1 for unlimited
+	Routes             string  // List of routes, comma separated
 	Thresholds         string
 	StatQueues         string
 	Error              string // Reply in case of error

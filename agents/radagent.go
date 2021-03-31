@@ -284,9 +284,10 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if evArgs.Debit {
+		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		// } else
+		if evArgs.Debit {
 			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
 		rply.SetMaxUsageNeeded(evArgs.Debit)
@@ -300,11 +301,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1ProcessEventReply)
 		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
-		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
+		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		// } else
+		// if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
+		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
+		// }
 		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:

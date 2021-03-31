@@ -31,7 +31,7 @@ func (m *Migrator) migrateCurrentTPRateProfiles() (err error) {
 
 	for _, tpid := range tpids {
 		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPRateProfiles,
-			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+			[]string{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

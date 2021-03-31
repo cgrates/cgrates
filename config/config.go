@@ -159,9 +159,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.httpCfg = new(HTTPCfg)
 	cfg.httpCfg.ClientOpts = make(map[string]interface{})
 	cfg.filterSCfg = new(FilterSCfg)
-	cfg.ralsCfg = new(RalsCfg)
-	cfg.ralsCfg.MaxComputedUsage = make(map[string]time.Duration)
-	cfg.ralsCfg.BalanceRatingSubject = make(map[string]string)
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -306,7 +303,6 @@ type CGRConfig struct {
 	listenCfg        *ListenCfg        // Listen config
 	httpCfg          *HTTPCfg          // HTTP config
 	filterSCfg       *FilterSCfg       // FilterS config
-	ralsCfg          *RalsCfg          // Rals config
 	cdrsCfg          *CdrsCfg          // Cdrs config
 	sessionSCfg      *SessionSCfg      // SessionS config
 	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
@@ -397,7 +393,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadRPCConns,
 		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
-		cfg.loadFilterSCfg, cfg.loadRalSCfg,
+		cfg.loadFilterSCfg,
 		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
@@ -526,15 +522,6 @@ func (cfg *CGRConfig) loadFilterSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.filterSCfg.loadFromJSONCfg(jsnFilterSCfg)
-}
-
-// loadRalSCfg loads the RalS section of the configuration
-func (cfg *CGRConfig) loadRalSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnRALsCfg *RalsJsonCfg
-	if jsnRALsCfg, err = jsnCfg.RalsJsonCfg(); err != nil {
-		return
-	}
-	return cfg.ralsCfg.loadFromJSONCfg(jsnRALsCfg)
 }
 
 // loadCdrsCfg loads the Cdrs section of the configuration
@@ -1060,13 +1047,6 @@ func (cfg *CGRConfig) HTTPCfg() *HTTPCfg {
 	return cfg.httpCfg
 }
 
-// RalsCfg returns the config for Ral Service
-func (cfg *CGRConfig) RalsCfg() *RalsCfg {
-	cfg.lks[RALS_JSN].Lock()
-	defer cfg.lks[RALS_JSN].Unlock()
-	return cfg.ralsCfg
-}
-
 // CdrsCfg returns the config for CDR Server
 func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
 	cfg.lks[CDRS_JSN].Lock()
@@ -1254,7 +1234,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		HTTP_JSN:           cfg.loadHTTPCfg,
 		CACHE_JSN:          cfg.loadCacheCfg,
 		FilterSjsn:         cfg.loadFilterSCfg,
-		RALS_JSN:           cfg.loadRalSCfg,
 		CDRS_JSN:           cfg.loadCdrsCfg,
 		ERsJson:            cfg.loadErsCfg,
 		EEsJson:            cfg.loadEesCfg,
@@ -1449,11 +1428,11 @@ func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string)
 // the list of sections should be always valid because we load the config first with this list
 func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN,
-		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
+		CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS, AccountSCfgJson,
 		ActionSJson})
-	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
 	needsStorDB := false
 	for _, section := range sections {
@@ -1491,8 +1470,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		case CoreSCfgJson: // nothing to reload
 		case HTTP_JSN:
 			cfg.rldChans[HTTP_JSN] <- struct{}{}
-		case RALS_JSN:
-			cfg.rldChans[RALS_JSN] <- struct{}{}
 		case CDRS_JSN:
 			cfg.rldChans[CDRS_JSN] <- struct{}{}
 		case ERsJson:
@@ -1563,7 +1540,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		LISTEN_JSN:         cfg.listenCfg.AsMapInterface(),
 		HTTP_JSN:           cfg.httpCfg.AsMapInterface(),
 		FilterSjsn:         cfg.filterSCfg.AsMapInterface(),
-		RALS_JSN:           cfg.ralsCfg.AsMapInterface(),
 		CDRS_JSN:           cfg.cdrsCfg.AsMapInterface(),
 		SessionSJson:       cfg.sessionSCfg.AsMapInterface(),
 		FreeSWITCHAgentJSN: cfg.fsAgentCfg.AsMapInterface(separator),
@@ -1688,8 +1664,6 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		mp = cfg.HTTPCfg().AsMapInterface()
 	case FilterSjsn:
 		mp = cfg.FilterSCfg().AsMapInterface()
-	case RALS_JSN:
-		mp = cfg.RalsCfg().AsMapInterface()
 	case CDRS_JSN:
 		mp = cfg.CdrsCfg().AsMapInterface()
 	case SessionSJson:
@@ -1856,8 +1830,6 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		mp = cfg.HTTPCfg().AsMapInterface()
 	case FilterSjsn:
 		mp = cfg.FilterSCfg().AsMapInterface()
-	case RALS_JSN:
-		mp = cfg.RalsCfg().AsMapInterface()
 	case CDRS_JSN:
 		mp = cfg.CdrsCfg().AsMapInterface()
 	case SessionSJson:
@@ -1992,7 +1964,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		listenCfg:        cfg.listenCfg.Clone(),
 		httpCfg:          cfg.httpCfg.Clone(),
 		filterSCfg:       cfg.filterSCfg.Clone(),
-		ralsCfg:          cfg.ralsCfg.Clone(),
 		cdrsCfg:          cfg.cdrsCfg.Clone(),
 		sessionSCfg:      cfg.sessionSCfg.Clone(),
 		fsAgentCfg:       cfg.fsAgentCfg.Clone(),

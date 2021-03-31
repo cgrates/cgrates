@@ -66,7 +66,7 @@ func (apierSv1 *APIerSv1) GetTPTimingIds(attrs *AttrGetTPTimingIds, reply *[]str
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPTimings,
-		utils.TPDistinctIds{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
+		[]string{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)

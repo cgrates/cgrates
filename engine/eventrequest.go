@@ -320,8 +320,7 @@ func (eeR *EventRequest) ParseField(
 		if exp, err = strconv.Atoi(strVal2); err != nil {
 			return
 		}
-		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
-			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.MetaRoundingMiddle), 'f', -1, 64)
+		out = strconv.FormatFloat(val*math.Pow10(exp), 'f', -1, 64)
 	case utils.MetaUnixTimestamp:
 		var val string
 		if val, err = cfgFld.Value.ParseDataProvider(eeR); err != nil {

@@ -554,65 +554,6 @@ func TestAPLockIDs(t *testing.T) {
 	}
 }
 
-func TestAPTenantIDs(t *testing.T) {
-	apS := AccountProfilesWithWeight{
-		{
-			AccountProfile: &AccountProfile{
-				Tenant:    "testTenant1",
-				ID:        "testID1",
-				FilterIDs: []string{"testFID1", "testFID2"},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
-					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
-				},
-				Weights: nil,
-				Balances: map[string]*Balance{
-					"testBalance1": {
-						ID:    "testBalance1",
-						Type:  MetaAbstract,
-						Units: &Decimal{decimal.New(0, 0)},
-					},
-				},
-			},
-			Weight: 23,
-			LockID: "testString1",
-		},
-		{
-			AccountProfile: &AccountProfile{
-				Tenant:    "testTenant2",
-				ID:        "testID2",
-				FilterIDs: []string{"testFID1", "testFID2"},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
-					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
-				},
-				Weights: nil,
-				Balances: map[string]*Balance{
-					"testBalance2": {
-						ID:    "testBalance2",
-						Type:  MetaAbstract,
-						Units: &Decimal{decimal.New(0, 0)},
-					},
-				},
-			},
-			Weight: 15,
-			LockID: "testString2",
-		},
-	}
-
-	expected := make([]string, 0)
-	for _, val := range apS {
-		id := val.AccountProfile.Tenant
-		tenant := val.AccountProfile.ID
-		expected = append(expected, ConcatenatedKey(id, tenant))
-	}
-	received := apS.TenantIDs()
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
-	}
-}
-
 func TestAPBlcsSort(t *testing.T) {
 
 	blncS := BalancesWithWeight{

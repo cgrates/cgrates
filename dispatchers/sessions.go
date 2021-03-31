@@ -288,7 +288,7 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 	}, utils.MetaSessionS, utils.SessionSv1SetPassiveSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -305,7 +305,7 @@ func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWi
 	}, utils.MetaSessionS, utils.SessionSv1ActivateSessions, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDsWithArgsDispatcher, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

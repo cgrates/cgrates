@@ -143,7 +143,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
-	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
+	internalLoaderSChan, internalCacheSChan,
 	internalEEsChan, internalRateSChan, internalActionSChan,
 	internalAccountSChan chan rpcclient.ClientConnector,
 	shdChan *utils.SyncedChan) {
@@ -171,8 +171,6 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalAnalyzerSChan <- analyzerS
 		case loaderS := <-internalLoaderSChan:
 			internalLoaderSChan <- loaderS
-		case ralS := <-internalRALsv1Chan:
-			internalRALsv1Chan <- ralS
 		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
 			internalCacheSChan <- chS
 		case eeS := <-internalEEsChan:
@@ -319,8 +317,8 @@ func stopCPUProfiling(f io.Closer) {
 }
 
 func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
-	shutdownSignal := make(chan os.Signal)
-	reloadSignal := make(chan os.Signal)
+	shutdownSignal := make(chan os.Signal, 1)
+	reloadSignal := make(chan os.Signal, 1)
 	signal.Notify(shutdownSignal, os.Interrupt,
 		syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	signal.Notify(reloadSignal, syscall.SIGHUP)
@@ -491,7 +489,6 @@ func main() {
 	internalStatSChan := make(chan rpcclient.ClientConnector, 1)
 	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)
 	internalRouteSChan := make(chan rpcclient.ClientConnector, 1)
-	internalRALsChan := make(chan rpcclient.ClientConnector, 1)
 	internalResponderChan := make(chan rpcclient.ClientConnector, 1)
 	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
@@ -550,7 +547,6 @@ func main() {
 		utils.KamailioAgent:   new(sync.WaitGroup),
 		utils.LoaderS:         new(sync.WaitGroup),
 		utils.RadiusAgent:     new(sync.WaitGroup),
-		utils.RALService:      new(sync.WaitGroup),
 		utils.RateS:           new(sync.WaitGroup),
 		utils.ResourceS:       new(sync.WaitGroup),
 		utils.ResponderS:      new(sync.WaitGroup),
@@ -716,7 +712,7 @@ func main() {
 		internalResourceSChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
-		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
+		internalDispatcherSChan, internalLoaderSChan,
 		internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
 		internalAccountSChan, shdChan)
 

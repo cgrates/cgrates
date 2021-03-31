@@ -289,7 +289,7 @@ func (tpExp *TPExporter) writeOut(fileName string, tpData []interface{}) error {
 		return nil
 	}
 	var fWriter io.Writer
-	var writerOut utils.CgrRecordWriter
+	var writerOut utils.NopFlushWriter
 	var err error
 
 	if tpExp.compress {
@@ -314,7 +314,7 @@ func (tpExp *TPExporter) writeOut(fileName string, tpData []interface{}) error {
 		csvWriter.Comma = tpExp.sep
 		writerOut = csvWriter
 	default:
-		writerOut = utils.NewCgrIORecordWriter(fWriter)
+		writerOut = utils.NewNopFlushWriter(fWriter)
 	}
 	for _, tpItem := range tpData {
 		record, err := CsvDump(tpItem)

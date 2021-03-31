@@ -68,7 +68,7 @@ func (apierSv1 *APIerSv1) GetTPDestinationIDs(attrs *AttrGetTPDestinationIds, re
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDestinations,
-		utils.TPDistinctIds{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
+		[]string{utils.TagCfg}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}

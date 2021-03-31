@@ -60,11 +60,9 @@ func (s StringSet) AsSlice() []string {
 	if s == nil {
 		return nil
 	}
-	result := make([]string, len(s))
-	i := 0
+	result := make([]string, 0, len(s))
 	for k := range s {
-		result[i] = k
-		i++
+		result = append(result, k)
 	}
 	return result
 }

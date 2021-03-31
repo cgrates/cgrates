@@ -67,7 +67,7 @@ func (apierSv1 *APIerSv1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherId
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, []string{utils.TenantCfg, utils.IDCfg},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -135,7 +135,7 @@ func (apierSv1 *APIerSv1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, 
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{utils.TenantCfg, utils.IDCfg},
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, []string{utils.TenantCfg, utils.IDCfg},
 		nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
