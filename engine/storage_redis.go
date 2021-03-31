@@ -269,8 +269,7 @@ func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (exists boo
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix,
-		utils.RateProfilePrefix:
+		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
 		err := rs.Cmd(&i, redis_EXISTS, category+utils.ConcatenatedKey(tenant, subject))
 		return i == 1, err
 	}
@@ -1246,30 +1245,6 @@ func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]int64) error {
 
 func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.LoadIDs)
-}
-
-func (rs *RedisStorage) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redis_GET, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrNotFound
-		return
-	}
-	err = rs.ms.Unmarshal(values, &rpp)
-	return
-}
-
-func (rs *RedisStorage) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(rpp); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redis_SET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), string(result))
-}
-
-func (rs *RedisStorage) RemoveRateProfileDrv(tenant, id string) (err error) {
-	return rs.Cmd(nil, redis_DEL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 func (rs *RedisStorage) GetActionProfileDrv(tenant, id string) (ap *ActionProfile, err error) {

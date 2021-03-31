@@ -64,11 +64,6 @@ func TestResponderInterface(t *testing.T) {
 	_ = ResponderInterface(&engine.Responder{})
 }
 
-func TestRateProfileInterface(t *testing.T) {
-	_ = RateProfileSv1Interface(NewDispatcherRateSv1(nil))
-	_ = RateProfileSv1Interface(NewRateSv1(nil))
-}
-
 func TestCacheSv1Interface(t *testing.T) {
 	_ = CacheSv1Interface(NewDispatcherCacheSv1(nil))
 	_ = CacheSv1Interface(NewCacheSv1(nil))
@@ -112,14 +107,4 @@ func TestCoreSv1Interface(t *testing.T) {
 func TestReplicatorSv1Interface(t *testing.T) {
 	_ = ReplicatorSv1Interface(NewDispatcherReplicatorSv1(nil))
 	_ = ReplicatorSv1Interface(NewReplicatorSv1(nil, nil))
-}
-
-func TestRateSv1Interface(t *testing.T) {
-	_ = RateSv1Interface(NewDispatcherRateSv1(nil))
-	_ = RateSv1Interface(NewRateSv1(nil))
-}
-
-func TestActionSv1Interface(t *testing.T) {
-	_ = ActionSv1Interface(NewDispatcherActionSv1(nil))
-	_ = ActionSv1Interface(NewActionSv1(nil))
 }

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -179,8 +178,6 @@ func removeItemFromFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID str
 // itemID - the object id
 // oldFilterIds - the filtersIDs that the old object had; this is optional if the object did not exist
 // newFilterIDs - the filtersIDs for the object that will be set
-// useCtx - in case of subindexes(e.g. Rate from RateProfiles) need to add the ctx to the itemID when reverse filter indexes are set
-// 			used when updating the filters
 func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string, useCtx bool) (err error) {
 	itmCtx := itemID
 	if useCtx {
@@ -712,73 +709,6 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					return &fltrIDs, nil
 				}); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
-			}
-		case utils.CacheRateProfilesFilterIndexes:
-			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
-				removeIndexKeys, indx); err != nil {
-				return
-			}
-			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					rp, e := dm.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
-					if e != nil {
-						return nil, e
-					}
-					fltrIDs := make([]string, len(rp.FilterIDs))
-					for i, fltrID := range rp.FilterIDs {
-						fltrIDs[i] = fltrID
-					}
-					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
-				return utils.APIErrorHandler(err)
-			}
-
-		case utils.CacheRateFilterIndexes:
-			itemIDs := make(map[string]utils.StringSet)
-			for itemID := range indx {
-				idSplit := strings.SplitN(itemID, utils.ConcatenatedKeySep, 2)
-				if len(idSplit) < 2 {
-					return errors.New("Expected to be 2 values")
-				}
-				if itemIDs[idSplit[1]] == nil {
-					itemIDs[idSplit[1]] = make(utils.StringSet)
-				}
-				itemIDs[idSplit[1]].Add(idSplit[0])
-			}
-			for rpID, ids := range itemIDs {
-				tntCtx := utils.ConcatenatedKey(newFlt.Tenant, rpID)
-				if err = removeFilterIndexesForFilter(dm, idxItmType, tntCtx,
-					removeIndexKeys, ids); err != nil {
-					return
-				}
-				var rp *utils.RateProfile
-				if rp, err = dm.GetRateProfile(newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				for itemID := range ids {
-					rate, has := rp.Rates[itemID]
-					if !has {
-						return utils.ErrNotFound
-					}
-					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
-					var updIdx map[string]utils.StringSet
-					if updIdx, err = newFilterIndex(dm, idxItmType,
-						newFlt.Tenant, rpID, itemID, rate.FilterIDs); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
-						return
-					}
-					for _, idx := range updIdx {
-						idx.Add(itemID)
-					}
-					if err = dm.SetIndexes(idxItmType, tntCtx,
-						updIdx, false, utils.NonTransactional); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
-						return
-					}
-					guardian.Guardian.UnguardIDs(refID)
-				}
 			}
 		case utils.CacheAttributeFilterIndexes:
 			for itemID := range indx {

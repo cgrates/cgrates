@@ -48,7 +48,6 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTPDispatcherProfiles,
 	testStorDBitCRUDTPDispatcherHosts,
 	testStorDBitCRUDTPFilters,
-	testStorDBitCRUDTPRateProfiles,
 	testStorDBitCRUDTPRoutes,
 	testStorDBitCRUDTPThresholds,
 	testStorDBitCRUDTPAttributes,
@@ -432,73 +431,6 @@ func testStorDBitCRUDTPFilters(t *testing.T) {
 	if err := storDB.RemTpData(utils.EmptyString, tpFilters[0].TPid, nil); err != nil {
 		t.Error(err)
 	} else if _, err := storDB.GetTPFilters(tpFilters[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testStorDBitCRUDTPRateProfiles(t *testing.T) {
-	//READ
-	if _, err := storDB.GetTPRateProfiles("ID_RP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	//WRITE
-	tpr := []*utils.TPRateProfile{
-		{
-			TPid:            "id_RP1",
-			Tenant:          "cgrates.org",
-			ID:              "RP1",
-			FilterIDs:       []string{"*string:~*req.Subject:1001"},
-			Weights:         ";0",
-			MinCost:         0.1,
-			MaxCost:         0.6,
-			MaxCostStrategy: "*free",
-			Rates: map[string]*utils.TPRate{
-				"FIRST_GI": {
-					ID:        "FIRST_GI",
-					FilterIDs: []string{"*gi:~*req.Usage:0"},
-					Weights:   ";0",
-					IntervalRates: []*utils.TPIntervalRate{
-						{
-							RecurrentFee: 0.12,
-							Unit:         "1m",
-							Increment:    "1m",
-						},
-					},
-					Blocker: false,
-				},
-			},
-		},
-	}
-	if err := storDB.SetTPRateProfiles(tpr); err != nil {
-		t.Error(err)
-	}
-
-	//READ
-	if rcv, err := storDB.GetTPRateProfiles(tpr[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv[0], tpr[0]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(tpr[0]), utils.ToJSON(rcv[0]))
-	}
-
-	//UPDATE and WRITE
-	tpr[0].MaxCost = 2.0
-	tpr[0].MinCost = 0.2
-	if err := storDB.SetTPRateProfiles(tpr); err != nil {
-		t.Error(err)
-	}
-
-	//READ
-	if rcv, err := storDB.GetTPRateProfiles(tpr[0].TPid, utils.EmptyString, utils.EmptyString); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv[0], tpr[0]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(tpr[0]), utils.ToJSON(rcv[0]))
-	}
-
-	//REMOVE AND READ
-	if err := storDB.RemTpData(utils.EmptyString, tpr[0].TPid, nil); err != nil {
-		t.Error(err)
-	} else if _, err := storDB.GetTPRateProfiles(tpr[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

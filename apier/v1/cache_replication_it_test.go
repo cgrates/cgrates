@@ -50,7 +50,6 @@ var (
 		testCacheSReplicateRpcConn,
 		testCacheSReplicateLoadTariffPlanFromFolder,
 		testCacheSReplicateProcessAttributes,
-		testCacheSReplicateProcessRateProfile,
 		testCacheSReplicateStopEngine,
 	}
 )
@@ -169,71 +168,6 @@ func testCacheSReplicateProcessAttributes(t *testing.T) {
 			t.Errorf("Expecting: %s, received: %s",
 				utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 		}
-	}
-}
-
-func testCacheSReplicateProcessRateProfile(t *testing.T) {
-	var rply *utils.RateProfileCost
-	argsRt := &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Event: map[string]interface{}{
-				utils.AccountField: "1002",
-			},
-		},
-	}
-	minDecimal, err := utils.NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &utils.Rate{
-		ID: "RT_ALWAYS",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*utils.IntervalRate{
-			{
-				IntervalStart: utils.NewDecimal(0, 0),
-				FixedFee:      utils.NewDecimal(0, 0),
-				RecurrentFee:  utils.NewDecimal(1, 2),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
-			},
-		},
-	}
-	exp := &utils.RateProfileCost{
-		ID:   "RT_SPECIAL_1002",
-		Cost: 0.01,
-		RateSIntervals: []*utils.RateSInterval{{
-			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrement{{
-				IncrementStart:    utils.NewDecimal(0, 0),
-				Usage:             utils.NewDecimal(int64(time.Minute), 0),
-				Rate:              rate1,
-				IntervalRateIndex: 0,
-				CompressFactor:    60,
-			}},
-			CompressFactor: 1,
-		}},
-	}
-	if err := engine1RPC.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-	}
-	if err := engine2RPC.Call(utils.RateSv1CostForEvent, &argsRt, &rply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exp), utils.ToJSON(rply))
-
 	}
 }
 

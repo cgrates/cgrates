@@ -64,9 +64,6 @@ func init() {
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithAPIOpts))
-	// RateProfiles
-	gob.Register(new(utils.RateProfile))
-	gob.Register(new(utils.RateProfileWithAPIOpts))
 	// ActionProfiles
 	gob.Register(new(ActionProfile))
 	gob.Register(new(ActionProfileWithAPIOpts))

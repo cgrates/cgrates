@@ -176,9 +176,6 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaIndexes: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
@@ -242,7 +239,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
 		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
@@ -349,9 +345,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActionProfiles: {
@@ -480,9 +473,6 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 			utils.MetaIndexes: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRateProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
@@ -536,7 +526,6 @@ func TestDataDBStartVersion(t *testing.T) {
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
 		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
@@ -599,7 +588,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
 		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
@@ -706,9 +694,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActionProfiles: {
@@ -767,7 +752,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
 		utils.ActionProfiles:      1,
 	}, true)
 	if err != nil {
@@ -874,9 +858,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActionProfiles: {
@@ -1022,9 +1003,6 @@ func TestDataDBReloadError(t *testing.T) {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaIndexes: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRateProfiles: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActionProfiles: {

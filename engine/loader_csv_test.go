@@ -42,7 +42,7 @@ func init() {
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent), testTPID, "", nil, nil, false)
+		DispatcherHostCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
@@ -105,9 +105,6 @@ func init() {
 	}
 	if err := csvr.LoadDispatcherHosts(); err != nil {
 		log.Print("error in LoadDispatcherHosts:", err)
-	}
-	if err := csvr.LoadRateProfiles(); err != nil {
-		log.Print("error in LoadRateProfiles:", err)
 	}
 	if err := csvr.LoadActionProfiles(); err != nil {
 		log.Print("error in LoadActionProfiles: ", err)
@@ -1395,81 +1392,6 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 	if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
-	}
-}
-
-func TestLoadRateProfiles(t *testing.T) {
-	eRatePrf := &utils.TPRateProfile{
-		TPid:            testTPID,
-		Tenant:          "cgrates.org",
-		ID:              "RP1",
-		FilterIDs:       []string{"*string:~*req.Subject:1001"},
-		Weights:         ";0",
-		MinCost:         0.1,
-		MaxCost:         0.6,
-		MaxCostStrategy: "*free",
-		Rates: map[string]*utils.TPRate{
-			"RT_WEEK": {
-				ID:              "RT_WEEK",
-				Weights:         ";0",
-				ActivationTimes: "* * * * 1-5",
-				IntervalRates: []*utils.TPIntervalRate{
-					{
-						IntervalStart: "0s",
-						RecurrentFee:  0.12,
-						Unit:          "1m",
-						Increment:     "1m",
-					},
-					{
-						IntervalStart: "1m",
-						FixedFee:      1.234,
-						RecurrentFee:  0.06,
-						Unit:          "1m",
-						Increment:     "1s",
-					},
-				},
-			},
-			"RT_WEEKEND": {
-				ID:              "RT_WEEKEND",
-				Weights:         ";10",
-				ActivationTimes: "* * * * 0,6",
-				IntervalRates: []*utils.TPIntervalRate{
-					{
-						IntervalStart: "0s",
-						FixedFee:      0.089,
-						RecurrentFee:  0.06,
-						Unit:          "1m",
-						Increment:     "1s",
-					},
-				},
-			},
-			"RT_CHRISTMAS": {
-				ID:              "RT_CHRISTMAS",
-				Weights:         ";30",
-				ActivationTimes: "* * 24 12 *",
-				IntervalRates: []*utils.TPIntervalRate{
-					{
-						IntervalStart: "0s",
-						FixedFee:      0.0564,
-						RecurrentFee:  0.06,
-						Unit:          "1m",
-						Increment:     "1s",
-					},
-				},
-			},
-		},
-	}
-	if len(csvr.rateProfiles) != 1 {
-		t.Errorf("Failed to load rateProfiles: %s", utils.ToIJSON(csvr.rateProfiles))
-	}
-	dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "RP1"}
-	sort.Slice(csvr.rateProfiles[dppKey].Rates["RT_WEEK"].IntervalRates, func(i, j int) bool {
-		return csvr.rateProfiles[dppKey].Rates["RT_WEEK"].IntervalRates[i].IntervalStart < csvr.rateProfiles[dppKey].Rates["RT_WEEK"].IntervalRates[j].IntervalStart
-	})
-
-	if !reflect.DeepEqual(eRatePrf, csvr.rateProfiles[dppKey]) {
-		t.Errorf("Expecting: %+v,\n received: %+v",
-			utils.ToJSON(eRatePrf), utils.ToJSON(csvr.rateProfiles[dppKey]))
 	}
 }
 

@@ -63,14 +63,6 @@ func (apierSv1 *APIerSv1) RemoveFilterIndexes(arg *AttrRemFilterIndexes, reply *
 		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaActionProfiles:
 		arg.ItemType = utils.CacheActionProfilesFilterIndexes
-	case utils.MetaRateProfiles:
-		arg.ItemType = utils.CacheRateProfilesFilterIndexes
-	case utils.MetaRateProfileRates:
-		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
-		arg.ItemType = utils.CacheRateFilterIndexes
-		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	case utils.MetaDispatchers:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -116,14 +108,6 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]s
 		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaActionProfiles:
 		arg.ItemType = utils.CacheActionProfilesFilterIndexes
-	case utils.MetaRateProfiles:
-		arg.ItemType = utils.CacheRateProfilesFilterIndexes
-	case utils.MetaRateProfileRates:
-		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
-		arg.ItemType = utils.CacheRateFilterIndexes
-		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	case utils.MetaDispatchers:
 		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -340,43 +324,6 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 			return utils.APIErrorHandler(err)
 		}
 	}
-	var ratePrf []string
-	//RateProfile Indexes
-	if args.RateS {
-		if args.RateS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRateProfilesFilterIndexes,
-			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				rpr, e := apierSv1.DataManager.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
-				if e != nil {
-					return nil, e
-				}
-				ratePrf = append(ratePrf, utils.ConcatenatedKey(tnt, id))
-				fltrIDs := make([]string, len(rpr.FilterIDs))
-				for i, fltrID := range rpr.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-
-				rtIds := make([]string, 0, len(rpr.Rates))
-
-				for key := range rpr.Rates {
-					rtIds = append(rtIds, key)
-				}
-
-				_, e = engine.ComputeIndexes(apierSv1.DataManager, tnt, id, utils.CacheRateFilterIndexes,
-					&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
-						rateFilters := make([]string, len(rpr.Rates[id].FilterIDs))
-						for i, fltrID := range rpr.Rates[id].FilterIDs {
-							rateFilters[i] = fltrID
-						}
-						return &rateFilters, nil
-					})
-				if e != nil {
-					return nil, e
-				}
-				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
-			return utils.APIErrorHandler(err)
-		}
-	}
 	//ChargerProfile  Indexes
 	if args.ChargerS {
 		if args.ChargerS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheChargerFilterIndexes,
@@ -450,17 +397,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 			return
 		}
 	}
-	//RateProfile Indexes
-	if args.RateS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheRateProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
-			return
-		}
-		for _, val := range ratePrf {
-			if err = apierSv1.DataManager.SetIndexes(utils.CacheRateFilterIndexes, val, nil, true, transactionID); err != nil {
-				return
-			}
-		}
-	}
+
 	//AttributeProfile Indexes
 	if args.AttributeS {
 		if err = apierSv1.DataManager.SetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
@@ -565,38 +502,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
-	//RateProfile Indexes
-	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheRateProfilesFilterIndexes,
-		&args.RateProfileIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			rpr, e := apierSv1.DataManager.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
-			if e != nil {
-				return nil, e
-			}
-			fltrIDs := make([]string, len(rpr.FilterIDs))
-			for i, fltrID := range rpr.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
 
-			rtIds := make([]string, 0, len(rpr.Rates))
-
-			for key := range rpr.Rates {
-				rtIds = append(rtIds, key)
-			}
-			_, e = engine.ComputeIndexes(apierSv1.DataManager, tnt, id, utils.CacheRateFilterIndexes,
-				&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
-					rateFilters := make([]string, len(rpr.Rates[id].FilterIDs))
-					for i, fltrID := range rpr.Rates[id].FilterIDs {
-						rateFilters[i] = fltrID
-					}
-					return &rateFilters, nil
-				})
-			if e != nil {
-				return nil, e
-			}
-			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
-	}
 	//AttributeProfile Indexes
 	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAttributeFilterIndexes,
 		&args.AttributeIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {

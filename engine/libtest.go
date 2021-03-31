@@ -281,22 +281,6 @@ cgrates.org,D1,,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204,
 #Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
 cgrates.org,ALL1,127.0.0.1:2012,*json,true
 `
-	RateProfileCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,*string:~*req.Subject:1001,,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0,0.12,1m,1m
-cgrates.org,RP1,,,,,,,RT_WEEK,,,,,1m,1.234,0.06,1m,1s
-cgrates.org,RP1,,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,0.089,0.06,1m,1s
-cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,0.0564,0.06,1m,1s
-`
-	ActionProfileCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionBlocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,10,*asap,*accounts,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
-`
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
@@ -502,59 +486,54 @@ func CallScript(scriptPath string, subcommand string, waitMs int) error {
 
 func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 	return map[string]*ltcache.CacheStats{
-		utils.MetaDefault:                      {},
-		utils.CacheAccountActionPlans:          {},
-		utils.CacheActionPlans:                 {},
-		utils.CacheActionTriggers:              {},
-		utils.CacheActions:                     {},
-		utils.CacheAttributeFilterIndexes:      {},
-		utils.CacheAttributeProfiles:           {},
-		utils.CacheChargerFilterIndexes:        {},
-		utils.CacheChargerProfiles:             {},
-		utils.CacheDispatcherFilterIndexes:     {},
-		utils.CacheDispatcherProfiles:          {},
-		utils.CacheDispatcherHosts:             {},
-		utils.CacheDispatcherRoutes:            {},
-		utils.CacheDispatcherLoads:             {},
-		utils.CacheDispatchers:                 {},
-		utils.CacheDestinations:                {},
-		utils.CacheEventResources:              {},
-		utils.CacheFilters:                     {},
-		utils.CacheRatingPlans:                 {},
-		utils.CacheRatingProfiles:              {},
-		utils.CacheResourceFilterIndexes:       {},
-		utils.CacheResourceProfiles:            {},
-		utils.CacheResources:                   {},
-		utils.CacheReverseDestinations:         {},
-		utils.CacheRPCResponses:                {},
-		utils.CacheSharedGroups:                {},
-		utils.CacheStatFilterIndexes:           {},
-		utils.CacheStatQueueProfiles:           {},
-		utils.CacheStatQueues:                  {},
-		utils.CacheSTIR:                        {},
-		utils.CacheRouteFilterIndexes:          {},
-		utils.CacheRouteProfiles:               {},
-		utils.CacheThresholdFilterIndexes:      {},
-		utils.CacheThresholdProfiles:           {},
-		utils.CacheThresholds:                  {},
-		utils.CacheRateProfiles:                {},
-		utils.CacheRateProfilesFilterIndexes:   {},
-		utils.CacheRateFilterIndexes:           {},
-		utils.CacheTimings:                     {},
-		utils.CacheDiameterMessages:            {},
-		utils.CacheClosedSessions:              {},
-		utils.CacheLoadIDs:                     {},
-		utils.CacheRPCConnections:              {},
-		utils.CacheCDRIDs:                      {},
-		utils.CacheRatingProfilesTmp:           {},
-		utils.CacheUCH:                         {},
-		utils.CacheEventCharges:                {},
-		utils.CacheReverseFilterIndexes:        {},
-		utils.MetaAPIBan:                       {},
-		utils.CacheCapsEvents:                  {},
-		utils.CacheActionProfiles:              {},
-		utils.CacheActionProfilesFilterIndexes: {},
-		utils.CacheReplicationHosts:            {},
+		utils.MetaDefault:                  {},
+		utils.CacheAccountActionPlans:      {},
+		utils.CacheActionPlans:             {},
+		utils.CacheActionTriggers:          {},
+		utils.CacheActions:                 {},
+		utils.CacheAttributeFilterIndexes:  {},
+		utils.CacheAttributeProfiles:       {},
+		utils.CacheChargerFilterIndexes:    {},
+		utils.CacheChargerProfiles:         {},
+		utils.CacheDispatcherFilterIndexes: {},
+		utils.CacheDispatcherProfiles:      {},
+		utils.CacheDispatcherHosts:         {},
+		utils.CacheDispatcherRoutes:        {},
+		utils.CacheDispatcherLoads:         {},
+		utils.CacheDispatchers:             {},
+		utils.CacheDestinations:            {},
+		utils.CacheEventResources:          {},
+		utils.CacheFilters:                 {},
+		utils.CacheRatingPlans:             {},
+		utils.CacheRatingProfiles:          {},
+		utils.CacheResourceFilterIndexes:   {},
+		utils.CacheResourceProfiles:        {},
+		utils.CacheResources:               {},
+		utils.CacheReverseDestinations:     {},
+		utils.CacheRPCResponses:            {},
+		utils.CacheSharedGroups:            {},
+		utils.CacheStatFilterIndexes:       {},
+		utils.CacheStatQueueProfiles:       {},
+		utils.CacheStatQueues:              {},
+		utils.CacheSTIR:                    {},
+		utils.CacheRouteFilterIndexes:      {},
+		utils.CacheRouteProfiles:           {},
+		utils.CacheThresholdFilterIndexes:  {},
+		utils.CacheThresholdProfiles:       {},
+		utils.CacheThresholds:              {},
+		utils.CacheTimings:                 {},
+		utils.CacheDiameterMessages:        {},
+		utils.CacheClosedSessions:          {},
+		utils.CacheLoadIDs:                 {},
+		utils.CacheRPCConnections:          {},
+		utils.CacheCDRIDs:                  {},
+		utils.CacheRatingProfilesTmp:       {},
+		utils.CacheUCH:                     {},
+		utils.CacheEventCharges:            {},
+		utils.CacheReverseFilterIndexes:    {},
+		utils.MetaAPIBan:                   {},
+		utils.CacheCapsEvents:              {},
+		utils.CacheReplicationHosts:        {},
 
 		utils.CacheAccounts:              {},
 		utils.CacheVersions:              {},
@@ -580,7 +559,6 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheTBLTPChargers:         {},
 		utils.CacheTBLTPDispatchers:      {},
 		utils.CacheTBLTPDispatcherHosts:  {},
-		utils.CacheTBLTPRateProfiles:     {},
 		utils.CacheTBLTPActionProfiles:   {},
 	}
 }
@@ -608,7 +586,6 @@ func GetDefaultEmptyArgCachePrefix() map[string][]string {
 		utils.ChargerProfilePrefix:          nil,
 		utils.DispatcherProfilePrefix:       nil,
 		utils.DispatcherHostPrefix:          nil,
-		utils.RateProfilePrefix:             nil,
 		utils.ActionProfilePrefix:           nil,
 		utils.TimingsPrefix:                 nil,
 		utils.AttributeFilterIndexes:        nil,
@@ -618,8 +595,6 @@ func GetDefaultEmptyArgCachePrefix() map[string][]string {
 		utils.RouteFilterIndexes:            nil,
 		utils.ChargerFilterIndexes:          nil,
 		utils.DispatcherFilterIndexes:       nil,
-		utils.RateProfilesFilterIndexPrfx:   nil,
-		utils.RateFilterIndexPrfx:           nil,
 		utils.ActionProfilesFilterIndexPrfx: nil,
 		utils.FilterIndexPrfx:               nil,
 	}

@@ -819,29 +819,6 @@ func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
-	x, ok := Cache.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
-	if !ok || x == nil {
-		return nil, utils.ErrNotFound
-	}
-	return x.(*utils.RateProfile), nil
-}
-
-func (iDB *InternalDB) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
-	if err = rpp.Compile(); err != nil {
-		return
-	}
-	Cache.SetWithoutReplicate(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveRateProfileDrv(tenant, id string) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
 func (iDB *InternalDB) GetActionProfileDrv(tenant, id string) (ap *ActionProfile, err error) {
 	x, ok := Cache.Get(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
