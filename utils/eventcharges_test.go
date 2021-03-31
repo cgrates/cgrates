@@ -27,9 +27,8 @@ import (
 
 func TestECNewEventCharges(t *testing.T) {
 	expected := &EventCharges{
-		Accounting:  make(map[string]*AccountCharge),
-		UnitFactors: make(map[string]*UnitFactor),
-		Rating:      make(map[string]*RateSInterval),
+		Accounting: make(map[string]*AccountCharge),
+		Rating:     make(map[string]*RateSInterval),
 	}
 	received := NewEventCharges()
 
