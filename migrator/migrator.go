@@ -133,8 +133,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateRatingPlans()
 		case utils.MetaRatingProfiles:
 			err = m.migrateRatingProfiles()
-		case utils.MetaActionProfiles:
-			err = m.migrateActionProfiles()
 		case utils.MetaDestinations:
 			err = m.migrateDestinations()
 		case utils.MetaReverseDestinations:
@@ -180,8 +178,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPsharedgroups()
 		case utils.MetaTpRatingProfiles:
 			err = m.migrateTPratingprofiles()
-		case utils.MetaTpActionProfiles:
-			err = m.migrateTPActionProfiles()
 		case utils.MetaTpResources:
 			err = m.migrateTPresources()
 		case utils.MetaTpRates:

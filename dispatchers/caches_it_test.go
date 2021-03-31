@@ -237,8 +237,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheTBLTPDispatchers:      utils.MetaReady,
 		utils.CacheTBLTPDispatcherHosts:  utils.MetaReady,
 		utils.MetaAPIBan:                 utils.MetaReady,
-		utils.CacheTBLTPActionProfiles:   utils.MetaReady,
-		utils.CacheReplicationHosts:      utils.MetaReady,
+
+		utils.CacheReplicationHosts: utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{

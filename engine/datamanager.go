@@ -35,44 +35,41 @@ var (
 		utils.RouteFilterIndexes:            {},
 		utils.ChargerFilterIndexes:          {},
 		utils.DispatcherFilterIndexes:       {},
-		utils.ActionProfilesFilterIndexPrfx: {},
 		utils.ActionPlanIndexes:             {},
 		utils.FilterIndexPrfx:               {},
 	}
 	cachePrefixMap = utils.StringSet{
-		utils.DestinationPrefix:             {},
-		utils.ReverseDestinationPrefix:      {},
-		utils.RatingPlanPrefix:              {},
-		utils.RatingProfilePrefix:           {},
-		utils.ActionPrefix:                  {},
-		utils.ActionPlanPrefix:              {},
-		utils.AccountActionPlansPrefix:      {},
-		utils.ActionTriggerPrefix:           {},
-		utils.SharedGroupPrefix:             {},
-		utils.ResourceProfilesPrefix:        {},
-		utils.TimingsPrefix:                 {},
-		utils.ResourcesPrefix:               {},
-		utils.StatQueuePrefix:               {},
-		utils.StatQueueProfilePrefix:        {},
-		utils.ThresholdPrefix:               {},
-		utils.ThresholdProfilePrefix:        {},
-		utils.FilterPrefix:                  {},
-		utils.RouteProfilePrefix:            {},
-		utils.AttributeProfilePrefix:        {},
-		utils.ChargerProfilePrefix:          {},
-		utils.DispatcherProfilePrefix:       {},
-		utils.DispatcherHostPrefix:          {},
-		utils.ActionProfilePrefix:           {},
-		utils.AttributeFilterIndexes:        {},
-		utils.ResourceFilterIndexes:         {},
-		utils.StatFilterIndexes:             {},
-		utils.ThresholdFilterIndexes:        {},
-		utils.RouteFilterIndexes:            {},
-		utils.ChargerFilterIndexes:          {},
-		utils.DispatcherFilterIndexes:       {},
-		utils.ActionProfilesFilterIndexPrfx: {},
-		utils.FilterIndexPrfx:               {},
-		utils.MetaAPIBan:                    {}, // not realy a prefix as this is not stored in DB
+		utils.DestinationPrefix:        {},
+		utils.ReverseDestinationPrefix: {},
+		utils.RatingPlanPrefix:         {},
+		utils.RatingProfilePrefix:      {},
+		utils.ActionPrefix:             {},
+		utils.ActionPlanPrefix:         {},
+		utils.AccountActionPlansPrefix: {},
+		utils.ActionTriggerPrefix:      {},
+		utils.SharedGroupPrefix:        {},
+		utils.ResourceProfilesPrefix:   {},
+		utils.TimingsPrefix:            {},
+		utils.ResourcesPrefix:          {},
+		utils.StatQueuePrefix:          {},
+		utils.StatQueueProfilePrefix:   {},
+		utils.ThresholdPrefix:          {},
+		utils.ThresholdProfilePrefix:   {},
+		utils.FilterPrefix:             {},
+		utils.RouteProfilePrefix:       {},
+		utils.AttributeProfilePrefix:   {},
+		utils.ChargerProfilePrefix:     {},
+		utils.DispatcherProfilePrefix:  {},
+		utils.DispatcherHostPrefix:     {},
+		utils.AttributeFilterIndexes:   {},
+		utils.ResourceFilterIndexes:    {},
+		utils.StatFilterIndexes:        {},
+		utils.ThresholdFilterIndexes:   {},
+		utils.RouteFilterIndexes:       {},
+		utils.ChargerFilterIndexes:     {},
+		utils.DispatcherFilterIndexes:  {},
+		utils.FilterIndexPrfx:          {},
+		utils.MetaAPIBan:               {}, // not realy a prefix as this is not stored in DB
 	}
 )
 
@@ -217,9 +214,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.DispatcherHostPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-		case utils.ActionProfilePrefix:
-			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
@@ -262,12 +256,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 				return
 			}
 			_, err = dm.GetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, false, true)
-		case utils.ActionProfilesFilterIndexPrfx:
-			var tntCtx, idxKey string
-			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
-				return
-			}
-			_, err = dm.GetIndexes(utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.FilterIndexPrfx:
 			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
 			if idx < 0 {
@@ -3003,131 +2991,6 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 			&utils.LoadIDsWithAPIOpts{
 				LoadIDs: loadIDs,
 				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (ap *ActionProfile, err error) {
-	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheActionProfiles, tntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*ActionProfile), nil
-		}
-	}
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	ap, err = dm.dataDB.GetActionProfileDrv(tenant, id)
-	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-				utils.ReplicatorSv1GetActionProfile,
-				&utils.TenantIDWithAPIOpts{
-					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &ap); err == nil {
-				err = dm.dataDB.SetActionProfileDrv(ap)
-			}
-		}
-		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(utils.CacheActionProfiles, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return nil, errCh
-				}
-
-			}
-			return nil, err
-		}
-	}
-	if cacheWrite {
-		if errCh := Cache.Set(utils.CacheActionProfiles, tntID, ap, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
-		}
-	}
-	return
-}
-
-func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if withIndex {
-		if brokenReference := dm.checkFilters(ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
-			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, ap.TenantID())
-		}
-	}
-	oldRpp, err := dm.GetActionProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	if err = dm.DataDB().SetActionProfileDrv(ap); err != nil {
-		return err
-	}
-	if withIndex {
-		var oldFiltersIDs *[]string
-		if oldRpp != nil {
-			oldFiltersIDs = &oldRpp.FilterIDs
-		}
-		if err := updatedIndexes(dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
-			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
-			return err
-		}
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
-		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.ActionProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1SetActionProfile,
-			&ActionProfileWithAPIOpts{
-				ActionProfile: ap,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) RemoveActionProfile(tenant, id string,
-	transactionID string, withIndex bool) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	oldRpp, err := dm.GetActionProfile(tenant, id, true, false, utils.NonTransactional)
-	if err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	if err = dm.DataDB().RemoveActionProfileDrv(tenant, id); err != nil {
-		return
-	}
-	if oldRpp == nil {
-		return utils.ErrNotFound
-	}
-	if withIndex {
-		if err = removeItemFromFilterIndex(dm, utils.CacheActionProfilesFilterIndexes,
-			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
-			return
-		}
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
-		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.ActionProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveActionProfile,
-			&utils.TenantIDWithAPIOpts{
-				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}

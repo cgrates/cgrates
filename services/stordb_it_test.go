@@ -197,7 +197,6 @@ func TestStorDBReloadVersion1(t *testing.T) {
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
-		utils.TpActionProfiles:   1,
 	}, true)
 
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
@@ -276,7 +275,6 @@ func TestStorDBReloadVersion2(t *testing.T) {
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
-		utils.TpActionProfiles:   1,
 	}, true)
 
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
@@ -352,7 +350,6 @@ func TestStorDBReloadVersion3(t *testing.T) {
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
 		utils.TpDispatchers:      1,
-		utils.TpActionProfiles:   1,
 	}, true)
 
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)

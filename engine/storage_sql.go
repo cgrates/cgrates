@@ -728,27 +728,6 @@ func (sqls *SQLStorage) SetTPDispatcherHosts(tpDPPs []*utils.TPDispatcherHost) e
 	return nil
 }
 
-func (sqls *SQLStorage) SetTPActionProfiles(tpAps []*utils.TPActionProfile) error {
-	if len(tpAps) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, tpAp := range tpAps {
-		// Remove previous
-		if err := tx.Where(&ActionProfileMdl{Tpid: tpAp.TPid, Tenant: tpAp.Tenant, ID: tpAp.ID}).Delete(ActionProfileMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, mst := range APItoModelTPActionProfile(tpAp) {
-			if err := tx.Create(&mst).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
 func (sqls *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -1566,26 +1545,6 @@ func (sqls *SQLStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.
 		return nil, err
 	}
 	arls := dpps.AsTPDispatcherHosts()
-	if len(arls) == 0 {
-		return arls, utils.ErrNotFound
-	}
-	return arls, nil
-}
-
-func (sqls *SQLStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.TPActionProfile, error) {
-	var dpps ActionProfileMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-
-	if len(id) != 0 {
-		q = q.Where("id = ?", id)
-	}
-	if len(tenant) != 0 {
-		q = q.Where("tenant = ?", tenant)
-	}
-	if err := q.Find(&dpps).Error; err != nil {
-		return nil, err
-	}
-	arls := dpps.AsTPActionProfile()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}

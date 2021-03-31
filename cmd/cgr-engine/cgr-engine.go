@@ -678,7 +678,6 @@ func main() {
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, internalEEsChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
-		services.NewActionService(cfg, dmService, cacheS, filterSChan, connManager, server, internalActionSChan, anz, srvDep),
 	)
 	srvManager.StartServices()
 	// Start FilterS
