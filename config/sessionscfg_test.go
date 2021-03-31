@@ -114,7 +114,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		TerminateAttempts:   6,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    1,
-		ActionsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -141,7 +141,7 @@ func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		Replication_conns: &[]string{utils.MetaInternal},
 	}
-	expected := "Replication connection ID needs to be different than *internal"
+	expected := "Replication connection ID needs to be different than *internal "
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -252,7 +252,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		TerminateAttempts:   5,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    0,
-		ActionsConns:        []string{},
+		ActionSConns:        []string{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -896,7 +896,7 @@ func TestSessionSCfgClone(t *testing.T) {
 		TerminateAttempts:   6,
 		AlterableFields:     utils.StringSet{},
 		MinDurLowBalance:    1,
-		ActionsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+		ActionSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		SessionTTLMaxDelay:  utils.DurationPointer(time.Second),
 		SessionTTLLastUsed:  utils.DurationPointer(time.Second),
 		SessionTTLUsage:     utils.DurationPointer(time.Second),

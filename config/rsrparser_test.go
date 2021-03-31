@@ -163,12 +163,12 @@ func TestNewRSRParsersConstant2(t *testing.T) {
 
 	ruleStr = "constant;`>;q=0.7;expires=3600constant"
 	if _, err := NewRSRParsers(ruleStr, utils.InfieldSep); err == nil {
-		t.Error("Unexpected error: ", err.Error())
+		t.Error("Unexpected error: ", err)
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
 	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
-		t.Error("Unexpected error: ", err.Error())
+		t.Error("Unexpected error: ", err)
 	} else if _, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != utils.ErrNotFound {
 		t.Error(err)
 	}

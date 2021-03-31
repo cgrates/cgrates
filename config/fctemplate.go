@@ -280,9 +280,6 @@ func (fc *FCTemplate) ComputePath() {
 
 // Clone returns a deep copy of FcTemplates
 func (sCft FcTemplates) Clone() (cln FcTemplates) {
-	if sCft == nil {
-		return
-	}
 	cln = make(FcTemplates)
 	for k, fcs := range sCft {
 		fcln := make([]*FCTemplate, len(fcs))

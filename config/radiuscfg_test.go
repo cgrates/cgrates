@@ -50,7 +50,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 						Type:      utils.StringPointer(utils.MetaConstant),
 						Value:     utils.StringPointer("1"),
 						Mandatory: utils.BoolPointer(true),
-						Layout:    utils.StringPointer(string(time.RFC3339)),
+						Layout:    utils.StringPointer(time.RFC3339),
 					},
 				},
 			},

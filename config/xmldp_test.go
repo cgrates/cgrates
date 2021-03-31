@@ -410,7 +410,7 @@ func TestXMLIndexes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXMLProvider(doc, utils.HierarchyPath([]string{}))
+	dP := NewXMLProvider(doc, []string{})
 	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
 		t.Error(err)
 	} else if data != "386" {
@@ -502,7 +502,7 @@ func TestFieldAsInterfaceInvalidSyntax(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXMLProvider(doc, utils.HierarchyPath([]string{}))
+	dP := NewXMLProvider(doc, []string{})
 	expected := "strconv.Atoi: parsing \"09]\": invalid syntax"
 	if _, err := dP.FieldAsString([]string{"complete-success-notification[09]]"}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)
@@ -514,7 +514,7 @@ func TestFieldAsInterfaceInvalidSyntax1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXMLProvider(doc, utils.HierarchyPath([]string{}))
+	dP := NewXMLProvider(doc, []string{})
 	expected := "filter rule <[0> needs to end in ]"
 	if _, err := dP.FieldAsString([]string{"complete-success-notification[0"}); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+q, received %+q", expected, err)

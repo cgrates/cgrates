@@ -79,7 +79,7 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
 		for i, item := range *jsnDbCfg.Remote_conns {
 			if item == utils.MetaInternal {
-				return fmt.Errorf("Remote connection ID needs to be different than *internal")
+				return fmt.Errorf("Remote connection ID needs to be different than *internal ")
 			}
 			dbcfg.RmtConns[i] = item
 		}
@@ -88,7 +88,7 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		dbcfg.RplConns = make([]string, len(*jsnDbCfg.Replication_conns))
 		for i, item := range *jsnDbCfg.Replication_conns {
 			if item == utils.MetaInternal {
-				return fmt.Errorf("Replication connection ID needs to be different than *internal")
+				return fmt.Errorf("Replication connection ID needs to be different than *internal ")
 			}
 			dbcfg.RplConns[i] = item
 		}

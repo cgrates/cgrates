@@ -37,7 +37,7 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 		return
 	}
 	if count := strings.Count(parsersRules, utils.RSRConstSep); count%2 != 0 { // check if we have matching `
-		return nil, fmt.Errorf("Unclosed unspilit syntax")
+		return nil, fmt.Errorf("Closed unspilit syntax ")
 	} else if count != 0 {
 		var splitedRule []string
 		for idx := strings.IndexByte(parsersRules, utils.RSRConstChar); idx != -1; idx = strings.IndexByte(parsersRules, utils.RSRConstChar) {

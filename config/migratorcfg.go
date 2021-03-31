@@ -109,7 +109,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	fltrs := []string{}
+	fltrs := make([]string, 0)
 	if mg.UsersFilters != nil {
 		fltrs = mg.UsersFilters
 	}

@@ -148,7 +148,7 @@ func TestFieldAsInterfaceSliceDP(t *testing.T) {
 func TestFieldAsInterfaceMultiplePaths(t *testing.T) {
 	pth := []string{"Tenant", "ID"}
 	sliceDp := new(SliceDP)
-	expected := "Invalid fieldPath [Tenant ID]"
+	expected := "Invalid fieldPath [Tenant ID] "
 	if _, err := sliceDp.FieldAsInterface(pth); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -173,7 +173,7 @@ func TestFieldAsInterfaceIgnoringError(t *testing.T) {
 			"NotFound": 0,
 		},
 	}
-	expected := "Ignoring record: [cgrates.org] with error : strconv.Atoi: parsing \"Tenant\": invalid syntax"
+	expected := "Ignoring record: [cgrates.org] with error : strconv.Atoi: parsing \"Tenant\": invalid syntax "
 	if _, err := slicedp.FieldAsInterface(pth); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
