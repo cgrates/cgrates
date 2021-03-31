@@ -112,7 +112,7 @@ type SessionSCfg struct {
 	TerminateAttempts   int
 	AlterableFields     utils.StringSet
 	MinDurLowBalance    time.Duration
-	ActionsConns        []string
+	ActionSConns        []string
 	STIRCfg             *STIRcfg
 	DefaultUsage        map[string]time.Duration
 }
@@ -214,7 +214,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
 		for idx, connID := range *jsnCfg.Replication_conns {
 			if connID == utils.MetaInternal {
-				return fmt.Errorf("Replication connection ID needs to be different than *internal")
+				return fmt.Errorf("Replication connection ID needs to be different than *internal ")
 			}
 			scfg.ReplicationConns[idx] = connID
 		}
@@ -290,12 +290,12 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Actions_conns != nil {
-		scfg.ActionsConns = make([]string, len(*jsnCfg.Actions_conns))
+		scfg.ActionSConns = make([]string, len(*jsnCfg.Actions_conns))
 		for idx, connID := range *jsnCfg.Actions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.ActionsConns[idx] = connID
+			scfg.ActionSConns[idx] = connID
 			if connID == utils.MetaInternal {
-				scfg.ActionsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
+				scfg.ActionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
 			}
 		}
 	}
@@ -440,9 +440,9 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.CDRsConnsCfg] = CDRsConns
 	}
-	if scfg.ActionsConns != nil {
-		actionConns := make([]string, len(scfg.ActionsConns))
-		for i, item := range scfg.ActionsConns {
+	if scfg.ActionSConns != nil {
+		actionConns := make([]string, len(scfg.ActionSConns))
+		for i, item := range scfg.ActionSConns {
 			actionConns[i] = item
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
 				actionConns[i] = utils.MetaInternal
@@ -541,10 +541,10 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 			cln.ReplicationConns[i] = con
 		}
 	}
-	if scfg.ActionsConns != nil {
-		cln.ActionsConns = make([]string, len(scfg.ActionsConns))
-		for i, con := range scfg.ActionsConns {
-			cln.ActionsConns[i] = con
+	if scfg.ActionSConns != nil {
+		cln.ActionSConns = make([]string, len(scfg.ActionSConns))
+		for i, con := range scfg.ActionSConns {
+			cln.ActionSConns[i] = con
 		}
 	}
 

@@ -20,6 +20,8 @@ package config
 
 import (
 	"encoding/json"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -75,6 +77,7 @@ var (
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
 		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
 		ActionSJson, AccountSCfgJson}
+	sortedSectionsSet = utils.NewStringSet(sortedCfgSections)
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -297,8 +300,8 @@ func (jsnCfg CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
 	return
 }
 
-func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
-	rawCfg, hasKey := cgrJsn[ATTRIBUTE_JSN]
+func (jsnCfg CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[ATTRIBUTE_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -309,8 +312,8 @@ func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (cgrJsn CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
-	rawCfg, hasKey := cgrJsn[ChargerSCfgJson]
+func (jsnCfg CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[ChargerSCfgJson]
 	if !hasKey {
 		return nil, nil
 	}

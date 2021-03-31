@@ -270,7 +270,8 @@ func TestFCTemplateInflate2(t *testing.T) {
 			},
 		},
 	}
-	if _, err := InflateTemplates(fcTmp1, fcTmpMp); err.Error() != "no template with id: <TmpMap3>" {
+	expected := "no template with id: <TmpMap3>"
+	if _, err := InflateTemplates(fcTmp1, fcTmpMp); err == nil || err.Error() != expected {
 		t.Error(err)
 	}
 }
@@ -512,11 +513,5 @@ func TestFCTemplatesClone(t *testing.T) {
 	smpl[utils.MetaErr] = nil
 	if !reflect.DeepEqual(cloned, initialSmpl) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
-	}
-
-	smpl = nil
-	cloned = smpl.Clone()
-	if !reflect.DeepEqual(cloned, smpl) {
-		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
 	}
 }

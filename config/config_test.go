@@ -400,7 +400,7 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		AttributeSConns: []string{},
 		ThresholdSConns: []string{},
 		StatSConns:      []string{},
-		ActionsConns:    []string{},
+		ActionSConns:    []string{},
 		EEsConns:        []string{},
 		ExtraFields:     RSRParsers{},
 	}
@@ -462,7 +462,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		ActionsConns: []string{},
+		ActionSConns: []string{},
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -900,11 +900,11 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 	flagInput := utils.MetaDynamic
 	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.INTERNAL}
 	for _, dbtype := range dbs {
-		host := dbdf.dbHost(dbtype, flagInput)
+		host := dbdf.dbHost(flagInput)
 		if host != utils.Localhost {
 			t.Errorf("received: %+v, expecting: %+v", host, utils.Localhost)
 		}
-		user := dbdf.dbUser(dbtype, flagInput)
+		user := dbdf.dbUser(flagInput)
 		if user != utils.CGRateSLwr {
 			t.Errorf("received: %+v, expecting: %+v", user, utils.CGRateSLwr)
 		}
@@ -928,11 +928,11 @@ func TestDbDefaults(t *testing.T) {
 	flagInput := "NonMetaDynamic"
 	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.INTERNAL, utils.Postgres}
 	for _, dbtype := range dbs {
-		host := dbdf.dbHost(dbtype, flagInput)
+		host := dbdf.dbHost(flagInput)
 		if host != flagInput {
 			t.Errorf("Expected %+v, received %+v", flagInput, host)
 		}
-		user := dbdf.dbUser(dbtype, flagInput)
+		user := dbdf.dbUser(flagInput)
 		if user != flagInput {
 			t.Errorf("Expected %+v, received %+v", flagInput, user)
 		}
@@ -1129,7 +1129,7 @@ func TestLoadDataDBCfgErrorCase2(t *testing.T) {
 	"remote_conns":["*internal"],
 	}
 }`
-	expected := "Remote connection ID needs to be different than *internal"
+	expected := "Remote connection ID needs to be different than <*internal> "
 	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
 		t.Error(err)
@@ -2066,7 +2066,7 @@ func TestSessionSConfig(t *testing.T) {
 		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
 		AlterableFields:     utils.StringSet{},
-		ActionsConns:        []string{},
+		ActionSConns:        []string{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -3471,7 +3471,7 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		TpID:            "",
 		DataPath:        "./",
 		DisableReverse:  false,
-		FieldSeparator:  rune(utils.CSVSep),
+		FieldSeparator:  utils.CSVSep,
 		CachesConns:     []string{utils.MetaLocalHost},
 		ActionSConns:    []string{utils.MetaLocalHost},
 		GapiCredentials: json.RawMessage(`".gapi/credentials.json"`),
@@ -3810,7 +3810,7 @@ func TestV1GetConfigDataDB(t *testing.T) {
 	expected := map[string]interface{}{
 		utils.DataDbTypeCfg:          "*redis",
 		utils.DataDbHostCfg:          "127.0.0.1",
-		utils.DataDbPortCfg:          int(6379),
+		utils.DataDbPortCfg:          6379,
 		utils.DataDbNameCfg:          "10",
 		utils.DataDbUserCfg:          "cgrates",
 		utils.DataDbPassCfg:          "",
@@ -4859,7 +4859,7 @@ func TestV1GetConfigSectionRateS(t *testing.T) {
 
 func TestV1GetConfigSectionInvalidSection(t *testing.T) {
 	var reply map[string]interface{}
-	expected := "Invalid section"
+	expected := "Invalid section "
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfig(&SectionWithAPIOpts{Section: "invalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -4882,7 +4882,7 @@ func TestV1ReloadConfigUnmarshalError(t *testing.T) {
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1SetConfig(&SetConfigArgs{
 		Config: map[string]interface{}{
-			"randomValue": make(chan int),
+			STATS_JSON: make(chan int),
 		},
 	},
 		&reply); err == nil || err.Error() != expected {
@@ -4895,10 +4895,10 @@ func TestV1ReloadConfigJSONWithLocks(t *testing.T) {
 	section := map[string]interface{}{
 		"inexistentSection": map[string]interface{}{},
 	}
-	expected := "Invalid section: <inexistentSection>"
+	expected := "Invalid section <inexistentSection> "
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1SetConfig(&SetConfigArgs{Config: section}, &reply); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
+		t.Errorf("Expected %+q, received %+q", expected, err)
 	}
 }
 
@@ -5418,7 +5418,7 @@ func TestV1GetConfigAsJSONCheckConfigSanity(t *testing.T) {
 
 func TestV1GetConfigAsJSONInvalidSection(t *testing.T) {
 	var reply string
-	expected := `Invalid section`
+	expected := `Invalid section `
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(&SectionWithAPIOpts{Section: "InvalidSection"}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -5745,7 +5745,7 @@ func TestCallOnCGRConfig(t *testing.T) {
 }
 
 func TestLoadCfgFromJSONWithLocksInvalidSeciton(t *testing.T) {
-	expected := "Invalid section: <invalidSection>"
+	expected := "Invalid section: <invalidSection> "
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.loadCfgWithLocks("/random/path", "invalidSection"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)

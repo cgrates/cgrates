@@ -94,7 +94,7 @@ func TestFieldAsInterfaceFWVInvalidPath(t *testing.T) {
 		req:   record,
 		cache: utils.MapStorage{},
 	}
-	expected := "Invalid format for index : [112]"
+	expected := "Invalid format for index : [112] "
 	if _, err := dp.FieldAsInterface(pth); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -174,7 +174,7 @@ func TestFieldAsStringFWVError(t *testing.T) {
 		req:   record,
 		cache: utils.MapStorage{},
 	}
-	expected := "Invalid format for index : [112]"
+	expected := "Invalid format for index : [112] "
 	if _, err := dp.FieldAsString(pth); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

@@ -88,14 +88,14 @@ func (dbDflt dbDefaults) dbName(dbType string, flagInput string) string {
 	return dbDflt[dbType]["DbName"]
 }
 
-func (dbDefaults) dbUser(dbType string, flagInput string) string {
+func (dbDefaults) dbUser(flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
 	return utils.CGRateSLwr
 }
 
-func (dbDefaults) dbHost(dbType string, flagInput string) string {
+func (dbDefaults) dbHost(flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
@@ -781,7 +781,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJSONCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvRdr, cfg.generalCfg.RSRSep)
+	return cfg.ersCfg.loadFromJSONCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvRdr)
 }
 
 // loadEesCfg loads the Ees section of the configuration
@@ -1276,13 +1276,13 @@ func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
 	loadMap := cfg.getLoadFunctions()
 	if section == utils.EmptyString || section == utils.MetaAll {
+		cfg.lockSections()
+		defer cfg.unlockSections()
 		for _, sec := range sortedCfgSections {
-			cfg.lks[sec].Lock()
-			defer cfg.lks[sec].Unlock()
 			loadFuncs = append(loadFuncs, loadMap[sec])
 		}
 	} else if fnct, has := loadMap[section]; !has {
-		return fmt.Errorf("Invalid section: <%s>", section)
+		return fmt.Errorf("Invalid section: <%s> ", section)
 	} else {
 		cfg.lks[section].Lock()
 		defer cfg.lks[section].Unlock()
@@ -1355,7 +1355,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 		return
 	}
 	if !jsonFilesFound {
-		return fmt.Errorf("No config file found on path %s", cfgDir)
+		return fmt.Errorf("No config file found on path %s ", cfgDir)
 	}
 	return
 }
@@ -1412,14 +1412,10 @@ func (cfg *CGRConfig) initChanels() {
 func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
 	loadMap := cfg.getLoadFunctions()
+	cfg.LockSections(sections...)
+	defer cfg.UnlockSections(sections...)
 	for _, section := range sections {
-		fnct, has := loadMap[section]
-		if !has {
-			return fmt.Errorf("Invalid section: <%s>", section)
-		}
-		cfg.lks[section].Lock()
-		defer cfg.lks[section].Unlock()
-		loadFuncs = append(loadFuncs, fnct)
+		loadFuncs = append(loadFuncs, loadMap[section])
 	}
 	return cfg.loadConfigFromReader(rdr, loadFuncs, false)
 }
@@ -1735,7 +1731,7 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 	case AccountSCfgJson:
 		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
-		return errors.New("Invalid section")
+		return errors.New("Invalid section ")
 	}
 	*reply = map[string]interface{}{args.Section: mp}
 	return
@@ -1757,6 +1753,9 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 	}
 	sections := make([]string, 0, len(args.Config))
 	for section := range args.Config {
+		if !sortedSectionsSet.Has(section) {
+			return fmt.Errorf("Invalid section <%s> ", section)
+		}
 		sections = append(sections, section)
 	}
 	var b []byte
@@ -1899,7 +1898,7 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 	case AccountSCfgJson:
 		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
-		return errors.New("Invalid section")
+		return errors.New("Invalid section ")
 	}
 	rplyMap = map[string]interface{}{args.Section: mp}
 	*reply = utils.ToJSON(rplyMap)
@@ -2018,7 +2017,7 @@ func (cfg *CGRConfig) GetDataProvider() utils.DataProvider {
 	cfg.cacheDPMux.RUnlock()
 	if !has || val == nil {
 		cfg.cacheDPMux.Lock()
-		val = utils.MapStorage(cfg.AsMapInterface(cfg.GeneralCfg().RSRSep))
+		val = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		cfg.cacheDP[utils.MetaAll] = val
 		cfg.cacheDPMux.Unlock()
 	}

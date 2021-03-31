@@ -97,7 +97,7 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &DbJsonCfg{
 		Remote_conns: &[]string{"*internal"},
 	}
-	expectedErrRmt := "Remote connection ID needs to be different than *internal"
+	expectedErrRmt := "Remote connection ID needs to be different than <*internal> "
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRmt {
 		t.Errorf("Expected %+v, received %+v", expectedErrRmt, err)
@@ -106,7 +106,7 @@ func TestConnsloadFromJsonCfg(t *testing.T) {
 	jsonCfg = &DbJsonCfg{
 		Replication_conns: &[]string{"*internal"},
 	}
-	expectedErrRpl := "Replication connection ID needs to be different than *internal"
+	expectedErrRpl := "Remote connection ID needs to be different than <*internal> "
 	jsnCfg = NewDefaultCGRConfig()
 	if err = jsnCfg.dataDbCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expectedErrRpl {
 		t.Errorf("Expected %+v, received %+v", expectedErrRpl, err)
@@ -509,9 +509,6 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else {
 		rcv := cgrCfg.dataDbCfg.AsMapInterface()
-		if err != nil {
-			t.Error(err)
-		}
 		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
 			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],

@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -47,7 +47,6 @@ var (
 		testCGRConfigReloadStatS,
 		testCGRConfigReloadResourceS,
 		testCGRConfigReloadSupplierS,
-		testCGRConfigReloadSchedulerS,
 		testCGRConfigReloadCDRs,
 		testCGRConfigReloadRALs,
 		testCGRConfigReloadSessionS,
@@ -112,7 +111,9 @@ func testNewCGRConfigFromPath(t *testing.T) {
 	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "ROUND_DEC": "5",
 		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "FAILED_POSTS_DIR": "/var/spool/cgrates/failed_posts",
 		"DF_TENANT": "cgrates.org", "TIMEZONE": "Local"} {
-		os.Setenv(key, val)
+		if err := os.Setenv(key, val); err != nil {
+			t.Error(err)
+		}
 	}
 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/b/b.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/c.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/d.json"
 	expVal, err := NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "multifiles"))
@@ -366,32 +367,6 @@ func testLoadConfigFromHTTPValidURL(t *testing.T) {
 	}
 }
 
-func testCGRConfigReloadSchedulerS(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
-	var reply string
-	if err = cfg.V1ReloadConfig(&ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
-		Section: SCHEDULER_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %s", reply)
-	}
-	expAttr := &SchedulerCfg{
-		Enabled:      true,
-		CDRsConns:    []string{utils.MetaLocalHost},
-		ThreshSConns: []string{},
-		StatSConns:   []string{},
-		Filters:      []string{},
-	}
-	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SchedulerCfg()))
-	}
-}
-
 func testCGRConfigReloadCDRs(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	for _, section := range sortedCfgSections {
@@ -501,7 +476,7 @@ func testCGRConfigReloadSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		ActionSConns: []string{},
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -884,7 +859,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		ActionSConns: []string{},
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -942,7 +917,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		ActionSConns: []string{},
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -1002,7 +977,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		SchedulerConns: []string{},
+		ActionSConns: make([]string, 0),
 		DefaultUsage: map[string]time.Duration{
 			utils.MetaAny:   3 * time.Hour,
 			utils.MetaVoice: 3 * time.Hour,
@@ -1288,8 +1263,8 @@ func (responseTest) Header() http.Header {
 	return nil
 }
 
-func (responseTest) Write(p []byte) (int, error) {
-	return 0, fmt.Errorf("Invalid section")
+func (responseTest) Write([]byte) (int, error) {
+	return 0, errors.New("Invalid section")
 }
 
-func (responseTest) WriteHeader(statusCode int) {}
+func (responseTest) WriteHeader(int) {}

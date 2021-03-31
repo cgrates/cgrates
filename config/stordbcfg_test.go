@@ -91,7 +91,7 @@ func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
 	storDbJSON := &DbJsonCfg{
 		Replication_conns: &[]string{utils.MetaInternal},
 	}
-	expected := "Replication connection ID needs to be different than *internal"
+	expected := "Replication connection ID needs to be different than *internal "
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
@@ -102,7 +102,7 @@ func TestStoreDbCfgloadFromJsonCfgCase3(t *testing.T) {
 	storDbJSON := &DbJsonCfg{
 		Remote_conns: &[]string{utils.MetaInternal},
 	}
-	expected := "Remote connection ID needs to be different than *internal"
+	expected := "Remote connection ID needs to be different than *internal "
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)

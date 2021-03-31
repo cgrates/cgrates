@@ -56,13 +56,13 @@ var (
 func TestEnvRawJsonReadByte(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(envStr))
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redis_sentinel":""}}`)
-	rply := []byte{}
+	var reply []byte
 	bit, err := raw.ReadByte()
 	for ; err == nil; bit, err = raw.ReadByte() {
-		rply = append(rply, bit)
+		reply = append(reply, bit)
 	}
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(rply))
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(reply))
 	}
 }
 
@@ -207,49 +207,53 @@ func TestEnvRawJsonreadFirstNonWhiteSpace(t *testing.T) {
 }
 
 func TestEnvReaderRead(t *testing.T) {
-	os.Setenv("TESTVAR", "cgRates")
+	if err := os.Setenv("TESTVAR", "cgRates"); err != nil {
+		t.Error(err)
+	}
 	envR := NewRjReaderFromBytes([]byte(envStr))
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/","redis_sentinel":""}}`)
-	rply := []byte{}
+	var reply []byte
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
 	for ; err == nil && n > 0; n, err = envR.Read(buf) {
-		rply = append(rply, buf[:n]...)
+		reply = append(reply, buf[:n]...)
 		buf = make([]byte, 20)
 	}
-	rply = append(rply, buf[:n]...)
-	for i, bit := range rply {
+	reply = append(reply, buf[:n]...)
+	for i, bit := range reply {
 		if bit == 0 {
 			t.Errorf("Recivied a zero bit on position %+v\n", i)
 		}
 	}
 
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v\n, received: %+v", (string(expected)), (string(rply)))
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expected: %+v\n, received: %+v", string(expected), string(reply))
 	}
 }
 
 func TestEnvReaderRead2(t *testing.T) {
-	os.Setenv("TESTVARNoZero", "cgr1")
+	if err := os.Setenv("TESTVARNoZero", "cgr1"); err != nil {
+		t.Error(err)
+	}
 	envR := NewRjReaderFromBytes([]byte(`{"origin_host": "*env:TESTVARNoZero",
         "origin_realm": "*env:TESTVARNoZero",}`))
 	expected := []byte(`{"origin_host":"cgr1","origin_realm":"cgr1"}`)
-	rply := []byte{}
+	var reply []byte
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
 	for ; err == nil && n > 0; n, err = envR.Read(buf) {
-		rply = append(rply, buf[:n]...)
+		reply = append(reply, buf[:n]...)
 		buf = make([]byte, 20)
 	}
-	rply = append(rply, buf[:n]...)
-	for i, bit := range rply {
+	reply = append(reply, buf[:n]...)
+	for i, bit := range reply {
 		if bit == 0 {
 			t.Errorf("Recivied a zero bit on position %+v\n", i)
 		}
 	}
 
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+q\n, received: %+q", (string(expected)), (string(rply)))
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expected: %+q\n, received: %+q", string(expected), string(reply))
 	}
 }
 
@@ -260,7 +264,7 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 	if endindx != 9 {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
+		t.Errorf("Expected: %+v, received: %+v", string(expected), string(rply))
 	}
 
 	expected = []byte("Var2_TEST")
@@ -268,7 +272,7 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 	if endindx != 21 {
 		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %+v, received: %+v", (string(expected)), (string(rply)))
+		t.Errorf("Expected: %+v, received: %+v", string(expected), string(rply))
 	}
 }
 
@@ -280,8 +284,12 @@ func TestEnvReaderreadEnvNameError(t *testing.T) {
 }
 
 func TestEnvReaderreplaceEnv(t *testing.T) {
-	os.Setenv("Test_VAR1", "5")
-	os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable")
+	if err := os.Setenv("Test_VAR1", "5"); err != nil {
+		t.Error(err)
+	}
+	if err := os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable"); err != nil {
+		t.Error(err)
+	}
 	envR := NewRjReaderFromBytes([]byte(`*env:Test_VAR1,/*comment*/ }*env:Test_VAR2"`))
 	// expected := []byte("5}   ")
 	if err := envR.replaceEnv(0); err != nil {
@@ -293,8 +301,12 @@ func TestEnvReaderreplaceEnv(t *testing.T) {
 }
 
 func TestHandleJSONErrorNil(t *testing.T) {
-	os.Setenv("Test_VAR1", "5")
-	os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable")
+	if err := os.Setenv("Test_VAR1", "5"); err != nil {
+		t.Error(err)
+	}
+	if err := os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable"); err != nil {
+		t.Error(err)
+	}
 	envR := NewRjReaderFromBytes([]byte(`*env:Test_VAR1,/*comment*/ }*env:Test_VAR2"`))
 	var expected error = nil
 	if err := envR.replaceEnv(0); err != nil {
@@ -350,7 +362,7 @@ func TestHandleJSONErrorUnmarshalTypeError(t *testing.T) {
 	}
 }
 
-func TestEnvReadercheckMeta(t *testing.T) {
+func TestEnvReaderCheckMeta(t *testing.T) {
 	envR := NewRjReaderFromBytes([]byte("*env:Var"))
 	envR.indx = 1
 	if !envR.checkMeta() {
@@ -380,7 +392,9 @@ func TestIsWhiteSpace(t *testing.T) {
 }
 
 func TestReadRJReader(t *testing.T) {
-	os.Setenv("TESTVARNoZero", utils.EmptyString)
+	if err := os.Setenv("TESTVARNoZero", utils.EmptyString); err != nil {
+		t.Error(err)
+	}
 	rjr := NewRjReaderFromBytes([]byte(`{"origin_host": "*env:TESTVARNoZero",
         "origin_realm": "*env:TESTVARNoZero",}`))
 	expected := "NOT_FOUND:ENV_VAR:TESTVARNoZero"
@@ -397,7 +411,9 @@ func TestReadEnv(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ErrEnvNotFound(key), err)
 	}
 	expected := "cgRates"
-	os.Setenv(key, expected)
+	if err := os.Setenv(key, expected); err != nil {
+		t.Error(err)
+	}
 	if rply, err := ReadEnv(key); err != nil {
 		t.Error(err)
 	} else if rply != expected {
@@ -444,11 +460,10 @@ func TestGetErrorLine(t *testing.T) {
 	} else if expChar != character {
 		t.Errorf("Expected line %v received:%v", expChar, character)
 	}
-
 }
 
 func TestGetErrorLine2(t *testing.T) {
-	jsonstr := `{//nonprocess string
+	jsonStr := `{//nonprocess string
 		/***********************************************/
 
 	// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -470,7 +485,7 @@ func TestGetErrorLine2(t *testing.T) {
 	Line3
 	*/
 /**/		}//`
-	r := NewRjReaderFromBytes([]byte(jsonstr))
+	r := NewRjReaderFromBytes([]byte(jsonStr))
 	var offset int64 = 31
 	var expLine, expChar int64 = 10, 46
 	if line, character := r.getJSONOffsetLine(offset); expLine != line {
@@ -576,7 +591,7 @@ func TestGetJSONOffsetLineInvalidComment(t *testing.T) {
 }
 
 func TestGetJSONOffsetLineReadCommentOffset(t *testing.T) {
-	rjr := NewRjReaderFromBytes([]byte(`//noCOmment`))
+	rjr := NewRjReaderFromBytes([]byte(`//noComment`))
 	rjr.indx = 0
 	var eLine, eCharacter int64 = 1, 5
 	if line, character := rjr.getJSONOffsetLine(int64(3)); line != eLine && character != eCharacter {

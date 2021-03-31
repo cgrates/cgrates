@@ -48,7 +48,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
-		ActionsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		ExtraFields:      RSRParsers{},
 	}
@@ -149,7 +149,7 @@ func TestCdrsCfgClone(t *testing.T) {
 		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		ActionsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
+		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
 		ExtraFields:      RSRParsers{},
@@ -173,7 +173,7 @@ func TestCdrsCfgClone(t *testing.T) {
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.ActionsConns[1] = ""; ban.ActionsConns[1] != "*conn1" {
+	if rcv.ActionSConns[1] = ""; ban.ActionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.EEsConns[1] = ""; ban.EEsConns[1] != "*conn1" {
