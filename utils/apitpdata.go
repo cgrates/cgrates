@@ -21,7 +21,6 @@ package utils
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -933,18 +932,17 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 }
 
 type ArgsComputeFilterIndexIDs struct {
-	Tenant            string
-	Context           string
-	AttributeIDs      []string
-	ResourceIDs       []string
-	StatIDs           []string
-	RouteIDs          []string
-	ThresholdIDs      []string
-	ChargerIDs        []string
-	DispatcherIDs     []string
-	RateProfileIDs    []string
-	AccountProfileIDs []string
-	ActionProfileIDs  []string
+	Tenant           string
+	Context          string
+	AttributeIDs     []string
+	ResourceIDs      []string
+	StatIDs          []string
+	RouteIDs         []string
+	ThresholdIDs     []string
+	ChargerIDs       []string
+	DispatcherIDs    []string
+	RateProfileIDs   []string
+	ActionProfileIDs []string
 }
 
 type ArgsComputeFilterIndexes struct {
@@ -1551,108 +1549,6 @@ type TPAPAction struct {
 type TPAPDiktat struct {
 	Path  string
 	Value string
-}
-
-type TPAccountProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	Weights            string
-	Balances           map[string]*TPAccountBalance
-	ThresholdIDs       []string
-}
-
-type TPAccountBalance struct {
-	ID             string
-	FilterIDs      []string
-	Weights        string
-	Blocker        bool
-	Type           string
-	Opts           string
-	CostIncrement  []*TPBalanceCostIncrement
-	AttributeIDs   []string
-	RateProfileIDs []string
-	UnitFactors    []*TPBalanceUnitFactor
-	Units          float64
-}
-
-func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr string) (costIncrement *TPBalanceCostIncrement, err error) {
-	costIncrement = &TPBalanceCostIncrement{
-		FilterIDs: strings.Split(filtersStr, ANDSep),
-	}
-	if incrementStr != EmptyString {
-		incr, err := strconv.ParseFloat(incrementStr, 64)
-		if err != nil {
-			return nil, err
-		}
-		costIncrement.Increment = Float64Pointer(incr)
-	}
-	if fixedFeeStr != EmptyString {
-		fixedFee, err := strconv.ParseFloat(fixedFeeStr, 64)
-		if err != nil {
-			return nil, err
-		}
-		costIncrement.FixedFee = Float64Pointer(fixedFee)
-	}
-	if recurrentFeeStr != EmptyString {
-		recFee, err := strconv.ParseFloat(recurrentFeeStr, 64)
-		if err != nil {
-			return nil, err
-		}
-		costIncrement.RecurrentFee = Float64Pointer(recFee)
-	}
-	return
-}
-
-type TPBalanceCostIncrement struct {
-	FilterIDs    []string
-	Increment    *float64
-	FixedFee     *float64
-	RecurrentFee *float64
-}
-
-func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
-	if len(costIncr.FilterIDs) != 0 {
-		s = s + strings.Join(costIncr.FilterIDs, ANDSep)
-	}
-	s = s + InfieldSep
-	if costIncr.Increment != nil {
-		s = s + strconv.FormatFloat(*costIncr.Increment, 'f', -1, 64)
-	}
-	s = s + InfieldSep
-	if costIncr.FixedFee != nil {
-		s = s + strconv.FormatFloat(*costIncr.FixedFee, 'f', -1, 64)
-	}
-	s = s + InfieldSep
-	if costIncr.RecurrentFee != nil {
-		s = s + strconv.FormatFloat(*costIncr.RecurrentFee, 'f', -1, 64)
-	}
-	return
-}
-
-func NewTPBalanceUnitFactor(filtersStr, factorStr string) (unitFactor *TPBalanceUnitFactor, err error) {
-	unitFactor = &TPBalanceUnitFactor{
-		FilterIDs: strings.Split(filtersStr, ANDSep),
-	}
-	if unitFactor.Factor, err = strconv.ParseFloat(factorStr, 64); err != nil {
-		return
-	}
-	return
-}
-
-type TPBalanceUnitFactor struct {
-	FilterIDs []string
-	Factor    float64
-}
-
-func (unitFactor *TPBalanceUnitFactor) AsString() (s string) {
-	if len(unitFactor.FilterIDs) != 0 {
-		s = s + strings.Join(unitFactor.FilterIDs, ANDSep)
-	}
-	s = s + InfieldSep + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
-	return
 }
 
 // ArgActionSv1ScheduleActions is used in ActionSv1 methods

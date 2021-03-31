@@ -58,7 +58,6 @@ type TpReader struct {
 	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
 	rateProfiles       map[utils.TenantID]*utils.TPRateProfile
 	actionProfiles     map[utils.TenantID]*utils.TPActionProfile
-	accountProfiles    map[utils.TenantID]*utils.TPAccountProfile
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -109,7 +108,6 @@ func (tpr *TpReader) Init() {
 	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
 	tpr.rateProfiles = make(map[utils.TenantID]*utils.TPRateProfile)
 	tpr.actionProfiles = make(map[utils.TenantID]*utils.TPActionProfile)
-	tpr.accountProfiles = make(map[utils.TenantID]*utils.TPAccountProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.acntActionPlans = make(map[string][]string)
 }

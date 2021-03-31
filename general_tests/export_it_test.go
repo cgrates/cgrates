@@ -61,7 +61,6 @@ var (
 		testExpVerifyRoutes,
 		testExpVerifyRateProfiles,
 		testExpVerifyActionProfiles,
-		testExpVerifyAccountProfiles,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
 	}
@@ -506,66 +505,6 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(actPrf, reply) {
 		t.Errorf("Expecting : %+v \n received: %+v", utils.ToJSON(actPrf), utils.ToJSON(reply))
-	}
-}
-
-func testExpVerifyAccountProfiles(t *testing.T) {
-	var reply *utils.AccountProfile
-	acctPrf := &utils.AccountProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ACC_PRF_1",
-		FilterIDs: []string{},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 20,
-			},
-		},
-		Balances: map[string]*utils.Balance{
-			"MonetaryBalance": {
-				ID: "MonetaryBalance",
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 10,
-					},
-				},
-				Type: "*monetary",
-				CostIncrements: []*utils.CostIncrement{
-					{
-						FilterIDs:    []string{"fltr1", "fltr2"},
-						Increment:    utils.NewDecimal(13, 1),
-						FixedFee:     utils.NewDecimal(23, 1),
-						RecurrentFee: utils.NewDecimal(33, 1),
-					},
-				},
-				AttributeIDs: []string{"attr1", "attr2"},
-				UnitFactors: []*utils.UnitFactor{
-					{
-						FilterIDs: []string{"fltr1", "fltr2"},
-						Factor:    utils.NewDecimal(100, 0),
-					},
-					{
-						FilterIDs: []string{"fltr3"},
-						Factor:    utils.NewDecimal(200, 0),
-					},
-				},
-				Units: utils.NewDecimal(14, 0),
-			},
-		},
-		ThresholdIDs: []string{"*none"},
-	}
-	sort.Strings(acctPrf.Balances["MonetaryBalance"].CostIncrements[0].FilterIDs)
-	sort.Strings(acctPrf.Balances["MonetaryBalance"].UnitFactors[0].FilterIDs)
-	sort.Strings(acctPrf.Balances["MonetaryBalance"].AttributeIDs)
-	if err := expRpc.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}}, &reply); err != nil {
-		t.Fatal(err)
-	} else {
-		sort.Strings(acctPrf.Balances["MonetaryBalance"].CostIncrements[0].FilterIDs)
-		sort.Strings(acctPrf.Balances["MonetaryBalance"].UnitFactors[0].FilterIDs)
-		sort.Strings(acctPrf.Balances["MonetaryBalance"].AttributeIDs)
-		if !reflect.DeepEqual(acctPrf, reply) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acctPrf), utils.ToJSON(reply))
-		}
 	}
 }
 

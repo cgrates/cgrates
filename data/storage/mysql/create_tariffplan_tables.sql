@@ -535,35 +535,6 @@ CREATE TABLE tp_action_profiles (
     `id`,`filter_ids`,`action_id` )
 );
 
-
-DROP TABLE IF EXISTS tp_account_profiles;
-CREATE TABLE tp_account_profiles (
-  `pk` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` varchar(64) NOT NULL,
-  `tenant` varchar(64) NOT NULL,
-  `id` varchar(64) NOT NULL,
-  `filter_ids` varchar(64) NOT NULL,
-  `activation_interval` varchar(64) NOT NULL,
-  `weights` varchar(64) NOT NULL,
-  `opts` varchar(256) NOT NULL,
-  `balance_id` varchar(64) NOT NULL,
-  `balance_filter_ids` varchar(64) NOT NULL,
-  `balance_weights` varchar(64) NOT NULL,
-  `balance_type` varchar(64) NOT NULL,
-  `balance_units` decimal(16,4) NOT NULL,
-  `balance_unit_factors` varchar(64) NOT NULL,
-  `balance_opts` varchar(256) NOT NULL,
-  `balance_cost_increments` varchar(64) NOT NULL,
-  `balance_attribute_ids` varchar(64) NOT NULL,
-  `balance_rate_profile_ids` varchar(64) NOT NULL,
-  `threshold_ids` varchar(64) NOT NULL,
-  `created_at` TIMESTAMP,
-  PRIMARY KEY (`pk`),
-  KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_account_profiles` (`tpid`,`tenant`,
-  `id`,`filter_ids`,`balance_id` )
-);
-
 --
 -- Table structure for table `versions`
 --
