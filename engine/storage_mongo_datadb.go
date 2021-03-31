@@ -76,7 +76,6 @@ const (
 	ColCpp  = "charger_profiles"
 	ColDpp  = "dispatcher_profiles"
 	ColDph  = "dispatcher_hosts"
-	ColApp  = "action_profiles"
 	ColLID  = "load_ids"
 )
 
@@ -636,13 +635,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, ColCpp, utils.ChargerProfilePrefix, subject, tntID)
 		case utils.DispatcherProfilePrefix:
 			result, err = ms.getField2(sctx, ColDpp, utils.DispatcherProfilePrefix, subject, tntID)
-<<<<<<< HEAD
-		case utils.ActionProfilePrefix:
-			result, err = ms.getField2(sctx, ColApp, utils.ActionProfilePrefix, subject, tntID)
-=======
-		case utils.AccountProfilePrefix:
-			result, err = ms.getField2(sctx, ColAnp, utils.AccountProfilePrefix, subject, tntID)
->>>>>>> Removing ActionS
 		case utils.DispatcherHostPrefix:
 			result, err = ms.getField2(sctx, ColDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
@@ -661,11 +653,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField3(sctx, ColIndx, utils.DispatcherFilterIndexes, "key")
 		case utils.ActionPlanIndexes:
 			result, err = ms.getField3(sctx, ColIndx, utils.ActionPlanIndexes, "key")
-<<<<<<< HEAD
-=======
-		case utils.AccountProfileFilterIndexPrfx:
-			result, err = ms.getField3(sctx, ColIndx, utils.AccountProfileFilterIndexPrfx, "key")
->>>>>>> Removing ActionS
 		case utils.FilterIndexPrfx:
 			result, err = ms.getField3(sctx, ColIndx, utils.FilterIndexPrfx, "key")
 		default:
@@ -716,13 +703,6 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(ColDpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherHostPrefix:
 			count, err = ms.getCol(ColDph).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
-<<<<<<< HEAD
-		case utils.ActionProfilePrefix:
-			count, err = ms.getCol(ColApp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
-=======
-		case utils.AccountProfilePrefix:
-			count, err = ms.getCol(ColAnp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
->>>>>>> Removing ActionS
 		default:
 			err = fmt.Errorf("unsupported category in HasData: %s", category)
 		}

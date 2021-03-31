@@ -198,7 +198,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
 	cfg.rateSCfg = new(RateSCfg)
-	cfg.actionSCfg = new(ActionSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
@@ -334,7 +333,6 @@ type CGRConfig struct {
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
-	actionSCfg       *ActionSCfg       // ActionS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
@@ -410,7 +408,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg, cfg.loadActionSCfg,
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg,
 		cfg.loadAccountSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
@@ -857,15 +855,6 @@ func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.configSCfg.loadFromJSONCfg(jsnConfigSCfg)
 }
 
-// loadActionSCfg loads the ActionS section of the configuration
-func (cfg *CGRConfig) loadActionSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnActionCfg *ActionSJsonCfg
-	if jsnActionCfg, err = jsnCfg.ActionSCfgJson(); err != nil {
-		return
-	}
-	return cfg.actionSCfg.loadFromJSONCfg(jsnActionCfg)
-}
-
 // loadAccountSCfg loads the AccountS section of the configuration
 func (cfg *CGRConfig) loadAccountSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnActionCfg *AccountSJsonCfg
@@ -1139,13 +1128,6 @@ func (cfg *CGRConfig) RateSCfg() *RateSCfg {
 	return cfg.rateSCfg
 }
 
-// ActionSCfg reads the ActionS configuration
-func (cfg *CGRConfig) ActionSCfg() *ActionSCfg {
-	cfg.lks[ActionSJson].RLock()
-	defer cfg.lks[ActionSJson].RUnlock()
-	return cfg.actionSCfg
-}
-
 // AccountSCfg reads the AccountS configuration
 func (cfg *CGRConfig) AccountSCfg() *AccountSCfg {
 	cfg.lks[AccountSCfgJson].RLock()
@@ -1307,7 +1289,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		ConfigSJson:        cfg.loadConfigSCfg,
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
 		CoreSCfgJson:       cfg.loadCoreSCfg,
-		ActionSJson:        cfg.loadActionSCfg,
 		AccountSCfgJson:    cfg.loadAccountSCfg,
 	}
 }
@@ -1471,7 +1452,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS, AccountSCfgJson,
-		ActionSJson})
+	})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
 	needsStorDB := false
@@ -1564,8 +1545,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[RegistrarCJson] <- struct{}{}
 		case AccountSCfgJson:
 			cfg.rldChans[AccountSCfgJson] <- struct{}{}
-		case ActionSJson:
-			cfg.rldChans[ActionSJson] <- struct{}{}
 		}
 	}
 }
@@ -1616,7 +1595,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		TemplatesJson:      cfg.templates.AsMapInterface(separator),
 		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
 		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
-		ActionSJson:        cfg.actionSCfg.AsMapInterface(),
 		AccountSCfgJson:    cfg.accountSCfg.AsMapInterface(),
 	}
 }
@@ -1780,8 +1758,6 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		mp = cfg.RateSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
-	case ActionSJson:
-		mp = cfg.ActionSCfg().AsMapInterface()
 	case AccountSCfgJson:
 		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
@@ -2049,7 +2025,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		configSCfg:       cfg.configSCfg.Clone(),
 		apiBanCfg:        cfg.apiBanCfg.Clone(),
 		coreSCfg:         cfg.coreSCfg.Clone(),
-		actionSCfg:       cfg.actionSCfg.Clone(),
 		accountSCfg:      cfg.accountSCfg.Clone(),
 
 		cacheDP: make(map[string]utils.MapStorage),
