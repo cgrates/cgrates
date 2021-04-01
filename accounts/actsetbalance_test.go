@@ -439,7 +439,7 @@ func TestActSetCostIncrement(t *testing.T) {
 }
 
 func TestActSetCostIncrementErrors(t *testing.T) {
-	costIncr := []*utils.CostIncrement{}
+	costIncr := make([]*utils.CostIncrement, 0)
 	expected := "strconv.Atoi: parsing \"a\": invalid syntax"
 	if _, err := actSetCostIncrement(costIncr, []string{"CostIncrements[a]", utils.Increment}, "2"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)

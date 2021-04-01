@@ -275,7 +275,7 @@ func TestCBDebitWithUnitFactor(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					Factor: utils.NewDecimal(100, 0),
 				},
 			},
@@ -301,7 +301,7 @@ func TestCBDebitWithUnitFactorWithLimit(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					Factor: utils.NewDecimal(100, 0),
 				},
 			},
@@ -329,7 +329,7 @@ func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					Factor: utils.NewDecimal(100, 0),
 				},
 			},
@@ -361,7 +361,7 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					FilterIDs: []string{"*string:~*req.CustomField:CustomValue"},
 					Factor:    utils.NewDecimal(100, 0),
 				},
@@ -400,7 +400,7 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					FilterIDs: []string{"*string:~*req.CustomField:CustomValue"},
 					Factor:    utils.NewDecimal(100, 0),
 				},
@@ -438,11 +438,11 @@ func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					FilterIDs: []string{"*string:~*req.CustomField:CustomValue"},
 					Factor:    utils.NewDecimal(100, 0),
 				},
-				&utils.UnitFactor{
+				{
 					FilterIDs: []string{"*string:~*req.CustomField2:CustomValue2"},
 					Factor:    utils.NewDecimal(50, 0),
 				},
@@ -559,7 +559,7 @@ func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 			ID:   "CB",
 			Type: utils.MetaConcrete,
 			UnitFactors: []*utils.UnitFactor{
-				&utils.UnitFactor{
+				{
 					FilterIDs: []string{"*string"},
 					Factor:    utils.NewDecimal(100, 0),
 				},

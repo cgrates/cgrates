@@ -110,7 +110,7 @@ func (tS *testMockCall) Call(method string, args interface{}, rply interface{}) 
 func TestProcessAttributeS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
-	config := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{ // coverage purpose
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
@@ -120,7 +120,7 @@ func TestProcessAttributeS(t *testing.T) {
 	}
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(config, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 	cgrEvent := &utils.CGREvent{
@@ -141,7 +141,7 @@ func TestProcessAttributeS(t *testing.T) {
 func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	engine.Cache.Clear(nil)
 
-	config := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
@@ -151,7 +151,7 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 	}
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(config, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
 	})
 	cgrEvent := &utils.CGREvent{
@@ -169,7 +169,7 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	engine.Cache.Clear(nil)
 
-	config := config.NewDefaultCGRConfig()
+	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{
 		calls: map[string]func(args interface{}, reply interface{}) error{
 			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
@@ -189,7 +189,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 	}
 	chanInternal := make(chan rpcclient.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(config, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
 	})
 	cgrEvent := &utils.CGREvent{
