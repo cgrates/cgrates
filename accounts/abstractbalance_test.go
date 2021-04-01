@@ -102,7 +102,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if _, err := debitConcreteUnits(decimal.New(int64(time.Duration(10*time.Minute)), 0),
+	if _, err := debitConcreteUnits(decimal.New(int64(10*time.Minute), 0),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
@@ -137,10 +137,10 @@ func TestABDebitAbstracts(t *testing.T) {
 			Type: utils.MetaAbstract,
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 0)},
 			},
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 		},
 		cncrtBlncs: []*concreteBalance{
 			{
@@ -171,7 +171,7 @@ func TestABDebitAbstracts(t *testing.T) {
 	}
 
 	// limited by concrete
-	aB.blnCfg.Units = utils.NewDecimal(int64(time.Duration(60*time.Second)), 0)
+	aB.blnCfg.Units = utils.NewDecimal(int64(60*time.Second), 0)
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(29, 0) // not enough concrete
 
 	if ec, err := aB.debitAbstracts(decimal.New(int64(30*time.Second), 0),
@@ -179,7 +179,7 @@ func TestABDebitAbstracts(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(29*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(31*time.Second)), 0)) != 0 { // used 29 units
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(31*time.Second), 0)) != 0 { // used 29 units
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -200,7 +200,7 @@ func TestABDebitAbstracts(t *testing.T) {
 	}
 
 	// limited by abstract
-	aB.blnCfg.Units = utils.NewDecimal(int64(time.Duration(29*time.Second)), 0) // not enough abstract
+	aB.blnCfg.Units = utils.NewDecimal(int64(29*time.Second), 0) // not enough abstract
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(60, 0)
 
 	if ec, err := aB.debitAbstracts(decimal.New(int64(30*time.Second), 0),
@@ -221,10 +221,10 @@ func TestABCost0WithConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -259,10 +259,10 @@ func TestABCost0WithoutConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -286,10 +286,10 @@ func TestABCost0Exceed(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -324,10 +324,10 @@ func TestABCost0ExceedWithoutConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -351,13 +351,13 @@ func TestABCost0WithUnlimitedWithConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceUnlimited: true,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -379,7 +379,7 @@ func TestABCost0WithUnlimitedWithConcrete(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(80*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(-int64(time.Duration(20*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(-int64(20*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(10, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -392,7 +392,7 @@ func TestABCost0WithLimit(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
@@ -403,7 +403,7 @@ func TestABCost0WithLimit(t *testing.T) {
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -414,7 +414,7 @@ func TestABCost0WithLimit(t *testing.T) {
 	if ec, err := aB.debitAbstracts(decimal.New(int64(30*time.Second), 0),
 		new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Expected %+v, received %+v", decimal.New(int64(30*time.Second), 0), ec.Abstracts)
@@ -427,13 +427,13 @@ func TestABCost0WithLimitWithConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -455,7 +455,7 @@ func TestABCost0WithLimitWithConcrete(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(10, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -468,13 +468,13 @@ func TestABCost0WithLimitExceed(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -487,7 +487,7 @@ func TestABCost0WithLimitExceed(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	}
 }
@@ -498,13 +498,13 @@ func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(0, 0),
 				},
 			},
@@ -526,7 +526,7 @@ func TestABCost0WithLimitExceedWithConcrete(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(10, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -706,10 +706,10 @@ func TestABCost(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -731,7 +731,7 @@ func TestABCost(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(10*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(50*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(50*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(9, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -748,11 +748,11 @@ func TestABCostWithFiltersNotMatch(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
 					FilterIDs:    []string{"*string:~*req.CustomField:CustomValue"},
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -791,11 +791,11 @@ func TestABCostWithFilters(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
 					FilterIDs:    []string{"*string:~*req.CustomField:CustomValue"},
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -824,7 +824,7 @@ func TestABCostWithFilters(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(10*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(50*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(50*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(9, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -837,10 +837,10 @@ func TestABCostExceed(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -875,13 +875,13 @@ func TestABCostUnlimitedExceed(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceUnlimited: true,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -903,7 +903,7 @@ func TestABCostUnlimitedExceed(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(70*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(-int64(time.Duration(10*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(-int64(10*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(3, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -916,13 +916,13 @@ func TestABCostLimit(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -944,7 +944,7 @@ func TestABCostLimit(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(7, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -957,13 +957,13 @@ func TestABCostLimitExceed(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceLimit: 30000000000.0,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -985,7 +985,7 @@ func TestABCostLimitExceed(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(30*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(30*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(7, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -998,10 +998,10 @@ func TestABCostNotEnoughConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -1023,7 +1023,7 @@ func TestABCostNotEnoughConcrete(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(50*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(10*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(10*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -1036,10 +1036,10 @@ func TestABCostMultipleConcrete(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -1068,7 +1068,7 @@ func TestABCostMultipleConcrete(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(55*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(5*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(5*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -1083,13 +1083,13 @@ func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 		blnCfg: &utils.Balance{
 			ID:    "AB_COST_0",
 			Type:  utils.MetaAbstract,
-			Units: utils.NewDecimal(int64(time.Duration(60*time.Second)), 0), // 1 Minute
+			Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			Opts: map[string]interface{}{
 				utils.MetaBalanceUnlimited: true,
 			},
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(int64(time.Duration(time.Second)), 0),
+					Increment:    utils.NewDecimal(int64(time.Second), 0),
 					RecurrentFee: utils.NewDecimal(1, 1),
 				},
 			},
@@ -1118,7 +1118,7 @@ func TestABCostMultipleConcreteUnlimited(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(70*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(-int64(time.Duration(10*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(-int64(10*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
@@ -1175,7 +1175,7 @@ func TestAMCostWithUnitFactor(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(20*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(time.Duration(40*time.Second)), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(40*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(30, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)

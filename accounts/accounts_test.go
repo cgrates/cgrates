@@ -97,7 +97,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 		ID:        "1004",
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"ConcreteBalance1": &utils.Balance{
+			"ConcreteBalance1": {
 				ID: "ConcreteBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -107,7 +107,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(0, 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						FilterIDs:    []string{"*string:~*req.ToR:*data"},
 						Increment:    &utils.Decimal{decimal.New(1, 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
@@ -176,7 +176,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 
 				Type:  utils.MetaAbstract,
@@ -260,7 +260,7 @@ func TestAccountDebit(t *testing.T) {
 		ID:        "TestAccountDebit",
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"ConcreteBalance1": &utils.Balance{
+			"ConcreteBalance1": {
 				ID: "ConcreteBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -271,7 +271,7 @@ func TestAccountDebit(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(150, 0)},
 			},
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -281,7 +281,7 @@ func TestAccountDebit(t *testing.T) {
 				Type:  utils.MetaAbstract,
 				Units: &utils.Decimal{decimal.New(200, 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(1, 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
@@ -355,7 +355,7 @@ func TestAccountsDebit(t *testing.T) {
 				ID:        "TestAccountsDebit",
 				FilterIDs: []string{"*string:~*req.Account:1004"},
 				Balances: map[string]*utils.Balance{
-					"AbstractBalance1": &utils.Balance{
+					"AbstractBalance1": {
 						ID: "AbstractBalance1",
 						Weights: utils.DynamicWeights{
 							{
@@ -365,14 +365,14 @@ func TestAccountsDebit(t *testing.T) {
 						Type:  utils.MetaAbstract,
 						Units: &utils.Decimal{decimal.New(40, 0)},
 						CostIncrements: []*utils.CostIncrement{
-							&utils.CostIncrement{
+							{
 								Increment:    &utils.Decimal{decimal.New(1, 0)},
 								FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 								RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 							},
 						},
 					},
-					"ConcreteBalance2": &utils.Balance{
+					"ConcreteBalance2": {
 						ID: "ConcreteBalance2",
 						Weights: utils.DynamicWeights{
 							{
@@ -482,7 +482,7 @@ func TestV1AccountProfilesForEvent(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 
 				Type:  utils.MetaAbstract,
@@ -504,7 +504,7 @@ func TestV1AccountProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	rply := []*utils.AccountProfile{}
+	rply := make([]*utils.AccountProfile, 0)
 
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter_format"
 	if err := accnts.V1AccountProfilesForEvent(args, &rply); err == nil || err.Error() != expected {
@@ -540,7 +540,7 @@ func TestV1MaxAbstracts(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -550,14 +550,14 @@ func TestV1MaxAbstracts(t *testing.T) {
 				Type:  utils.MetaAbstract,
 				Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(0, 0)},
 					},
 				},
 			},
-			"ConcreteBalance2": &utils.Balance{
+			"ConcreteBalance2": {
 				ID: "ConcreteBalance2",
 				Weights: utils.DynamicWeights{
 					{
@@ -627,7 +627,7 @@ func TestV1DebitAbstracts(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -638,7 +638,7 @@ func TestV1DebitAbstracts(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
@@ -714,7 +714,7 @@ func TestV1MaxConcretes(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -725,14 +725,14 @@ func TestV1MaxConcretes(t *testing.T) {
 				Type:  utils.MetaAbstract,
 				Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 					},
 				},
 			},
-			"ConcreteBalance1": &utils.Balance{
+			"ConcreteBalance1": {
 				ID: "ConcreteBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -742,14 +742,14 @@ func TestV1MaxConcretes(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(int64(time.Minute), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 					},
 				},
 			},
-			"ConcreteBalance2": &utils.Balance{
+			"ConcreteBalance2": {
 				ID: "ConcreteBalance2",
 				Weights: utils.DynamicWeights{
 					{
@@ -759,7 +759,7 @@ func TestV1MaxConcretes(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(int64(30*time.Second), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
@@ -825,7 +825,7 @@ func TestV1DebitConcretes(t *testing.T) {
 		},
 		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
-			"AbstractBalance1": &utils.Balance{
+			"AbstractBalance1": {
 				ID: "AbstractBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -836,14 +836,14 @@ func TestV1DebitConcretes(t *testing.T) {
 				Type:  utils.MetaAbstract,
 				Units: &utils.Decimal{decimal.New(int64(40*time.Second), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 					},
 				},
 			},
-			"ConcreteBalance1": &utils.Balance{
+			"ConcreteBalance1": {
 				ID: "ConcreteBalance1",
 				Weights: utils.DynamicWeights{
 					{
@@ -853,14 +853,14 @@ func TestV1DebitConcretes(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(int64(time.Minute), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
 					},
 				},
 			},
-			"ConcreteBalance2": &utils.Balance{
+			"ConcreteBalance2": {
 				ID: "ConcreteBalance2",
 				Weights: utils.DynamicWeights{
 					{
@@ -870,7 +870,7 @@ func TestV1DebitConcretes(t *testing.T) {
 				Type:  utils.MetaConcrete,
 				Units: &utils.Decimal{decimal.New(int64(30*time.Second), 0)},
 				CostIncrements: []*utils.CostIncrement{
-					&utils.CostIncrement{
+					{
 						Increment:    &utils.Decimal{decimal.New(int64(time.Second), 0)},
 						FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 						RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
@@ -948,7 +948,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
 			Balances: map[string]*utils.Balance{
-				"ConcreteBalance2": &utils.Balance{
+				"ConcreteBalance2": {
 					ID: "ConcreteBalance2",
 					Weights: utils.DynamicWeights{
 						{
@@ -958,7 +958,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 					Type:  utils.MetaConcrete,
 					Units: &utils.Decimal{decimal.New(213, 0)},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    &utils.Decimal{decimal.New(1, 0)},
 							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
@@ -977,7 +977,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
 			Balances: map[string]*utils.Balance{
-				"ConcreteBalance2": &utils.Balance{
+				"ConcreteBalance2": {
 					ID: "ConcreteBalance2",
 					Weights: utils.DynamicWeights{
 						{
@@ -987,7 +987,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 					Type:  utils.MetaConcrete,
 					Units: &utils.Decimal{decimal.New(213, 0)},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    &utils.Decimal{decimal.New(1, 0)},
 							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
@@ -1007,7 +1007,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 			},
 			FilterIDs: []string{"*string:~*req.Account:1004"},
 			Balances: map[string]*utils.Balance{
-				"ConcreteBalance2": &utils.Balance{
+				"ConcreteBalance2": {
 					ID: "ConcreteBalance2",
 					Weights: utils.DynamicWeights{
 						{
@@ -1017,7 +1017,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 					Type:  utils.MetaConcrete,
 					Units: &utils.Decimal{decimal.New(213, 0)},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    &utils.Decimal{decimal.New(1, 0)},
 							FixedFee:     &utils.Decimal{decimal.New(0, 0)},
 							RecurrentFee: &utils.Decimal{decimal.New(1, 0)},
