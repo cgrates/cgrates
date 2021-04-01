@@ -152,7 +152,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheAttributeProfiles].Items = 2
 	expectedStats[utils.MetaDefault].Items = 1
 	expectedStats[utils.CacheActionTriggers].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 33
+	expectedStats[utils.CacheLoadIDs].Items = 30
 	expectedStats[utils.CacheChargerProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 2
 	expectedStats[utils.CacheTimings].Items = 14
