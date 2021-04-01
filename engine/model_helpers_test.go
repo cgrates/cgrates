@@ -89,11 +89,11 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 	}
 	eOut = map[string]*Destination{
 		"TEST_DEST1": {
-			Id:       "TEST_DEST1",
+			ID:       "TEST_DEST1",
 			Prefixes: []string{"+491"},
 		},
 		"TEST_DEST2": {
-			Id:       "TEST_DEST2",
+			ID:       "TEST_DEST2",
 			Prefixes: []string{"+492"},
 		},
 	}
@@ -113,15 +113,15 @@ func TestTpDestinationsAsMapDestinations(t *testing.T) {
 	}
 	eOut = map[string]*Destination{
 		"TEST_DEST1": {
-			Id:       "TEST_DEST1",
+			ID:       "TEST_DEST1",
 			Prefixes: []string{"+491"},
 		},
 		"TEST_DEST2": {
-			Id:       "TEST_DEST2",
+			ID:       "TEST_DEST2",
 			Prefixes: []string{"+492"},
 		},
 		"": {
-			Id:       "",
+			ID:       "",
 			Prefixes: []string{""},
 		},
 	}

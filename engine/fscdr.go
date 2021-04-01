@@ -30,21 +30,21 @@ import (
 
 const (
 	// Freswitch event property names
-	FS_CDR_MAP            = "variables"
-	FS_UUID               = "uuid" // -Unique ID for this call leg
-	FS_CALL_DEST_NR       = "dialed_extension"
-	FS_PARK_TIME          = "start_epoch"
-	FS_SETUP_TIME         = "start_epoch"
-	FS_ANSWER_TIME        = "answer_epoch"
-	FS_HANGUP_TIME        = "end_epoch"
-	FS_DURATION           = "billsec"
-	FS_USERNAME           = "user_name"
-	FS_CDR_SOURCE         = "freeswitch_json"
-	FS_SIP_REQUSER        = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
-	FS_PROGRESS_MEDIAMSEC = "progress_mediamsec"
-	FS_PROGRESSMS         = "progressmsec"
-	FsUsername            = "username"
-	FsIPv4                = "FreeSWITCH-IPv4"
+	fsCDRMap            = "variables"
+	fsUUID              = "uuid" // -Unique ID for this call leg
+	fsCallDestNR        = "dialed_extension"
+	fsParkTime          = "start_epoch"
+	fsSetupTime         = "start_epoch"
+	fsAnswerTime        = "answer_epoch"
+	fsHangupTime        = "end_epoch"
+	fsDuration          = "billsec"
+	fsUsernameVar       = "user_name"
+	fsCDRSource         = "freeswitch_json"
+	fsSIPReqUser        = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
+	fsProgressMediamsec = "progress_mediamsec"
+	fsProgressMS        = "progressmsec"
+	fsUsername          = "username"
+	fsIPv4              = "FreeSWITCH-IPv4"
 )
 
 func NewFSCdr(body io.Reader, cgrCfg *config.CGRConfig) (*FSCdr, error) {
@@ -53,7 +53,7 @@ func NewFSCdr(body io.Reader, cgrCfg *config.CGRConfig) (*FSCdr, error) {
 	if err = json.NewDecoder(body).Decode(&fsCdr.body); err != nil {
 		return nil, err
 	}
-	if variables, ok := fsCdr.body[FS_CDR_MAP]; ok {
+	if variables, ok := fsCdr.body[fsCDRMap]; ok {
 		if variables, ok := variables.(map[string]interface{}); ok {
 			for k, v := range variables {
 				fsCdr.vars[k] = v.(string)
@@ -70,8 +70,8 @@ type FSCdr struct {
 }
 
 func (fsCdr FSCdr) getCGRID() string {
-	return utils.Sha1(fsCdr.vars[FS_UUID],
-		utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4]))
+	return utils.Sha1(fsCdr.vars[fsUUID],
+		utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[fsIPv4]))
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
@@ -131,16 +131,16 @@ func (fsCdr FSCdr) AsCDR(timezone string) (storCdr *CDR, err error) {
 	storCdr = &CDR{
 		CGRID:       fsCdr.getCGRID(),
 		RunID:       fsCdr.vars["cgr_runid"],
-		OriginHost:  utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4]),
-		Source:      FS_CDR_SOURCE,
-		OriginID:    fsCdr.vars[FS_UUID],
+		OriginHost:  utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[fsIPv4]),
+		Source:      fsCDRSource,
+		OriginID:    fsCdr.vars[fsUUID],
 		ToR:         utils.MetaVoice,
 		RequestType: utils.FirstNonEmpty(fsCdr.vars[utils.CGRReqType], fsCdr.cgrCfg.GeneralCfg().DefaultReqType),
 		Tenant:      utils.FirstNonEmpty(fsCdr.vars[utils.CGRTenant], fsCdr.cgrCfg.GeneralCfg().DefaultTenant),
 		Category:    utils.FirstNonEmpty(fsCdr.vars[utils.CGRCategory], fsCdr.cgrCfg.GeneralCfg().DefaultCategory),
-		Account:     fsCdr.firstDefined([]string{utils.CGRAccount, FS_USERNAME}, FsUsername),
-		Subject:     fsCdr.firstDefined([]string{utils.CGRSubject, utils.CGRAccount, FS_USERNAME}, FsUsername),
-		Destination: utils.FirstNonEmpty(fsCdr.vars[utils.CGRDestination], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER]),
+		Account:     fsCdr.firstDefined([]string{utils.CGRAccount, fsUsernameVar}, fsUsername),
+		Subject:     fsCdr.firstDefined([]string{utils.CGRSubject, utils.CGRAccount, fsUsernameVar}, fsUsername),
+		Destination: utils.FirstNonEmpty(fsCdr.vars[utils.CGRDestination], fsCdr.vars[fsCallDestNR], fsCdr.vars[fsSIPReqUser]),
 		ExtraFields: fsCdr.getExtraFields(),
 		ExtraInfo:   fsCdr.vars["cgr_extrainfo"],
 		CostSource:  fsCdr.vars["cgr_costsource"],
@@ -151,17 +151,17 @@ func (fsCdr FSCdr) AsCDR(timezone string) (storCdr *CDR, err error) {
 			return nil, err
 		}
 	}
-	if setupTime, hasIt := fsCdr.vars[FS_SETUP_TIME]; hasIt {
+	if setupTime, hasIt := fsCdr.vars[fsSetupTime]; hasIt {
 		if storCdr.SetupTime, err = utils.ParseTimeDetectLayout(setupTime, timezone); err != nil {
 			return nil, err
 		} // Not interested to process errors, should do them if necessary in a previous step
 	}
-	if answerTime, hasIt := fsCdr.vars[FS_ANSWER_TIME]; hasIt {
+	if answerTime, hasIt := fsCdr.vars[fsAnswerTime]; hasIt {
 		if storCdr.AnswerTime, err = utils.ParseTimeDetectLayout(answerTime, timezone); err != nil {
 			return nil, err
 		}
 	}
-	if usage, hasIt := fsCdr.vars[FS_DURATION]; hasIt {
+	if usage, hasIt := fsCdr.vars[fsDuration]; hasIt {
 		if storCdr.Usage, err = utils.ParseDurationWithSecs(usage); err != nil {
 			return nil, err
 		}

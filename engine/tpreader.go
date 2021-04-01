@@ -108,7 +108,7 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 		if err = tpr.dm.SetDestination(dst, transID); err != nil {
 			Cache.RollbackTransaction(transID)
 		}
-		if err = tpr.dm.SetReverseDestination(dst.Id, dst.Prefixes, transID); err != nil {
+		if err = tpr.dm.SetReverseDestination(dst.ID, dst.Prefixes, transID); err != nil {
 			Cache.RollbackTransaction(transID)
 		}
 	}
@@ -452,7 +452,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 			return
 		}
 		if verbose {
-			log.Print("\t", d.Id, " : ", d.Prefixes)
+			log.Print("\t", d.ID, " : ", d.Prefixes)
 		}
 	}
 	if len(tpr.destinations) != 0 {
@@ -953,11 +953,11 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	loadID := time.Now().UnixNano()
 	loadIDs := make(map[string]int64)
 	for _, d := range tpr.destinations {
-		if err = tpr.dm.RemoveDestination(d.Id, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveDestination(d.ID, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {
-			log.Print("\t", d.Id, " : ", d.Prefixes)
+			log.Print("\t", d.ID, " : ", d.Prefixes)
 		}
 	}
 
@@ -1473,14 +1473,14 @@ func (tpr *TpReader) setDestination(dest *Destination, disableReverse bool, tran
 		return tpr.dm.SetDestination(dest, transID)
 	}
 	var oldDest *Destination
-	if oldDest, err = tpr.dm.GetDestination(dest.Id, false, false, transID); err != nil &&
+	if oldDest, err = tpr.dm.GetDestination(dest.ID, false, false, transID); err != nil &&
 		err != utils.ErrNotFound {
 		return
 	}
 	if err = tpr.dm.SetDestination(dest, transID); err != nil {
 		return
 	}
-	if err = Cache.Set(utils.CacheDestinations, dest.Id, dest, nil,
+	if err = Cache.Set(utils.CacheDestinations, dest.ID, dest, nil,
 		cacheCommit(transID), transID); err != nil {
 		return
 	}

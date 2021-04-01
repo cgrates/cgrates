@@ -1815,7 +1815,7 @@ func testFltrRplDestination(t *testing.T) {
 	dstID := "DST1"
 	dstPrf := utils.AttrSetDestination{Id: dstID, Prefixes: []string{"dan"}}
 	expPrf := &engine.Destination{
-		Id:       dstID,
+		ID:       dstID,
 		Prefixes: []string{"dan"},
 	}
 	args := &utils.StringWithAPIOpts{

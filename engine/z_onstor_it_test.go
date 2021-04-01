@@ -151,24 +151,24 @@ func testOnStorITCacheDestinations(t *testing.T) {
 	if err := onStor.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
 		t.Error(err)
 	}
-	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
+	dst := &Destination{ID: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
 	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
-	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.ID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
+	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.ID}, true); err != nil { // Should not cache due to mustBeCached
 		t.Error(err)
 	}
-	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.ID); hasIt {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.Id}, false); err != nil {
+	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.ID}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheDestinations, dst.ID); !hasIt {
 		t.Error("Did not cache")
 	} else if !reflect.DeepEqual(dst, itm.(*Destination)) {
 		t.Error("Wrong item in the cache")
@@ -176,8 +176,8 @@ func testOnStorITCacheDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheReverseDestinations(t *testing.T) {
-	dst := &Destination{Id: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
-	if err := onStor.SetReverseDestination(dst.Id, dst.Prefixes, utils.NonTransactional); err != nil {
+	dst := &Destination{ID: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
+	if err := onStor.SetReverseDestination(dst.ID, dst.Prefixes, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	for _, prfx := range dst.Prefixes {
@@ -193,7 +193,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 		for _, prfx := range dst.Prefixes {
 			if itm, hasIt := Cache.Get(utils.CacheReverseDestinations, prfx); !hasIt {
 				t.Error("Did not cache")
-			} else if !reflect.DeepEqual([]string{dst.Id}, itm.([]string)) {
+			} else if !reflect.DeepEqual([]string{dst.ID}, itm.([]string)) {
 				t.Error("Wrong item in the cache")
 			}
 		}
@@ -606,14 +606,14 @@ func testOnStorITRatingProfile(t *testing.T) {
 }
 
 func testOnStorITCRUDDestinations(t *testing.T) {
-	dst := &Destination{Id: "CRUDDestination2", Prefixes: []string{"+491", "+492", "+493"}}
-	if _, rcvErr := onStor.GetDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	dst := &Destination{ID: "CRUDDestination2", Prefixes: []string{"+491", "+492", "+493"}}
+	if _, rcvErr := onStor.GetDestination(dst.ID, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetDestination(dst.Id, false, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetDestination(dst.ID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dst, rcv) {
 		t.Errorf("Expecting: %v, received: %v", dst, rcv)
@@ -635,28 +635,28 @@ func testOnStorITCRUDDestinations(t *testing.T) {
 	// 	t.Error(err)
 	// }
 
-	if err = onStor.RemoveDestination(dst.Id, utils.NonTransactional); err != nil {
+	if err = onStor.RemoveDestination(dst.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetDestination(dst.ID, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
 
 func testOnStorITCRUDReverseDestinations(t *testing.T) {
-	dst := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
-	dst2 := &Destination{Id: "CRUDReverseDestination", Prefixes: []string{"+497", "+498", "+499"}}
-	if _, rcvErr := onStor.GetReverseDestination(dst.Id, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	dst := &Destination{ID: "CRUDReverseDestination", Prefixes: []string{"+494", "+495", "+496"}}
+	dst2 := &Destination{ID: "CRUDReverseDestination", Prefixes: []string{"+497", "+498", "+499"}}
+	if _, rcvErr := onStor.GetReverseDestination(dst.ID, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetReverseDestination(dst.Id, dst.Prefixes, utils.NonTransactional); err != nil {
+	if err := onStor.SetReverseDestination(dst.ID, dst.Prefixes, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	for i := range dst.Prefixes {
 		if rcv, err := onStor.GetReverseDestination(dst.Prefixes[i], false, true, utils.NonTransactional); err != nil {
 			t.Error(err)
-		} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
-			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		} else if !reflect.DeepEqual([]string{dst.ID}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.ID}, rcv)
 		}
 	}
 	if err := onStor.UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
@@ -665,8 +665,8 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	for i := range dst.Prefixes {
 		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], false, true, utils.NonTransactional); err != nil {
 			t.Error(err)
-		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
-			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		} else if !reflect.DeepEqual([]string{dst2.ID}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.ID}, rcv)
 		}
 	}
 	// FixMe
@@ -680,8 +680,8 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	for i := range dst.Prefixes {
 		if rcv, err := onStor.GetReverseDestination(dst2.Prefixes[i], true, true, utils.NonTransactional); err != nil {
 			t.Error(err)
-		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
-			t.Errorf("Expecting: %v, received: %v", []string{dst.Id}, rcv)
+		} else if !reflect.DeepEqual([]string{dst2.ID}, rcv) {
+			t.Errorf("Expecting: %v, received: %v", []string{dst.ID}, rcv)
 		}
 	}
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {

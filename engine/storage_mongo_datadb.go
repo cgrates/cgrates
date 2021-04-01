@@ -716,11 +716,11 @@ func (ms *MongoStorage) SetDestinationDrv(dest *Destination, transactionID strin
 	w.Write(result)
 	w.Close()
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColDst).UpdateOne(sctx, bson.M{"key": dest.Id},
+		_, err = ms.getCol(ColDst).UpdateOne(sctx, bson.M{"key": dest.ID},
 			bson.M{"$set": struct {
 				Key   string
 				Value []byte
-			}{Key: dest.Id, Value: b.Bytes()}},
+			}{Key: dest.ID, Value: b.Bytes()}},
 			options.Update().SetUpsert(true),
 		)
 		return err

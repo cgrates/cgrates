@@ -549,11 +549,11 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 func TestFsCdrFirstDefined(t *testing.T) {
 	newReader := bytes.NewReader(body)
 	fsCdr, _ := NewFSCdr(newReader, fsCdrCfg)
-	value := fsCdr.firstDefined([]string{utils.CGRSubject, utils.CGRAccount, FS_USERNAME}, FsUsername)
+	value := fsCdr.firstDefined([]string{utils.CGRSubject, utils.CGRAccount, fsUsernameVar}, fsUsername)
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}
-	value = fsCdr.firstDefined([]string{utils.CGRAccount, FS_USERNAME}, FsUsername)
+	value = fsCdr.firstDefined([]string{utils.CGRAccount, fsUsernameVar}, fsUsername)
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}
@@ -576,7 +576,7 @@ func TestFscdrAsCDR(t *testing.T) {
 	expectedCdr := &CDR{
 		OrderID: 123,
 		ToR:     utils.MetaVoice,
-		Source:  FS_CDR_SOURCE, Category: cgrCfg.GeneralCfg().DefaultCategory,
+		Source:  fsCDRSource, Category: cgrCfg.GeneralCfg().DefaultCategory,
 		Tenant:      cgrCfg.GeneralCfg().DefaultTenant,
 		RequestType: cgrCfg.GeneralCfg().DefaultReqType,
 		Partial:     true,
@@ -711,7 +711,7 @@ func TestFscdrAsCdrFirstDefined(t *testing.T) {
 }`)
 	expectedCdr := &CDR{
 		ToR:    utils.MetaVoice,
-		Source: FS_CDR_SOURCE, Category: cgrCfg.GeneralCfg().DefaultCategory,
+		Source: fsCDRSource, Category: cgrCfg.GeneralCfg().DefaultCategory,
 		Tenant:      cgrCfg.GeneralCfg().DefaultTenant,
 		RequestType: cgrCfg.GeneralCfg().DefaultReqType,
 		Account:     "randomAccount",

@@ -25,7 +25,7 @@ import (
 )
 
 func NewDestinationFromTPDestination(tpDst *utils.TPDestination) *Destination {
-	return &Destination{Id: tpDst.ID, Prefixes: tpDst.Prefixes}
+	return &Destination{ID: tpDst.ID, Prefixes: tpDst.Prefixes}
 
 }
 
@@ -33,7 +33,7 @@ func NewDestinationFromTPDestination(tpDst *utils.TPDestination) *Destination {
 Structure that gathers multiple destination prefixes under a common id.
 */
 type Destination struct {
-	Id       string
+	ID       string
 	Prefixes []string
 }
 
@@ -57,7 +57,7 @@ func (d *Destination) containsPrefix(prefix string) int {
 }
 
 func (d *Destination) String() (result string) {
-	result = d.Id + ": "
+	result = d.ID + ": "
 	for _, k := range d.Prefixes {
 		result += k + ", "
 	}
@@ -70,9 +70,9 @@ func (d *Destination) AddPrefix(pfx string) {
 }
 
 // Reverse search in cache to see if prefix belongs to destination id
-func CachedDestHasPrefix(destId, prefix string) bool {
+func CachedDestHasPrefix(destID, prefix string) bool {
 	if cached, err := dm.GetReverseDestination(prefix, true, true, utils.NonTransactional); err == nil {
-		return utils.IsSliceMember(cached, destId)
+		return utils.IsSliceMember(cached, destID)
 	}
 	return false
 }

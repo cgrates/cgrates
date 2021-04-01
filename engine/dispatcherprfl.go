@@ -189,8 +189,6 @@ func (dHPrflIDs DispatcherHostIDs) Shuffle() {
 
 func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	cln = make(DispatcherHostIDs, len(dHPrflIDs))
-	for i, dhID := range dHPrflIDs {
-		cln[i] = dhID
-	}
+	copy(cln, dHPrflIDs)
 	return
 }

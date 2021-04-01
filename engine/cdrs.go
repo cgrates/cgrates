@@ -88,10 +88,10 @@ func (cdrS *CDRServer) fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 // NewCDRServer is a constructor for CDRServer
 func NewCDRServer(cgrCfg *config.CGRConfig, storDBChan chan StorDB, dm *DataManager, filterS *FilterS,
 	connMgr *ConnManager) *CDRServer {
-	cdrDb := <-storDBChan
+	cdrDB := <-storDBChan
 	return &CDRServer{
 		cgrCfg:     cgrCfg,
-		cdrDb:      cdrDb,
+		cdrDB:      cdrDB,
 		dm:         dm,
 		guard:      guardian.Guardian,
 		filterS:    filterS,
@@ -103,7 +103,7 @@ func NewCDRServer(cgrCfg *config.CGRConfig, storDBChan chan StorDB, dm *DataMana
 // CDRServer stores and rates CDRs
 type CDRServer struct {
 	cgrCfg     *config.CGRConfig
-	cdrDb      CdrStorage
+	cdrDB      CdrStorage
 	dm         *DataManager
 	guard      *guardian.GuardianLocker
 	filterS    *FilterS
@@ -121,7 +121,7 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 			if !ok { // the chanel was closed by the shutdown of stordbService
 				return
 			}
-			cdrS.cdrDb = stordb
+			cdrS.cdrDB = stordb
 		}
 	}
 }
@@ -131,9 +131,6 @@ func (cdrS *CDRServer) RegisterHandlersToServer(server utils.Server) {
 	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPCDRsURL, cdrS.cgrCdrHandler)
 	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, cdrS.fsCdrHandler)
 }
-
-var reqTypes = utils.NewStringSet([]string{utils.MetaPseudoPrepaid, utils.MetaPostpaid, utils.MetaPrepaid,
-	utils.PseudoPrepaid, utils.Postpaid, utils.Prepaid, utils.MetaDynaprepaid})
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
@@ -642,7 +639,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 		return utils.NewErrServerError(err)
 	}
 	var cdrs []*CDR
-	if cdrs, _, err = cdrS.cdrDb.GetCDRs(cdrFltr, false); err != nil {
+	if cdrs, _, err = cdrS.cdrDB.GetCDRs(cdrFltr, false); err != nil {
 		return
 	}
 	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
@@ -709,7 +706,7 @@ func (cdrS *CDRServer) V1GetCDRs(args utils.RPCCDRsFilterWithAPIOpts, cdrs *[]*C
 		}
 		return err
 	}
-	qryCDRs, _, err := cdrS.cdrDb.GetCDRs(cdrsFltr, false)
+	qryCDRs, _, err := cdrS.cdrDB.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -727,7 +724,7 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithAPIOpts, cnt *in
 		return err
 	}
 	cdrsFltr.Count = true
-	_, qryCnt, err := cdrS.cdrDb.GetCDRs(cdrsFltr, false)
+	_, qryCnt, err := cdrS.cdrDB.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

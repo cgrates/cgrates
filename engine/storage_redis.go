@@ -290,7 +290,7 @@ func (rs *RedisStorage) SetDestinationDrv(dest *Destination, transactionID strin
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	err = rs.Cmd(nil, redis_SET, utils.DestinationPrefix+dest.Id, b.String())
+	err = rs.Cmd(nil, redis_SET, utils.DestinationPrefix+dest.ID, b.String())
 	return
 }
 

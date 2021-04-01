@@ -316,7 +316,7 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			if dest, err = dm.GetDestination(key[len(utils.DestinationPrefix):], false, true, utils.NonTransactional); err != nil {
 				return err
 			}
-			if err = dm.SetReverseDestination(dest.Id, dest.Prefixes, utils.NonTransactional); err != nil {
+			if err = dm.SetReverseDestination(dest.ID, dest.Prefixes, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -383,7 +383,7 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.DestinationPrefix, dest.Id, // this are used to get the host IDs from cache
+			utils.DestinationPrefix, dest.ID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDestination,
 			&DestinationWithAPIOpts{
 				Destination: dest,
@@ -448,7 +448,7 @@ func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, t
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DestinationPrefix, destID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetReverseDestination,
-			&DestinationWithAPIOpts{Destination: &Destination{Id: destID, Prefixes: prefixes}})
+			&DestinationWithAPIOpts{Destination: &Destination{ID: destID, Prefixes: prefixes}})
 	}
 	return
 }
@@ -507,7 +507,7 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 		return utils.ErrNoDatabaseConn
 	}
 	if oldDest == nil {
-		return dm.dataDB.SetReverseDestinationDrv(newDest.Id, newDest.Prefixes, transactionID)
+		return dm.dataDB.SetReverseDestinationDrv(newDest.ID, newDest.Prefixes, transactionID)
 	}
 
 	cCommit := cacheCommit(transactionID)
@@ -521,7 +521,7 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 			}
 		}
 		if !found {
-			if err = dm.dataDB.RemoveReverseDestinationDrv(newDest.Id, oldPrefix, transactionID); err != nil {
+			if err = dm.dataDB.RemoveReverseDestinationDrv(newDest.ID, oldPrefix, transactionID); err != nil {
 				return
 			}
 			if err = Cache.Remove(utils.CacheReverseDestinations, oldPrefix,
@@ -543,7 +543,7 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 			addedPrefixes = append(addedPrefixes, newPrefix)
 		}
 	}
-	return dm.SetReverseDestination(newDest.Id, addedPrefixes, transactionID)
+	return dm.SetReverseDestination(newDest.ID, addedPrefixes, transactionID)
 }
 
 // GetStatQueue retrieves a StatQueue from dataDB

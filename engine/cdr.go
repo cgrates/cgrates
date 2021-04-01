@@ -500,7 +500,7 @@ type UsageRecord struct {
 	ExtraFields map[string]string
 }
 
-func (uR *UsageRecord) GetId() string {
+func (uR *UsageRecord) GetID() string {
 	return utils.Sha1(uR.ToR, uR.RequestType, uR.Tenant, uR.Category, uR.Account, uR.Subject, uR.Destination, uR.SetupTime, uR.AnswerTime, uR.Usage)
 }
 

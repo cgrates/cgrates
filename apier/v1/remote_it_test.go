@@ -551,7 +551,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 func testInternalRemoteITGetDestination(t *testing.T) {
 	var dst *engine.Destination
 	eDst := &engine.Destination{
-		Id:       "DST_1002",
+		ID:       "DST_1002",
 		Prefixes: []string{"1002"},
 	}
 	if err := internalRPC.Call(utils.APIerSv1GetDestination, utils.StringPointer("DST_1002"), &dst); err != nil {

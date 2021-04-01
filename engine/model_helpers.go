@@ -154,7 +154,7 @@ func (tps DestinationMdls) AsMapDestinations() (map[string]*Destination, error) 
 		var d *Destination
 		var found bool
 		if d, found = result[tp.Tag]; !found {
-			d = &Destination{Id: tp.Tag}
+			d = &Destination{ID: tp.Tag}
 			result[tp.Tag] = d
 		}
 		d.AddPrefix(tp.Prefix)
