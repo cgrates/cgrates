@@ -29,11 +29,11 @@ import (
 // Import tariff plan from csv into storDb
 type TPCSVImporter struct {
 	TPid     string     // Load data on this tpid
-	StorDb   LoadWriter // StorDb connection handle
+	StorDB   LoadWriter // StorDb connection handle
 	DirPath  string     // Directory path to import from
 	Sep      rune       // Separator in the csv file
 	Verbose  bool       // If true will print a detailed information instead of silently discarding it
-	ImportId string     // Use this to differentiate between imports (eg: when autogenerating fields like RatingProfileID
+	ImportID string     // Use this to differentiate between imports (eg: when autogenerating fields like RatingProfileID
 	csvr     LoadReader
 }
 
@@ -89,7 +89,7 @@ func (tpImp *TPCSVImporter) importTimings(fn string) error {
 		tps[i].TPid = tpImp.TPid
 	}
 
-	return tpImp.StorDb.SetTPTimings(tps)
+	return tpImp.StorDB.SetTPTimings(tps)
 }
 
 func (tpImp *TPCSVImporter) importDestinations(fn string) error {
@@ -104,7 +104,7 @@ func (tpImp *TPCSVImporter) importDestinations(fn string) error {
 		tps[i].TPid = tpImp.TPid
 	}
 
-	return tpImp.StorDb.SetTPDestinations(tps)
+	return tpImp.StorDB.SetTPDestinations(tps)
 }
 
 func (tpImp *TPCSVImporter) importResources(fn string) error {
@@ -115,7 +115,7 @@ func (tpImp *TPCSVImporter) importResources(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPResources(rls)
+	return tpImp.StorDB.SetTPResources(rls)
 }
 
 func (tpImp *TPCSVImporter) importStats(fn string) error {
@@ -126,7 +126,7 @@ func (tpImp *TPCSVImporter) importStats(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPStats(sts)
+	return tpImp.StorDB.SetTPStats(sts)
 }
 
 func (tpImp *TPCSVImporter) importThresholds(fn string) error {
@@ -137,7 +137,7 @@ func (tpImp *TPCSVImporter) importThresholds(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPThresholds(sts)
+	return tpImp.StorDB.SetTPThresholds(sts)
 }
 
 func (tpImp *TPCSVImporter) importFilters(fn string) error {
@@ -148,7 +148,7 @@ func (tpImp *TPCSVImporter) importFilters(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPFilters(sts)
+	return tpImp.StorDB.SetTPFilters(sts)
 }
 
 func (tpImp *TPCSVImporter) importRoutes(fn string) error {
@@ -159,7 +159,7 @@ func (tpImp *TPCSVImporter) importRoutes(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPRoutes(rls)
+	return tpImp.StorDB.SetTPRoutes(rls)
 }
 
 func (tpImp *TPCSVImporter) importAttributeProfiles(fn string) error {
@@ -170,7 +170,7 @@ func (tpImp *TPCSVImporter) importAttributeProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPAttributes(rls)
+	return tpImp.StorDB.SetTPAttributes(rls)
 }
 
 func (tpImp *TPCSVImporter) importChargerProfiles(fn string) error {
@@ -181,7 +181,7 @@ func (tpImp *TPCSVImporter) importChargerProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPChargers(rls)
+	return tpImp.StorDB.SetTPChargers(rls)
 }
 
 func (tpImp *TPCSVImporter) importDispatcherProfiles(fn string) error {
@@ -192,7 +192,7 @@ func (tpImp *TPCSVImporter) importDispatcherProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPDispatcherProfiles(dpps)
+	return tpImp.StorDB.SetTPDispatcherProfiles(dpps)
 }
 
 func (tpImp *TPCSVImporter) importDispatcherHosts(fn string) error {
@@ -203,7 +203,7 @@ func (tpImp *TPCSVImporter) importDispatcherHosts(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPDispatcherHosts(dpps)
+	return tpImp.StorDB.SetTPDispatcherHosts(dpps)
 }
 
 func (tpImp *TPCSVImporter) importRateProfiles(fn string) error {
@@ -214,7 +214,7 @@ func (tpImp *TPCSVImporter) importRateProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPRateProfiles(rpps)
+	return tpImp.StorDB.SetTPRateProfiles(rpps)
 }
 
 func (tpImp *TPCSVImporter) importActionProfiles(fn string) error {
@@ -225,7 +225,7 @@ func (tpImp *TPCSVImporter) importActionProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPActionProfiles(rpps)
+	return tpImp.StorDB.SetTPActionProfiles(rpps)
 }
 
 func (tpImp *TPCSVImporter) importAccountProfiles(fn string) error {
@@ -236,5 +236,5 @@ func (tpImp *TPCSVImporter) importAccountProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDb.SetTPAccountProfiles(rpps)
+	return tpImp.StorDB.SetTPAccountProfiles(rpps)
 }

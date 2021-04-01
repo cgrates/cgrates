@@ -99,14 +99,14 @@ func testPartITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testPartITInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(partCfg); err != nil {
+	if err := engine.InitStorDB(partCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testPartITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(partCfg); err != nil {
+	if err := engine.InitDataDB(partCfg); err != nil {
 		t.Fatal(err)
 	}
 }

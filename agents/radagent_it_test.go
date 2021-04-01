@@ -123,24 +123,24 @@ func testRadiusitResetAllDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(allCfg); err != nil {
+	if err := engine.InitDataDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(allCfg); err != nil {
+	if err := engine.InitStorDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testRAitResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(raCfg); err != nil {
+	if err := engine.InitDataDB(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testRAitResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(raCfg); err != nil {
+	if err := engine.InitStorDB(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }

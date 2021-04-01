@@ -84,14 +84,14 @@ func testFWVITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testFWVITInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(fwvCfg); err != nil {
+	if err := engine.InitStorDB(fwvCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testFWVITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(fwvCfg); err != nil {
+	if err := engine.InitDataDB(fwvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

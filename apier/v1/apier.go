@@ -264,11 +264,11 @@ func (apierSv1 *APIerSv1) ImportTariffPlanFromFolder(attrs *utils.AttrImportTPFr
 	}
 	csvImporter := engine.TPCSVImporter{
 		TPid:     attrs.TPid,
-		StorDb:   apierSv1.StorDb,
+		StorDB:   apierSv1.StorDb,
 		DirPath:  attrs.FolderPath,
 		Sep:      rune(attrs.CsvSeparator[0]),
 		Verbose:  false,
-		ImportId: attrs.RunId,
+		ImportID: attrs.RunId,
 	}
 	if err := csvImporter.Run(); err != nil {
 		return utils.NewErrServerError(err)

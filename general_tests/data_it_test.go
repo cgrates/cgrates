@@ -88,13 +88,13 @@ func testV1DataLoadConfig(t *testing.T) {
 }
 
 func testV1DataInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(dataCfg); err != nil {
+	if err := engine.InitDataDB(dataCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1DataResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(dataCfg); err != nil {
+	if err := engine.InitStorDB(dataCfg); err != nil {
 		t.Fatal(err)
 	}
 }

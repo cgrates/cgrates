@@ -84,13 +84,13 @@ func testElasticLoadConfig(t *testing.T) {
 }
 
 func testElasticResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(elasticCfg); err != nil {
+	if err := engine.InitDataDB(elasticCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testElasticResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(elasticCfg); err != nil {
+	if err := engine.InitStorDB(elasticCfg); err != nil {
 		t.Fatal(err)
 	}
 }

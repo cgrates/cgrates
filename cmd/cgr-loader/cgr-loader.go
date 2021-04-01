@@ -283,11 +283,11 @@ func importData(cfg *config.CGRConfig) (err error) {
 	}
 	csvImporter := engine.TPCSVImporter{
 		TPid:     cfg.LoaderCgrCfg().TpID,
-		StorDb:   storDB,
+		StorDB:   storDB,
 		DirPath:  *dataPath,
 		Sep:      cfg.LoaderCgrCfg().FieldSeparator,
 		Verbose:  *verbose,
-		ImportId: *importID,
+		ImportID: *importID,
 	}
 	return csvImporter.Run()
 }

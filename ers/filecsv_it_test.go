@@ -109,14 +109,14 @@ func testCsvITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testCsvITInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(csvCfg); err != nil {
+	if err := engine.InitStorDB(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testCsvITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(csvCfg); err != nil {
+	if err := engine.InitDataDB(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

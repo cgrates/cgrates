@@ -88,10 +88,10 @@ func testRPCInitCfg(t *testing.T) {
 }
 
 func testRPCInitDB(t *testing.T) {
-	if err := engine.InitDataDb(rpcsCfg); err != nil {
+	if err := engine.InitDataDB(rpcsCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(rpcsCfg); err != nil {
+	if err := engine.InitStorDB(rpcsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

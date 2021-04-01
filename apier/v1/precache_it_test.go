@@ -90,7 +90,7 @@ func testPrecacheInitCfg(t *testing.T) {
 }
 
 func testPrecacheResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(precacheCfg); err != nil {
+	if err := engine.InitDataDB(precacheCfg); err != nil {
 		t.Fatal(err)
 	}
 }

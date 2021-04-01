@@ -109,10 +109,10 @@ func testInternalReplicateITInitCfg(t *testing.T) {
 }
 
 func testInternalReplicateITDataFlush(t *testing.T) {
-	if err := engine.InitDataDb(engineOneCfg); err != nil {
+	if err := engine.InitDataDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(engineTwoCfg); err != nil {
+	if err := engine.InitDataDB(engineTwoCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -97,14 +97,14 @@ func testAnalyzerSInitCfg(t *testing.T) {
 }
 
 func testAnalyzerSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(anzCfg); err != nil {
+	if err := engine.InitDataDB(anzCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testAnalyzerSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(anzCfg); err != nil {
+	if err := engine.InitStorDB(anzCfg); err != nil {
 		t.Fatal(err)
 	}
 }

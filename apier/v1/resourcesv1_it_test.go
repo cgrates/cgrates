@@ -116,14 +116,14 @@ func testV1RsLoadConfig(t *testing.T) {
 }
 
 func testV1RsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rlsV1Cfg); err != nil {
+	if err := engine.InitDataDB(rlsV1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testV1RsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(rlsV1Cfg); err != nil {
+	if err := engine.InitStorDB(rlsV1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

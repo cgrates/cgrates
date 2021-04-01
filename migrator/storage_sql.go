@@ -51,7 +51,7 @@ func (sqlMig *migratorSQL) StorDB() engine.StorDB {
 
 func (mgSQL *migratorSQL) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if mgSQL.rowIter == nil {
-		mgSQL.rowIter, err = mgSQL.sqlStorage.Db.Query("SELECT * FROM cdrs")
+		mgSQL.rowIter, err = mgSQL.sqlStorage.DB.Query("SELECT * FROM cdrs")
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +101,7 @@ func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {
 	if mgSQL.StorDB().GetStorageType() == utils.Postgres {
 		qry = "ALTER TABLE sm_costs RENAME TO session_costs"
 	}
-	if _, err := mgSQL.sqlStorage.Db.Exec(qry); err != nil {
+	if _, err := mgSQL.sqlStorage.DB.Exec(qry); err != nil {
 		return err
 	}
 	return
@@ -126,13 +126,13 @@ func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
 	);
 		`
 	}
-	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS session_costs;"); err != nil {
+	if _, err := mgSQL.sqlStorage.DB.Exec("DROP TABLE IF EXISTS session_costs;"); err != nil {
 		return err
 	}
-	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
+	if _, err := mgSQL.sqlStorage.DB.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
 		return err
 	}
-	if _, err := mgSQL.sqlStorage.Db.Exec(qry); err != nil {
+	if _, err := mgSQL.sqlStorage.DB.Exec(qry); err != nil {
 		return err
 	}
 	return

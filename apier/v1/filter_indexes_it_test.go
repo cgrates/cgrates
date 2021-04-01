@@ -154,7 +154,7 @@ func testV1FIdxLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxdxInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tSv1Cfg); err != nil {
+	if err := engine.InitDataDB(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -168,7 +168,7 @@ func testV1IndexClearCache(t *testing.T) {
 
 // Wipe out the cdr database
 func testV1FIdxResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tSv1Cfg); err != nil {
+	if err := engine.InitStorDB(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

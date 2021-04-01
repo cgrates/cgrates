@@ -104,7 +104,7 @@ func testRPCITLclInitCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := engine.InitDataDb(rpcITCfg1); err != nil {
+	if err := engine.InitDataDB(rpcITCfg1); err != nil {
 		t.Fatal(err)
 	}
 }

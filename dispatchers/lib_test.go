@@ -107,14 +107,14 @@ func (d *testDispatcher) stopEngine(t *testing.T) {
 }
 
 func (d *testDispatcher) initDataDb(t *testing.T) {
-	if err := engine.InitDataDb(d.Cfg); err != nil {
+	if err := engine.InitDataDB(d.Cfg); err != nil {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }
 
 // Wipe out the cdr database
 func (d *testDispatcher) resetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(d.Cfg); err != nil {
+	if err := engine.InitStorDB(d.Cfg); err != nil {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }

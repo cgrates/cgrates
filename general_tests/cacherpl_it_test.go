@@ -151,10 +151,10 @@ func testCacheRplAAInitCfg(t *testing.T) {
 }
 
 func testCacheRplInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(dspEngine1Cfg); err != nil {
+	if err := engine.InitDataDB(dspEngine1Cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(dspEngine2Cfg); err != nil {
+	if err := engine.InitDataDB(dspEngine2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

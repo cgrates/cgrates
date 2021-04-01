@@ -94,14 +94,14 @@ func testEEsInitCfg(t *testing.T) {
 }
 
 func testEEsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(eeSCfg); err != nil {
+	if err := engine.InitDataDB(eeSCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testEEsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(eeSCfg); err != nil {
+	if err := engine.InitStorDB(eeSCfg); err != nil {
 		t.Fatal(err)
 	}
 }

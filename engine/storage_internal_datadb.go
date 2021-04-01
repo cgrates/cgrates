@@ -32,7 +32,6 @@ import (
 
 // InternalDB is used as a DataDB and a StorDB
 type InternalDB struct {
-	mu                  sync.RWMutex
 	stringIndexedFields []string
 	prefixIndexedFields []string
 	indexedFieldsMutex  sync.RWMutex   // used for reload

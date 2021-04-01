@@ -93,7 +93,7 @@ func testTPTimingsInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testTPTimingsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpTimingCfg); err != nil {
+	if err := engine.InitStorDB(tpTimingCfg); err != nil {
 		t.Fatal(err)
 	}
 }

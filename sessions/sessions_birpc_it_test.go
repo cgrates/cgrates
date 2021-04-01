@@ -88,14 +88,14 @@ func testSessionsBiRPCInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionsBiRPCResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(sessionsBiRPCCfg); err != nil {
+	if err := engine.InitDataDB(sessionsBiRPCCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testSessionsBiRPCResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(sessionsBiRPCCfg); err != nil {
+	if err := engine.InitStorDB(sessionsBiRPCCfg); err != nil {
 		t.Fatal(err)
 	}
 }

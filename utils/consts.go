@@ -1622,7 +1622,6 @@ const (
 const (
 	TimingsCsv            = "Timings.csv"
 	DestinationsCsv       = "Destinations.csv"
-	RatesCsv              = "Rates.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"

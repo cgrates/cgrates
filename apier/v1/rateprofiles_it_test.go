@@ -98,14 +98,14 @@ func testV1RatePrfLoadConfig(t *testing.T) {
 }
 
 func testV1RatePrfInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(ratePrfCfg); err != nil {
+	if err := engine.InitDataDB(ratePrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testV1RatePrfResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(ratePrfCfg); err != nil {
+	if err := engine.InitStorDB(ratePrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

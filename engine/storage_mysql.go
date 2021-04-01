@@ -41,19 +41,19 @@ func NewMySQLStorage(host, port, name, user, password string,
 	}
 
 	mySQLStorage := new(MySQLStorage)
-	if mySQLStorage.Db, err = db.DB(); err != nil {
+	if mySQLStorage.DB, err = db.DB(); err != nil {
 		return nil, err
 	}
-	if mySQLStorage.Db.Ping(); err != nil {
+	if mySQLStorage.DB.Ping(); err != nil {
 		return nil, err
 	}
-	mySQLStorage.Db.SetMaxIdleConns(maxIdleConn)
-	mySQLStorage.Db.SetMaxOpenConns(maxConn)
-	mySQLStorage.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
+	mySQLStorage.DB.SetMaxIdleConns(maxIdleConn)
+	mySQLStorage.DB.SetMaxOpenConns(maxConn)
+	mySQLStorage.DB.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	//db.LogMode(true)
 	mySQLStorage.db = db
 	return &SQLStorage{
-		Db:      mySQLStorage.Db,
+		DB:      mySQLStorage.DB,
 		db:      mySQLStorage.db,
 		StorDB:  mySQLStorage,
 		SQLImpl: mySQLStorage,

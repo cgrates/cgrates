@@ -97,14 +97,14 @@ func testRPCMethodsLoadConfig(t *testing.T) {
 }
 
 func testRPCMethodsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rpcCfg); err != nil {
+	if err := engine.InitDataDB(rpcCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testRPCMethodsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(rpcCfg); err != nil {
+	if err := engine.InitStorDB(rpcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

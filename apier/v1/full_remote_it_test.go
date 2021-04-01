@@ -92,7 +92,7 @@ func testFullRemoteITInitCfg(t *testing.T) {
 }
 
 func testFullRemoteITDataFlush(t *testing.T) {
-	if err := engine.InitDataDb(fullRemEngineOneCfg); err != nil {
+	if err := engine.InitDataDB(fullRemEngineOneCfg); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(100 * time.Millisecond)

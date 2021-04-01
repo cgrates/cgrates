@@ -118,7 +118,7 @@ func testSQLInitConfig(t *testing.T) {
 }
 
 func testSQLInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(sqlCfg); err != nil {
+	if err := engine.InitStorDB(sqlCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -395,7 +395,7 @@ func testSQLInitConfig2(t *testing.T) {
 }
 
 func testSQLInitCdrDb2(t *testing.T) {
-	if err := engine.InitStorDb(sqlCfg); err != nil {
+	if err := engine.InitStorDB(sqlCfg); err != nil {
 		t.Fatal(err)
 	}
 }

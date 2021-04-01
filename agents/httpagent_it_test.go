@@ -154,10 +154,10 @@ func testHAitHttp(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testHAitResetDB(t *testing.T) {
-	if err := engine.InitDataDb(haCfg); err != nil {
+	if err := engine.InitDataDB(haCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(haCfg); err != nil {
+	if err := engine.InitStorDB(haCfg); err != nil {
 		t.Fatal(err)
 	}
 }

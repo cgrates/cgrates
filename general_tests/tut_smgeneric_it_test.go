@@ -83,14 +83,14 @@ func testTutSMGInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testTutSMGResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tutSMGCfg); err != nil {
+	if err := engine.InitDataDB(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testTutSMGResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tutSMGCfg); err != nil {
+	if err := engine.InitStorDB(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
 }

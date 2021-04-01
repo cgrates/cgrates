@@ -110,14 +110,14 @@ func testActionsInitCdrsStore(t *testing.T) {
 }
 
 func testActionsInitDataDb(t *testing.T) {
-	if err := InitDataDb(actsCfg); err != nil {
+	if err := InitDataDB(actsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testActionsResetStorDb(t *testing.T) {
-	if err := InitStorDb(actsCfg); err != nil {
+	if err := InitStorDB(actsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -167,7 +167,7 @@ func testClsrInitConfig(t *testing.T) {
 }
 
 func testClsrFlushDb(t *testing.T) {
-	if err := engine.InitDataDb(clsrConfig); err != nil {
+	if err := engine.InitDataDB(clsrConfig); err != nil {
 		t.Fatal(err)
 	}
 }

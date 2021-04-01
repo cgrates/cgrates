@@ -91,7 +91,7 @@ func testTPFilterInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testTPFilterResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpFilterCfg); err != nil {
+	if err := engine.InitStorDB(tpFilterCfg); err != nil {
 		t.Fatal(err)
 	}
 }

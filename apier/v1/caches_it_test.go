@@ -90,14 +90,14 @@ func testCacheSLoadConfig(t *testing.T) {
 }
 
 func testCacheSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(chcCfg); err != nil {
+	if err := engine.InitDataDB(chcCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Empty tables before using them
 func testCacheSInitStorDb(t *testing.T) {
-	if err := engine.InitStorDb(chcCfg); err != nil {
+	if err := engine.InitStorDB(chcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -74,20 +74,20 @@ func testCacheSReplicateLoadConfig(t *testing.T) {
 }
 
 func testCacheSReplicateInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(engine1Cfg); err != nil {
+	if err := engine.InitDataDB(engine1Cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(engine2Cfg); err != nil {
+	if err := engine.InitDataDB(engine2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Empty tables before using them
 func testCacheSReplicateInitStorDb(t *testing.T) {
-	if err := engine.InitStorDb(engine1Cfg); err != nil {
+	if err := engine.InitStorDB(engine1Cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(engine2Cfg); err != nil {
+	if err := engine.InitStorDB(engine2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

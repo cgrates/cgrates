@@ -91,14 +91,14 @@ func testAccountSv1InitCfg(t *testing.T) {
 }
 
 func testAccountSv1InitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(acntSCfg); err != nil {
+	if err := engine.InitDataDB(acntSCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testAccountSv1ResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(acntSCfg); err != nil {
+	if err := engine.InitStorDB(acntSCfg); err != nil {
 		t.Fatal(err)
 	}
 }

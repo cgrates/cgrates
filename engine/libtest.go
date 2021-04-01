@@ -167,7 +167,7 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*voice,3600000000000,,,,,,
 `
 )
 
-func InitDataDb(cfg *config.CGRConfig) error {
+func InitDataDB(cfg *config.CGRConfig) error {
 	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
@@ -188,8 +188,8 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	return nil
 }
 
-func InitStorDb(cfg *config.CGRConfig) error {
-	storDb, err := NewStorDBConn(cfg.StorDbCfg().Type,
+func InitStorDB(cfg *config.CGRConfig) error {
+	storDB, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
@@ -198,13 +198,13 @@ func InitStorDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
+	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage",
 		cfg.StorDbCfg().Type)); err != nil {
 		return err
 	}
 	if utils.IsSliceMember([]string{utils.Mongo, utils.MySQL, utils.Postgres},
 		cfg.StorDbCfg().Type) {
-		if err := SetDBVersions(storDb); err != nil {
+		if err := SetDBVersions(storDB); err != nil {
 			return err
 		}
 	}
@@ -278,7 +278,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool,
+func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableReverse bool,
 	cacheConns, schedConns []string) error {
 	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSVSep, tpPath), "",
 		timezone, cacheConns, schedConns, false)
@@ -288,14 +288,14 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := loader.WriteToDatabase(false, disable_reverse); err != nil {
+	if err := loader.WriteToDatabase(false, disableReverse); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil
 }
 
 type PjsuaAccount struct {
-	Id, Username, Password, Realm, Registrar string
+	ID, Username, Password, Realm, Registrar string
 }
 
 // Returns file reference where we can write to control pjsua in terminal
@@ -305,7 +305,7 @@ func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitDur time.Duration)
 		if idx != 0 {
 			cmdArgs = append(cmdArgs, "--next-account")
 		}
-		cmdArgs = append(cmdArgs, "--id="+acnt.Id, "--registrar="+acnt.Registrar, "--username="+acnt.Username, "--password="+acnt.Password, "--realm="+acnt.Realm)
+		cmdArgs = append(cmdArgs, "--id="+acnt.ID, "--registrar="+acnt.Registrar, "--username="+acnt.Username, "--password="+acnt.Password, "--realm="+acnt.Realm)
 	}
 	pjsuaPath, err := exec.LookPath("pjsua")
 	if err != nil {
@@ -322,9 +322,9 @@ func StartPjsuaListener(acnts []*PjsuaAccount, localPort, waitDur time.Duration)
 	return fPty, nil
 }
 
-func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.Duration, localPort int) error {
+func PjsuaCallURI(acnt *PjsuaAccount, dstURI, outboundURI string, callDur time.Duration, localPort int) error {
 	cmdArgs := []string{"--null-audio", "--app-log-level=0", fmt.Sprintf("--local-port=%d", localPort), fmt.Sprintf("--duration=%d", int(callDur.Seconds())),
-		"--outbound=" + outboundUri, "--id=" + acnt.Id, "--username=" + acnt.Username, "--password=" + acnt.Password, "--realm=" + acnt.Realm, dstUri}
+		"--outbound=" + outboundURI, "--id=" + acnt.ID, "--username=" + acnt.Username, "--password=" + acnt.Password, "--realm=" + acnt.Realm, dstURI}
 
 	pjsuaPath, err := exec.LookPath("pjsua")
 	if err != nil {

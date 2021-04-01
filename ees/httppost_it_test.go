@@ -72,13 +72,13 @@ func testHTTPPostLoadConfig(t *testing.T) {
 }
 
 func testHTTPPostResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(httpPostCfg); err != nil {
+	if err := engine.InitDataDB(httpPostCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testHTTPPostResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(httpPostCfg); err != nil {
+	if err := engine.InitStorDB(httpPostCfg); err != nil {
 		t.Fatal(err)
 	}
 }

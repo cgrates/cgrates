@@ -83,13 +83,13 @@ func testSesPauseItLoadConfig(t *testing.T) {
 }
 
 func testSesPauseItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesPauseCfg); err != nil {
+	if err := engine.InitDataDB(sesPauseCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testSesPauseItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(sesPauseCfg); err != nil {
+	if err := engine.InitStorDB(sesPauseCfg); err != nil {
 		t.Fatal(err)
 	}
 }

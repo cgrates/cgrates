@@ -39,14 +39,14 @@ type SQLImpl interface {
 }
 
 type SQLStorage struct {
-	Db *sql.DB
+	DB *sql.DB
 	db *gorm.DB
 	StorDB
 	SQLImpl
 }
 
 func (sqls *SQLStorage) Close() {
-	sqls.Db.Close()
+	sqls.DB.Close()
 	// sqls.db
 }
 
@@ -60,13 +60,13 @@ func (sqls *SQLStorage) Flush(scriptsPath string) (err error) {
 			return err
 		}
 	}
-	if _, err := sqls.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.CDRsTBL)); err != nil {
+	if _, err := sqls.DB.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.CDRsTBL)); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (rs *SQLStorage) SelectDatabase(dbName string) (err error) {
+func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
@@ -89,7 +89,7 @@ func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 		if len(qry) == 0 {
 			continue
 		}
-		if _, err := sqls.Db.Exec(qry); err != nil {
+		if _, err := sqls.DB.Exec(qry); err != nil {
 			return err
 		}
 	}
@@ -138,7 +138,7 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 		}
 		qryStr = strings.TrimPrefix(qryStr, "UNION ")
 	}
-	rows, err = sqls.Db.Query(qryStr)
+	rows, err = sqls.DB.Query(qryStr)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct []string,
 			}
 		}
 	}
-	rows, err := sqls.Db.Query(qry)
+	rows, err := sqls.DB.Query(qry)
 	if err != nil {
 		return nil, err
 	}
