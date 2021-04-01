@@ -47,6 +47,7 @@ type EventCharges struct {
 
 // Merge will merge the event charges into existing
 func (ec *EventCharges) Merge(eCs ...*EventCharges) {
+	ec.syncIDs(eCs...) // so we can compare properly
 	for _, nEc := range eCs {
 		if ec.Abstracts != nil {
 			ec.Abstracts = &Decimal{SumBig(ec.Abstracts.Big, nEc.Abstracts.Big)}
@@ -63,7 +64,7 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 }
 
 // SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
-func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
+func (ec *EventCharges) syncIDs(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
 		for _, cIl := range nEc.ChargingIntervals {
 			for _, cIcrm := range cIl.Increments {
@@ -120,7 +121,6 @@ func (ec *EventCharges) AppendChargingIntervals(cIls ...*ChargingInterval) {
 			ec.ChargingIntervals = []*ChargingInterval{cIl}
 			continue
 		}
-
 		if ec.ChargingIntervals[len(ec.ChargingIntervals)-1].CompressEquals(cIl) {
 			ec.ChargingIntervals[len(ec.ChargingIntervals)-1].CompressFactor += 1
 			continue
