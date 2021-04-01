@@ -105,9 +105,11 @@ var (
 
 //Test start here
 func TestChargerSIT(t *testing.T) {
+	sTestsChargerCache := sTestsCharger
 	switch *dbType {
 	case utils.MetaInternal:
 		chargerConfigDIR = "tutinternal"
+		sTestsChargerCache = sTestsChargerCache[:len(sTestsChargerCache)-10]
 	case utils.MetaMySQL:
 		chargerConfigDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -117,7 +119,7 @@ func TestChargerSIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsCharger {
+	for _, stest := range sTestsChargerCache {
 		t.Run(chargerConfigDIR, stest)
 	}
 }

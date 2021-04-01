@@ -246,9 +246,11 @@ var (
 
 // Test start here
 func TestTSV1IT(t *testing.T) {
+	sTestsThresholdCacheSV1 := sTestsThresholdSV1
 	switch *dbType {
 	case utils.MetaInternal:
 		tSv1ConfDIR = "tutinternal"
+		sTestsThresholdCacheSV1 = sTestsThresholdCacheSV1[:len(sTestsThresholdCacheSV1)-10]
 	case utils.MetaMySQL:
 		tSv1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -259,7 +261,7 @@ func TestTSV1IT(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	for _, stest := range sTestsThresholdSV1 {
+	for _, stest := range sTestsThresholdCacheSV1 {
 		t.Run(tSv1ConfDIR, stest)
 	}
 }
