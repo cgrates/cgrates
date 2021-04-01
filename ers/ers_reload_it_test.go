@@ -79,14 +79,14 @@ func testReloadITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testReloadITInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(reloadCfg); err != nil {
+	if err := engine.InitStorDB(reloadCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testReloadITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(reloadCfg); err != nil {
+	if err := engine.InitDataDB(reloadCfg); err != nil {
 		t.Fatal(err)
 	}
 }

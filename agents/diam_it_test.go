@@ -214,24 +214,24 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(allCfg); err != nil {
+	if err := engine.InitDataDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(allCfg); err != nil {
+	if err := engine.InitStorDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testDiamItResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(daCfg); err != nil {
+	if err := engine.InitDataDB(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testDiamItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(daCfg); err != nil {
+	if err := engine.InitStorDB(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }

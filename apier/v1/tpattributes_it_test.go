@@ -90,7 +90,7 @@ func testTPAlsPrfInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testTPAlsPrfResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpAlsPrfCfg); err != nil {
+	if err := engine.InitStorDB(tpAlsPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

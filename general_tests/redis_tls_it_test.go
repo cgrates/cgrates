@@ -83,7 +83,7 @@ func testRedisTLSInitConfig(t *testing.T) {
 }
 
 func testRedisTLSFlushDb(t *testing.T) {
-	if err := engine.InitDataDb(redisTLSCfg); err != nil {
+	if err := engine.InitDataDB(redisTLSCfg); err != nil {
 		t.Fatal(err)
 	}
 }

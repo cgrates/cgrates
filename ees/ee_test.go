@@ -49,6 +49,9 @@ func TestNewEventExporter(t *testing.T) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
 	err = eeExpect.init()
+	if err != nil {
+		t.Error(err)
+	}
 	newEE := ee.(*FileCSVee)
 	newEE.dc[utils.TimeNow] = nil
 	newEE.dc[utils.ExportPath] = nil
@@ -74,11 +77,17 @@ func TestNewEventExporterCase2(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	eeExpect, err := NewFileFWVee(cgrCfg, 0, filterS, dc)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
 	err = eeExpect.init()
+	if err != nil {
+		t.Error(err)
+	}
 	newEE := ee.(*FileFWVee)
 	newEE.dc[utils.TimeNow] = nil
 	newEE.dc[utils.ExportPath] = nil

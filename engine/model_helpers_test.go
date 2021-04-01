@@ -256,7 +256,6 @@ func TestMapTPTimings(t *testing.T) {
 
 func TestAPItoModelTimings(t *testing.T) {
 	ts := []*utils.ApierTPTiming{}
-	eOut := TimingMdls{}
 	if rcv := APItoModelTimings(ts); rcv != nil {
 		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
 	}
@@ -268,7 +267,7 @@ func TestAPItoModelTimings(t *testing.T) {
 			Months: "1;2;3;4",
 		},
 	}
-	eOut = TimingMdls{
+	eOut := TimingMdls{
 		TimingMdl{
 			Tpid:   "TPid1",
 			Months: "1;2;3;4",
@@ -3398,7 +3397,7 @@ func TestAsTPRateProfile(t *testing.T) {
 
 func TestModelHelperCsvLoadError(t *testing.T) {
 	type testStruct struct {
-		Id        int64
+		ID        int64
 		Tpid      string
 		Tag       string `index:"cat" re:"\w+\s*,\s*"`
 		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
@@ -3413,7 +3412,7 @@ func TestModelHelperCsvLoadError(t *testing.T) {
 
 func TestModelHelperCsvLoadError2(t *testing.T) {
 	type testStruct struct {
-		Id        int64
+		ID        int64
 		Tpid      string
 		Tag       string `index:"0" re:"cat"`
 		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
@@ -3429,7 +3428,7 @@ func TestModelHelperCsvLoadError2(t *testing.T) {
 
 func TestModelHelpersCsvDumpError(t *testing.T) {
 	type testStruct struct {
-		Id        int64
+		ID        int64
 		Tpid      string
 		Tag       string `index:"cat" re:"\w+\s*,\s*"`
 		Prefix    string `index:"1" re:"\+?\d+.?\d*"`
@@ -3444,11 +3443,9 @@ func TestModelHelpersCsvDumpError(t *testing.T) {
 
 func TestAPItoModelTPRoutesCase1(t *testing.T) {
 	structTest := &utils.TPRouteProfile{}
-	structTest2 := RouteMdls{}
-	structTest2 = nil
 	result := APItoModelTPRoutes(structTest)
-	if !reflect.DeepEqual(structTest2, result) {
-		t.Errorf("Expecting: <%+v>,\n  Received: <%+v>", structTest2, result)
+	if result != nil {
+		t.Errorf("Expecting: <%+v>,\n  Received: <%+v>", nil, result)
 	}
 }
 
@@ -3887,8 +3884,7 @@ func TestAPItoDispatcherProfileError(t *testing.T) {
 }
 
 func TestAPItoModelTPDispatcherProfileNil(t *testing.T) {
-	structTest := &utils.TPDispatcherProfile{}
-	structTest = nil
+	var structTest *utils.TPDispatcherProfile = nil
 	expected := "null"
 	result := APItoModelTPDispatcherProfile(structTest)
 	if !reflect.DeepEqual(utils.ToJSON(result), expected) {
@@ -4282,8 +4278,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 
 func TestAPItoModelTPActionProfileTPActionProfileNil(t *testing.T) {
 	testStruct := &utils.TPActionProfile{}
-	expStruct := ActionProfileMdls{}
-	expStruct = nil
+	var expStruct ActionProfileMdls = nil
 	result := APItoModelTPActionProfile(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4643,8 +4638,7 @@ func TestAPItoAttributeProfileError3(t *testing.T) {
 
 func TestAPItoModelTPAttributeNoAttributes(t *testing.T) {
 	testStruct := &utils.TPAttributeProfile{}
-	expStruct := AttributeMdls{}
-	expStruct = nil
+	var expStruct AttributeMdls = nil
 	result := APItoModelTPAttribute(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -5265,7 +5259,7 @@ func TestTpResourcesAsTpResources2(t *testing.T) {
 
 func TestModelHelpersCSVLoadErrorInt(t *testing.T) {
 	type testStruct struct {
-		Id        int64
+		ID        int64
 		Tpid      string
 		Tag       int `index:"0" re:"\w+\s*,\s*"`
 		CreatedAt time.Time
@@ -5279,7 +5273,7 @@ func TestModelHelpersCSVLoadErrorInt(t *testing.T) {
 
 func TestModelHelpersCSVLoadErrorFloat64(t *testing.T) {
 	type testStruct struct {
-		Id        int64
+		ID        int64
 		Tpid      string
 		Tag       float64 `index:"0" re:"\w+\s*,\s*"`
 		CreatedAt time.Time
@@ -5293,7 +5287,7 @@ func TestModelHelpersCSVLoadErrorFloat64(t *testing.T) {
 
 func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 	type testStruct struct {
-		Id        int64
+		ID        int64
 		Tpid      string
 		Tag       bool `index:"0" re:"\w+\s*,\s*"`
 		CreatedAt time.Time
@@ -5518,8 +5512,7 @@ func TestAPItoModelTPAccountProfileNoBalance(t *testing.T) {
 		Weights:      "10.0",
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	exp := AccountProfileMdls{}
-	exp = nil
+	var exp AccountProfileMdls = nil
 	result := APItoModelTPAccountProfile(testStruct)
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))

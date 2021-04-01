@@ -254,13 +254,13 @@ func testLoadItLoadConfig(t *testing.T) {
 }
 
 func testLoadItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(ldrItCfg); err != nil {
+	if err := engine.InitDataDB(ldrItCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testLoadItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(ldrItCfg); err != nil {
+	if err := engine.InitStorDB(ldrItCfg); err != nil {
 		t.Fatal(err)
 	}
 }

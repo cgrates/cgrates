@@ -96,14 +96,14 @@ func testAPIerInitCfg(t *testing.T) {
 }
 
 func testAPIerInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(apierCfg); err != nil {
+	if err := engine.InitDataDB(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testAPIerResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(apierCfg); err != nil {
+	if err := engine.InitStorDB(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }

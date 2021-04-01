@@ -90,7 +90,7 @@ func testTPThreholdInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testTPThreholdResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpThresholdCfg); err != nil {
+	if err := engine.InitStorDB(tpThresholdCfg); err != nil {
 		t.Fatal(err)
 	}
 }

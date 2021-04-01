@@ -91,7 +91,7 @@ func testTPRouteInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testTPRouteResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tpRouteCfg); err != nil {
+	if err := engine.InitStorDB(tpRouteCfg); err != nil {
 		t.Fatal(err)
 	}
 }

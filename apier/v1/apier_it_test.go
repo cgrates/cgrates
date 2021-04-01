@@ -156,14 +156,14 @@ func testApierCreateDirs(t *testing.T) {
 }
 
 func testApierInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(cfg); err != nil {
+	if err := engine.InitDataDB(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Empty tables before using them
 func testApierInitStorDb(t *testing.T) {
-	if err := engine.InitStorDb(cfg); err != nil {
+	if err := engine.InitStorDB(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -867,13 +867,13 @@ func testApierITGetCost(t *testing.T) {
 
 // Test LoadTPFromStorDb
 func testApierInitDataDb2(t *testing.T) {
-	if err := engine.InitDataDb(cfg); err != nil {
+	if err := engine.InitDataDB(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testApierInitStorDb2(t *testing.T) {
-	if err := engine.InitStorDb(cfg); err != nil {
+	if err := engine.InitStorDB(cfg); err != nil {
 		t.Fatal(err)
 	}
 }

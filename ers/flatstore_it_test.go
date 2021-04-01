@@ -101,14 +101,14 @@ func testFlatstoreITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testFlatstoreITInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(flatstoreCfg); err != nil {
+	if err := engine.InitStorDB(flatstoreCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testFlatstoreITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(flatstoreCfg); err != nil {
+	if err := engine.InitDataDB(flatstoreCfg); err != nil {
 		t.Fatal(err)
 	}
 }

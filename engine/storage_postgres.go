@@ -35,19 +35,19 @@ func NewPostgresStorage(host, port, name, user, password, sslmode string, maxCon
 		return nil, err
 	}
 	postgressStorage := new(PostgresStorage)
-	if postgressStorage.Db, err = db.DB(); err != nil {
+	if postgressStorage.DB, err = db.DB(); err != nil {
 		return nil, err
 	}
-	if err = postgressStorage.Db.Ping(); err != nil {
+	if err = postgressStorage.DB.Ping(); err != nil {
 		return nil, err
 	}
-	postgressStorage.Db.SetMaxIdleConns(maxIdleConn)
-	postgressStorage.Db.SetMaxOpenConns(maxConn)
-	postgressStorage.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
+	postgressStorage.DB.SetMaxIdleConns(maxIdleConn)
+	postgressStorage.DB.SetMaxOpenConns(maxConn)
+	postgressStorage.DB.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	//db.LogMode(true)
 	postgressStorage.db = db
 	return &SQLStorage{
-		Db:      postgressStorage.Db,
+		DB:      postgressStorage.DB,
 		db:      postgressStorage.db,
 		StorDB:  postgressStorage,
 		SQLImpl: postgressStorage,

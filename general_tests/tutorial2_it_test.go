@@ -85,10 +85,10 @@ func testTutLoadConfig(t *testing.T) {
 }
 
 func testTutResetDB(t *testing.T) {
-	if err := engine.InitDataDb(tutCfg); err != nil {
+	if err := engine.InitDataDB(tutCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(tutCfg); err != nil {
+	if err := engine.InitStorDB(tutCfg); err != nil {
 		t.Fatal(err)
 	}
 }

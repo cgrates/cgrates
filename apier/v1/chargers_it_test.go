@@ -132,14 +132,14 @@ func testChargerSInitCfg(t *testing.T) {
 }
 
 func testChargerSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(chargerCfg); err != nil {
+	if err := engine.InitDataDB(chargerCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testChargerSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(chargerCfg); err != nil {
+	if err := engine.InitStorDB(chargerCfg); err != nil {
 		t.Fatal(err)
 	}
 }

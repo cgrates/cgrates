@@ -141,13 +141,13 @@ func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
 }
 
 func testSSv1ItResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(sSv1Cfg); err != nil {
+	if err := engine.InitDataDB(sSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testSSv1ItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(sSv1Cfg); err != nil {
+	if err := engine.InitStorDB(sSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

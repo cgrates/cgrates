@@ -92,10 +92,10 @@ func testDsphInitCfg(t *testing.T) {
 }
 
 func testDsphInitDB(t *testing.T) {
-	if err := engine.InitDataDb(dspCfg); err != nil {
+	if err := engine.InitDataDB(dspCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(dspCfg); err != nil {
+	if err := engine.InitStorDB(dspCfg); err != nil {
 		t.Fatal(err)
 	}
 }

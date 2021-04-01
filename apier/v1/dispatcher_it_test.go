@@ -99,14 +99,14 @@ func testDispatcherSInitCfg(t *testing.T) {
 }
 
 func testDispatcherSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(dispatcherCfg); err != nil {
+	if err := engine.InitDataDB(dispatcherCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testDispatcherSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(dispatcherCfg); err != nil {
+	if err := engine.InitStorDB(dispatcherCfg); err != nil {
 		t.Fatal(err)
 	}
 }

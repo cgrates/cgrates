@@ -139,10 +139,10 @@ func testCDRsExpInitConfig(t *testing.T) {
 }
 
 func testCDRsExpInitDB(t *testing.T) {
-	if err := engine.InitDataDb(cdrsExpCfg); err != nil {
+	if err := engine.InitDataDB(cdrsExpCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(cdrsExpCfg); err != nil {
+	if err := engine.InitStorDB(cdrsExpCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.RemoveAll(cdrsExpCfg.GeneralCfg().FailedPostsDir); err != nil {

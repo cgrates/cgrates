@@ -138,10 +138,10 @@ func testInternalRemoteITInitCfg(t *testing.T) {
 }
 
 func testInternalRemoteITDataFlush(t *testing.T) {
-	if err := engine.InitDataDb(engineOneCfg); err != nil {
+	if err := engine.InitDataDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(engineTwoCfg); err != nil {
+	if err := engine.InitDataDB(engineTwoCfg); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(100 * time.Millisecond)

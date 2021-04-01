@@ -88,7 +88,7 @@ func testFilterInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testFilterResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(filterCfg); err != nil {
+	if err := engine.InitDataDB(filterCfg); err != nil {
 		t.Fatal(err)
 	}
 }

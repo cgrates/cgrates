@@ -87,14 +87,14 @@ func testCDRsPostFailoverInitConfig(t *testing.T) {
 }
 
 func testCDRsPostFailoverInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(cdrsPostFailCfg); err != nil {
+	if err := engine.InitDataDB(cdrsPostFailCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // InitDb so we can rely on count
 func testCDRsPostFailoverInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(cdrsPostFailCfg); err != nil {
+	if err := engine.InitStorDB(cdrsPostFailCfg); err != nil {
 		t.Fatal(err)
 	}
 }

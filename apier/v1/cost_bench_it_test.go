@@ -48,14 +48,14 @@ func testCostBenchInitCfg(b *testing.B) {
 }
 
 func testCostBenchInitDataDb(b *testing.B) {
-	if err := engine.InitDataDb(costBenchCfg); err != nil {
+	if err := engine.InitDataDB(costBenchCfg); err != nil {
 		b.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testCostBenchResetStorDb(b *testing.B) {
-	if err := engine.InitStorDb(costBenchCfg); err != nil {
+	if err := engine.InitStorDB(costBenchCfg); err != nil {
 		b.Fatal(err)
 	}
 }

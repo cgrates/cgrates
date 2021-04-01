@@ -90,14 +90,14 @@ func testAPIerSv2itLoadConfig(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testAPIerSv2itResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(apierCfg); err != nil {
+	if err := engine.InitDataDB(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testAPIerSv2itResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(apierCfg); err != nil {
+	if err := engine.InitStorDB(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -91,13 +91,13 @@ func testV1CDRsInitConfig(t *testing.T) {
 }
 
 func testV1CDRsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(pecdrsCfg); err != nil {
+	if err := engine.InitDataDB(pecdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1CDRsInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(pecdrsCfg); err != nil {
+	if err := engine.InitStorDB(pecdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

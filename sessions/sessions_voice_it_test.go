@@ -87,14 +87,14 @@ func testSessionsVoiceInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionsVoiceResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(voiceCfg); err != nil {
+	if err := engine.InitDataDB(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testSessionsVoiceResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(voiceCfg); err != nil {
+	if err := engine.InitStorDB(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }

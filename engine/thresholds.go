@@ -322,13 +322,13 @@ func (attr *ThresholdsArgsProcessEvent) Clone() *ThresholdsArgsProcessEvent {
 
 // processEvent processes a new event, dispatching to matching thresholds
 func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcessEvent) (thresholdsIDs []string, err error) {
-	matchTs, err := tS.matchingThresholdsForEvent(tnt, args)
+	matchTS, err := tS.matchingThresholdsForEvent(tnt, args)
 	if err != nil {
 		return nil, err
 	}
 	var withErrors bool
 	var tIDs []string
-	for _, t := range matchTs {
+	for _, t := range matchTS {
 		tIDs = append(tIDs, t.ID)
 		t.Hits++
 		err = t.ProcessEvent(args, tS.dm)

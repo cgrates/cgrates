@@ -95,13 +95,13 @@ func testV1FltrLoadConfig(t *testing.T) {
 }
 
 func testV1FltrInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(fltrCfg); err != nil {
+	if err := engine.InitDataDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testV1FltrResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(fltrCfg); err != nil {
+	if err := engine.InitStorDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

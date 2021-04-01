@@ -77,11 +77,11 @@ func (apierSv1 *APIerSv1) ImportTPZipFile(attrs *AttrImportTPZipFile, reply *str
 			}
 			csvImporter := engine.TPCSVImporter{
 				TPid:     attrs.TPid,
-				StorDb:   apierSv1.StorDb,
+				StorDB:   apierSv1.StorDb,
 				DirPath:  path,
 				Sep:      utils.CSVSep,
 				Verbose:  false,
-				ImportId: "",
+				ImportID: "",
 			}
 			if errImport := csvImporter.Run(); errImport != nil {
 				return errImport

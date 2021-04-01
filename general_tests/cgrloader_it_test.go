@@ -82,13 +82,13 @@ func testCGRLoaderInitConfig(t *testing.T) {
 }
 
 func testCGRLoaderInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(cgrloaderCfg); err != nil {
+	if err := engine.InitDataDB(cgrloaderCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCGRLoaderInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(cgrloaderCfg); err != nil {
+	if err := engine.InitStorDB(cgrloaderCfg); err != nil {
 		t.Fatal(err)
 	}
 }

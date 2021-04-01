@@ -480,12 +480,12 @@ func (tps StatMdls) CSVHeader() (result []string) {
 		utils.Stored, utils.Blocker, utils.Weight, utils.ThresholdIDs}
 }
 
-func (models StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
+func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 	filterMap := make(map[string]utils.StringSet)
 	thresholdMap := make(map[string]utils.StringSet)
 	statMetricsMap := make(map[string]map[string]*utils.MetricWithFilters)
 	mst := make(map[string]*utils.TPStatProfile)
-	for _, model := range models {
+	for _, model := range tps {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
 		st, found := mst[key.TenantID()]
 		if !found {
@@ -2410,11 +2410,11 @@ func (apm ActionProfileMdls) CSVHeader() (result []string) {
 	}
 }
 
-func (tps ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfile) {
+func (apm ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfile) {
 	filterIDsMap := make(map[string]utils.StringSet)
 	targetIDsMap := make(map[string]map[string]utils.StringSet)
 	actPrfMap := make(map[string]*utils.TPActionProfile)
-	for _, tp := range tps {
+	for _, tp := range apm {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		aPrf, found := actPrfMap[tenID]
 		if !found {
@@ -2664,11 +2664,11 @@ func (apm AccountProfileMdls) CSVHeader() (result []string) {
 	}
 }
 
-func (tps AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile, err error) {
+func (apm AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile, err error) {
 	filterIDsMap := make(map[string]utils.StringSet)
 	thresholdIDsMap := make(map[string]utils.StringSet)
 	actPrfMap := make(map[string]*utils.TPAccountProfile)
-	for _, tp := range tps {
+	for _, tp := range apm {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		aPrf, found := actPrfMap[tenID]
 		if !found {

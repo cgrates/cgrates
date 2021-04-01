@@ -202,13 +202,13 @@ func CurrentStorDBVersions() Versions {
 
 // CurrentAllDBVersions returns the both DataDB and StorDB versions
 func CurrentAllDBVersions() Versions {
-	dataDbVersions := CurrentDataDBVersions()
-	storDbVersions := CurrentStorDBVersions()
+	dataDBVersions := CurrentDataDBVersions()
+	storDBVersions := CurrentStorDBVersions()
 	allVersions := make(Versions)
-	for k, v := range dataDbVersions {
+	for k, v := range dataDBVersions {
 		allVersions[k] = v
 	}
-	for k, v := range storDbVersions {
+	for k, v := range storDBVersions {
 		allVersions[k] = v
 	}
 	return allVersions

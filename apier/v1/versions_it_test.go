@@ -96,7 +96,7 @@ func testVrsInitCfg(t *testing.T) {
 
 // Wipe out the cdr database
 func testVrsResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(vrsCfg); err != nil {
+	if err := engine.InitStorDB(vrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

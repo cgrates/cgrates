@@ -91,14 +91,14 @@ func testConfigSInitCfg(t *testing.T) {
 }
 
 func testConfigSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(configCfg); err != nil {
+	if err := engine.InitDataDB(configCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testConfigSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(configCfg); err != nil {
+	if err := engine.InitStorDB(configCfg); err != nil {
 		t.Fatal(err)
 	}
 }

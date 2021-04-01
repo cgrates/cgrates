@@ -82,7 +82,7 @@ func testdoubleRemoveLoadConfig(t *testing.T) {
 }
 
 func testdoubleRemoveInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(doubleRemove); err != nil {
+	if err := engine.InitDataDB(doubleRemove); err != nil {
 		t.Fatal(err)
 	}
 }

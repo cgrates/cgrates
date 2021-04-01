@@ -109,7 +109,7 @@ func testV1RouteLoadConfig(t *testing.T) {
 }
 
 func testV1RouteInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(routeSv1Cfg); err != nil {
+	if err := engine.InitDataDB(routeSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -123,7 +123,7 @@ func testV1RouteClearCache(t *testing.T) {
 
 // Wipe out the cdr database
 func testV1RouteResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(routeSv1Cfg); err != nil {
+	if err := engine.InitStorDB(routeSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

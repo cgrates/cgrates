@@ -491,11 +491,11 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 func testLoaderITImportToStorDb(t *testing.T) {
 	csvImporter := TPCSVImporter{
 		TPid:     utils.TestSQL,
-		StorDb:   storDb,
+		StorDB:   storDb,
 		DirPath:  path.Join(*dataDir, "tariffplans", *tpCsvScenario),
 		Sep:      utils.CSVSep,
 		Verbose:  false,
-		ImportId: utils.TestSQL}
+		ImportID: utils.TestSQL}
 	if err := csvImporter.Run(); err != nil {
 		t.Error("Error when importing tpdata to storDb: ", err)
 	}

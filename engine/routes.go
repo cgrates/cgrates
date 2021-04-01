@@ -246,7 +246,6 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 				// update the setup time and the usage
 				sTime = sTime.Add(accountMaxUsage)
 				initialUsage = usage
-				usage = usage - accountMaxUsage
 			}
 			for k, v := range acntCost { // update the costData with the infos from AccountS
 				costData[k] = v

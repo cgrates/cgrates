@@ -88,14 +88,14 @@ func testAttributeSInitCfg(t *testing.T) {
 }
 
 func testAttributeSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(attrCfg); err != nil {
+	if err := engine.InitDataDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testAttributeSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(attrCfg); err != nil {
+	if err := engine.InitStorDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

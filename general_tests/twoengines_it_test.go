@@ -75,12 +75,12 @@ func testTwoEnginesInitConfig(t *testing.T) {
 
 }
 func testTwoEnginesInitDataDB(t *testing.T) {
-	if err := engine.InitDataDb(engineOneCfg); err != nil {
+	if err := engine.InitDataDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 func testTwoEnginesInitStorDB(t *testing.T) {
-	if err := engine.InitStorDb(engineOneCfg); err != nil {
+	if err := engine.InitStorDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
 }

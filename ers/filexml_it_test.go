@@ -81,14 +81,14 @@ func testXMLITInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testXMLITInitCdrDb(t *testing.T) {
-	if err := engine.InitStorDb(xmlCfg); err != nil {
+	if err := engine.InitStorDB(xmlCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
 func testXMLITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(xmlCfg); err != nil {
+	if err := engine.InitDataDB(xmlCfg); err != nil {
 		t.Fatal(err)
 	}
 }

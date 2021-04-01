@@ -81,13 +81,13 @@ func testSesRoutesItLoadConfig(t *testing.T) {
 }
 
 func testSesRoutesItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesRoutesCfg); err != nil {
+	if err := engine.InitDataDB(sesRoutesCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testSesRoutesItResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(sesRoutesCfg); err != nil {
+	if err := engine.InitStorDB(sesRoutesCfg); err != nil {
 		t.Fatal(err)
 	}
 }

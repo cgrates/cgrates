@@ -503,7 +503,7 @@ func (ms *MongoStorage) getField(sctx mongo.SessionContext, col, prefix, subject
 }
 
 func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
-	idResult := struct{ Tenant, Id string }{}
+	idResult := struct{ Tenant, ID string }{}
 	elem := bson.M{}
 	if tntID.Tenant != "" {
 		elem["tenant"] = tntID.Tenant
@@ -522,7 +522,7 @@ func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subjec
 		if err != nil {
 			return
 		}
-		result = append(result, prefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+		result = append(result, prefix+utils.ConcatenatedKey(idResult.Tenant, idResult.ID))
 	}
 	return result, iter.Close(sctx)
 }
@@ -1548,6 +1548,9 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 			var result []string
 			result, err = ms.getField3(sctx, ColIndx, regexKey, "key")
+			if err != nil {
+				return
+			}
 			for _, key := range result {
 				idxKey := strings.TrimPrefix(key, dbKey)
 				if _, err = ms.getCol(ColIndx).DeleteOne(sctx,

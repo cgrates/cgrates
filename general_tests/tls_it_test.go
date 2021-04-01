@@ -71,7 +71,7 @@ func testTLSLoadConfig(t *testing.T) {
 }
 
 func testTLSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tlsCfg); err != nil {
+	if err := engine.InitDataDB(tlsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

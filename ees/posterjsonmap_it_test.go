@@ -72,13 +72,13 @@ func testHTTPJsonMapLoadConfig(t *testing.T) {
 }
 
 func testHTTPJsonMapResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(httpJSONMapCfg); err != nil {
+	if err := engine.InitDataDB(httpJSONMapCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testHTTPJsonMapResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(httpJSONMapCfg); err != nil {
+	if err := engine.InitStorDB(httpJSONMapCfg); err != nil {
 		t.Fatal(err)
 	}
 }

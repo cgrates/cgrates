@@ -98,14 +98,14 @@ func testActionSInitCfg(t *testing.T) {
 }
 
 func testActionSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(actPrfCfg); err != nil {
+	if err := engine.InitDataDB(actPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testActionSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(actPrfCfg); err != nil {
+	if err := engine.InitStorDB(actPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

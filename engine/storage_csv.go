@@ -183,7 +183,6 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	var destinationsPaths []string
 	var timingsPaths []string
-	var ratesPaths []string
 	var resourcesPaths []string
 	var statsPaths []string
 	var thresholdsPaths []string
@@ -201,7 +200,6 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 		if !strings.HasSuffix(baseURL, utils.CSVSuffix) {
 			destinationsPaths = append(destinationsPaths, joinURL(baseURL, utils.DestinationsCsv))
 			timingsPaths = append(timingsPaths, joinURL(baseURL, utils.TimingsCsv))
-			ratesPaths = append(ratesPaths, joinURL(baseURL, utils.RatesCsv))
 			resourcesPaths = append(resourcesPaths, joinURL(baseURL, utils.ResourcesCsv))
 			statsPaths = append(statsPaths, joinURL(baseURL, utils.StatsCsv))
 			thresholdsPaths = append(thresholdsPaths, joinURL(baseURL, utils.ThresholdsCsv))
@@ -221,8 +219,6 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			destinationsPaths = append(destinationsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.TimingsCsv):
 			timingsPaths = append(timingsPaths, baseURL)
-		case strings.HasSuffix(baseURL, utils.RatesCsv):
-			ratesPaths = append(ratesPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.ResourcesCsv):
 			resourcesPaths = append(resourcesPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.StatsCsv):

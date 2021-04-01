@@ -94,13 +94,13 @@ func testExpLoadConfig(t *testing.T) {
 }
 
 func testExpResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(expCfg); err != nil {
+	if err := engine.InitDataDB(expCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testExpResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(expCfg); err != nil {
+	if err := engine.InitStorDB(expCfg); err != nil {
 		t.Fatal(err)
 	}
 }

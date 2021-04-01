@@ -90,13 +90,13 @@ func testV1AccLoadConfig(t *testing.T) {
 }
 
 func testV1AccInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(accCfg); err != nil {
+	if err := engine.InitDataDB(accCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testAccResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(accCfg); err != nil {
+	if err := engine.InitStorDB(accCfg); err != nil {
 		t.Fatal(err)
 	}
 }

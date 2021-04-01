@@ -118,7 +118,7 @@ func testRedisSentinelInitConfig(t *testing.T) {
 }
 
 func testRedisSentinelFlushDb(t *testing.T) {
-	if err := engine.InitDataDb(sentinelConfig); err != nil {
+	if err := engine.InitDataDB(sentinelConfig); err != nil {
 		t.Fatal(err)
 	}
 }

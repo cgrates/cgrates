@@ -28,7 +28,7 @@ import (
 // to be used by gorm orm
 
 type TimingMdl struct {
-	Id        int64
+	ID        int64
 	Tpid      string
 	Tag       string `index:"0" re:"\w+\s*,\s*"`
 	Years     string `index:"1" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
@@ -44,7 +44,7 @@ func (TimingMdl) TableName() string {
 }
 
 type DestinationMdl struct {
-	Id        int64
+	ID        int64
 	Tpid      string
 	Tag       string `index:"0" re:"\w+\s*,\s*"`
 	Prefix    string `index:"1" re:"\+?\d+.?\d*"`

@@ -64,7 +64,7 @@ func TestITCDRs(t *testing.T) {
 
 // helper function to populate CDRs and check if they were stored in storDb
 func testSetCDR(cfg *config.CGRConfig) error {
-	if err := InitStorDb(cfg); err != nil {
+	if err := InitStorDB(cfg); err != nil {
 		return err
 	}
 	cdrStorage, err := NewStorDBConn(cfg.StorDbCfg().Type,
@@ -170,7 +170,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 }
 
 func testSMCosts(cfg *config.CGRConfig) error {
-	if err := InitStorDb(cfg); err != nil {
+	if err := InitStorDB(cfg); err != nil {
 		return fmt.Errorf("testSMCosts #1 err: %v", err)
 	}
 	cdrStorage, err := NewStorDBConn(cfg.StorDbCfg().Type,
@@ -223,7 +223,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 }
 
 func testGetCDRs(cfg *config.CGRConfig) error {
-	if err := InitStorDb(cfg); err != nil {
+	if err := InitStorDB(cfg); err != nil {
 		return fmt.Errorf("testGetCDRs #1: %v", err)
 	}
 	cfg.StorDbCfg().StringIndexedFields = []string{utils.CGRID,

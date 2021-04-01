@@ -139,7 +139,7 @@ func testLoaderMakeFolders(t *testing.T) {
 
 // Wipe out the cdr database
 func testLoaderResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(loaderCfg); err != nil {
+	if err := engine.InitDataDB(loaderCfg); err != nil {
 		t.Fatal(err)
 	}
 	engine.Cache.Clear(nil)
