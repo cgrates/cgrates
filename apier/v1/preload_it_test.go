@@ -90,8 +90,8 @@ func testPreloadITStartEngine(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	engine := exec.Command(enginePath, "-config_path", preloadCfgPath, "-preload", "CustomLoader")
-	if err := engine.Start(); err != nil {
+	eng := exec.Command(enginePath, "-config_path", preloadCfgPath, "-preload", "CustomLoader")
+	if err := eng.Start(); err != nil {
 		t.Error(err)
 	}
 	fib := utils.Fib()

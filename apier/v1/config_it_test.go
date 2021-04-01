@@ -438,8 +438,8 @@ func testConfigStartEngineFromHTTP(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	engine := exec.Command(enginePath, "-config_path", "http://127.0.0.1:3080/configs/tutmysql/cgrates.json")
-	if err := engine.Start(); err != nil {
+	eng := exec.Command(enginePath, "-config_path", "http://127.0.0.1:3080/configs/tutmysql/cgrates.json")
+	if err := eng.Start(); err != nil {
 		t.Error(err)
 	}
 	fib := utils.Fib()
