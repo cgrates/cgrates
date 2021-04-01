@@ -128,8 +128,8 @@ func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
 
 // RegisterHandlersToServer is called by cgr-engine to register HTTP URL handlers
 func (cdrS *CDRServer) RegisterHandlersToServer(server utils.Server) {
-	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPCDRsURL, cdrS.cgrCdrHandler)
-	server.RegisterHttpFunc(cdrS.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, cdrS.fsCdrHandler)
+	server.RegisterHTTPFunc(cdrS.cgrCfg.HTTPCfg().HTTPCDRsURL, cdrS.cgrCdrHandler)
+	server.RegisterHTTPFunc(cdrS.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, cdrS.fsCdrHandler)
 }
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles

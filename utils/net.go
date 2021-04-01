@@ -31,7 +31,7 @@ import (
 type Server interface {
 	RpcRegister(rcvr interface{})
 	RpcRegisterName(name string, rcvr interface{})
-	RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
+	RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 	RegisterHttpHandler(pattern string, handler http.Handler)
 	BiRPCRegisterName(method string, handlerFunc interface{})
 }
