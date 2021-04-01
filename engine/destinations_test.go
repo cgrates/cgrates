@@ -25,9 +25,9 @@ import (
 )
 
 func TestDestinationStoreRestore(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	nationale := &Destination{ID: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	s, _ := json.Marshal(nationale)
-	d1 := &Destination{Id: "nat"}
+	d1 := &Destination{ID: "nat"}
 	json.Unmarshal(s, d1)
 	s1, _ := json.Marshal(d1)
 	if string(s1) != string(s) {
@@ -36,13 +36,13 @@ func TestDestinationStoreRestore(t *testing.T) {
 }
 
 func TestDestinationStorageStore(t *testing.T) {
-	nationale := &Destination{Id: "nat",
+	nationale := &Destination{ID: "nat",
 		Prefixes: []string{"0257", "0256", "0723"}}
 	err := dm.SetDestination(nationale, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := dm.GetDestination(nationale.Id,
+	result, err := dm.GetDestination(nationale.ID,
 		true, true, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -55,7 +55,7 @@ func TestDestinationStorageStore(t *testing.T) {
 }
 
 func TestDestinationContainsPrefix(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	nationale := &Destination{ID: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	precision := nationale.containsPrefix("0256")
 	if precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
@@ -63,7 +63,7 @@ func TestDestinationContainsPrefix(t *testing.T) {
 }
 
 func TestDestinationContainsPrefixLong(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	nationale := &Destination{ID: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	precision := nationale.containsPrefix("0256723045")
 	if precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
@@ -71,7 +71,7 @@ func TestDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestDestinationContainsPrefixWrong(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	nationale := &Destination{ID: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	precision := nationale.containsPrefix("01234567")
 	if precision != 0 {
 		t.Error("Should not contain prefix: ", nationale)
@@ -129,9 +129,9 @@ func TestDestinationNonCachedDestWrongPrefix(t *testing.T) {
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	nationale := &Destination{ID: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
 		dm.SetDestination(nationale, utils.NonTransactional)
-		dm.GetDestination(nationale.Id, false, true, utils.NonTransactional)
+		dm.GetDestination(nationale.ID, false, true, utils.NonTransactional)
 	}
 }

@@ -96,7 +96,7 @@ func TestLoadDestinations(t *testing.T) {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
-		switch d.Id {
+		switch d.ID {
 		case "NAT":
 			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`, `+49`}) {
 				t.Error("Faild to load destinations", d)

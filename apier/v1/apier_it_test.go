@@ -396,7 +396,7 @@ func testApierReloadCache(t *testing.T) {
 func testApierGetDestination(t *testing.T) {
 	reply := new(engine.Destination)
 	dstId := "GERMANY_MOBILE"
-	expectedReply := &engine.Destination{Id: dstId, Prefixes: []string{"+4915", "+4916", "+4917"}}
+	expectedReply := &engine.Destination{ID: dstId, Prefixes: []string{"+4915", "+4916", "+4917"}}
 	if err := rater.Call(utils.APIerSv1GetDestination, &dstId, reply); err != nil {
 		t.Error("Got error on APIerSv1.GetDestination: ", err.Error())
 	} else if !reflect.DeepEqual(expectedReply, reply) {
@@ -820,7 +820,7 @@ func testApierITSetDestination(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	eDestination := engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
+	eDestination := engine.Destination{ID: attrs.Id, Prefixes: attrs.Prefixes}
 	var rcvDestination engine.Destination
 	if err := rater.Call(utils.APIerSv1GetDestination, &attrs.Id, &rcvDestination); err != nil {
 		t.Error("Unexpected error", err.Error())

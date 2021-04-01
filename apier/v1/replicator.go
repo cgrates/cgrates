@@ -270,7 +270,7 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithAPIOpts, 
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(dst.APIOpts[utils.CacheOpt]),
-		dst.Tenant, utils.CacheDestinations, dst.Id, nil, nil, dst.APIOpts); err != nil {
+		dst.Tenant, utils.CacheDestinations, dst.ID, nil, nil, dst.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -279,7 +279,7 @@ func (rplSv1 *ReplicatorSv1) SetDestination(dst *engine.DestinationWithAPIOpts, 
 
 // SetReverseDestination is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.DestinationWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination.Id, dst.Destination.Prefixes, utils.NonTransactional); err != nil {
+	if err = rplSv1.dm.DataDB().SetReverseDestinationDrv(dst.Destination.ID, dst.Destination.Prefixes, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rplSv1.v1.callCacheMultiple(utils.IfaceAsString(dst.APIOpts[utils.CacheOpt]),

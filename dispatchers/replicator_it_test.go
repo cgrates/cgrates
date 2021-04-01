@@ -1374,7 +1374,7 @@ func testDspRplDestination(t *testing.T) {
 	var replyStr string
 	setDestination := &engine.DestinationWithAPIOpts{
 		Destination: &engine.Destination{
-			Id: "idDestination"},
+			ID: "idDestination"},
 		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
@@ -1396,8 +1396,8 @@ func testDspRplDestination(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetDestination: ", err)
-	} else if reply.Id != setDestination.Id {
-		t.Errorf("Expecting: %+v, received: %+v", setDestination.Id, reply.Id)
+	} else if reply.ID != setDestination.ID {
+		t.Errorf("Expecting: %+v, received: %+v", setDestination.ID, reply.ID)
 	}
 	// Stop engine 1
 	allEngine.stopEngine(t)

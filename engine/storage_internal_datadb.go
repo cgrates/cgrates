@@ -201,7 +201,7 @@ func (iDB *InternalDB) GetDestinationDrv(key, _ string) (dest *Destination, err 
 }
 
 func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
-	Cache.SetWithoutReplicate(utils.CacheDestinations, dest.Id, dest, nil,
+	Cache.SetWithoutReplicate(utils.CacheDestinations, dest.ID, dest, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }

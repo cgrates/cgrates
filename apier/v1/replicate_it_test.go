@@ -172,7 +172,7 @@ func testInternalReplicateITDestination(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	eDst := &engine.Destination{
-		Id:       "testDestination",
+		ID:       "testDestination",
 		Prefixes: []string{"004", "005"},
 	}
 	// check

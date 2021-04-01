@@ -71,7 +71,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 		}
 		if len(attr.Prefixes) != 0 {
 			newDst := &engine.Destination{
-				Id:       dstID,
+				ID:       dstID,
 				Prefixes: make([]string, 0, len(oldDst.Prefixes)),
 			}
 			toRemove := utils.NewStringSet(attr.Prefixes)
@@ -138,7 +138,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	if missing := utils.MissingStructFields(attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
+	dest := &engine.Destination{ID: attrs.Id, Prefixes: attrs.Prefixes}
 	var oldDest *engine.Destination
 	if oldDest, err = apierSv1.DataManager.GetDestination(attrs.Id, true, true, utils.NonTransactional); err != nil {
 		if err != utils.ErrNotFound {
