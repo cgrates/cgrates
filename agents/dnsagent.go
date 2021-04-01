@@ -167,7 +167,6 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		rply.Rcode = dns.RcodeServerFailure
 		dnsWriteMsg(w, rply)
 	}
-	return
 }
 
 func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,

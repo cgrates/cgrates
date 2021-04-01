@@ -99,17 +99,14 @@ func (rdr *KafkaER) Serve() (err error) {
 	}
 
 	go func(r *kafka.Reader) { // use a secondary gorutine because the ReadMessage is blocking function
-		select {
-		case <-rdr.rdrExit:
-			utils.Logger.Info(
-				fmt.Sprintf("<%s> stop monitoring kafka path <%s>",
-					utils.ERs, rdr.dialURL))
-			if rdr.poster != nil {
-				rdr.poster.Close()
-			}
-			r.Close() // already locked in library
-			return
+		<-rdr.rdrExit
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> stop monitoring kafka path <%s>",
+				utils.ERs, rdr.dialURL))
+		if rdr.poster != nil {
+			rdr.poster.Close()
 		}
+		r.Close() // already locked in library
 	}(r)
 	go rdr.readLoop(r) // read until the connection is closed
 	return

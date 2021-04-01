@@ -160,6 +160,7 @@ func TestNewSQSER(t *testing.T) {
 	}
 	expected.cap = rdr.(*SQSER).cap
 	expected.session = rdr.(*SQSER).session
+	rdr.(*SQSER).poster = nil
 	if !reflect.DeepEqual(rdr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)
 	}

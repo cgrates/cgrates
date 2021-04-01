@@ -118,9 +118,7 @@ func (eEe *ElasticEe) ID() string {
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (eEe *ElasticEe) OnEvicted(_ string, _ interface{}) {
-	return
-}
+func (eEe *ElasticEe) OnEvicted(_ string, _ interface{}) {}
 
 // ExportEvent implements EventExporter
 func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {

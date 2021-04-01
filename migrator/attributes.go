@@ -75,26 +75,6 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	return
 }
 
-// migrateV1ToV2Attributes migrates attributeProfile from v1 to v2
-// for the moment the system in using the shortcut from v1 to v4
-func (m *Migrator) migrateV1ToV2Attributes() (v2Attr *v2AttributeProfile, err error) {
-	var v1Attr *v1AttributeProfile
-
-	v1Attr, err = m.dmIN.getV1AttributeProfile()
-	if err != nil {
-		return nil, err
-	} else if v1Attr == nil {
-		return nil, errors.New("Attribute NIL")
-	}
-
-	v2Attr, err = v1Attr.AsAttributeProfile()
-	if err != nil {
-		return nil, err
-	}
-
-	return
-}
-
 func (m *Migrator) migrateV1ToV4AttributeProfile() (v4Attr *v4AttributeProfile, err error) {
 	var v1Attr *v1AttributeProfile
 	v1Attr, err = m.dmIN.getV1AttributeProfile()
@@ -306,7 +286,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *v3AttributePr
 	for _, attr := range v2AttrPrf.Attributes {
 		filterIDs := make([]string, 0)
 		//append false translate to  if FieldName exist do stuff
-		if attr.Append == false {
+		if !attr.Append {
 			filterIDs = append(filterIDs, utils.MetaExists+utils.InInFieldSep+attr.FieldName+utils.InInFieldSep)
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
@@ -339,7 +319,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4Attrib
 			// Create FilterIDs []string
 			filterIDs := make([]string, 0)
 			//append false translate to  if FieldName exist do stuff
-			if attr.Append == false {
+			if !attr.Append {
 				filterIDs = append(filterIDs, utils.MetaExists+utils.ConcatenatedKeySep+attr.FieldName+utils.ConcatenatedKeySep)
 			}
 			//Initial not *any translate to if value of fieldName = initial do stuff

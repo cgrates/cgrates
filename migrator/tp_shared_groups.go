@@ -41,7 +41,7 @@ func (m *Migrator) migrateCurrentTPsharedgroups() (err error) {
 				return err
 			}
 			if sharedGroup != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPSharedGroups(sharedGroup); err != nil {
 						return err
 					}

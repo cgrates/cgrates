@@ -2679,14 +2679,6 @@ var (
 	}
 )
 
-// ActionSv1
-const (
-	ActionSv1                = "ActionSv1"
-	ActionSv1Ping            = "ActionSv1.Ping"
-	ActionSv1ScheduleActions = "ActionSv1.ScheduleActions"
-	ActionSv1ExecuteActions  = "ActionSv1.ExecuteActions"
-)
-
 // Time duration suffix
 const (
 	NsSuffix = "ns"

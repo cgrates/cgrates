@@ -97,7 +97,6 @@ type Loader struct {
 	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
 	flagsTpls     map[string]utils.FlagsWithParams     //map[loaderType]utils.FlagsWithParams
 	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
-	procRows      int                                  // keep here the last processed row in the file/-s
 	bufLoaderData map[string][]LoaderData              // cache of data read, indexed on tenantID
 	dm            *engine.DataManager
 	timezone      string

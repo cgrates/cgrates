@@ -24,10 +24,8 @@ import (
 )
 
 type internalMigrator struct {
-	dm       *engine.DataManager
-	iDB      *engine.InternalDB
-	dataKeys []string
-	qryIdx   *int
+	dm  *engine.DataManager
+	iDB *engine.InternalDB
 }
 
 func newInternalMigrator(dm *engine.DataManager) (iDBMig *internalMigrator) {

@@ -62,21 +62,6 @@ func (m *Migrator) migrateCurrentActions() (err error) {
 	return
 }
 
-func (m *Migrator) removeV1Actions() (err error) {
-	var v1 *v1Actions
-	for {
-		if v1, err = m.dmIN.getV1Actions(); err != nil && err != utils.ErrNoMoreData {
-			return err
-		}
-		if v1 == nil {
-			return nil
-		}
-		if err = m.dmIN.remV1Actions(*v1); err != nil {
-			return err
-		}
-	}
-}
-
 func (m *Migrator) migrateV1Actions() (acts engine.Actions, err error) {
 	var v1ACs *v1Actions
 
@@ -191,7 +176,7 @@ func (v1Act v1Action) AsAction() (act *engine.Action) {
 	if v1Act.Balance.Weight != 0 {
 		bf.Weight = utils.Float64Pointer(v1Act.Balance.Weight)
 	}
-	if v1Act.Balance.Disabled != false {
+	if v1Act.Balance.Disabled {
 		bf.Disabled = utils.BoolPointer(v1Act.Balance.Disabled)
 	}
 	if !v1Act.Balance.ExpirationDate.IsZero() {

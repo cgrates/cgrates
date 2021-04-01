@@ -63,9 +63,7 @@ func (httpEE *HTTPjsonMapEE) ID() string {
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {
-	return
-}
+func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {}
 
 // ExportEvent implements EventExporter
 func (httpEE *HTTPjsonMapEE) ExportEvent(cgrEv *utils.CGREvent) (err error) {

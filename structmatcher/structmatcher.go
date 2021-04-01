@@ -267,10 +267,6 @@ func isOperator(s string) bool {
 	return strings.HasPrefix(s, "*")
 }
 
-func notEmpty(x interface{}) bool {
-	return !reflect.DeepEqual(x, reflect.Zero(reflect.TypeOf(x)).Interface())
-}
-
 type StructMatcher struct {
 	rootElement element
 }

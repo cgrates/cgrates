@@ -47,7 +47,6 @@ type v1ActionTrigger struct {
 	ActionsId             string
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
 	Executed              bool
-	lastExecutionTime     time.Time
 }
 
 type v1ActionTriggers []*v1ActionTrigger

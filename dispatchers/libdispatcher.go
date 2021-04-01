@@ -125,7 +125,6 @@ func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	pfl.Hosts.Sort()
 	wd.hosts = pfl.Hosts.Clone() // avoid concurrency on profile
 	wd.Unlock()
-	return
 }
 
 // HostIDs used to implement Dispatcher interface
@@ -158,7 +157,6 @@ func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	d.Lock()
 	d.hosts = pfl.Hosts.Clone()
 	d.Unlock()
-	return
 }
 
 // HostIDs used to implement Dispatcher interface
@@ -192,7 +190,6 @@ func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	d.Lock()
 	d.hosts = pfl.Hosts.Clone()
 	d.Unlock()
-	return
 }
 
 // HostIDs used to implement Dispatcher interface

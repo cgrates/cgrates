@@ -57,9 +57,7 @@ func (httpPost *HTTPPost) ID() string {
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {
-	return
-}
+func (httpPost *HTTPPost) OnEvicted(_ string, _ interface{}) {}
 
 // ExportEvent implements EventExporter
 func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {

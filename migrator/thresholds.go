@@ -45,8 +45,6 @@ type v2ActionTrigger struct {
 	LastExecutionTime time.Time
 }
 
-type v2ActionTriggers []*v2ActionTrigger
-
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
 	//Thresholds
