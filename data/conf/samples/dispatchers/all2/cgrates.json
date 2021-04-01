@@ -66,19 +66,6 @@
 	"enabled": true,
 },
 
-
-"rates": {
-	"enabled": true,
-},
-
-
-
-
-"accounts": {
-	"enabled": true,
-},
-
-
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":["*internal"],

@@ -52,11 +52,6 @@
 },
 
 
-"rates": {
-	"enabled": true
-},
-
-
 "schedulers": {
 	"enabled": true
 },
@@ -69,4 +64,4 @@
 
 
 
-},
+}

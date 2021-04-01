@@ -123,8 +123,7 @@ func testVrsDataDB(t *testing.T) {
 		"Actions": 2, "RQF": 5, "ReverseDestinations": 1, "Attributes": 6, "RatingPlan": 1,
 		"RatingProfile": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 2,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 4, "Resource": 1,
-		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1, "Dispatchers": 2,
-		"RateProfiles": 1}
+		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1, "Dispatchers": 2}
 	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
@@ -165,7 +164,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 		"RatingProfile": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 2,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 4, "Resource": 1,
 		"Subscribers": 1, "Routes": 2, "Thresholds": 4, "Timing": 1,
-		"RateProfiles": 1, "Dispatchers": 2}
+		"Dispatchers": 2}
 	if err := vrsRPC.Call(utils.APIerSv1GetDataDBVersions, utils.StringPointer(utils.EmptyString), &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {

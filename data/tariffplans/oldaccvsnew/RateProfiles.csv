@@ -1,3 +1,0 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Weight,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeight,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP_ANY,,,,,,,RT_ANY,,,,,0s,0,0.2,60s,60s
-cgrates.org,RP_ANY,,,,,,,RT_ANY,,,,,60s,0,0.1,60s,1s

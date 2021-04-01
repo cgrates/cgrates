@@ -917,22 +917,6 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"rates": {
-	"enabled": false,
-	"indexed_selects": true,				// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"rate_indexed_selects": true,			// enable profile matching exclusively on indexes
-	//"rate_string_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"rate_prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"rate_suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-    "verbosity": 1000,                      // number of increment iterations allowed
-},
-
-
 "sip_agent": {							// SIP Agents, only used for redirections
 	"enabled": false,					// enables the SIP agent: <true|false>
 	"listen": "127.0.0.1:5060",			// address where to listen for SIP requests <x.y.z.y:1234>
@@ -1045,23 +1029,6 @@ const CGRATES_CFG_JSON = `
 "apiban": {
 	"enabled": false,
 	"keys": [],
-},
-
-
-
-
-"accounts": {								// AccountS config
-	"enabled": false,						// starts service: <true|false>
-	"indexed_selects": true,				// enable profile matching exclusively on indexes
-	"attributes_conns": [],					// connections to AttributeS for account/balance updates, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
-	"rates_conns": [],						// connections to RatesS for account/balance updates, empty to disable rates functionality: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],					// connections to ThresholdS for account/balance updates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
-	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-    "max_iterations": 1000,                 // maximum number of iterations
-    "max_usage": "72h",                     // maximum time of usage
 },
 
 

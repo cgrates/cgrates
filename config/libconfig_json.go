@@ -626,21 +626,6 @@ type STIRJsonCfg struct {
 	Privatekey_path     *string
 }
 
-type RateSJsonCfg struct {
-	Enabled                    *bool
-	Indexed_selects            *bool
-	String_indexed_fields      *[]string
-	Prefix_indexed_fields      *[]string
-	Suffix_indexed_fields      *[]string
-	Nested_fields              *bool // applies when indexed fields is not defined
-	Rate_indexed_selects       *bool
-	Rate_string_indexed_fields *[]string
-	Rate_prefix_indexed_fields *[]string
-	Rate_suffix_indexed_fields *[]string
-	Rate_nested_fields         *bool // applies when indexed fields is not defined
-	Verbosity                  *int
-}
-
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
 	Enabled              *bool
@@ -668,19 +653,4 @@ type CoreSJsonCfg struct {
 	Caps_strategy       *string
 	Caps_stats_interval *string
 	Shutdown_timeout    *string
-}
-
-// Account service config section
-type AccountSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	Attributes_conns      *[]string
-	Rates_conns           *[]string
-	Thresholds_conns      *[]string
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Max_iterations        *int
-	Max_usage             *string
 }

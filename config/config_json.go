@@ -59,14 +59,12 @@ const (
 	DNSAgentJson       = "dns_agent"
 	ERsJson            = "ers"
 	EEsJson            = "ees"
-	RateSJson          = "rates"
 	RPCConnsJsonName   = "rpc_conns"
 	SIPAgentJson       = "sip_agent"
 	TemplatesJson      = "templates"
 	ConfigSJson        = "configs"
 	APIBanCfgJson      = "apiban"
 	CoreSCfgJson       = "cores"
-	AccountSCfgJson    = "accounts"
 )
 
 var (
@@ -74,8 +72,7 @@ var (
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
-		AccountSCfgJson}
+		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson}
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -514,18 +511,6 @@ func (jsnCfg CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
 	return cfg, nil
 }
 
-func (jsnCfg CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RateSJson]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(RateSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
 func (jsnCfg CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
 	rawCfg, hasKey := jsnCfg[SIPAgentJson]
 	if !hasKey {
@@ -580,18 +565,6 @@ func (jsnCfg CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(CoreSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AccountSCfgJson]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(AccountSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

@@ -204,6 +204,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 		getIfExist(utils.Chargers),
 		getIfExist(utils.DispatcherProfiles),
 		getIfExist(utils.DispatcherHosts),
+	)
 	c.generator = func() csvReaderCloser {
 		return &csvGoogle{
 			spreadsheetID: spreadsheetID,

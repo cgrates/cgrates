@@ -197,12 +197,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.ersCfg = new(ERsCfg)
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
-	cfg.rateSCfg = new(RateSCfg)
 	cfg.sipAgentCfg = new(SIPAgentCfg)
 	cfg.configSCfg = new(ConfigSCfg)
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
-	cfg.accountSCfg = new(AccountSCfg)
 
 	cfg.cacheDP = make(map[string]utils.MapStorage)
 
@@ -332,12 +330,10 @@ type CGRConfig struct {
 	apier            *ApierCfg         // APIer config
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
-	rateSCfg         *RateSCfg         // RateS config
 	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
 	configSCfg       *ConfigSCfg       // ConfigS config
 	apiBanCfg        *APIBanCfg        // APIBan config
 	coreSCfg         *CoreSCfg         // CoreS config
-	accountSCfg      *AccountSCfg      // AccountS config
 
 	cacheDP    map[string]utils.MapStorage
 	cacheDPMux sync.RWMutex
@@ -407,9 +403,8 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
-		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg,
-		cfg.loadAccountSCfg} {
+		cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -815,15 +810,6 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.eesCfg.loadFromJSONCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep, cfg.dfltEvExp)
 }
 
-// loadRateSCfg loads the rates section of the configuration
-func (cfg *CGRConfig) loadRateSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnRateCfg *RateSJsonCfg
-	if jsnRateCfg, err = jsnCfg.RateCfgJson(); err != nil {
-		return
-	}
-	return cfg.rateSCfg.loadFromJSONCfg(jsnRateCfg)
-}
-
 // loadSIPAgentCfg loads the sip_agent section of the configuration
 func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnSIPAgentCfg *SIPAgentJsonCfg
@@ -853,15 +839,6 @@ func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.configSCfg.loadFromJSONCfg(jsnConfigSCfg)
-}
-
-// loadAccountSCfg loads the AccountS section of the configuration
-func (cfg *CGRConfig) loadAccountSCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnActionCfg *AccountSJsonCfg
-	if jsnActionCfg, err = jsnCfg.AccountSCfgJson(); err != nil {
-		return
-	}
-	return cfg.accountSCfg.loadFromJSONCfg(jsnActionCfg)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1121,20 +1098,6 @@ func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 	return cfg.eesCfg
 }
 
-// RateSCfg reads the RateS configuration
-func (cfg *CGRConfig) RateSCfg() *RateSCfg {
-	cfg.lks[RateSJson].RLock()
-	defer cfg.lks[RateSJson].RUnlock()
-	return cfg.rateSCfg
-}
-
-// AccountSCfg reads the AccountS configuration
-func (cfg *CGRConfig) AccountSCfg() *AccountSCfg {
-	cfg.lks[AccountSCfgJson].RLock()
-	defer cfg.lks[AccountSCfgJson].RUnlock()
-	return cfg.accountSCfg
-}
-
 // SIPAgentCfg reads the Apier configuration
 func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
 	cfg.lks[SIPAgentJson].Lock()
@@ -1283,13 +1246,11 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
 		ApierS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
-		RateSJson:          cfg.loadRateSCfg,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
 		TemplatesJson:      cfg.loadTemplateSCfg,
 		ConfigSJson:        cfg.loadConfigSCfg,
 		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
 		CoreSCfgJson:       cfg.loadCoreSCfg,
-		AccountSCfgJson:    cfg.loadAccountSCfg,
 	}
 }
 
@@ -1451,7 +1412,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS, AccountSCfgJson,
+		RouteSJson, LoaderJson, DispatcherSJson, ApierS,
 	})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
@@ -1539,12 +1500,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[EEsJson] <- struct{}{}
 		case SIPAgentJson:
 			cfg.rldChans[SIPAgentJson] <- struct{}{}
-		case RateSJson:
-			cfg.rldChans[RateSJson] <- struct{}{}
 		case RegistrarCJson:
 			cfg.rldChans[RegistrarCJson] <- struct{}{}
-		case AccountSCfgJson:
-			cfg.rldChans[AccountSCfgJson] <- struct{}{}
 		}
 	}
 }
@@ -1590,12 +1547,10 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		ERsJson:            cfg.ersCfg.AsMapInterface(separator),
 		APIBanCfgJson:      cfg.apiBanCfg.AsMapInterface(),
 		EEsJson:            cfg.eesCfg.AsMapInterface(separator),
-		RateSJson:          cfg.rateSCfg.AsMapInterface(),
 		SIPAgentJson:       cfg.sipAgentCfg.AsMapInterface(separator),
 		TemplatesJson:      cfg.templates.AsMapInterface(separator),
 		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
 		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
-		AccountSCfgJson:    cfg.accountSCfg.AsMapInterface(),
 	}
 }
 
@@ -1754,12 +1709,8 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		mp = cfg.MailerCfg().AsMapInterface()
 	case AnalyzerCfgJson:
 		mp = cfg.AnalyzerSCfg().AsMapInterface()
-	case RateSJson:
-		mp = cfg.RateSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
-	case AccountSCfgJson:
-		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1922,12 +1873,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		mp = cfg.MailerCfg().AsMapInterface()
 	case AnalyzerCfgJson:
 		mp = cfg.AnalyzerSCfg().AsMapInterface()
-	case RateSJson:
-		mp = cfg.RateSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
-	case AccountSCfgJson:
-		mp = cfg.AccountSCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")
 	}
@@ -2020,12 +1967,10 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		apier:            cfg.apier.Clone(),
 		ersCfg:           cfg.ersCfg.Clone(),
 		eesCfg:           cfg.eesCfg.Clone(),
-		rateSCfg:         cfg.rateSCfg.Clone(),
 		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
 		configSCfg:       cfg.configSCfg.Clone(),
 		apiBanCfg:        cfg.apiBanCfg.Clone(),
 		coreSCfg:         cfg.coreSCfg.Clone(),
-		accountSCfg:      cfg.accountSCfg.Clone(),
 
 		cacheDP: make(map[string]utils.MapStorage),
 	}

@@ -1321,7 +1321,6 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 			RouteFilterIndexIDs:      nil,
 			ChargerFilterIndexIDs:    nil,
 			DispatcherFilterIndexIDs: nil,
-			RateFilterIndexIDs:       nil,
 			FilterIndexIDs:           nil,
 		},
 	}

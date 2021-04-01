@@ -47,7 +47,7 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString), utils.EmptyString,
+		utils.EmptyString, utils.EmptyString), utils.EmptyString,
 		utils.EmptyString, nil, nil, false)
 	if err != nil {
 		t.Error(err)
