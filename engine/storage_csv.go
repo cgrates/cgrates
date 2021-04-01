@@ -639,7 +639,7 @@ func getCfgJSONData(raw json.RawMessage) (data []byte, err error) {
 		return
 	}
 	dataPath := string(raw[1 : len(raw)-1])
-	if !strings.HasSuffix(dataPath, utils.JSNSuffix) {
+	if !strings.HasSuffix(dataPath, utils.JSONSuffix) {
 		dataPath = path.Join(dataPath, utils.GoogleCredentialsFileName)
 	}
 	return os.ReadFile(dataPath)

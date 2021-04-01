@@ -59,7 +59,7 @@ func (apiv2 *APIerSv2) LoadTariffPlanFromFolder(attrs *utils.AttrLoadTpFromFolde
 	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSVSep, attrs.FolderPath), "", apiv2.Config.GeneralCfg().DefaultTimezone,
 		apiv2.Config.ApierCfg().CachesConns, apiv2.Config.ApierCfg().ActionSConns,
-		apiv2.Config.DataDbCfg().Type == utils.INTERNAL)
+		apiv2.Config.DataDbCfg().Type == utils.Internal)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

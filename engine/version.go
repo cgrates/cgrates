@@ -125,7 +125,7 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 		} else {
 			message = storDBVers
 		}
-	case utils.INTERNAL:
+	case utils.Internal:
 		message = allVers
 	case utils.Postgres, utils.MySQL:
 		message = storDBVers
@@ -222,7 +222,7 @@ func CurrentDBVersions(storType string, isDataDB bool) Versions {
 			return CurrentDataDBVersions()
 		}
 		return CurrentStorDBVersions()
-	case utils.INTERNAL:
+	case utils.Internal:
 		return CurrentAllDBVersions()
 	case utils.Postgres, utils.MySQL:
 		return CurrentStorDBVersions()

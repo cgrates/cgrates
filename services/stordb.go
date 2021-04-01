@@ -126,7 +126,7 @@ func (db *StorDBService) Reload() (err error) {
 		msql.Db.SetMaxOpenConns(int(maxConn))
 		msql.Db.SetMaxIdleConns(int(maxIdleConn))
 		msql.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
-	} else if db.cfg.StorDbCfg().Type == utils.INTERNAL {
+	} else if db.cfg.StorDbCfg().Type == utils.Internal {
 		idb, canCast := db.db.(*engine.InternalDB)
 		if !canCast {
 			return fmt.Errorf("can't conver StorDB of type %s to InternalDB",

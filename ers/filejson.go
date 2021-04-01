@@ -98,7 +98,7 @@ func (rdr *JSONFileER) Serve() (err error) {
 				}
 				filesInDir, _ := os.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
-					if !strings.HasSuffix(file.Name(), utils.JSNSuffix) { // hardcoded file extension for json event reader
+					if !strings.HasSuffix(file.Name(), utils.JSONSuffix) { // hardcoded file extension for json event reader
 						continue // used in order to filter the files from directory
 					}
 					go func(fileName string) {

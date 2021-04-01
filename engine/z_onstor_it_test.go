@@ -144,7 +144,7 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 }
 
 func testOnStorITCacheDestinations(t *testing.T) {
-	if onStor.dataDB.GetStorageType() == utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() == utils.Internal {
 		t.SkipNow()
 	}
 
@@ -182,14 +182,14 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 	}
 	for _, prfx := range dst.Prefixes {
 		if _, hasIt := Cache.Get(utils.CacheReverseDestinations, dst.Id); hasIt &&
-			onStor.dataDB.GetStorageType() != utils.INTERNAL {
+			onStor.dataDB.GetStorageType() != utils.Internal {
 			t.Errorf("Prefix: %s already in cache", prfx)
 		}
 	}
 	if err := onStor.CacheDataFromDB(utils.ReverseDestinationPrefix, dst.Prefixes, false); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		for _, prfx := range dst.Prefixes {
 			if itm, hasIt := Cache.Get(utils.CacheReverseDestinations, prfx); !hasIt {
 				t.Error("Did not cache")
@@ -245,13 +245,13 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAp, itm)
 	}
 	if _, hasIt := Cache.Get(utils.CacheActionPlans, ap.Id); hasIt &&
-		onStor.dataDB.GetStorageType() != utils.INTERNAL {
+		onStor.dataDB.GetStorageType() != utils.Internal {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.ActionPlanPrefix, []string{ap.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		if itm, hasIt := Cache.Get(utils.CacheActionPlans, ap.Id); !hasIt {
 			t.Error("Did not cache")
 		} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
@@ -273,13 +273,13 @@ func testOnStorITCacheAccountActionPlans(t *testing.T) {
 		t.Error(err)
 	}
 	if _, hasIt := Cache.Get(utils.CacheAccountActionPlans, acntID); hasIt &&
-		onStor.dataDB.GetStorageType() != utils.INTERNAL {
+		onStor.dataDB.GetStorageType() != utils.Internal {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{acntID}, false); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		if itm, hasIt := Cache.Get(utils.CacheAccountActionPlans, acntID); !hasIt {
 			t.Error("Did not cache")
 		} else if rcv := itm.([]string); !reflect.DeepEqual(aAPs, rcv) {
@@ -312,7 +312,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAt, itm)
 	}
 	if _, hasIt := Cache.Get(utils.CacheActionTriggers, atsID); hasIt &&
-		onStor.dataDB.GetStorageType() != utils.INTERNAL {
+		onStor.dataDB.GetStorageType() != utils.Internal {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.ActionTriggerPrefix, []string{atsID}, false); err != nil {
@@ -452,7 +452,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 			t.Error(err)
@@ -546,7 +546,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 	}
 
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
 			utils.NonTransactional); err != nil {
@@ -580,7 +580,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(rpf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
 			utils.NonTransactional); err != nil {
@@ -762,7 +762,7 @@ func testOnStorITActions(t *testing.T) {
 	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetActions(acts[0].Id,
 			false, utils.NonTransactional); err != nil {
@@ -868,7 +868,7 @@ func testOnStorITActions(t *testing.T) {
 	} else if !reflect.DeepEqual(acts[0], rcv[0]) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetActions(acts[0].Id,
 			false, utils.NonTransactional); err != nil {
@@ -910,7 +910,7 @@ func testOnStorITSharedGroup(t *testing.T) {
 	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetSharedGroup(sg.Id, false,
 			utils.NonTransactional); err != nil {
@@ -940,7 +940,7 @@ func testOnStorITSharedGroup(t *testing.T) {
 	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetSharedGroup(sg.Id, false,
 			utils.NonTransactional); err != nil {
@@ -1306,7 +1306,7 @@ func testOnStorITTiming(t *testing.T) {
 	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
-	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
+	if onStor.dataDB.GetStorageType() != utils.Internal {
 		//get from cache
 		if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
 			t.Error(err)

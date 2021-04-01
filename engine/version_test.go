@@ -128,7 +128,7 @@ func TestCurrentDBVersions(t *testing.T) {
 
 	//Compare AllVersions
 	expStr := "cgr-migrator"
-	if rcv := expVersDataDB.Compare(expVersStorDB, utils.INTERNAL, true); !strings.Contains(rcv, expStr) {
+	if rcv := expVersDataDB.Compare(expVersStorDB, utils.Internal, true); !strings.Contains(rcv, expStr) {
 		t.Errorf("Expected %+v, received %+v", expStr, rcv)
 	}
 }

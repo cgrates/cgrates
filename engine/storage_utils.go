@@ -70,7 +70,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			return
 		}
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, ttl)
-	case utils.INTERNAL:
+	case utils.Internal:
 		d = NewInternalDB(nil, nil, true)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
@@ -115,11 +115,11 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		}
 		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn),
 			int(connMaxLifetime), utils.IfaceAsString(opts[utils.MysqlLocation]))
-	case utils.INTERNAL:
+	case utils.Internal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.INTERNAL)
+			dbType, utils.MySQL, utils.Mongo, utils.Postgres, utils.Internal)
 	}
 	return
 }

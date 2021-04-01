@@ -246,7 +246,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		Type:     utils.INTERNAL,
+		Type:     utils.Internal,
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",
@@ -277,7 +277,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 }`
 
 	expected = DataDbCfg{
-		Type:     utils.INTERNAL,
+		Type:     utils.Internal,
 		Host:     "127.0.0.1",
 		Port:     "6379",
 		Name:     "10",

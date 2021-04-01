@@ -106,7 +106,7 @@ func (dm *DataManager) LoadDataDBCache(attr map[string][]string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if dm.DataDB().GetStorageType() == utils.INTERNAL {
+	if dm.DataDB().GetStorageType() == utils.Internal {
 		return // all the data is in cache already
 	}
 	for key, ids := range attr {
