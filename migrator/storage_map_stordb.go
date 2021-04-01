@@ -31,10 +31,8 @@ func newInternalStorDBMigrator(stor engine.StorDB) (iDBMig *internalStorDBMigrat
 }
 
 type internalStorDBMigrator struct {
-	storDB   *engine.StorDB
-	iDB      *engine.InternalDB
-	dataKeys []string
-	qryIdx   *int
+	storDB *engine.StorDB
+	iDB    *engine.InternalDB
 }
 
 func (iDBMig *internalStorDBMigrator) close() {}

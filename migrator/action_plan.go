@@ -21,7 +21,6 @@ package migrator
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,8 +33,6 @@ type v1ActionPlan struct {
 	Timing     *engine.RateInterval
 	Weight     float64
 	ActionsId  string
-	actions    v1Actions
-	stCache    time.Time // cached time of the next start
 }
 
 type v1ActionPlans []*v1ActionPlan

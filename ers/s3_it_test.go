@@ -183,6 +183,7 @@ func TestNewS3ER(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	rdr.(*S3ER).poster = nil
 	if !reflect.DeepEqual(rdr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)
 	}
@@ -227,6 +228,7 @@ func TestNewS3ERCase2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	rdr.(*S3ER).poster = nil
 	expected.cap = rdr.(*S3ER).cap
 	if !reflect.DeepEqual(rdr, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)

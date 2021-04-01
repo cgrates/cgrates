@@ -106,7 +106,6 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 			}
 		}
 	}
-	return
 }
 
 // Shutdown is called by engine to clear states
@@ -807,7 +806,6 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) 
 					utils.SessionS, sCln.CGRID, err.Error()))
 		}
 	}
-	return
 }
 
 // registerSession will register an active or passive Session
@@ -899,7 +897,6 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
 		}
 	}
-	return
 }
 
 // unindexASession removes an active or passive session from indexes
@@ -938,9 +935,6 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 		f, err := sS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
-			if err == utils.ErrNotFound {
-				err = utils.ErrPrefixNotFound(fltrID)
-			}
 			continue
 		}
 		if f.ActivationInterval != nil &&
@@ -1848,7 +1842,6 @@ func (args *V1AuthorizeArgs) ParseFlags(flags, sep string) {
 		}
 	}
 	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
-	return
 }
 
 // V1AuthorizeReply are options available in auth reply
@@ -2817,7 +2810,6 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags, sep string) {
 		}
 	}
 	args.Paginator, _ = utils.GetRoutePaginatorFromOpts(args.APIOpts)
-	return
 }
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API

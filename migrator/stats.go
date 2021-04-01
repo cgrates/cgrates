@@ -58,8 +58,6 @@ type v1Stat struct {
 	Triggers        engine.ActionTriggers
 }
 
-type v1Stats []*v1Stat
-
 func (m *Migrator) moveStatQueueProfile() (err error) {
 	//StatQueueProfile
 	var ids []string

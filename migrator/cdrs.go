@@ -95,20 +95,6 @@ func (m *Migrator) migrateCDRs() (err error) {
 	return m.ensureIndexesStorDB(engine.ColCDRs)
 }
 
-func (m *Migrator) removeV1CDRs() (err error) {
-	var v1CDR *v1Cdrs
-	if v1CDR, err = m.storDBIn.getV1CDR(); err != nil {
-		return err
-	}
-	if v1CDR == nil {
-		return
-	}
-	if err = m.storDBIn.remV1CDRs(v1CDR); err != nil {
-		return
-	}
-	return
-}
-
 func (m *Migrator) migrateV1CDRs() (cdr *engine.CDR, err error) {
 	var v1CDR *v1Cdrs
 	if v1CDR, err = m.storDBIn.getV1CDR(); err != nil {

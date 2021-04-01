@@ -54,6 +54,7 @@ func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
 		}
 	}
 	rdr.parseOpts(rdr.Config().Opts)
+	rdr.createPoster()
 	return rdr, nil
 }
 

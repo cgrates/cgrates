@@ -23,7 +23,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -115,10 +114,7 @@ func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 			fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
 		} else {
 			for idx, val := range rule.Values {
-				if strings.HasPrefix(val, utils.DynamicDataPrefix) {
-					// remove dynamic data prefix from fieldName
-					val = val[1:]
-				}
+				val = strings.TrimPrefix(val, utils.DynamicDataPrefix) // remove dynamic data prefix from fieldName
 				fltr.Rules[i].Values[idx] = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
 			}
 		}
@@ -803,11 +799,9 @@ type v1Filter struct {
 }
 
 type v1FilterRule struct {
-	Type      string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	FieldName string            // Name of the field providing us the Values to check (used in case of some )
-	Values    []string          // Filter definition
-	rsrFields config.RSRParsers // Cache here the RSRFilter Values
-	negative  *bool
+	Type      string   // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	FieldName string   // Name of the field providing us the Values to check (used in case of some )
+	Values    []string // Filter definition
 }
 
 func (m *Migrator) migrateRequestFilterV4(v4Fltr *engine.Filter) (fltr *engine.Filter, err error) {

@@ -102,6 +102,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
 				rplyEv := &engine.AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
+					CGREvent:      &utils.CGREvent{Event: map[string]interface{}{"testcase": 1}},
 				}
 				*reply.(*engine.AttrSProcessEventReply) = *rplyEv
 				return nil
@@ -125,8 +126,11 @@ func TestAttrSProcessEvent(t *testing.T) {
 	})
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
 	// cgrEv := &utils.CGREvent{}
+	exp := &utils.CGREvent{Event: map[string]interface{}{"testcase": 1}}
 	if err := eeS.attrSProcessEvent(cgrEv, []string{}, utils.EmptyString); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(exp, cgrEv) {
+		t.Errorf("Expected %v but received %v", utils.ToJSON(exp), utils.ToJSON(cgrEv))
 	}
 }
 

@@ -78,7 +78,6 @@ func (fFwv *FileFWVee) OnEvicted(_ string, _ interface{}) {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when closing the file",
 			utils.EventExporterS, fFwv.id, err.Error()))
 	}
-	return
 }
 
 // ExportEvent implements EventExporter

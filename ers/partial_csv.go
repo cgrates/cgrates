@@ -283,7 +283,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
-			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
+			utils.ERs, absPath, rowNr, evsPosted, time.Since(timeStart)))
 	return
 }
 

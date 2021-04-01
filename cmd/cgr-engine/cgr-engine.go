@@ -144,7 +144,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
-	internalEEsChan, internalRateSChan, internalActionSChan,
+	internalEEsChan, internalRateSChan,
 	internalAccountSChan chan rpcclient.ClientConnector,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
@@ -179,8 +179,6 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalEEsChan <- eeS
 		case rateS := <-internalRateSChan:
 			internalRateSChan <- rateS
-		case actionS := <-internalActionSChan:
-			internalActionSChan <- actionS
 		case accountS := <-internalAccountSChan:
 			internalAccountSChan <- accountS
 		case <-shdChan.Done():
@@ -319,8 +317,8 @@ func stopCPUProfiling(f io.Closer) {
 }
 
 func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
-	shutdownSignal := make(chan os.Signal)
-	reloadSignal := make(chan os.Signal)
+	shutdownSignal := make(chan os.Signal, 1)
+	reloadSignal := make(chan os.Signal, 1)
 	signal.Notify(shutdownSignal, os.Interrupt,
 		syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	signal.Notify(reloadSignal, syscall.SIGHUP)
@@ -499,7 +497,6 @@ func main() {
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
 	internalRateSChan := make(chan rpcclient.ClientConnector, 1)
-	internalActionSChan := make(chan rpcclient.ClientConnector, 1)
 	internalAccountSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
@@ -526,7 +523,6 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        internalActionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       internalAccountSChan,
 
@@ -565,7 +561,6 @@ func main() {
 		utils.StatS:           new(sync.WaitGroup),
 		utils.StorDB:          new(sync.WaitGroup),
 		utils.ThresholdS:      new(sync.WaitGroup),
-		utils.ActionS:         new(sync.WaitGroup),
 		utils.AccountS:        new(sync.WaitGroup),
 	}
 	gvService := services.NewGlobalVarS(cfg, srvDep)
@@ -710,7 +705,6 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.ActionSv1, internalActionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.EeSv1, internalEEsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.AccountSv1, internalAccountSChan)
@@ -727,7 +721,7 @@ func main() {
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
-		internalCacheSChan, internalEEsChan, internalRateSChan, internalActionSChan,
+		internalCacheSChan, internalEEsChan, internalRateSChan,
 		internalAccountSChan, shdChan)
 
 	<-shdChan.Done()

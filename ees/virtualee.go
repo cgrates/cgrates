@@ -55,9 +55,7 @@ func (vEe *VirtualEe) ID() string {
 }
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
-func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {
-	return
-}
+func (vEe *VirtualEe) OnEvicted(_ string, _ interface{}) {}
 
 // ExportEvent implements EventExporter
 func (vEe *VirtualEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {

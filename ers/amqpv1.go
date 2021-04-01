@@ -101,11 +101,9 @@ func (rdr *AMQPv1ER) Serve() (err error) {
 		return
 	}
 	go func() {
-		select {
-		case <-rdr.rdrExit:
-			receiver.Close(context.Background())
-			rdr.close()
-		}
+		<-rdr.rdrExit
+		receiver.Close(context.Background())
+		rdr.close()
 	}()
 
 	go rdr.readLoop(receiver) // read until the connection is closed

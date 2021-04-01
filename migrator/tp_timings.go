@@ -41,7 +41,7 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 				return err
 			}
 			if tm != nil {
-				if m.dryRun != true {
+				if !m.dryRun {
 					if err := m.storDBOut.StorDB().SetTPTimings(tm); err != nil {
 						return err
 					}

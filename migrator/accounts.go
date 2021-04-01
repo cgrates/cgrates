@@ -232,13 +232,12 @@ type v1UnitsCounter struct {
 }
 
 type v2Account struct {
-	ID                string
-	BalanceMap        map[string]engine.Balances
-	UnitCounters      engine.UnitCounters
-	ActionTriggers    engine.ActionTriggers
-	AllowNegative     bool
-	Disabled          bool
-	executingTriggers bool
+	ID             string
+	BalanceMap     map[string]engine.Balances
+	UnitCounters   engine.UnitCounters
+	ActionTriggers engine.ActionTriggers
+	AllowNegative  bool
+	Disabled       bool
 }
 
 func (b *v1Balance) IsDefault() bool {
@@ -248,7 +247,7 @@ func (b *v1Balance) IsDefault() bool {
 		b.ExpirationDate.IsZero() &&
 		b.SharedGroup == "" &&
 		b.Weight == 0 &&
-		b.Disabled == false
+		!b.Disabled
 }
 
 func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
@@ -331,7 +330,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 			if oldUcBal.TimingIDs != "" {
 				bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(oldUcBal.TimingIDs))
 			}
-			if oldUcBal.Disabled != false {
+			if oldUcBal.Disabled {
 				bf.Disabled = utils.BoolPointer(oldUcBal.Disabled)
 			}
 			bf.Timings = oldUcBal.Timings
