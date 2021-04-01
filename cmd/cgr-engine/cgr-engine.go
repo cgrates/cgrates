@@ -144,8 +144,7 @@ func startRPC(server *cores.Server, internalRaterChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
-	internalEEsChan, internalRateSChan,
-	internalAccountSChan chan rpcclient.ClientConnector,
+	internalEEsChan chan rpcclient.ClientConnector,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -177,10 +176,6 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalCacheSChan <- chS
 		case eeS := <-internalEEsChan:
 			internalEEsChan <- eeS
-		case rateS := <-internalRateSChan:
-			internalRateSChan <- rateS
-		case accountS := <-internalAccountSChan:
-			internalAccountSChan <- accountS
 		case <-shdChan.Done():
 			return
 		}
@@ -496,8 +491,6 @@ func main() {
 	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
-	internalRateSChan := make(chan rpcclient.ClientConnector, 1)
-	internalAccountSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -522,9 +515,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs):            internalEEsChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       internalAccountSChan,
 
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
@@ -551,7 +542,6 @@ func main() {
 		utils.LoaderS:         new(sync.WaitGroup),
 		utils.RadiusAgent:     new(sync.WaitGroup),
 		utils.RALService:      new(sync.WaitGroup),
-		utils.RateS:           new(sync.WaitGroup),
 		utils.ResourceS:       new(sync.WaitGroup),
 		utils.ResponderS:      new(sync.WaitGroup),
 		utils.RouteS:          new(sync.WaitGroup),
@@ -704,10 +694,8 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 	engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsChan)
-	engine.IntRPC.AddInternalRPCClient(utils.RateSv1, internalRateSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.EeSv1, internalEEsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.DispatcherSv1, internalDispatcherSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.AccountSv1, internalAccountSChan)
 
 	initConfigSv1(internalConfigChan, server, anz)
 
@@ -721,8 +709,7 @@ func main() {
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
-		internalCacheSChan, internalEEsChan, internalRateSChan,
-		internalAccountSChan, shdChan)
+		internalCacheSChan, internalEEsChan, shdChan)
 
 	<-shdChan.Done()
 	shtdDone := make(chan struct{})

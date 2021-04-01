@@ -486,7 +486,6 @@ const (
 	MetaUCH                  = "*uch"
 	MetaGuardian             = "*guardians"
 	MetaEEs                  = "*ees"
-	MetaRateS                = "*rates"
 	MetaContinue             = "*continue"
 	MetaUp                   = "*up"
 	Migrator                 = "migrator"
@@ -871,7 +870,6 @@ const (
 	MetaYearly            = "*yearly"
 	MetaDaily             = "*daily"
 	MetaWeekly            = "*weekly"
-	RateS                 = "RateS"
 	Underline             = "_"
 	MetaPartial           = "*partial"
 	MetaBusy              = "*busy"
@@ -1020,8 +1018,6 @@ const (
 	ReplicatorLow  = "replicator"
 	ApierSLow      = "apiers"
 	EEsLow         = "ees"
-	RateSLow       = "rates"
-	AccountSLow    = "accounts"
 )
 
 // Actions
@@ -1502,23 +1498,6 @@ const (
 	RALsV1                   = "RALsV1"
 	RALsV1GetRatingPlansCost = "RALsV1.GetRatingPlansCost"
 	RALsV1Ping               = "RALsV1.Ping"
-)
-
-const (
-	RateSv1             = "RateSv1"
-	RateSv1CostForEvent = "RateSv1.CostForEvent"
-	RateSv1Ping         = "RateSv1.Ping"
-)
-
-const (
-	AccountSv1                    = "AccountSv1"
-	AccountSv1Ping                = "AccountSv1.Ping"
-	AccountSv1MaxAbstracts        = "AccountSv1.MaxAbstracts"
-	AccountSv1DebitAbstracts      = "AccountSv1.DebitAbstracts"
-	AccountSv1MaxConcretes        = "AccountSv1.MaxConcretes"
-	AccountSv1DebitConcretes      = "AccountSv1.DebitConcretes"
-	AccountSv1ActionSetBalance    = "AccountSv1.ActionSetBalance"
-	AccountSv1ActionRemoveBalance = "AccountSv1.ActionRemoveBalance"
 )
 
 const (

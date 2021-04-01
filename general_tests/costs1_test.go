@@ -59,7 +59,7 @@ cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString),
+		utils.EmptyString, utils.EmptyString),
 		utils.EmptyString, utils.EmptyString, nil, nil, false)
 	if err != nil {
 		t.Error(err)

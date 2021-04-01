@@ -14,16 +14,7 @@
     "db_password": "CGRateS.org",
   },
 
- // "caches":{
- //   "partitions": {
- //     "*destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-  //    "*reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-   //   "*rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
-   //   "*rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 
-   //   "*rate_profiles": {"limit": 10000, "ttl": "", "static_ttl": false, "precache": true, "replicate": false},			// control rate profile caching
-  //  },
- // },
 
   "rals": {
     "enabled": true,
@@ -38,10 +29,5 @@
     "enabled": true,
   },
   
-  "rates": {
-    "enabled": true,
-    "rate_string_indexed_fields": ["*req.PrefixDestination"]
-  },
 
-
-},
+}

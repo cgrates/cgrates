@@ -17,7 +17,6 @@ require (
 	github.com/cenkalti/rpc2 v0.0.0-20210220005819-4a29bc83afe1
 	github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d
 	github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b
-	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
 	github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca

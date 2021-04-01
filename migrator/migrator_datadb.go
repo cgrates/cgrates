@@ -83,6 +83,7 @@ type MigratorDataDB interface {
 
 	getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error)
 	getV1DispatcherProfile() (v1chrPrf *engine.DispatcherProfile, err error)
+	getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error)
 
 	getV3Stats() (v1st *engine.StatQueueProfile, err error)
 	getV3ThresholdProfile() (v2T *engine.ThresholdProfile, err error)

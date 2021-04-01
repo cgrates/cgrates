@@ -239,8 +239,6 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.StorDB)
 		case <-srvMngr.GetConfig().GetReloadChan(config.EEsJson):
 			go srvMngr.reloadService(utils.EventExporterS)
-		case <-srvMngr.GetConfig().GetReloadChan(config.RateSJson):
-			go srvMngr.reloadService(utils.RateS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
 			go srvMngr.connMgr.Reload()
 		case <-srvMngr.GetConfig().GetReloadChan(config.SIPAgentJson):
@@ -249,8 +247,6 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.RegistrarC)
 		case <-srvMngr.GetConfig().GetReloadChan(config.HTTP_JSN):
 			go srvMngr.reloadService(utils.GlobalVarS)
-		case <-srvMngr.GetConfig().GetReloadChan(config.AccountSCfgJson):
-			go srvMngr.reloadService(utils.AccountS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.CoreSCfgJson):
 			go srvMngr.reloadService(utils.CoreS)
 		}

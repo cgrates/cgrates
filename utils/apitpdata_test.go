@@ -22,8 +22,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 func TestTPDistinctIdsString(t *testing.T) {
@@ -1045,134 +1043,11 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 			RouteFilterIndexIDs:      nil,
 			ChargerFilterIndexIDs:    nil,
 			DispatcherFilterIndexIDs: nil,
-			RateFilterIndexIDs:       nil,
 			FilterIndexIDs:           nil,
 		},
 	}
 	eMap := NewAttrReloadCacheWithOpts()
 	if !reflect.DeepEqual(eMap, newAttrReloadCache) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, newAttrReloadCache)
-	}
-}
-
-func TestStartTimeNow(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
-		},
-	}
-	timpulet1 := time.Now()
-	result, err := testCostEventStruct.StartTime("")
-	timpulet2 := time.Now()
-	if err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	}
-	if result.Before(timpulet1) && result.After(timpulet2) {
-		t.Errorf("Expected between <%+v> and <%+v>, received <%+v>", timpulet1, timpulet2, result)
-	}
-}
-
-func TestStartTime(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesStartTime": "2018-01-07T17:00:10Z"},
-		},
-	}
-	if result, err := testCostEventStruct.StartTime(""); err != nil {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	} else if !reflect.DeepEqual(result.String(), "2018-01-07 17:00:10 +0000 UTC") {
-		t.Errorf("Expected <2018-01-07 17:00:10 +0000 UTC> , received <%+v>", result)
-	}
-}
-
-func TestStartTimeError(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesStartTime": "start"},
-		},
-	}
-	_, err := testCostEventStruct.StartTime("")
-	if err == nil && err.Error() != "received <Unsupported time format" {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	}
-}
-
-func TestUsageMinute(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{},
-		},
-	}
-	if rcv, err := testCostEventStruct.Usage(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(decimal.New(int64(time.Minute), 0), rcv) {
-		t.Errorf("Expected %+v, received %+v", decimal.New(int64(time.Minute), 0), rcv)
-	}
-}
-
-func TestUsageError(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesUsage": "start"},
-		},
-	}
-	_, err := testCostEventStruct.Usage()
-	if err == nil && err.Error() != "received <Unsupported time format" {
-		t.Errorf("Expected <nil> , received <%+v>", err)
-	}
-}
-
-func TestUsage(t *testing.T) {
-	testCostEventStruct := &ArgsCostForEvent{
-		RateProfileIDs: []string{"123", "456", "789"},
-		CGREvent: &CGREvent{
-			Tenant:  "*req.CGRID",
-			ID:      "",
-			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{"*ratesUsage": "2m10s"},
-		},
-	}
-
-	if result, err := testCostEventStruct.Usage(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result.String(), "130000000000") {
-		t.Errorf("Expected <130000000000> , received <%+v>", result.String())
-	}
-}
-
-func TestATDUsage(t *testing.T) {
-	args := &ArgsCostForEvent{
-		CGREvent: &CGREvent{
-			ID: "testID",
-			Event: map[string]interface{}{
-				Usage: true,
-			},
-		},
-	}
-
-	_, err := args.Usage()
-	expected := "cannot convert field: true to time.Duration"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
 	}
 }

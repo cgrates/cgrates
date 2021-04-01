@@ -86,8 +86,6 @@ github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d h1:1PLz/t3XZy5KF8EY
 github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d/go.mod h1:mMAzSIjK11XfRMrOIa7DXYl64REdPldRCbAgzKB47XQ=
 github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b h1:9IX5Z3Tw7n2QrY7GLGGpqjjC/NVSJvQ7nxLkC2JP4vw=
 github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
-github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70 h1:/O+Dr12jcizDiCoIG2oK6wyE1pNRVQc62Wz+TfPWDhU=
-github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
 github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7 h1:dxtBWRAr62vRRKkExmJZ0u1EbCw/y0vOkSfdFND5qXw=
 github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7/go.mod h1:uWcTZ01eKJdWcoYBhsEXKgSlO6Vv8wT9qcR5JeJovBs=
 github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817 h1:1Tdv6H/usqmkQVeQbd+x87L5xo6DFmbYpbI00qfrWGw=
