@@ -242,7 +242,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t1.Add(-24*time.Hour), t1.Add(-23*time.Hour)); err != nil {
 		t.Fatal(err)
 	}
-	reply := []map[string]interface{}{}
+	reply := make([]map[string]interface{}, 0)
 	if err = anz.V1StringQuery(&QueryArgs{HeaderFilters: utils.CoreSv1Ping}, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 4 {

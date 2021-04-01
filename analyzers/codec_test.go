@@ -38,10 +38,10 @@ func (c *mockServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
 	return
 }
 
-func (c *mockServerCodec) ReadRequestBody(x interface{}) (err error) {
+func (c *mockServerCodec) ReadRequestBody(_ interface{}) (err error) {
 	return
 }
-func (c *mockServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *mockServerCodec) WriteResponse(_ *rpc.Response, _ interface{}) error {
 	return nil
 }
 func (c *mockServerCodec) Close() error { return nil }
