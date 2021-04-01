@@ -61,7 +61,7 @@ func TestNewServer(t *testing.T) {
 	}
 }
 
-func TestRegisterHttpFunc(t *testing.T) {
+func TestRegisterHTTPFunc(t *testing.T) {
 	log.SetOutput(io.Discard)
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
@@ -83,7 +83,7 @@ func TestRegisterHttpFunc(t *testing.T) {
 
 	handler := func(http.ResponseWriter, *http.Request) {}
 
-	rcv.RegisterHttpFunc("/home", handler)
+	rcv.RegisterHTTPFunc("/home", handler)
 
 	rcv.RpcRegisterName(utils.EmptyString, handler)
 
