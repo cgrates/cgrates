@@ -1101,7 +1101,7 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 		ActionPlan: []*AttrActionPlan{{
 			ActionsId: "TOPUP_ACTION",
 			MonthDays: "31",
-			Time:      "00:00:00",
+			Time:      "23:59:59",
 			Weight:    20.0,
 			TimingID:  utils.MetaMonthlyEstimated,
 		}},
