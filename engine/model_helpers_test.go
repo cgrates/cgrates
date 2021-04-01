@@ -4608,8 +4608,9 @@ func TestAPItoAttributeProfileError2(t *testing.T) {
 	}
 
 	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
-	if err == nil || err.Error() != "Unclosed unspilit syntax" {
-		t.Errorf("\nExpecting <Unclosed unspilit syntax>,\n Received <%+v>", err)
+	expected := "Closed unspilit syntax "
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
 
 }
