@@ -405,7 +405,7 @@ func testSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+		t.Errorf("Expecting: nil, received: %+v",
 			rply.ThresholdIDs)
 	}
 	if rply.StatQueueIDs != nil && len(*rply.StatQueueIDs) != 1 && (*rply.StatQueueIDs)[0] != "Stat_2" {
@@ -449,7 +449,7 @@ func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 			1024, rply.MaxUsage)
 	}
 	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+		t.Errorf("Expecting: nil, received: %+v",
 			rply.ThresholdIDs)
 	}
 	if rply.StatQueueIDs != nil && len(*rply.StatQueueIDs) != 1 && (*rply.StatQueueIDs)[0] != "Stat_2" {
@@ -537,11 +537,11 @@ func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 		t.Error(err)
 	}
 	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+		t.Errorf("Expecting: nil, received: %+v",
 			rply.ThresholdIDs)
 	}
 	if rply.StatQueueIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+		t.Errorf("Expecting: nil, received: %+v",
 			rply.StatQueueIDs)
 	}
 }
@@ -582,11 +582,11 @@ func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 			1024, rply.MaxUsage)
 	}
 	if rply.ThresholdIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+		t.Errorf("Expecting: nil, received: %+v",
 			rply.ThresholdIDs)
 	}
 	if rply.StatQueueIDs != nil {
-		t.Errorf("Expecting: nil, received: %s",
+		t.Errorf("Expecting: nil, received: %+v",
 			rply.StatQueueIDs)
 	}
 
