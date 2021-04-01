@@ -47,7 +47,6 @@ type CoreService struct {
 func (cS *CoreService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
-	return
 }
 
 // Status returns the status of the engine

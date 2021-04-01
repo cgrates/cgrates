@@ -83,7 +83,7 @@ func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
 	s.Unlock()
 }
 
-func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+func (s *Server) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	if s.httpMux != nil {
 		s.httpMux.HandleFunc(pattern, handler)
 	}
@@ -378,7 +378,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 		}
 
 		if ok := rootCAs.AppendCertsFromPEM(ca); !ok {
-			utils.Logger.Crit(fmt.Sprintf("Cannot append certificate authority"))
+			utils.Logger.Crit("Cannot append certificate authority")
 			return config, errors.New("Cannot append certificate authority")
 		}
 	}
