@@ -70,7 +70,7 @@ func newDbDefaults() dbDefaults {
 			"DbPort": "6379",
 			"DbPass": "",
 		},
-		utils.INTERNAL: map[string]string{
+		utils.Internal: map[string]string{
 			"DbName": "internal",
 			"DbPort": "internal",
 			"DbPass": "internal",

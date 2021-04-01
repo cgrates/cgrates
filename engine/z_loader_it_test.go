@@ -93,7 +93,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	dataDbCsv = NewDataManager(dbConn, lCfg.CacheCfg(), nil)
-	if lCfg.DataDbCfg().Type == utils.INTERNAL {
+	if lCfg.DataDbCfg().Type == utils.Internal {
 		chIDs := []string{}
 		for dbKey := range utils.CacheInstanceToPrefix { // clear only the DataDB
 			chIDs = append(chIDs, dbKey)

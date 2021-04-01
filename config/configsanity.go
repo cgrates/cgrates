@@ -583,7 +583,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DataDB sanity checks
-	if cfg.dataDbCfg.Type == utils.INTERNAL {
+	if cfg.dataDbCfg.Type == utils.Internal {
 		if cfg.resourceSCfg.Enabled && cfg.resourceSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
 		}
