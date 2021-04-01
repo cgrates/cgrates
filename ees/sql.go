@@ -39,7 +39,7 @@ func NewSQLEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS,
 	sqlEe = &SQLEe{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
 
-	dialect, err := sqlEe.NewSQLEeUrl(cgrCfg)
+	dialect, err := sqlEe.NewSQLEeURL(cgrCfg)
 	if err != nil {
 		return
 	}
@@ -62,7 +62,7 @@ type SQLEe struct {
 	dc utils.MapStorage
 }
 
-func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
+func (sqlEe *SQLEe) NewSQLEeURL(cgrCfg *config.CGRConfig) (dialect gorm.Dialector, err error) {
 	var u *url.URL
 	// var err error
 	if u, err = url.Parse(strings.TrimPrefix(cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].ExportPath, utils.Meta)); err != nil {

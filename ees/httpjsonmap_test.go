@@ -159,6 +159,9 @@ func TestHttpJsonMapExportEvent3(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
@@ -202,6 +205,9 @@ func TestHttpJsonMapExportEvent4(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
@@ -249,6 +255,9 @@ func TestHttpJsonMapExportEvent5(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	httpEE, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)

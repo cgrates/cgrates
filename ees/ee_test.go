@@ -110,6 +110,9 @@ func TestNewEventExporterCase3(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	eeExpect, err := NewHTTPPostEe(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
@@ -134,6 +137,9 @@ func TestNewEventExporterCase4(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	eeExpect, err := NewHTTPjsonMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)
@@ -158,6 +164,9 @@ func TestNewEventExporterCase5(t *testing.T) {
 		"Local",
 		utils.EmptyString,
 	))
+	if err != nil {
+		t.Error(err)
+	}
 	eeExpect, err := NewPosterJSONMapEE(cgrCfg, 0, filterS, dc)
 	if err != nil {
 		t.Error(err)

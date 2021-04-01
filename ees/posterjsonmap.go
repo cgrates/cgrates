@@ -76,7 +76,6 @@ func (pstrEE *PosterJSONMapEE) ID() string {
 // OnEvicted implements EventExporter, doing the cleanup before exit
 func (pstrEE *PosterJSONMapEE) OnEvicted(string, interface{}) {
 	pstrEE.poster.Close()
-	return
 }
 
 // ExportEvent implements EventExporter

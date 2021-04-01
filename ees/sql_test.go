@@ -75,7 +75,7 @@ func TestNewSQLeUrl(t *testing.T) {
 	}
 	sqlEe := &SQLEe{id: cgrCfg.EEsCfg().Exporters[0].ID,
 		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
-	_, err = sqlEe.NewSQLEeUrl(cgrCfg)
+	_, err = sqlEe.NewSQLEeURL(cgrCfg)
 	errExpect := "db type <> not supported"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
@@ -101,7 +101,7 @@ func TestNewSQLeUrlSQL(t *testing.T) {
 		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
 	dialectExpect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "mysql"))
-	if dialect, err := sqlEe.NewSQLEeUrl(cgrCfg); err != nil {
+	if dialect, err := sqlEe.NewSQLEeURL(cgrCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dialect, dialectExpect) {
 		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(dialect))
@@ -127,7 +127,7 @@ func TestNewSQLeUrlPostgres(t *testing.T) {
 		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
 	dialectExpect := postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 		"127.0.0.1", "3306", "postgres", "cgrates", "CGRateS.org", utils.SQLDefaultSSLMode))
-	if dialect, err := sqlEe.NewSQLEeUrl(cgrCfg); err != nil {
+	if dialect, err := sqlEe.NewSQLEeURL(cgrCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dialect, dialectExpect) {
 		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(dialect))
@@ -152,7 +152,7 @@ func TestNewSQLeExportPathError(t *testing.T) {
 	sqlEe := &SQLEe{id: cgrCfg.EEsCfg().Exporters[0].ID,
 		cgrCfg: cgrCfg, cfgIdx: 0, filterS: filterS, dc: dc}
 	errExpect := `parse ":foo": missing protocol scheme`
-	if _, err := sqlEe.NewSQLEeUrl(cgrCfg); err == nil || err.Error() != errExpect {
+	if _, err := sqlEe.NewSQLEeURL(cgrCfg); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
