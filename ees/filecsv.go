@@ -88,7 +88,6 @@ func (fCsv *FileCSVee) OnEvicted(_ string, _ interface{}) {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Exporter with id: <%s> received error: <%s> when closing the file",
 			utils.EventExporterS, fCsv.id, err.Error()))
 	}
-	return
 }
 
 // ExportEvent implements EventExporter

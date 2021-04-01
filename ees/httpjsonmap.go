@@ -64,7 +64,6 @@ func (httpEE *HTTPjsonMapEE) ID() string {
 
 // OnEvicted implements EventExporter, doing the cleanup before exit
 func (httpEE *HTTPjsonMapEE) OnEvicted(string, interface{}) {
-	return
 }
 
 // ExportEvent implements EventExporter
