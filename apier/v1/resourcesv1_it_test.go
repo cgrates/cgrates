@@ -92,7 +92,7 @@ func TestRsV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		rlsV1ConfDIR = "tutinternal"
-		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-4]
+		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-14]
 	case utils.MetaMySQL:
 		rlsV1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
