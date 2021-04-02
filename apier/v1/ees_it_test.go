@@ -210,7 +210,6 @@ func testEEsExportCDRs(t *testing.T) {
 				if v != 4.04 {
 					t.Errorf("Expected %+v, received: %+v", 4.04, v)
 				}
-
 			}
 		}
 	}
@@ -283,7 +282,7 @@ func testEEsExportCDRsMultipleExporters(t *testing.T) {
 }
 
 func testEEsVerifyExportsMultipleExporters(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(time.Second + 600*time.Millisecond)
 	var files []string
 	err := filepath.Walk("/tmp/testCSV2/", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, utils.CSVSuffix) {
