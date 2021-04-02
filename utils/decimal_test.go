@@ -20,6 +20,7 @@ package utils
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/ericlagergren/decimal"
@@ -171,5 +172,37 @@ func TestDecimalNewDecimalFromStringFail(t *testing.T) {
 
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err)
+	}
+}
+
+func TestDivideBigWithReminder(t *testing.T) {
+	x := new(decimal.Big).SetUint64(10)
+	y := new(decimal.Big).SetUint64(5)
+	qExpected := new(decimal.Big).SetUint64(2)
+	rExpected := new(decimal.Big).SetUint64(0)
+	qReceived, rReceived := DivideBigWithReminder(x, y)
+	if !reflect.DeepEqual(qExpected, qReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", qExpected, qReceived)
+	} else if !reflect.DeepEqual(rExpected, rReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", rExpected, rReceived)
+	}
+}
+
+func TestNewDecimalFromFloat64(t *testing.T) {
+	x := 21.5
+	xExp, _ := new(decimal.Big).SetString(strconv.FormatFloat(x, 'f', -1, 64))
+	expected := &Decimal{xExp}
+	// fmt.Printf("%v of type %T", expected, expected)
+	rcv := NewDecimalFromFloat64(x)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected <+%v> but received <+%v>", xExp, rcv)
+	}
+}
+
+func TestDecimalClone(t *testing.T) {
+	d := &Decimal{new(decimal.Big).SetUint64(3)}
+	rcv := d.Clone()
+	if !reflect.DeepEqual(d, rcv) {
+		t.Errorf("Expected <+%v> but received <+%v>", d, rcv)
 	}
 }
