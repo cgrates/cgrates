@@ -148,6 +148,10 @@ var (
 		TBLTPActionProfiles:  CacheTBLTPActionProfiles,
 		TBLTPAccountProfiles: CacheTBLTPAccountProfiles,
 	}
+
+	// ProtectedSFlds are the fields that sessions should not alter
+	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
+
 	ArgCacheToPrefix = map[string]string{
 		DestinationIDs:        DestinationPrefix,
 		ReverseDestinationIDs: ReverseDestinationPrefix,
@@ -973,37 +977,29 @@ const (
 
 // Actions
 const (
-	MetaLog                     = "*log"
-	MetaTopUpReset              = "*topup_reset"
-	MetaTopUp                   = "*topup"
-	MetaDebitReset              = "*debit_reset"
-	MetaDebit                   = "*debit"
-	MetaResetCounters           = "*reset_counters"
-	MetaEnableAccount           = "*enable_account"
-	MetaDisableAccount          = "*disable_account"
-	HttpPostAsync               = "*http_post_async"
-	MetaMailAsync               = "*mail_async"
-	MetaUnlimited               = "*unlimited"
-	CDRLog                      = "*cdrlog"
-	MetaSetDDestinations        = "*set_ddestinations"
-	MetaTransferMonetaryDefault = "*transfer_monetary_default"
-	MetaCgrRpc                  = "*cgr_rpc"
-	TopUpZeroNegative           = "*topup_zero_negative"
-	SetExpiry                   = "*set_expiry"
-	MetaPublishAccount          = "*publish_account"
-	MetaRemoveSessionCosts      = "*remove_session_costs"
-	MetaRemoveExpired           = "*remove_expired"
-	MetaPostEvent               = "*post_event"
-	MetaCDRAccount              = "*reset_account_cdr"
-	MetaResetThreshold          = "*reset_threshold"
-	MetaResetStatQueue          = "*reset_stat_queue"
-	MetaRemoteSetAccount        = "*remote_set_account"
-	ActionID                    = "ActionID"
-	ActionType                  = "ActionType"
-	ActionValue                 = "ActionValue"
-	BalanceValue                = "BalanceValue"
-	BalanceUnits                = "BalanceUnits"
-	ExtraParameters             = "ExtraParameters"
+	MetaLog                = "*log"
+	MetaTopUpReset         = "*topup_reset"
+	MetaTopUp              = "*topup"
+	MetaDebitReset         = "*debit_reset"
+	MetaDebit              = "*debit"
+	MetaEnableAccount      = "*enable_account"
+	MetaDisableAccount     = "*disable_account"
+	MetaUnlimited          = "*unlimited"
+	CDRLog                 = "*cdrlog"
+	MetaSetDDestinations   = "*set_ddestinations"
+	MetaCgrRpc             = "*cgr_rpc"
+	MetaRemoveSessionCosts = "*remove_session_costs"
+	MetaPostEvent          = "*post_event"
+	MetaCDRAccount         = "*reset_account_cdr"
+	MetaResetThreshold     = "*reset_threshold"
+	MetaResetStatQueue     = "*reset_stat_queue"
+	MetaRemoteSetAccount   = "*remote_set_account"
+	ActionID               = "ActionID"
+	ActionType             = "ActionType"
+	ActionValue            = "ActionValue"
+	BalanceValue           = "BalanceValue"
+	BalanceUnits           = "BalanceUnits"
+	ExtraParameters        = "ExtraParameters"
 
 	MetaAddBalance = "*add_balance"
 	MetaSetBalance = "*set_balance"
@@ -1259,7 +1255,6 @@ const (
 	APIerSv1SetTPStat                   = "APIerSv1.SetTPStat"
 	APIerSv1GetTPStat                   = "APIerSv1.GetTPStat"
 	APIerSv1RemoveTPStat                = "APIerSv1.RemoveTPStat"
-	APIerSv1GetTPDestinationRate        = "APIerSv1.GetTPDestinationRate"
 	APIerSv1SetTPRouteProfile           = "APIerSv1.SetTPRouteProfile"
 	APIerSv1GetTPRouteProfile           = "APIerSv1.GetTPRouteProfile"
 	APIerSv1GetTPRouteProfileIDs        = "APIerSv1.GetTPRouteProfileIDs"
@@ -1268,15 +1263,8 @@ const (
 	APIerSv1SetTPDispatcherProfile      = "APIerSv1.SetTPDispatcherProfile"
 	APIerSv1RemoveTPDispatcherProfile   = "APIerSv1.RemoveTPDispatcherProfile"
 	APIerSv1GetTPDispatcherProfileIDs   = "APIerSv1.GetTPDispatcherProfileIDs"
-	APIerSv1GetTPSharedGroups           = "APIerSv1.GetTPSharedGroups"
-	APIerSv1SetTPSharedGroups           = "APIerSv1.SetTPSharedGroups"
-	APIerSv1GetTPSharedGroupIds         = "APIerSv1.GetTPSharedGroupIds"
-	APIerSv1RemoveTPSharedGroups        = "APIerSv1.RemoveTPSharedGroups"
 	APIerSv1ExportCDRs                  = "APIerSv1.ExportCDRs"
-	APIerSv1GetTPRatingPlan             = "APIerSv1.GetTPRatingPlan"
 	APIerSv1SetTPRatingPlan             = "APIerSv1.SetTPRatingPlan"
-	APIerSv1GetTPRatingPlanIds          = "APIerSv1.GetTPRatingPlanIds"
-	APIerSv1RemoveTPRatingPlan          = "APIerSv1.RemoveTPRatingPlan"
 	APIerSv1SetTPActions                = "APIerSv1.SetTPActions"
 	APIerSv1GetTPActionIds              = "APIerSv1.GetTPActionIds"
 	APIerSv1RemoveTPActions             = "APIerSv1.RemoveTPActions"
@@ -1284,13 +1272,7 @@ const (
 	APIerSv1ExecuteAction               = "APIerSv1.ExecuteAction"
 	APIerSv1SetTPRatingProfile          = "APIerSv1.SetTPRatingProfile"
 	APIerSv1GetTPRatingProfile          = "APIerSv1.GetTPRatingProfile"
-	APIerSv1RemoveTPRatingProfile       = "APIerSv1.RemoveTPRatingProfile"
 	APIerSv1SetTPDestinationRate        = "APIerSv1.SetTPDestinationRate"
-	APIerSv1GetTPRatingProfileLoadIds   = "APIerSv1.GetTPRatingProfileLoadIds"
-	APIerSv1GetTPRatingProfilesByLoadID = "APIerSv1.GetTPRatingProfilesByLoadID"
-	APIerSv1GetTPRatingProfileIds       = "APIerSv1.GetTPRatingProfileIds"
-	APIerSv1GetTPDestinationRateIds     = "APIerSv1.GetTPDestinationRateIds"
-	APIerSv1RemoveTPDestinationRate     = "APIerSv1.RemoveTPDestinationRate"
 	APIerSv1ImportTariffPlanFromFolder  = "APIerSv1.ImportTariffPlanFromFolder"
 	APIerSv1ExportTPToFolder            = "APIerSv1.ExportTPToFolder"
 	APIerSv1SetActions                  = "APIerSv1.SetActions"
@@ -1354,7 +1336,6 @@ const (
 	APIerSv2GetCacheStats            = "APIerSv2.GetCacheStats"
 	APIerSv2ExecuteAction            = "APIerSv2.ExecuteAction"
 	APIerSv2RemoveActions            = "APIerSv2.RemoveActions"
-	APIerSv2ExportCdrsToFile         = "APIerSv2.ExportCdrsToFile"
 )
 
 const (
@@ -1460,7 +1441,6 @@ const (
 	StatSv1Ping                    = "StatSv1.Ping"
 	StatSv1GetStatQueuesForEvent   = "StatSv1.GetStatQueuesForEvent"
 	StatSv1GetStatQueue            = "StatSv1.GetStatQueue"
-	StatSv1V1GetQueueIDs           = "StatSv1.GetQueueIDs"
 	StatSv1ResetStatQueue          = "StatSv1.ResetStatQueue"
 	APIerSv1GetStatQueueProfile    = "APIerSv1.GetStatQueueProfile"
 	APIerSv1RemoveStatQueueProfile = "APIerSv1.RemoveStatQueueProfile"
@@ -1509,7 +1489,6 @@ const (
 	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
 	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
-	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 	SessionSv1ReAuthorize                = "SessionSv1.ReAuthorize"
 	SessionSv1DisconnectPeer             = "SessionSv1.DisconnectPeer"
 	SessionSv1WarnDisconnect             = "SessionSv1.WarnDisconnect"
@@ -1523,7 +1502,6 @@ const (
 	DispatcherSv1                   = "DispatcherSv1"
 	DispatcherSv1Ping               = "DispatcherSv1.Ping"
 	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
-	DispatcherSv1Apier              = "DispatcherSv1.Apier"
 	DispatcherServicePing           = "DispatcherService.Ping"
 )
 
@@ -1782,9 +1760,7 @@ const (
 // Google_API
 const (
 	MetaGoogleAPI             = "*gapi"
-	GoogleConfigDirName       = ".gapi"
 	GoogleCredentialsFileName = "credentials.json"
-	GoogleTokenFileName       = "token.json"
 )
 
 // StorDB
@@ -1905,7 +1881,6 @@ const (
 	HTTPUseBasicAuthCfg      = "use_basic_auth"
 	HTTPAuthUsersCfg         = "auth_users"
 	HTTPClientOptsCfg        = "client_opts"
-	ConfigsURL               = "configs_url"
 
 	HTTPClientTLSClientConfigCfg       = "skipTlsVerify"
 	HTTPClientTLSHandshakeTimeoutCfg   = "tlsHandshakeTimeout"
@@ -1935,7 +1910,6 @@ const (
 	EnabledCfg         = "enabled"
 	ThresholdSConnsCfg = "thresholds_conns"
 	CacheSConnsCfg     = "caches_conns"
-	RemoveExpiredCfg   = "remove_expired"
 )
 
 // SchedulerCfg
@@ -1962,10 +1936,7 @@ const (
 	ListenBijsonCfg        = "listen_bijson"
 	ListenBigobCfg         = "listen_bigob"
 	RALsConnsCfg           = "rals_conns"
-	ResSConnsCfg           = "resources_conns"
-	ThreshSConnsCfg        = "thresholds_conns"
 	RouteSConnsCfg         = "routes_conns"
-	AttrSConnsCfg          = "attributes_conns"
 	ReplicationConnsCfg    = "replication_conns"
 	RemoteConnsCfg         = "remote_conns"
 	DebitIntervalCfg       = "debit_interval"
@@ -2014,7 +1985,6 @@ const (
 	// KamAgentCfg
 	EvapiConnsCfg = "evapi_conns"
 	TimezoneCfg   = "timezone"
-	TimezoneCfgC  = "Timezone"
 
 	// AsteriskConnCfg
 	UserCf = "user"
@@ -2065,12 +2035,11 @@ const (
 	PrecacheCfg   = "precache"
 
 	// CdreCfg
-	ExportPathCfg        = "export_path"
-	AttributeSContextCfg = "attributes_context"
-	SynchronousCfg       = "synchronous"
-	AttemptsCfg          = "attempts"
-	AttributeContextCfg  = "attribute_context"
-	AttributeIDsCfg      = "attribute_ids"
+	ExportPathCfg       = "export_path"
+	SynchronousCfg      = "synchronous"
+	AttemptsCfg         = "attempts"
+	AttributeContextCfg = "attribute_context"
+	AttributeIDsCfg     = "attribute_ids"
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
@@ -2079,17 +2048,16 @@ const (
 	TpOutDirCfg     = "tp_out_dir"
 	DataCfg         = "data"
 
-	DefaultRatioCfg           = "default_ratio"
-	ReadersCfg                = "readers"
-	ExportersCfg              = "exporters"
-	PoolSize                  = "poolSize"
-	Conns                     = "conns"
-	FilenameCfg               = "file_name"
-	RequestPayloadCfg         = "request_payload"
-	ReplyPayloadCfg           = "reply_payload"
-	TransportCfg              = "transport"
-	StrategyCfg               = "strategy"
-	DynaprepaidActionplansCfg = "dynaprepaid_actionplans"
+	DefaultRatioCfg   = "default_ratio"
+	ReadersCfg        = "readers"
+	ExportersCfg      = "exporters"
+	PoolSize          = "poolSize"
+	Conns             = "conns"
+	FilenameCfg       = "file_name"
+	RequestPayloadCfg = "request_payload"
+	ReplyPayloadCfg   = "reply_payload"
+	TransportCfg      = "transport"
+	StrategyCfg       = "strategy"
 
 	//RateSCfg
 	RateIndexedSelectsCfg      = "rate_indexed_selects"
@@ -2128,8 +2096,6 @@ const (
 	AttributeIDCfg     = "attribute_id"
 	NewBranchCfg       = "new_branch"
 	BlockerCfg         = "blocker"
-	BreakOnSuccessCfg  = "break_on_success"
-	HandlerIDCfg       = "handler_id"
 	LayoutCfg          = "layout"
 	CostShiftDigitsCfg = "cost_shift_digits"
 	MaskDestIDCfg      = "mask_destinationd_id"
@@ -2328,18 +2294,12 @@ const (
 	ElsIfSeqNo             = "if_seq_no"
 	ElsOpType              = "op_type"
 	ElsPipeline            = "pipeline"
-	ElsRequireAlias        = "require_alias"
 	ElsRouting             = "routing"
 	ElsTimeout             = "timeout"
 	ElsVersionLow          = "version"
 	ElsVersionType         = "version_type"
 	ElsWaitForActiveShards = "wait_for_active_shards"
 	// SQLEe options
-	SQLUser            = "user"
-	SQLPassword        = "password"
-	SQLHost            = "host"
-	SQLPort            = "port"
-	SQLName            = "name"
 	SQLMaxIdleConns    = "maxIdleConns"
 	SQLMaxOpenConns    = "maxOpenConns"
 	SQLMaxConnLifetime = "maxConnLifetime"
