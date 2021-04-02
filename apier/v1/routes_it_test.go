@@ -78,6 +78,12 @@ var (
 		testV1RouteMultipleRouteSameID,
 		testV1RouteAccountWithRatingPlan,
 		testV1RouteStopEngine,
+		//cache test
+		testRouteSCacheTestGetNotFound,
+		testRouteSCacheTestSet,
+		testRouteSCacheTestGetNotFound,
+		testRouteSCacheReload,
+		testRouteSCacheTestGetFound,
 	}
 )
 
@@ -1622,5 +1628,72 @@ func testV1RouteRemRouteProfilesWithoutTenant(t *testing.T) {
 		&utils.TenantID{ID: "TEST_PROFILE10"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+func testRouteSCacheTestGetNotFound(t *testing.T) {
+	var suplsReply *engine.RouteProfile
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_CACHE",
+		}, &suplsReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testRouteSCacheTestGetFound(t *testing.T) {
+	var suplsReply *engine.RouteProfile
+	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_CACHE",
+		}, &suplsReply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testRouteSCacheTestSet(t *testing.T) {
+	routePrf = &RouteWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_CACHE",
+			Routes: []*engine.Route{
+				{
+					ID:              "ROUTE_CACHE",
+					RatingPlanIDs:   []string{"RP1"},
+					FilterIDs:       []string{"FLTR_1"},
+					AccountIDs:      []string{"Acc"},
+					ResourceIDs:     []string{"Res1", "ResGroup2"},
+					StatIDs:         []string{"Stat1"},
+					Weight:          20,
+					Blocker:         false,
+					RouteParameters: "SortingParameter1",
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	var result string
+	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testRouteSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.RouteProfileIDs: {"cgrates.org:ROUTE_CACHE"},
+		},
+	}
+	var reply string
+	if err := routeSv1Rpc.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }
