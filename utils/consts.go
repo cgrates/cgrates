@@ -48,7 +48,7 @@ var (
 		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
 
 	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
-		CacheRatingProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
+		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
