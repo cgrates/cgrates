@@ -42,6 +42,7 @@ var (
 	dispatcherConfigDIR string //run tests for specific configuration
 
 	sTestsDispatcher = []func(t *testing.T){
+
 		testDispatcherSInitCfg,
 		testDispatcherSInitDataDb,
 		testDispatcherSResetStorDb,
@@ -65,14 +66,29 @@ var (
 		testDispatcherSRemDispatcherHostWithoutTenant,
 
 		testDispatcherSKillEngine,
+
+		//cache test
+		testDispatcherSInitCfg,
+		testDispatcherSInitDataDb,
+		testDispatcherSResetStorDb,
+		testDispatcherSStartEngine,
+		testDispatcherSRPCConn,
+		testDispatcherSCacheTestGetNotFound,
+		testDispatcherSCacheTestSet,
+		testDispatcherSCacheTestGetNotFound,
+		testDispatcherSCacheReload,
+		testDispatcherSCacheTestGetFound,
+		testDispatcherSKillEngine,
 	}
 )
 
 //Test start here
 func TestDispatcherSIT(t *testing.T) {
+	sTestsDispatcherCacheSV1 := sTestsDispatcher
 	switch *dbType {
 	case utils.MetaInternal:
 		dispatcherConfigDIR = "tutinternal"
+		sTestsDispatcherCacheSV1 = sTestsDispatcherCacheSV1[:len(sTestsDispatcherCacheSV1)-10]
 	case utils.MetaMySQL:
 		dispatcherConfigDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -83,7 +99,7 @@ func TestDispatcherSIT(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	for _, stest := range sTestsDispatcher {
+	for _, stest := range sTestsDispatcherCacheSV1 {
 		t.Run(dispatcherConfigDIR, stest)
 	}
 }
@@ -457,5 +473,62 @@ func testDispatcherSRemDispatcherHostWithoutTenant(t *testing.T) {
 		&utils.TenantID{ID: "DspHst7"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testDispatcherSCacheTestGetNotFound(t *testing.T) {
+	var suplsReply *engine.DispatcherProfile
+	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "DISPATCHER_CACHE",
+		}, &suplsReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDispatcherSCacheTestGetFound(t *testing.T) {
+	var suplsReply *engine.DispatcherProfile
+	if err := dispatcherRPC.Call(utils.APIerSv1GetDispatcherProfile,
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "DISPATCHER_CACHE",
+		}, &suplsReply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDispatcherSCacheTestSet(t *testing.T) {
+	var reply string
+	dispatcherProfile = &DispatcherWithAPIOpts{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant: "cgrates.org",
+			ID:     "DISPATCHER_CACHE",
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+}
+
+func testDispatcherSCacheReload(t *testing.T) {
+	cache := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.DispatcherProfileIDs: {"cgrates.org:DISPATCHER_CACHE"},
+		},
+	}
+	var reply string
+	if err := dispatcherRPC.Call(utils.CacheSv1ReloadCache, cache, &reply); err != nil {
+		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }

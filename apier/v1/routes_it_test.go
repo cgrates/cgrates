@@ -79,19 +79,27 @@ var (
 		testV1RouteAccountWithRatingPlan,
 		testV1RouteStopEngine,
 		//cache test
+		testV1RouteLoadConfig,
+		testV1RouteInitDataDb,
+		testV1RouteResetStorDb,
+		testV1RouteStartEngine,
+		testV1RouteRpcConn,
 		testRouteSCacheTestGetNotFound,
 		testRouteSCacheTestSet,
 		testRouteSCacheTestGetNotFound,
 		testRouteSCacheReload,
 		testRouteSCacheTestGetFound,
+		testV1RouteStopEngine,
 	}
 )
 
 // Test start here
 func TestRouteSV1IT(t *testing.T) {
+	sTestsRouteCacheSV1 := sTestsRouteSV1
 	switch *dbType {
 	case utils.MetaInternal:
 		routeSv1ConfDIR = "tutinternal"
+		sTestsRouteCacheSV1 = sTestsRouteCacheSV1[:len(sTestsRouteCacheSV1)-10]
 	case utils.MetaMySQL:
 		routeSv1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -101,7 +109,7 @@ func TestRouteSV1IT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsRouteSV1 {
+	for _, stest := range sTestsRouteCacheSV1 {
 		t.Run(routeSv1ConfDIR, stest)
 	}
 }
@@ -1630,6 +1638,7 @@ func testV1RouteRemRouteProfilesWithoutTenant(t *testing.T) {
 		t.Error(err)
 	}
 }
+
 func testRouteSCacheTestGetNotFound(t *testing.T) {
 	var suplsReply *engine.RouteProfile
 	if err := routeSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
