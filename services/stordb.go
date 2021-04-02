@@ -123,9 +123,9 @@ func (db *StorDBService) Reload() (err error) {
 		if connMaxLifetime, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.ConnMaxLifetimeCfg]); err != nil {
 			return
 		}
-		msql.Db.SetMaxOpenConns(int(maxConn))
-		msql.Db.SetMaxIdleConns(int(maxIdleConn))
-		msql.Db.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
+		msql.DB.SetMaxOpenConns(int(maxConn))
+		msql.DB.SetMaxIdleConns(int(maxIdleConn))
+		msql.DB.SetConnMaxLifetime(time.Duration(connMaxLifetime) * time.Second)
 	} else if db.cfg.StorDbCfg().Type == utils.Internal {
 		idb, canCast := db.db.(*engine.InternalDB)
 		if !canCast {
