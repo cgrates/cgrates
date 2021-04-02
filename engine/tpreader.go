@@ -53,21 +53,21 @@ type TpReader struct {
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	acntActionPlans    map[string][]string
 	cacheConns         []string
-	schedulerConns     []string
-	isInternalDB       bool // do not reload cache if we use intarnalDB
+	//schedulerConns     []string
+	isInternalDB bool // do not reload cache if we use internalDB
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	cacheConns, schedulerConns []string, isInternalDB bool) (*TpReader, error) {
 
 	tpr := &TpReader{
-		tpid:           tpid,
-		timezone:       timezone,
-		dm:             NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr), // ToDo: add ChacheCfg as parameter to the NewTpReader
-		lr:             lr,
-		cacheConns:     cacheConns,
-		schedulerConns: schedulerConns,
-		isInternalDB:   isInternalDB,
+		tpid:       tpid,
+		timezone:   timezone,
+		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		lr:         lr,
+		cacheConns: cacheConns,
+		//schedulerConns: schedulerConns,
+		isInternalDB: isInternalDB,
 	}
 	tpr.Init()
 	//add default timing tag (in case of no timings file)
