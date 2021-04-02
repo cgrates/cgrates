@@ -76,15 +76,6 @@ var (
 		testAccITRemoveBalances,
 		testAccITAddVoiceBalanceWithDestinations,
 		testAccITStopCgrEngine,
-		//cache test
-		testAccITLoadConfig,
-		testAccITResetDataDB,
-		testAccITResetStorDb,
-		testAccITStartEngine,
-		testAccITRPCConn,
-		testAccountSCacheTestGetNotFound,
-
-		testAccITStopCgrEngine,
 	}
 )
 
@@ -1356,16 +1347,5 @@ func testAccITAddVoiceBalanceWithDestinations(t *testing.T) {
 		t.Error("Got error on Responder.Debit: ", err.Error())
 	} else if rply != 0 {
 		t.Errorf("Expecting %+v, received: %+v", 0, rply)
-	}
-}
-
-func testAccountSCacheTestGetNotFound(t *testing.T) {
-	var suplsReply *engine.RouteProfile
-	if err := accRPC.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "ROUTE_CACHE",
-		}, &suplsReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
 	}
 }
