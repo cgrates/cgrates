@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -378,13 +377,12 @@ func TestAppend2(t *testing.T) {
 	dn.Type = NMMapType
 	dn.Slice = nil
 	dn.Map = map[string]*DataNode{}
-	dnExpect := NewDataNode(testPath)
 
-	if _, err := dn.Append(testPath, val1); err != nil {
+	if rcv, err := dn.Append(testPath, val1); err != nil {
 		t.Error(err)
+	} else if rcv != 0 {
+		t.Errorf("Expected %+v, received %+v", 0, rcv)
 	}
-	fmt.Println(ToJSON(dn.Map["0"]))
-	fmt.Println(ToJSON(dnExpect))
 
 	///
 	dn.Type = NMSliceType

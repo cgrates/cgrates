@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -194,8 +193,6 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		}
 		rcv := cgrCfg.diameterAgentCfg.AsMapInterface(utils.InfieldSep)
 		if !reflect.DeepEqual(rcv, eMap) {
-			fmt.Printf("%T \n", rcv[utils.RequestProcessorsCfg].([]map[string]interface{})[0][utils.FlagsCfg])
-			fmt.Printf("%T \n", eMap[utils.RequestProcessorsCfg].([]map[string]interface{})[0][utils.FlagsCfg])
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 		}
 	}
