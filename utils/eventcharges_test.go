@@ -169,6 +169,7 @@ func TestECAsExtEventChargesFailConcretes(t *testing.T) {
 	}
 }
 
+/*
 func TestEqualsAccountCharge(t *testing.T) {
 	accCharge1 := &AccountCharge{
 		AccountID:       "AccountID1",
@@ -285,7 +286,8 @@ func TestEqualsAccountCharge(t *testing.T) {
 		t.Errorf("Charge %+v and %+v are not equal", ToJSON(accCharge1), ToJSON(accCharge2))
 	}
 }
-
+*/
+/*
 func TestCompressEqualsChargingInterval(t *testing.T) {
 	chIn1 := &ChargingInterval{
 		Increments: []*ChargingIncrement{
@@ -365,3 +367,4 @@ func TestCompressEqualsChargingInterval(t *testing.T) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(chIn1), ToJSON(chIn2))
 	}
 }
+*/

@@ -29,22 +29,49 @@ import (
 )
 
 func DivideBig(x, y *decimal.Big) *decimal.Big {
+	if x == nil {
+		return nil
+	}
+	if y == nil {
+		return nil
+	}
 	return new(decimal.Big).Quo(x, y)
 }
 
 func DivideBigWithReminder(x, y *decimal.Big) (q *decimal.Big, r *decimal.Big) {
+	if x == nil {
+		return
+	}
+	if y == nil {
+		return
+	}
 	return new(decimal.Big).QuoRem(x, y, new(decimal.Big))
 }
 
 func MultiplyBig(x, y *decimal.Big) *decimal.Big {
+	if x == nil {
+		return nil
+	}
+	if y == nil {
+		return nil
+	}
 	return new(decimal.Big).Mul(x, y)
 }
 
 func SumBig(x, y *decimal.Big) *decimal.Big {
+	if x == nil {
+		return y
+	}
+	if y == nil {
+		return x
+	}
 	return new(decimal.Big).Add(x, y)
 }
 
 func SubstractBig(x, y *decimal.Big) *decimal.Big {
+	if x == nil || y == nil {
+		return x
+	}
 	return new(decimal.Big).Sub(x, y)
 }
 
@@ -55,6 +82,18 @@ func MultiplyDecimal(x, y *Decimal) *Decimal {
 
 func SubstractDecimal(x, y *Decimal) *Decimal {
 	return &Decimal{new(decimal.Big).Sub(x.Big, y.Big)}
+}
+
+// SumDecimalAsBig returns tbe Big sum, protecting against nil Decimals
+func SumDecimalAsBig(x, y *Decimal) *decimal.Big {
+	var xBig, yBig *decimal.Big
+	if x != nil {
+		xBig = x.Big
+	}
+	if y != nil {
+		yBig = y.Big
+	}
+	return SumBig(xBig, yBig)
 }
 
 // NewDecimalFromFloat64 is a constructor for Decimal out of float64
