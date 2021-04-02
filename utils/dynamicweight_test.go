@@ -43,6 +43,14 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	} else if !reflect.DeepEqual(eDws, dws) {
 		t.Errorf("expecting: %+v, received: %+v", ToJSON(eDws), ToJSON(dws))
 	}
+
+	///
+	dwsStr = "fltr1&fltr2;20;30;fltr3;30;fltr4&fltr5;50"
+	expected := "invalid DynamicWeight format for string <fltr1&fltr2;20;30;fltr3;30;fltr4&fltr5;50>"
+	if _, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err == nil || err.Error() != expected {
+		t.Errorf("expecting: %+v, received: %+v", expected, err)
+	}
+
 	eDws = DynamicWeights{
 		{
 			FilterIDs: []string{"fltr1", "fltr2"},
@@ -86,7 +94,7 @@ func TestNewDynamicWeightsFromString(t *testing.T) {
 	}
 
 	dwsStr = "fltr1&fltr2;not_a_float64"
-	expected := "invalid Weight <not_a_float64> in string: <fltr1&fltr2;not_a_float64>"
+	expected = "invalid Weight <not_a_float64> in string: <fltr1&fltr2;not_a_float64>"
 	if _, err := NewDynamicWeightsFromString(dwsStr, ";", "&"); err == nil || err.Error() != expected {
 		t.Errorf("expecting: %+v, received: %+v", expected, err)
 	}

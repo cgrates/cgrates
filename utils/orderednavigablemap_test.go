@@ -870,3 +870,20 @@ func TestOrderedNavigableMapOrderedFields(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", exp2, rcv2)
 	}
 }
+
+func TestSetAsSliceErr(t *testing.T) {
+	nm := NewOrderedNavigableMap()
+	err := nm.SetAsSlice(&FullPath{}, []*DataNode{NewLeafNode(10), NewLeafNode(101)})
+	if err == nil || err != ErrWrongPath {
+		t.Errorf("Expected %+v, received %+v", ErrWrongPath, err)
+	}
+}
+
+func TestFieldAsString(t *testing.T) {
+	nm := NewOrderedNavigableMap()
+	path := []string{"0", "path"}
+	_, err := nm.FieldAsString(path)
+	if err == nil || err != ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", ErrNotFound, err)
+	}
+}
