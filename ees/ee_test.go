@@ -49,8 +49,8 @@ func TestNewEventExporter(t *testing.T) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
 	err = eeExpect.init()
-	if err != nil {
-		t.Error(err)
+	if err == nil {
+		t.Error("\nExpected an error")
 	}
 	newEE := ee.(*FileCSVee)
 	newEE.dc[utils.TimeNow] = nil
@@ -85,8 +85,8 @@ func TestNewEventExporterCase2(t *testing.T) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
 	err = eeExpect.init()
-	if err != nil {
-		t.Error(err)
+	if err == nil {
+		t.Error("\nExpected an error")
 	}
 	newEE := ee.(*FileFWVee)
 	newEE.dc[utils.TimeNow] = nil
