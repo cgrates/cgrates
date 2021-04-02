@@ -688,3 +688,21 @@ func verifyInlineFilterS(fltrs []string) (err error) {
 	}
 	return
 }
+
+func CheckFilter(fltr *Filter) (err error) {
+	for _, rls := range fltr.Rules {
+		valFunc := utils.IsPathValid
+		if rls.Type == utils.MetaEmpty || rls.Type == utils.MetaExists {
+			valFunc = utils.IsPathValidForExporters
+		}
+		if err = valFunc(rls.Element); err != nil {
+			return fmt.Errorf("%s for filter <%v>", err, fltr) //encapsulated error
+		}
+		for _, val := range rls.Values {
+			if err = valFunc(val); err != nil {
+				return fmt.Errorf("%s for filter <%v>", err, fltr) //encapsulated error
+			}
+		}
+	}
+	return nil
+}

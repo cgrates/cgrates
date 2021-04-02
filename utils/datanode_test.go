@@ -378,8 +378,10 @@ func TestAppend2(t *testing.T) {
 	dn.Slice = nil
 	dn.Map = map[string]*DataNode{}
 
-	if _, err := dn.Append(testPath, val1); err != nil {
+	if rcv, err := dn.Append(testPath, val1); err != nil {
 		t.Error(err)
+	} else if rcv != 0 {
+		t.Errorf("Expected %+v, received %+v", 0, rcv)
 	}
 
 	///

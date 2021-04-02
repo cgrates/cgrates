@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
+	"fmt"
 	"net"
 	"strings"
 )
@@ -72,4 +74,57 @@ func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 		return dP.FieldAsString(strings.Split(dnVal, NestingSep))
 	}
 	return dnVal, nil
+}
+
+func IsPathValid(path string) (err error) {
+	if !strings.HasPrefix(path, DynamicDataPrefix) {
+		return nil
+	}
+	paths := strings.Split(path, NestingSep)
+	if len(paths) <= 1 {
+		return errors.New("Path is missing ")
+	}
+	for _, path := range paths {
+		if strings.TrimSpace(path) == EmptyString {
+			return errors.New("Empty field path ")
+		}
+	}
+	return nil
+}
+
+func IsPathValidForExporters(path string) (err error) {
+	if !strings.HasPrefix(path, DynamicDataPrefix) {
+		return nil
+	}
+	paths := strings.Split(path, NestingSep)
+	for _, path := range paths {
+		if strings.TrimSpace(path) == EmptyString {
+			return errors.New("Empty field path ")
+		}
+	}
+	return nil
+}
+
+func CheckInLineFilter(fltrs []string) (err error) {
+	for _, fltr := range fltrs {
+		if strings.HasPrefix(fltr, Meta) {
+			rules := strings.SplitN(fltr, InInFieldSep, 3)
+			if len(rules) < 3 {
+				return fmt.Errorf("inline parse error for string: <%s>", fltr)
+			}
+			valFunc := IsPathValid
+			if rules[0] == MetaEmpty || rules[0] == MetaExists {
+				valFunc = IsPathValidForExporters
+			}
+			if err = valFunc(rules[1]); err != nil {
+				return fmt.Errorf("%s for <%s>", err, fltr) //encapsulated error
+			}
+			for _, val := range strings.Split(rules[2], PipeSep) {
+				if err = valFunc(val); err != nil {
+					return fmt.Errorf("%s for <%s>", err, fltr) //encapsulated error
+				}
+			}
+		}
+	}
+	return nil
 }
