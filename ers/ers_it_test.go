@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"errors"
 	"reflect"
 	"sync"
 	"testing"
@@ -677,40 +678,6 @@ func TestERsProcessEvent10(t *testing.T) {
 			Type: utils.MetaNone,
 		},
 	}
-	cfg.ERsCfg().SessionSConns = []string{rpcclient.InternalRPC}
-	fltrS := &engine.FilterS{}
-	rpcInt := map[string]chan rpcclient.ClientConnector{}
-	connMang := engine.NewConnManager(cfg, rpcInt)
-	srv := NewERService(cfg, fltrS, connMang)
-
-	rdrCfg := &config.EventReaderCfg{
-		Flags: map[string]utils.FlagParams{
-			utils.MetaMessage: map[string][]string{},
-		},
-	}
-	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-		Time:   nil,
-		Event:  nil,
-		APIOpts: map[string]interface{}{
-			utils.OptsRoutesLimit: true,
-		},
-	}
-	err := srv.processEvent(cgrEvent, rdrCfg)
-	if err == nil || err.Error() != "UNSUPPORTED_SERVICE_METHOD" {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "UNSUPPORTED_SERVICE_METHOD", err)
-	}
-}
-
-func TestERsProcessEvent11(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:   "test",
-			Type: utils.MetaNone,
-		},
-	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
@@ -734,5 +701,62 @@ func TestERsProcessEvent11(t *testing.T) {
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "MANDATORY_IE_MISSING: [connIDs]", err)
+	}
+}
+
+type testMockClients struct {
+	calls map[string]func(args interface{}, reply interface{}) error
+}
+
+func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}) error {
+	if call, has := sT.calls[method]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(arg, rply)
+	}
+}
+
+func TestERsProcessEvent11(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			ID:   "test",
+			Type: utils.MetaNone,
+		},
+	}
+	cfg.ERsCfg().SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	fltrS := &engine.FilterS{}
+	testMockClient := &testMockClients{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.SessionSv1ProcessMessage: func(args interface{}, reply interface{}) error {
+				return errors.New("RALS_ERROR")
+			},
+		},
+	}
+	clientChan := make(chan rpcclient.ClientConnector, 1)
+	clientChan <- testMockClient
+	connMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): clientChan,
+	})
+	srv := NewERService(cfg, fltrS, connMng)
+	rdrCfg := &config.EventReaderCfg{
+		Flags: map[string]utils.FlagParams{
+			utils.MetaMessage: map[string][]string{},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "",
+		ID:     "",
+		Time:   nil,
+		Event: map[string]interface{}{
+			utils.Usage: 0,
+		},
+		APIOpts: map[string]interface{}{
+			utils.OptsRoutesLimit: true,
+		},
+	}
+	err := srv.processEvent(cgrEvent, rdrCfg)
+	if err == nil || err.Error() != "RALS_ERROR" {
+		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "RALS_ERROR", err)
 	}
 }
