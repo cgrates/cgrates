@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -384,7 +383,6 @@ func TestAppend2(t *testing.T) {
 	} else if rcv != 0 {
 		t.Errorf("Expected %+v, received %+v", 0, rcv)
 	}
-	fmt.Println(ToJSON(dn.Map))
 
 	///
 	dn.Type = NMSliceType
