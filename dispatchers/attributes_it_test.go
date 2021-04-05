@@ -642,3 +642,63 @@ func testDspAttrPingNoArgDispatcher(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 }
+
+func TestDspAttributeSv1PingError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrEvent := &utils.CGREvent{}
+	var reply *string
+	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDspAttributeSv1PingErrorTenant(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrEvent := &utils.CGREvent{
+		Tenant:  "tenant",
+		ID:      "",
+		Time:    nil,
+		Event:   nil,
+		APIOpts: nil,
+	}
+	var reply *string
+	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDspAttributeSv1PingErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	var reply *string
+	err := dspSrv.AttributeSv1Ping(nil, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDspAttributeSv1PingErrorAttributeSConns(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrEvent := &utils.CGREvent{
+		Tenant:  "tenant",
+		ID:      "ID",
+		Time:    nil,
+		Event:   nil,
+		APIOpts: nil,
+	}
+	var reply *string
+	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
