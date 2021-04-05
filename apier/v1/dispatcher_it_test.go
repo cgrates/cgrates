@@ -155,7 +155,7 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 		},
 	}
 
-	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:Dsp1"
+	expErr := "SERVER_ERROR: broken reference to filter: <*wrong:inline> for item with ID: cgrates.org:Dsp1"
 	if err := dispatcherRPC.Call(utils.APIerSv1SetDispatcherProfile,
 		dispatcherProfile,
 		&reply); err == nil || err.Error() != expErr {

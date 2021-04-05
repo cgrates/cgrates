@@ -831,7 +831,7 @@ func testSessionsVoiceSessionTTL(t *testing.T) {
 			Filters: []string{
 				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12372-1"),
-				"*string:~no_field:10",
+				"*string:~*req.no_field:10",
 			},
 		}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {

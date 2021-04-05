@@ -452,7 +452,7 @@ func testV1TSSetThresholdProfileBrokenReference(t *testing.T) {
 			Async:     true,
 		},
 	}
-	expErr := "SERVER_ERROR: broken reference to filter: NonExistingFilter for item with ID: cgrates.org:THD_Test"
+	expErr := "SERVER_ERROR: broken reference to filter: <NonExistingFilter> for item with ID: cgrates.org:THD_Test"
 	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
@@ -518,7 +518,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 
 func testV1TSUpdateThresholdProfile(t *testing.T) {
 	var result string
-	tPrfl.FilterIDs = []string{"*string:~Account:1001", "*prefix:~DST:10"}
+	tPrfl.FilterIDs = []string{"*string:~*req.Account:1001", "*prefix:~*opts.DST:10"}
 	if err := tSv1Rpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

@@ -885,7 +885,7 @@ func testV1RouteSetRouteProfiles(t *testing.T) {
 	}
 
 	var result string
-	expErr := "SERVER_ERROR: broken reference to filter: FLTR_NotFound for item with ID: cgrates.org:TEST_PROFILE1"
+	expErr := "SERVER_ERROR: broken reference to filter: <FLTR_NotFound> for item with ID: cgrates.org:TEST_PROFILE1"
 	if err := routeSv1Rpc.Call(utils.APIerSv1SetRouteProfile, routePrf, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
