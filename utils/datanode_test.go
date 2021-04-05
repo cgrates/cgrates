@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -365,7 +366,7 @@ func TestAppend2(t *testing.T) {
 	dn.Type = NMDataType
 	testPath := []string{"0", "testPath"}
 	val1 := &DataLeaf{
-		Data: "data",
+		AttributeID: "ID1",
 	}
 	if rcv, err := dn.Append(testPath, val1); err != ErrWrongPath {
 		t.Errorf("Expected %v but received %v", ErrWrongPath, err)
@@ -383,6 +384,7 @@ func TestAppend2(t *testing.T) {
 	} else if rcv != 0 {
 		t.Errorf("Expected %+v, received %+v", 0, rcv)
 	}
+	fmt.Println(ToJSON(dn.Map))
 
 	///
 	dn.Type = NMSliceType
