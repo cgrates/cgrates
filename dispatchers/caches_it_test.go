@@ -97,11 +97,9 @@ func testDspChcPing(t *testing.T) {
 func testDspChcLoadAfterFolder(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheActionPlans].Items = 1
-	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
-	expStats[utils.CacheLoadIDs].Items = 17
-	expStats[utils.CacheRPCConnections].Items = 2
+	expStats[utils.CacheLoadIDs].Items = 12
+	expStats[utils.CacheRPCConnections].Items = 1
 	args := utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
@@ -126,12 +124,9 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
-	expStats[utils.CacheActions].Items = 2
 	expStats[utils.CacheAttributeProfiles].Items = 11
 	expStats[utils.CacheChargerProfiles].Items = 2
 	expStats[utils.CacheFilters].Items = 7
-	expStats[utils.CacheRatingPlans].Items = 6
-	expStats[utils.CacheRatingProfiles].Items = 7
 	expStats[utils.CacheResourceProfiles].Items = 1
 	expStats[utils.CacheResources].Items = 1
 	expStats[utils.CacheReverseDestinations].Items = 4
@@ -168,13 +163,6 @@ func testDspChcPrecacheStatus(t *testing.T) {
 	expected := map[string]string{
 		utils.CacheDestinations:                 utils.MetaReady,
 		utils.CacheReverseDestinations:          utils.MetaReady,
-		utils.CacheRatingPlans:                  utils.MetaReady,
-		utils.CacheRatingProfiles:               utils.MetaReady,
-		utils.CacheActions:                      utils.MetaReady,
-		utils.CacheActionPlans:                  utils.MetaReady,
-		utils.CacheAccountActionPlans:           utils.MetaReady,
-		utils.CacheActionTriggers:               utils.MetaReady,
-		utils.CacheSharedGroups:                 utils.MetaReady,
 		utils.CacheResourceProfiles:             utils.MetaReady,
 		utils.CacheResources:                    utils.MetaReady,
 		utils.CacheTimings:                      utils.MetaReady,
@@ -206,7 +194,6 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheEventResources:               utils.MetaReady,
 		utils.CacheRPCConnections:               utils.MetaReady,
 		utils.CacheRPCResponses:                 utils.MetaReady,
-		utils.CacheRatingProfilesTmp:            utils.MetaReady,
 		utils.CacheUCH:                          utils.MetaReady,
 		utils.CacheSTIR:                         utils.MetaReady,
 		utils.CacheDispatcherLoads:              utils.MetaReady,
@@ -219,35 +206,25 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheAccountProfilesFilterIndexes: utils.MetaReady,
 		utils.CacheAccountProfiles:              utils.MetaReady,
 
-		utils.CacheAccounts:              utils.MetaReady,
-		utils.CacheVersions:              utils.MetaReady,
-		utils.CacheTBLTPTimings:          utils.MetaReady,
-		utils.CacheTBLTPDestinations:     utils.MetaReady,
-		utils.CacheTBLTPRates:            utils.MetaReady,
-		utils.CacheTBLTPDestinationRates: utils.MetaReady,
-		utils.CacheTBLTPRatingPlans:      utils.MetaReady,
-		utils.CacheTBLTPRatingProfiles:   utils.MetaReady,
-		utils.CacheTBLTPSharedGroups:     utils.MetaReady,
-		utils.CacheTBLTPActions:          utils.MetaReady,
-		utils.CacheTBLTPActionPlans:      utils.MetaReady,
-		utils.CacheTBLTPActionTriggers:   utils.MetaReady,
-		utils.CacheTBLTPAccountActions:   utils.MetaReady,
-		utils.CacheTBLTPResources:        utils.MetaReady,
-		utils.CacheTBLTPStats:            utils.MetaReady,
-		utils.CacheTBLTPThresholds:       utils.MetaReady,
-		utils.CacheTBLTPFilters:          utils.MetaReady,
-		utils.CacheSessionCostsTBL:       utils.MetaReady,
-		utils.CacheCDRsTBL:               utils.MetaReady,
-		utils.CacheTBLTPRoutes:           utils.MetaReady,
-		utils.CacheTBLTPAttributes:       utils.MetaReady,
-		utils.CacheTBLTPChargers:         utils.MetaReady,
-		utils.CacheTBLTPDispatchers:      utils.MetaReady,
-		utils.CacheTBLTPDispatcherHosts:  utils.MetaReady,
-		utils.CacheTBLTPRateProfiles:     utils.MetaReady,
-		utils.MetaAPIBan:                 utils.MetaReady,
-		utils.CacheTBLTPActionProfiles:   utils.MetaReady,
-		utils.CacheTBLTPAccountProfiles:  utils.MetaReady,
-		utils.CacheReplicationHosts:      utils.MetaReady,
+		utils.CacheVersions:             utils.MetaReady,
+		utils.CacheTBLTPTimings:         utils.MetaReady,
+		utils.CacheTBLTPDestinations:    utils.MetaReady,
+		utils.CacheTBLTPResources:       utils.MetaReady,
+		utils.CacheTBLTPStats:           utils.MetaReady,
+		utils.CacheTBLTPThresholds:      utils.MetaReady,
+		utils.CacheTBLTPFilters:         utils.MetaReady,
+		utils.CacheSessionCostsTBL:      utils.MetaReady,
+		utils.CacheCDRsTBL:              utils.MetaReady,
+		utils.CacheTBLTPRoutes:          utils.MetaReady,
+		utils.CacheTBLTPAttributes:      utils.MetaReady,
+		utils.CacheTBLTPChargers:        utils.MetaReady,
+		utils.CacheTBLTPDispatchers:     utils.MetaReady,
+		utils.CacheTBLTPDispatcherHosts: utils.MetaReady,
+		utils.CacheTBLTPRateProfiles:    utils.MetaReady,
+		utils.MetaAPIBan:                utils.MetaReady,
+		utils.CacheTBLTPActionProfiles:  utils.MetaReady,
+		utils.CacheTBLTPAccountProfiles: utils.MetaReady,
+		utils.CacheReplicationHosts:     utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithAPIOpts{

@@ -29,7 +29,6 @@ type CdrsCfg struct {
 	StoreCdrs        bool       // store cdrs in storDb
 	SMCostRetries    int
 	ChargerSConns    []string
-	RaterConns       []string
 	AttributeSConns  []string
 	ThresholdSConns  []string
 	StatSConns       []string
@@ -64,16 +63,6 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 			cdrscfg.ChargerSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				cdrscfg.ChargerSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-			}
-		}
-	}
-	if jsnCdrsCfg.Rals_conns != nil {
-		cdrscfg.RaterConns = make([]string, len(*jsnCdrsCfg.Rals_conns))
-		for idx, connID := range *jsnCdrsCfg.Rals_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			cdrscfg.RaterConns[idx] = connID
-			if connID == utils.MetaInternal {
-				cdrscfg.RaterConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
 			}
 		}
 	}
@@ -164,16 +153,6 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.ChargerSConnsCfg] = chargerSConns
 	}
-	if cdrscfg.RaterConns != nil {
-		raterConns := make([]string, len(cdrscfg.RaterConns))
-		for i, item := range cdrscfg.RaterConns {
-			raterConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				raterConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.RALsConnsCfg] = raterConns
-	}
 	if cdrscfg.AttributeSConns != nil {
 		attributeSConns := make([]string, len(cdrscfg.AttributeSConns))
 		for i, item := range cdrscfg.AttributeSConns {
@@ -239,12 +218,6 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 		cln.ChargerSConns = make([]string, len(cdrscfg.ChargerSConns))
 		for i, con := range cdrscfg.ChargerSConns {
 			cln.ChargerSConns[i] = con
-		}
-	}
-	if cdrscfg.RaterConns != nil {
-		cln.RaterConns = make([]string, len(cdrscfg.RaterConns))
-		for i, con := range cdrscfg.RaterConns {
-			cln.RaterConns[i] = con
 		}
 	}
 	if cdrscfg.AttributeSConns != nil {

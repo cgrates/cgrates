@@ -52,7 +52,6 @@ var (
 		testLoaderITInitDataDB,
 		testLoaderITLoadFromStorDb,
 		testLoaderITInitDataDB,
-		testLoaderITLoadIndividualProfiles,
 	}
 )
 
@@ -154,21 +153,6 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadTimings(); err != nil {
 		t.Error("Failed loading timings: ", err.Error())
 	}
-	if err = loader.LoadRates(); err != nil {
-		t.Error("Failed loading rates: ", err.Error())
-	}
-	if err = loader.LoadDestinationRates(); err != nil {
-		t.Error("Failed loading destination rates: ", err.Error())
-	}
-	if err = loader.LoadRatingPlans(); err != nil {
-		t.Error("Failed loading rating plans: ", err.Error())
-	}
-	if err = loader.LoadRatingProfiles(); err != nil {
-		t.Error("Failed loading rating profiles: ", err.Error())
-	}
-	if err = loader.LoadActions(); err != nil {
-		t.Error("Failed loading actions: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -224,21 +208,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadTimings(); err != nil {
 		t.Error("Failed loading timings: ", err.Error())
 	}
-	if err = loader.LoadRates(); err != nil {
-		t.Error("Failed loading rates: ", err.Error())
-	}
-	if err = loader.LoadDestinationRates(); err != nil {
-		t.Error("Failed loading destination rates: ", err.Error())
-	}
-	if err = loader.LoadRatingPlans(); err != nil {
-		t.Error("Failed loading rating plans: ", err.Error())
-	}
-	if err = loader.LoadRatingProfiles(); err != nil {
-		t.Error("Failed loading rating profiles: ", err.Error())
-	}
-	if err = loader.LoadActions(); err != nil {
-		t.Error("Failed loading actions: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -272,46 +241,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 }
 
 func testLoaderITWriteToDatabase(t *testing.T) {
-	for k, as := range loader.actions {
-		rcv, err := loader.dm.GetActions(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetActions: ", err.Error())
-		}
-		if !reflect.DeepEqual(as[0], rcv[0]) {
-			t.Errorf("Expecting: %v, received: %v", as[0], rcv[0])
-		}
-	}
-
-	for k, ap := range loader.actionPlans {
-		rcv, err := loader.dm.GetActionPlan(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetActionPlan: ", err.Error())
-		}
-		if !reflect.DeepEqual(ap.Id, rcv.Id) {
-			t.Errorf("Expecting: %v, received: %v", ap.Id, rcv.Id)
-		}
-	}
-
-	for k, atrs := range loader.actionsTriggers {
-		rcv, err := loader.dm.GetActionTriggers(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetActionTriggers: ", err.Error())
-		}
-		if !reflect.DeepEqual(atrs[0].ActionsID, rcv[0].ActionsID) {
-			t.Errorf("Expecting: %v, received: %v", atrs[0].ActionsID, rcv[0].ActionsID)
-		}
-	}
-
-	for k, ub := range loader.accountActions {
-		rcv, err := loader.dm.GetAccount(k)
-		if err != nil {
-			t.Error("Failed GetAccount: ", err.Error())
-		}
-		if !reflect.DeepEqual(ub.GetID(), rcv.GetID()) {
-			t.Errorf("Expecting: %v, received: %v", ub.GetID(), rcv.GetID())
-		}
-	}
-
 	for k, d := range loader.destinations {
 		rcv, err := loader.dm.GetDestination(k, false, true, utils.NonTransactional)
 		if err != nil {
@@ -329,36 +258,6 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		}
 		if !reflect.DeepEqual(tm, rcv) {
 			t.Errorf("Expecting: %v, received: %v", tm, rcv)
-		}
-	}
-
-	for k, rp := range loader.ratingPlans {
-		rcv, err := loader.dm.GetRatingPlan(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetRatingPlan: ", err.Error())
-		}
-		if !reflect.DeepEqual(rp.Id, rcv.Id) {
-			t.Errorf("Expecting: %v, received: %v", rp.Id, rcv.Id)
-		}
-	}
-
-	for k, rp := range loader.ratingProfiles {
-		rcv, err := loader.dm.GetRatingProfile(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetRatingProfile: ", err.Error())
-		}
-		if !reflect.DeepEqual(rp, rcv) {
-			t.Errorf("Expecting: %v, received: %v", rp, rcv)
-		}
-	}
-
-	for k, sg := range loader.sharedGroups {
-		rcv, err := loader.dm.GetSharedGroup(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetSharedGroup: ", err.Error())
-		}
-		if !reflect.DeepEqual(sg, rcv) {
-			t.Errorf("Expecting: %v, received: %v", sg, rcv)
 		}
 	}
 
@@ -515,51 +414,6 @@ func testLoaderITLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading timings: ", err.Error())
 	}
-	if err := loader.LoadRates(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading rates: ", err.Error())
-	}
-	if err := loader.LoadDestinationRates(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading destination rates: ", err.Error())
-	}
-	if err := loader.LoadRatingPlans(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading rating plans: ", err.Error())
-	}
-	if err := loader.LoadRatingProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading rating profiles: ", err.Error())
-	}
-	if err := loader.LoadActions(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading actions: ", err.Error())
-	}
-}
-
-func testLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
-	// Load ratingPlans. This will also set destination keys
-	if rps, err := storDb.GetTPRatingPlans(utils.TestSQL, "", nil); err != nil {
-		t.Fatal("Could not retrieve rating plans")
-	} else {
-		for _, r := range rps {
-			if loaded, err := loader.LoadRatingPlansFiltered(r.ID); err != nil {
-				t.Fatalf("Could not load ratingPlan for id: %s, error: %s", r.ID, err.Error())
-			} else if !loaded {
-				t.Fatal("Cound not find ratingPLan with id:", r.ID)
-			}
-		}
-	}
-	// Load rating profiles
-	loadId := utils.CSVLoad + "_" + utils.TestSQL
-	if rprs, err := storDb.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: utils.TestSQL, LoadId: loadId}); err != nil {
-		t.Fatal("Could not retrieve rating profiles, error: ", err.Error())
-	} else if len(rprs) == 0 {
-		t.Fatal("Could not retrieve rating profiles")
-	} else {
-		for _, r := range rprs {
-			if err := loader.LoadRatingProfilesFiltered(r); err != nil {
-				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", r.KeyId(), err.Error())
-			}
-		}
-	}
-
 }
 
 /*

@@ -20,11 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"path"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -55,9 +53,6 @@ func TestITCDRs(t *testing.T) {
 		t.Error(err)
 	}
 	if err := testSetCDR(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSMCosts(cfg); err != nil {
 		t.Error(err)
 	}
 }
@@ -165,59 +160,6 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		if cdrs[0].Cost != ratedCDR.Cost {
 			return fmt.Errorf("Unexpected ratedCDR received after rerating: %+v", cdrs[0])
 		}
-	}
-	return nil
-}
-
-func testSMCosts(cfg *config.CGRConfig) error {
-	if err := InitStorDB(cfg); err != nil {
-		return fmt.Errorf("testSMCosts #1 err: %v", err)
-	}
-	cdrStorage, err := NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts)
-	if err != nil {
-		return fmt.Errorf("testSMCosts #2 err: %v", err)
-	}
-	cc := &CallCost{
-		Destination: "+4986517174963",
-		Timespans: []*TimeSpan{
-			{
-				TimeStart:     time.Date(2015, 12, 28, 8, 53, 0, 0, time.UTC),
-				TimeEnd:       time.Date(2015, 12, 28, 8, 54, 40, 0, time.UTC),
-				DurationIndex: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&RGRate{GroupIntervalStart: 0,
-					Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-			},
-		},
-		ToR: utils.MetaVoice,
-	}
-	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UnitTest,
-		CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.MetaDefault)}); err != nil {
-		return fmt.Errorf("testSMCosts #3 err: %v", err)
-	}
-	if rcvSMC, err := cdrStorage.GetSMCosts("164b0422fdc6a5117031b427439482c6a4f90e41", utils.MetaDefault, "", ""); err != nil {
-		return fmt.Errorf("testSMCosts #4 err: %v", err)
-	} else if len(rcvSMC) == 0 {
-		return errors.New("testSMCosts #5, no SMCosts received")
-	}
-	// Test query per prefix
-	for i := 0; i < 3; i++ {
-		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i),
-			RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
-			CostSource:  utils.UnitTest,
-			CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e5"+strconv.Itoa(i), utils.MetaDefault)}); err != nil {
-			return fmt.Errorf("testSMCosts #7 err: %v", err)
-		}
-	}
-	if rcvSMC, err := cdrStorage.GetSMCosts("", utils.MetaDefault, "localhost", "abc"); err != nil {
-		return fmt.Errorf("testSMCosts #8 err: %v", err)
-	} else if len(rcvSMC) != 3 {
-		return fmt.Errorf("testSMCosts #9 expecting 3, received: %d", len(rcvSMC))
 	}
 	return nil
 }

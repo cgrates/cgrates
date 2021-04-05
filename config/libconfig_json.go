@@ -122,7 +122,6 @@ type CdrsJsonCfg struct {
 	Store_cdrs           *bool
 	Session_cost_retries *int
 	Chargers_conns       *[]string
-	Rals_conns           *[]string
 	Attributes_conns     *[]string
 	Thresholds_conns     *[]string
 	Stats_conns          *[]string
@@ -194,7 +193,6 @@ type SessionSJsonCfg struct {
 	Listen_bijson          *string
 	Listen_bigob           *string
 	Chargers_conns         *[]string
-	Rals_conns             *[]string
 	Resources_conns        *[]string
 	Thresholds_conns       *[]string
 	Stats_conns            *[]string
@@ -442,7 +440,6 @@ type RouteSJsonCfg struct {
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
 	Stats_conns           *[]string
-	Rals_conns            *[]string
 	Default_ratio         *int
 }
 

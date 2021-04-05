@@ -75,16 +75,7 @@ func TestDataDBCoverage(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {

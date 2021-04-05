@@ -110,25 +110,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {
@@ -224,14 +206,11 @@ func TestDataDBReloadBadType(t *testing.T) {
 	}()
 
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:          4,
-		utils.Accounts:       3,
-		utils.Actions:        2,
-		utils.ActionTriggers: 2,
-		utils.ActionPlans:    3,
-		utils.SharedGroups:   2,
-		utils.Thresholds:     4,
-		utils.Routes:         2,
+		utils.StatS:      4,
+		utils.Accounts:   3,
+		utils.Actions:    2,
+		utils.Thresholds: 4,
+		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:          5,
 		utils.Timing:              1,
@@ -240,8 +219,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 		utils.Subscribers:         1,
 		utils.Destinations:        1,
 		utils.ReverseDestinations: 1,
-		utils.RatingPlan:          1,
-		utils.RatingProfile:       1,
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
@@ -288,25 +265,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {
@@ -417,25 +376,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {
@@ -518,14 +459,11 @@ func TestDataDBStartVersion(t *testing.T) {
 		dbConn.Close()
 	}()
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:          4,
-		utils.Accounts:       3,
-		utils.Actions:        2,
-		utils.ActionTriggers: 2,
-		utils.ActionPlans:    3,
-		utils.SharedGroups:   2,
-		utils.Thresholds:     4,
-		utils.Routes:         2,
+		utils.StatS:      4,
+		utils.Accounts:   3,
+		utils.Actions:    2,
+		utils.Thresholds: 4,
+		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:          5,
 		utils.Timing:              1,
@@ -534,8 +472,6 @@ func TestDataDBStartVersion(t *testing.T) {
 		utils.Subscribers:         1,
 		utils.Destinations:        1,
 		utils.ReverseDestinations: 1,
-		utils.RatingPlan:          1,
-		utils.RatingProfile:       1,
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
@@ -581,14 +517,11 @@ func TestDataDBReloadCastError(t *testing.T) {
 	}()
 
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:          4,
-		utils.Accounts:       3,
-		utils.Actions:        2,
-		utils.ActionTriggers: 2,
-		utils.ActionPlans:    3,
-		utils.SharedGroups:   2,
-		utils.Thresholds:     4,
-		utils.Routes:         2,
+		utils.StatS:      4,
+		utils.Accounts:   3,
+		utils.Actions:    2,
+		utils.Thresholds: 4,
+		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:          5,
 		utils.Timing:              1,
@@ -597,8 +530,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 		utils.Subscribers:         1,
 		utils.Destinations:        1,
 		utils.ReverseDestinations: 1,
-		utils.RatingPlan:          1,
-		utils.RatingProfile:       1,
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
@@ -645,25 +576,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {
@@ -749,14 +662,11 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 	}()
 
 	err = dbConn.SetVersions(engine.Versions{
-		utils.StatS:          4,
-		utils.Accounts:       3,
-		utils.Actions:        2,
-		utils.ActionTriggers: 2,
-		utils.ActionPlans:    3,
-		utils.SharedGroups:   2,
-		utils.Thresholds:     4,
-		utils.Routes:         2,
+		utils.StatS:      4,
+		utils.Accounts:   3,
+		utils.Actions:    2,
+		utils.Thresholds: 4,
+		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:          5,
 		utils.Timing:              1,
@@ -765,8 +675,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		utils.Subscribers:         1,
 		utils.Destinations:        1,
 		utils.ReverseDestinations: 1,
-		utils.RatingPlan:          1,
-		utils.RatingProfile:       1,
 		utils.Chargers:            2,
 		utils.Dispatchers:         2,
 		utils.LoadIDsVrs:          1,
@@ -813,25 +721,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {
@@ -918,7 +808,6 @@ func TestDataDBStartRalsSCfgErr(t *testing.T) {
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
-	db.cfg.RalsCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	err := db.Start()
 	if err == nil || err.Error() != "unsupported db_type <badtype>" {
@@ -961,25 +850,7 @@ func TestDataDBReloadError(t *testing.T) {
 			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaRatingPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaRatingProfiles: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaAccountActionPlans: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaActionTriggers: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaSharedGroups: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaTimings: {

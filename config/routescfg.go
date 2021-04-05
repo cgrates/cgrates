@@ -32,7 +32,6 @@ type RouteSCfg struct {
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
-	RALsConns           []string
 	DefaultRatio        int
 	NestedFields        bool
 }
@@ -98,16 +97,6 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnCfg.Rals_conns != nil {
-		rts.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
-		for idx, conn := range *jsnCfg.Rals_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			rts.RALsConns[idx] = conn
-			if conn == utils.MetaInternal {
-				rts.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
-			}
-		}
-	}
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
 	}
@@ -156,16 +145,6 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.AttributeSConnsCfg] = attributeSConns
 	}
-	if rts.RALsConns != nil {
-		ralSConns := make([]string, len(rts.RALsConns))
-		for i, item := range rts.RALsConns {
-			ralSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				ralSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.RALsConnsCfg] = ralSConns
-	}
 	if rts.ResourceSConns != nil {
 		resourceSConns := make([]string, len(rts.ResourceSConns))
 		for i, item := range rts.ResourceSConns {
@@ -213,12 +192,6 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		cln.StatSConns = make([]string, len(rts.StatSConns))
 		for i, con := range rts.StatSConns {
 			cln.StatSConns[i] = con
-		}
-	}
-	if rts.RALsConns != nil {
-		cln.RALsConns = make([]string, len(rts.RALsConns))
-		for i, con := range rts.RALsConns {
-			cln.RALsConns[i] = con
 		}
 	}
 	if rts.StringIndexedFields != nil {

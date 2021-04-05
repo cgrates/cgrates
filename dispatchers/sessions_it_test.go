@@ -20,19 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-import (
-	"path"
-	"reflect"
-	"sort"
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 var sTestsDspSession = []func(t *testing.T){
 	testDspSessionAddBalacne,
 
@@ -1053,3 +1041,4 @@ func testDspSessionSTIRIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+*/

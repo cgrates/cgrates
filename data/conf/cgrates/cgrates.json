@@ -66,12 +66,8 @@
 // 		"*accounts":{"remote":false, "replicate":false}, 					
 // 		"*reverse_destinations": {"remote":false, "replicate":false},
 // 		"*destinations": {"remote":false, "replicate":false}, 
-// 		"*rating_plans": {"remote":false, "replicate":false}, 
-// 		"*rating_profiles":{"remote":false, "replicate":false}, 
 // 		"*actions":{"remote":false, "replicate":false}, 
 // 		"*action_plans": {"remote":false, "replicate":false}, 
-// 		"*account_action_plans":{"remote":false, "replicate":false}, 
-// 		"*action_triggers":{"remote":false, "replicate":false}, 
 // 		"*shared_groups":{"remote":false, "replicate":false}, 
 // 		"*timings": {"remote":false, "replicate":false}, 
 // 		"*resource_profiles":{"remote":false, "replicate":false}, 
@@ -217,11 +213,8 @@
 // 	"partitions": {
 // 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// destination caching
 // 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// reverse destinations index caching
-// 		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// rating plans caching
-// 		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// rating profiles caching
 // 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// actions caching
 // 		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// action plans caching
-// 		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// account action plans index caching
 // 		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// action triggers caching
 // 		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// shared groups caching
 // 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// timings caching

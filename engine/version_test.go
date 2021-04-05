@@ -27,38 +27,24 @@ import (
 
 func TestVersionCompare(t *testing.T) {
 	x := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 2,
-		utils.SharedGroups: 2, utils.CostDetails: 2}
+		utils.Attributes: 2, utils.Chargers: 2,
+		utils.CostDetails: 2}
 	y := Versions{utils.Accounts: 1, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 2,
-		utils.SharedGroups: 2, utils.CostDetails: 2}
-	z := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 1,
-		utils.SharedGroups: 2, utils.CostDetails: 2}
-	q := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 2,
-		utils.SharedGroups: 1, utils.CostDetails: 2}
+		utils.Attributes: 2, utils.Chargers: 2,
+		utils.CostDetails: 2}
 	c := Versions{utils.CostDetails: 1}
 	a := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 2,
-		utils.SharedGroups: 2, utils.CostDetails: 2,
+		utils.Attributes: 2, utils.Chargers: 2,
+		utils.CostDetails:   2,
 		utils.SessionSCosts: 1}
 	b := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 2,
-		utils.SharedGroups: 2, utils.CostDetails: 2,
+		utils.Attributes: 2, utils.Chargers: 2,
+		utils.CostDetails:   2,
 		utils.SessionSCosts: 2}
 
 	message1 := y.Compare(x, utils.Mongo, true)
 	if message1 != "cgr-migrator -exec=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message1)
-	}
-	message2 := z.Compare(x, utils.Mongo, true)
-	if message2 != "cgr-migrator -exec=*action_plans" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*action_plans", message2)
-	}
-	message3 := q.Compare(x, utils.Mongo, true)
-	if message3 != "cgr-migrator -exec=*shared_groups" {
-		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*shared_groups", message3)
 	}
 	message4 := c.Compare(x, utils.Mongo, false)
 	if message4 != "cgr-migrator -exec=*cost_details" {
@@ -87,23 +73,19 @@ func TestVersionCompare(t *testing.T) {
 func TestCurrentDBVersions(t *testing.T) {
 	expVersDataDB := Versions{
 		utils.StatS: 4, utils.Accounts: 3, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 3, utils.SharedGroups: 2,
 		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 6,
 		utils.Timing: 1, utils.RQF: 5, utils.Resource: 1,
 		utils.Subscribers: 1, utils.Destinations: 1, utils.ReverseDestinations: 1,
-		utils.RatingPlan: 1, utils.RatingProfile: 1, utils.Chargers: 2,
+		utils.Chargers:    2,
 		utils.Dispatchers: 2, utils.LoadIDsVrs: 1, utils.RateProfiles: 1,
 		utils.ActionProfiles: 1,
 	}
 	expVersStorDB := Versions{
 		utils.CostDetails: 2, utils.SessionSCosts: 3, utils.CDRs: 2,
-		utils.TpRatingPlans: 1, utils.TpFilters: 1, utils.TpDestinationRates: 1,
-		utils.TpActionTriggers: 1, utils.TpAccountActionsV: 1, utils.TpActionPlans: 1,
-		utils.TpActions: 1, utils.TpThresholds: 1, utils.TpRoutes: 1,
-		utils.TpStats: 1, utils.TpSharedGroups: 1, utils.TpRatingProfiles: 1,
-		utils.TpResources: 1, utils.TpRates: 1, utils.TpTiming: 1,
-		utils.TpResource: 1, utils.TpDestinations: 1, utils.TpRatingPlan: 1,
-		utils.TpRatingProfile: 1, utils.TpChargers: 1, utils.TpDispatchers: 1,
+		utils.TpFilters: 1, utils.TpThresholds: 1, utils.TpRoutes: 1,
+		utils.TpStats: 1, utils.TpResources: 1, utils.TpTiming: 1,
+		utils.TpResource: 1, utils.TpDestinations: 1,
+		utils.TpChargers: 1, utils.TpDispatchers: 1,
 		utils.TpRateProfiles: 1, utils.TpActionProfiles: 1,
 	}
 	if vrs := CurrentDBVersions(utils.Mongo, true); !reflect.DeepEqual(expVersDataDB, vrs) {

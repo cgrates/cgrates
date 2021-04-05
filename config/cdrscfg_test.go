@@ -30,7 +30,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(1),
 		Chargers_conns:       &[]string{utils.MetaInternal, "*conn1"},
-		Rals_conns:           &[]string{utils.MetaInternal, "*conn1"},
 		Attributes_conns:     &[]string{utils.MetaInternal, "*conn1"},
 		Thresholds_conns:     &[]string{utils.MetaInternal, "*conn1"},
 		Stats_conns:          &[]string{utils.MetaInternal, "*conn1"},
@@ -43,7 +42,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		StoreCdrs:        true,
 		SMCostRetries:    1,
 		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		RaterConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
@@ -94,7 +92,6 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.StoreCdrsCfg:        true,
 		utils.SessionCostRetires:  5,
 		utils.ChargerSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.RALsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
 		utils.AttributeSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 		utils.ThresholdSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 		utils.StatSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
@@ -124,7 +121,6 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.StoreCdrsCfg:        true,
 		utils.SessionCostRetires:  5,
 		utils.ChargerSConnsCfg:    []string{"conn1", "conn2"},
-		utils.RALsConnsCfg:        []string{},
 		utils.AttributeSConnsCfg:  []string{"*internal"},
 		utils.ThresholdSConnsCfg:  []string{},
 		utils.StatSConnsCfg:       []string{},
@@ -145,7 +141,6 @@ func TestCdrsCfgClone(t *testing.T) {
 		StoreCdrs:        true,
 		SMCostRetries:    1,
 		ChargerSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		RaterConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		AttributeSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
@@ -159,9 +154,6 @@ func TestCdrsCfgClone(t *testing.T) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
 	if rcv.ChargerSConns[1] = ""; ban.ChargerSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.RaterConns[1] = ""; ban.RaterConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.AttributeSConns[1] = ""; ban.AttributeSConns[1] != "*conn1" {

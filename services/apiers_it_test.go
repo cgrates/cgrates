@@ -49,10 +49,8 @@ func TestApiersReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheThresholdProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 
 	cfg.ThresholdSCfg().Enabled = true
-	cfg.SchedulerCfg().Enabled = true
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
@@ -60,14 +58,12 @@ func TestApiersReload(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.Internal
 	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
-	rspd := NewResponderService(cfg, server, make(chan rpcclient.ClientConnector, 1), shdChan, anz, srvDep)
-	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server, rspd,
+	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
 
 	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
-	srvMngr.AddServices(apiSv1, apiSv2, schS, tS,
+	srvMngr.AddServices(apiSv1, apiSv2, tS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)

@@ -19,21 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
-import (
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"net/rpc"
-	"path"
-	"reflect"
-	"strconv"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 var (
 	actsLclCfg       *config.CGRConfig
 	actsLclRpc       *rpc.Client
@@ -983,3 +969,4 @@ func testActionsitremoteSetAccount(t *testing.T) {
 		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(acc2))
 	}
 }
+*/

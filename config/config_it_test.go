@@ -47,9 +47,6 @@ var (
 		testCGRConfigReloadStatS,
 		testCGRConfigReloadResourceS,
 		testCGRConfigReloadSupplierS,
-		testCGRConfigReloadCDRs,
-		testCGRConfigReloadRALs,
-		testCGRConfigReloadSessionS,
 		testCGRConfigReloadERs,
 		testCGRConfigReloadDNSAgent,
 		testCGRConfigReloadFreeswitchAgent,
@@ -313,7 +310,6 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		AttributeSConns:     []string{},
-		RALsConns:           []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 	}
@@ -333,7 +329,7 @@ func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
 		Section: "InvalidSection",
 	}, &reply); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v. received %+v", expectedErr, err)
+		t.Errorf("Expected %q. received %q", expectedErr, err.Error())
 	}
 
 	expectedErr = utils.NewErrMandatoryIeMissing("Path").Error()
@@ -364,128 +360,6 @@ func testLoadConfigFromHTTPValidURL(t *testing.T) {
 	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
 	if err := cfg.loadConfigFromHTTP(url, nil); err != nil {
 		t.Error(err)
-	}
-}
-
-func testCGRConfigReloadCDRs(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
-	cfg.RalsCfg().Enabled = true
-	var reply string
-	if err = cfg.V1ReloadConfig(&ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
-		Section: CDRS_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %s", reply)
-	}
-	rsr, err := NewRSRParsersFromSlice([]string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	expAttr := &CdrsCfg{
-		Enabled:         true,
-		ExtraFields:     rsr,
-		ChargerSConns:   []string{utils.MetaLocalHost},
-		RaterConns:      []string{},
-		AttributeSConns: []string{},
-		ThresholdSConns: []string{},
-		StatSConns:      []string{},
-		SMCostRetries:   5,
-		StoreCdrs:       true,
-		ActionSConns:    []string{},
-		EEsConns:        []string{utils.MetaLocalHost},
-	}
-	if !reflect.DeepEqual(expAttr, cfg.CdrsCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.CdrsCfg()))
-	}
-}
-
-func testCGRConfigReloadRALs(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
-	blMap := cfg.RalsCfg().BalanceRatingSubject
-	maxComp := cfg.RalsCfg().MaxComputedUsage
-	var reply string
-	if err = cfg.V1ReloadConfig(&ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
-		Section: RALS_JSN,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %s", reply)
-	}
-	expAttr := &RalsCfg{
-		Enabled:                 true,
-		RpSubjectPrefixMatching: false,
-		RemoveExpired:           true,
-		MaxComputedUsage:        maxComp,
-		BalanceRatingSubject:    blMap,
-		CacheSConns:             []string{utils.MetaInternal + utils.InInFieldSep + utils.MetaCaches},
-		ThresholdSConns:         []string{utils.MetaLocalHost},
-		StatSConns:              []string{utils.MetaLocalHost},
-		MaxIncrements:           1000000,
-		DynaprepaidActionPlans:  []string{},
-	}
-	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))
-	}
-}
-
-func testCGRConfigReloadSessionS(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	for _, section := range sortedCfgSections {
-		cfg.rldChans[section] = make(chan struct{}, 1)
-	}
-	cfg.RalsCfg().Enabled = true
-	cfg.ChargerSCfg().Enabled = true
-	cfg.CdrsCfg().Enabled = true
-	var reply string
-	if err = cfg.V1ReloadConfig(&ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
-		Section: SessionSJson,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %s", reply)
-	}
-	expAttr := &SessionSCfg{
-		Enabled:       true,
-		ListenBijson:  "127.0.0.1:2014",
-		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
-		ResSConns:     []string{utils.MetaLocalHost},
-		ThreshSConns:  []string{},
-		StatSConns:    []string{},
-		RouteSConns:   []string{utils.MetaLocalHost},
-		AttrSConns:    []string{utils.MetaLocalHost},
-		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-
-		ReplicationConns:  []string{},
-		SessionIndexes:    utils.StringSet{},
-		ClientProtocol:    1,
-		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
-		STIRCfg: &STIRcfg{
-			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
-			PayloadMaxduration: -1,
-			DefaultAttest:      "A",
-		},
-		ActionSConns: []string{},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
-		},
-	}
-	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
 	}
 }
 
@@ -816,7 +690,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	for _, section := range sortedCfgSections {
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
-	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
@@ -827,7 +700,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 				"resources_conns":  []string{"*localhost"},
 				"routes_conns":     []string{"*localhost"},
 				"attributes_conns": []string{"*localhost"},
-				"rals_conns":       []string{"*internal"},
 				"cdrs_conns":       []string{"*internal"},
 				"chargers_conns":   []string{"*internal"},
 			},
@@ -841,7 +713,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		Enabled:       true,
 		ListenBijson:  "127.0.0.1:2014",
 		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		ResSConns:     []string{utils.MetaLocalHost},
 		ThreshSConns:  []string{},
 		StatSConns:    []string{},
@@ -877,7 +748,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	for _, section := range sortedCfgSections {
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
-	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
@@ -887,7 +757,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 				"resources_conns":  ["*localhost"],
 				"routes_conns":     ["*localhost"],
 				"attributes_conns": ["*localhost"],
-				"rals_conns":       ["*internal"],
 				"cdrs_conns":       ["*internal"],
 				"chargers_conns":   ["*localhost"]
 				}}`}, &reply); err != nil {
@@ -899,7 +768,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 		Enabled:       true,
 		ListenBijson:  "127.0.0.1:2014",
 		ChargerSConns: []string{utils.MetaLocalHost},
-		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		ResSConns:     []string{utils.MetaLocalHost},
 		ThreshSConns:  []string{},
 		StatSConns:    []string{},
@@ -930,11 +798,11 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	}
 
 	var rcv string
-	expected := `{"sessions":{"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"debit_interval":"0","default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","rals_conns":["*internal"],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"scheduler_conns":[],"session_indexes":[],"session_ttl":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
+	expected := `{"sessions":{"actions_conns":[],"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"debit_interval":"0","default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"session_indexes":[],"session_ttl":"0","stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
 	if err := cfg.V1GetConfigAsJSON(&SectionWithAPIOpts{Section: SessionSJson}, &rcv); err != nil {
 		t.Error(err)
 	} else if expected != rcv {
-		t.Errorf("Expected: %+q, \n received: %s", expected, rcv)
+		t.Errorf("Expected: %+s, \n received: %s", expected, rcv)
 	}
 }
 
@@ -943,7 +811,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 	for _, section := range sortedCfgSections {
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
-	cfg.RalsCfg().Enabled = true
 	cfg.ChargerSCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	var reply string
@@ -959,7 +826,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 		Enabled:       true,
 		ListenBijson:  "127.0.0.1:2014",
 		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
 		ResSConns:     []string{utils.MetaLocalHost},
 		ThreshSConns:  []string{},
 		StatSConns:    []string{},

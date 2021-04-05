@@ -91,7 +91,6 @@ type SessionSCfg struct {
 	ListenBijson        string
 	ListenBigob         string
 	ChargerSConns       []string
-	RALsConns           []string
 	ResSConns           []string
 	ThreshSConns        []string
 	StatSConns          []string
@@ -137,16 +136,6 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			scfg.ChargerSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				scfg.ChargerSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-			}
-		}
-	}
-	if jsnCfg.Rals_conns != nil {
-		scfg.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
-		for idx, connID := range *jsnCfg.Rals_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			scfg.RALsConns[idx] = connID
-			if connID == utils.MetaInternal {
-				scfg.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
 			}
 		}
 	}
@@ -370,16 +359,6 @@ func (scfg *SessionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.ChargerSConnsCfg] = chargerSConns
 	}
-	if scfg.RALsConns != nil {
-		RALsConns := make([]string, len(scfg.RALsConns))
-		for i, item := range scfg.RALsConns {
-			RALsConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder) {
-				RALsConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.RALsConnsCfg] = RALsConns
-	}
 	if scfg.ResSConns != nil {
 		resSConns := make([]string, len(scfg.ResSConns))
 		for i, item := range scfg.ResSConns {
@@ -491,12 +470,6 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		cln.ChargerSConns = make([]string, len(scfg.ChargerSConns))
 		for i, con := range scfg.ChargerSConns {
 			cln.ChargerSConns[i] = con
-		}
-	}
-	if scfg.RALsConns != nil {
-		cln.RALsConns = make([]string, len(scfg.RALsConns))
-		for i, con := range scfg.RALsConns {
-			cln.RALsConns[i] = con
 		}
 	}
 	if scfg.ResSConns != nil {
