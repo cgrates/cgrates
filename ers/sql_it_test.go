@@ -660,30 +660,31 @@ func TestSQLSetURLError2(t *testing.T) {
 	}
 }
 
-/*
-func TestSQLProcessMessageError2(t *testing.T) {
+func TestErsSqlPostCDRS(t *testing.T) {
+	tmp := logger.Default
+	logger.Default = logger.Default.LogMode(logger.Silent)
 	cfg := config.NewDefaultCGRConfig()
-	testSQLEventReader := &SQLEventReader{
-		cgrCfg:        cfg,
-		cfgIdx:        0,
-		fltrS:         &engine.FilterS{},
-		connString:    "",
-		connType:      "",
-		tableName:     "testName",
-		expConnString: "",
-		expConnType:   utils.Postgres,
-		expTableName:  "",
-		rdrEvents:     nil,
-		rdrExit:       nil,
-		rdrErr:        nil,
-		cap:           nil,
+	fltr := &engine.FilterS{}
+	reader := cfg.ERsCfg().Readers[0].Clone()
+	reader.Type = utils.MetaSQL
+	reader.ID = "file_reader"
+	reader.ConcurrentReqs = -1
+	reader.Opts = map[string]interface{}{"db_name": "cgrates2"}
+	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
+	reader.ProcessedPath = ""
+	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
+	if len(cfg.ERsCfg().Readers) != 2 {
+		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	testSQLEventReader.Config().Filters = []string{"*apiban:~*req.IP:*single"}
-	msg := map[string]interface{}{}
-	err := testSQLEventReader.processMessage(msg)
-	expected := ""
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	sqlEvReader, err := NewSQLEventReader(cfg, 1, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
+	sqlEvReader.(*SQLEventReader).expConnType = utils.MySQL
+	result := sqlEvReader.(*SQLEventReader).postCDR([]interface{}{})
+	expected := "Error 1045: Access denied for user ''@'localhost' (using password: NO)"
+	if result == nil {
+		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, result)
+	}
+	logger.Default = tmp
 }
-*/
