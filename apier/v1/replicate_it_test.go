@@ -571,7 +571,7 @@ func testInternalReplicateITChargerProfile(t *testing.T) {
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~Account:1002"},
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.Account:1002"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

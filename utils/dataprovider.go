@@ -97,8 +97,8 @@ func IsPathValidForExporters(path string) (err error) {
 		return nil
 	}
 	paths := strings.Split(path, NestingSep)
-	for _, path := range paths {
-		if strings.TrimSpace(path) == EmptyString {
+	for _, newPath := range paths {
+		if strings.TrimSpace(newPath) == EmptyString {
 			return errors.New("Empty field path ")
 		}
 	}

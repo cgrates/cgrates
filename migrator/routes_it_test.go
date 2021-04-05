@@ -180,7 +180,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 	supPrfl := &engine.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SUP1",
-		FilterIDs:         []string{"*string:~Account:1001"},
+		FilterIDs:         []string{"*string:~*opts.Account:1001"},
 		Weight:            10,
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{},

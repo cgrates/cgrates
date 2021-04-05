@@ -462,7 +462,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		},
 	}
 
-	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:TEST_PROFILE1"
+	expErr := "SERVER_ERROR: broken reference to filter: <*wrong:inline> for item with ID: cgrates.org:TEST_PROFILE1"
 	if err := stsV1Rpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}

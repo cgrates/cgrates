@@ -126,7 +126,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		Tenant:             defaultTenant,
 		ID:                 "1001",
 		Contexts:           []string{utils.MetaAny},
-		FilterIDs:          []string{"*string:~Account:1002"},
+		FilterIDs:          []string{"*string:~*req.Account:1002"},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{

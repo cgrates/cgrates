@@ -775,9 +775,9 @@ func testAttributeSSetAlsPrfBrokenReference(t *testing.T) {
 		},
 	}
 	var result string
-	expErr := "SERVER_ERROR: broken reference to filter: FLTR_ACNT_danBroken for item with ID: cgrates.org:ApierTest"
+	expErr := "SERVER_ERROR: broken reference to filter: <FLTR_ACNT_danBroken> for item with ID: cgrates.org:ApierTest"
 	if err := attrSRPC.Call(utils.APIerSv1SetAttributeProfile, alsPrf, &result); err == nil || err.Error() != expErr {
-		t.Fatalf("Expected error: %q, received: %v", expErr, err)
+		t.Fatalf("Expected error: %q, received: %q", expErr, err)
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.APIerSv1GetAttributeProfile,

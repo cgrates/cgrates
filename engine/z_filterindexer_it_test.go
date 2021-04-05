@@ -988,7 +988,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Destinations",
-				Values:  []string{"DEST_RES1", "~DynamicValue", "DEST_RES2"},
+				Values:  []string{"DEST_RES1", "~*opts.DynamicValue", "DEST_RES2"},
 			},
 		},
 	}
@@ -1011,7 +1011,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 		Stored:    true,
 	}
 
-	expected := "broken reference to filter: FIRST for item with ID: cgrates.org:RES_PRF1"
+	expected := "broken reference to filter: <FIRST> for item with ID: cgrates.org:RES_PRF1"
 	if err := dataManager.SetResourceProfile(resPref1, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

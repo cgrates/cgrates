@@ -396,7 +396,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		},
 	}
 	var result string
-	expErr := "SERVER_ERROR: broken reference to filter: *wrong:inline for item with ID: cgrates.org:ApierTest"
+	expErr := "SERVER_ERROR: broken reference to filter: <*wrong:inline> for item with ID: cgrates.org:ApierTest"
 	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err == nil || err.Error() != expErr {
 		t.Fatalf("Expected error: %q, received: %v", expErr, err)
 	}
@@ -407,7 +407,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chargerProfile.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~Account:1002"}
+	chargerProfile.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*opts.Account:1002"}
 	if err := chargerRPC.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
