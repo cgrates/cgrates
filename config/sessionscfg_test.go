@@ -67,7 +67,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:               utils.BoolPointer(true),
 		Listen_bijson:         utils.StringPointer("127.0.0.1:2018"),
 		Chargers_conns:        &[]string{utils.MetaInternal, "*conn1"},
-		Rals_conns:            &[]string{utils.MetaInternal, "*conn1"},
 		Resources_conns:       &[]string{utils.MetaInternal, "*conn1"},
 		Thresholds_conns:      &[]string{utils.MetaInternal, "*conn1"},
 		Stats_conns:           &[]string{utils.MetaInternal, "*conn1"},
@@ -97,7 +96,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:             true,
 		ListenBijson:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
@@ -235,7 +233,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		Enabled:             false,
 		ListenBijson:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
-		RALsConns:           []string{},
 		ResSConns:           []string{},
 		ThreshSConns:        []string{},
 		StatSConns:          []string{},
@@ -345,7 +342,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ListenBijsonCfg:        "127.0.0.1:2014",
 		utils.ListenBigobCfg:         "",
 		utils.ChargerSConnsCfg:       []string{},
-		utils.RALsConnsCfg:           []string{},
 		utils.CDRsConnsCfg:           []string{},
 		utils.ResourceSConnsCfg:      []string{},
 		utils.ThresholdSConnsCfg:     []string{},
@@ -423,7 +419,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ListenBijsonCfg:        "127.0.0.1:2018",
 		utils.ListenBigobCfg:         "",
 		utils.ChargerSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
-		utils.RALsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
 		utils.CDRsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
 		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
 		utils.ThresholdSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
@@ -879,7 +874,6 @@ func TestSessionSCfgClone(t *testing.T) {
 		Enabled:             true,
 		ListenBijson:        "127.0.0.1:2018",
 		ChargerSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"},
-		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "*conn1"},
 		ResSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		ThreshSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
@@ -923,9 +917,6 @@ func TestSessionSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 
-	if rcv.RALsConns[1] = ""; ban.RALsConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
 	if rcv.ResSConns[1] = ""; ban.ResSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}

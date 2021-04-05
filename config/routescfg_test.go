@@ -34,7 +34,6 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{utils.MetaInternal, "conn1"},
 		Resources_conns:       &[]string{utils.MetaInternal, "conn1"},
 		Stats_conns:           &[]string{utils.MetaInternal, "conn1"},
-		Rals_conns:            &[]string{utils.MetaInternal, "conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
 	}
@@ -47,7 +46,6 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"},
-		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
 	}
@@ -72,7 +70,6 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AttributeSConnsCfg:     []string{},
 		utils.ResourceSConnsCfg:      []string{},
 		utils.StatSConnsCfg:          []string{},
-		utils.RALsConnsCfg:           []string{},
 		utils.DefaultRatioCfg:        1,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -108,7 +105,6 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AttributeSConnsCfg:     []string{utils.MetaInternal, "conn1"},
 		utils.ResourceSConnsCfg:      []string{utils.MetaInternal, "conn1"},
 		utils.StatSConnsCfg:          []string{utils.MetaInternal, "conn1"},
-		utils.RALsConnsCfg:           []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -128,7 +124,6 @@ func TestRouteSCfgClone(t *testing.T) {
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "conn1"},
-		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
 	}
@@ -143,9 +138,6 @@ func TestRouteSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.RALsConns[1] = ""; ban.RALsConns[1] != "conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.StringIndexedFields)[0] = ""; (*ban.StringIndexedFields)[0] != "*req.index1" {

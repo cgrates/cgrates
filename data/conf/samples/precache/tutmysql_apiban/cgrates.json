@@ -29,13 +29,6 @@
 	"partitions": {
 		"*destinations": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
-		"*rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*actions": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*resources": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*statqueues": {"limit": 10000, "ttl":"0s", "precache": true},

@@ -142,7 +142,7 @@ func testStsITFlush(t *testing.T) {
 }
 
 func testStsITMigrateAndMove(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
+	// tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	var filters []*engine.FilterRule
 	v1Sts := &v1Stat{
 		Id:              "test",      // Config id, unique per config instance
@@ -169,24 +169,24 @@ func testStsITMigrateAndMove(t *testing.T) {
 		RatedAccount:    []string{},
 		RatedSubject:    []string{},
 		CostInterval:    []float64{},
-		Triggers: engine.ActionTriggers{
-			&engine.ActionTrigger{
-				ID: "Test",
-				Balance: &engine.BalanceFilter{
-					ID:             utils.StringPointer("TESTB"),
-					Timings:        []*engine.RITiming{},
-					ExpirationDate: utils.TimePointer(tim),
-					Type:           utils.StringPointer(utils.MetaMonetary),
-				},
-				ExpirationDate:    tim,
-				LastExecutionTime: tim,
-				ActivationDate:    tim,
-				ThresholdType:     utils.TriggerMaxBalance,
-				ThresholdValue:    2,
-				ActionsID:         "TEST_ACTIONS",
-				Executed:          true,
-			},
-		},
+		// Triggers: engine.ActionTriggers{
+		// 	&engine.ActionTrigger{
+		// 		ID: "Test",
+		// 		Balance: &engine.BalanceFilter{
+		// 			ID:             utils.StringPointer("TESTB"),
+		// 			Timings:        []*engine.RITiming{},
+		// 			ExpirationDate: utils.TimePointer(tim),
+		// 			Type:           utils.StringPointer(utils.MetaMonetary),
+		// 		},
+		// 		ExpirationDate:    tim,
+		// 		LastExecutionTime: tim,
+		// 		ActivationDate:    tim,
+		// 		ThresholdType:     utils.TriggerMaxBalance,
+		// 		ThresholdValue:    2,
+		// 		ActionsID:         "TEST_ACTIONS",
+		// 		Executed:          true,
+		// 	},
+		// },
 	}
 	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual,
 		"SetupInterval", []string{v1Sts.SetupInterval[0].String()})
@@ -354,24 +354,24 @@ func testStsITMigrateFromv1(t *testing.T) {
 		RatedAccount:    []string{},
 		RatedSubject:    []string{},
 		CostInterval:    []float64{},
-		Triggers: engine.ActionTriggers{
-			&engine.ActionTrigger{
-				ID: "Test",
-				Balance: &engine.BalanceFilter{
-					ID:             utils.StringPointer("TESTB"),
-					Timings:        []*engine.RITiming{},
-					ExpirationDate: utils.TimePointer(tim),
-					Type:           utils.StringPointer(utils.MetaMonetary),
-				},
-				ExpirationDate:    tim,
-				LastExecutionTime: tim,
-				ActivationDate:    tim,
-				ThresholdType:     utils.TriggerMaxBalance,
-				ThresholdValue:    2,
-				ActionsID:         "TEST_ACTIONS",
-				Executed:          true,
-			},
-		},
+		// Triggers: engine.ActionTriggers{
+		// 	&engine.ActionTrigger{
+		// 		ID: "Test",
+		// 		Balance: &engine.BalanceFilter{
+		// 			ID:             utils.StringPointer("TESTB"),
+		// 			Timings:        []*engine.RITiming{},
+		// 			ExpirationDate: utils.TimePointer(tim),
+		// 			Type:           utils.StringPointer(utils.MetaMonetary),
+		// 		},
+		// 		ExpirationDate:    tim,
+		// 		LastExecutionTime: tim,
+		// 		ActivationDate:    tim,
+		// 		ThresholdType:     utils.TriggerMaxBalance,
+		// 		ThresholdValue:    2,
+		// 		ActionsID:         "TEST_ACTIONS",
+		// 		Executed:          true,
+		// 	},
+		// },
 	}
 
 	err := stsMigrator.dmIN.setV1Stats(v1Sts)

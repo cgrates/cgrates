@@ -107,29 +107,29 @@ func testCdrITFlush(t *testing.T) {
 }
 
 func testCdrITMigrateAndMove(t *testing.T) {
-	cc := &engine.CallCost{
-		Destination: "0723045326",
-		Timespans: []*engine.TimeSpan{
-			{
-				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				DurationIndex: 0,
-				RateInterval: &engine.RateInterval{
-					Rating: &engine.RIRate{
-						Rates: engine.RateGroups{
-							&engine.RGRate{
-								GroupIntervalStart: 0,
-								Value:              100,
-								RateIncrement:      10 * time.Second,
-								RateUnit:           time.Second,
-							},
-						},
-					},
-				},
-			},
-		},
-		ToR: utils.MetaVoice,
-	}
+	// cc := &engine.CallCost{
+	// 	Destination: "0723045326",
+	// 	Timespans: []*engine.TimeSpan{
+	// 		{
+	// 			TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+	// 			TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+	// 			DurationIndex: 0,
+	// 			RateInterval: &engine.RateInterval{
+	// 				Rating: &engine.RIRate{
+	// 					Rates: engine.RateGroups{
+	// 						&engine.RGRate{
+	// 							GroupIntervalStart: 0,
+	// 							Value:              100,
+	// 							RateIncrement:      10 * time.Second,
+	// 							RateUnit:           time.Second,
+	// 						},
+	// 					},
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	ToR: utils.MetaVoice,
+	// }
 	v1Cdr := &v1Cdrs{
 		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID:     123,
@@ -150,7 +150,7 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01,
 		Rated:       true,
-		CostDetails: cc,
+		// CostDetails: cc,
 	}
 	var err error
 	if err = cdrMigrator.storDBIn.setV1CDR(v1Cdr); err != nil {

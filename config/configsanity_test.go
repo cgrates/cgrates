@@ -53,13 +53,6 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	}
 	cfg.cdrsCfg.ChargerSConns = []string{}
 
-	cfg.cdrsCfg.RaterConns = []string{"test"}
-	expected = "<CDRs> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.cdrsCfg.RaterConns = []string{}
-
 	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -629,14 +622,6 @@ func TestConfigSanityRouteS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.routeSCfg.AttributeSConns = []string{}
-
-	cfg.routeSCfg.RALsConns = []string{"test"}
-	expected = "<RouteS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.routeSCfg.RALsConns = []string{}
-
 }
 
 func TestConfigSanityEventReader(t *testing.T) {

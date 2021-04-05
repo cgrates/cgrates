@@ -1282,7 +1282,7 @@ func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 			loadFuncs = append(loadFuncs, loadMap[sec])
 		}
 	} else if fnct, has := loadMap[section]; !has {
-		return fmt.Errorf("Invalid section: <%s> ", section)
+		return fmt.Errorf("Invalid section: <%s>", section)
 	} else {
 		cfg.lks[section].Lock()
 		defer cfg.lks[section].Unlock()
@@ -1355,7 +1355,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 		return
 	}
 	if !jsonFilesFound {
-		return fmt.Errorf("No config file found on path %s ", cfgDir)
+		return fmt.Errorf("No config file found on path %s", cfgDir)
 	}
 	return
 }

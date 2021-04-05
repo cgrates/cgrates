@@ -87,8 +87,6 @@ const CGRATES_CFG_JSON = `
 		"*accounts":{"remote":false, "replicate":false}, 					
 		"*reverse_destinations": {"remote":false, "replicate":false},
 		"*destinations": {"remote":false, "replicate":false}, 
-		"*rating_plans": {"remote":false, "replicate":false}, 
-		"*rating_profiles":{"remote":false, "replicate":false}, 
 		"*actions":{"remote":false, "replicate":false},
 		"*timings": {"remote":false, "replicate":false}, 
 		"*resource_profiles":{"remote":false, "replicate":false}, 
@@ -288,7 +286,7 @@ const CGRATES_CFG_JSON = `
 "filters": {								// Filters configuration (*new)
 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"apiers_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"apiers_conns": [],						// connections to apierS for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 },
 
 
@@ -299,7 +297,6 @@ const CGRATES_CFG_JSON = `
 	"store_cdrs": true,						// store cdrs in StorDB
 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
-	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|$rpc_conns_id>
 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
@@ -380,7 +377,6 @@ const CGRATES_CFG_JSON = `
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"listen_bigob": "",						// address where to listen for bidirectional GOB-RPC requests
 	"chargers_conns": [],					// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
-	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|$rpc_conns_id>
 	"cdrs_conns": [],						// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
@@ -578,7 +574,6 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"rals_conns": [],						// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"default_ratio":1						// default ratio used in case of *load strategy
 },
 

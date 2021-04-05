@@ -349,14 +349,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
-			utils.MetaRatingPlans: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.MetaRatingProfiles: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
 			utils.MetaActions: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
@@ -546,8 +538,6 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 	}
 }
 
-
-
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
 		Enabled:              utils.BoolPointer(false),
@@ -555,7 +545,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(5),
 		Chargers_conns:       &[]string{},
-		Rals_conns:           &[]string{},
 		Attributes_conns:     &[]string{},
 		Thresholds_conns:     &[]string{},
 		Stats_conns:          &[]string{},
@@ -580,7 +569,6 @@ func TestSmgJsonCfg(t *testing.T) {
 		Listen_bijson:         utils.StringPointer("127.0.0.1:2014"),
 		Listen_bigob:          utils.StringPointer(""),
 		Chargers_conns:        &[]string{},
-		Rals_conns:            &[]string{},
 		Cdrs_conns:            &[]string{},
 		Resources_conns:       &[]string{},
 		Thresholds_conns:      &[]string{},
@@ -930,7 +918,6 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{},
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
-		Rals_conns:            &[]string{},
 		Default_ratio:         utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(false),
 	}

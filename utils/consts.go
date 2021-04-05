@@ -444,7 +444,6 @@ const (
 	MetaRerate               = "*rerate"
 	MetaRefund               = "*refund"
 	MetaStats                = "*stats"
-	MetaResponder            = "*responder"
 	MetaCore                 = "*core"
 	MetaServiceManager       = "*servicemanager"
 	MetaChargers             = "*chargers"
@@ -483,12 +482,9 @@ const (
 	Accounts                 = "Accounts"
 	AccountS                 = "AccountS"
 	Actions                  = "Actions"
-	ActionPlans              = "ActionPlans"
-	ActionTriggers           = "ActionTriggers"
 	BalanceMap               = "BalanceMap"
 	UnitCounters             = "UnitCounters"
 	UpdateTime               = "UpdateTime"
-	SharedGroups             = "SharedGroups"
 	Timings                  = "Timings"
 	Rates                    = "Rates"
 	DestinationRates         = "DestinationRates"
@@ -564,13 +560,8 @@ const (
 	Resource                 = "Resource"
 	User                     = "User"
 	Subscribers              = "Subscribers"
-	DerivedChargersV         = "DerivedChargers"
 	Destinations             = "Destinations"
 	ReverseDestinations      = "ReverseDestinations"
-	RatingPlan               = "RatingPlan"
-	RatingProfile            = "RatingProfile"
-	MetaRatingPlans          = "*rating_plans"
-	MetaRatingProfiles       = "*rating_profiles"
 	MetaSubscribers          = "*subscribers"
 	MetaStorDB               = "*stordb"
 	MetaDataDB               = "*datadb"
@@ -896,7 +887,6 @@ const (
 // Meta Items
 const (
 	MetaAccounts            = "*accounts"
-	MetaAccountActionPlans  = "*account_action_plans"
 	MetaReverseDestinations = "*reverse_destinations"
 	MetaActions             = "*actions"
 	MetaResourceProfile     = "*resource_profiles"
@@ -949,7 +939,6 @@ const (
 	CacheS      = "CacheS"
 	AnalyzerS   = "AnalyzerS"
 	CDRServer   = "CDRServer"
-	ResponderS  = "ResponderS"
 	GuardianS   = "GuardianS"
 	ApierS      = "ApierS"
 )
@@ -1033,26 +1022,15 @@ const (
 )
 
 const (
-	TpRatingPlans        = "TpRatingPlans"
 	TpFilters            = "TpFilters"
-	TpDestinationRates   = "TpDestinationRates"
-	TpActionTriggers     = "TpActionTriggers"
-	TpAccountActionsV    = "TpAccountActions"
-	TpActionPlans        = "TpActionPlans"
-	TpActions            = "TpActions"
 	TpThresholds         = "TpThresholds"
 	TpRoutes             = "TpRoutes"
 	TpAttributes         = "TpAttributes"
 	TpStats              = "TpStats"
-	TpSharedGroups       = "TpSharedGroups"
-	TpRatingProfiles     = "TpRatingProfiles"
 	TpResources          = "TpResources"
-	TpRates              = "TpRates"
 	TpTiming             = "TpTiming"
 	TpResource           = "TpResource"
 	TpDestinations       = "TpDestinations"
-	TpRatingPlan         = "TpRatingPlan"
-	TpRatingProfile      = "TpRatingProfile"
 	TpChargers           = "TpChargers"
 	TpDispatchers        = "TpDispatchers"
 	TpDispatcherProfiles = "TpDispatcherProfiles"
@@ -1904,7 +1882,6 @@ const (
 	ApierSConnsCfg    = "apiers_conns"
 )
 
-// RalsCfg
 const (
 	EnabledCfg         = "enabled"
 	ThresholdSConnsCfg = "thresholds_conns"
@@ -1934,7 +1911,6 @@ const (
 const (
 	ListenBijsonCfg        = "listen_bijson"
 	ListenBigobCfg         = "listen_bigob"
-	RALsConnsCfg           = "rals_conns"
 	RouteSConnsCfg         = "routes_conns"
 	ReplicationConnsCfg    = "replication_conns"
 	RemoteConnsCfg         = "remote_conns"

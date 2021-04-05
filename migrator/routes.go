@@ -140,7 +140,7 @@ func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 func (m *Migrator) migrateRouteProfiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.ActionTriggers); err != nil {
+	if vrs, err = m.getVersions(utils.Routes); err != nil {
 		return
 	}
 	routeVersion, has := vrs[utils.Routes]

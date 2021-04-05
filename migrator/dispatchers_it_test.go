@@ -82,7 +82,6 @@ func TestDispatcherITMove2(t *testing.T) {
 	for _, stest := range sTestsDspIT {
 		t.Run("TestDispatcherITMove", stest)
 	}
-	dcMigrator.Close()
 }
 
 func TestDispatcherITMoveEncoding(t *testing.T) {
@@ -101,7 +100,6 @@ func TestDispatcherITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsDspIT {
 		t.Run("TestDispatcherITMoveEncoding", stest)
 	}
-	dcMigrator.Close()
 }
 
 func TestDispatcherITMoveEncoding2(t *testing.T) {
@@ -120,7 +118,6 @@ func TestDispatcherITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsDspIT {
 		t.Run("TestDispatcherITMoveEncoding2", stest)
 	}
-	dcMigrator.Close()
 }
 
 func testDspITConnect(t *testing.T) {

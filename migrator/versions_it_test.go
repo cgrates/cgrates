@@ -138,7 +138,7 @@ func testVrsITMigrate(t *testing.T) {
 		}
 	}
 
-	currentVersion := engine.Versions{Alias: 0}
+	currentVersion := engine.Versions{utils.Attributes: 0}
 	err := vrsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version ", err.Error())

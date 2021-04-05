@@ -118,9 +118,8 @@ func (sqls *SQLStorage) IsDBEmpty() (resp bool, err error) {
 func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	var rows *sql.Rows
 	var err error
-	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
+	var qryStr string
 	if colName == "" {
-
 		for _, clNm := range []string{
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
@@ -137,6 +136,8 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			qryStr += fmt.Sprintf("UNION (SELECT tpid FROM %s)", clNm)
 		}
 		qryStr = strings.TrimPrefix(qryStr, "UNION ")
+	} else {
+		qryStr = fmt.Sprintf("(SELECT tpid FROM %s)", colName)
 	}
 	rows, err = sqls.DB.Query(qryStr)
 	if err != nil {
@@ -163,7 +164,7 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 // ToDo: TEST
 func (sqls *SQLStorage) GetTpTableIds(tpid, table string, distinct []string,
 	filters map[string]string, pagination *utils.PaginatorWithSearch) ([]string, error) {
-	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
+	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", strings.Join(distinct, utils.FieldsSep), table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
 			qry += fmt.Sprintf(" AND %s='%s'", key, value)

@@ -139,7 +139,7 @@ func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
 	internalConfigChan <- rpc
 }
 
-func startRPC(server *cores.Server, internalRaterChan,
+func startRPC(server *cores.Server,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
@@ -149,8 +149,6 @@ func startRPC(server *cores.Server, internalRaterChan,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
-		case resp := <-internalRaterChan:
-			internalRaterChan <- resp
 		case cdrs := <-internalCdrSChan:
 			internalCdrSChan <- cdrs
 		case smg := <-internalSMGChan:
@@ -489,7 +487,6 @@ func main() {
 	internalStatSChan := make(chan rpcclient.ClientConnector, 1)
 	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)
 	internalRouteSChan := make(chan rpcclient.ClientConnector, 1)
-	internalResponderChan := make(chan rpcclient.ClientConnector, 1)
 	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
 	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
@@ -510,7 +507,6 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats):          internalStatSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes):         internalRouteSChan,
@@ -549,7 +545,6 @@ func main() {
 		utils.RadiusAgent:     new(sync.WaitGroup),
 		utils.RateS:           new(sync.WaitGroup),
 		utils.ResourceS:       new(sync.WaitGroup),
-		utils.ResponderS:      new(sync.WaitGroup),
 		utils.RouteS:          new(sync.WaitGroup),
 		utils.SchedulerS:      new(sync.WaitGroup),
 		utils.SessionS:        new(sync.WaitGroup),
@@ -708,7 +703,7 @@ func main() {
 	}
 
 	// Serve rpc connections
-	go startRPC(server, internalResponderChan, internalCDRServerChan,
+	go startRPC(server, internalCDRServerChan,
 		internalResourceSChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,

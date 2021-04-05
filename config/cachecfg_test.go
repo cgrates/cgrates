@@ -159,36 +159,6 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 	}
 }
 
-func TestCachesCfgAsMapInterface2(t *testing.T) {
-	cfgJSONStr := `{
-"caches":{
-	"partitions": {
-		"*rating_plans": {"limit": 10, "ttl": "", "static_ttl": true, "precache": true, "replicate": false},
-		},
-    "replication_conns": ["conn1", "conn2"],
-	},
-}`
-	eMap := map[string]interface{}{
-		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaRatingPlans: map[string]interface{}{"limit": 10, "ttl": "", "static_ttl": true, "precache": true},
-		},
-		utils.ReplicationConnsCfg: []string{"conn1", "conn2"},
-	}
-	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
-		t.Error(err)
-	} else {
-		newMap := cgrCfg.cacheCfg.AsMapInterface()
-		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans],
-			newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans],
-				eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaRatingPlans])
-		}
-		if !reflect.DeepEqual(newMap[utils.ReplicationConnsCfg], eMap[utils.ReplicationConnsCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ReplicationConnsCfg], newMap[utils.ReplicationConnsCfg])
-		}
-	}
-}
-
 func TestCacheCfgClone(t *testing.T) {
 	cs := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{

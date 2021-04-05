@@ -51,14 +51,10 @@ func TestStorDBReload(t *testing.T) {
 	stordb := NewStorDBService(cfg, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	ralS := NewRalService(cfg, chS, server,
-		make(chan rpcclient.ClientConnector, 1),
-		make(chan rpcclient.ClientConnector, 1),
-		shdChan, nil, anz, srvDep)
 	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)
-	srvMngr.AddServices(cdrS, ralS, chrS,
+	srvMngr.AddServices(cdrS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server,
 			make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db, stordb)
 	if err := srvMngr.StartServices(); err != nil {
@@ -72,7 +68,6 @@ func TestStorDBReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 
-	cfg.RalsCfg().Enabled = true
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),

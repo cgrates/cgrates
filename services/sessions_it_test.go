@@ -141,7 +141,6 @@ func TestSessionSReload2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.ChargerSCfg().Enabled = true
-	cfg.RalsCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -153,7 +152,6 @@ func TestSessionSReload2(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheActions))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	internalChan := make(chan rpcclient.ClientConnector, 1)
@@ -197,7 +195,6 @@ func TestSessionSReload3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
 	cfg.ChargerSCfg().Enabled = true
-	cfg.RalsCfg().Enabled = true
 	cfg.CdrsCfg().Enabled = true
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
@@ -209,7 +206,6 @@ func TestSessionSReload3(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 	close(chS.GetPrecacheChannel(utils.CacheDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheActions))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	internalChan := make(chan rpcclient.ClientConnector, 1)

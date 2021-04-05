@@ -44,14 +44,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
 			}
 		}
-		for _, connID := range cfg.cdrsCfg.RaterConns {
-			// if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
-			// return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.RALService, utils.CDRs)
-			// }
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
-			}
-		}
 		for _, connID := range cfg.cdrsCfg.AttributeSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.CDRs)
@@ -134,14 +126,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.chargerSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ChargerS, utils.SessionS)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
-			}
-		}
-		for _, connID := range cfg.sessionSCfg.RALsConns {
-			// if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
-			// return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.RALService, utils.SessionS)
-			// }
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
@@ -470,14 +454,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.resourceSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ResourceS, utils.RouteS)
 			}
-			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RouteS, connID)
-			}
-		}
-		for _, connID := range cfg.routeSCfg.RALsConns {
-			// if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
-			// return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.RALService, utils.RouteS)
-			// }
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RouteS, connID)
 			}
