@@ -24,6 +24,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ericlagergren/decimal"
 )
 
 func TestReflectFieldAsStringOnStruct(t *testing.T) {
@@ -1637,5 +1639,197 @@ func TestMultiplyInt64Error(t *testing.T) {
 	_, err := Multiply(int64(2), "cat")
 	if err == nil || err.Error() != "strconv.ParseInt: parsing \"cat\": invalid syntax" {
 		t.Errorf("Expected <strconv.ParseInt: parsing \"cat\": invalid syntax> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsBigTimeDuration(t *testing.T) {
+	itm := 5 * time.Second
+	exp := decimal.New(int64(itm), 0)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigInt(t *testing.T) {
+	itm := 20
+	exp := decimal.New(int64(itm), 0)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigInt8(t *testing.T) {
+	itm := int8(20)
+	exp := decimal.New(int64(itm), 0)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigInt16(t *testing.T) {
+	itm := int16(4363)
+	exp := decimal.New(int64(itm), 0)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigInt32(t *testing.T) {
+	itm := int32(4363)
+	exp := decimal.New(int64(itm), 0)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigInt64(t *testing.T) {
+	itm := int64(4363)
+	exp := decimal.New(int64(itm), 0)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigUint(t *testing.T) {
+	itm := uint(20)
+	exp := new(decimal.Big).SetUint64(uint64(itm))
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigUint8(t *testing.T) {
+	itm := uint8(20)
+	exp := new(decimal.Big).SetUint64(uint64(itm))
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigUint16(t *testing.T) {
+	itm := uint16(4363)
+	exp := new(decimal.Big).SetUint64(uint64(itm))
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigUint32(t *testing.T) {
+	itm := uint32(4363)
+	exp := new(decimal.Big).SetUint64(uint64(itm))
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigUint64(t *testing.T) {
+	itm := uint64(4363)
+	exp := new(decimal.Big).SetUint64(uint64(itm))
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigFloat32(t *testing.T) {
+	itm := float32(42.2)
+	exp := new(decimal.Big).SetFloat64(float64(itm))
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigFloat64(t *testing.T) {
+	itm := float64(42.2)
+	exp := new(decimal.Big).SetFloat64(itm)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigString(t *testing.T) {
+	itm := "32ns"
+	exp := new(decimal.Big).SetUint64(32)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigStringConvert(t *testing.T) {
+	itm := "1.234"
+	exp, _ := new(decimal.Big).SetString(itm)
+	rcv, err := IfaceAsBig(itm)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rcv) {
+		fmt.Printf("%T and %T", exp, rcv)
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestIfaceAsBigStringErr1(t *testing.T) {
+	itm := "32ps"
+	_, err := IfaceAsBig(itm)
+	errExpect := `time: unknown unit "ps" in duration "32ps"`
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestIfaceAsBigStringErr2(t *testing.T) {
+	itm := "can't convert"
+	_, err := IfaceAsBig(itm)
+	errExpect := "can't convert <can't convert> to decimal"
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+func TestIfaceAsBigDefault(t *testing.T) {
+	itm := []string{"defaultCase"}
+	_, err := IfaceAsBig(itm)
+	errExpect := "cannot convert field: [defaultCase] to time.Duration"
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
