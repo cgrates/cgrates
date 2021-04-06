@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -592,7 +594,6 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 			},
 		},
 	}
-
 	if err := dispEngine.RPC.Call(utils.CDRsV2ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 2 {
