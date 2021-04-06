@@ -377,11 +377,26 @@ func TestAppend2(t *testing.T) {
 	dn.Type = NMMapType
 	dn.Slice = nil
 	dn.Map = map[string]*DataNode{}
-
-	if rcv, err := dn.Append(testPath, val1); err != nil {
+	dnMapExpect := map[string]*DataNode{
+		"0": &DataNode{
+			Type: NMMapType,
+			Map: map[string]*DataNode{
+				testPath[1]: &DataNode{
+					Type: NMSliceType,
+					Slice: []*DataNode{
+						{
+							Type:  NMDataType,
+							Value: val1,
+						},
+					},
+				},
+			},
+		},
+	}
+	if _, err := dn.Append(testPath, val1); err != nil {
 		t.Error(err)
-	} else if rcv != 0 {
-		t.Errorf("Expected %+v, received %+v", 0, rcv)
+	} else if !reflect.DeepEqual(dnMapExpect, dn.Map) {
+		t.Errorf("Expected %v but recived %v", ToJSON(dnMapExpect), ToJSON(dn.Map))
 	}
 
 	///
@@ -409,12 +424,29 @@ func TestAppend2(t *testing.T) {
 		t.Errorf("Expected %v but received %v", -1, rcv)
 	}
 
-	///
+	dn.Map = nil
+	dn.Slice = nil
 	testPath = []string{"0", "testPath"}
-	if rcv, err := dn.Append(testPath, val1); err != nil {
+	dnSliceExpect := []*DataNode{
+		{
+			Type: NMMapType,
+			Map: map[string]*DataNode{
+				testPath[1]: &DataNode{
+					Type: NMSliceType,
+					Slice: []*DataNode{
+						{
+							Type:  NMDataType,
+							Value: val1,
+						},
+					},
+				},
+			},
+		},
+	}
+	if _, err := dn.Append(testPath, val1); err != nil {
 		t.Error(err)
-	} else if rcv == -1 {
-		t.Errorf("Expected %v but received %v", -1, rcv)
+	} else if !reflect.DeepEqual(dn.Slice, dnSliceExpect) {
+		t.Errorf("Expected %v but recived %v", ToJSON(dn.Slice), ToJSON(dnSliceExpect))
 	}
 
 	///
@@ -504,11 +536,26 @@ func TestCompose2(t *testing.T) {
 	///
 	dn.Slice = nil
 	testPath = []string{"0", "testPath"}
-	if err := dn.Compose(testPath, val); err != nil {
-		t.Error(err)
+	dnSliceExpect := []*DataNode{
+		{
+			Type: NMMapType,
+			Map: map[string]*DataNode{
+				testPath[1]: &DataNode{
+					Type: NMSliceType,
+					Slice: []*DataNode{
+						{
+							Type:  NMDataType,
+							Value: val,
+						},
+					},
+				},
+			},
+		},
 	}
 	if err := dn.Compose(testPath, val); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(dn.Slice, dnSliceExpect) {
+		t.Errorf("Expected %v but recived %v", ToJSON(dn.Slice), ToJSON(dnSliceExpect))
 	}
 
 	///
