@@ -802,12 +802,13 @@ func TestDataDBStartSessionSCfgErr(t *testing.T) {
 	}
 }
 
-func TestDataDBStartRalsSCfgErr(t *testing.T) {
+func TestDataDBStartAttributeSCfgErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg, nil)
 	db := NewDataDBService(cfg, cM, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
+	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
 	err := db.Start()
 	if err == nil || err.Error() != "unsupported db_type <badtype>" {

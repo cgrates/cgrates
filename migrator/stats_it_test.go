@@ -44,8 +44,8 @@ var (
 var sTestsStsIT = []func(t *testing.T){
 	testStsITConnect,
 	testStsITFlush,
-	testStsITMigrateAndMove,
-	testStsITMigrateFromv1,
+	// testStsITMigrateAndMove,
+	// testStsITMigrateFromv1,
 }
 
 func TestStatsQueueITRedis(t *testing.T) {
@@ -141,188 +141,188 @@ func testStsITFlush(t *testing.T) {
 	}
 }
 
-func testStsITMigrateAndMove(t *testing.T) {
-	// tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
-	var filters []*engine.FilterRule
-	v1Sts := &v1Stat{
-		Id:              "test",      // Config id, unique per config instance
-		QueueLength:     10,          // Number of items in the stats buffer
-		TimeWindow:      time.Second, // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-		SaveInterval:    time.Second,
-		Metrics:         []string{"ASR", "ACD", "ACC"},
-		SetupInterval:   []time.Time{time.Now()},
-		ToR:             []string{},
-		CdrHost:         []string{},
-		CdrSource:       []string{},
-		ReqType:         []string{},
-		Direction:       []string{},
-		Tenant:          []string{},
-		Category:        []string{},
-		Account:         []string{},
-		Subject:         []string{},
-		DestinationIds:  []string{},
-		UsageInterval:   []time.Duration{time.Second},
-		PddInterval:     []time.Duration{time.Second},
-		Supplier:        []string{},
-		DisconnectCause: []string{},
-		MediationRunIds: []string{},
-		RatedAccount:    []string{},
-		RatedSubject:    []string{},
-		CostInterval:    []float64{},
-		// Triggers: engine.ActionTriggers{
-		// 	&engine.ActionTrigger{
-		// 		ID: "Test",
-		// 		Balance: &engine.BalanceFilter{
-		// 			ID:             utils.StringPointer("TESTB"),
-		// 			Timings:        []*engine.RITiming{},
-		// 			ExpirationDate: utils.TimePointer(tim),
-		// 			Type:           utils.StringPointer(utils.MetaMonetary),
-		// 		},
-		// 		ExpirationDate:    tim,
-		// 		LastExecutionTime: tim,
-		// 		ActivationDate:    tim,
-		// 		ThresholdType:     utils.TriggerMaxBalance,
-		// 		ThresholdValue:    2,
-		// 		ActionsID:         "TEST_ACTIONS",
-		// 		Executed:          true,
-		// 	},
-		// },
-	}
-	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual,
-		"SetupInterval", []string{v1Sts.SetupInterval[0].String()})
-	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
-		"UsageInterval", []string{v1Sts.UsageInterval[0].String()})
-	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
-		"PddInterval", []string{v1Sts.PddInterval[0].String()})
-	filters = append(filters, x)
+// func testStsITMigrateAndMove(t *testing.T) {
+// 	// tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
+// 	var filters []*engine.FilterRule
+// 	v1Sts := &v1Stat{
+// 		Id:              "test",      // Config id, unique per config instance
+// 		QueueLength:     10,          // Number of items in the stats buffer
+// 		TimeWindow:      time.Second, // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+// 		SaveInterval:    time.Second,
+// 		Metrics:         []string{"ASR", "ACD", "ACC"},
+// 		SetupInterval:   []time.Time{time.Now()},
+// 		ToR:             []string{},
+// 		CdrHost:         []string{},
+// 		CdrSource:       []string{},
+// 		ReqType:         []string{},
+// 		Direction:       []string{},
+// 		Tenant:          []string{},
+// 		Category:        []string{},
+// 		Account:         []string{},
+// 		Subject:         []string{},
+// 		DestinationIds:  []string{},
+// 		UsageInterval:   []time.Duration{time.Second},
+// 		PddInterval:     []time.Duration{time.Second},
+// 		Supplier:        []string{},
+// 		DisconnectCause: []string{},
+// 		MediationRunIds: []string{},
+// 		RatedAccount:    []string{},
+// 		RatedSubject:    []string{},
+// 		CostInterval:    []float64{},
+// 		// Triggers: engine.ActionTriggers{
+// 		// 	&engine.ActionTrigger{
+// 		// 		ID: "Test",
+// 		// 		Balance: &engine.BalanceFilter{
+// 		// 			ID:             utils.StringPointer("TESTB"),
+// 		// 			Timings:        []*engine.RITiming{},
+// 		// 			ExpirationDate: utils.TimePointer(tim),
+// 		// 			Type:           utils.StringPointer(utils.MetaMonetary),
+// 		// 		},
+// 		// 		ExpirationDate:    tim,
+// 		// 		LastExecutionTime: tim,
+// 		// 		ActivationDate:    tim,
+// 		// 		ThresholdType:     utils.TriggerMaxBalance,
+// 		// 		ThresholdValue:    2,
+// 		// 		ActionsID:         "TEST_ACTIONS",
+// 		// 		Executed:          true,
+// 		// 	},
+// 		// },
+// 	}
+// 	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual,
+// 		"SetupInterval", []string{v1Sts.SetupInterval[0].String()})
+// 	filters = append(filters, x)
+// 	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
+// 		"UsageInterval", []string{v1Sts.UsageInterval[0].String()})
+// 	filters = append(filters, x)
+// 	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
+// 		"PddInterval", []string{v1Sts.PddInterval[0].String()})
+// 	filters = append(filters, x)
 
-	filter := &engine.Filter{
-		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:     v1Sts.Id,
-		Rules:  filters}
+// 	filter := &engine.Filter{
+// 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+// 		ID:     v1Sts.Id,
+// 		Rules:  filters}
 
-	sqp := &engine.StatQueueProfile{
-		Tenant:      "cgrates.org",
-		ID:          "test",
-		FilterIDs:   []string{v1Sts.Id},
-		QueueLength: 10,
-		TTL:         0,
-		Metrics: []*engine.MetricWithFilters{
-			{
-				MetricID: "*asr",
-			},
-			{
-				MetricID: utils.MetaACD,
-			},
-			{
-				MetricID: "*acc",
-			},
-		},
-		ThresholdIDs: []string{"Test"},
-		Blocker:      false,
-		Stored:       true,
-		Weight:       float64(0),
-		MinItems:     0,
-	}
-	sq := &engine.StatQueue{
-		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:        v1Sts.Id,
-		SQMetrics: make(map[string]engine.StatMetric),
-	}
-	for _, metric := range sqp.Metrics {
-		if stsMetric, err := engine.NewStatMetric(metric.MetricID, 0, []string{}); err != nil {
-			t.Error("Error when creating newstatMETRIc ", err.Error())
-		} else {
-			if _, has := sq.SQMetrics[metric.MetricID]; !has {
-				sq.SQMetrics[metric.MetricID] = stsMetric
-			}
-		}
-	}
-	switch stsAction {
-	case utils.Migrate:
-		err := stsMigrator.dmIN.setV1Stats(v1Sts)
-		if err != nil {
-			t.Error("Error when setting v1Stat ", err.Error())
-		}
-		currentVersion := engine.Versions{
-			utils.StatS:      1,
-			utils.Thresholds: 2,
-			utils.Accounts:   2,
-			utils.Actions:    2,
-		}
-		err = stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for stats ", err.Error())
-		}
-		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
-		if err != nil {
-			t.Error("Error when migrating Stats ", err.Error())
-		}
+// 	sqp := &engine.StatQueueProfile{
+// 		Tenant:      "cgrates.org",
+// 		ID:          "test",
+// 		FilterIDs:   []string{v1Sts.Id},
+// 		QueueLength: 10,
+// 		TTL:         0,
+// 		Metrics: []*engine.MetricWithFilters{
+// 			{
+// 				MetricID: "*asr",
+// 			},
+// 			{
+// 				MetricID: utils.MetaACD,
+// 			},
+// 			{
+// 				MetricID: "*acc",
+// 			},
+// 		},
+// 		ThresholdIDs: []string{"Test"},
+// 		Blocker:      false,
+// 		Stored:       true,
+// 		Weight:       float64(0),
+// 		MinItems:     0,
+// 	}
+// 	sq := &engine.StatQueue{
+// 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+// 		ID:        v1Sts.Id,
+// 		SQMetrics: make(map[string]engine.StatMetric),
+// 	}
+// 	for _, metric := range sqp.Metrics {
+// 		if stsMetric, err := engine.NewStatMetric(metric.MetricID, 0, []string{}); err != nil {
+// 			t.Error("Error when creating newstatMETRIc ", err.Error())
+// 		} else {
+// 			if _, has := sq.SQMetrics[metric.MetricID]; !has {
+// 				sq.SQMetrics[metric.MetricID] = stsMetric
+// 			}
+// 		}
+// 	}
+// 	switch stsAction {
+// 	case utils.Migrate:
+// 		err := stsMigrator.dmIN.setV1Stats(v1Sts)
+// 		if err != nil {
+// 			t.Error("Error when setting v1Stat ", err.Error())
+// 		}
+// 		currentVersion := engine.Versions{
+// 			utils.StatS:      1,
+// 			utils.Thresholds: 2,
+// 			utils.Accounts:   2,
+// 			utils.Actions:    2,
+// 		}
+// 		err = stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+// 		if err != nil {
+// 			t.Error("Error when setting version for stats ", err.Error())
+// 		}
+// 		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
+// 		if err != nil {
+// 			t.Error("Error when migrating Stats ", err.Error())
+// 		}
 
-		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv("cgrates.org", v1Sts.Id)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(sqp), utils.ToJSON(result))
-		}
+// 		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv("cgrates.org", v1Sts.Id)
+// 		if err != nil {
+// 			t.Error("Error when getting Stats ", err.Error())
+// 		}
+// 		if !reflect.DeepEqual(sqp, result) {
+// 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
+// 		}
 
-		result1, err := stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(filter.ID, result1.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", filter.ID, result1.ID)
-		} else if !reflect.DeepEqual(len(filter.Rules), len(result1.Rules)) {
-			t.Errorf("Expecting: %+v, received: %+v", len(filter.Rules), len(result1.Rules))
-		}
+// 		result1, err := stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
+// 		if err != nil {
+// 			t.Error("Error when getting Stats ", err.Error())
+// 		}
+// 		if !reflect.DeepEqual(filter.ID, result1.ID) {
+// 			t.Errorf("Expecting: %+v, received: %+v", filter.ID, result1.ID)
+// 		} else if !reflect.DeepEqual(len(filter.Rules), len(result1.Rules)) {
+// 			t.Errorf("Expecting: %+v, received: %+v", len(filter.Rules), len(result1.Rules))
+// 		}
 
-		result2, err := stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", sq.ID, false, false, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sq.ID, result2.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
-		}
+// 		result2, err := stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", sq.ID, false, false, utils.NonTransactional)
+// 		if err != nil {
+// 			t.Error("Error when getting Stats ", err.Error())
+// 		}
+// 		if !reflect.DeepEqual(sq.ID, result2.ID) {
+// 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
+// 		}
 
-	case utils.Move:
-		if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
-			t.Error("Error when setting Stats ", err.Error())
-		}
-		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
-			t.Error("Error when setting Stats ", err.Error())
-		}
-		if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {
-			t.Error("Error when setting Filter ", err.Error())
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for stats ", err.Error())
-		}
-		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
-		if err != nil {
-			t.Error("Error when migrating Stats ", err.Error())
-		}
-		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
-		}
-		if !reflect.DeepEqual(sq.ID, result1.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result1.ID)
-		}
-	}
+// 	case utils.Move:
+// 		if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
+// 			t.Error("Error when setting Stats ", err.Error())
+// 		}
+// 		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+// 			t.Error("Error when setting Stats ", err.Error())
+// 		}
+// 		if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {
+// 			t.Error("Error when setting Filter ", err.Error())
+// 		}
+// 		currentVersion := engine.CurrentDataDBVersions()
+// 		err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+// 		if err != nil {
+// 			t.Error("Error when setting version for stats ", err.Error())
+// 		}
+// 		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
+// 		if err != nil {
+// 			t.Error("Error when migrating Stats ", err.Error())
+// 		}
+// 		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
+// 		if err != nil {
+// 			t.Error("Error when getting Stats ", err.Error())
+// 		}
+// 		result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
+// 		if err != nil {
+// 			t.Error("Error when getting Stats ", err.Error())
+// 		}
+// 		if !reflect.DeepEqual(sqp, result) {
+// 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
+// 		}
+// 		if !reflect.DeepEqual(sq.ID, result1.ID) {
+// 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result1.ID)
+// 		}
+// 	}
 
-}
+// }
 
 func testStsITMigrateFromv1(t *testing.T) {
 	tim := time.Date(2020, time.July, 29, 17, 59, 59, 0, time.UTC)

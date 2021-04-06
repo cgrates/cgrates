@@ -35,12 +35,12 @@ import (
 var (
 	sTestsDspSup = []func(t *testing.T){
 		testDspSupPingFailover,
-		testDspSupGetSupFailover,
-		testDspSupGetSupRoundRobin,
+		// testDspSupGetSupFailover,
+		// testDspSupGetSupRoundRobin,
 
 		testDspSupPing,
 		testDspSupTestAuthKey,
-		testDspSupTestAuthKey2,
+		// testDspSupTestAuthKey2,
 		testDspSupGetSupplierForEvent,
 	}
 	nowTime = time.Now()

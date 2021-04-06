@@ -161,11 +161,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		CacheIDs: []string{},
 	}
 	expectedStats := &map[string]*ltcache.CacheStats{
-		utils.MetaDefault:             {},
-		utils.CacheAccountActionPlans: {},
-		utils.CacheActionPlans:        {Items: 4},
-		utils.CacheActionTriggers:     {Items: 1},
-		utils.CacheActions:            {Items: 9},
+		utils.MetaDefault: {},
 		utils.CacheAttributeFilterIndexes: {
 			Items:  2,
 			Groups: 2,
@@ -185,8 +181,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheRateProfilesFilterIndexes: {},
 		utils.CacheRateFilterIndexes:         {},
 		utils.CacheRateProfiles:              {},
-		utils.CacheRatingPlans:               {Items: 4},
-		utils.CacheRatingProfiles:            {Items: 5},
 		utils.CacheResourceFilterIndexes: {
 			Items:  6,
 			Groups: 1,
@@ -195,7 +189,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.CacheResources:           {Items: 3},
 		utils.CacheReverseDestinations: {Items: 7},
 		utils.CacheRPCResponses:        {},
-		utils.CacheSharedGroups:        {Items: 1},
 		utils.CacheStatFilterIndexes: {
 			Items:  2,
 			Groups: 1,
