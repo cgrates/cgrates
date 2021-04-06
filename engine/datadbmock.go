@@ -301,11 +301,11 @@ func (dbM *DataDBMock) RemoveActionProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountProfileDrv(string, string) (*utils.AccountProfile, error) {
+func (dbM *DataDBMock) GetAccountProfileDrv(string, string) (*utils.Account, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAccountProfileDrv(profile *utils.AccountProfile) error {
+func (dbM *DataDBMock) SetAccountProfileDrv(profile *utils.Account) error {
 	return utils.ErrNotImplemented
 }
 

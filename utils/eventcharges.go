@@ -38,7 +38,7 @@ type EventCharges struct {
 	Concretes *Decimal // total concrete units charged
 
 	ChargingIntervals []*ChargingInterval
-	Accounts          []*AccountProfile
+	Accounts          []*Account
 
 	Accounting  map[string]*AccountCharge
 	UnitFactors map[string]*UnitFactor

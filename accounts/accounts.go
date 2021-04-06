@@ -68,7 +68,7 @@ func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface
 // if lked option is passed, each AccountProfile will be also locked
 //   so it becomes responsibility of upper layers to release the lock
 func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
-	acntIDs []string, lked bool) (acnts utils.AccountProfilesWithWeight, err error) {
+	acntIDs []string, lked bool) (acnts utils.AccountsWithWeight, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
@@ -97,7 +97,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			refID = guardian.Guardian.GuardIDs("",
 				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		}
-		var qAcnt *utils.AccountProfile
+		var qAcnt *utils.Account
 		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err == utils.ErrNotFound {
@@ -129,7 +129,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			unlockAccountProfiles(acnts)
 			return
 		}
-		acnts = append(acnts, &utils.AccountProfileWithWeight{qAcnt, weight, refID})
+		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, weight, refID})
 	}
 	if len(acnts) == 0 {
 		return nil, utils.ErrNotFound
@@ -139,7 +139,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 }
 
 // accountsDebit will debit an usage out of multiple accounts
-func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
+func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	usage := decimal.New(int64(72*time.Hour), 0)
 	var usgEv time.Duration
@@ -164,9 +164,9 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debits
 		}
-		acntBkps[i] = acnt.AccountProfile.AccountBalancesBackup()
+		acntBkps[i] = acnt.Account.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = aS.accountDebit(acnt.AccountProfile,
+		if ecDbt, err = aS.accountDebit(acnt.Account,
 			new(decimal.Big).Copy(usage), cgrEv, concretes); err != nil {
 			if store {
 				restoreAccounts(aS.dm, acnts, acntBkps)
@@ -179,8 +179,8 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 		if ec == nil { // no debit performed yet
 			ec = utils.NewEventCharges()
 		}
-		if store && acnt.AccountProfile.BalancesAltered(acntBkps[i]) {
-			if err = aS.dm.SetAccountProfile(acnt.AccountProfile, false); err != nil {
+		if store && acnt.Account.BalancesAltered(acntBkps[i]) {
+			if err = aS.dm.SetAccountProfile(acnt.Account, false); err != nil {
 				restoreAccounts(aS.dm, acnts, acntBkps)
 				return
 			}
@@ -198,7 +198,7 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountProfileWithWeight,
 }
 
 // accountDebit will debit the usage out of an Account
-func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
+func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
 
 	// Find balances matching event
@@ -254,8 +254,8 @@ func (aS *AccountS) accountDebit(acnt *utils.AccountProfile, usage *decimal.Big,
 }
 
 // V1AccountProfilesForEvent returns the matching AccountProfiles for Event
-func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) (err error) {
-	var acnts utils.AccountProfilesWithWeight
+func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) (err error) {
+	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, false); err != nil {
 		if err != utils.ErrNotFound {
@@ -269,7 +269,7 @@ func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, 
 
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
-	var acnts utils.AccountProfilesWithWeight
+	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
@@ -293,7 +293,7 @@ func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.
 
 // V1DebitAbstracts performs debit for the provided event
 func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
-	var acnts utils.AccountProfilesWithWeight
+	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
@@ -319,7 +319,7 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
 func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
-	var acnts utils.AccountProfilesWithWeight
+	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
@@ -343,7 +343,7 @@ func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.
 
 // V1DebitConcretes performs debit of concrete units for the provided event
 func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
-	var acnts utils.AccountProfilesWithWeight
+	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {

@@ -677,15 +677,15 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	return
 }
 
-func (iDB *InternalDB) GetAccountProfileDrv(tenant, id string) (ap *utils.AccountProfile, err error) {
+func (iDB *InternalDB) GetAccountProfileDrv(tenant, id string) (ap *utils.Account, err error) {
 	x, ok := Cache.Get(utils.CacheAccountProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*utils.AccountProfile).Clone(), nil
+	return x.(*utils.Account).Clone(), nil
 }
 
-func (iDB *InternalDB) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
+func (iDB *InternalDB) SetAccountProfileDrv(ap *utils.Account) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheAccountProfiles, ap.TenantID(), ap, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

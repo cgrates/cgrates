@@ -29,13 +29,13 @@ import (
 
 // actSetAccount updates the balances base on the diktat
 func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (err error) {
-	var qAcnt *utils.AccountProfile
+	var qAcnt *utils.Account
 	if qAcnt, err = dm.GetAccountProfile(tnt, acntID); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
 		// in case the account doesn't exist create it with minimal information
-		qAcnt = &utils.AccountProfile{
+		qAcnt = &utils.Account{
 			Tenant: tnt,
 			ID:     acntID,
 		}
@@ -79,7 +79,7 @@ func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.
 }
 
 // actSetAccountFields sets the fields inside the account
-func actSetAccountFields(ac *utils.AccountProfile, path []string, value string) (err error) {
+func actSetAccountFields(ac *utils.Account, path []string, value string) (err error) {
 	switch path[0] {
 	// the tenant and ID should come from user and should not change
 	case utils.FilterIDs:

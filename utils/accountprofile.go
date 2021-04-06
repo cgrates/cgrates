@@ -26,7 +26,7 @@ import (
 )
 
 // AccountProfile represents one Account on a Tenant
-type AccountProfile struct {
+type Account struct {
 	Tenant             string
 	ID                 string // Account identificator, unique within the tenant
 	FilterIDs          []string
@@ -38,7 +38,7 @@ type AccountProfile struct {
 }
 
 // BalancesAltered detects altering of the Balances by comparing the Balance values with the ones from backup
-func (ap *AccountProfile) BalancesAltered(abb AccountBalancesBackup) (altred bool) {
+func (ap *Account) BalancesAltered(abb AccountBalancesBackup) (altred bool) {
 	if len(ap.Balances) != len(abb) {
 		return true
 	}
@@ -51,14 +51,14 @@ func (ap *AccountProfile) BalancesAltered(abb AccountBalancesBackup) (altred boo
 	return
 }
 
-func (ap *AccountProfile) RestoreFromBackup(abb AccountBalancesBackup) {
+func (ap *Account) RestoreFromBackup(abb AccountBalancesBackup) {
 	for blncID, val := range abb {
 		ap.Balances[blncID].Units.Big = val
 	}
 }
 
 // AccountBalancesBackup returns a backup of all balance values
-func (ap *AccountProfile) AccountBalancesBackup() (abb AccountBalancesBackup) {
+func (ap *Account) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	if ap.Balances != nil {
 		abb = make(AccountBalancesBackup)
 		for blncID, blnc := range ap.Balances {
@@ -185,13 +185,13 @@ func (uF *UnitFactor) Equals(nUf *UnitFactor) (eq bool) {
 }
 
 // TenantID returns the combined Tenant:ID
-func (aP *AccountProfile) TenantID() string {
+func (aP *Account) TenantID() string {
 	return ConcatenatedKey(aP.Tenant, aP.ID)
 }
 
 // Clone returns a clone of the Account
-func (aP *AccountProfile) Clone() (acnt *AccountProfile) {
-	acnt = &AccountProfile{
+func (aP *Account) Clone() (acnt *Account) {
+	acnt = &Account{
 		Tenant:             aP.Tenant,
 		ID:                 aP.ID,
 		ActivationInterval: aP.ActivationInterval.Clone(),
@@ -285,33 +285,33 @@ func (bL *Balance) Clone() (blnc *Balance) {
 }
 
 // AccountProfileWithWeight attaches static weight to AccountProfile
-type AccountProfileWithWeight struct {
-	*AccountProfile
+type AccountWithWeight struct {
+	*Account
 	Weight float64
 	LockID string
 }
 
 // AccountProfilesWithWeight is a sortable list of AccountProfileWithWeight
-type AccountProfilesWithWeight []*AccountProfileWithWeight
+type AccountsWithWeight []*AccountWithWeight
 
 // Sort is part of sort interface, sort based on Weight
-func (aps AccountProfilesWithWeight) Sort() {
+func (aps AccountsWithWeight) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
 
 // AccountProfiles returns the list of AccountProfiles
-func (apWws AccountProfilesWithWeight) AccountProfiles() (aps []*AccountProfile) {
+func (apWws AccountsWithWeight) AccountProfiles() (aps []*Account) {
 	if apWws != nil {
-		aps = make([]*AccountProfile, len(apWws))
+		aps = make([]*Account, len(apWws))
 		for i, apWw := range apWws {
-			aps[i] = apWw.AccountProfile
+			aps[i] = apWw.Account
 		}
 	}
 	return
 }
 
 // LockIDs returns the list of LockIDs
-func (apWws AccountProfilesWithWeight) LockIDs() (lkIDs []string) {
+func (apWws AccountsWithWeight) LockIDs() (lkIDs []string) {
 	if apWws != nil {
 		lkIDs = make([]string, len(apWws))
 		for i, apWw := range apWws {
@@ -347,13 +347,13 @@ func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
 }
 
 // APIAccountProfileWithOpts is used in API calls
-type APIAccountProfileWithOpts struct {
-	*APIAccountProfile
+type APIAccountWithOpts struct {
+	*APIAccount
 	APIOpts map[string]interface{}
 }
 
-type AccountProfileWithAPIOpts struct {
-	*AccountProfile
+type AccountWithAPIOpts struct {
+	*Account
 	APIOpts map[string]interface{}
 }
 
@@ -364,7 +364,7 @@ type ArgsAccountsForEvent struct {
 }
 
 // APIAccountProfile represents one APIAccount on a Tenant
-type APIAccountProfile struct {
+type APIAccount struct {
 	Tenant             string
 	ID                 string
 	FilterIDs          []string
@@ -375,9 +375,9 @@ type APIAccountProfile struct {
 	ThresholdIDs       []string
 }
 
-// AsAccountProfile convert APIAccountProfile struct to AccountProfile struct
-func (ext *APIAccountProfile) AsAccountProfile() (profile *AccountProfile, err error) {
-	profile = &AccountProfile{
+// AsAccount convert APIAccount struct to AccountProfile struct
+func (ext *APIAccount) AsAccount() (profile *Account, err error) {
+	profile = &Account{
 		Tenant:             ext.Tenant,
 		ID:                 ext.ID,
 		FilterIDs:          ext.FilterIDs,

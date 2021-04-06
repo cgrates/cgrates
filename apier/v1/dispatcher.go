@@ -1059,12 +1059,12 @@ func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, repl
 }
 
 // GetAccountProfile .
-func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
+func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	return dS.dS.ReplicatorSv1GetAccountProfile(tntID, reply)
 }
 
 // SetAccountProfile .
-func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountProfileWithAPIOpts, reply *string) error {
+func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetAccountProfile(args, reply)
 }
 
@@ -1141,7 +1141,7 @@ func (dR *DispatcherAccountSv1) Ping(args *utils.CGREvent, reply *string) error 
 	return dR.dR.AccountSv1Ping(args, reply)
 }
 
-func (dR *DispatcherAccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.AccountProfile) error {
+func (dR *DispatcherAccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) error {
 	return dR.dR.AccountProfilesForEvent(args, aps)
 }
 

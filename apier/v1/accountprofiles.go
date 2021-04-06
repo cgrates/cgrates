@@ -27,7 +27,7 @@ import (
 )
 
 // GetAccountProfile returns an Account Profile
-func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
+func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -88,14 +88,14 @@ func (apierSv1 *APIerSv1) GetAccountProfileIDsCount(args *utils.TenantWithAPIOpt
 }
 
 //SetAccountProfile add/update a new Account Profile
-func (apierSv1 *APIerSv1) SetAccountProfile(extAp *utils.APIAccountProfileWithOpts, reply *string) error {
-	if missing := utils.MissingStructFields(extAp.APIAccountProfile, []string{utils.ID}); len(missing) != 0 {
+func (apierSv1 *APIerSv1) SetAccountProfile(extAp *utils.APIAccountWithOpts, reply *string) error {
+	if missing := utils.MissingStructFields(extAp.APIAccount, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if extAp.Tenant == utils.EmptyString {
 		extAp.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	ap, err := extAp.AsAccountProfile()
+	ap, err := extAp.AsAccount()
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (aSv1 *AccountSv1) Ping(ign *utils.CGREvent, reply *string) error {
 
 // AccountProfilesForEvent returns the matching AccountProfile for Event
 func (aSv1 *AccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent,
-	aps *[]*utils.AccountProfile) (err error) {
+	aps *[]*utils.Account) (err error) {
 	return aSv1.aS.V1AccountProfilesForEvent(args, aps)
 }
 

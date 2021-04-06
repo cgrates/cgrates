@@ -937,7 +937,7 @@ func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	return rs.Cmd(nil, redisHDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
 }
 
-func (rs *RedisStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.AccountProfile, err error) {
+func (rs *RedisStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.Account, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.AccountProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -949,7 +949,7 @@ func (rs *RedisStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.Accou
 	return
 }
 
-func (rs *RedisStorage) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
+func (rs *RedisStorage) SetAccountProfileDrv(ap *utils.Account) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(ap); err != nil {
 		return

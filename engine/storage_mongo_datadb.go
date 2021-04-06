@@ -1612,8 +1612,8 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	})
 }
 
-func (ms *MongoStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.AccountProfile, err error) {
-	ap = new(utils.AccountProfile)
+func (ms *MongoStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.Account, err error) {
+	ap = new(utils.Account)
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColAnp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(ap); err != nil {
@@ -1628,7 +1628,7 @@ func (ms *MongoStorage) GetAccountProfileDrv(tenant, id string) (ap *utils.Accou
 	return
 }
 
-func (ms *MongoStorage) SetAccountProfileDrv(ap *utils.AccountProfile) (err error) {
+func (ms *MongoStorage) SetAccountProfileDrv(ap *utils.Account) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColAnp).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
 			bson.M{"$set": ap},

@@ -4716,7 +4716,7 @@ cgrates.org,REM_ACTPROFILE_1
 
 	//set dataManager
 	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	acntPrf := &utils.AccountProfile{
+	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "REM_ACTPROFILE_1",
 	}

@@ -1008,7 +1008,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesAr
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIndexes, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) (err error) {
+func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantIDWithAPIOpts, reply *utils.Account) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant
@@ -1026,9 +1026,9 @@ func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantID
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccountProfile, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountProfileWithAPIOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.AccountProfileWithAPIOpts{}
+		args = &utils.AccountWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

@@ -68,7 +68,7 @@ func TestCloneBalance(t *testing.T) {
 }
 
 func TestCloneAccountProfile(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Tenant:    "cgrates.org",
 		ID:        "Profile_id1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -129,7 +129,7 @@ func TestCloneAccountProfile(t *testing.T) {
 }
 
 func TestTenantIDAccountProfile(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
 	}
@@ -140,7 +140,7 @@ func TestTenantIDAccountProfile(t *testing.T) {
 }
 
 func TestAccountProfileAsAccountProfile(t *testing.T) {
-	apiAccPrf := &APIAccountProfile{
+	apiAccPrf := &APIAccount{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
 		Opts:   map[string]interface{}{},
@@ -158,7 +158,7 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 		},
 		Weights: ";10",
 	}
-	expected := &AccountProfile{
+	expected := &Account{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
 		Opts:   map[string]interface{}{},
@@ -184,7 +184,7 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := apiAccPrf.AsAccountProfile(); err != nil {
+	if rcv, err := apiAccPrf.AsAccount(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
@@ -192,7 +192,7 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 }
 
 func TestAsAccountProfileError(t *testing.T) {
-	apiAccPrf := &APIAccountProfile{
+	apiAccPrf := &APIAccount{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
 		Opts:   map[string]interface{}{},
@@ -204,14 +204,14 @@ func TestAsAccountProfileError(t *testing.T) {
 		Weights: "10",
 	}
 	expectedErr := "invalid DynamicWeight format for string <10>"
-	if _, err := apiAccPrf.AsAccountProfile(); err == nil || err.Error() != expectedErr {
+	if _, err := apiAccPrf.AsAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	apiAccPrf.Weights = ";10"
 	apiAccPrf.Balances["MonetaryBalance"].Weights = "10"
 	expectedErr = "invalid DynamicWeight format for string <10>"
-	if _, err := apiAccPrf.AsAccountProfile(); err == nil || err.Error() != expectedErr {
+	if _, err := apiAccPrf.AsAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -267,7 +267,7 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 }
 
 func TestAccountProfileBalancesAlteredCompareLength(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString":  {},
 			"testString2": {},
@@ -286,7 +286,7 @@ func TestAccountProfileBalancesAlteredCompareLength(t *testing.T) {
 }
 
 func TestAccountProfileBalancesAlteredCheckKeys(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString": {},
 		},
@@ -304,7 +304,7 @@ func TestAccountProfileBalancesAlteredCheckKeys(t *testing.T) {
 }
 
 func TestAccountProfileBalancesAlteredCompareValues(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString": {
 				Units: &Decimal{decimal.New(1, 1)},
@@ -324,7 +324,7 @@ func TestAccountProfileBalancesAlteredCompareValues(t *testing.T) {
 }
 
 func TestAccountProfileBalancesAlteredFalse(t *testing.T) {
-	actPrf := &AccountProfile{}
+	actPrf := &Account{}
 
 	actBk := AccountBalancesBackup{}
 
@@ -336,7 +336,7 @@ func TestAccountProfileBalancesAlteredFalse(t *testing.T) {
 }
 
 func TestAPRestoreFromBackup(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString": {
 				Units: &Decimal{},
@@ -357,7 +357,7 @@ func TestAPRestoreFromBackup(t *testing.T) {
 }
 
 func TestAPAccountBalancesBackup(t *testing.T) {
-	actPrf := &AccountProfile{
+	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testKey": {
 				Units: &Decimal{decimal.New(1234, 3)},
@@ -410,7 +410,7 @@ func TestAPNewDefaultBalance(t *testing.T) {
 
 func TestAPApsSort(t *testing.T) {
 
-	apS := AccountProfilesWithWeight{
+	apS := AccountsWithWeight{
 		{
 			Weight: 2,
 		},
@@ -421,7 +421,7 @@ func TestAPApsSort(t *testing.T) {
 			Weight: 3,
 		},
 	}
-	expected := AccountProfilesWithWeight{
+	expected := AccountsWithWeight{
 		{
 			Weight: 3,
 		},
@@ -441,9 +441,9 @@ func TestAPApsSort(t *testing.T) {
 
 func TestAPAccountProfiles(t *testing.T) {
 
-	apS := AccountProfilesWithWeight{
+	apS := AccountsWithWeight{
 		{
-			AccountProfile: &AccountProfile{
+			Account: &Account{
 				Tenant:    "testTenant1",
 				ID:        "testID1",
 				FilterIDs: []string{"testFID1", "testFID2"},
@@ -464,7 +464,7 @@ func TestAPAccountProfiles(t *testing.T) {
 			LockID: "testString1",
 		},
 		{
-			AccountProfile: &AccountProfile{
+			Account: &Account{
 				Tenant:    "testTenant2",
 				ID:        "testID2",
 				FilterIDs: []string{"testFID1", "testFID2"},
@@ -486,9 +486,9 @@ func TestAPAccountProfiles(t *testing.T) {
 		},
 	}
 
-	expected := make([]*AccountProfile, 0)
+	expected := make([]*Account, 0)
 	for i := range apS {
-		expected = append(expected, apS[i].AccountProfile)
+		expected = append(expected, apS[i].Account)
 	}
 	received := apS.AccountProfiles()
 
@@ -498,9 +498,9 @@ func TestAPAccountProfiles(t *testing.T) {
 }
 
 func TestAPLockIDs(t *testing.T) {
-	apS := AccountProfilesWithWeight{
+	apS := AccountsWithWeight{
 		{
-			AccountProfile: &AccountProfile{
+			Account: &Account{
 				Tenant:    "testTenant1",
 				ID:        "testID1",
 				FilterIDs: []string{"testFID1", "testFID2"},
@@ -521,7 +521,7 @@ func TestAPLockIDs(t *testing.T) {
 			LockID: "testString1",
 		},
 		{
-			AccountProfile: &AccountProfile{
+			Account: &Account{
 				Tenant:    "testTenant2",
 				ID:        "testID2",
 				FilterIDs: []string{"testFID1", "testFID2"},

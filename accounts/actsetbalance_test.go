@@ -60,7 +60,7 @@ func TestActSetAccountBalance(t *testing.T) {
 	}
 	diktats[0].Path = "*balance.Concrete1.Weights"
 
-	expectedAcc := &utils.AccountProfile{
+	expectedAcc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     acntID,
 		Balances: map[string]*utils.Balance{
@@ -133,7 +133,7 @@ func TestActSetAccount(t *testing.T) {
 	}
 	diktats[0].Value = ";10"
 
-	expectedAcc := &utils.AccountProfile{
+	expectedAcc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     acntID,
 		Weights: []*utils.DynamicWeight{
@@ -152,9 +152,9 @@ func TestActSetAccount(t *testing.T) {
 }
 
 func TestActSetAccountFields(t *testing.T) {
-	accPrf := &utils.AccountProfile{}
+	accPrf := &utils.Account{}
 
-	expectedAccprf := &utils.AccountProfile{
+	expectedAccprf := &utils.Account{
 		FilterIDs: []string{"*string:~*req.ToR:*sms"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),

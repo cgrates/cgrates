@@ -2845,8 +2845,8 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 	return
 }
 
-func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *utils.AccountProfile, err error) {
-	ap = &utils.AccountProfile{
+func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *utils.Account, err error) {
+	ap = &utils.Account{
 		Tenant:       tpAp.Tenant,
 		ID:           tpAp.ID,
 		FilterIDs:    make([]string, len(tpAp.FilterIDs)),
@@ -2939,7 +2939,7 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 	return
 }
 
-func AccountProfileToAPI(ap *utils.AccountProfile) (tpAp *utils.TPAccountProfile) {
+func AccountProfileToAPI(ap *utils.Account) (tpAp *utils.TPAccountProfile) {
 	tpAp = &utils.TPAccountProfile{
 		Tenant:             ap.Tenant,
 		ID:                 ap.ID,
