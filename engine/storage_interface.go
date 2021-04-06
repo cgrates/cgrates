@@ -107,8 +107,8 @@ type DataDB interface {
 	GetActionProfileDrv(string, string) (*ActionProfile, error)
 	SetActionProfileDrv(*ActionProfile) error
 	RemoveActionProfileDrv(string, string) error
-	GetAccountProfileDrv(string, string) (*utils.AccountProfile, error)
-	SetAccountProfileDrv(profile *utils.AccountProfile) error
+	GetAccountProfileDrv(string, string) (*utils.Account, error)
+	SetAccountProfileDrv(profile *utils.Account) error
 	RemoveAccountProfileDrv(string, string) error
 }
 

@@ -26,7 +26,7 @@ func init() {
 	c := &CmdSetAccountProfile{
 		name:      "accounts_profile_set",
 		rpcMethod: utils.APIerSv1SetAccountProfile,
-		rpcParams: &utils.APIAccountProfileWithOpts{},
+		rpcParams: &utils.APIAccountWithOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -35,7 +35,7 @@ func init() {
 type CmdSetAccountProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.APIAccountProfileWithOpts
+	rpcParams *utils.APIAccountWithOpts
 	*CommandExecuter
 }
 
@@ -49,7 +49,7 @@ func (self *CmdSetAccountProfile) RpcMethod() string {
 
 func (self *CmdSetAccountProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.APIAccountProfileWithOpts{APIAccountProfile: new(utils.APIAccountProfile)}
+		self.rpcParams = &utils.APIAccountWithOpts{APIAccount: new(utils.APIAccount)}
 	}
 	return self.rpcParams
 }

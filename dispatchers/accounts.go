@@ -38,7 +38,7 @@ func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREvent, rpl *string) (
 	return dS.Dispatch(args, utils.MetaAccounts, utils.AccountSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, reply *[]*utils.AccountProfile) (err error) {
+func (dS *DispatcherService) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, reply *[]*utils.Account) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant

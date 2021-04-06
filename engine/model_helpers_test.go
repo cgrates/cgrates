@@ -5617,7 +5617,7 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	exp := &utils.AccountProfile{
+	exp := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
 		FilterIDs: []string{"FLTR_RES_GR1"},
@@ -5809,7 +5809,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 }
 
 func TestModelHelpersAccountProfileToAPI(t *testing.T) {
-	testStruct := &utils.AccountProfile{
+	testStruct := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"test_filterId"},

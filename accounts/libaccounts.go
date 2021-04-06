@@ -331,22 +331,22 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 
 // restoreAccounts will restore the accounts in DataDB out of their backups if present
 func restoreAccounts(dm *engine.DataManager,
-	acnts []*utils.AccountProfileWithWeight, bkps []utils.AccountBalancesBackup) {
+	acnts []*utils.AccountWithWeight, bkps []utils.AccountBalancesBackup) {
 	for i, bkp := range bkps {
 		if bkp == nil ||
-			!acnts[i].AccountProfile.BalancesAltered(bkp) {
+			!acnts[i].Account.BalancesAltered(bkp) {
 			continue
 		}
-		acnts[i].AccountProfile.RestoreFromBackup(bkp)
-		if err := dm.SetAccountProfile(acnts[i].AccountProfile, false); err != nil {
+		acnts[i].Account.RestoreFromBackup(bkp)
+		if err := dm.SetAccountProfile(acnts[i].Account, false); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> restoring account <%s>",
-				utils.AccountS, err, acnts[i].AccountProfile.TenantID()))
+				utils.AccountS, err, acnts[i].Account.TenantID()))
 		}
 	}
 }
 
 // unlockAccountProfiles is used to unlock the accounts based on their lock identifiers
-func unlockAccountProfiles(acnts utils.AccountProfilesWithWeight) {
+func unlockAccountProfiles(acnts utils.AccountsWithWeight) {
 	for _, lkID := range acnts.LockIDs() {
 		guardian.Guardian.UnguardIDs(lkID)
 	}

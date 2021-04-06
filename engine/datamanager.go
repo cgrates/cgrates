@@ -2831,7 +2831,7 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (brokenReferenc
 	return
 }
 
-func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.AccountProfile, err error) {
+func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.Account, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -2857,7 +2857,7 @@ func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.AccountPr
 	return
 }
 
-func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetAccountProfile(ap *utils.Account, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2890,8 +2890,8 @@ func (dm *DataManager) SetAccountProfile(ap *utils.AccountProfile, withIndex boo
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccountProfile,
-			&utils.AccountProfileWithAPIOpts{
-				AccountProfile: ap,
+			&utils.AccountWithAPIOpts{
+				Account: ap,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}

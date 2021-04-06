@@ -60,6 +60,6 @@ func (self *CmdGetAccountsProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetAccountsProfile) RpcResult() interface{} {
-	var atr utils.AccountProfile
+	var atr utils.Account
 	return &atr
 }

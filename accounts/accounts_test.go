@@ -83,7 +83,7 @@ type dataDBMockErrorNotFound struct {
 	*engine.DataDBMock
 }
 
-func (dB *dataDBMockErrorNotFound) GetAccountProfileDrv(string, string) (*utils.AccountProfile, error) {
+func (dB *dataDBMockErrorNotFound) GetAccountProfileDrv(string, string) (*utils.Account, error) {
 	return nil, utils.ErrNotFound
 }
 
@@ -92,7 +92,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltr := engine.NewFilterS(cfg, nil, nil)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "1004",
 		FilterIDs: []string{"*string:~*req.Account:1004"},
@@ -161,7 +161,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1004",
 		ActivationInterval: &utils.ActivationInterval{
@@ -233,10 +233,10 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
 
-	expectedAccPrfWeght := utils.AccountProfilesWithWeight{
+	expectedAccPrfWeght := utils.AccountsWithWeight{
 		{
-			AccountProfile: accPrf,
-			Weight:         20,
+			Account: accPrf,
+			Weight:  20,
 		},
 	}
 	if rcv, err := accnts.matchingAccountsForEvent("cgrates.org", cgrEvent,
@@ -255,7 +255,7 @@ func TestAccountDebit(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "TestAccountDebit",
 		FilterIDs: []string{"*string:~*req.Account:1004"},
@@ -348,9 +348,9 @@ func TestAccountsDebit(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accntsPrf := []*utils.AccountProfileWithWeight{
+	accntsPrf := []*utils.AccountWithWeight{
 		{
-			AccountProfile: &utils.AccountProfile{
+			Account: &utils.Account{
 				Tenant:    "cgrates.org",
 				ID:        "TestAccountsDebit",
 				FilterIDs: []string{"*string:~*req.Account:1004"},
@@ -467,7 +467,7 @@ func TestV1AccountProfilesForEvent(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1004",
 		ActivationInterval: &utils.ActivationInterval{
@@ -504,7 +504,7 @@ func TestV1AccountProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	rply := make([]*utils.AccountProfile, 0)
+	rply := make([]*utils.Account, 0)
 
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter_format"
 	if err := accnts.V1AccountProfilesForEvent(args, &rply); err == nil || err.Error() != expected {
@@ -529,7 +529,7 @@ func TestV1MaxAbstracts(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TestV1MaxAbstracts",
 		Weights: []*utils.DynamicWeight{
@@ -616,7 +616,7 @@ func TestV1DebitAbstracts(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TestV1DebitAbstracts",
 		Weights: []*utils.DynamicWeight{
@@ -703,7 +703,7 @@ func TestV1MaxConcretes(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TestV1DebitAbstracts",
 		Weights: []*utils.DynamicWeight{
@@ -814,7 +814,7 @@ func TestV1DebitConcretes(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TestV1DebitAbstracts",
 		Weights: []*utils.DynamicWeight{
@@ -937,7 +937,7 @@ func TestMultipleAccountsFail(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accPrf := []*utils.AccountProfile{
+	accPrf := []*utils.Account{
 		{
 			Tenant: "cgrates.org",
 			ID:     "TestV1MaxAbstracts",
@@ -1109,7 +1109,7 @@ func TestV1ActionSetBalance(t *testing.T) {
 		t.Error("Unexpected status reply", reply)
 	}
 
-	expectedAcc := &utils.AccountProfile{
+	expectedAcc := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "TestV1ActionSetBalance",
 		Balances: map[string]*utils.Balance{

@@ -763,7 +763,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("AccountProfiles:")
 	}
 	for _, tpAP := range tpr.accountProfiles {
-		var ap *utils.AccountProfile
+		var ap *utils.Account
 		if ap, err = APItoAccountProfile(tpAP, tpr.timezone); err != nil {
 			return
 		}

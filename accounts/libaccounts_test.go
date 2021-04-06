@@ -39,7 +39,7 @@ import (
 )
 
 func TestNewAccountBalanceOperators(t *testing.T) {
-	acntPrf := &utils.AccountProfile{
+	acntPrf := &utils.Account{
 		ID:     "TEST_ID",
 		Tenant: "cgrates.org",
 		Balances: map[string]*utils.Balance{
@@ -450,7 +450,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	acntPrf := &utils.AccountProfile{
+	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
@@ -470,7 +470,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 		t.Error(err)
 	}
 
-	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
+	restoreAccounts(dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
@@ -493,7 +493,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	engine.Cache.Clear(nil)
 
 	dm := engine.NewDataManager(&dataDBMockError{}, config.CgrConfig().CacheCfg(), nil)
-	acntPrf := &utils.AccountProfile{
+	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
@@ -518,7 +518,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
 
-	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
+	restoreAccounts(dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
@@ -537,7 +537,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	acntPrf := &utils.AccountProfile{
+	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
@@ -557,7 +557,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 		t.Error(err)
 	}
 
-	restoreAccounts(dm, []*utils.AccountProfileWithWeight{
+	restoreAccounts(dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		nil,

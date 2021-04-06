@@ -232,7 +232,7 @@ func (rplSv1 *ReplicatorSv1) GetActionProfile(tntID *utils.TenantIDWithAPIOpts, 
 }
 
 // GetAccountProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.AccountProfile) error {
+func (rplSv1 *ReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	engine.UpdateReplicationFilters(utils.AccountProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetAccountProfileDrv(tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -486,8 +486,8 @@ func (rplSv1 *ReplicatorSv1) SetActionProfile(acp *engine.ActionProfileWithAPIOp
 }
 
 // SetAccountProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetAccountProfileDrv(acp.AccountProfile); err != nil {
+func (rplSv1 *ReplicatorSv1) SetAccountProfile(acp *utils.AccountWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetAccountProfileDrv(acp.Account); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(acp.APIOpts[utils.CacheOpt]),
