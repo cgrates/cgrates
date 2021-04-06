@@ -586,7 +586,6 @@ func TestConfigSanityDAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.diameterAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req.Valid.Field"}
-
 }
 
 func TestConfigSanityRadiusAgent(t *testing.T) {
@@ -631,10 +630,63 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	}
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "~req."
+	expected = "<RadiusAgent> Empty field path  for ~req. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.OriginID"
+
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "~req."
+	expected = "<RadiusAgent> Empty field path  for ~req. at Values of request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "*req.OriginID"
+
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:*ec"}
+	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*string:~*req.Account:1001"}
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields = []*FCTemplate{}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "~req."
+	expected = "<RadiusAgent> Empty field path  for ~req. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*req.OriginID"
+
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "~req."
+	expected = "<RadiusAgent> Empty field path  for ~req. at Values of reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "*req.OriginID"
+
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:*ec"}
+	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*string:~*req.Account:1001"}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Type = "changed"
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
 	expected = "<RadiusAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
+
+	cfg.radiusAgentCfg.RequestProcessors[0].Filters = []string{"*empty:*ec"}
+	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_processors"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.radiusAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req.Account:1001"}
 }
 
 func TestConfigSanityDNSAgent(t *testing.T) {
@@ -679,10 +731,63 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	}
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "~req."
+	expected = "<DNSAgent> Empty field path  for ~req. at Values of request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "*req.Value"
+
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~*req"}
+	expected = "<DNSAgent> inline parse error for string: <*empty:~*req> for [*empty:~*req] at request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*string:~*req.Account:1001"}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Path = "~req."
+	expected = "<DNSAgent> Empty field path  for ~req. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.Value"
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields = []*FCTemplate{}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "~req."
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Type = "CHANGED"
+	expected = "<DNSAgent> Empty field path  for ~req. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
+
 	expected = "<DNSAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*empty:*ec"
+
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "~req."
+	expected = "<DNSAgent> Empty field path  for ~req. at Values of reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "*empty:*ec"
+
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:*ec"}
+	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
+
+	cfg.dnsAgentCfg.RequestProcessors[0].Filters = []string{"*empty:*ec"}
+	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_processors"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req.Account:1001"}
+
 }
 
 func TestConfigSanityHTTPAgent1(t *testing.T) {
