@@ -372,9 +372,6 @@ func main() {
 		cfg.GeneralCfg().NodeID = *nodeID
 	}
 	if *checkConfig {
-		if err := cfg.CheckConfigSanity(); err != nil {
-			fmt.Println(err)
-		}
 		return
 	}
 	config.SetCgrConfig(cfg) // Share the config object
