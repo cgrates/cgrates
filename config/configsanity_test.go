@@ -222,6 +222,30 @@ func TestConfigSanityLoaders(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+
+	cfg.loaderCfg[0].Data[0].Fields[0].Path = "~req."
+	expected = "<LoaderS> Empty field path  for ~req. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.loaderCfg[0].Data[0].Fields[0].Path = "~*req.Destination"
+
+	cfg.loaderCfg[0].Data[0].Fields[0].Value = RSRParsers{{}}
+	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].path = "~req."
+	expected = "<LoaderS> Empty field path  for ~req. at Values"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].path = "*req.Destination"
+
+	cfg.loaderCfg[0].Data[0].Fields[0].Filters = make([]string, 1)
+	cfg.loaderCfg[0].Data[0].Fields[0].Filters = []string{"*string:~*req..Field"}
+	expected = "<LoaderS> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at Filters"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.loaderCfg[0].Data[0].Fields[0].Filters = []string{"~req.Valid.Field"}
+
 }
 
 func TestConfigSanitySessionS(t *testing.T) {
@@ -477,6 +501,27 @@ func TestConfigSanityDAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+
+	cfg.templates[utils.MetaEEs][0].Path = "~Req."
+	expected = "<DiameterAgent> Empty field path  for ~Req. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.templates[utils.MetaEEs][0].Path = "*req.OriginID"
+
+	cfg.templates[utils.MetaEEs][0].Value[0].path = "~Req."
+	expected = "<DiameterAgent> Empty field path  for ~Req. at Values"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.templates[utils.MetaEEs][0].Value[0].path = "*req.OriginID"
+
+	cfg.templates[utils.MetaEEs][0].Filters = []string{"*string:~*req..Field"}
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at templates"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.templates[utils.MetaEEs][0].Filters = []string{"*string:~*req.VAlid.Field"}
 	cfg.templates = nil
 
 	expected = "<DiameterAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
@@ -485,10 +530,63 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*string:~*req..Field"}
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*string:~*req.Valid.Field"}
+
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "~REQ."
+	expected = "<DiameterAgent> Empty field path  for ~REQ. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.Valid.Field"
+
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "~REQ."
+	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "*req.Valid.Field"
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields = []*FCTemplate{}
+
 	expected = "<DiameterAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Type = utils.MetaNone
+
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*string:~*req..Field"}
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*string:~*req.Valid.Field"}
+
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "~REQ."
+	expected = "<DiameterAgent> Empty field path  for ~REQ. at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*req.Valid.Field"
+
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "~REQ."
+	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "*req.Valid.Field"
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
+
+	cfg.diameterAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req..Field"}
+	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at request_processors"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req.Valid.Field"}
+
 }
 
 func TestConfigSanityRadiusAgent(t *testing.T) {
