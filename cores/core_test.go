@@ -80,11 +80,26 @@ func TestCoreServiceStatus(t *testing.T) {
 	} else {
 		reply[utils.RunningSince] = "TIME_CHANGED"
 		reply[utils.MemoryUsage] = "CHANGED_MEMORY_USAGE"
-		if !reflect.DeepEqual(expected, reply) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
-		}
 	}
-
+	goRoutines := (reply[utils.GoVersion]).(int)
+	if goRoutines < 18 {
+		t.Errorf("Expected %+v to be larger than 18", reply[utils.GoVersion])
+	}
+	if !reflect.DeepEqual(expected[utils.GoVersion], reply[utils.GoVersion]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.GoVersion]), utils.ToJSON(reply[utils.GoVersion]))
+	}
+	if !reflect.DeepEqual(expected[utils.RunningSince], reply[utils.RunningSince]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.RunningSince]), utils.ToJSON(reply[utils.RunningSince]))
+	}
+	if !reflect.DeepEqual(expected[utils.VersionName], reply[utils.VersionName]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.VersionName]), utils.ToJSON(reply[utils.VersionName]))
+	}
+	if !reflect.DeepEqual(expected[utils.MemoryUsage], reply[utils.MemoryUsage]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.MemoryUsage]), utils.ToJSON(reply[utils.MemoryUsage]))
+	}
+	if !reflect.DeepEqual(expected[utils.NodeID], reply[utils.NodeID]) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.NodeID]), utils.ToJSON(reply[utils.NodeID]))
+	}
 	utils.GitLastLog = `Date: wrong format
 `
 	if err := cores.Status(args, &reply); err != nil {
