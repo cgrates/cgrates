@@ -86,7 +86,7 @@ func TestCoreServiceStatus(t *testing.T) {
 		t.Error(err)
 	}
 	if goRoutinesInt < 18 {
-		t.Errorf("Expected %+v to be larger than 18", reply[utils.GoVersion])
+		t.Errorf("number of goroutines received: %d", goRoutinesInt)
 	}
 	if !reflect.DeepEqual(expected[utils.GoVersion], reply[utils.GoVersion]) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.GoVersion]), utils.ToJSON(reply[utils.GoVersion]))

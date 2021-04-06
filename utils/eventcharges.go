@@ -80,43 +80,43 @@ func (ec *EventCharges) syncIDs(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
 		for _, cIl := range nEc.ChargingIntervals {
 			for _, cIcrm := range cIl.Increments {
-				nEcAcntChrg := nEc.Accounting[cIcrm.accountChargeID]
+				nEcAcntChrg := nEc.Accounting[cIcrm.AccountChargeID]
 
 				// UnitFactors
-				if nEcAcntChrg.unitFactorID != EmptyString {
-					if uFctID := ec.unitFactorID(nEc.UnitFactors[nEcAcntChrg.unitFactorID]); uFctID != EmptyString &&
-						uFctID != nEcAcntChrg.unitFactorID {
+				if nEcAcntChrg.UnitFactorID != EmptyString {
+					if uFctID := ec.unitFactorID(nEc.UnitFactors[nEcAcntChrg.UnitFactorID]); uFctID != EmptyString &&
+						uFctID != nEcAcntChrg.UnitFactorID {
 						nEc.UnitFactors[uFctID] = ec.UnitFactors[uFctID]
-						delete(nEc.UnitFactors, nEcAcntChrg.unitFactorID)
-						nEcAcntChrg.unitFactorID = uFctID
+						delete(nEc.UnitFactors, nEcAcntChrg.UnitFactorID)
+						nEcAcntChrg.UnitFactorID = uFctID
 					}
 				}
 
 				// Rating
-				if nEcAcntChrg.ratingID != EmptyString {
-					if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.ratingID]); rtID != EmptyString &&
-						rtID != nEcAcntChrg.ratingID {
+				if nEcAcntChrg.RatingID != EmptyString {
+					if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.RatingID]); rtID != EmptyString &&
+						rtID != nEcAcntChrg.RatingID {
 						nEc.Rating[rtID] = ec.Rating[rtID]
-						delete(nEc.Rating, nEcAcntChrg.ratingID)
-						nEcAcntChrg.ratingID = rtID
+						delete(nEc.Rating, nEcAcntChrg.RatingID)
+						nEcAcntChrg.RatingID = rtID
 					}
 				}
 
 				// AccountCharges
-				for i, chrgID := range nEc.Accounting[cIcrm.accountChargeID].JoinedChargeIDs {
+				for i, chrgID := range nEc.Accounting[cIcrm.AccountChargeID].JoinedChargeIDs {
 					if acntChrgID := ec.accountChargeID(nEc.Accounting[chrgID]); acntChrgID != chrgID {
 						// matched the accountChargeID with an existing one in reference ec, replace in nEc
 						nEc.Accounting[acntChrgID] = ec.Accounting[acntChrgID]
 						delete(nEc.Accounting, chrgID)
-						nEc.Accounting[cIcrm.accountChargeID].JoinedChargeIDs[i] = acntChrgID
+						nEc.Accounting[cIcrm.AccountChargeID].JoinedChargeIDs[i] = acntChrgID
 					}
 				}
 				if acntChrgID := ec.accountChargeID(nEcAcntChrg); acntChrgID != EmptyString &&
-					acntChrgID != cIcrm.accountChargeID {
+					acntChrgID != cIcrm.AccountChargeID {
 					// matched the accountChargeID with an existing one in reference ec, replace in nEc
-					nEc.Accounting[acntChrgID] = ec.Accounting[cIcrm.accountChargeID]
-					delete(nEc.Accounting, cIcrm.accountChargeID)
-					cIcrm.accountChargeID = acntChrgID
+					nEc.Accounting[acntChrgID] = ec.Accounting[cIcrm.AccountChargeID]
+					delete(nEc.Accounting, cIcrm.AccountChargeID)
+					cIcrm.AccountChargeID = acntChrgID
 				}
 
 			}
@@ -202,7 +202,7 @@ func (cIl *ChargingInterval) CompressEquals(nCil *ChargingInterval) (eq bool) {
 // ChargingIncrement represents one unit charged inside an interval
 type ChargingIncrement struct {
 	Units           *Decimal // Can differ from AccountCharge due to JoinedCharging
-	accountChargeID string   // Account charging information
+	AccountChargeID string   // Account charging information
 	CompressFactor  int
 }
 
@@ -212,7 +212,7 @@ func (cI *ChargingIncrement) CompressEquals(chIh *ChargingIncrement) (eq bool) {
 		return
 	}
 	return cI.Units.Compare(chIh.Units) == 0 &&
-		cI.accountChargeID == chIh.accountChargeID
+		cI.AccountChargeID == chIh.AccountChargeID
 }
 
 // AccountCharge represents one Account charge
@@ -221,9 +221,9 @@ type AccountCharge struct {
 	BalanceID       string
 	Units           *Decimal
 	BalanceLimit    *Decimal // the minimum balance value accepted
-	unitFactorID    string   // identificator in ChargingUnitFactors
+	UnitFactorID    string   // identificator in ChargingUnitFactors
 	AttributeIDs    []string // list of attribute profiles matched
-	ratingID        string   // identificator in cost increments
+	RatingID        string   // identificator in cost increments
 	JoinedChargeIDs []string // identificator of extra account charges
 }
 
@@ -251,8 +251,8 @@ func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
 	}
 	if ac.AccountID != nAc.AccountID ||
 		ac.BalanceID != nAc.BalanceID ||
-		ac.unitFactorID != nAc.unitFactorID ||
-		ac.ratingID != nAc.ratingID {
+		ac.UnitFactorID != nAc.UnitFactorID ||
+		ac.RatingID != nAc.RatingID {
 		return
 	}
 	if ac.Units == nil && nAc.Units != nil ||
