@@ -1334,31 +1334,31 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	attrSetBalance := utils.AttrSetBalance{
-		Tenant:      "cgrates.org",
-		Account:     "AccWithVoice",
-		BalanceType: utils.MetaVoice,
-		Value:       30 * float64(time.Second),
-		Balance: map[string]interface{}{
-			utils.ID: "VoiceBalance",
-		},
-	}
-	var reply string
-	if err := routeSv1Rpc.Call(utils.APIerSv2SetBalance, &attrSetBalance, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Received: %s", reply)
-	}
-	var acnt *engine.Account
-	attrAcc := &utils.AttrGetAccount{
-		Tenant:  "cgrates.org",
-		Account: "AccWithVoice",
-	}
-	if err := routeSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
-		t.Error(err)
-	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 30*float64(time.Second) {
-		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
-	}
+	// attrSetBalance := utils.AttrSetBalance{
+	// 	Tenant:      "cgrates.org",
+	// 	Account:     "AccWithVoice",
+	// 	BalanceType: utils.MetaVoice,
+	// 	Value:       30 * float64(time.Second),
+	// 	Balance: map[string]interface{}{
+	// 		utils.ID: "VoiceBalance",
+	// 	},
+	// }
+	// var reply string
+	// if err := routeSv1Rpc.Call(utils.APIerSv2SetBalance, &attrSetBalance, &reply); err != nil {
+	// 	t.Error(err)
+	// } else if reply != utils.OK {
+	// 	t.Errorf("Received: %s", reply)
+	// }
+	// var acnt *engine.Account
+	// attrAcc := &utils.AttrGetAccount{
+	// 	Tenant:  "cgrates.org",
+	// 	Account: "AccWithVoice",
+	// }
+	// if err := routeSv1Rpc.Call(utils.APIerSv2GetAccount, attrAcc, &acnt); err != nil {
+	// 	t.Error(err)
+	// } else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != 30*float64(time.Second) {
+	// 	t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
+	// }
 
 	// test for 30 seconds usage
 	// we expect that the route with account to have cost 0

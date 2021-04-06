@@ -944,6 +944,12 @@ func (sS *SessionS) newSession(cgrEv *utils.CGREvent, resID, clntConnID string,
 		return
 	}
 	s.SRuns = make([]*SRun, len(chrgrs))
+	for i, chrgr := range chrgrs {
+		me := engine.MapEvent(chrgr.CGREvent.Event)
+		s.SRuns[i] = &SRun{
+			Event: me,
+		}
+	}
 	return
 }
 

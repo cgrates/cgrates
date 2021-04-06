@@ -56,7 +56,6 @@ var (
 		testAPIerSv2itSetActionPlanWithWrongTiming,
 		testAPIerSv2itSetActionPlanWithWrongTiming2,
 		testAPIerSv2itBackwardsCompatible,
-		testAPIerSv2itGetAccountsCount,
 		testAPIerSv2itGetActionsCount,
 		testAPIerSv2itKillEngine,
 	}

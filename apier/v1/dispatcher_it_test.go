@@ -208,7 +208,7 @@ func testDispatcherSGetDispatcherProfileIDs(t *testing.T) {
 func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 	var result string
 	dispatcherProfile.Strategy = utils.MetaWeight
-	dispatcherProfile.Subsystems = []string{utils.MetaAttributes, utils.MetaSessionS, utils.MetaRALs, utils.MetaCDRs}
+	dispatcherProfile.Subsystems = []string{utils.MetaAttributes, utils.MetaSessionS, utils.MetaCDRs}
 	dispatcherProfile.ActivationInterval = &utils.ActivationInterval{
 		ActivationTime: time.Date(2019, 3, 1, 0, 0, 0, 0, time.UTC),
 		ExpiryTime:     time.Date(2019, 4, 1, 0, 0, 0, 0, time.UTC),
