@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -592,7 +594,6 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 			},
 		},
 	}
-
 	if err := dispEngine.RPC.Call(utils.CDRsV2ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if len(reply) != 2 {
@@ -604,38 +605,272 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 	}
 }
 
-// func testDspCDRsV2StoreSessionCostNoAuth(t *testing.T) {
-// 	var reply string
-// 	cc := &engine.CallCost{
-// 		Category:    "generic",
-// 		Tenant:      "cgrates.org",
-// 		Subject:     "1001",
-// 		Account:     "1001",
-// 		Destination: "data",
-// 		ToR:         "*data",
-// 		Cost:        0,
-// 	}
-// 	args := &engine.ArgsV2CDRSStoreSMCost{
-// 		CheckDuplicate: true,
-// 		Cost: &engine.V2SMCost{
-// 			CGRID:       "testDspCDRsV2StoreSessionCostNoAuth",
-// 			RunID:       utils.MetaDefault,
-// 			OriginHost:  "",
-// 			OriginID:    "testdatagrp_grp1",
-// 			CostSource:  "SMR",
-// 			Usage:       1536,
-// 			CostDetails: engine.NewEventCostFromCallCost(cc, "testDspCDRsV2StoreSessionCostNoAuth", utils.MetaDefault),
-// 		},
-// 	}
+func TestDspCDRsV1PingError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.CGREvent{}
+	var reply *string
+	result := dspSrv.CDRsV1Ping(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
 
-// 	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args, &reply); err != nil {
-// 		t.Error("Unexpected error: ", err.Error())
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply received: ", reply)
-// 	}
-// 	time.Sleep(150 * time.Millisecond)
-// 	if err := dispEngine.RPC.Call(utils.CDRsV2StoreSessionCost, args,
-// 		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
-// 		t.Error("Unexpected error: ", err)
-// 	}
-// }
+func TestDspCDRsV1PingNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
+	}
+	var reply *string
+	result := dspSrv.CDRsV1Ping(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1PingNilError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *string
+	result := dspSrv.CDRsV1Ping(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1GetCDRsError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.RPCCDRsFilterWithAPIOpts{}
+	var reply *[]*engine.CDR
+	result := dspSrv.CDRsV1GetCDRs(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1GetCDRsNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.RPCCDRsFilterWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]*engine.CDR
+	result := dspSrv.CDRsV1GetCDRs(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1GetCDRsCountError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.RPCCDRsFilterWithAPIOpts{}
+	var reply *int64
+	result := dspSrv.CDRsV1GetCDRsCount(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1GetCDRsCountNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.RPCCDRsFilterWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *int64
+	result := dspSrv.CDRsV1GetCDRsCount(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1RateCDRsError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.ArgRateCDRs{}
+	var reply *string
+	result := dspSrv.CDRsV1RateCDRs(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1RateCDRsNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.ArgRateCDRs{
+		Tenant: "tenant",
+	}
+	var reply *string
+	result := dspSrv.CDRsV1RateCDRs(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1ProcessExternalCDRError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.ExternalCDRWithAPIOpts{
+		ExternalCDR: &engine.ExternalCDR{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	result := dspSrv.CDRsV1ProcessExternalCDR(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1ProcessExternalCDRNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.ExternalCDRWithAPIOpts{
+		ExternalCDR: &engine.ExternalCDR{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	result := dspSrv.CDRsV1ProcessExternalCDR(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1ProcessEventError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.ArgV1ProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	result := dspSrv.CDRsV1ProcessEvent(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1ProcessEventNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.ArgV1ProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	result := dspSrv.CDRsV1ProcessEvent(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1ProcessCDRError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.CDRWithAPIOpts{
+		CDR: &engine.CDR{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	result := dspSrv.CDRsV1ProcessCDR(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1ProcessCDRNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.CDRWithAPIOpts{
+		CDR: &engine.CDR{
+			Tenant: "tenant",
+		},
+	}
+	var reply *string
+	result := dspSrv.CDRsV1ProcessCDR(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV2ProcessEventError(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.ArgV1ProcessEvent{
+		Flags: nil,
+		CGREvent: utils.CGREvent{
+			Tenant: "tenant",
+		},
+	}
+	var reply *[]*utils.EventWithFlags
+	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV2ProcessEventNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.ArgV1ProcessEvent{
+		Flags: nil,
+		CGREvent: utils.CGREvent{
+			Tenant: "tenant",
+		},
+	}
+	var reply *[]*utils.EventWithFlags
+	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV2ProcessEventErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.ArgV1ProcessEvent{
+		Flags:    nil,
+		CGREvent: utils.CGREvent{},
+	}
+	var reply *[]*utils.EventWithFlags
+	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
