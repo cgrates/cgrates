@@ -841,8 +841,77 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 	expected = "<HTTPAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Path = "~Field1..Field2[0]"
+	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Path = utils.EmptyString
+	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Values of request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Filters = nil
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Path = "~Field1..Field2[0]"
+	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Type = utils.MetaNone
+	expected = "<HTTPAgent> Empty field path  for ~Field1..Field2[0] at Values of reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Filters = nil
+
+	cfg.httpAgentCfg[0].RequestProcessors[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<HTTPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_processors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -885,6 +954,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
+	//Request fields
 	cfg.rpcConns["test"] = nil
 	expected = "<SIPAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -892,6 +962,76 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 	expected = "<SIPAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = "~Field1..Field2[0]"
+	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = utils.EmptyString
+	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Values of request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Filters = nil
+
+	//Reply fields
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "~Field1..Field2[0]"
+	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Type = utils.MetaNone
+	expected = "<SIPAgent> Empty field path  for ~Field1..Field2[0] at Values of reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at reply_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = nil
+
+	cfg.sipAgentCfg.RequestProcessors[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<SIPAgent> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at request_processors"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1055,6 +1195,12 @@ func TestConfigSanityScheduler(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.schedulerCfg.StatSConns = []string{}
+
+	cfg.schedulerCfg.Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<SchedulerS> got Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> in Filters"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityEventReader(t *testing.T) {
