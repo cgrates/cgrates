@@ -874,3 +874,57 @@ func TestDspCDRsV2ProcessEventErrorNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestDspCDRsV1StoreSessionCostNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.AttrCDRSStoreSMCost{
+		Tenant: "tenant",
+	}
+	var reply *string
+	result := dspSrv.CDRsV1StoreSessionCost(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV1StoreSessionCostErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.AttrCDRSStoreSMCost{}
+	var reply *string
+	result := dspSrv.CDRsV1StoreSessionCost(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV2StoreSessionCostNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &engine.ArgsV2CDRSStoreSMCost{
+		Tenant: "tenant",
+	}
+	var reply *string
+	result := dspSrv.CDRsV2StoreSessionCost(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspCDRsV2StoreSessionCostErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &engine.ArgsV2CDRSStoreSMCost{}
+	var reply *string
+	result := dspSrv.CDRsV2StoreSessionCost(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
