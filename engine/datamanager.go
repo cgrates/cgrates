@@ -2857,7 +2857,7 @@ func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.Account, 
 	return
 }
 
-func (dm *DataManager) SetAccountProfile(ap *utils.Account, withIndex bool) (err error) {
+func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}

@@ -45,7 +45,7 @@ func (m *Migrator) migrateCurrentAccountProfiles() (err error) {
 		if ap == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetAccountProfile(ap, true); err != nil {
+		if err := m.dmOut.DataManager().SetAccount(ap, true); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveAccountProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {

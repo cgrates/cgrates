@@ -4720,7 +4720,7 @@ cgrates.org,REM_ACTPROFILE_1
 		Tenant: "cgrates.org",
 		ID:     "REM_ACTPROFILE_1",
 	}
-	if err := ldr.dm.SetAccountProfile(acntPrf, true); err != nil {
+	if err := ldr.dm.SetAccount(acntPrf, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(utils.MetaAccountProfiles, utils.EmptyString); err != nil {
 		t.Error(err)

@@ -767,7 +767,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if ap, err = APItoAccountProfile(tpAP, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetAccountProfile(ap, true); err != nil {
+		if err = tpr.dm.SetAccount(ap, true); err != nil {
 			return
 		}
 		if verbose {

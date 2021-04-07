@@ -1411,7 +1411,7 @@ func testOnStorITActionProfile(t *testing.T) {
 }
 
 func testOnStorITAccountProfile(t *testing.T) {
-	acctPrf := &utils.AccountProfile{
+	acctPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"test_filterId"},
@@ -1450,7 +1450,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	}
 
 	//get from database
-	if err := onStor.SetAccountProfile(acctPrf, false); err != nil {
+	if err := onStor.SetAccount(acctPrf, false); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != nil {
@@ -1469,7 +1469,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 
 	//updateFilters
 	acctPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
-	if err := onStor.SetAccountProfile(acctPrf, false); err != nil {
+	if err := onStor.SetAccount(acctPrf, false); err != nil {
 		t.Error(err)
 	} else if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != nil {
 		t.Error(err)

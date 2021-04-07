@@ -173,7 +173,7 @@ func testCsvITHandleCdr2File(t *testing.T) {
 
 // Scenario out of first .xml config
 func testCsvITHandleSessionFile(t *testing.T) {
-	var acnt *engine.Account
+	var acnt *utils.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
 	if err := csvRPC.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {

@@ -130,7 +130,7 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -199,7 +199,7 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 
 	cgrEvent.Event[utils.AccountField] = "1004"
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -491,7 +491,7 @@ func TestV1AccountProfilesForEvent(t *testing.T) {
 		},
 	}
 
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -512,7 +512,7 @@ func TestV1AccountProfilesForEvent(t *testing.T) {
 	}
 
 	accPrf.Weights[0].FilterIDs = []string{}
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	} else if err := accnts.V1AccountProfilesForEvent(args, &rply); err != nil {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -571,7 +571,7 @@ func TestV1MaxAbstracts(t *testing.T) {
 		},
 	}
 
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -648,7 +648,7 @@ func TestV1DebitAbstracts(t *testing.T) {
 		},
 	}
 
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -769,7 +769,7 @@ func TestV1MaxConcretes(t *testing.T) {
 		},
 	}
 
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -880,7 +880,7 @@ func TestV1DebitConcretes(t *testing.T) {
 		},
 	}
 
-	if err := accnts.dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1037,13 +1037,13 @@ func TestMultipleAccountsFail(t *testing.T) {
 		},
 	}
 
-	if err := accnts.dm.SetAccountProfile(accPrf[0], true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := accnts.dm.SetAccountProfile(accPrf[1], true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf[1], true); err != nil {
 		t.Error(err)
 	}
-	if err := accnts.dm.SetAccountProfile(accPrf[2], true); err != nil {
+	if err := accnts.dm.SetAccount(accPrf[2], true); err != nil {
 		t.Error(err)
 	}
 

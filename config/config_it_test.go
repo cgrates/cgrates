@@ -323,7 +323,7 @@ func testCGRConfigV1ReloadConfigFromPathInvalidSection(t *testing.T) {
 	for _, section := range sortedCfgSections {
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
-	expectedErr := "Invalid section: <InvalidSection>"
+	expectedErr := "Invalid section: <InvalidSection> "
 	var reply string
 	if err := cfg.V1ReloadConfig(&ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
@@ -1032,7 +1032,7 @@ func testLoadConfigFromPathValidPath(t *testing.T) {
 	}
 	cfg := NewDefaultCGRConfig()
 
-	expected := "No config file found on path /tmp/testLoadConfigFromPathValidPath"
+	expected := "No config file found on path /tmp/testLoadConfigFromPathValidPath "
 	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err.Error() != expected {
@@ -1050,7 +1050,7 @@ func testLoadConfigFromPathFile(t *testing.T) {
 	}
 	cfg := NewDefaultCGRConfig()
 
-	expected := "No config file found on path /tmp/testLoadConfigFromPathFile"
+	expected := "No config file found on path /tmp/testLoadConfigFromPathFile "
 	if err = cfg.loadConfigFromPath(newDir,
 		[]func(jsonCfg *CgrJsonCfg) error{cfg.loadFromJSONCfg},
 		false); err == nil || err.Error() != expected {

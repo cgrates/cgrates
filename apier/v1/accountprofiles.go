@@ -99,7 +99,7 @@ func (apierSv1 *APIerSv1) SetAccountProfile(extAp *utils.APIAccountWithOpts, rep
 	if err != nil {
 		return err
 	}
-	if err := apierSv1.DataManager.SetAccountProfile(ap, true); err != nil {
+	if err := apierSv1.DataManager.SetAccount(ap, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAccountProfiles and store it in database

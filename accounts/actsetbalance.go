@@ -75,7 +75,7 @@ func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.
 			return utils.ErrWrongPath
 		}
 	}
-	return dm.SetAccountProfile(qAcnt, false)
+	return dm.SetAccount(qAcnt, false)
 }
 
 // actSetAccountFields sets the fields inside the account

@@ -1041,8 +1041,8 @@ func testDspRplRateProfile(t *testing.T) {
 func testDspRplAccountProfile(t *testing.T) {
 	// Set RateProfile
 	var replyStr string
-	rPrf := &utils.AccountProfileWithAPIOpts{
-		AccountProfile: &utils.AccountProfile{
+	rPrf := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "RP1",
 		},
@@ -1056,7 +1056,7 @@ func testDspRplAccountProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 	// Get RateProfile
-	var reply *utils.AccountProfile
+	var reply *utils.Account
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
@@ -1068,8 +1068,8 @@ func testDspRplAccountProfile(t *testing.T) {
 	}
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountProfile, args, &reply); err != nil {
 		t.Error("Unexpected error when calling ReplicatorSv1.GetAccountProfile: ", err)
-	} else if !reflect.DeepEqual(rPrf.AccountProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v, ", rPrf.AccountProfile, reply)
+	} else if !reflect.DeepEqual(rPrf.Account, reply) {
+		t.Errorf("Expecting: %+v, received: %+v, ", rPrf.Account, reply)
 	}
 	// Stop engine 1
 	allEngine.stopEngine(t)

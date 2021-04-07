@@ -1000,7 +1000,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	accPrf1 := &utils.AccountProfile{
+	accPrf1 := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "test_ID1",
 		FilterIDs: []string{"FIRST", "*string:~*req.Account:DAN"},
@@ -1012,7 +1012,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	accPrf2 := &utils.AccountProfile{
+	accPrf2 := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "test_ID2",
 		FilterIDs: []string{"FIRST"},
@@ -1025,9 +1025,9 @@ func testITAccountProfileIndexes(t *testing.T) {
 		},
 	}
 
-	if err := dataManager.SetAccountProfile(accPrf1, true); err != nil {
+	if err := dataManager.SetAccount(accPrf1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetAccountProfile(accPrf2, true); err != nil {
+	} else if err := dataManager.SetAccount(accPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1067,7 +1067,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	accPrf3 := &utils.AccountProfile{
+	accPrf3 := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "test_ID3",
 		FilterIDs: []string{"SECOND", "*string:~*req.Account:DAN"},
@@ -1079,7 +1079,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetAccountProfile(accPrf3, true); err != nil {
+	if err := dataManager.SetAccount(accPrf3, true); err != nil {
 		t.Error(err)
 	}
 
