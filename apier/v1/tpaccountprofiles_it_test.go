@@ -36,7 +36,7 @@ var (
 	tpAcctPrfCfgPath   string
 	tpAcctPrfCfg       *config.CGRConfig
 	tpAcctPrfRPC       *rpc.Client
-	tpAcctPrf          *utils.TPAccountProfile
+	tpAcctPrf          *utils.TPAccount
 	tpAcctPrfDelay     int
 	tpAcctPrfConfigDIR string //run tests for specific configuration
 )
@@ -110,7 +110,7 @@ func testTPAcctPrfRPCConn(t *testing.T) {
 }
 
 func testTPAcctPrfGetTPAcctPrfBeforeSet(t *testing.T) {
-	var reply *utils.TPAccountProfile
+	var reply *utils.TPAccount
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -118,7 +118,7 @@ func testTPAcctPrfGetTPAcctPrfBeforeSet(t *testing.T) {
 }
 
 func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
-	tpAcctPrf = &utils.TPAccountProfile{
+	tpAcctPrf = &utils.TPAccount{
 		TPid:    "TP1",
 		Tenant:  "cgrates.org",
 		ID:      "1001",
@@ -142,7 +142,7 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 }
 
 func testTPAcctPrfGetTPAcctPrfAfterSet(t *testing.T) {
-	var reply *utils.TPAccountProfile
+	var reply *utils.TPAccount
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err != nil {
 		t.Fatal(err)
@@ -156,7 +156,7 @@ func testTPAcctPrfGetTPAcctPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"cgrates.org:1001"}
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfileIDs,
-		&AttrGetTPAccountProfileIDs{TPid: "TP1"}, &result); err != nil {
+		&AttrGetTPAccountIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -181,8 +181,8 @@ func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 }
 
 func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
-	var reply *utils.TPAccountProfile
-	revTPAcctPrf := &utils.TPAccountProfile{
+	var reply *utils.TPAccount
+	revTPAcctPrf := &utils.TPAccount{
 		TPid:    "TP1",
 		Tenant:  "cgrates.org",
 		ID:      "1001",
@@ -218,7 +218,7 @@ func testTPAcctPrfRemTPAcctPrf(t *testing.T) {
 }
 
 func testTPAcctPrfGetTPAcctPrfAfterRemove(t *testing.T) {
-	var reply *utils.TPAccountProfile
+	var reply *utils.TPAccount
 	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {

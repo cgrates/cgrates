@@ -723,15 +723,15 @@ func testFullRemoteITAction(t *testing.T) {
 
 func testFullRemoteITAccount(t *testing.T) {
 	// verify for not found in internal
-	var reply *utils.AccountProfile
+	var reply *utils.Account
 	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
 
-	apiAccPrf := &utils.APIAccountProfileWithOpts{
-		APIAccountProfile: &utils.APIAccountProfile{
+	apiAccPrf := &utils.APIAccountWithOpts{
+		APIAccount: &utils.APIAccount{
 			Tenant:  "cgrates.org",
 			ID:      "1001",
 			Weights: ";20",
@@ -787,7 +787,7 @@ func testFullRemoteITAccount(t *testing.T) {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	accPrf, err := apiAccPrf.AsAccountProfile()
+	accPrf, err := apiAccPrf.AsAccount()
 	if err != nil {
 		t.Error(err)
 	}
@@ -808,7 +808,7 @@ func testFullRemoteITAccount(t *testing.T) {
 		t.Error("Unexpected reply returned", replySet)
 	}
 
-	accPrf, err = apiAccPrf.AsAccountProfile()
+	accPrf, err = apiAccPrf.AsAccount()
 	if err != nil {
 		t.Error(err)
 	}

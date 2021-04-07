@@ -38,7 +38,7 @@ func (m *Migrator) migrateCurrentAccountProfiles() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating from account profiles", id)
 		}
-		ap, err := m.dmIN.DataManager().GetAccountProfile(tntID[0], tntID[1])
+		ap, err := m.dmIN.DataManager().GetAccount(tntID[0], tntID[1])
 		if err != nil {
 			return err
 		}
@@ -48,7 +48,7 @@ func (m *Migrator) migrateCurrentAccountProfiles() (err error) {
 		if err := m.dmOut.DataManager().SetAccount(ap, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveAccountProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveAccount(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.AccountProfilesString]++

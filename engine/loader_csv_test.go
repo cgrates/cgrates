@@ -83,7 +83,7 @@ func init() {
 	if err := csvr.LoadActionProfiles(); err != nil {
 		log.Print("error in LoadActionProfiles: ", err)
 	}
-	if err := csvr.LoadAccountProfiles(); err != nil {
+	if err := csvr.LoadAccounts(); err != nil {
 		log.Print("error in LoadActionProfiles: ", err)
 	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
@@ -857,8 +857,8 @@ func TestLoadThresholds(t *testing.T) {
 	}
 }
 
-func TestLoadAccountProfiles(t *testing.T) {
-	expected := &utils.TPAccountProfile{
+func TestLoadAccount(t *testing.T) {
+	expected := &utils.TPAccount{
 		TPid:    testTPID,
 		Tenant:  "cgrates.org",
 		ID:      "1001",

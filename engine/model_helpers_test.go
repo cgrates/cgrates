@@ -5299,8 +5299,8 @@ func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 	}
 }
 
-func TestAccountProfileMdlsCSVHeader(t *testing.T) {
-	testStruct := AccountProfileMdls{{
+func TestAccountMdlsCSVHeader(t *testing.T) {
+	testStruct := AccountMdls{{
 		Tpid:               "TEST_TPID",
 		Tenant:             "cgrates.org",
 		ID:                 "ResGroup1",
@@ -5320,8 +5320,8 @@ func TestAccountProfileMdlsCSVHeader(t *testing.T) {
 	}
 }
 
-func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
-	testStruct := AccountProfileMdls{{
+func TestAccountMdlsAsTPAccount(t *testing.T) {
+	testStruct := AccountMdls{{
 		PK:                    0,
 		Tpid:                  "TEST_TPID",
 		Tenant:                "cgrates.org",
@@ -5338,7 +5338,7 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 		ThresholdIDs:          "WARN_RES1",
 	},
 	}
-	exp := []*utils.TPAccountProfile{
+	exp := []*utils.TPAccount{
 		{
 			TPid:      "TEST_TPID",
 			Tenant:    "cgrates.org",
@@ -5362,7 +5362,7 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 			ThresholdIDs: []string{"WARN_RES1"},
 		},
 	}
-	result, err := testStruct.AsTPAccountProfile()
+	result, err := testStruct.AsTPAccount()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -5373,8 +5373,8 @@ func TestAccountProfileMdlsAsTPAccountProfile(t *testing.T) {
 	}
 }
 
-func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
-	testStruct := AccountProfileMdls{{
+func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
+	testStruct := AccountMdls{{
 		PK:                 0,
 		Tpid:               "TEST_TPID",
 		Tenant:             "cgrates.org",
@@ -5390,7 +5390,7 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 		ThresholdIDs:       "WARN_RES1",
 	},
 	}
-	exp := []*utils.TPAccountProfile{
+	exp := []*utils.TPAccount{
 		{
 			TPid:      "TEST_TPID",
 			Tenant:    "cgrates.org",
@@ -5412,7 +5412,7 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 			ThresholdIDs: []string{"WARN_RES1"},
 		},
 	}
-	result, err := testStruct.AsTPAccountProfile()
+	result, err := testStruct.AsTPAccount()
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, result) {
@@ -5420,8 +5420,8 @@ func TestAccountProfileMdlsAsTPAccountProfileCase2(t *testing.T) {
 	}
 }
 
-func TestAccountProfileMdlsAsTPAccountProfileError(t *testing.T) {
-	testStruct := AccountProfileMdls{
+func TestAccountMdlsAsTPAccountError(t *testing.T) {
+	testStruct := AccountMdls{
 		{
 			PK:                    0,
 			Tpid:                  "TEST_TPID",
@@ -5432,32 +5432,32 @@ func TestAccountProfileMdlsAsTPAccountProfileError(t *testing.T) {
 		},
 	}
 	expectedErr := "invlid key: <AN;INVALID;COST;INCREMENT;VALUE> for BalanceCostIncrements"
-	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+	if _, err := testStruct.AsTPAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	testStruct[0].BalanceCostIncrements = ";20;not_float;10"
 	expectedErr = "strconv.ParseFloat: parsing \"not_float\": invalid syntax"
-	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+	if _, err := testStruct.AsTPAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	testStruct[0].BalanceCostIncrements = utils.EmptyString
 	testStruct[0].BalanceUnitFactors = "NOT;A;VALUE"
 	expectedErr = "invlid key: <NOT;A;VALUE> for BalanceUnitFactors"
-	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+	if _, err := testStruct.AsTPAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	testStruct[0].BalanceUnitFactors = ";float"
 	expectedErr = "strconv.ParseFloat: parsing \"float\": invalid syntax"
-	if _, err := testStruct.AsTPAccountProfile(); err == nil || err.Error() != expectedErr {
+	if _, err := testStruct.AsTPAccount(); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
-func TestAPItoModelTPAccountProfile(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestAPItoModelTPAccount(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		TPid:      "TEST_TPID",
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
@@ -5479,7 +5479,7 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	exp := AccountProfileMdls{{
+	exp := AccountMdls{{
 		Tpid:               "TEST_TPID",
 		Tenant:             "cgrates.org",
 		ID:                 "ResGroup1",
@@ -5493,14 +5493,14 @@ func TestAPItoModelTPAccountProfile(t *testing.T) {
 		BalanceUnits:       3600000000000,
 		ThresholdIDs:       "WARN_RES1",
 	}}
-	result := APItoModelTPAccountProfile(testStruct)
+	result := APItoModelTPAccount(testStruct)
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
 
-func TestAPItoModelTPAccountProfileNoBalance(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestAPItoModelTPAccountNoBalance(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		TPid:      "TEST_TPID",
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
@@ -5512,15 +5512,15 @@ func TestAPItoModelTPAccountProfileNoBalance(t *testing.T) {
 		Weights:      "10.0",
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	var exp AccountProfileMdls = nil
-	result := APItoModelTPAccountProfile(testStruct)
+	var exp AccountMdls = nil
+	result := APItoModelTPAccount(testStruct)
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
 
-func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestAPItoModelTPAccountCase2(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		TPid:      "TEST_TPID",
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
@@ -5567,7 +5567,7 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 		},
 		ThresholdIDs: []string{"WARN_RES1", "WARN_RES2"},
 	}
-	exp := AccountProfileMdls{{
+	exp := AccountMdls{{
 		Tpid:                  "TEST_TPID",
 		Tenant:                "cgrates.org",
 		ID:                    "ResGroup1",
@@ -5588,14 +5588,14 @@ func TestAPItoModelTPAccountProfileCase2(t *testing.T) {
 	sort.Strings(testStruct.FilterIDs)
 	sort.Strings(testStruct.ThresholdIDs)
 	sort.Strings(testStruct.Balances["VoiceBalance"].FilterIDs)
-	result := APItoModelTPAccountProfile(testStruct)
+	result := APItoModelTPAccount(testStruct)
 	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
 
-func TestApitoAccountProfileCase2(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestApitoAccountCase2(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
 		FilterIDs: []string{"FLTR_RES_GR1"},
@@ -5648,7 +5648,7 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 			}},
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	result, err := APItoAccountProfile(testStruct, "")
+	result, err := APItoAccount(testStruct, "")
 	if err != nil {
 		t.Errorf("Expecting: <nil>,\nreceived: <%+v>", err)
 	}
@@ -5657,8 +5657,8 @@ func TestApitoAccountProfileCase2(t *testing.T) {
 	}
 }
 
-func TestApiToAccountProfileWeightsError(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestApiToAccountWeightsError(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		Tenant:  "cgrates.org",
 		Weights: "10",
 		Balances: map[string]*utils.TPAccountBalance{
@@ -5669,19 +5669,19 @@ func TestApiToAccountProfileWeightsError(t *testing.T) {
 		},
 	}
 	expectedErr := "invalid DynamicWeight format for string <10>"
-	if _, err := APItoAccountProfile(testStruct, ""); err == nil || err.Error() != expectedErr {
+	if _, err := APItoAccount(testStruct, ""); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expecting: %+v,\nreceived: <%+v>", expectedErr, err)
 	}
 
 	testStruct.Weights = ";10"
 	testStruct.Balances["VoiceBalance"].Weights = "10"
-	if _, err := APItoAccountProfile(testStruct, ""); err == nil || err.Error() != expectedErr {
+	if _, err := APItoAccount(testStruct, ""); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expecting: %+v,\nreceived: <%+v>", expectedErr, err)
 	}
 }
 
-func TestApitoAccountProfileCaseTimeError(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestApitoAccountCaseTimeError(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
 		FilterIDs: []string{"FLTR_RES_GR1"},
@@ -5702,14 +5702,14 @@ func TestApitoAccountProfileCaseTimeError(t *testing.T) {
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	_, err := APItoAccountProfile(testStruct, "")
+	_, err := APItoAccount(testStruct, "")
 	if err == nil || err.Error() != "Unsupported time format" {
 		t.Errorf("Expecting: <Unsupported time format>,\nreceived: <%+v>", err)
 	}
 }
 
-func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
-	testStruct := &utils.TPAccountProfile{
+func TestApitoAccountCaseTimeError2(t *testing.T) {
+	testStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
 		FilterIDs: []string{"FLTR_RES_GR1"},
@@ -5730,7 +5730,7 @@ func TestApitoAccountProfileCaseTimeError2(t *testing.T) {
 		},
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
-	_, err := APItoAccountProfile(testStruct, "")
+	_, err := APItoAccount(testStruct, "")
 	if err == nil || err.Error() != "malformed option for ActionProfile <cgrates.org:ResGroup1> for action <VoiceBalance>" {
 		t.Errorf("Expecting: <malformed option for ActionProfile <cgrates.org:ResGroup1> for action <VoiceBalance>>,\nreceived: <%+v>", err)
 	}
@@ -5808,7 +5808,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 	}
 }
 
-func TestModelHelpersAccountProfileToAPI(t *testing.T) {
+func TestModelHelpersAccountToAPI(t *testing.T) {
 	testStruct := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
@@ -5855,7 +5855,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 			}},
 		ThresholdIDs: []string{"test_thrs"},
 	}
-	expStruct := &utils.TPAccountProfile{
+	expStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"test_filterId"},
@@ -5892,7 +5892,7 @@ func TestModelHelpersAccountProfileToAPI(t *testing.T) {
 		},
 		ThresholdIDs: []string{"test_thrs"},
 	}
-	if result := AccountProfileToAPI(testStruct); !reflect.DeepEqual(result, expStruct) {
+	if result := AccountToAPI(testStruct); !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
 }

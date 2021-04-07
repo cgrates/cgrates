@@ -95,7 +95,7 @@ func TestActSetAccountBalance(t *testing.T) {
 	}
 	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := dm.GetAccountProfile("cgrates.org", acntID); err != nil {
+	} else if rcv, err := dm.GetAccount("cgrates.org", acntID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expectedAcc) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAcc), utils.ToJSON(rcv))
@@ -144,7 +144,7 @@ func TestActSetAccount(t *testing.T) {
 	}
 	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := dm.GetAccountProfile("cgrates.org", acntID); err != nil {
+	} else if rcv, err := dm.GetAccount("cgrates.org", acntID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expectedAcc) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAcc), utils.ToJSON(rcv))
