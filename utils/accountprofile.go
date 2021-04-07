@@ -299,8 +299,8 @@ func (aps AccountsWithWeight) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
 
-// AccountProfiles returns the list of AccountProfiles
-func (apWws AccountsWithWeight) AccountProfiles() (aps []*Account) {
+// Accounts returns the list of Account
+func (apWws AccountsWithWeight) Accounts() (aps []*Account) {
 	if apWws != nil {
 		aps = make([]*Account, len(apWws))
 		for i, apWw := range apWws {

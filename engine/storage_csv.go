@@ -486,16 +486,16 @@ func (csvs *CSVStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.T
 	return tpDPPs.AsTPActionProfile(), nil
 }
 
-func (csvs *CSVStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.TPAccountProfile, error) {
-	var tpDPPs AccountProfileMdls
-	if err := csvs.proccesData(AccountProfileMdl{}, csvs.accountProfilesFn, func(tp interface{}) {
-		dpp := tp.(AccountProfileMdl)
+func (csvs *CSVStorage) GetTPAccounts(tpid, tenant, id string) ([]*utils.TPAccount, error) {
+	var tpDPPs AccountMdls
+	if err := csvs.proccesData(AccountMdl{}, csvs.accountProfilesFn, func(tp interface{}) {
+		dpp := tp.(AccountMdl)
 		dpp.Tpid = tpid
 		tpDPPs = append(tpDPPs, &dpp)
 	}); err != nil {
 		return nil, err
 	}
-	return tpDPPs.AsTPAccountProfile()
+	return tpDPPs.AsTPAccount()
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

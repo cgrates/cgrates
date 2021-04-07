@@ -346,7 +346,7 @@ func (iDB *InternalDB) GetTPActionProfiles(tpid, tenant, id string) (tpPrfs []*u
 	return
 }
 
-func (iDB *InternalDB) GetTPAccountProfiles(tpid, tenant, id string) (tpPrfs []*utils.TPAccountProfile, err error) {
+func (iDB *InternalDB) GetTPAccounts(tpid, tenant, id string) (tpPrfs []*utils.TPAccount, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + tenant
@@ -360,7 +360,7 @@ func (iDB *InternalDB) GetTPAccountProfiles(tpid, tenant, id string) (tpPrfs []*
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
-		tpPrfs = append(tpPrfs, x.(*utils.TPAccountProfile))
+		tpPrfs = append(tpPrfs, x.(*utils.TPAccount))
 	}
 	if len(tpPrfs) == 0 {
 		return nil, utils.ErrNotFound
@@ -531,7 +531,7 @@ func (iDB *InternalDB) SetTPActionProfiles(tpPrfs []*utils.TPActionProfile) (err
 	return
 }
 
-func (iDB *InternalDB) SetTPAccountProfiles(tpPrfs []*utils.TPAccountProfile) (err error) {
+func (iDB *InternalDB) SetTPAccounts(tpPrfs []*utils.TPAccount) (err error) {
 	if len(tpPrfs) == 0 {
 		return nil
 	}

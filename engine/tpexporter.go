@@ -237,13 +237,13 @@ func (tpExp *TPExporter) Run() error {
 		}
 	}
 
-	storDataAccountProfiles, err := tpExp.storDB.GetTPAccountProfiles(tpExp.tpID, "", "")
+	storDataAccountProfiles, err := tpExp.storDB.GetTPAccounts(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpAccountProfiles))
 		withError = true
 	}
 	for _, sd := range storDataAccountProfiles {
-		sdModels := APItoModelTPAccountProfile(sd)
+		sdModels := APItoModelTPAccount(sd)
 		for _, sdModel := range sdModels {
 			toExportMap[utils.AccountProfilesCsv] = append(toExportMap[utils.AccountProfilesCsv], sdModel)
 		}

@@ -642,19 +642,19 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	case utils.MetaAccountProfiles:
 		cacheIDs = []string{utils.CacheAccountProfilesFilterIndexes}
 		for _, lDataSet := range lds {
-			acpsModels := make(engine.AccountProfileMdls, len(lDataSet))
+			acpsModels := make(engine.AccountMdls, len(lDataSet))
 			for i, ld := range lDataSet {
-				acpsModels[i] = new(engine.AccountProfileMdl)
+				acpsModels[i] = new(engine.AccountMdl)
 				if err = utils.UpdateStructWithIfaceMap(acpsModels[i], ld); err != nil {
 					return
 				}
 			}
-			accountTPModels, err := acpsModels.AsTPAccountProfile()
+			accountTPModels, err := acpsModels.AsTPAccount()
 			if err != nil {
 				return err
 			}
 			for _, tpAcp := range accountTPModels {
-				acp, err := engine.APItoAccountProfile(tpAcp, ldr.timezone)
+				acp, err := engine.APItoAccount(tpAcp, ldr.timezone)
 				if err != nil {
 					return err
 				}
@@ -1021,7 +1021,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveAccountProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveAccount(tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}

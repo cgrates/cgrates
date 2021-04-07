@@ -2831,7 +2831,7 @@ func (dm *DataManager) checkFilters(tenant string, ids []string) (brokenReferenc
 	return
 }
 
-func (dm *DataManager) GetAccountProfile(tenant, id string) (ap *utils.Account, err error) {
+func (dm *DataManager) GetAccount(tenant, id string) (ap *utils.Account, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -2868,7 +2868,7 @@ func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error)
 				brokenReference, ap.TenantID())
 		}
 	}
-	oldRpp, err := dm.GetAccountProfile(ap.Tenant, ap.ID)
+	oldRpp, err := dm.GetAccount(ap.Tenant, ap.ID)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -2898,12 +2898,12 @@ func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error)
 	return
 }
 
-func (dm *DataManager) RemoveAccountProfile(tenant, id string,
+func (dm *DataManager) RemoveAccount(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetAccountProfile(tenant, id)
+	oldRpp, err := dm.GetAccount(tenant, id)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

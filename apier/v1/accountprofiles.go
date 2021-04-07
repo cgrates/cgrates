@@ -35,7 +35,7 @@ func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithAPIOpts, repl
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	ap, err := apierSv1.DataManager.GetAccountProfile(tnt, arg.ID)
+	ap, err := apierSv1.DataManager.GetAccount(tnt, arg.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -119,7 +119,7 @@ func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithAPIOpts, r
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveAccountProfile(tnt, arg.ID,
+	if err := apierSv1.DataManager.RemoveAccount(tnt, arg.ID,
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
