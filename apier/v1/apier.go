@@ -1106,16 +1106,16 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter := csv.NewWriter(f)
 			csvWriter.Comma = utils.CSVSep
 			//write the header of the file
-			if err := csvWriter.Write(engine.AccountProfileMdls{}.CSVHeader()); err != nil {
+			if err := csvWriter.Write(engine.AccountMdls{}.CSVHeader()); err != nil {
 				return err
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				accPrf, err := apierSv1.DataManager.GetAccountProfile(tntID[0], tntID[1])
+				accPrf, err := apierSv1.DataManager.GetAccount(tntID[0], tntID[1])
 				if err != nil {
 					return err
 				}
-				for _, model := range engine.APItoModelTPAccountProfile(engine.AccountProfileToAPI(accPrf)) {
+				for _, model := range engine.APItoModelTPAccount(engine.AccountToAPI(accPrf)) {
 					if record, err := engine.CsvDump(model); err != nil {
 						return err
 					} else if err := csvWriter.Write(record); err != nil {

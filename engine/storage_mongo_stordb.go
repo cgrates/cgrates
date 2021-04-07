@@ -1055,7 +1055,7 @@ func (ms *MongoStorage) GetTPActionProfiles(tpid, tenant, id string) ([]*utils.T
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.TPAccountProfile, error) {
+func (ms *MongoStorage) GetTPAccounts(tpid, tenant, id string) ([]*utils.TPAccount, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
@@ -1063,14 +1063,14 @@ func (ms *MongoStorage) GetTPAccountProfiles(tpid, tenant, id string) ([]*utils.
 	if tenant != "" {
 		filter["tenant"] = tenant
 	}
-	var results []*utils.TPAccountProfile
+	var results []*utils.TPAccount
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.TBLTPAccountProfiles).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
 		for cur.Next(sctx) {
-			var tp utils.TPAccountProfile
+			var tp utils.TPAccount
 			err := cur.Decode(&tp)
 			if err != nil {
 				return err
@@ -1103,7 +1103,7 @@ func (ms *MongoStorage) SetTPActionProfiles(tpAps []*utils.TPActionProfile) (err
 	})
 }
 
-func (ms *MongoStorage) SetTPAccountProfiles(tpAps []*utils.TPAccountProfile) (err error) {
+func (ms *MongoStorage) SetTPAccounts(tpAps []*utils.TPAccount) (err error) {
 	if len(tpAps) == 0 {
 		return
 	}

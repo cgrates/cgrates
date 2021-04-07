@@ -326,11 +326,11 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 			return utils.APIErrorHandler(err)
 		}
 	}
-	//AccountProfile Indexes
+	//Account Indexes
 	if args.AccountS {
 		if args.AccountS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountProfilesFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				acp, e := apierSv1.DataManager.GetAccountProfile(tnt, id)
+				acp, e := apierSv1.DataManager.GetAccount(tnt, id)
 				if e != nil {
 					return nil, e
 				}
@@ -465,7 +465,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 			return
 		}
 	}
-	//AccountProfile Indexes
+	//Account Indexes
 	if args.AccountS {
 		if err = apierSv1.DataManager.SetIndexes(utils.CacheAccountProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
@@ -577,10 +577,10 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		}); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
-	//AccountProfile Indexes
+	//Account Indexes
 	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountProfilesFilterIndexes,
 		&args.AccountProfileIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			acp, e := apierSv1.DataManager.GetAccountProfile(tnt, id)
+			acp, e := apierSv1.DataManager.GetAccount(tnt, id)
 			if e != nil {
 				return nil, e
 			}

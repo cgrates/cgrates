@@ -346,7 +346,7 @@ func restoreAccounts(dm *engine.DataManager,
 }
 
 // unlockAccountProfiles is used to unlock the accounts based on their lock identifiers
-func unlockAccountProfiles(acnts utils.AccountsWithWeight) {
+func unlockAccounts(acnts utils.AccountsWithWeight) {
 	for _, lkID := range acnts.LockIDs() {
 		guardian.Guardian.UnguardIDs(lkID)
 	}

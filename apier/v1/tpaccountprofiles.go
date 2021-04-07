@@ -23,14 +23,14 @@ import (
 )
 
 // SetTPAccountProfile creates a new TPAccountProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPAccountProfile(attrs *utils.TPAccountProfile, reply *string) error {
+func (apierSv1 *APIerSv1) SetTPAccountProfile(attrs *utils.TPAccount, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attrs.Tenant == utils.EmptyString {
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.StorDb.SetTPAccountProfiles([]*utils.TPAccountProfile{attrs}); err != nil {
+	if err := apierSv1.StorDb.SetTPAccounts([]*utils.TPAccount{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -38,14 +38,14 @@ func (apierSv1 *APIerSv1) SetTPAccountProfile(attrs *utils.TPAccountProfile, rep
 }
 
 // GetTPAccountProfile queries specific TPAccountProfile on tariff plan
-func (apierSv1 *APIerSv1) GetTPAccountProfile(attr *utils.TPTntID, reply *utils.TPAccountProfile) error {
+func (apierSv1 *APIerSv1) GetTPAccountProfile(attr *utils.TPTntID, reply *utils.TPAccount) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.Tenant == utils.EmptyString {
 		attr.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	spp, err := apierSv1.StorDb.GetTPAccountProfiles(attr.TPid, attr.Tenant, attr.ID)
+	spp, err := apierSv1.StorDb.GetTPAccounts(attr.TPid, attr.Tenant, attr.ID)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
@@ -56,13 +56,13 @@ func (apierSv1 *APIerSv1) GetTPAccountProfile(attr *utils.TPTntID, reply *utils.
 	return nil
 }
 
-type AttrGetTPAccountProfileIDs struct {
+type AttrGetTPAccountIDs struct {
 	TPid string // Tariff plan id
 	utils.PaginatorWithSearch
 }
 
 // GetTPRouteProfileIDs queries TPAccountProfiles identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPAccountProfileIDs(attrs *AttrGetTPAccountProfileIDs, reply *[]string) error {
+func (apierSv1 *APIerSv1) GetTPAccountProfileIDs(attrs *AttrGetTPAccountIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -382,7 +382,7 @@ func (ActionProfileMdl) TableName() string {
 	return utils.TBLTPActionProfiles
 }
 
-type AccountProfileMdl struct {
+type AccountMdl struct {
 	PK                    uint `gorm:"primary_key"`
 	Tpid                  string
 	Tenant                string  `index:"0" re:""`
@@ -405,6 +405,6 @@ type AccountProfileMdl struct {
 	CreatedAt             time.Time
 }
 
-func (AccountProfileMdl) TableName() string {
+func (AccountMdl) TableName() string {
 	return utils.TBLTPAccountProfiles
 }

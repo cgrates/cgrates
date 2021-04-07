@@ -98,13 +98,13 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		}
 		var qAcnt *utils.Account
-		if qAcnt, err = aS.dm.GetAccountProfile(tnt, acntID); err != nil {
+		if qAcnt, err = aS.dm.GetAccount(tnt, acntID); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
 			}
-			unlockAccountProfiles(acnts) // in case of errors will not have unlocks in upper layers
+			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 			return
 		}
 		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled ||
@@ -116,7 +116,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 		var pass bool
 		if pass, err = aS.fltrS.Pass(tnt, qAcnt.FilterIDs, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
-			unlockAccountProfiles(acnts)
+			unlockAccounts(acnts)
 			return
 		} else if !pass {
 			guardian.Guardian.UnguardIDs(refID)
@@ -126,7 +126,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 		if weight, err = engine.WeightFromDynamics(qAcnt.Weights,
 			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
-			unlockAccountProfiles(acnts)
+			unlockAccounts(acnts)
 			return
 		}
 		acnts = append(acnts, &utils.AccountWithWeight{qAcnt, weight, refID})
@@ -263,7 +263,7 @@ func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, 
 		}
 		return
 	}
-	*aps = acnts.AccountProfiles()
+	*aps = acnts.Accounts()
 	return
 }
 
@@ -277,7 +277,7 @@ func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.
 		}
 		return
 	}
-	defer unlockAccountProfiles(acnts)
+	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, false); err != nil {
@@ -301,7 +301,7 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 		}
 		return
 	}
-	defer unlockAccountProfiles(acnts)
+	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, true); err != nil {
@@ -327,7 +327,7 @@ func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.
 		}
 		return
 	}
-	defer unlockAccountProfiles(acnts)
+	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, false); err != nil {
@@ -351,7 +351,7 @@ func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *util
 		}
 		return
 	}
-	defer unlockAccountProfiles(acnts)
+	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, true); err != nil {
@@ -403,7 +403,7 @@ func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rpl
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
 	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		qAcnt, err := aS.dm.GetAccountProfile(tnt, args.AccountID)
+		qAcnt, err := aS.dm.GetAccount(tnt, args.AccountID)
 		if err != nil {
 			return nil, err
 		}

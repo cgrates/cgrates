@@ -232,9 +232,9 @@ func (tpImp *TPCSVImporter) importAccountProfiles(fn string) error {
 	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rpps, err := tpImp.csvr.GetTPAccountProfiles(tpImp.TPid, "", "")
+	rpps, err := tpImp.csvr.GetTPAccounts(tpImp.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return tpImp.StorDB.SetTPAccountProfiles(rpps)
+	return tpImp.StorDB.SetTPAccounts(rpps)
 }

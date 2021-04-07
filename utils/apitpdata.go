@@ -995,7 +995,7 @@ type TPAPDiktat struct {
 	Value string
 }
 
-type TPAccountProfile struct {
+type TPAccount struct {
 	TPid               string
 	Tenant             string
 	ID                 string

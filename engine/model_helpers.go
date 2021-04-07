@@ -2653,10 +2653,10 @@ func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 	return
 }
 
-type AccountProfileMdls []*AccountProfileMdl
+type AccountMdls []*AccountMdl
 
 // CSVHeader return the header for csv fields as a slice of string
-func (apm AccountProfileMdls) CSVHeader() (result []string) {
+func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
 		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
@@ -2664,15 +2664,15 @@ func (apm AccountProfileMdls) CSVHeader() (result []string) {
 	}
 }
 
-func (apm AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountProfile, err error) {
+func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 	filterIDsMap := make(map[string]utils.StringSet)
 	thresholdIDsMap := make(map[string]utils.StringSet)
-	actPrfMap := make(map[string]*utils.TPAccountProfile)
+	actPrfMap := make(map[string]*utils.TPAccount)
 	for _, tp := range apm {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		aPrf, found := actPrfMap[tenID]
 		if !found {
-			aPrf = &utils.TPAccountProfile{
+			aPrf = &utils.TPAccount{
 				TPid:     tp.Tpid,
 				Tenant:   tp.Tenant,
 				ID:       tp.ID,
@@ -2759,7 +2759,7 @@ func (apm AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 		}
 		actPrfMap[tenID] = aPrf
 	}
-	result = make([]*utils.TPAccountProfile, len(actPrfMap))
+	result = make([]*utils.TPAccount, len(actPrfMap))
 	i := 0
 	for tntID, th := range actPrfMap {
 		result[i] = th
@@ -2770,13 +2770,13 @@ func (apm AccountProfileMdls) AsTPAccountProfile() (result []*utils.TPAccountPro
 	return
 }
 
-func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfileMdls) {
+func APItoModelTPAccount(tPrf *utils.TPAccount) (mdls AccountMdls) {
 	if len(tPrf.Balances) == 0 {
 		return
 	}
 	i := 0
 	for _, balance := range tPrf.Balances {
-		mdl := &AccountProfileMdl{
+		mdl := &AccountMdl{
 			Tenant: tPrf.Tenant,
 			Tpid:   tPrf.TPid,
 			ID:     tPrf.ID,
@@ -2845,7 +2845,7 @@ func APItoModelTPAccountProfile(tPrf *utils.TPAccountProfile) (mdls AccountProfi
 	return
 }
 
-func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *utils.Account, err error) {
+func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, err error) {
 	ap = &utils.Account{
 		Tenant:       tpAp.Tenant,
 		ID:           tpAp.ID,
@@ -2939,8 +2939,8 @@ func APItoAccountProfile(tpAp *utils.TPAccountProfile, timezone string) (ap *uti
 	return
 }
 
-func AccountProfileToAPI(ap *utils.Account) (tpAp *utils.TPAccountProfile) {
-	tpAp = &utils.TPAccountProfile{
+func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
+	tpAp = &utils.TPAccount{
 		Tenant:             ap.Tenant,
 		ID:                 ap.ID,
 		Weights:            ap.Weights.String(";", "&"),
