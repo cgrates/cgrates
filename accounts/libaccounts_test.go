@@ -466,7 +466,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 			},
 		},
 	}
-	if err := dm.SetAccountProfile(acntPrf, false); err != nil {
+	if err := dm.SetAccount(acntPrf, false); err != nil {
 		t.Error(err)
 	}
 
@@ -553,7 +553,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 			},
 		},
 	}
-	if err := dm.SetAccountProfile(acntPrf, false); err != nil {
+	if err := dm.SetAccount(acntPrf, false); err != nil {
 		t.Error(err)
 	}
 

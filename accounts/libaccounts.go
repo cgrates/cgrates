@@ -338,7 +338,7 @@ func restoreAccounts(dm *engine.DataManager,
 			continue
 		}
 		acnts[i].Account.RestoreFromBackup(bkp)
-		if err := dm.SetAccountProfile(acnts[i].Account, false); err != nil {
+		if err := dm.SetAccount(acnts[i].Account, false); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> restoring account <%s>",
 				utils.AccountS, err, acnts[i].Account.TenantID()))
 		}

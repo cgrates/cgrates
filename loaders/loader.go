@@ -666,7 +666,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, acp.TenantID())
-				if err := ldr.dm.SetAccountProfile(acp, true); err != nil {
+				if err := ldr.dm.SetAccount(acp, true); err != nil {
 					return err
 				}
 			}

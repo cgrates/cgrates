@@ -37,8 +37,8 @@ var (
 	accPrfCfgPath   string
 	accPrfCfg       *config.CGRConfig
 	accSRPC         *rpc.Client
-	apiAccPrf       *utils.APIAccountProfileWithOpts
-	accPrf          *utils.AccountProfile
+	apiAccPrf       *utils.APIAccountWithOpts
+	accPrf          *utils.Account
 	accPrfConfigDIR string //run tests for specific configuration
 
 	sTestsAccPrf = []func(t *testing.T){
@@ -126,7 +126,7 @@ func testAccountSLoadFromFolder(t *testing.T) {
 }
 
 func testAccountSGetAccountProfile(t *testing.T) {
-	eAcnt := &utils.AccountProfile{
+	eAcnt := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -206,7 +206,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	var reply *utils.AccountProfile
+	var reply *utils.Account
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
 		t.Fatal(err)
@@ -225,8 +225,8 @@ func testAccountSPing(t *testing.T) {
 }
 
 func testAccountSSettAccountProfile(t *testing.T) {
-	apiAccPrf = &utils.APIAccountProfileWithOpts{
-		APIAccountProfile: &utils.APIAccountProfile{
+	apiAccPrf = &utils.APIAccountWithOpts{
+		APIAccount: &utils.APIAccount{
 			Tenant:  "cgrates.org",
 			ID:      "id_test",
 			Weights: ";10",
@@ -279,10 +279,10 @@ func testAccountSSettAccountProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var err error
-	if accPrf, err = apiAccPrf.AsAccountProfile(); err != nil {
+	if accPrf, err = apiAccPrf.AsAccount(); err != nil {
 		t.Error(err)
 	}
-	var reply2 *utils.AccountProfile
+	var reply2 *utils.Account
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
@@ -337,10 +337,10 @@ func testAccountSUpdateAccountProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var err error
-	if accPrf, err = apiAccPrf.AsAccountProfile(); err != nil {
+	if accPrf, err = apiAccPrf.AsAccount(); err != nil {
 		t.Error(err)
 	}
-	var reply2 *utils.AccountProfile
+	var reply2 *utils.Account
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
@@ -356,7 +356,7 @@ func testAccountSRemoveAccountProfile(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	var reply2 *utils.AccountProfile
+	var reply2 *utils.Account
 	expErr := utils.ErrNotFound.Error()
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {

@@ -180,7 +180,7 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 			ec = utils.NewEventCharges()
 		}
 		if store && acnt.Account.BalancesAltered(acntBkps[i]) {
-			if err = aS.dm.SetAccountProfile(acnt.Account, false); err != nil {
+			if err = aS.dm.SetAccount(acnt.Account, false); err != nil {
 				restoreAccounts(aS.dm, acnts, acntBkps)
 				return
 			}
@@ -410,7 +410,7 @@ func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rpl
 		for _, balID := range args.BalanceIDs {
 			delete(qAcnt.Balances, balID)
 		}
-		return nil, aS.dm.SetAccountProfile(qAcnt, false)
+		return nil, aS.dm.SetAccount(qAcnt, false)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
 		utils.ConcatenatedKey(utils.CacheAccountProfiles, tnt, args.AccountID)); err != nil {
 		return

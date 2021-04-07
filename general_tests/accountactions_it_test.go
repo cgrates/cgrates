@@ -238,7 +238,7 @@ func testAccActionsExecuteAction2(t *testing.T) {
 }
 
 func testAccActionsGetAccountAfterActions(t *testing.T) {
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1001",
 		Balances: map[string]*utils.Balance{
@@ -270,7 +270,7 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	var result *utils.AccountProfile
+	var result *utils.Account
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
 		t.Error(err)
@@ -338,13 +338,13 @@ func testAccActionsExecuteAction3(t *testing.T) {
 }
 
 func testAccActionsGetAccountAfterRemActions(t *testing.T) {
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant:       "cgrates.org",
 		ID:           "1001",
 		Balances:     map[string]*utils.Balance{},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	var result *utils.AccountProfile
+	var result *utils.Account
 	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
 		t.Error(err)
