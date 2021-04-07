@@ -476,7 +476,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
 	})
 
-	if rcv, err := dm.GetAccountProfile("cgrates.org", "1001"); err != nil {
+	if rcv, err := dm.GetAccount("cgrates.org", "1001"); err != nil {
 		t.Error(err)
 	} else if len(rcv.Balances) != 2 {
 		t.Errorf("Unexpected number of balances received")
@@ -582,7 +582,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 	//AccountS
 	accnts := NewAccountS(cfg, fltr, connMngr, dm)
 
-	accPrf := &utils.AccountProfile{
+	accPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "1002",
 		FilterIDs: []string{"*string:~*req.Account:2003"},
@@ -620,7 +620,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetAccountProfile(accPrf, true); err != nil {
+	if err := dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -681,13 +681,13 @@ func TestDebitFromBothBalances(t *testing.T) {
 	accPrf.Balances["AbstractBalance"].Units = utils.NewDecimal(1200, 0)
 	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(49999999997, 9)
 	//as we debited, the account is changed
-	if rcvAcc, err := dm.GetAccountProfile(accPrf.Tenant, accPrf.ID); err != nil {
+	if rcvAcc, err := dm.GetAccount(accPrf.Tenant, accPrf.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvAcc, accPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcvAcc))
 	}
 
-	if err := dm.RemoveAccountProfile(accPrf.Tenant, accPrf.ID,
+	if err := dm.RemoveAccount(accPrf.Tenant, accPrf.ID,
 		utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	} else if err := dm.RemoveRateProfile(rtPrf.Tenant, rtPrf.ID,

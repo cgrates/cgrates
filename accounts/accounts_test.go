@@ -459,7 +459,7 @@ func TestAccountsDebit(t *testing.T) {
 	log.SetOutput(os.Stderr)
 }
 
-func TestV1AccountProfilesForEvent(t *testing.T) {
+func TestV1AccountsForEvent(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -688,7 +688,7 @@ func TestV1DebitAbstracts(t *testing.T) {
 
 	//now we'll check the debited account
 	accPrf.Balances["AbstractBalance1"].Units = &utils.Decimal{decimal.New(39999999973, 0)}
-	if debitedAcc, err := accnts.dm.GetAccountProfile(accPrf.Tenant, accPrf.ID); err != nil {
+	if debitedAcc, err := accnts.dm.GetAccount(accPrf.Tenant, accPrf.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, debitedAcc) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(accPrf), utils.ToJSON(debitedAcc))
@@ -917,7 +917,7 @@ func TestV1DebitConcretes(t *testing.T) {
 	}
 
 	//now we will check the debited account
-	rcv, err := accnts.dm.GetAccountProfile("cgrates.org", "TestV1DebitAbstracts")
+	rcv, err := accnts.dm.GetAccount("cgrates.org", "TestV1DebitAbstracts")
 	if err != nil {
 		t.Error(err)
 	}
@@ -1137,7 +1137,7 @@ func TestV1ActionSetBalance(t *testing.T) {
 			},
 		},
 	}
-	if rcv, err := accnts.dm.GetAccountProfile(args.Tenant, args.AccountID); err != nil {
+	if rcv, err := accnts.dm.GetAccount(args.Tenant, args.AccountID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedAcc, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAcc), utils.ToJSON(rcv))

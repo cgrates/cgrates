@@ -67,7 +67,7 @@ func TestCloneBalance(t *testing.T) {
 	}
 }
 
-func TestCloneAccountProfile(t *testing.T) {
+func TestCloneAccount(t *testing.T) {
 	actPrf := &Account{
 		Tenant:    "cgrates.org",
 		ID:        "Profile_id1",
@@ -128,7 +128,7 @@ func TestCloneAccountProfile(t *testing.T) {
 	}
 }
 
-func TestTenantIDAccountProfile(t *testing.T) {
+func TestTenantIDAccount(t *testing.T) {
 	actPrf := &Account{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
@@ -139,7 +139,7 @@ func TestTenantIDAccountProfile(t *testing.T) {
 	}
 }
 
-func TestAccountProfileAsAccountProfile(t *testing.T) {
+func TestAPIAccountAsAccount(t *testing.T) {
 	apiAccPrf := &APIAccount{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
@@ -191,7 +191,7 @@ func TestAccountProfileAsAccountProfile(t *testing.T) {
 	}
 }
 
-func TestAsAccountProfileError(t *testing.T) {
+func TestAsAccountError(t *testing.T) {
 	apiAccPrf := &APIAccount{
 		Tenant: "cgrates.org",
 		ID:     "test_ID1",
@@ -266,7 +266,7 @@ func TestAPIBalanceAsBalance(t *testing.T) {
 
 }
 
-func TestAccountProfileBalancesAlteredCompareLength(t *testing.T) {
+func TestAccountBalancesAlteredCompareLength(t *testing.T) {
 	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString":  {},
@@ -285,7 +285,7 @@ func TestAccountProfileBalancesAlteredCompareLength(t *testing.T) {
 
 }
 
-func TestAccountProfileBalancesAlteredCheckKeys(t *testing.T) {
+func TestAccountBalancesAlteredCheckKeys(t *testing.T) {
 	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString": {},
@@ -303,7 +303,7 @@ func TestAccountProfileBalancesAlteredCheckKeys(t *testing.T) {
 
 }
 
-func TestAccountProfileBalancesAlteredCompareValues(t *testing.T) {
+func TestAccountBalancesAlteredCompareValues(t *testing.T) {
 	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString": {
@@ -323,7 +323,7 @@ func TestAccountProfileBalancesAlteredCompareValues(t *testing.T) {
 
 }
 
-func TestAccountProfileBalancesAlteredFalse(t *testing.T) {
+func TestAccountBalancesAlteredFalse(t *testing.T) {
 	actPrf := &Account{}
 
 	actBk := AccountBalancesBackup{}
@@ -439,8 +439,7 @@ func TestAPApsSort(t *testing.T) {
 	}
 }
 
-func TestAPAccountProfiles(t *testing.T) {
-
+func TestAPAccount(t *testing.T) {
 	apS := AccountsWithWeight{
 		{
 			Account: &Account{
@@ -490,7 +489,7 @@ func TestAPAccountProfiles(t *testing.T) {
 	for i := range apS {
 		expected = append(expected, apS[i].Account)
 	}
-	received := apS.AccountProfiles()
+	received := apS.Accounts()
 
 	if !reflect.DeepEqual(received, expected) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(received))

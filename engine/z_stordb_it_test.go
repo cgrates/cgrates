@@ -140,12 +140,12 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 
 func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 	//READ
-	if _, err := storDB.GetTPAccountProfiles("sub_ID1", utils.EmptyString, "TEST_ID1"); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPAccounts("sub_ID1", utils.EmptyString, "TEST_ID1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
 	//WRITE
-	var actPrf = []*utils.TPAccountProfile{
+	var actPrf = []*utils.TPAccount{
 		{
 			TPid:    testTPID,
 			Tenant:  "cgrates.org",
@@ -181,12 +181,12 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
-	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {
+	if err := storDB.SetTPAccounts(actPrf); err != nil {
 		t.Error(err)
 	}
 
 	//READ
-	rcv, err := storDB.GetTPAccountProfiles(actPrf[0].TPid, utils.EmptyString, utils.EmptyString)
+	rcv, err := storDB.GetTPAccounts(actPrf[0].TPid, utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		t.Error(err)
 	}
@@ -197,9 +197,9 @@ func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
 
 	//UPDATE AND READ
 	actPrf[0].FilterIDs = []string{"*string:~*req.Account:1007"}
-	if err := storDB.SetTPAccountProfiles(actPrf); err != nil {
+	if err := storDB.SetTPAccounts(actPrf); err != nil {
 		t.Error(err)
-	} else if rcv, err := storDB.GetTPAccountProfiles(actPrf[0].TPid,
+	} else if rcv, err := storDB.GetTPAccounts(actPrf[0].TPid,
 		utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(rcv[0], actPrf[0])) {
