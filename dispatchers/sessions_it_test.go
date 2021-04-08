@@ -21,15 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"path"
-	"reflect"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1029,7 +1024,7 @@ func testDspSessionSTIRAuthenticate(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", utils.OK, rply)
 	}
 }
-
+*/
 func testDspSessionSTIRIdentity(t *testing.T) {
 	payload := &utils.PASSporTPayload{
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},
@@ -1407,39 +1402,6 @@ func TestDspSessionSv1ProcessEventErrorNil(t *testing.T) {
 	}
 }
 
-func TestDspSessionSv1GetCostNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
-	}
-	var reply *sessions.V1GetCostReply
-	result := dspSrv.SessionSv1GetCost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1GetCostErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.V1ProcessEventArgs{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
-	}
-	var reply *sessions.V1GetCostReply
-	result := dspSrv.SessionSv1GetCost(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
 func TestDspSessionSv1GetActiveSessionsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
@@ -1637,64 +1599,6 @@ func TestDspSessionSv1SetPassiveSessionErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1SetPassiveSession(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1ActivateSessionsNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.SessionIDsWithArgsDispatcher{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.SessionSv1ActivateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1ActivateSessionsErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.SessionIDsWithArgsDispatcher{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.SessionSv1ActivateSessions(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1DeactivateSessionsNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.SessionIDsWithArgsDispatcher{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.SessionSv1DeactivateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1DeactivateSessionsErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.SessionIDsWithArgsDispatcher{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.SessionSv1DeactivateSessions(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
