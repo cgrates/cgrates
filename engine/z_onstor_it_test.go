@@ -1445,7 +1445,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	}
 
 	//empty in database
-	if _, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != utils.ErrNotFound {
+	if _, err := onStor.GetAccount("cgrates.org", "RP1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -1453,7 +1453,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 	if err := onStor.SetAccount(acctPrf, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != nil {
+	if rcv, err := onStor.GetAccount("cgrates.org", "RP1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, acctPrf) {
 		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
@@ -1461,7 +1461,7 @@ func testOnStorITAccountProfile(t *testing.T) {
 
 	//craft akeysFromPrefix
 	expectedKey := []string{"anp_cgrates.org:RP1"}
-	if rcv, err := onStor.DataDB().GetKeysForPrefix(utils.AccountProfilePrefix); err != nil {
+	if rcv, err := onStor.DataDB().GetKeysForPrefix(utils.AccountPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedKey, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expectedKey, rcv)
@@ -1471,17 +1471,17 @@ func testOnStorITAccountProfile(t *testing.T) {
 	acctPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
 	if err := onStor.SetAccount(acctPrf, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != nil {
+	} else if rcv, err := onStor.GetAccount("cgrates.org", "RP1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acctPrf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
 	}
 
 	//remove from database
-	if err := onStor.RemoveAccountProfile("cgrates.org", "RP1",
+	if err := onStor.RemoveAccount("cgrates.org", "RP1",
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	} else if _, err := onStor.GetAccountProfile("cgrates.org", "RP1"); err != utils.ErrNotFound {
+	} else if _, err := onStor.GetAccount("cgrates.org", "RP1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

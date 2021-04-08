@@ -40,7 +40,7 @@ func init() {
 		DestinationsCSVContent, TimingsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountProfileCSVContent), testTPID, "", nil, nil, false)
+		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
@@ -900,7 +900,7 @@ func TestLoadAccount(t *testing.T) {
 	}
 
 	if len(csvr.accountProfiles) != 1 {
-		t.Fatalf("Failed to load ActionProfiles: %s", utils.ToJSON(csvr.actionProfiles))
+		t.Fatalf("Failed to load Accounts: %s", utils.ToJSON(csvr.actionProfiles))
 	}
 	accPrfKey := utils.TenantID{
 		Tenant: "cgrates.org",

@@ -212,7 +212,7 @@ func testAccountSv1AccountProfilesForEvent(t *testing.T) {
 		},
 	}
 	var acnts []*utils.Account
-	if err := acntSRPC.Call(utils.AccountSv1AccountProfilesForEvent,
+	if err := acntSRPC.Call(utils.AccountSv1AccountsForEvent,
 		&utils.ArgsAccountsForEvent{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -325,7 +325,7 @@ func testAccountSv1MaxAbstracts(t *testing.T) {
 	}
 
 	var reply *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile,
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(eAcnt, reply) {
@@ -432,7 +432,7 @@ func testAccountSv1DebitAbstracts(t *testing.T) {
 	}
 
 	var reply *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile,
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(eAcnt, reply) {
@@ -466,12 +466,12 @@ func testAccountSv1SimpleDebit(t *testing.T) {
 	}
 	var result string
 	expErr := utils.ErrNotFound.Error()
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &result); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -482,7 +482,7 @@ func testAccountSv1SimpleDebit(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
@@ -503,7 +503,7 @@ func testAccountSv1SimpleDebit(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(99, 0)) != 0 {
@@ -536,7 +536,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -547,7 +547,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
@@ -577,7 +577,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI2, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -586,7 +586,7 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 	if convAcc2, err = accPrfAPI2.AsAccount(); err != nil {
 		t.Fatal(err)
 	}
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount2"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc2, reply2) {
@@ -607,14 +607,14 @@ func testAccountSv1DebitMultipleAcc(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("Expecting : %s, received: %s", decimal.New(0, 0), reply2.Balances["Balance1"].Units)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount2"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(10, 0)) != 0 {
@@ -650,7 +650,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -661,7 +661,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
@@ -691,7 +691,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI2, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -700,7 +700,7 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 	if convAcc2, err = accPrfAPI2.AsAccount(); err != nil {
 		t.Fatal(err)
 	}
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount2"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc2, reply2) {
@@ -721,14 +721,14 @@ func testAccountSv1DebitMultipleAccLimited(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(50, 0)) != 0 {
 		t.Errorf("Expecting : %s, received: %s", decimal.New(50, 0), reply2.Balances["Balance1"].Units)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "CustomAccount2"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(10, 0)) != 0 {
@@ -762,7 +762,7 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -773,7 +773,7 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_ATTRIBUTES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
@@ -825,7 +825,7 @@ func testAccountSv1DebitWithAttributeSandRateS(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_ATTRIBUTES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(99, 0)) != 0 {
@@ -858,7 +858,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -869,7 +869,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
@@ -922,7 +922,7 @@ func testAccountSv1DebitWithRateS(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(95, 0)) != 0 {
@@ -962,7 +962,7 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, accPrfAPI, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, accPrfAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -973,7 +973,7 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES2"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(convAcc, reply2) {
@@ -1026,7 +1026,7 @@ func testAccountSv1DebitWithRateS2(t *testing.T) {
 		t.Fatalf("received usage: %v", *eEc.Abstracts)
 	}
 
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_WITH_RATES2"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if reply2.Balances["Balance1"].Units.Cmp(decimal.New(80, 0)) != 0 {
@@ -1089,7 +1089,7 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 	}
 
 	var reply string
-	if err := acntSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
+	if err := acntSRPC.Call(utils.APIerSv1SetAccount, apiAccPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -1100,7 +1100,7 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 		t.Error(err)
 	}
 	var result *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, result) {
@@ -1128,7 +1128,7 @@ func testAccountSv1MaxConcretes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, result) {
@@ -1218,7 +1218,7 @@ func testAccountSv1DebitConcretes(t *testing.T) {
 
 	var result *utils.Account
 	//As we debit, our Account balances are changed now
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, result) {
@@ -1337,7 +1337,7 @@ func testAccountSv1ActionSetBalance(t *testing.T) {
 	}
 
 	var result *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedSetBalance, result) {
@@ -1407,7 +1407,7 @@ func testAccountSv1ActionRemoveBalance(t *testing.T) {
 	}
 
 	var result *utils.Account
-	if err := acntSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := acntSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1004"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedSetBalance, result) {

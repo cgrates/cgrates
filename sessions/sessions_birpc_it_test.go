@@ -152,7 +152,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	var acnt *engine.Account
+	var acnt *utils.Account
 	attrGetAcnt := &utils.AttrGetAccount{
 		Tenant:  attrSetBalance.Tenant,
 		Account: attrSetBalance.Account,

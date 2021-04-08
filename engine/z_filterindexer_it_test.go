@@ -1044,7 +1044,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1103,7 +1103,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1116,7 +1116,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
 		"cgrates.org", "*string:*req.Destination:DEST1", false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1153,7 +1153,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 			"test_ID3": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1162,7 +1162,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 
 	// here we will get the reverse indexing
 	eIdxes = map[string]utils.StringSet{
-		utils.CacheAccountProfilesFilterIndexes: {
+		utils.CacheAccountsFilterIndexes: {
 			"test_ID1": struct{}{},
 			"test_ID2": struct{}{},
 		},
@@ -1175,7 +1175,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 	}
 
 	eIdxes = map[string]utils.StringSet{
-		utils.CacheAccountProfilesFilterIndexes: {
+		utils.CacheAccountsFilterIndexes: {
 			"test_ID3": struct{}{},
 		},
 	}
@@ -1188,7 +1188,7 @@ func testITAccountProfileIndexes(t *testing.T) {
 
 	//invalid tnt:context or index key
 	eIdxes = nil
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountProfilesFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
 		"cgrates.org", "*string:*req.Destination:DEST6", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {

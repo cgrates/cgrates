@@ -83,7 +83,7 @@ type dataDBMockErrorNotFound struct {
 	*engine.DataDBMock
 }
 
-func (dB *dataDBMockErrorNotFound) GetAccountProfileDrv(string, string) (*utils.Account, error) {
+func (dB *dataDBMockErrorNotFound) GetAccountDrv(string, string) (*utils.Account, error) {
 	return nil, utils.ErrNotFound
 }
 
@@ -507,14 +507,14 @@ func TestV1AccountsForEvent(t *testing.T) {
 	rply := make([]*utils.Account, 0)
 
 	expected := "SERVER_ERROR: NOT_FOUND:invalid_filter_format"
-	if err := accnts.V1AccountProfilesForEvent(args, &rply); err == nil || err.Error() != expected {
+	if err := accnts.V1AccountsForEvent(args, &rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	accPrf.Weights[0].FilterIDs = []string{}
 	if err := accnts.dm.SetAccount(accPrf, true); err != nil {
 		t.Error(err)
-	} else if err := accnts.V1AccountProfilesForEvent(args, &rply); err != nil {
+	} else if err := accnts.V1AccountsForEvent(args, &rply); err != nil {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	} else if !reflect.DeepEqual(rply[0], accPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rply[0]), utils.ToJSON(accPrf))

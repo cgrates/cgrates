@@ -271,7 +271,7 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result *utils.Account
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, result) {
@@ -345,7 +345,7 @@ func testAccActionsGetAccountAfterRemActions(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result *utils.Account
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, result) {

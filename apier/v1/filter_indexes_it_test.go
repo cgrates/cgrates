@@ -1167,9 +1167,9 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 	}
 }
 
-//AccountProfile
+//Account
 func testV1FISetAccountProfileIndexes(t *testing.T) {
-	var reply *utils.AccountProfile
+	var reply *utils.Account
 	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
@@ -1191,15 +1191,15 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 	}
 
 	//there is not an accPrf in database, so we will get NOT_FOUND
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	//set in db an accPrf then we will get it without errors
-	accPrf := &utils.APIAccountProfileWithOpts{
-		APIAccountProfile: &utils.APIAccountProfile{
+	accPrf := &utils.APIAccountWithOpts{
+		APIAccount: &utils.APIAccount{
 			Tenant:    tenant,
 			ID:        "ACC_PRF",
 			FilterIDs: []string{"*prefix:~*req.Destination:123", "ACCPRF_FLTR"},
@@ -1212,16 +1212,16 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAccountProfile, accPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(utils.APIerSv1SetAccount, accPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
-	newAccPrf, err := accPrf.AsAccountProfile()
+	newAccPrf, err := accPrf.AsAccount()
 	if err != nil {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err != nil {
 		t.Error(err)
@@ -1233,7 +1233,7 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 	expectedIDx := []string{"*string:*req.Account:1001:ACC_PRF", "*string:*req.Account:1002:ACC_PRF", "*prefix:*req.Destination:123:ACC_PRF"}
 	//trying to get indexes,
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1249,7 +1249,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 	//remove indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrRemFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1259,7 +1259,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 	var indexes []string
 	//nothing to get from db, as we removed them
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1278,7 +1278,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 	expectedIDx := []string{"*string:*req.Account:1001:ACC_PRF", "*string:*req.Account:1002:ACC_PRF", "*prefix:*req.Destination:123:ACC_PRF"}
 	//as we compute them, next we will try to get them again from db
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1313,8 +1313,8 @@ func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 	}
 
 	//we will overwrite this AccPrf with our new filter
-	accPrf := &utils.APIAccountProfileWithOpts{
-		APIAccountProfile: &utils.APIAccountProfile{
+	accPrf := &utils.APIAccountWithOpts{
+		APIAccount: &utils.APIAccount{
 			Tenant:    tenant,
 			ID:        "ACC_PRF",
 			FilterIDs: []string{"*prefix:~*req.Destination:123", "ACCPRF_FLTR", "ACCPRF_FLTR2"},
@@ -1327,17 +1327,17 @@ func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := tFIdxRpc.Call(utils.APIerSv1SetAccountProfile, accPrf, &result); err != nil {
+	if err := tFIdxRpc.Call(utils.APIerSv1SetAccount, accPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
-	newAccPrf, err := accPrf.AsAccountProfile()
+	newAccPrf, err := accPrf.AsAccount()
 	if err != nil {
 		t.Error(err)
 	}
-	var reply *utils.AccountProfile
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
+	var reply *utils.Account
+	if err := tFIdxRpc.Call(utils.APIerSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err != nil {
 		t.Error(err)
@@ -1350,7 +1350,7 @@ func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 		"*prefix:*req.Destination:123:ACC_PRF", "*string:*req.CGRID:Dan1:ACC_PRF"}
 	//trying to get indexes, should be indexes for both filters:"ACCPRF_FLTR" and "ACCPRF_FLTR2"
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1366,7 +1366,7 @@ func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
 	//remove indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrRemFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1376,7 +1376,7 @@ func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
 	var indexes []string
 	//nothing to get from db, as we removed them,
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1384,8 +1384,8 @@ func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
 	//compute them, to put indexes again in db for the right subsystem
 	if err := tFIdxRpc.Call(utils.APIerSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{
-			Tenant:            tenant,
-			AccountProfileIDs: []string{"ACC_PRF"},
+			Tenant:     tenant,
+			AccountIDs: []string{"ACC_PRF"},
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1396,7 +1396,7 @@ func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
 		"*prefix:*req.Destination:123:ACC_PRF", "*string:*req.CGRID:Dan1:ACC_PRF"}
 	//as we compute them, next we will try to get them again from db
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1411,7 +1411,7 @@ func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
 func testV1FIRemoveAccountProfile(t *testing.T) {
 	//removing accPrf from db will delete the indexes from dB
 	var result string
-	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAccountProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAccount,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&result); err != nil {
 		t.Error(err)
@@ -1419,9 +1419,9 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 		t.Error("Unexpected result returned", result)
 	}
 
-	var reply *utils.AccountProfile
+	var reply *utils.Account
 	//there is not an accPrf in database, so we will get NOT_FOUND
-	if err := tFIdxRpc.Call(utils.APIerSv1GetAccountProfile,
+	if err := tFIdxRpc.Call(utils.APIerSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: "ACC_PRF"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1430,7 +1430,7 @@ func testV1FIRemoveAccountProfile(t *testing.T) {
 	var indexes []string
 	//there are no indexes in db, as we removed actprf from db
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{ItemType: utils.MetaAccountProfiles, Tenant: tenant},
+		&AttrGetFilterIndexes{ItemType: utils.MetaAccounts, Tenant: tenant},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

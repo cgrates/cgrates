@@ -111,7 +111,7 @@ func testTPAcctPrfRPCConn(t *testing.T) {
 
 func testTPAcctPrfGetTPAcctPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPAccount
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccount,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -134,7 +134,7 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var result string
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1SetTPAccountProfile, tpAcctPrf, &result); err != nil {
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1SetTPAccount, tpAcctPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -143,7 +143,7 @@ func testTPAcctPrfSetTPAcctPrf(t *testing.T) {
 
 func testTPAcctPrfGetTPAcctPrfAfterSet(t *testing.T) {
 	var reply *utils.TPAccount
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccount,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func testTPAcctPrfGetTPAcctPrfAfterSet(t *testing.T) {
 func testTPAcctPrfGetTPAcctPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"cgrates.org:1001"}
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfileIDs,
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountIDs,
 		&AttrGetTPAccountIDs{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -173,7 +173,7 @@ func testTPAcctPrfUpdateTPAcctBal(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1SetTPAccountProfile, tpAcctPrf, &result); err != nil {
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1SetTPAccount, tpAcctPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -197,7 +197,7 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 		},
 		ThresholdIDs: []string{utils.MetaNone},
 	}
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccount,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +208,7 @@ func testTPAcctPrfGetTPAcctBalAfterUpdate(t *testing.T) {
 
 func testTPAcctPrfRemTPAcctPrf(t *testing.T) {
 	var resp string
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1RemoveTPAccountProfile,
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1RemoveTPAccount,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"},
 		&resp); err != nil {
 		t.Error(err)
@@ -219,7 +219,7 @@ func testTPAcctPrfRemTPAcctPrf(t *testing.T) {
 
 func testTPAcctPrfGetTPAcctPrfAfterRemove(t *testing.T) {
 	var reply *utils.TPAccount
-	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccountProfile,
+	if err := tpAcctPrfRPC.Call(utils.APIerSv1GetTPAccount,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "1001"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
