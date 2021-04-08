@@ -1157,3 +1157,911 @@ func testDspRplActionProfile(t *testing.T) {
 	}
 
 }
+
+func TestDspReplicatorSv1PingNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *string
+	result := dspSrv.ReplicatorSv1Ping(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1PingNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
+	}
+	var reply *string
+	result := dspSrv.ReplicatorSv1Ping(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1PingErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.CGREvent{
+		Tenant: "tenant",
+	}
+	var reply *string
+	result := dspSrv.ReplicatorSv1Ping(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAccountNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *engine.Account
+	result := dspSrv.ReplicatorSv1GetAccount(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAccountNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.Account
+	result := dspSrv.ReplicatorSv1GetAccount(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAccountErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.Account
+	result := dspSrv.ReplicatorSv1GetAccount(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetDestinationNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+
+	var reply *engine.Destination
+	result := dspSrv.ReplicatorSv1GetDestination(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetDestinationNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.Destination
+	result := dspSrv.ReplicatorSv1GetDestination(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetDestinationErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.Destination
+	result := dspSrv.ReplicatorSv1GetDestination(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetReverseDestinationNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *[]string
+	result := dspSrv.ReplicatorSv1GetReverseDestination(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetReverseDestinationNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]string
+	result := dspSrv.ReplicatorSv1GetReverseDestination(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetReverseDestinationErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]string
+	result := dspSrv.ReplicatorSv1GetReverseDestination(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetStatQueueNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.StatQueue
+	result := dspSrv.ReplicatorSv1GetStatQueue(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetStatQueueErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.StatQueue
+	result := dspSrv.ReplicatorSv1GetStatQueue(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetFilterNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.Filter
+	result := dspSrv.ReplicatorSv1GetFilter(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetFilterErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.Filter
+	result := dspSrv.ReplicatorSv1GetFilter(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetThresholdNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.Threshold
+	result := dspSrv.ReplicatorSv1GetThreshold(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetThresholdErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.Threshold
+	result := dspSrv.ReplicatorSv1GetThreshold(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetThresholdProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.ThresholdProfile
+	result := dspSrv.ReplicatorSv1GetThresholdProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetThresholdProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.ThresholdProfile
+	result := dspSrv.ReplicatorSv1GetThresholdProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetStatQueueProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.StatQueueProfile
+	result := dspSrv.ReplicatorSv1GetStatQueueProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetStatQueueProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.StatQueueProfile
+	result := dspSrv.ReplicatorSv1GetStatQueueProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetTimingNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *utils.TPTiming
+	result := dspSrv.ReplicatorSv1GetTiming(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetTimingNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *utils.TPTiming
+	result := dspSrv.ReplicatorSv1GetTiming(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetTimingErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *utils.TPTiming
+	result := dspSrv.ReplicatorSv1GetTiming(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetResourceNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.Resource
+	result := dspSrv.ReplicatorSv1GetResource(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetResourceErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.Resource
+	result := dspSrv.ReplicatorSv1GetResource(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetResourceProfileReplicatorSv1GetResourceProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.ResourceProfile
+	result := dspSrv.ReplicatorSv1GetResourceProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetResourceProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.ResourceProfile
+	result := dspSrv.ReplicatorSv1GetResourceProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionTriggersNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *engine.ActionTriggers
+	result := dspSrv.ReplicatorSv1GetActionTriggers(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionTriggersNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.ActionTriggers
+	result := dspSrv.ReplicatorSv1GetActionTriggers(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionTriggersErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.ActionTriggers
+	result := dspSrv.ReplicatorSv1GetActionTriggers(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetSharedGroupNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *engine.SharedGroup
+	result := dspSrv.ReplicatorSv1GetSharedGroup(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetSharedGroupNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.SharedGroup
+	result := dspSrv.ReplicatorSv1GetSharedGroup(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetSharedGroupErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.SharedGroup
+	result := dspSrv.ReplicatorSv1GetSharedGroup(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionsNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *engine.Actions
+	result := dspSrv.ReplicatorSv1GetActions(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionsNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.Actions
+	result := dspSrv.ReplicatorSv1GetActions(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionsErrorNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	var reply *engine.Actions
+	result := dspSrv.ReplicatorSv1GetActions(nil, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionsErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.Actions
+	result := dspSrv.ReplicatorSv1GetActions(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionPlanNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.ActionPlan
+	result := dspSrv.ReplicatorSv1GetActionPlan(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionPlanErrorNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	var reply *engine.ActionPlan
+	result := dspSrv.ReplicatorSv1GetActionPlan(nil, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetActionPlanErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.ActionPlan
+	result := dspSrv.ReplicatorSv1GetActionPlan(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAllActionPlansNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *map[string]*engine.ActionPlan
+	result := dspSrv.ReplicatorSv1GetAllActionPlans(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAllActionPlansNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *map[string]*engine.ActionPlan
+	result := dspSrv.ReplicatorSv1GetAllActionPlans(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAllActionPlansErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *map[string]*engine.ActionPlan
+	result := dspSrv.ReplicatorSv1GetAllActionPlans(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAccountActionPlansNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *[]string
+	result := dspSrv.ReplicatorSv1GetAccountActionPlans(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAccountActionPlansNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]string
+	result := dspSrv.ReplicatorSv1GetAccountActionPlans(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAccountActionPlansErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]string
+	result := dspSrv.ReplicatorSv1GetAccountActionPlans(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRatingPlanNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+
+	var reply *engine.RatingPlan
+	result := dspSrv.ReplicatorSv1GetRatingPlan(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRatingPlanNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.RatingPlan
+	result := dspSrv.ReplicatorSv1GetRatingPlan(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRatingPlanErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.RatingPlan
+	result := dspSrv.ReplicatorSv1GetRatingPlan(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRatingProfileNilEvent(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	var reply *engine.RatingProfile
+	result := dspSrv.ReplicatorSv1GetRatingProfile(nil, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRatingProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.RatingProfile
+	result := dspSrv.ReplicatorSv1GetRatingProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRatingProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.StringWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *engine.RatingProfile
+	result := dspSrv.ReplicatorSv1GetRatingProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRouteProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.RouteProfile
+	result := dspSrv.ReplicatorSv1GetRouteProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetRouteProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.RouteProfile
+	result := dspSrv.ReplicatorSv1GetRouteProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAttributeProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.AttributeProfile
+	result := dspSrv.ReplicatorSv1GetAttributeProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetAttributeProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.AttributeProfile
+	result := dspSrv.ReplicatorSv1GetAttributeProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetChargerProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.ChargerProfile
+	result := dspSrv.ReplicatorSv1GetChargerProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetChargerProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.ChargerProfile
+	result := dspSrv.ReplicatorSv1GetChargerProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetDispatcherProfileNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.DispatcherProfile
+	result := dspSrv.ReplicatorSv1GetDispatcherProfile(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspReplicatorSv1GetDispatcherProfileErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+		},
+	}
+	var reply *engine.DispatcherProfile
+	result := dspSrv.ReplicatorSv1GetDispatcherProfile(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
