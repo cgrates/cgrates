@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GetAccountProfile returns an Account Profile
-func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+// GetAccount returns an Account
+func (apierSv1 *APIerSv1) GetAccount(arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -46,13 +46,13 @@ func (apierSv1 *APIerSv1) GetAccountProfile(arg *utils.TenantIDWithAPIOpts, repl
 	return nil
 }
 
-// GetAccountProfileIDs returns list of action profile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetAccountProfileIDs(args *utils.PaginatorWithTenant, actPrfIDs *[]string) error {
+// GetAccountIDs returns list of action profile IDs registered for a tenant
+func (apierSv1 *APIerSv1) GetAccountIDs(args *utils.PaginatorWithTenant, actPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	prfx := utils.AccountProfilePrefix + tnt + utils.ConcatenatedKeySep
+	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
 	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -68,15 +68,15 @@ func (apierSv1 *APIerSv1) GetAccountProfileIDs(args *utils.PaginatorWithTenant, 
 	return nil
 }
 
-// GetAccountProfileIDsCount sets in reply var the total number of AccountProfileIDs registered for a tenant
-// returns ErrNotFound in case of 0 AccountProfileIDs
-func (apierSv1 *APIerSv1) GetAccountProfileIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
+// GetAccountIDsCount sets in reply var the total number of AccountIDs registered for a tenant
+// returns ErrNotFound in case of 0 AccountIDs
+func (apierSv1 *APIerSv1) GetAccountIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.AccountProfilePrefix + tnt + utils.ConcatenatedKeySep
+	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
 	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
 		return err
 	}
@@ -87,8 +87,8 @@ func (apierSv1 *APIerSv1) GetAccountProfileIDsCount(args *utils.TenantWithAPIOpt
 	return
 }
 
-//SetAccountProfile add/update a new Account Profile
-func (apierSv1 *APIerSv1) SetAccountProfile(extAp *utils.APIAccountWithOpts, reply *string) error {
+//SetAccount add/update a new Account
+func (apierSv1 *APIerSv1) SetAccount(extAp *utils.APIAccountWithOpts, reply *string) error {
 	if missing := utils.MissingStructFields(extAp.APIAccount, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -102,16 +102,16 @@ func (apierSv1 *APIerSv1) SetAccountProfile(extAp *utils.APIAccountWithOpts, rep
 	if err := apierSv1.DataManager.SetAccount(ap, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for CacheAccountProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccountProfiles: time.Now().UnixNano()}); err != nil {
+	//generate a loadID for CacheAccounts and store it in database
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// RemoveAccountProfile remove a specific Account Profile
-func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+// RemoveAccount remove a specific Account
+func (apierSv1 *APIerSv1) RemoveAccount(arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -123,8 +123,8 @@ func (apierSv1 *APIerSv1) RemoveAccountProfile(arg *utils.TenantIDWithAPIOpts, r
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for CacheAccountProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccountProfiles: time.Now().UnixNano()}); err != nil {
+	//generate a loadID for CacheAccounts and store it in database
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -153,10 +153,10 @@ func (aSv1 *AccountSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	return nil
 }
 
-// AccountProfilesForEvent returns the matching AccountProfile for Event
-func (aSv1 *AccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent,
+// AccountsForEvent returns the matching Account for Event
+func (aSv1 *AccountSv1) AccountsForEvent(args *utils.ArgsAccountsForEvent,
 	aps *[]*utils.Account) (err error) {
-	return aSv1.aS.V1AccountProfilesForEvent(args, aps)
+	return aSv1.aS.V1AccountsForEvent(args, aps)
 }
 
 // MaxAbstracts returns the maximum abstracts for the event, based on matching Account

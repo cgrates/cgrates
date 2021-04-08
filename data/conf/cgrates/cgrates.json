@@ -799,8 +799,8 @@
 // 				],
 // 			},
 // 			{
-// 				"type": "*account_profiles",						// data source type
-// 				"file_name": "AccountProfiles.csv",				// file name in the tp_in_dir
+// 				"type": "*accounts",						// data source type
+// 				"file_name": "Accounts.csv",				// file name in the tp_in_dir
 // 				"fields": [
 // 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 // 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

@@ -79,8 +79,8 @@ func (acts *AccountService) Start() (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	<-acts.cacheS.GetPrecacheChannel(utils.CacheAccountProfiles)
-	<-acts.cacheS.GetPrecacheChannel(utils.CacheAccountProfilesFilterIndexes)
+	<-acts.cacheS.GetPrecacheChannel(utils.CacheAccounts)
+	<-acts.cacheS.GetPrecacheChannel(utils.CacheAccountsFilterIndexes)
 
 	filterS := <-acts.filterSChan
 	acts.filterSChan <- filterS

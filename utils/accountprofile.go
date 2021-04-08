@@ -25,7 +25,7 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-// AccountProfile represents one Account on a Tenant
+// Account represents one Account on a Tenant
 type Account struct {
 	Tenant             string
 	ID                 string // Account identificator, unique within the tenant
@@ -284,14 +284,14 @@ func (bL *Balance) Clone() (blnc *Balance) {
 	return
 }
 
-// AccountProfileWithWeight attaches static weight to AccountProfile
+// AccountWithWeight attaches static weight to Account
 type AccountWithWeight struct {
 	*Account
 	Weight float64
 	LockID string
 }
 
-// AccountProfilesWithWeight is a sortable list of AccountProfileWithWeight
+// AccountsWithWeight is a sortable list of AccountWithWeight
 type AccountsWithWeight []*AccountWithWeight
 
 // Sort is part of sort interface, sort based on Weight
@@ -346,7 +346,7 @@ func (bWws BalancesWithWeight) Balances() (blncs []*Balance) {
 	return
 }
 
-// APIAccountProfileWithOpts is used in API calls
+// APIAccountWithOpts is used in API calls
 type APIAccountWithOpts struct {
 	*APIAccount
 	APIOpts map[string]interface{}
@@ -363,7 +363,7 @@ type ArgsAccountsForEvent struct {
 	AccountIDs []string
 }
 
-// APIAccountProfile represents one APIAccount on a Tenant
+// APIAccount represents one APIAccount on a Tenant
 type APIAccount struct {
 	Tenant             string
 	ID                 string
@@ -375,7 +375,7 @@ type APIAccount struct {
 	ThresholdIDs       []string
 }
 
-// AsAccount convert APIAccount struct to AccountProfile struct
+// AsAccount convert APIAccount struct to Account struct
 func (ext *APIAccount) AsAccount() (profile *Account, err error) {
 	profile = &Account{
 		Tenant:             ext.Tenant,

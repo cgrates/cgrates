@@ -103,7 +103,6 @@ const CGRATES_CFG_JSON = `
 		"*dispatcher_hosts":{"remote":false, "replicate":false}, 
 		"*rate_profiles":{"remote":false, "replicate":false},
 		"*action_profiles":{"remote":false, "replicate":false},
-		"*account_profiles":{"remote":false, "replicate":false},
 		"*load_ids":{"remote":false, "replicate":false}, 
 		"*indexes":{"remote":false, "replicate":false}, 
 	},
@@ -155,7 +154,7 @@ const CGRATES_CFG_JSON = `
 		"*tp_dispatcher_hosts":{"remote":false, "replicate":false}, 
 		"*tp_rate_profiles":{"remote":false, "replicate":false}, 
 		"*tp_action_profiles":{"remote":false, "replicate":false},
-		"*tp_account_profiles":{"remote":false, "replicate":false},
+		"*tp_accounts":{"remote":false, "replicate":false},
 	},
 },
 
@@ -229,7 +228,7 @@ const CGRATES_CFG_JSON = `
 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
-		"*account_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control resource filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control stat filter indexes caching
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 				// control threshold filter indexes caching
@@ -240,7 +239,7 @@ const CGRATES_CFG_JSON = `
 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control rate profile filter indexes caching
 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control rate filter indexes caching
 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control action profile filter indexes caching
-		"*account_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control coount profile filter indexes caching
+		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 			// control coount profile filter indexes caching
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					// control reverse filter indexes caching used only for set and remove filters 
 		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 						// control dispatcher routes caching
 		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// control dispatcher load( in case of *ratio ConnParams is present)
@@ -277,7 +276,7 @@ const CGRATES_CFG_JSON = `
 		"*tp_dispatcher_hosts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_rate_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 		"*tp_action_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
-		"*tp_account_profiles":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+		"*tp_accounts":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 	},
 	"replication_conns": [],
 },
@@ -785,8 +784,8 @@ const CGRATES_CFG_JSON = `
 				],
 			},
 			{
-				"type": "*account_profiles",						// data source type
-				"file_name": "AccountProfiles.csv",				// file name in the tp_in_dir
+				"type": "*accounts",						// data source type
+				"file_name": "Accounts.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},

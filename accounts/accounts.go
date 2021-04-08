@@ -65,7 +65,7 @@ func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface
 }
 
 // matchingAccountsForEvent returns the matched Accounts for the given event
-// if lked option is passed, each AccountProfile will be also locked
+// if lked option is passed, each Account will be also locked
 //   so it becomes responsibility of upper layers to release the lock
 func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	acntIDs []string, lked bool) (acnts utils.AccountsWithWeight, err error) {
@@ -81,7 +81,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			aS.cfg.AccountSCfg().PrefixIndexedFields,
 			aS.cfg.AccountSCfg().SuffixIndexedFields,
 			aS.dm,
-			utils.CacheAccountProfilesFilterIndexes,
+			utils.CacheAccountsFilterIndexes,
 			tnt,
 			aS.cfg.AccountSCfg().IndexedSelects,
 			aS.cfg.AccountSCfg().NestedFields,
@@ -93,7 +93,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	for _, acntID := range acntIDs {
 		var refID string
 		if lked {
-			cacheKey := utils.ConcatenatedKey(utils.CacheAccountProfiles, tnt, acntID)
+			cacheKey := utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID)
 			refID = guardian.Guardian.GuardIDs("",
 				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		}
@@ -253,8 +253,8 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 	return
 }
 
-// V1AccountProfilesForEvent returns the matching AccountProfiles for Event
-func (aS *AccountS) V1AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) (err error) {
+// V1AccountsForEvent returns the matching Accounts for Event
+func (aS *AccountS) V1AccountsForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) (err error) {
 	var acnts utils.AccountsWithWeight
 	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, false); err != nil {
@@ -382,7 +382,7 @@ func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *stri
 	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		return nil, actSetAccount(aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
-		utils.ConcatenatedKey(utils.CacheAccountProfiles, tnt, args.AccountID)); err != nil {
+		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
 	}
 
@@ -412,7 +412,7 @@ func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rpl
 		}
 		return nil, aS.dm.SetAccount(qAcnt, false)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
-		utils.ConcatenatedKey(utils.CacheAccountProfiles, tnt, args.AccountID)); err != nil {
+		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
 	}
 	*rply = utils.OK

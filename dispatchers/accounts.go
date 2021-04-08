@@ -38,18 +38,18 @@ func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREvent, rpl *string) (
 	return dS.Dispatch(args, utils.MetaAccounts, utils.AccountSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, reply *[]*utils.Account) (err error) {
+func (dS *DispatcherService) AccountsForEvent(args *utils.ArgsAccountsForEvent, reply *[]*utils.Account) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.AccountSv1AccountProfilesForEvent, tnt,
+		if err = dS.authorize(utils.AccountSv1AccountsForEvent, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1AccountProfilesForEvent, args, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1AccountsForEvent, args, reply)
 }
 
 func (dS *DispatcherService) MaxAbstracts(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {

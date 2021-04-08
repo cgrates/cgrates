@@ -71,6 +71,7 @@ func (m *Migrator) moveStatQueueProfile() (err error) {
 			return fmt.Errorf("Invalid key <%s> when migrating stat queue profiles", id)
 		}
 		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		fmt.Println("sgs", utils.ToJSON(sgs))
 		if err != nil {
 			return err
 		}

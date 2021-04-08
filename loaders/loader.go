@@ -639,8 +639,8 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.ActionProfileIDs] = ids
 			}
 		}
-	case utils.MetaAccountProfiles:
-		cacheIDs = []string{utils.CacheAccountProfilesFilterIndexes}
+	case utils.MetaAccounts:
+		cacheIDs = []string{utils.CacheAccountsFilterIndexes}
 		for _, lDataSet := range lds {
 			acpsModels := make(engine.AccountMdls, len(lDataSet))
 			for i, ld := range lDataSet {
@@ -660,7 +660,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				if ldr.dryRun {
 					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: AccountProfiles: %s",
+						fmt.Sprintf("<%s-%s> DRY_RUN: Accounts: %s",
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(acp)))
 					continue
 				}
@@ -1010,12 +1010,12 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				cacheArgs[utils.ActionProfileIDs] = ids
 			}
 		}
-	case utils.MetaAccountProfiles:
-		cacheIDs = []string{utils.CacheAccountProfiles, utils.CacheAccountProfilesFilterIndexes}
+	case utils.MetaAccounts:
+		cacheIDs = []string{utils.CacheAccounts, utils.CacheAccountsFilterIndexes}
 		for tntID := range lds {
 			if ldr.dryRun {
 				utils.Logger.Info(
-					fmt.Sprintf("<%s-%s> DRY_RUN: AccountProfileIDs: %s",
+					fmt.Sprintf("<%s-%s> DRY_RUN: AccountIDs: %s",
 						utils.LoaderS, ldr.ldrID, tntID))
 			} else {
 				tntIDStruct := utils.NewTenantID(tntID)

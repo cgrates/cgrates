@@ -61,8 +61,8 @@ func (apierSv1 *APIerSv1) RemoveFilterIndexes(arg *AttrRemFilterIndexes, reply *
 		arg.ItemType = utils.CacheResourceFilterIndexes
 	case utils.MetaChargers:
 		arg.ItemType = utils.CacheChargerFilterIndexes
-	case utils.MetaAccountProfiles:
-		arg.ItemType = utils.CacheAccountProfilesFilterIndexes
+	case utils.MetaAccounts:
+		arg.ItemType = utils.CacheAccountsFilterIndexes
 	case utils.MetaActionProfiles:
 		arg.ItemType = utils.CacheActionProfilesFilterIndexes
 	case utils.MetaRateProfiles:
@@ -116,8 +116,8 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]s
 		arg.ItemType = utils.CacheResourceFilterIndexes
 	case utils.MetaChargers:
 		arg.ItemType = utils.CacheChargerFilterIndexes
-	case utils.MetaAccountProfiles:
-		arg.ItemType = utils.CacheAccountProfilesFilterIndexes
+	case utils.MetaAccounts:
+		arg.ItemType = utils.CacheAccountsFilterIndexes
 	case utils.MetaActionProfiles:
 		arg.ItemType = utils.CacheActionProfilesFilterIndexes
 	case utils.MetaRateProfiles:
@@ -328,7 +328,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//Account Indexes
 	if args.AccountS {
-		if args.AccountS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountProfilesFilterIndexes,
+		if args.AccountS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountsFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				acp, e := apierSv1.DataManager.GetAccount(tnt, id)
 				if e != nil {
@@ -467,7 +467,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	}
 	//Account Indexes
 	if args.AccountS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheAccountProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(utils.CacheAccountsFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
@@ -578,8 +578,8 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 		return utils.APIErrorHandler(err)
 	}
 	//Account Indexes
-	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountProfilesFilterIndexes,
-		&args.AccountProfileIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
+	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAccountsFilterIndexes,
+		&args.AccountIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			acp, e := apierSv1.DataManager.GetAccount(tnt, id)
 			if e != nil {
 				return nil, e

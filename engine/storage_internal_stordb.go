@@ -354,9 +354,9 @@ func (iDB *InternalDB) GetTPAccounts(tpid, tenant, id string) (tpPrfs []*utils.T
 	if id != utils.EmptyString {
 		key += utils.ConcatenatedKeySep + id
 	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPAccountProfiles, key)
+	ids := Cache.GetItemIDs(utils.CacheTBLTPAccounts, key)
 	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPAccountProfiles, id)
+		x, ok := Cache.Get(utils.CacheTBLTPAccounts, id)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
 		}
@@ -536,7 +536,7 @@ func (iDB *InternalDB) SetTPAccounts(tpPrfs []*utils.TPAccount) (err error) {
 		return nil
 	}
 	for _, tpPrf := range tpPrfs {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPAccountProfiles, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
+		Cache.SetWithoutReplicate(utils.CacheTBLTPAccounts, utils.ConcatenatedKey(tpPrf.TPid, tpPrf.Tenant, tpPrf.ID), tpPrf, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return

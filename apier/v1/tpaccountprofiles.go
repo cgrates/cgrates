@@ -22,8 +22,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// SetTPAccountProfile creates a new TPAccountProfile within a tariff plan
-func (apierSv1 *APIerSv1) SetTPAccountProfile(attrs *utils.TPAccount, reply *string) error {
+// SetTPAccount creates a new TPAccount within a tariff plan
+func (apierSv1 *APIerSv1) SetTPAccount(attrs *utils.TPAccount, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -37,8 +37,8 @@ func (apierSv1 *APIerSv1) SetTPAccountProfile(attrs *utils.TPAccount, reply *str
 	return nil
 }
 
-// GetTPAccountProfile queries specific TPAccountProfile on tariff plan
-func (apierSv1 *APIerSv1) GetTPAccountProfile(attr *utils.TPTntID, reply *utils.TPAccount) error {
+// GetTPAccount queries specific TPAccount on tariff plan
+func (apierSv1 *APIerSv1) GetTPAccount(attr *utils.TPTntID, reply *utils.TPAccount) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -61,12 +61,12 @@ type AttrGetTPAccountIDs struct {
 	utils.PaginatorWithSearch
 }
 
-// GetTPRouteProfileIDs queries TPAccountProfiles identities on specific tariff plan.
-func (apierSv1 *APIerSv1) GetTPAccountProfileIDs(attrs *AttrGetTPAccountIDs, reply *[]string) error {
+// GetTPRouteIDs queries TPAccounts identities on specific tariff plan.
+func (apierSv1 *APIerSv1) GetTPAccountIDs(attrs *AttrGetTPAccountIDs, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountProfiles,
+	ids, err := apierSv1.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccounts,
 		[]string{"tenant", "id"}, nil, &attrs.PaginatorWithSearch)
 	if err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
@@ -78,15 +78,15 @@ func (apierSv1 *APIerSv1) GetTPAccountProfileIDs(attrs *AttrGetTPAccountIDs, rep
 	return nil
 }
 
-// RemoveTPAccountProfile removes specific TPAccountProfile on Tariff plan
-func (apierSv1 *APIerSv1) RemoveTPAccountProfile(attrs *utils.TPTntID, reply *string) error {
+// RemoveTPAccount removes specific TPAccount on Tariff plan
+func (apierSv1 *APIerSv1) RemoveTPAccount(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{utils.TPid, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attrs.Tenant == utils.EmptyString {
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.StorDb.RemTpData(utils.TBLTPAccountProfiles, attrs.TPid,
+	if err := apierSv1.StorDb.RemTpData(utils.TBLTPAccounts, attrs.TPid,
 		map[string]string{utils.TenantCfg: attrs.Tenant, utils.IDCfg: attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	}
