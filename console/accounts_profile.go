@@ -23,8 +23,8 @@ import (
 )
 
 func init() {
-	c := &CmdGetAccountsProfile{
-		name:      "accounts_profile",
+	c := &CmdGetAccounts{
+		name:      "accounts",
 		rpcMethod: utils.APIerSv1GetAccount,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
@@ -33,33 +33,33 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetAccountsProfile struct {
+type CmdGetAccounts struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
-func (self *CmdGetAccountsProfile) Name() string {
+func (self *CmdGetAccounts) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAccountsProfile) RpcMethod() string {
+func (self *CmdGetAccounts) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccountsProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetAccounts) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetAccountsProfile) PostprocessRpcParams() error {
+func (self *CmdGetAccounts) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAccountsProfile) RpcResult() interface{} {
+func (self *CmdGetAccounts) RpcResult() interface{} {
 	var atr utils.Account
 	return &atr
 }

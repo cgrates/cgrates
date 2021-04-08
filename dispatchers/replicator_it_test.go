@@ -46,7 +46,7 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplTiming,
 	testDspRplDestination,
 	testDspRplRateProfile,
-	testDspRplAccountProfile,
+	testDspRplAccount,
 	testDspRplActionProfile,
 }
 
@@ -1038,7 +1038,7 @@ func testDspRplRateProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }
-func testDspRplAccountProfile(t *testing.T) {
+func testDspRplAccount(t *testing.T) {
 	// Set Account
 	var replyStr string
 	rPrf := &utils.AccountWithAPIOpts{

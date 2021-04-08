@@ -44,7 +44,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitFlush,
 	testStorDBitIsDBEmpty,
 	testStorDBitCRUDVersions,
-	testStorDBitCRUDTPAccountProfiles,
+	testStorDBitCRUDTPAccounts,
 	testStorDBitCRUDTPActionProfiles,
 	testStorDBitCRUDTPDispatcherProfiles,
 	testStorDBitCRUDTPDispatcherHosts,
@@ -138,7 +138,7 @@ func testStorDBitIsDBEmpty(t *testing.T) {
 	}
 }
 
-func testStorDBitCRUDTPAccountProfiles(t *testing.T) {
+func testStorDBitCRUDTPAccounts(t *testing.T) {
 	//READ
 	if _, err := storDB.GetTPAccounts("sub_ID1", utils.EmptyString, "TEST_ID1"); err != utils.ErrNotFound {
 		t.Error(err)

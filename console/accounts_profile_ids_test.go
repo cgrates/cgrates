@@ -28,9 +28,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdAccountsProfileIDs(t *testing.T) {
+func TestCmdAccountsIDs(t *testing.T) {
 	// commands map is initiated in init function
-	command := commands["accounts_profile_ids"]
+	command := commands["accounts_ids"]
 	// verify if ApierSv1 object has method on it
 	m, ok := reflect.TypeOf(new(v1.APIerSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {

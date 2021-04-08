@@ -73,11 +73,11 @@ var (
 		testV1FIdxRemoveRouteProfile,
 
 		testV1FIdxdxInitDataDb,
-		testV1FISetAccountProfileIndexes,
-		testV1FIComputeAccountProfileIndexes,
-		testV1FISetSecondFilterForAccountProfile,
-		testV1FIComputeIDsAccountProfileIndexes,
-		testV1FIRemoveAccountProfile,
+		testV1FISetAccountIndexes,
+		testV1FIComputeAccountIndexes,
+		testV1FISetSecondFilterForAccount,
+		testV1FIComputeIDsAccountIndexes,
+		testV1FIRemoveAccount,
 
 		testV1FIdxdxInitDataDb,
 		testV1FISetActionProfileIndexes,
@@ -1168,7 +1168,7 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 }
 
 //Account
-func testV1FISetAccountProfileIndexes(t *testing.T) {
+func testV1FISetAccountIndexes(t *testing.T) {
 	var reply *utils.Account
 	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
@@ -1245,7 +1245,7 @@ func testV1FISetAccountProfileIndexes(t *testing.T) {
 	}
 }
 
-func testV1FIComputeAccountProfileIndexes(t *testing.T) {
+func testV1FIComputeAccountIndexes(t *testing.T) {
 	//remove indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
@@ -1290,7 +1290,7 @@ func testV1FIComputeAccountProfileIndexes(t *testing.T) {
 	}
 }
 
-func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
+func testV1FISetSecondFilterForAccount(t *testing.T) {
 	//new filter
 	filter = &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
@@ -1362,7 +1362,7 @@ func testV1FISetSecondFilterForAccountProfile(t *testing.T) {
 	}
 }
 
-func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
+func testV1FIComputeIDsAccountIndexes(t *testing.T) {
 	//remove indexes from db
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes,
@@ -1408,7 +1408,7 @@ func testV1FIComputeIDsAccountProfileIndexes(t *testing.T) {
 	}
 }
 
-func testV1FIRemoveAccountProfile(t *testing.T) {
+func testV1FIRemoveAccount(t *testing.T) {
 	//removing accPrf from db will delete the indexes from dB
 	var result string
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveAccount,

@@ -61,7 +61,7 @@ var (
 		testExpVerifyRoutes,
 		testExpVerifyRateProfiles,
 		testExpVerifyActionProfiles,
-		testExpVerifyAccountProfiles,
+		testExpVerifyAccounts,
 		testExpCleanFiles,
 		testExpStopCgrEngine,
 	}
@@ -509,7 +509,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 	}
 }
 
-func testExpVerifyAccountProfiles(t *testing.T) {
+func testExpVerifyAccounts(t *testing.T) {
 	var reply *utils.Account
 	acctPrf := &utils.Account{
 		Tenant:    "cgrates.org",

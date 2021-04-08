@@ -66,7 +66,7 @@ var (
 		testFltrRplDispatcherHost,
 		testFltrRplRateProfile,
 		testFltrRplActionProfile,
-		testFltrRplAccountProfile,
+		testFltrRplAccount1,
 		testFltrRplAccount,
 		testFltrRplDestination,
 
@@ -1584,7 +1584,7 @@ func testFltrRplActionProfile(t *testing.T) {
 	}
 }
 
-func testFltrRplAccountProfile(t *testing.T) {
+func testFltrRplAccount1(t *testing.T) {
 	acID := "ATTR1"
 	acPrf := &utils.APIAccountWithOpts{
 		APIAccount: &utils.APIAccount{

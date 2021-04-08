@@ -21,8 +21,8 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdRemoveAccountsProfile{
-		name:      "accounts_profile_remove",
+	c := &CmdRemoveAccounts{
+		name:      "accounts_remove",
 		rpcMethod: utils.APIerSv1RemoveAccount,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
@@ -30,33 +30,33 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdRemoveAccountsProfile struct {
+type CmdRemoveAccounts struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithAPIOpts
 	*CommandExecuter
 }
 
-func (self *CmdRemoveAccountsProfile) Name() string {
+func (self *CmdRemoveAccounts) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveAccountsProfile) RpcMethod() string {
+func (self *CmdRemoveAccounts) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveAccountsProfile) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveAccounts) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithAPIOpts{APIOpts: make(map[string]interface{})}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveAccountsProfile) PostprocessRpcParams() error {
+func (self *CmdRemoveAccounts) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveAccountsProfile) RpcResult() interface{} {
+func (self *CmdRemoveAccounts) RpcResult() interface{} {
 	var s string
 	return &s
 }

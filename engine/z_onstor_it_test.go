@@ -68,7 +68,7 @@ var (
 		testOnStorITDispatcherProfile,
 		testOnStorITRateProfile,
 		testOnStorITActionProfile,
-		testOnStorITAccountProfile,
+		testOnStorITAccount,
 		//testOnStorITCacheActionTriggers,
 		//testOnStorITCRUDActionTriggers,
 	}
@@ -1410,7 +1410,7 @@ func testOnStorITActionProfile(t *testing.T) {
 	}
 }
 
-func testOnStorITAccountProfile(t *testing.T) {
+func testOnStorITAccount(t *testing.T) {
 	acctPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",

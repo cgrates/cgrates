@@ -49,7 +49,7 @@ func TestAccountSv1IT(t *testing.T) {
 		testAccountSv1StartEngine,
 		testAccountSv1RPCConn,
 		testAccountSv1LoadFromFolder,
-		//testAccountSv1AccountProfilesForEvent,
+		//testAccountSv1AccountsForEvent,
 		//testAccountSv1MaxAbstracts,
 		//testAccountSv1DebitAbstracts,
 		//testAccountSv1SimpleDebit,
@@ -128,7 +128,7 @@ func testAccountSv1LoadFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testAccountSv1AccountProfilesForEvent(t *testing.T) {
+func testAccountSv1AccountsForEvent(t *testing.T) {
 	eAcnts := []*utils.Account{
 		{
 			Tenant:    "cgrates.org",

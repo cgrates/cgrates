@@ -47,7 +47,7 @@ type TpReader struct {
 	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
 	rateProfiles       map[utils.TenantID]*utils.TPRateProfile
 	actionProfiles     map[utils.TenantID]*utils.TPActionProfile
-	accountProfiles    map[utils.TenantID]*utils.TPAccount
+	accounts           map[utils.TenantID]*utils.TPAccount
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
@@ -89,7 +89,7 @@ func (tpr *TpReader) Init() {
 	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
 	tpr.rateProfiles = make(map[utils.TenantID]*utils.TPRateProfile)
 	tpr.actionProfiles = make(map[utils.TenantID]*utils.TPActionProfile)
-	tpr.accountProfiles = make(map[utils.TenantID]*utils.TPAccount)
+	tpr.accounts = make(map[utils.TenantID]*utils.TPAccount)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.acntActionPlans = make(map[string][]string)
 }
@@ -376,14 +376,14 @@ func (tpr *TpReader) LoadAccountsFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapAccountProfiles := make(map[utils.TenantID]*utils.TPAccount)
+	mapAccounts := make(map[utils.TenantID]*utils.TPAccount)
 	for _, ap := range aps {
 		if err = verifyInlineFilterS(ap.FilterIDs); err != nil {
 			return
 		}
-		mapAccountProfiles[utils.TenantID{Tenant: ap.Tenant, ID: ap.ID}] = ap
+		mapAccounts[utils.TenantID{Tenant: ap.Tenant, ID: ap.ID}] = ap
 	}
-	tpr.accountProfiles = mapAccountProfiles
+	tpr.accounts = mapAccounts
 	return nil
 }
 
@@ -762,7 +762,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	if verbose {
 		log.Print("Accounts:")
 	}
-	for _, tpAP := range tpr.accountProfiles {
+	for _, tpAP := range tpr.accounts {
 		var ap *utils.Account
 		if ap, err = APItoAccount(tpAP, tpr.timezone); err != nil {
 			return
@@ -774,7 +774,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 			log.Print("\t", ap.TenantID())
 		}
 	}
-	if len(tpr.accountProfiles) != 0 {
+	if len(tpr.accounts) != 0 {
 		loadIDs[utils.CacheAccounts] = loadID
 	}
 
@@ -1120,7 +1120,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if verbose {
 		log.Print("Accounts:")
 	}
-	for _, tpAp := range tpr.accountProfiles {
+	for _, tpAp := range tpr.accounts {
 		if err = tpr.dm.RemoveAccount(tpAp.Tenant, tpAp.ID,
 			utils.NonTransactional, true); err != nil {
 			return
@@ -1210,7 +1210,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.actionProfiles) != 0 {
 		loadIDs[utils.CacheActionProfiles] = loadID
 	}
-	if len(tpr.accountProfiles) != 0 {
+	if len(tpr.accounts) != 0 {
 		loadIDs[utils.CacheAccounts] = loadID
 	}
 	if len(tpr.timings) != 0 {
