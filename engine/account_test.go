@@ -2329,6 +2329,76 @@ func TestAccountGetBalanceWithID(t *testing.T) {
 	}
 }
 
+// func TestAccountgetCreditForPrefix(t *testing.T) {
+// 	acc := &Account{
+// 		BalanceMap: map[string]Balances{
+// 			utils.MetaMonetary: {
+// 				&Balance{
+// 					ID: "testID",
+// 					SharedGroups: utils.StringMap{
+// 						"testKey": false,
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	cd := &CallDescriptor{}
+// 	rcvdur, rcvcredit, rcvblncs := acc.getCreditForPrefix(cd)
+// 	fmt.Println(rcvdur, rcvcredit, rcvblncs)
+// }
+
+func TestAccountSetRecurrent(t *testing.T) {
+	aType := "testType"
+	var ptrType *string = &aType
+	acc := &Account{
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ID:     "testID1",
+				Weight: 10,
+				Balance: &BalanceFilter{
+					Type: ptrType,
+				},
+			},
+			&ActionTrigger{
+				ID:     "testID2",
+				Weight: 10,
+			},
+		},
+	}
+	act := &Action{
+		Id:     "testID",
+		Weight: 10,
+		Balance: &BalanceFilter{
+			Type: ptrType,
+		},
+	}
+	exp := ActionTriggers{
+		&ActionTrigger{
+			ID:        "testID1",
+			Weight:    10,
+			Recurrent: true,
+			Balance: &BalanceFilter{
+				Type: ptrType,
+			},
+		},
+		&ActionTrigger{
+			ID:     "testID2",
+			Weight: 10,
+		},
+	}
+	acc.SetRecurrent(act, true)
+	rcv := acc.ActionTriggers
+
+	if len(rcv) != len(exp) {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+	for i := range rcv {
+		if rcv[i].Recurrent != exp[i].Recurrent {
+			t.Fatalf("\nexpected: <%+v>,\nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
