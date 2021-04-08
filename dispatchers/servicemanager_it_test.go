@@ -24,73 +24,22 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
-var sTestsDspAccPrf = []func(t *testing.T){
-	testDspAccPrfPing,
-}
-
-//Test start here
-func TestDspAccountSIT(t *testing.T) {
-	var config1, config2, config3 string
-	switch *dbType {
-	case utils.MetaInternal:
-		t.SkipNow()
-	case utils.MetaMySQL:
-		config1 = "all_mysql"
-		config2 = "all2_mysql"
-		config3 = "dispatchers_mysql"
-	case utils.MetaMongo:
-		config1 = "all_mongo"
-		config2 = "all2_mongo"
-		config3 = "dispatchers_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-
-	dispDIR := "dispatchers"
-	if *encoding == utils.MetaGOB {
-		dispDIR += "_gob"
-	}
-	testDsp(t, sTestsDspAccPrf, "TestDspAccionSIT", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
-}
-
-func testDspAccPrfPing(t *testing.T) {
-	var reply string
-	if err := allEngine.RPC.Call(utils.AccountSv1Ping, new(utils.CGREvent), &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
-	if err := dispEngine.RPC.Call(utils.AccountSv1Ping, &utils.CGREvent{
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "accPrf12345",
-		},
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
-}
-
-func TestDspSchedulerSv1PingErrorNilEvent(t *testing.T) {
+func TestDspServiceManagerV1PingErrorNilEvent(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	var reply *string
-	result := dspSrv.SchedulerSv1Ping(nil, reply)
+	result := dspSrv.ServiceManagerV1Ping(nil, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1PingErrorNil(t *testing.T) {
+func TestDspServiceManagerV1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
@@ -98,108 +47,108 @@ func TestDspSchedulerSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1Ping(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1Ping(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1PingNil(t *testing.T) {
+func TestDspServiceManagerV1PingNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1Ping(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1Ping(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NOT_FOUND"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1ReloadErrorNil(t *testing.T) {
+func TestDspServiceManagerV1StartServiceErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.CGREvent{
+	CGREvent := ArgStartServiceWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1Reload(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1StartService(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1ReloadPingNil(t *testing.T) {
+func TestDspServiceManagerV1StartServiceNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.CGREvent{
+	CGREvent := ArgStartServiceWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1Reload(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1StartService(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NOT_FOUND"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1ExecuteActionsErrorNil(t *testing.T) {
+func TestDspServiceManagerV1StopServiceErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.AttrsExecuteActions{
+	CGREvent := ArgStartServiceWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1ExecuteActions(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1StopService(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1ExecuteActionsNil(t *testing.T) {
+func TestDspServiceManagerV1StopServiceNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.AttrsExecuteActions{
+	CGREvent := ArgStartServiceWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1ExecuteActions(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1StopService(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NOT_FOUND"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1ExecuteActionPlansErrorNil(t *testing.T) {
+func TestDspServiceManagerV1ServiceStatusNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.AttrsExecuteActionPlans{
+	CGREvent := ArgStartServiceWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1ExecuteActionPlans(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1ServiceStatus(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspSchedulerSv1ExecuteActionPlansNil(t *testing.T) {
+func TestDspServiceManagerV1ServiceStatusErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.AttrsExecuteActionPlans{
+	CGREvent := ArgStartServiceWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.SchedulerSv1ExecuteActionPlans(CGREvent, reply)
+	result := dspSrv.ServiceManagerV1ServiceStatus(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NOT_FOUND"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
