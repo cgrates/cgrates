@@ -510,8 +510,8 @@ func testExpVerifyActionProfiles(t *testing.T) {
 }
 
 func testExpVerifyAccountProfiles(t *testing.T) {
-	var reply *utils.AccountProfile
-	acctPrf := &utils.AccountProfile{
+	var reply *utils.Account
+	acctPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "ACC_PRF_1",
 		FilterIDs: []string{},
@@ -556,7 +556,7 @@ func testExpVerifyAccountProfiles(t *testing.T) {
 	sort.Strings(acctPrf.Balances["MonetaryBalance"].CostIncrements[0].FilterIDs)
 	sort.Strings(acctPrf.Balances["MonetaryBalance"].UnitFactors[0].FilterIDs)
 	sort.Strings(acctPrf.Balances["MonetaryBalance"].AttributeIDs)
-	if err := expRpc.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := expRpc.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACC_PRF_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else {

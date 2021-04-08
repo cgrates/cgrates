@@ -207,7 +207,7 @@ func testAccountSGetAccountProfile(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var reply *utils.Account
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile,
+	if err := accSRPC.Call(utils.APIerSv1GetAccount,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(eAcnt, reply) {
@@ -268,12 +268,12 @@ func testAccountSSettAccountProfile(t *testing.T) {
 	}
 	var result string
 	expErr := utils.ErrNotFound.Error()
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &result); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 	var reply string
-	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
+	if err := accSRPC.Call(utils.APIerSv1SetAccount, apiAccPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -283,7 +283,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, reply2) {
@@ -295,17 +295,17 @@ func testAccountSSettAccountProfile(t *testing.T) {
 func testAccountSGetAccountProfileIDs(t *testing.T) {
 	expected := []string{"id_test", "1001", "1002"}
 	var result []string
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfileIDs, utils.PaginatorWithTenant{}, &result); err != nil {
+	if err := accSRPC.Call(utils.APIerSv1GetAccountIDs, utils.PaginatorWithTenant{}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfileIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
+	if err := accSRPC.Call(utils.APIerSv1GetAccountIDs, utils.PaginatorWithTenant{Tenant: "cgrates.org"}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfileIDs, utils.PaginatorWithTenant{
+	if err := accSRPC.Call(utils.APIerSv1GetAccountIDs, utils.PaginatorWithTenant{
 		Tenant:    "cgrates.org",
 		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
 	}, &result); err != nil {
@@ -318,7 +318,7 @@ func testAccountSGetAccountProfileIDs(t *testing.T) {
 
 func testAccountSGetAccountProfileIDsCount(t *testing.T) {
 	var reply int
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfileIDsCount,
+	if err := accSRPC.Call(utils.APIerSv1GetAccountIDsCount,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 3 {
@@ -331,7 +331,7 @@ func testAccountSUpdateAccountProfile(t *testing.T) {
 	var reply string
 	apiAccPrf.Weights = ";2"
 	apiAccPrf.Balances["MonetaryBalance"].CostIncrements[0].FixedFee = utils.Float64Pointer(123.5)
-	if err := accSRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &reply); err != nil {
+	if err := accSRPC.Call(utils.APIerSv1SetAccount, apiAccPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -341,7 +341,7 @@ func testAccountSUpdateAccountProfile(t *testing.T) {
 		t.Error(err)
 	}
 	var reply2 *utils.Account
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(accPrf, reply2) {
@@ -351,18 +351,18 @@ func testAccountSUpdateAccountProfile(t *testing.T) {
 
 func testAccountSRemoveAccountProfile(t *testing.T) {
 	var reply string
-	if err := accSRPC.Call(utils.APIerSv1RemoveAccountProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply); err != nil {
+	if err := accSRPC.Call(utils.APIerSv1RemoveAccount, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 	var reply2 *utils.Account
 	expErr := utils.ErrNotFound.Error()
-	if err := accSRPC.Call(utils.APIerSv1GetAccountProfile, &utils.TenantIDWithAPIOpts{
+	if err := accSRPC.Call(utils.APIerSv1GetAccount, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
-	if err := accSRPC.Call(utils.APIerSv1RemoveAccountProfile, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {
+	if err := accSRPC.Call(utils.APIerSv1RemoveAccount, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply2); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %v received: %v", expErr, err)
 	}
 }

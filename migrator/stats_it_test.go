@@ -247,13 +247,10 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting v1Stat ", err.Error())
 		}
 		currentVersion := engine.Versions{
-			utils.StatS:          1,
-			utils.Thresholds:     2,
-			utils.Accounts:       2,
-			utils.Actions:        2,
-			utils.ActionTriggers: 2,
-			utils.ActionPlans:    2,
-			utils.SharedGroups:   2,
+			utils.StatS:      1,
+			utils.Thresholds: 2,
+			utils.Accounts:   2,
+			utils.Actions:    2,
 		}
 		err = stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
@@ -269,7 +266,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when getting Stats ", err.Error())
 		}
 		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(sqp), utils.ToJSON(result))
 		}
 
 		result1, err := stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)

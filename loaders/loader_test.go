@@ -993,16 +993,16 @@ func TestLoaderProcessRoutes(t *testing.T) {
 	}
 }
 
-func TestLoaderProcessAccountProfiles(t *testing.T) {
+func TestLoaderProcessAccounts(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
-		ldrID:         "TestLoaderProcessAccountProfiles",
+		ldrID:         "TestLoaderProcessAccounts",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccountProfiles: {
+		utils.MetaAccounts: {
 			{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
@@ -1023,31 +1023,31 @@ cgrates.org,ACTPRF_ID1
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv, rdr: rdr,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv, rdr: rdr,
 				csvRdr: csvRdr,
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
-	//cannot set an AccountProfile while dryrun is true
+	//cannot set an Account while dryrun is true
 	ldr.dryRun = true
 	rdr = io.NopCloser(strings.NewReader(actPrflCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv, rdr: rdr,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv, rdr: rdr,
 				csvRdr: csvRdr,
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -2416,7 +2416,7 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 		utils.StatsCsv:              {},
 		utils.ThresholdsCsv:         {},
 		utils.ActionProfilesCsv:     {},
-		utils.AccountProfilesCsv:    {},
+		utils.AccountsCsv:           {},
 	}
 	if !reflect.DeepEqual(expected, openRdrs) {
 		t.Errorf("Expected %s,received %s", utils.ToJSON(expected), utils.ToJSON(openRdrs))
@@ -3544,16 +3544,16 @@ func TestLoadRateProfilesAsStructErrConversion(t *testing.T) {
 	}
 }
 
-func TestLoadAccountProfilesAsStructErrConversion(t *testing.T) {
+func TestLoadAccountsAsStructErrConversion(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
-		ldrID:         "TestLoadAccountProfilesAsStructErrConversion",
+		ldrID:         "TestLoadAccountsAsStructErrConversion",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccountProfiles: {
+		utils.MetaAccounts: {
 			{Tag: "ActivationInterval",
 				Path:  "ActivationInterval",
 				Type:  utils.MetaComposed,
@@ -3568,30 +3568,30 @@ func TestLoadAccountProfilesAsStructErrConversion(t *testing.T) {
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
 		},
 	}
 	expectedErr := "Unsupported time format"
-	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
-func TestProcessContentAccountProfileAsTPError(t *testing.T) {
+func TestProcessContentAccountAsTPError(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
-		ldrID:         "TestProcessContentAccountProfileAsTPError",
+		ldrID:         "TestProcessContentAccountAsTPError",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccountProfiles: {
+		utils.MetaAccounts: {
 			{Tag: "Tenant",
 				Path:  "Tenant",
 				Type:  utils.MetaComposed,
@@ -3619,30 +3619,30 @@ cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
 		},
 	}
 	expectedErr := "invlid key: <fltr1&fltr2;100;fltr3> for BalanceUnitFactors"
-	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
-func TestLoadAccountProfilesAsStructErrType(t *testing.T) {
+func TestLoadAccountsAsStructErrType(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
-		ldrID:         "TestLoadAccountProfilesAsStructErrType",
+		ldrID:         "TestLoadAccountsAsStructErrType",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccountProfiles: {
+		utils.MetaAccounts: {
 			{Tag: "PK",
 				Path:  "PK",
 				Type:  utils.MetaComposed,
@@ -3657,16 +3657,16 @@ NOT_UINT
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv,
 				rdr:      rdr,
 				csvRdr:   rdrCsv,
 			},
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -4671,16 +4671,16 @@ cgrates.org,REM_ACTPROFILE_1
 	}
 }
 
-func TestRemoveAccountProfileContent(t *testing.T) {
+func TestRemoveAccountContent(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
-		ldrID:         "TestRemoveActionProfileContent",
+		ldrID:         "TestRemoveAccountContent",
 		dm:            nil,
 		bufLoaderData: make(map[string][]LoaderData),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAccountProfiles: {
+		utils.MetaAccounts: {
 			{Tag: "TenantID",
 				Path:      "Tenant",
 				Type:      utils.MetaComposed,
@@ -4701,16 +4701,16 @@ cgrates.org,REM_ACTPROFILE_1
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
 		},
 	}
 	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaAccountProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -4722,30 +4722,30 @@ cgrates.org,REM_ACTPROFILE_1
 	}
 	if err := ldr.dm.SetAccount(acntPrf, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaAccountProfiles, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaAccountProfiles, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(utils.MetaAccounts, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
-	//cannot remove AccountProfile when dryrun is true
+	//cannot remove Account when dryrun is true
 	ldr.dryRun = true
 	rdr = io.NopCloser(strings.NewReader(acntPrfCsv))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAccountProfiles: {
-			utils.AccountProfilesCsv: &openedCSVFile{
-				fileName: utils.AccountProfilesCsv,
+		utils.MetaAccounts: {
+			utils.AccountsCsv: &openedCSVFile{
+				fileName: utils.AccountsCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaAccountProfiles, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }

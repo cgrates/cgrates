@@ -164,7 +164,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaAccountProfiles: {
+			utils.MetaAccounts: {
 				Replicate: false,
 				Remote:    false},
 		},

@@ -1039,7 +1039,7 @@ func testDspRplRateProfile(t *testing.T) {
 	}
 }
 func testDspRplAccountProfile(t *testing.T) {
-	// Set RateProfile
+	// Set Account
 	var replyStr string
 	rPrf := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
@@ -1050,8 +1050,8 @@ func testDspRplAccountProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccountProfile, rPrf, &replyStr); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.SetAccountProfile: ", err)
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetAccount, rPrf, &replyStr); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.SetAccount: ", err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
@@ -1066,8 +1066,8 @@ func testDspRplAccountProfile(t *testing.T) {
 			utils.OptsAPIKey: "repl12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountProfile, args, &reply); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.GetAccountProfile: ", err)
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, args, &reply); err != nil {
+		t.Error("Unexpected error when calling ReplicatorSv1.GetAccount: ", err)
 	} else if !reflect.DeepEqual(rPrf.Account, reply) {
 		t.Errorf("Expecting: %+v, received: %+v, ", rPrf.Account, reply)
 	}
@@ -1075,7 +1075,7 @@ func testDspRplAccountProfile(t *testing.T) {
 	allEngine.stopEngine(t)
 
 	// Get RateProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountProfile, args, &reply); err == nil ||
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
@@ -1084,14 +1084,14 @@ func testDspRplAccountProfile(t *testing.T) {
 	allEngine.startEngine(t)
 
 	// Remove RateProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccountProfile, args, &replyStr); err != nil {
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveAccount, args, &replyStr); err != nil {
 		t.Error(err)
 	} else if replyStr != utils.OK {
 		t.Error("Unexpected reply returned", replyStr)
 	}
 
 	// Get RateProfile
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccountProfile, args, &reply); err == nil ||
+	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetAccount, args, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}

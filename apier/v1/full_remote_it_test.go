@@ -724,7 +724,7 @@ func testFullRemoteITAction(t *testing.T) {
 func testFullRemoteITAccount(t *testing.T) {
 	// verify for not found in internal
 	var reply *utils.Account
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccount,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
@@ -781,7 +781,7 @@ func testFullRemoteITAccount(t *testing.T) {
 	var replySet string
 
 	// add a threshold profile in engine1 and verify it internal
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccount, apiAccPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
@@ -792,7 +792,7 @@ func testFullRemoteITAccount(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccount,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
@@ -802,7 +802,7 @@ func testFullRemoteITAccount(t *testing.T) {
 
 	// update the threshold profile and verify it to be updated
 	apiAccPrf.FilterIDs = []string{"*string:~*req.Account:1001", "*string:~*req.Destination:1002"}
-	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccountProfile, apiAccPrf, &replySet); err != nil {
+	if err := fullRemEngineOneRPC.Call(utils.APIerSv1SetAccount, apiAccPrf, &replySet); err != nil {
 		t.Error(err)
 	} else if replySet != utils.OK {
 		t.Error("Unexpected reply returned", replySet)
@@ -813,7 +813,7 @@ func testFullRemoteITAccount(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccountProfile,
+	if err := fullRemInternalRPC.Call(utils.APIerSv1GetAccount,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
 		&reply); err != nil {
 		t.Fatal(err)
