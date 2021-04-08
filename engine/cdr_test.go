@@ -54,6 +54,66 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 	}
 }
 
+func TestNewCDRFromExternalCDRErrors(t *testing.T) {
+	extCdr := &ExternalCDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.MetaVoice,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UnitTest,
+		RequestType: utils.MetaRated,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   "2013-11-07T08:42:20Z",
+		AnswerTime:  "2013-11-07T08:42:26Z",
+		RunID:       utils.MetaDefault,
+		Usage:       "10",
+		Cost:        1.01,
+		PreRated:    true,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+
+	///
+	extCdr.SetupTime = "invalid"
+	errExpect := "Unsupported time format"
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	extCdr.SetupTime = "2013-11-07T08:42:20Z"
+
+	///
+	extCdr.AnswerTime = "invalid"
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	extCdr.AnswerTime = "2013-11-07T08:42:20Z"
+
+	///
+	extCdr.CGRID = ""
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
+		t.Error(err)
+	}
+	extCdr.CGRID = utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String())
+
+	///
+	extCdr.Usage = "invalid"
+	errExpect = `time: invalid duration "invalid"`
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
+		t.Error(err)
+	}
+	extCdr.Usage = "10"
+
+	///
+	extCdr.CostDetails = "CostDetail"
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestCDRClone(t *testing.T) {
 	storCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.MetaVoice, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",

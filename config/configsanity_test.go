@@ -1301,6 +1301,8 @@ func TestConfigSanityEventReader(t *testing.T) {
 			},
 		},
 	}
+
+	//CacheDumpFields
 	expected = "<ERs> MANDATORY_IE_MISSING: [Path] for  at SessionId"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1308,6 +1310,79 @@ func TestConfigSanityEventReader(t *testing.T) {
 	expected = "<ERs> MANDATORY_IE_MISSING: [Path] for  at SessionId"
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaNone
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Path = "~Field1..Field2[0]"
+	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Path = "~Field1.Field3[0]"
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaUnixTimestamp
+	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Values of cache_dump_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaNone
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<ERs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at cache_dump_fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Filters = nil
+
+	//Fields
+	cfg.ersCfg.Readers[0].Fields[0].Path = "~Field1..Field2[0]"
+	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Fields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.ersCfg.Readers[0].Fields[0].Path = "~Field1.Field3[0]"
+	cfg.ersCfg.Readers[0].Fields[0].Type = utils.MetaUnixTimestamp
+	expected = "<ERs> Empty field path  for ~Field1..Field2[0] at Values of fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Fields[0].Type = utils.MetaNone
+	cfg.ersCfg.Readers[0].Fields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.ersCfg.Readers[0].Fields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<ERs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ersCfg.Readers[0].Fields[0].Filters = nil
+
+	cfg.ersCfg.Readers[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<ERs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at readers"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 }
@@ -1371,6 +1446,46 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	cfg.eesCfg.Exporters[0].Type = utils.MetaSQL
 	expected = "<EEs> empty content fields for exporter with ID: "
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.eesCfg.Exporters[0].Type = utils.MetaHTTPPost
+	cfg.eesCfg.Exporters[0].Fields[0].Path = "~Field1..Field2[0]"
+	expected = "<EEs> Empty field path  for ~Field1..Field2[0] at Path"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.eesCfg.Exporters[0].Fields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1..Field2[0]",
+		},
+	}
+	cfg.eesCfg.Exporters[0].Fields[0].Path = "~Field1.Field3[0]"
+	cfg.eesCfg.Exporters[0].Fields[0].Type = utils.MetaUnixTimestamp
+	expected = "<EEs> Empty field path  for ~Field1..Field2[0] at Values of fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.eesCfg.Exporters[0].Fields[0].Type = utils.MetaNone
+	cfg.eesCfg.Exporters[0].Fields[0].Value = RSRParsers{
+		&RSRParser{
+			Rules: "~*req.Session-Id2",
+			path:  "~Field1.Field2[0]",
+		},
+	}
+	cfg.eesCfg.Exporters[0].Fields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<EEs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at fields"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.eesCfg.Exporters[0].Fields[0].Filters = nil
+
+	cfg.eesCfg.Exporters[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	expected = "<EEs> Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4> for [*empty:~Field1..Field2[0]:*Test3:*Test4] at exporters"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 }
