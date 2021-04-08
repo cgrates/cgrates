@@ -54,7 +54,7 @@ var sTests = []func(t *testing.T){
 	testITTestStoreFilterIndexesWithTransID,
 	testITFlush,
 	testITIsDBEmpty,
-	testITAccountProfileIndexes,
+	testITAccountIndexes,
 	testITFlush,
 	testITIsDBEmpty,
 	testITResourceProfileIndexes,
@@ -984,7 +984,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 	}
 }
 
-func testITAccountProfileIndexes(t *testing.T) {
+func testITAccountIndexes(t *testing.T) {
 	fltr1 := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "FIRST",

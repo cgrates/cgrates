@@ -899,16 +899,16 @@ func TestLoadAccount(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 
-	if len(csvr.accountProfiles) != 1 {
+	if len(csvr.accounts) != 1 {
 		t.Fatalf("Failed to load Accounts: %s", utils.ToJSON(csvr.actionProfiles))
 	}
 	accPrfKey := utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "1001",
 	}
-	sort.Strings(csvr.accountProfiles[accPrfKey].Balances["MonetaryBalance"].AttributeIDs)
-	if !reflect.DeepEqual(csvr.accountProfiles[accPrfKey], expected) {
+	sort.Strings(csvr.accounts[accPrfKey].Balances["MonetaryBalance"].AttributeIDs)
+	if !reflect.DeepEqual(csvr.accounts[accPrfKey], expected) {
 		t.Errorf("Expecting: %+v,\n received: %+v",
-			utils.ToJSON(expected), utils.ToJSON(csvr.accountProfiles[accPrfKey]))
+			utils.ToJSON(expected), utils.ToJSON(csvr.accounts[accPrfKey]))
 	}
 }

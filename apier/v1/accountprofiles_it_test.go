@@ -48,13 +48,13 @@ var (
 		testAccountSStartEngine,
 		testAccountSRPCConn,
 		testAccountSLoadFromFolder,
-		testAccountSGetAccountProfile,
+		testAccountSGetAccount,
 		testAccountSPing,
-		testAccountSSettAccountProfile,
-		testAccountSGetAccountProfileIDs,
-		testAccountSGetAccountProfileIDsCount,
-		testAccountSUpdateAccountProfile,
-		testAccountSRemoveAccountProfile,
+		testAccountSSettAccount,
+		testAccountSGetAccountIDs,
+		testAccountSGetAccountIDsCount,
+		testAccountSUpdateAccount,
+		testAccountSRemoveAccount,
 		testAccountSKillEngine,
 	}
 )
@@ -125,7 +125,7 @@ func testAccountSLoadFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testAccountSGetAccountProfile(t *testing.T) {
+func testAccountSGetAccount(t *testing.T) {
 	eAcnt := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
@@ -224,7 +224,7 @@ func testAccountSPing(t *testing.T) {
 	}
 }
 
-func testAccountSSettAccountProfile(t *testing.T) {
+func testAccountSSettAccount(t *testing.T) {
 	apiAccPrf = &utils.APIAccountWithOpts{
 		APIAccount: &utils.APIAccount{
 			Tenant:  "cgrates.org",
@@ -292,7 +292,7 @@ func testAccountSSettAccountProfile(t *testing.T) {
 
 }
 
-func testAccountSGetAccountProfileIDs(t *testing.T) {
+func testAccountSGetAccountIDs(t *testing.T) {
 	expected := []string{"id_test", "1001", "1002"}
 	var result []string
 	if err := accSRPC.Call(utils.APIerSv1GetAccountIDs, utils.PaginatorWithTenant{}, &result); err != nil {
@@ -316,7 +316,7 @@ func testAccountSGetAccountProfileIDs(t *testing.T) {
 
 }
 
-func testAccountSGetAccountProfileIDsCount(t *testing.T) {
+func testAccountSGetAccountIDsCount(t *testing.T) {
 	var reply int
 	if err := accSRPC.Call(utils.APIerSv1GetAccountIDsCount,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &reply); err != nil {
@@ -327,7 +327,7 @@ func testAccountSGetAccountProfileIDsCount(t *testing.T) {
 
 }
 
-func testAccountSUpdateAccountProfile(t *testing.T) {
+func testAccountSUpdateAccount(t *testing.T) {
 	var reply string
 	apiAccPrf.Weights = ";2"
 	apiAccPrf.Balances["MonetaryBalance"].CostIncrements[0].FixedFee = utils.Float64Pointer(123.5)
@@ -349,7 +349,7 @@ func testAccountSUpdateAccountProfile(t *testing.T) {
 	}
 }
 
-func testAccountSRemoveAccountProfile(t *testing.T) {
+func testAccountSRemoveAccount(t *testing.T) {
 	var reply string
 	if err := accSRPC.Call(utils.APIerSv1RemoveAccount, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "id_test"}}, &reply); err != nil {
 		t.Error(err)

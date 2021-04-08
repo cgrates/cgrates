@@ -277,9 +277,9 @@ func TestGetFormatedSliceResultCase2(t *testing.T) {
 
 func TestCommandExecuterUsage(t *testing.T) {
 	testStruct := &CommandExecuter{}
-	testStruct.command = commands["accounts_profile"]
+	testStruct.command = commands["accounts"]
 	result := testStruct.Usage()
-	expected := "\n\tUsage: accounts_profile APIOpts=null \n"
+	expected := "\n\tUsage: accounts APIOpts=null \n"
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expected <%+q>, Received <%+q>", expected, result)
 	}
@@ -288,7 +288,7 @@ func TestCommandExecuterUsage(t *testing.T) {
 
 func TestCommandExecuterLocalExecute(t *testing.T) {
 	testStruct := &CommandExecuter{}
-	testStruct.command = commands["accounts_profile"]
+	testStruct.command = commands["accounts"]
 	result := testStruct.LocalExecute()
 	expected := utils.EmptyString
 	if !reflect.DeepEqual(expected, result) {
@@ -350,7 +350,7 @@ func TestCommandExecuterLocalFromArgsCase2(t *testing.T) {
 
 func TestCommandExecuterClientArgs(t *testing.T) {
 	testStruct := &CommandExecuter{}
-	testStruct.command = commands["accounts_profile"]
+	testStruct.command = commands["accounts"]
 	result := testStruct.clientArgs(testStruct.command.RpcParams(true))
 	expected := []string{"APIOpts", "ID", "Tenant"}
 	sort.Strings(result)

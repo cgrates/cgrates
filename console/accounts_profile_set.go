@@ -23,8 +23,8 @@ import (
 )
 
 func init() {
-	c := &CmdSetAccountProfile{
-		name:      "accounts_profile_set",
+	c := &CmdSetAccount{
+		name:      "accounts_set",
 		rpcMethod: utils.APIerSv1SetAccount,
 		rpcParams: &utils.APIAccountWithOpts{},
 	}
@@ -32,33 +32,33 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetAccountProfile struct {
+type CmdSetAccount struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.APIAccountWithOpts
 	*CommandExecuter
 }
 
-func (self *CmdSetAccountProfile) Name() string {
+func (self *CmdSetAccount) Name() string {
 	return self.name
 }
 
-func (self *CmdSetAccountProfile) RpcMethod() string {
+func (self *CmdSetAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetAccountProfile) RpcParams(reset bool) interface{} {
+func (self *CmdSetAccount) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.APIAccountWithOpts{APIAccount: new(utils.APIAccount)}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetAccountProfile) PostprocessRpcParams() error {
+func (self *CmdSetAccount) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetAccountProfile) RpcResult() interface{} {
+func (self *CmdSetAccount) RpcResult() interface{} {
 	var s string
 	return &s
 }
