@@ -91,7 +91,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// fieldNameType (~*accounts), accountID(1001) and queried part (BalanceMap.*monetary[0].Value)
 
 		var account utils.Account
-		if err = connMgr.Call(dDP.apiConns, nil, utils.APIerSv1GetAccountProfile,
+		if err = connMgr.Call(dDP.apiConns, nil, utils.APIerSv1GetAccount,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &account); err != nil {
 			return
 		}

@@ -219,9 +219,9 @@ type ReplicatorSv1Interface interface {
 	SetIndexes(args *utils.SetIndexesArg, reply *string) error
 	RemoveIndexes(args *utils.GetIndexesArg, reply *string) error
 
-	GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.Account) error
-	SetAccountProfile(args *utils.AccountWithAPIOpts, reply *string) error
-	RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error
+	GetAccount(tntID *utils.TenantIDWithAPIOpts, reply *utils.Account) error
+	SetAccount(args *utils.AccountWithAPIOpts, reply *string) error
+	RemoveAccount(args *utils.TenantIDWithAPIOpts, reply *string) error
 
 	GetActionProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error
 	SetActionProfile(args *engine.ActionProfileWithAPIOpts, reply *string) error
@@ -236,7 +236,7 @@ type ActionSv1Interface interface {
 
 type AccountSv1Interface interface {
 	Ping(ign *utils.CGREvent, reply *string) error
-	AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) error
+	AccountsForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) error
 	MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
 	DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error
 	ActionSetBalance(args *utils.ArgsActSetBalance, eEc *string) (err error)

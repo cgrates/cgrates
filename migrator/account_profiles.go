@@ -27,16 +27,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentAccountProfiles() (err error) {
+func (m *Migrator) migrateCurrentAccounts() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AccountProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AccountPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AccountProfilePrefix), utils.InInFieldSep, 2)
+		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AccountPrefix), utils.InInFieldSep, 2)
 		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating from account profiles", id)
+			return fmt.Errorf("Invalid key <%s> when migrating from account ", id)
 		}
 		ap, err := m.dmIN.DataManager().GetAccount(tntID[0], tntID[1])
 		if err != nil {
@@ -51,44 +51,44 @@ func (m *Migrator) migrateCurrentAccountProfiles() (err error) {
 		if err := m.dmIN.DataManager().RemoveAccount(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
-		m.stats[utils.AccountProfilesString]++
+		m.stats[utils.AccountsString]++
 	}
 	return
 }
 
-func (m *Migrator) migrateAccountProfiles() (err error) {
+func (m *Migrator) migrateAccounts() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.AccountProfilesString); err != nil {
+	if vrs, err = m.getVersions(utils.AccountsString); err != nil {
 		return
 	}
 	migrated := true
 	for {
-		version := vrs[utils.AccountProfilesString]
+		version := vrs[utils.AccountsString]
 		for {
 			switch version {
 			default:
 				return fmt.Errorf("Unsupported version %v", version)
-			case current[utils.AccountProfilesString]:
+			case current[utils.AccountsString]:
 				migrated = false
 				if m.sameDataDB {
 					break
 				}
-				if err = m.migrateCurrentAccountProfiles(); err != nil {
+				if err = m.migrateCurrentAccounts(); err != nil {
 					return
 				}
 			}
-			if version == current[utils.AccountProfilesString] || err == utils.ErrNoMoreData {
+			if version == current[utils.AccountsString] || err == utils.ErrNoMoreData {
 				break
 			}
 		}
 		if err == utils.ErrNoMoreData || !migrated {
 			break
 		}
-		m.stats[utils.AccountProfilesString]++
+		m.stats[utils.AccountsString]++
 	}
 	//All done, update version with current one
-	if err = m.setVersions(utils.AccountProfilesString); err != nil {
+	if err = m.setVersions(utils.AccountsString); err != nil {
 		return
 	}
 	return m.ensureIndexesDataDB(engine.ColApp)

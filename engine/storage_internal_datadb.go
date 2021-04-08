@@ -677,22 +677,22 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	return
 }
 
-func (iDB *InternalDB) GetAccountProfileDrv(tenant, id string) (ap *utils.Account, err error) {
-	x, ok := Cache.Get(utils.CacheAccountProfiles, utils.ConcatenatedKey(tenant, id))
+func (iDB *InternalDB) GetAccountDrv(tenant, id string) (ap *utils.Account, err error) {
+	x, ok := Cache.Get(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
 	return x.(*utils.Account).Clone(), nil
 }
 
-func (iDB *InternalDB) SetAccountProfileDrv(ap *utils.Account) (err error) {
-	Cache.SetWithoutReplicate(utils.CacheAccountProfiles, ap.TenantID(), ap, nil,
+func (iDB *InternalDB) SetAccountDrv(ap *utils.Account) (err error) {
+	Cache.SetWithoutReplicate(utils.CacheAccounts, ap.TenantID(), ap, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveAccountProfileDrv(tenant, id string) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheAccountProfiles, utils.ConcatenatedKey(tenant, id),
+func (iDB *InternalDB) RemoveAccountDrv(tenant, id string) (err error) {
+	Cache.RemoveWithoutReplicate(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }

@@ -1008,13 +1008,13 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesAr
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveIndexes, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantIDWithAPIOpts, reply *utils.Account) (err error) {
+func (dS *DispatcherService) ReplicatorSv1GetAccount(args *utils.TenantIDWithAPIOpts, reply *utils.Account) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
 		tnt = args.TenantID.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1GetAccountProfile, tnt,
+		if err = dS.authorize(utils.ReplicatorSv1GetAccount, tnt,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -1023,16 +1023,16 @@ func (dS *DispatcherService) ReplicatorSv1GetAccountProfile(args *utils.TenantID
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccountProfile, args, reply)
+	}, utils.MetaReplicator, utils.ReplicatorSv1GetAccount, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountWithAPIOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1SetAccount(args *utils.AccountWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
 		args = &utils.AccountWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1SetAccountProfile, args.Tenant,
+		if err = dS.authorize(utils.ReplicatorSv1SetAccount, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -1040,16 +1040,16 @@ func (dS *DispatcherService) ReplicatorSv1SetAccountProfile(args *utils.AccountW
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccountProfile, args, rpl)
+	}, utils.MetaReplicator, utils.ReplicatorSv1SetAccount, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
+func (dS *DispatcherService) ReplicatorSv1RemoveAccount(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
 		args = &utils.TenantIDWithAPIOpts{}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1RemoveAccountProfile, args.Tenant,
+		if err = dS.authorize(utils.ReplicatorSv1RemoveAccount, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -1057,5 +1057,5 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccountProfile(args *utils.Tenan
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAccountProfile, args, rpl)
+	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveAccount, args, rpl)
 }

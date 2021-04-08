@@ -406,5 +406,5 @@ type AccountMdl struct {
 }
 
 func (AccountMdl) TableName() string {
-	return utils.TBLTPAccountProfiles
+	return utils.TBLTPAccounts
 }

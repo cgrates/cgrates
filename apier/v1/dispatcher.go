@@ -1058,19 +1058,19 @@ func (dS *DispatcherReplicatorSv1) RemoveIndexes(args *utils.GetIndexesArg, repl
 	return dS.dS.ReplicatorSv1RemoveIndexes(args, reply)
 }
 
-// GetAccountProfile .
-func (dS *DispatcherReplicatorSv1) GetAccountProfile(tntID *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
-	return dS.dS.ReplicatorSv1GetAccountProfile(tntID, reply)
+// GetAccount .
+func (dS *DispatcherReplicatorSv1) GetAccount(tntID *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+	return dS.dS.ReplicatorSv1GetAccount(tntID, reply)
 }
 
-// SetAccountProfile .
-func (dS *DispatcherReplicatorSv1) SetAccountProfile(args *utils.AccountWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1SetAccountProfile(args, reply)
+// SetAccount .
+func (dS *DispatcherReplicatorSv1) SetAccount(args *utils.AccountWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetAccount(args, reply)
 }
 
-// RemoveAccountProfile .
-func (dS *DispatcherReplicatorSv1) RemoveAccountProfile(args *utils.TenantIDWithAPIOpts, reply *string) error {
-	return dS.dS.ReplicatorSv1RemoveAccountProfile(args, reply)
+// RemoveAccount .
+func (dS *DispatcherReplicatorSv1) RemoveAccount(args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveAccount(args, reply)
 }
 
 // GetActionProfile .
@@ -1141,8 +1141,8 @@ func (dR *DispatcherAccountSv1) Ping(args *utils.CGREvent, reply *string) error 
 	return dR.dR.AccountSv1Ping(args, reply)
 }
 
-func (dR *DispatcherAccountSv1) AccountProfilesForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) error {
-	return dR.dR.AccountProfilesForEvent(args, aps)
+func (dR *DispatcherAccountSv1) AccountsForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) error {
+	return dR.dR.AccountsForEvent(args, aps)
 }
 
 func (dR *DispatcherAccountSv1) MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) error {

@@ -1065,7 +1065,7 @@ func (ms *MongoStorage) GetTPAccounts(tpid, tenant, id string) ([]*utils.TPAccou
 	}
 	var results []*utils.TPAccount
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPAccountProfiles).Find(sctx, filter)
+		cur, err := ms.getCol(utils.TBLTPAccounts).Find(sctx, filter)
 		if err != nil {
 			return err
 		}
@@ -1109,7 +1109,7 @@ func (ms *MongoStorage) SetTPAccounts(tpAps []*utils.TPAccount) (err error) {
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tpAps {
-			_, err = ms.getCol(utils.TBLTPAccountProfiles).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
+			_, err = ms.getCol(utils.TBLTPAccounts).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
 				bson.M{"$set": tp},
 				options.Update().SetUpsert(true),
 			)

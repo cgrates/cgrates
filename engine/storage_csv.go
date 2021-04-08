@@ -105,7 +105,7 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 	dispatcherhostsPaths := appendName(allFoldersPath, utils.DispatcherHostsCsv)
 	rateProfilesFn := appendName(allFoldersPath, utils.RateProfilesCsv)
 	actionProfilesFn := appendName(allFoldersPath, utils.ActionProfilesCsv)
-	accountProfilesFn := appendName(allFoldersPath, utils.AccountProfilesCsv)
+	accountProfilesFn := appendName(allFoldersPath, utils.AccountsCsv)
 	return NewCSVStorage(sep,
 		destinationsPaths,
 		timingsPaths,
@@ -169,7 +169,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 		getIfExist(utils.DispatcherHosts),
 		getIfExist(utils.RateProfiles),
 		getIfExist(utils.ActionProfiles),
-		getIfExist(utils.AccountProfilesString))
+		getIfExist(utils.AccountsString))
 	c.generator = func() csvReaderCloser {
 		return &csvGoogle{
 			spreadsheetID: spreadsheetID,
@@ -211,7 +211,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			dispatcherhostsPaths = append(dispatcherhostsPaths, joinURL(baseURL, utils.DispatcherHostsCsv))
 			rateProfilesPaths = append(rateProfilesPaths, joinURL(baseURL, utils.RateProfilesCsv))
 			actionProfilesPaths = append(actionProfilesPaths, joinURL(baseURL, utils.ActionProfilesCsv))
-			accountProfilesPaths = append(accountProfilesPaths, joinURL(baseURL, utils.AccountProfilesCsv))
+			accountProfilesPaths = append(accountProfilesPaths, joinURL(baseURL, utils.AccountsCsv))
 			continue
 		}
 		switch {
@@ -241,7 +241,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			rateProfilesPaths = append(rateProfilesPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.ActionProfilesCsv):
 			actionProfilesPaths = append(actionProfilesPaths, baseURL)
-		case strings.HasSuffix(baseURL, utils.AccountProfilesCsv):
+		case strings.HasSuffix(baseURL, utils.AccountsCsv):
 			accountProfilesPaths = append(accountProfilesPaths, baseURL)
 
 		}

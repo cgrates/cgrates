@@ -760,7 +760,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	}
 
 	if verbose {
-		log.Print("AccountProfiles:")
+		log.Print("Accounts:")
 	}
 	for _, tpAP := range tpr.accountProfiles {
 		var ap *utils.Account
@@ -775,7 +775,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		}
 	}
 	if len(tpr.accountProfiles) != 0 {
-		loadIDs[utils.CacheAccountProfiles] = loadID
+		loadIDs[utils.CacheAccounts] = loadID
 	}
 
 	if verbose {
@@ -1118,7 +1118,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 
 	if verbose {
-		log.Print("AccountProfiles:")
+		log.Print("Accounts:")
 	}
 	for _, tpAp := range tpr.accountProfiles {
 		if err = tpr.dm.RemoveAccount(tpAp.Tenant, tpAp.ID,
@@ -1211,7 +1211,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		loadIDs[utils.CacheActionProfiles] = loadID
 	}
 	if len(tpr.accountProfiles) != 0 {
-		loadIDs[utils.CacheAccountProfiles] = loadID
+		loadIDs[utils.CacheAccounts] = loadID
 	}
 	if len(tpr.timings) != 0 {
 		loadIDs[utils.CacheTimings] = loadID
@@ -1244,7 +1244,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	dphIDs, _ := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
 	ratePrfIDs, _ := tpr.GetLoadedIds(utils.RateProfilePrefix)
 	actionPrfIDs, _ := tpr.GetLoadedIds(utils.ActionProfilePrefix)
-	accountPrfIDs, _ := tpr.GetLoadedIds(utils.AccountProfilePrefix)
+	accountPrfIDs, _ := tpr.GetLoadedIds(utils.AccountPrefix)
 
 	//compose Reload Cache argument
 	cacheArgs := utils.AttrReloadCacheWithAPIOpts{
@@ -1325,7 +1325,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 		cacheIDs = append(cacheIDs, utils.CacheActionProfilesFilterIndexes)
 	}
 	if len(accountPrfIDs) != 0 {
-		cacheIDs = append(cacheIDs, utils.CacheAccountProfilesFilterIndexes)
+		cacheIDs = append(cacheIDs, utils.CacheAccountsFilterIndexes)
 	}
 	if len(flrIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheReverseFilterIndexes)

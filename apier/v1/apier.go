@@ -666,7 +666,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 	if len(arg.Items) == 0 {
 		arg.Items = []string{utils.MetaAttributes, utils.MetaChargers, utils.MetaDispatchers,
 			utils.MetaDispatcherHosts, utils.MetaFilters, utils.MetaResources, utils.MetaStats,
-			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccountProfiles}
+			utils.MetaRoutes, utils.MetaThresholds, utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts}
 	}
 	if _, err := os.Stat(arg.Path); os.IsNotExist(err) {
 		os.Mkdir(arg.Path, os.ModeDir)
@@ -1088,8 +1088,8 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 				}
 			}
 			csvWriter.Flush()
-		case utils.MetaAccountProfiles:
-			prfx := utils.AccountProfilePrefix
+		case utils.MetaAccounts:
+			prfx := utils.AccountPrefix
 			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 			if err != nil {
 				return err
@@ -1097,7 +1097,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			if len(keys) == 0 {
 				continue
 			}
-			f, err := os.Create(path.Join(arg.Path, utils.AccountProfilesCsv))
+			f, err := os.Create(path.Join(arg.Path, utils.AccountsCsv))
 			if err != nil {
 				return err
 			}

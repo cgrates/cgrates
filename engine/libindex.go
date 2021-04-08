@@ -693,7 +693,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				}); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
-		case utils.CacheAccountProfilesFilterIndexes:
+		case utils.CacheAccountsFilterIndexes:
 			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
