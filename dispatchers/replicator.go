@@ -965,7 +965,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccount(args *utils.StringWithAP
 
 func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -982,7 +984,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(args *utils.TenantIDWi
 
 func (dS *DispatcherService) ReplicatorSv1RemoveFilter(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -999,7 +1003,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveFilter(args *utils.TenantIDWithA
 
 func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1016,7 +1022,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(args *utils.Ten
 
 func (dS *DispatcherService) ReplicatorSv1RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1050,7 +1058,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveTiming(args *utils.StringWithAPI
 
 func (dS *DispatcherService) ReplicatorSv1RemoveResource(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1067,7 +1077,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResource(args *utils.TenantIDWit
 
 func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1203,7 +1215,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRatingProfile(args *utils.String
 
 func (dS *DispatcherService) ReplicatorSv1RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1220,7 +1234,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRouteProfile(args *utils.TenantI
 
 func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1237,7 +1253,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(args *utils.Ten
 
 func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1254,7 +1272,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(args *utils.Tenan
 
 func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -1271,7 +1291,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(args *utils.Te
 
 func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
