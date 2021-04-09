@@ -2329,24 +2329,6 @@ func TestAccountGetBalanceWithID(t *testing.T) {
 	}
 }
 
-// func TestAccountgetCreditForPrefix(t *testing.T) {
-// 	acc := &Account{
-// 		BalanceMap: map[string]Balances{
-// 			utils.MetaMonetary: {
-// 				&Balance{
-// 					ID: "testID",
-// 					SharedGroups: utils.StringMap{
-// 						"testKey": false,
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
-// 	cd := &CallDescriptor{}
-// 	rcvdur, rcvcredit, rcvblncs := acc.getCreditForPrefix(cd)
-// 	fmt.Println(rcvdur, rcvcredit, rcvblncs)
-// }
-
 func TestAccountSetRecurrent(t *testing.T) {
 	aType := "testType"
 	var ptrType *string = &aType

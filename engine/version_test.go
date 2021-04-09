@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -128,5 +129,183 @@ func TestCurrentDBVersions(t *testing.T) {
 	expStr := "cgr-migrator"
 	if rcv := expVersDataDB.Compare(expVersStorDB, utils.INTERNAL, true); !strings.Contains(rcv, expStr) {
 		t.Errorf("Expected %+v, received %+v", expStr, rcv)
+	}
+}
+
+type storageMock struct {
+	testcase string
+}
+
+func (sM *storageMock) Close() {}
+
+func (sM *storageMock) Flush(string) error {
+	return nil
+}
+
+func (sM *storageMock) GetKeysForPrefix(string) ([]string, error) {
+	return nil, nil
+}
+
+func (sM *storageMock) RemoveKeysForPrefix(string) error {
+	return nil
+}
+
+func (sM *storageMock) GetVersions(itm string) (vrs Versions, err error) {
+	switch sM.testcase {
+	case "GetVersions non-nil error":
+		err = fmt.Errorf("GetVersions mock error")
+		return nil, err
+	case "GetVersions ErrNotFound":
+		return nil, utils.ErrNotFound
+	case "ErrNotFound empty db":
+		return nil, utils.ErrNotFound
+	case "ErrNotFound IsDBEmpty error":
+		return nil, utils.ErrNotFound
+	}
+	return nil, nil
+}
+
+func (sM *storageMock) SetVersions(vrs Versions, overwrite bool) (err error) {
+	switch sM.testcase {
+	case "setDBVersions error":
+		err = fmt.Errorf("SetVersions error")
+		return
+	case "ErrNotFound empty db":
+		err = fmt.Errorf("OverwriteDBVersions mock error")
+		return
+	}
+	return
+}
+
+func (sM *storageMock) RemoveVersions(vrs Versions) (err error) {
+	return nil
+}
+
+func (sM *storageMock) SelectDatabase(dbName string) (err error) {
+	return nil
+}
+
+func (sM *storageMock) GetStorageType() string {
+	switch sM.testcase {
+	case "Compare returns non-nil message":
+		return utils.Postgres
+	}
+	return ""
+}
+
+func (sM *storageMock) IsDBEmpty() (resp bool, err error) {
+	switch sM.testcase {
+	case "ErrNotFound empty db":
+		return true, nil
+	case "ErrNotFound IsDBEmpty error":
+		err = fmt.Errorf("IsDBEmpty mock error")
+		return false, err
+	}
+	return false, nil
+}
+
+func TestVersionSetDBVersions(t *testing.T) {
+	storage := &storageMock{}
+
+	err := SetDBVersions(storage)
+
+	if err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+}
+
+func TestVersionisDataDB(t *testing.T) {
+	var storage Storage = &MongoStorage{}
+	rcv := isDataDB(storage)
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+	}
+}
+
+func TestVersionsetDBVersions(t *testing.T) {
+	storage := &storageMock{
+		testcase: "setDBVersions error",
+	}
+
+	experr := "SetVersions error"
+	err := setDBVersions(storage, false)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestVersionCheckVersionsNilError(t *testing.T) {
+	storage := &storageMock{}
+	err := CheckVersions(storage)
+
+	if err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+}
+
+func TestVersionCheckVersionsGetVersionsNonNilErr(t *testing.T) {
+	storage := &storageMock{
+		testcase: "GetVersions non-nil error",
+	}
+
+	experr := "GetVersions mock error"
+	err := CheckVersions(storage)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestVersionCheckVersionsGetVersionsErrNotFoundEmptyDB(t *testing.T) {
+	storage := &storageMock{
+		testcase: "ErrNotFound empty db",
+	}
+
+	experr := "OverwriteDBVersions mock error"
+	err := CheckVersions(storage)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestVersionCheckVersionsGetVersionsErrNotFoundNonEmptyDB(t *testing.T) {
+	storage := &storageMock{
+		testcase: "GetVersions ErrNotFound",
+	}
+
+	experr := "No versions defined: please backup cgrates data and run : <cgr-migrator -exec=*set_versions>"
+	err := CheckVersions(storage)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestVersionCheckVersionsGetVersionsErrNotFoundDataDBErr(t *testing.T) {
+	storage := &storageMock{
+		testcase: "ErrNotFound IsDBEmpty error",
+	}
+
+	experr := "IsDBEmpty mock error"
+	err := CheckVersions(storage)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestVersionCheckVersionsCompareNonNilMsg(t *testing.T) {
+	storage := &storageMock{
+		testcase: "Compare returns non-nil message",
+	}
+
+	experr := fmt.Sprintf("Migration needed: please backup cgr data and run : <%s>", "cgr-migrator -exec=*cost_details")
+	err := CheckVersions(storage)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
