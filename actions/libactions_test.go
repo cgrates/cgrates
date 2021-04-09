@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"bytes"
+	"log"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -72,5 +75,62 @@ func TestACExecuteCDRLog(t *testing.T) {
 	} else if !reflect.DeepEqual(acts, expectedActs) {
 		t.Errorf("Expected %+v, received %+v", expectedActs, acts)
 	}
+}
 
+func TestACExecuteScheduledAction(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	acts := []actioner{
+		&actCDRLog{cfg, fltr, nil, &engine.APAction{
+			ID:   "TEST_ACTION",
+			Type: utils.CDRLog,
+		}},
+	}
+	dataStorage := utils.MapStorage{
+		utils.LogLevelCfg: 7,
+	}
+
+	schedActs := newScheduledActs(nil, "cgrates.org", "FirstAction",
+		utils.EmptyString, utils.MetaTopUp, utils.MetaNow,
+		dataStorage, acts)
+
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
+	schedActs.ScheduledExecute()
+
+	expected := "CGRateS <> [WARNING] executing action: <TEST_ACTION>, error: <no connection with CDR Server>"
+	if rcv := buff.String(); !strings.Contains(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+	buff.Reset()
+
+	//not a data to save
+	if err := schedActs.postExec(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestACActionTarget(t *testing.T) {
+	if rcv := actionTarget(utils.MetaResetStatQueue); rcv != utils.MetaStats {
+		t.Errorf("Expected %+v, received %+v", utils.MetaStats, rcv)
+	}
+	if rcv := actionTarget(utils.MetaResetThreshold); rcv != utils.MetaThresholds {
+		t.Errorf("Expected %+v, received %+v", utils.MetaThresholds, rcv)
+	}
+	if rcv := actionTarget(utils.MetaAddBalance); rcv != utils.MetaAccounts {
+		t.Errorf("Expected %+v, received %+v", utils.MetaAccounts, rcv)
+	}
+	if rcv := actionTarget("not_a_target"); rcv != utils.MetaNone {
+		t.Errorf("Expected %+v, received %+v", utils.MetaNone, rcv)
+	}
 }
