@@ -478,7 +478,9 @@ func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(args *utils.StringWithA
 
 func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(args *engine.ThresholdProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.ThresholdProfileWithAPIOpts{}
+		args = &engine.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &engine.ThresholdProfile{},
+		}
 	}
 	args.ThresholdProfile.Tenant = utils.FirstNonEmpty(args.ThresholdProfile.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -495,7 +497,9 @@ func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(args *engine.Thres
 
 func (dS *DispatcherService) ReplicatorSv1SetThreshold(args *engine.ThresholdWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.ThresholdWithAPIOpts{}
+		args = &engine.ThresholdWithAPIOpts{
+			Threshold: &engine.Threshold{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -529,7 +533,9 @@ func (dS *DispatcherService) ReplicatorSv1SetDestination(args *engine.Destinatio
 
 func (dS *DispatcherService) ReplicatorSv1SetAccount(args *engine.AccountWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.AccountWithAPIOpts{}
+		args = &engine.AccountWithAPIOpts{
+			Account: &engine.Account{},
+		}
 	}
 	tenant := utils.FirstNonEmpty(utils.SplitConcatenatedKey(args.ID)[0], dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -563,7 +569,9 @@ func (dS *DispatcherService) ReplicatorSv1SetReverseDestination(args *engine.Des
 
 func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StatQueueWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.StatQueueWithAPIOpts{}
+		args = &engine.StatQueueWithAPIOpts{
+			StatQueue: &engine.StatQueue{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -580,7 +588,9 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StatQueueWit
 
 func (dS *DispatcherService) ReplicatorSv1SetFilter(args *engine.FilterWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.FilterWithAPIOpts{}
+		args = &engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -597,7 +607,9 @@ func (dS *DispatcherService) ReplicatorSv1SetFilter(args *engine.FilterWithAPIOp
 
 func (dS *DispatcherService) ReplicatorSv1SetStatQueueProfile(args *engine.StatQueueProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.StatQueueProfileWithAPIOpts{}
+		args = &engine.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &engine.StatQueueProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -631,7 +643,9 @@ func (dS *DispatcherService) ReplicatorSv1SetTiming(args *utils.TPTimingWithAPIO
 
 func (dS *DispatcherService) ReplicatorSv1SetResource(args *engine.ResourceWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.ResourceWithAPIOpts{}
+		args = &engine.ResourceWithAPIOpts{
+			Resource: &engine.Resource{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -648,7 +662,9 @@ func (dS *DispatcherService) ReplicatorSv1SetResource(args *engine.ResourceWithA
 
 func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(args *engine.ResourceProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.ResourceProfileWithAPIOpts{}
+		args = &engine.ResourceProfileWithAPIOpts{
+			ResourceProfile: &engine.ResourceProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -750,7 +766,9 @@ func (dS *DispatcherService) ReplicatorSv1SetRatingProfile(args *engine.RatingPr
 
 func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(args *engine.RouteProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.RouteProfileWithAPIOpts{}
+		args = &engine.RouteProfileWithAPIOpts{
+			RouteProfile: &engine.RouteProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -767,7 +785,9 @@ func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(args *engine.RouteProf
 
 func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(args *engine.AttributeProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.AttributeProfileWithAPIOpts{}
+		args = &engine.AttributeProfileWithAPIOpts{
+			AttributeProfile: &engine.AttributeProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -784,7 +804,9 @@ func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(args *engine.Attri
 
 func (dS *DispatcherService) ReplicatorSv1SetChargerProfile(args *engine.ChargerProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.ChargerProfileWithAPIOpts{}
+		args = &engine.ChargerProfileWithAPIOpts{
+			ChargerProfile: &engine.ChargerProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -801,7 +823,9 @@ func (dS *DispatcherService) ReplicatorSv1SetChargerProfile(args *engine.Charger
 
 func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(args *engine.DispatcherProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.DispatcherProfileWithAPIOpts{}
+		args = &engine.DispatcherProfileWithAPIOpts{
+			DispatcherProfile: &engine.DispatcherProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -852,7 +876,9 @@ func (dS *DispatcherService) ReplicatorSv1SetAccountActionPlans(args *engine.Set
 
 func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(args *engine.DispatcherHostWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.DispatcherHostWithAPIOpts{}
+		args = &engine.DispatcherHostWithAPIOpts{
+			DispatcherHost: &engine.DispatcherHost{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -869,7 +895,9 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(args *engine.Dispatc
 
 func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
