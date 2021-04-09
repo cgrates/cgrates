@@ -314,8 +314,8 @@ CREATE TABLE tp_action_profiles (
     "filter_ids", "action_id");
 
 
-DROP TABLE IF EXISTS tp_account_profiles;
-CREATE TABLE tp_account_profiles (
+DROP TABLE IF EXISTS tp_accounts;
+CREATE TABLE tp_accounts (
   "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tenant" varchar(64) NOT NULL,
@@ -337,8 +337,8 @@ CREATE TABLE tp_account_profiles (
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
- CREATE INDEX tp_account_profiles_ids ON tp_account_profiles (tpid);
- CREATE INDEX tp_account_profiles_unique ON tp_account_profiles  ("tpid",  "tenant", "id",
+ CREATE INDEX tp_accounts_ids ON tp_accounts (tpid);
+ CREATE INDEX tp_accounts_unique ON tp_accounts  ("tpid",  "tenant", "id",
    "filter_ids", "balance_id");
 
 --
