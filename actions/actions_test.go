@@ -1050,3 +1050,100 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestACScheduledActions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	acts := NewActionS(cfg, fltrs, dm, nil)
+	actPrf := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TestACScheduledActions",
+		FilterIDs: []string{"*string:~*req.Destination:1005"},
+		Actions: []*engine.APAction{
+			{
+				ID:        "TOPUP",
+				FilterIDs: []string{},
+				Type:      "inexistent_type",
+				Diktats: []*engine.APDiktat{{
+					Path:  "~*balance.TestBalance.Value",
+					Value: "10",
+				}},
+			},
+		},
+	}
+
+	if err := dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.Destination: "1005",
+		},
+	}
+
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
+	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
+	if _, err := acts.scheduledActions("cgrates.org", cgrEv, []string{}, true); err != nil {
+		t.Error(err)
+	} else if rcv := buff.String(); !strings.Contains(rcv, expected) {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+	buff.Reset()
+
+	actPrf.Actions[0].Type = utils.MetaResetStatQueue
+	actPrf.Targets = map[string]utils.StringSet{
+		utils.MetaStats: map[string]struct{}{
+			"ID_TEST": {},
+		},
+	}
+	if err := dm.SetActionProfile(actPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	mapStorage := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.APIOpts,
+	}
+	expectedSChed := []*scheduledActs{
+		{
+			tenant:   "cgrates.org",
+			apID:     "TestACScheduledActions",
+			trgTyp:   utils.MetaStats,
+			trgID:    "ID_TEST",
+			schedule: utils.EmptyString,
+			ctx:      context.Background(),
+			data:     mapStorage,
+		},
+	}
+	var schedActs []*scheduledActs
+	if schedActs, err = acts.scheduledActions("cgrates.org", cgrEv, []string{}, true); err != nil {
+		t.Error(err)
+	} else {
+
+	}
+	//execute asap the actions
+	schedActs[0].trgID = "invalid_type"
+	if err := acts.asapExecuteActions(schedActs[0]); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	}
+
+	schedActs[0].trgID = "ID_TEST"
+	schedActs[0].acts = nil
+	schedActs[0].cch = nil
+	if !reflect.DeepEqual(schedActs, expectedSChed) {
+		t.Errorf("Expected %+v, received %+v", expectedSChed, schedActs)
+	}
+}
