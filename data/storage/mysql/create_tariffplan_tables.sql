@@ -329,8 +329,8 @@ CREATE TABLE tp_action_profiles (
 );
 
 
-DROP TABLE IF EXISTS tp_account_profiles;
-CREATE TABLE tp_account_profiles (
+DROP TABLE IF EXISTS tp_accounts;
+CREATE TABLE tp_accounts (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
@@ -353,7 +353,7 @@ CREATE TABLE tp_account_profiles (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_account_profiles` (`tpid`,`tenant`,
+  UNIQUE KEY `unique_tp_accounts` (`tpid`,`tenant`,
   `id`,`filter_ids`,`balance_id` )
 );
 
