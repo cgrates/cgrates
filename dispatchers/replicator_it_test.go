@@ -1792,16 +1792,3 @@ func TestDspReplicatorSv1SetThresholdProfileErrorNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
-
-func TestDspReplicatorSv1SetThresholdProfileNilEvent(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	var CGREvent *engine.ThresholdProfileWithAPIOpts
-	var reply *string
-	result := dspSrv.ReplicatorSv1SetThresholdProfile(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
