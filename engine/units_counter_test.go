@@ -589,3 +589,212 @@ func TestUnitCountersResetCounterById(t *testing.T) {
 		t.Errorf("Error Initializing adding unit counters: %v", len(a.UnitCounters))
 	}
 }
+
+func TestUnitCounterHasCounter(t *testing.T) {
+	cfs := CounterFilters{
+		{
+			Value: 15,
+			Filter: &BalanceFilter{
+				ID:     utils.StringPointer("testID1"),
+				Type:   utils.StringPointer("testType1"),
+				Weight: utils.Float64Pointer(15),
+			},
+		},
+		{
+			Value: 10,
+			Filter: &BalanceFilter{
+				ID:     utils.StringPointer("testID2"),
+				Type:   utils.StringPointer("testType2"),
+				Weight: utils.Float64Pointer(10),
+			},
+		},
+	}
+	cf := &CounterFilter{
+		Value: 10,
+		Filter: &BalanceFilter{
+			ID:     utils.StringPointer("testID2"),
+			Type:   utils.StringPointer("testType2"),
+			Weight: utils.Float64Pointer(10),
+		},
+	}
+
+	rcv := cfs.HasCounter(cf)
+
+	if rcv != true {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
+	}
+}
+
+func TestUnitsCounteraddUnits(t *testing.T) {
+	var uc *UnitCounter
+	ucs := UnitCounters{
+		"kind": []*UnitCounter{
+			{
+				Counters: CounterFilters{
+					{
+						Value: 10,
+					},
+					{
+						Value: 15,
+					},
+				},
+				CounterType: "",
+			},
+			uc,
+			{
+				Counters: CounterFilters{
+					{
+						Value: 20,
+					},
+					{
+						Value: 25,
+					},
+				},
+				CounterType: utils.MetaBalance,
+			},
+		},
+	}
+	cc := &CallCost{}
+	b := &Balance{}
+
+	exp := []*UnitCounter{
+		{
+			Counters: CounterFilters{
+				{
+					Value: 15,
+				},
+				{
+					Value: 20,
+				},
+			},
+			CounterType: utils.MetaCounterEvent,
+		},
+		uc,
+		{
+			Counters: CounterFilters{
+				{
+					Value: 25,
+				},
+				{
+					Value: 30,
+				},
+			},
+			CounterType: utils.MetaBalance,
+		},
+	}
+	ucs.addUnits(5, "kind", cc, b)
+
+	if !reflect.DeepEqual(ucs["kind"], exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(ucs["kind"]))
+	}
+}
+
+func TestUnitsCounterresetCounters(t *testing.T) {
+	var emptyctr *UnitCounter
+	ucs := UnitCounters{
+		"kind": []*UnitCounter{
+			{
+				Counters: CounterFilters{
+					{
+						Value: 10,
+						Filter: &BalanceFilter{
+							ID:     utils.StringPointer("testID1"),
+							Type:   utils.StringPointer("kind"),
+							Weight: utils.Float64Pointer(10),
+						},
+					},
+
+					{
+						Value: 15,
+						Filter: &BalanceFilter{
+							ID:     utils.StringPointer("testID2"),
+							Type:   utils.StringPointer("kind"),
+							Weight: utils.Float64Pointer(15),
+						},
+					},
+				},
+				CounterType: "",
+			},
+			emptyctr,
+			{
+				Counters: CounterFilters{
+					{
+						Value: 20,
+						Filter: &BalanceFilter{
+							ID:     utils.StringPointer("testID2"),
+							Type:   utils.StringPointer("kind"),
+							Weight: utils.Float64Pointer(15),
+						},
+					},
+					{
+						Value: 25,
+						Filter: &BalanceFilter{
+							ID:     utils.StringPointer("testID1"),
+							Type:   utils.StringPointer("kind"),
+							Weight: utils.Float64Pointer(10),
+						},
+					},
+				},
+				CounterType: utils.MetaBalance,
+			},
+		},
+	}
+	a := &Action{
+		Balance: &BalanceFilter{
+			ID:     utils.StringPointer("testID1"),
+			Type:   utils.StringPointer("kind"),
+			Weight: utils.Float64Pointer(10),
+		},
+	}
+
+	exp := []*UnitCounter{
+		{
+			Counters: CounterFilters{
+				{
+					Value: 0,
+					Filter: &BalanceFilter{
+						ID:     utils.StringPointer("testID1"),
+						Type:   utils.StringPointer("kind"),
+						Weight: utils.Float64Pointer(10),
+					},
+				},
+				{
+					Value: 15,
+					Filter: &BalanceFilter{
+						ID:     utils.StringPointer("testID2"),
+						Type:   utils.StringPointer("kind"),
+						Weight: utils.Float64Pointer(15),
+					},
+				},
+			},
+			CounterType: "",
+		},
+		emptyctr,
+		{
+			Counters: CounterFilters{
+				{
+					Value: 20,
+					Filter: &BalanceFilter{
+						ID:     utils.StringPointer("testID2"),
+						Type:   utils.StringPointer("kind"),
+						Weight: utils.Float64Pointer(15),
+					},
+				},
+				{
+					Value: 0,
+					Filter: &BalanceFilter{
+						ID:     utils.StringPointer("testID1"),
+						Type:   utils.StringPointer("kind"),
+						Weight: utils.Float64Pointer(10),
+					},
+				},
+			},
+			CounterType: utils.MetaBalance,
+		},
+	}
+	ucs.resetCounters(a)
+
+	if !reflect.DeepEqual(ucs["kind"], exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(ucs["kind"]))
+	}
+}
