@@ -3801,3 +3801,78 @@ func TestECFieldAsInterfaceNilEventCost(t *testing.T) {
 		t.Fatalf("Expected error:%s, received: %v", utils.ErrNotFound.Error(), err)
 	}
 }
+
+func TestECnewChargingIncrementMissingBalanceInfo(t *testing.T) {
+	ec := &EventCost{}
+	incr := &Increment{}
+	rf := make(RatingMatchedFilters)
+
+	exp := &ChargingIncrement{
+		Usage:          incr.Duration,
+		Cost:           incr.Cost,
+		CompressFactor: incr.CompressFactor,
+	}
+	rcv := ec.newChargingIncrement(incr, rf, false, false)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestECnewChargingIncrementWithUnitInfo(t *testing.T) {
+	ec := &EventCost{
+		Accounting: Accounting{},
+	}
+	incr := &Increment{
+		BalanceInfo: &DebitInfo{
+			Unit:     &UnitInfo{},
+			Monetary: &MonetaryInfo{},
+		},
+	}
+	rf := make(RatingMatchedFilters)
+
+	exp := &ChargingIncrement{
+		Usage:          incr.Duration,
+		Cost:           incr.Cost,
+		CompressFactor: incr.CompressFactor,
+		AccountingID:   utils.MetaPause,
+	}
+	rcv := ec.newChargingIncrement(incr, rf, false, true)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestECnewChargingIncrementNoUnitInfo(t *testing.T) {
+	ec := &EventCost{
+		Accounting: Accounting{},
+	}
+	incr := &Increment{
+		BalanceInfo: &DebitInfo{
+			Monetary: &MonetaryInfo{},
+		},
+	}
+	rf := make(RatingMatchedFilters)
+
+	exp := &ChargingIncrement{
+		Usage:          incr.Duration,
+		Cost:           incr.Cost,
+		CompressFactor: incr.CompressFactor,
+		AccountingID:   utils.MetaPause,
+	}
+	expEC := &EventCost{
+		Accounting: Accounting{
+			utils.MetaPause: &BalanceCharge{},
+		},
+	}
+	rcv := ec.newChargingIncrement(incr, rf, false, true)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	if !reflect.DeepEqual(ec, expEC) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expEC, ec)
+	}
+}
