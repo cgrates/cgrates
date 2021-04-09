@@ -126,6 +126,28 @@ func TestDestinationNonCachedDestWrongPrefix(t *testing.T) {
 	}
 }
 
+func TestDestinationcontainsPrefixNilDestination(t *testing.T) {
+	var d *Destination
+	rcv := d.containsPrefix("prefix")
+	if rcv != 0 {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 0, rcv)
+	}
+}
+
+func TestDestinationString(t *testing.T) {
+	d := &Destination{
+		Id:       "ID",
+		Prefixes: []string{"prefix1", "prefix2", "prefix3"},
+	}
+
+	exp := "ID: prefix1, prefix2, prefix3"
+	rcv := d.String()
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
