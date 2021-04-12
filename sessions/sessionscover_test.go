@@ -18,6 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessions
 
+import (
+	"bytes"
+	"log"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/cgrates/rpcclient"
+
+	"github.com/cgrates/cgrates/utils"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+)
+
 /*
 func TestSetSTerminator(t *testing.T) {
 	log.SetOutput(io.Discard)
@@ -4457,4 +4472,153 @@ func TestBiRPCv1GetCost(t *testing.T) {
 		}
 	* /
 }
+
 */
+
+type mkCall struct{}
+
+func (sT *mkCall) Call(method string, arg interface{}, rply interface{}) error {
+	if arg.(*utils.DPRArgs).OriginHost != "cgrates" {
+		return utils.ErrNoActiveSession
+	}
+	return nil
+}
+
+func TestBiRPCv1DisconnectPeer(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	client := new(mkCall)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	sessions.biJIDs = map[string]*biJClient{
+		"client1": &biJClient{
+			conn: client,
+		},
+	}
+	args := &utils.DPRArgs{
+		OriginHost: "cgrates",
+	}
+	var reply string
+	if err := sessions.BiRPCv1DisconnectPeer(nil, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply result")
+	}
+
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+
+	buff := new(bytes.Buffer)
+	log.SetOutput(buff)
+
+	args.OriginHost = "changed_host"
+	expLogg := "[WARNING] <SessionS> failed sending DPR for connection with id: <client1>, err: <NO_ACTIVE_SESSION>"
+	if err := sessions.BiRPCv1DisconnectPeer(nil, args, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
+	} else if rcv := buff.String(); !strings.Contains(rcv, expLogg) {
+		t.Errorf("Expected %+v, received %+v", expLogg, rcv)
+	}
+
+	buff.Reset()
+}
+
+type mkCallForces struct{}
+
+func (sT *mkCallForces) Call(method string, arg interface{}, rply interface{}) error {
+	return utils.ErrNoActiveSession
+}
+
+func TestBiRPCv1ForceDisconnect(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	client := new(mkCall)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	sessions := NewSessionS(cfg, dm, nil)
+
+	var reply string
+	if err := sessions.BiRPCv1ForceDisconnect(client, nil, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+	args := &utils.SessionFilter{
+		Tenant:  "cgrates.org",
+		Filters: []string{"*string:~*opts.Disconnected:*asap"},
+		Limit:   utils.IntPointer(7),
+	}
+	sessions.dm = nil
+
+	if err := sessions.BiRPCv1ForceDisconnect(client, args, &reply); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
+	}
+	sessions.dm = dm
+	args.Filters = nil
+	sessions.aSessions = map[string]*Session{
+		"sess1": {
+			CGRID: "CGRATES_ID",
+			EventStart: map[string]interface{}{
+				utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+				utils.OriginID: "222",
+			},
+			SRuns: []*SRun{
+				{
+					Event: map[string]interface{}{
+						utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+						utils.OriginID: "222",
+					},
+				},
+			},
+		},
+		"CGRATES_ID": {
+			CGRID:  "CGRATES1_ID",
+			Tenant: "cgrates.org",
+			EventStart: map[string]interface{}{
+				utils.Usage:    7 * time.Minute,
+				utils.OriginID: "1234",
+			},
+			ResourceID:   "res_id_forcesterminate",
+			ClientConnID: "client1",
+			SRuns: []*SRun{
+				{
+					Event: map[string]interface{}{
+						utils.CGRID:    "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
+						utils.OriginID: "222",
+					},
+				},
+			},
+		},
+	}
+	time.Sleep(50 * time.Millisecond)
+
+	if err := sessions.BiRPCv1ForceDisconnect(client, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	testMk := &mkCallForces{}
+	clntConn := make(chan rpcclient.ClientConnector, 1)
+	clntConn <- testMk
+	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clntConn,
+	})
+	sessions.connMgr = connMngr
+	sessions.biJIDs = map[string]*biJClient{
+		"client1": {
+			conn: testMk,
+		},
+	}
+	if err := sessions.BiRPCv1ForceDisconnect(client, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+}

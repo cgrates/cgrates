@@ -942,7 +942,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 }
 */
 
-func TestV1AuthorizeArgsParseFlags11(t *testing.T) {
+func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 	v1authArgs := new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	eOut := new(V1AuthorizeArgs)

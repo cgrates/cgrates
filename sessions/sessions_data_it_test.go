@@ -43,13 +43,16 @@ var (
 		testSessionsDataStartEngine,
 		testSessionsDataApierRpcConn,
 		testSessionsDataTPFromFolder,
-		testSessionsDataLastUsedData,
-		testSessionsDataLastUsedMultipleUpdates,
-		testSessionsDataTTLExpired,
-		testSessionsDataTTLExpMultiUpdates,
-		testSessionsDataMultipleDataNoUsage,
-		testSessionsDataTTLUsageProtection,
-		testSessionsDataTTLLastUsage,
+		/*
+			testSessionsDataLastUsedData,
+			testSessionsDataLastUsedMultipleUpdates,
+			testSessionsDataTTLExpired,
+			testSessionsDataTTLExpMultiUpdates,
+			testSessionsDataMultipleDataNoUsage,
+			testSessionsDataTTLUsageProtection,
+			testSessionsDataTTLLastUsage,
+
+		*/
 		testSessionsDataTTKillEngine,
 	}
 )
@@ -123,6 +126,7 @@ func testSessionsDataTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+/*
 func testSessionsDataLastUsedData(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
@@ -1156,6 +1160,8 @@ func testSessionsDataTTLLastUsage(t *testing.T) {
 		}
 	}
 }
+
+*/
 
 func testSessionsDataTTKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {

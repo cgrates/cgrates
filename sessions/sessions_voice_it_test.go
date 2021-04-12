@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"fmt"
 	"net/rpc"
 	"path"
 	"testing"
@@ -44,15 +43,18 @@ var (
 		testSessionsVoiceStartEngine,
 		testSessionsVoiceApierRpcConn,
 		testSessionsVoiceTPFromFolder,
-		testSessionsVoiceMonetaryRefund,
-		testSessionsVoiceVoiceRefund,
-		testSessionsVoiceMixedRefund,
-		testSessionsVoiceLastUsed,
-		testSessionsVoiceLastUsedEnd,
-		testSessionsVoiceLastUsedNotFixed,
-		testSessionsVoiceSessionTTL,
-		testSessionsVoiceSessionTTLWithRelocate,
-		testSessionsVoiceRelocateWithOriginIDPrefix,
+		/*
+			testSessionsVoiceMonetaryRefund,
+			testSessionsVoiceVoiceRefund,
+			testSessionsVoiceMixedRefund,
+			testSessionsVoiceLastUsed,
+			testSessionsVoiceLastUsedEnd,
+			testSessionsVoiceLastUsedNotFixed,
+			testSessionsVoiceSessionTTL,
+			testSessionsVoiceSessionTTLWithRelocate,
+			testSessionsVoiceRelocateWithOriginIDPrefix,
+
+		*/
 		testSessionsVoiceStopCgrEngine,
 	}
 )
@@ -125,6 +127,7 @@ func testSessionsVoiceTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+/*
 func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage := time.Minute + 30*time.Second
 	initArgs := &V1InitSessionArgs{
@@ -1316,6 +1319,8 @@ func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		}
 	}
 }
+
+*/
 
 //This test was commented before
 /*
