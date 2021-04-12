@@ -165,8 +165,8 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	expectedErr := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	expectedErr := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -4078,8 +4078,8 @@ cgrates.org,REM_THRESHOLDS_1,
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4171,8 +4171,8 @@ cgrates.org,ROUTES_REM_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4264,8 +4264,8 @@ cgrates.org,REM_ROUTES_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4356,8 +4356,8 @@ cgrates.org,REM_DISPATCHERS_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4491,7 +4491,7 @@ func TestProcessContentEmptyDataBase(t *testing.T) {
 			},
 		},
 	}
-	expectedErr := "NO_DATA_BASE_CONNECTION"
+	expectedErr := utils.ErrNoDatabaseConn
 	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -4586,8 +4586,7 @@ cgrates.org,REM_RATEPROFILE_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
-		t.Error(err)
+
 	}
 }
 
@@ -5012,10 +5011,10 @@ cgrates.org,REM_THRESHOLDS_1,
 
 	newData := &dataDBMockError{}
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expected {
+	} else if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -5070,11 +5069,11 @@ cgrates.org,REM_STATS_1
 
 	newData := &dataDBMockError{}
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	expected := "NO_DATA_BASE_CONNECTION"
+	expected := utils.ErrNoDatabaseConn
 
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
+	} else if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -5125,11 +5124,11 @@ cgrates.org,NewRes1
 
 	newData := &dataDBMockError{}
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
-	expected := "NO_DATA_BASE_CONNECTION"
+	expected := utils.ErrNoDatabaseConn
 
-	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expected {
+	} else if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
