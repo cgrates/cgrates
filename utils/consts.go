@@ -223,6 +223,7 @@ var (
 
 const (
 	CGRateS                  = "CGRateS"
+	CGRateSorg               = "cgrates.org"
 	Version                  = "v0.11.0~dev"
 	DiameterFirmwareRevision = 918
 	RedisMaxConns            = 10
