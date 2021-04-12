@@ -1100,7 +1100,9 @@ func (dS *DispatcherService) ReplicatorSv1SetAccount(args *utils.AccountWithAPIO
 
 func (dS *DispatcherService) ReplicatorSv1RemoveAccount(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
