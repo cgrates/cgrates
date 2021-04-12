@@ -446,12 +446,12 @@ func TestAccountsDebit(t *testing.T) {
 
 	accntsPrf[0].Balances["ConcreteBalance2"].Units = &utils.Decimal{decimal.New(213, 0)}
 	accnts.dm = nil
-	expected = "NO_DATA_BASE_CONNECTION"
+	expected = utils.ErrNoDatabaseConn.Error()
 	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, true, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	subString := "<AccountS> error <NO_DATA_BASE_CONNECTION> restoring account <cgrates.org:TestAccountsDebit>"
+	subString := "<AccountS> error <NO_DATABASE_CONNECTION> restoring account <cgrates.org:TestAccountsDebit>"
 	if rcv := buff.String(); !strings.Contains(rcv, subString) {
 		t.Errorf("Expected %+q, received %+q", subString, rcv)
 	}
@@ -1187,7 +1187,7 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 	}
 	args.BalanceIDs = []string{"AbstractBalance1"}
 
-	expected = "NO_DATA_BASE_CONNECTION"
+	expected = utils.ErrNoDatabaseConn.Error()
 	accnts.dm = nil
 	if err := accnts.V1ActionRemoveBalance(args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)

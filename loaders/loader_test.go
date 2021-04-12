@@ -3799,8 +3799,8 @@ cgrates.org,NewRes1
 			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
 				rdr: rdr, csvRdr: rdrCsv}},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3892,8 +3892,8 @@ cgrates.org,FILTERS_REM_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3985,8 +3985,8 @@ cgrates.org,REM_STATS_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4492,7 +4492,7 @@ func TestProcessContentEmptyDataBase(t *testing.T) {
 		},
 	}
 	expectedErr := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -4587,7 +4587,6 @@ cgrates.org,REM_RATEPROFILE_1
 		},
 	}
 
-	}
 }
 
 func TestRemoveActionProfileContent(t *testing.T) {
@@ -4629,8 +4628,8 @@ cgrates.org,REM_ACTPROFILE_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -4708,8 +4707,8 @@ cgrates.org,REM_ACTPROFILE_1
 			},
 		},
 	}
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -4925,8 +4924,8 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	ldr.dm = nil
-	expected := "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+	expected := utils.ErrNoDatabaseConn
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 
@@ -4943,8 +4942,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 		},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{"INVALID_FLAGS"})
-	expected = "NO_DATA_BASE_CONNECTION"
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 
@@ -4955,8 +4953,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 
 	ldr.dm = nil
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	expected = "NO_DATA_BASE_CONNECTION"
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 }
