@@ -20,10 +20,12 @@ package dispatchers
 
 import (
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestLoadMetricsGetHosts(t *testing.T) {
@@ -233,5 +235,284 @@ func TestLoadMetricsGetHosts2(t *testing.T) {
 			t.Errorf("Expected: %+v ,received: %+v", exp, rply)
 		}
 		lm.incrementLoad(exp[0], utils.EmptyString)
+	}
+}
+
+func TestLibDispatcherNewDispatcherMetaWeight(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts:    engine.DispatcherHostProfiles{},
+		Strategy: utils.MetaWeight,
+	}
+	result, err := newDispatcher(dataMng, pfl)
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	strategy, err := newSingleStrategyDispatcher(pfl.Hosts, pfl.StrategyParams, pfl.TenantID())
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	expected := &WeightDispatcher{
+		hosts:    engine.DispatcherHostProfiles{},
+		dm:       dataMng,
+		strategy: strategy,
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).dm, expected.dm) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.dm, result.(*WeightDispatcher).dm)
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).strategy, expected.strategy) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.strategy, result.(*WeightDispatcher).strategy)
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).hosts, expected.hosts) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.hosts, result.(*WeightDispatcher).hosts)
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).tnt, expected.tnt) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", result.(*WeightDispatcher).tnt, expected.tnt)
+	}
+}
+
+func TestLibDispatcherNewDispatcherMetaWeightErr(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts: engine.DispatcherHostProfiles{},
+		StrategyParams: map[string]interface{}{
+			utils.MetaDefaultRatio: false,
+		},
+		Strategy: utils.MetaWeight,
+	}
+	_, err := newDispatcher(dataMng, pfl)
+	expected := "cannot convert field<bool>: false to int"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+
+}
+
+func TestLibDispatcherNewDispatcherMetaRandom(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts:    engine.DispatcherHostProfiles{},
+		Strategy: utils.MetaRandom,
+	}
+	result, err := newDispatcher(dataMng, pfl)
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	strategy, err := newSingleStrategyDispatcher(pfl.Hosts, pfl.StrategyParams, pfl.TenantID())
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	expected := &RandomDispatcher{
+		hosts:    engine.DispatcherHostProfiles{},
+		dm:       dataMng,
+		strategy: strategy,
+	}
+	if !reflect.DeepEqual(result.(*RandomDispatcher).dm, expected.dm) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.dm, result.(*WeightDispatcher).dm)
+	}
+	if !reflect.DeepEqual(result.(*RandomDispatcher).strategy, expected.strategy) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.strategy, result.(*WeightDispatcher).strategy)
+	}
+	if !reflect.DeepEqual(result.(*RandomDispatcher).hosts, expected.hosts) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.hosts, result.(*WeightDispatcher).hosts)
+	}
+	if !reflect.DeepEqual(result.(*RandomDispatcher).tnt, expected.tnt) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", result.(*WeightDispatcher).tnt, expected.tnt)
+	}
+}
+
+func TestLibDispatcherNewDispatcherMetaRandomErr(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts: engine.DispatcherHostProfiles{},
+		StrategyParams: map[string]interface{}{
+			utils.MetaDefaultRatio: false,
+		},
+		Strategy: utils.MetaRandom,
+	}
+	_, err := newDispatcher(dataMng, pfl)
+	expected := "cannot convert field<bool>: false to int"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+
+}
+
+func TestLibDispatcherNewDispatcherMetaRoundRobin(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts:    engine.DispatcherHostProfiles{},
+		Strategy: utils.MetaRoundRobin,
+	}
+	result, err := newDispatcher(dataMng, pfl)
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	strategy, err := newSingleStrategyDispatcher(pfl.Hosts, pfl.StrategyParams, pfl.TenantID())
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	expected := &RoundRobinDispatcher{
+		hosts:    engine.DispatcherHostProfiles{},
+		dm:       dataMng,
+		strategy: strategy,
+	}
+	if !reflect.DeepEqual(result.(*RoundRobinDispatcher).dm, expected.dm) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.dm, result.(*WeightDispatcher).dm)
+	}
+	if !reflect.DeepEqual(result.(*RoundRobinDispatcher).strategy, expected.strategy) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.strategy, result.(*WeightDispatcher).strategy)
+	}
+	if !reflect.DeepEqual(result.(*RoundRobinDispatcher).hosts, expected.hosts) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.hosts, result.(*WeightDispatcher).hosts)
+	}
+	if !reflect.DeepEqual(result.(*RoundRobinDispatcher).tnt, expected.tnt) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", result.(*WeightDispatcher).tnt, expected.tnt)
+	}
+}
+
+func TestLibDispatcherNewDispatcherMetaRoundRobinErr(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts: engine.DispatcherHostProfiles{},
+		StrategyParams: map[string]interface{}{
+			utils.MetaDefaultRatio: false,
+		},
+		Strategy: utils.MetaRoundRobin,
+	}
+	_, err := newDispatcher(dataMng, pfl)
+	expected := "cannot convert field<bool>: false to int"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+
+}
+
+func TestLibDispatcherNewDispatcherPoolBroadcast(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts:    engine.DispatcherHostProfiles{},
+		Strategy: rpcclient.PoolBroadcast,
+	}
+	result, err := newDispatcher(dataMng, pfl)
+	if err != nil {
+		t.Errorf("\nExpected <nil>, \nReceived <%+v>", err)
+	}
+	strategy := &broadcastStrategyDispatcher{strategy: pfl.Strategy}
+	expected := &WeightDispatcher{
+		hosts:    engine.DispatcherHostProfiles{},
+		dm:       dataMng,
+		strategy: strategy,
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).dm, expected.dm) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.dm, result.(*WeightDispatcher).dm)
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).strategy, expected.strategy) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.strategy, result.(*WeightDispatcher).strategy)
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).hosts, expected.hosts) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.hosts, result.(*WeightDispatcher).hosts)
+	}
+	if !reflect.DeepEqual(result.(*WeightDispatcher).tnt, expected.tnt) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", result.(*WeightDispatcher).tnt, expected.tnt)
+	}
+}
+
+func TestLibDispatcherNewDispatcherError(t *testing.T) {
+	dataMng := &engine.DataManager{}
+	pfl := &engine.DispatcherProfile{
+		Hosts:    engine.DispatcherHostProfiles{},
+		Strategy: "badStrategy",
+	}
+	expected := "unsupported dispatch strategy: <badStrategy>"
+	_, err := newDispatcher(dataMng, pfl)
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+
+}
+
+func TestLibDispatcherSetProfile(t *testing.T) {
+	pfl := &engine.DispatcherProfile{
+		Hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "0",
+				FilterIDs: []string{"FilterTest1"},
+				Weight:    1,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+	}
+	wgDsp := &WeightDispatcher{}
+	wgDsp.SetProfile(pfl)
+	expected := &engine.DispatcherProfile{
+		Hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "0",
+				FilterIDs: []string{"FilterTest1"},
+				Weight:    1,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+	}
+	if !reflect.DeepEqual(expected, pfl) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(pfl))
+	}
+}
+
+func TestLibDispatcherHostIDs(t *testing.T) {
+	expected := engine.DispatcherHostIDs{"5", "10", "1"}
+
+	wgDsp := &WeightDispatcher{
+		RWMutex: sync.RWMutex{},
+		dm:      nil,
+		tnt:     "",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "5",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+			{
+				ID:        "10",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+			{
+				ID:        "1",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+		strategy: nil,
+	}
+	result := wgDsp.HostIDs()
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+type strategyMockDispatcher struct{}
+
+func (stMck strategyMockDispatcher) dispatch(dm *engine.DataManager, routeID string, subsystem, tnt string, hostIDs []string,
+	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	return
+}
+
+func TestLibDispatcherDispatch(t *testing.T) {
+	wgDsp := &WeightDispatcher{
+		strategy: strategyMockDispatcher{},
+	}
+	result := wgDsp.Dispatch("", "", "", "", "")
+	if !reflect.DeepEqual(nil, result) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
 	}
 }
