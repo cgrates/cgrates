@@ -356,7 +356,7 @@ const (
 	DispatcherProfilePrefix   = "dpp_"
 	RateProfilePrefix         = "rtp_"
 	ActionProfilePrefix       = "acp_"
-	AccountPrefix             = "anp_"
+	AccountPrefix             = "acn_"
 	DispatcherHostPrefix      = "dph_"
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
