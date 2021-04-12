@@ -516,3 +516,137 @@ func TestLibDispatcherDispatch(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
 	}
 }
+
+func TestLibDispatcherRandomSetProfile(t *testing.T) {
+	pfl := &engine.DispatcherProfile{
+		Hosts: []*engine.DispatcherHostProfile{
+			{
+				ID:        "0",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+	}
+	wgDsp := &RandomDispatcher{
+		strategy: strategyMockDispatcher{},
+	}
+	wgDsp.SetProfile(pfl)
+	expected := &engine.DispatcherProfile{
+		Hosts: []*engine.DispatcherHostProfile{
+			{
+				ID:        "0",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(pfl, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, pfl)
+	}
+}
+
+func TestLibDispatcherRandomHostIDs(t *testing.T) {
+	expected := engine.DispatcherHostIDs{"5"}
+	wgDsp := &RandomDispatcher{
+		RWMutex: sync.RWMutex{},
+		dm:      nil,
+		tnt:     "",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "5",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+		strategy: nil,
+	}
+	result := wgDsp.HostIDs()
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestLibDispatcherRandomDispatch(t *testing.T) {
+	wgDsp := &RandomDispatcher{
+		strategy: strategyMockDispatcher{},
+	}
+	result := wgDsp.Dispatch("", "", "", "", "")
+	if !reflect.DeepEqual(nil, result) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+
+func TestLibDispatcherRoundRobinSetProfile(t *testing.T) {
+	pfl := &engine.DispatcherProfile{
+		Hosts: []*engine.DispatcherHostProfile{
+			{
+				ID:        "0",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+	}
+	wgDsp := &RoundRobinDispatcher{
+		strategy: strategyMockDispatcher{},
+	}
+	wgDsp.SetProfile(pfl)
+	expected := &engine.DispatcherProfile{
+		Hosts: []*engine.DispatcherHostProfile{
+			{
+				ID:        "0",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(pfl, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, pfl)
+	}
+}
+
+func TestLibDispatcherRoundRobinHostIDs(t *testing.T) {
+	expected := engine.DispatcherHostIDs{"5"}
+	wgDsp := &RoundRobinDispatcher{
+		RWMutex: sync.RWMutex{},
+		dm:      nil,
+		tnt:     "",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "5",
+				FilterIDs: nil,
+				Weight:    0,
+				Params:    nil,
+				Blocker:   false,
+			},
+		},
+		strategy: nil,
+	}
+	result := wgDsp.HostIDs()
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestLibDispatcherRoundRobinDispatch(t *testing.T) {
+	wgDsp := &RoundRobinDispatcher{
+		strategy: strategyMockDispatcher{},
+	}
+	result := wgDsp.Dispatch("", "", "", "", "")
+	if !reflect.DeepEqual(nil, result) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
