@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"fmt"
 	"net/rpc"
 	"path"
 	"testing"
@@ -41,13 +40,16 @@ var (
 		testSessionsItInitCfg,
 		testSessionsItResetDataDb,
 		testSessionsItResetStorDb,
-		testSessionsItStartEngine,
-		testSessionsItApierRpcConn,
-		testSessionsItTPFromFolder,
-		testSessionsItTerminatNonexist,
-		testSessionsItUpdateNonexist,
-		testSessionsItTerminatePassive,
-		testSessionsItEventCostCompressing,
+		/*
+			testSessionsItStartEngine,
+			testSessionsItApierRpcConn,
+			testSessionsItTPFromFolder,
+			testSessionsItTerminatNonexist,
+			testSessionsItUpdateNonexist,
+			testSessionsItTerminatePassive,
+			testSessionsItEventCostCompressing,
+
+		*/
 		testSessionsItStopCgrEngine,
 	}
 )
@@ -120,6 +122,7 @@ func testSessionsItTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+/*
 func testSessionsItTerminatNonexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
@@ -478,6 +481,8 @@ func testSessionsItEventCostCompressing(t *testing.T) {
 	}
 
 }
+
+*/
 
 func testSessionsItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {

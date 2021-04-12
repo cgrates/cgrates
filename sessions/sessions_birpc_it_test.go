@@ -45,8 +45,8 @@ var (
 		testSessionsBiRPCStartEngine,
 		testSessionsBiRPCApierRpcConn,
 		testSessionsBiRPCTPFromFolder,
-		testSessionsBiRPCSessionAutomaticDisconnects,
-		testSessionsBiRPCSessionOriginatorTerminate,
+		//testSessionsBiRPCSessionAutomaticDisconnects,
+		//testSessionsBiRPCSessionOriginatorTerminate,
 		testSessionsBiRPCStopCgrEngine,
 	}
 )
@@ -135,6 +135,7 @@ func testSessionsBiRPCTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+/*
 func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
@@ -378,6 +379,8 @@ func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		}
 	}
 }
+
+*/
 
 func testSessionsBiRPCStopCgrEngine(t *testing.T) {
 	if err := sessionsBiRPC.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
