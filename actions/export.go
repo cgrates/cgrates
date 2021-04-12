@@ -52,11 +52,8 @@ func (aL *actHTTPPost) execute(_ context.Context, data utils.MapStorage, _ strin
 	}
 	var partExec bool
 	for _, actD := range aL.cfg().Diktats {
-		var pstr *engine.HTTPPoster
-		if pstr, err = engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, actD.Path,
-			utils.ContentJSON, aL.config.GeneralCfg().PosterAttempts); err != nil {
-			return
-		}
+		pstr := engine.NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, actD.Path,
+			utils.ContentJSON, aL.config.GeneralCfg().PosterAttempts)
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
 			go aL.post(pstr, body, actD.Path)
 		} else if err = aL.post(pstr, body, actD.Path); err != nil {
