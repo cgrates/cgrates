@@ -96,6 +96,23 @@ func (rdr *SQLEventReader) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
+func (rdr *SQLEventReader) openDB(dialect gorm.Dialector) (err error) {
+	var db *gorm.DB
+	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
+		return
+	}
+	var sqlDB *sql.DB
+	if sqlDB, err = db.DB(); err != nil {
+		return
+	}
+	sqlDB.SetMaxOpenConns(10)
+	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
+		return
+	}
+	go rdr.readLoop(db, sqlDB) // read until the connection is closed
+	return
+}
+
 // Serve will start the gorutines needed to watch the sql topic
 func (rdr *SQLEventReader) Serve() (err error) {
 	var dialect gorm.Dialector
@@ -107,22 +124,7 @@ func (rdr *SQLEventReader) Serve() (err error) {
 	default:
 		return fmt.Errorf("db type <%s> not supported", rdr.connType)
 	}
-	var db *gorm.DB
-	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
-		return
-	}
-	var sqlDB *sql.DB
-	if sqlDB, err = db.DB(); err != nil {
-		return
-	}
-	sqlDB.SetMaxOpenConns(10)
-	if err = sqlDB.Ping(); err != nil {
-		return
-	}
-	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
-		return
-	}
-	go rdr.readLoop(db, sqlDB) // read until the connection is closed
+	err = rdr.openDB(dialect)
 	return
 }
 
