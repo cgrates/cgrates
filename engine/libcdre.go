@@ -27,6 +27,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -85,7 +86,7 @@ func AddFailedPost(expPath, format, module string, ev interface{}, opts map[stri
 // used only on replay failed post
 func NewExportEventsFromFile(filePath string) (expEv *ExportEvents, err error) {
 	var fileContent []byte
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 		if fileContent, err = os.ReadFile(filePath); err != nil {
 			return 0, err
 		}
@@ -123,7 +124,7 @@ func (expEv *ExportEvents) SetModule(mod string) {
 
 // WriteToFile writes the events to file
 func (expEv *ExportEvents) WriteToFile(filePath string) (err error) {
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	_, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return nil, err

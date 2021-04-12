@@ -22,13 +22,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DestinationPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.DestinationPrefix)
 	if err != nil {
 		return err
 	}
@@ -95,7 +96,7 @@ func (m *Migrator) migrateDestinations() (err error) {
 
 func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ReverseDestinationPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ReverseDestinationPrefix)
 	if err != nil {
 		return err
 	}

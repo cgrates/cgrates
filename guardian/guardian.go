@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -127,32 +128,31 @@ func (gl *GuardianLocker) unlockWithReference(refID string) (lkIDs []string) {
 }
 
 // Guard executes the handler between locks
-func (gl *GuardianLocker) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
+func (gl *GuardianLocker) Guard(ctx *context.Context, handler func(*context.Context) (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
 	for _, lockID := range lockIDs {
 		gl.lockItem(lockID)
 	}
 	rplyChan := make(chan interface{})
 	errChan := make(chan error)
+	if timeout > 0 { // wait with timeout
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel() // stop the context at the end of function
+	}
 	go func(rplyChan chan interface{}, errChan chan error) {
 		// execute
-		if rply, err := handler(); err != nil {
+		if rply, err := handler(ctx); err != nil {
 			errChan <- err
 		} else {
 			rplyChan <- rply
 		}
 	}(rplyChan, errChan)
-	if timeout > 0 { // wait with timeout
-		select {
-		case err = <-errChan:
-		case reply = <-rplyChan:
-		case <-time.After(timeout):
-			utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: %+v", lockIDs))
-		}
-	} else { // a bit dangerous but wait till handler finishes
-		select {
-		case err = <-errChan:
-		case reply = <-rplyChan:
-		}
+
+	select {
+	case err = <-errChan:
+	case reply = <-rplyChan:
+	case <-ctx.Done(): // ignore context error but log it
+		utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: <%+v> because: <%s> ", lockIDs, ctx.Err()))
 	}
 	for _, lockID := range lockIDs {
 		gl.unlockItem(lockID)

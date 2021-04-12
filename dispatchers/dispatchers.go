@@ -115,7 +115,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
-	prflIDs, err := engine.MatchingItemIDsForEvent(evNm,
+	prflIDs, err := engine.MatchingItemIDsForEvent(context.TODO(), evNm,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.cfg.DispatcherSCfg().SuffixIndexedFields,
@@ -128,7 +128,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		if err != utils.ErrNotFound {
 			return nil, err
 		}
-		prflIDs, err = engine.MatchingItemIDsForEvent(evNm,
+		prflIDs, err = engine.MatchingItemIDsForEvent(context.TODO(), evNm,
 			dS.cfg.DispatcherSCfg().StringIndexedFields,
 			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 			dS.cfg.DispatcherSCfg().SuffixIndexedFields,
@@ -156,7 +156,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := dS.fltrS.Pass(tnt, prfl.FilterIDs,
+		if pass, err := dS.fltrS.Pass(context.TODO(), tnt, prfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -192,7 +192,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	} else if d, err = newDispatcher(dS.dm, dPrfl); err != nil {
 		return utils.NewErrDispatcherS(err)
 	}
-	if errCh := engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
+	if errCh := engine.Cache.Set(context.TODO(), utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
 		return utils.NewErrDispatcherS(errCh)
 	}
 	return d.Dispatch(utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]), subsys, serviceMethod, args, reply)

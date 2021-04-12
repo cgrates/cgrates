@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -162,7 +163,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, tplFld := range tplFlds {
-		if pass, err := ar.filterS.Pass(ar.Tenant,
+		if pass, err := ar.filterS.Pass(context.TODO(), ar.Tenant,
 			tplFld.Filters, ar); err != nil {
 			return err
 		} else if !pass {
@@ -256,7 +257,7 @@ func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf)
 	case utils.MetaOpts:
 		return ar.Opts.Set(fullPath.PathSlice[1:], nm.Data)
 	case utils.MetaUCH:
-		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], nm.Data, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], nm.Data, nil, true, utils.NonTransactional)
 	}
 }
 
@@ -526,7 +527,7 @@ func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (e
 	case utils.MetaOpts:
 		return ar.Opts.Set(fullPath.PathSlice[1:], val.Data)
 	case utils.MetaUCH:
-		return engine.Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	}
 }
 
@@ -577,6 +578,6 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 		} else {
 			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
 		}
-		return engine.Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	}
 }

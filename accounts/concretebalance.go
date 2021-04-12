@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -66,7 +67,7 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(context.TODO(), cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
@@ -95,7 +96,7 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(context.TODO(), cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps

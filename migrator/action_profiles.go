@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/utils"
@@ -29,7 +30,7 @@ import (
 
 func (m *Migrator) migrateCurrentActionProfiles() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ActionProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ActionProfilePrefix)
 	if err != nil {
 		return err
 	}

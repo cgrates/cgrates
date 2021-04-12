@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -47,7 +48,7 @@ type v1AttributeProfile struct {
 
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -56,7 +57,7 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating attributes", id)
 		}
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -244,7 +245,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 				}
 			}
 			if vrs[utils.Attributes] == 1 {
-				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(v6Attr); err != nil {
+				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(context.TODO(), v6Attr); err != nil {
 					return
 				}
 			}

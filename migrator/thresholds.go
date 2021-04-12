@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +31,7 @@ import (
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
 	//Thresholds
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdPrefix)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		m.stats[utils.Thresholds]++
 	}
 	//ThresholdProfiles
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
 	}

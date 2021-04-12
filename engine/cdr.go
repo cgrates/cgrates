@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -266,7 +267,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 		if cdr.CGRID != grpCDR.CGRID {
 			continue // We only care about cdrs with same primary cdr behind
 		}
-		if pass, err := filterS.Pass(grpCDR.Tenant, cfgCdrFld.Filters, grpCDR.AsMapStorage()); err != nil {
+		if pass, err := filterS.Pass(context.TODO(), grpCDR.Tenant, cfgCdrFld.Filters, grpCDR.AsMapStorage()); err != nil {
 			return utils.EmptyString, err
 		} else if !pass {
 			continue
@@ -378,7 +379,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate, groupedCDRs []
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
 			continue
 		}
-		if pass, err := filterS.Pass(cdr.Tenant,
+		if pass, err := filterS.Pass(context.TODO(), cdr.Tenant,
 			cfgFld.Filters, nM); err != nil {
 			return []string{}, err
 		} else if !pass {

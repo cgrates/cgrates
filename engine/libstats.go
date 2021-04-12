@@ -24,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -253,10 +254,10 @@ func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils
 	sq.SQItems = append(sq.SQItems, SQItem{EventID: evID, ExpiryTime: expTime})
 	var pass bool
 	// recreate the request without *opts
-	dDP := newDynamicDP(config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
+	dDP := newDynamicDP(context.TODO(), config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
 		config.CgrConfig().FilterSCfg().ApierSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]})
 	for metricID, metric := range sq.SQMetrics {
-		if pass, err = filterS.Pass(tnt, metric.GetFilterIDs(),
+		if pass, err = filterS.Pass(context.TODO(), tnt, metric.GetFilterIDs(),
 			evNm); err != nil {
 			return
 		} else if !pass {

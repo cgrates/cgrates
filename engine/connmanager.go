@@ -79,7 +79,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan, isInternalRPC); err != nil {
 		return
 	}
-	err = Cache.Set(utils.CacheRPCConnections, connID, conn, nil,
+	err = Cache.Set(context.TODO(), utils.CacheRPCConnections, connID, conn, nil,
 		true, utils.NonTransactional)
 	return
 }

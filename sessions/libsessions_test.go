@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -230,7 +231,7 @@ func TestAuthStirShaken(t *testing.T) {
 		"1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
 		t.Error("Expected invalid identity")
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", nil,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", nil,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -248,7 +249,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -295,7 +296,7 @@ AwEHoUQDQgAESt8sEh55Yc579vLHjFRWVQO27p4Yaa+jqv4dwkr/FLEcN1zC76Y/
 IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 -----END EC PRIVATE KEY-----
 `)
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", nil,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -318,11 +319,11 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}

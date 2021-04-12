@@ -146,7 +146,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
-	rPrfIDs, err := MatchingItemIDsForEvent(evNm,
+	rPrfIDs, err := MatchingItemIDsForEvent(context.TODO(), evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
 		rpS.cgrcfg.RouteSCfg().SuffixIndexedFields,
@@ -170,7 +170,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := rpS.filterS.Pass(tnt, rPrf.FilterIDs,
+		if pass, err := rpS.filterS.Pass(context.TODO(), tnt, rPrf.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -469,7 +469,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//filter the route
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
-		dynDP := newDynamicDP(rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
+		dynDP := newDynamicDP(context.TODO(), rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
 			rpS.cgrcfg.FilterSCfg().ApierSConns,
 			ev.Tenant, utils.MapStorage{
 				utils.MetaReq:  ev.Event,

@@ -21,6 +21,7 @@ package v1
 import (
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -141,7 +142,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(arg *AttrGetFilterIndexes, reply *[]s
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	}
-	if indexes, err = apierSv1.DataManager.GetIndexes(
+	if indexes, err = apierSv1.DataManager.GetIndexes(context.TODO(),
 		arg.ItemType, tntCtx, utils.EmptyString, true, true); err != nil {
 		return
 	}
@@ -309,7 +310,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	if args.AttributeS {
 		if args.AttributeS, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAttributeFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				ap, e := apierSv1.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
+				ap, e := apierSv1.DataManager.GetAttributeProfile(context.TODO(), tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
@@ -642,7 +643,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 	//AttributeProfile Indexes
 	if _, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheAttributeFilterIndexes,
 		&args.AttributeIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			ap, e := apierSv1.DataManager.GetAttributeProfile(tnt, id, true, false, utils.NonTransactional)
+			ap, e := apierSv1.DataManager.GetAttributeProfile(context.TODO(), tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -43,7 +44,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 	if len(filterIDs) == 0 { // in case of None
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx map[string]utils.StringSet
-		if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
+		if rcvIndx, err = dm.GetIndexes(context.TODO(), idxItmType, tntCtx,
 			idxKey,
 			true, false); err != nil {
 			if err != utils.ErrNotFound {
@@ -62,7 +63,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 	// we try to get them from Cache/DataDB or if not found in this location we create them here
 	for _, fltrID := range filterIDs {
 		var fltr *Filter
-		if fltr, err = dm.GetFilter(tnt, fltrID,
+		if fltr, err = dm.GetFilter(context.TODO(), tnt, fltrID,
 			true, false, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
@@ -91,7 +92,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 				}
 				var rcvIndx map[string]utils.StringSet
 				// only read from cache in case if we do not find the index to not cache the negative response
-				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
+				if rcvIndx, err = dm.GetIndexes(context.TODO(), idxItmType, tntCtx,
 					idxKey, true, false); err != nil {
 					if err != utils.ErrNotFound {
 						return
@@ -388,7 +389,7 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		var ids []string
-		if ids, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[idxItmType]); err != nil {
+		if ids, err = dm.DataDB().GetKeysForPrefix(context.TODO(), utils.CacheIndexesToPrefix[idxItmType]); err != nil {
 			return
 		}
 		for _, id := range ids {
@@ -441,7 +442,7 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
 		var indexes map[string]utils.StringSet
-		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
+		if indexes, err = dm.GetIndexes(context.TODO(), utils.CacheReverseFilterIndexes, tntCtx,
 			idxItmType, true, false); err != nil {
 			if err != utils.ErrNotFound {
 				guardian.Guardian.UnguardIDs(refID)
@@ -478,7 +479,7 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
 		var indexes map[string]utils.StringSet
-		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
+		if indexes, err = dm.GetIndexes(context.TODO(), utils.CacheReverseFilterIndexes, tntCtx,
 			idxItmType, true, false); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err != utils.ErrNotFound {
@@ -580,7 +581,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	defer guardian.Guardian.UnguardIDs(refID)
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
-	if rcvIndx, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntID,
+	if rcvIndx, err = dm.GetIndexes(context.TODO(), utils.CacheReverseFilterIndexes, tntID,
 		utils.EmptyString, true, false); err != nil {
 		if err != utils.ErrNotFound {
 			return
@@ -803,7 +804,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 		case utils.CacheAttributeFilterIndexes:
 			for itemID := range indx {
 				var ap *AttributeProfile
-				if ap, err = dm.GetAttributeProfile(newFlt.Tenant, itemID,
+				if ap, err = dm.GetAttributeProfile(context.TODO(), newFlt.Tenant, itemID,
 					true, false, utils.NonTransactional); err != nil {
 					return
 				}
@@ -880,7 +881,7 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
 	defer guardian.Guardian.UnguardIDs(refID)
 	for _, idxKey := range removeIndexKeys { // delete old filters indexes for this item
 		var remIndx map[string]utils.StringSet
-		if remIndx, err = dm.GetIndexes(idxItmType, tnt,
+		if remIndx, err = dm.GetIndexes(context.TODO(), idxItmType, tnt,
 			idxKey, true, false); err != nil {
 			if err != utils.ErrNotFound {
 				return

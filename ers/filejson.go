@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -151,7 +152,7 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, nil, nil) // create an AgentRequest
-	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> reading file: <%s>  ignoring due to filter error: <%s>",

@@ -283,7 +283,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		return "", utils.ErrResourceUnavailable
 	}
 	lockIDs := utils.PrefixSliceItems(rs.tenatIDs(), utils.ResourcesPrefix)
-	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
 		// Simulate resource usage
 		for _, r := range rs {
 			r.removeExpiredUnits()
@@ -477,7 +477,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 		}
 		rIDs = x.(utils.StringSet)
 	} else { // select the resourceIDs out of dataDB
-		rIDs, err = MatchingItemIDsForEvent(evNm,
+		rIDs, err = MatchingItemIDsForEvent(context.TODO(), evNm,
 			rS.cgrcfg.ResourceSCfg().StringIndexedFields,
 			rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
 			rS.cgrcfg.ResourceSCfg().SuffixIndexedFields,
@@ -487,7 +487,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				if errCh := Cache.Set(utils.CacheEventResources, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
+				if errCh := Cache.Set(context.TODO(), utils.CacheEventResources, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
 					return nil, errCh
 				}
 			}
@@ -495,7 +495,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 		}
 	}
 	lockIDs := utils.PrefixSliceItems(rs.IDs(), utils.ResourcesPrefix)
-	guardian.Guardian.Guard(func() (gIface interface{}, gErr error) {
+	guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gIface interface{}, gErr error) {
 		for resName := range rIDs {
 			var rPrf *ResourceProfile
 			if rPrf, err = rS.dm.GetResourceProfile(tnt, resName,
@@ -509,7 +509,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 				!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 				continue
 			}
-			if pass, err := rS.filterS.Pass(tnt, rPrf.FilterIDs,
+			if pass, err := rS.filterS.Pass(context.TODO(), tnt, rPrf.FilterIDs,
 				evNm); err != nil {
 				return nil, err
 			} else if !pass {
@@ -560,7 +560,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 			break
 		}
 	}
-	err = Cache.Set(utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, "")
+	err = Cache.Set(context.TODO(), utils.CacheEventResources, evUUID, rs.resIDsMp(), nil, true, "")
 	return
 }
 
@@ -592,7 +592,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -634,7 +634,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -687,7 +687,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -758,7 +758,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}

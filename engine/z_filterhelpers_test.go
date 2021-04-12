@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -38,7 +39,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	context := utils.MetaRating
+	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.Field", []string{"profile"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -83,24 +84,24 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
-		tnt, context, stringFilterID, []string{"stringFilter"}); err != nil {
+		tnt, ctx, stringFilterID, []string{"stringFilter"}); err != nil {
 		t.Error(err)
 	}
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
-		tnt, context, prefixFilterID, []string{"prefFilter"}); err != nil {
+		tnt, ctx, prefixFilterID, []string{"prefFilter"}); err != nil {
 		t.Error(err)
 	}
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
-		tnt, context, suffixFilterID, []string{"sufFilter"}); err != nil {
+		tnt, ctx, suffixFilterID, []string{"sufFilter"}); err != nil {
 		t.Error(err)
 	}
-	tntCtx := utils.ConcatenatedKey(tnt, context)
+	tntCtx := utils.ConcatenatedKey(tnt, ctx)
 
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
 	}}
-	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil, nil,
+	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -113,7 +114,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Field": "profilePrefix",
 	}}
-	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -126,7 +127,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"Field": "profilePrefix",
 	}}
-	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -143,7 +144,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	prefixFilterID := "prefixFilterID"
 	data := NewInternalDB(nil, nil, true)
 	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	context := utils.MetaRating
+	ctx := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.CallCost.Account", []string{"1001"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -177,20 +178,20 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
-		tnt, context, stringFilterID, []string{"stringFilter"}); err != nil {
+		tnt, ctx, stringFilterID, []string{"stringFilter"}); err != nil {
 		t.Error(err)
 	}
 	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
-		tnt, context, prefixFilterID, []string{"prefFilter"}); err != nil {
+		tnt, ctx, prefixFilterID, []string{"prefFilter"}); err != nil {
 		t.Error(err)
 	}
-	tntCtx := utils.ConcatenatedKey(config.CgrConfig().GeneralCfg().DefaultTenant, context)
+	tntCtx := utils.ConcatenatedKey(config.CgrConfig().GeneralCfg().DefaultTenant, ctx)
 
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"CallCost":       map[string]interface{}{"Account": 1001},
 	}}
-	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil, nil,
+	aPrflIDs, err := MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -202,7 +203,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	matchEV = utils.MapStorage{utils.MetaReq: map[string]interface{}{
 		"CallCost": map[string]interface{}{"Field": "profilePrefix"},
 	}}
-	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(context.TODO(), matchEV, nil, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, tntCtx, true, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)

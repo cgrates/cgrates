@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/gorm"
 )
@@ -70,7 +71,7 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-func (sqls *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 

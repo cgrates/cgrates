@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/baningo"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -330,13 +331,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	fEv := utils.MapStorage{}
 	fEv.Set([]string{utils.MetaReq}, failEvent)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*string:~*req.Account:1007:error"}, fEv); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -344,14 +345,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*notstring:~*req.Account:1007"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -367,32 +368,32 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	fEv.Set([]string{utils.MetaReq}, failEvent)
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*prefix:~*req.Account:10"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*prefix:~*req.Account:10"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*suffix:~*req.Account:07"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*suffix:~*req.Account:07"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*notsuffix:~*req.Account:07"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -408,20 +409,20 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	fEv.Set([]string{utils.MetaReq}, failEvent)
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*notrsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -437,13 +438,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	fEv.Set([]string{utils.MetaReq}, failEvent)
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*gte:~*req.Weight:20"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*gte:~*req.Weight:10"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -474,26 +475,26 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	for key := range failEvent {
-		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~*req." + key + ":"},
+		if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*empty:~*req." + key + ":"},
 			fEv); err != nil {
 			t.Errorf(err.Error())
 		} else if pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, false, pass)
 		}
-		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~*req." + key + ":"},
+		if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*empty:~*req." + key + ":"},
 			pEv); err != nil {
 			t.Errorf(err.Error())
 		} else if !pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, true, pass)
 		}
 	}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*exists:~*req.NewKey:"},
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*exists:~*req.NewKey:"},
 		fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*notexists:~*req.NewKey:"},
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*notexists:~*req.NewKey:"},
 		fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -525,13 +526,13 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv1.Set([]string{utils.MetaReq}, passEvent1)
 	pEv2 := utils.MapStorage{}
 	pEv2.Set([]string{utils.MetaReq}, passEvent2)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{}, pEv1); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("itsyscom.com",
+	if pass, err := filterS.Pass(context.TODO(), "itsyscom.com",
 		[]string{}, pEv2); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -542,7 +543,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	}
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Test:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -553,7 +554,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Test:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -567,7 +568,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Test.Test2:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -580,7 +581,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Test.Test2:~^\\w{30,}"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -596,7 +597,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, ev)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{
 			"*string:~*req.Account:1003",
 			"*prefix:~*req.Destination:10",
@@ -623,7 +624,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	}
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0s"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -635,7 +636,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0s"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -647,13 +648,13 @@ func TestPassFilterMaxCost(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent3)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -675,7 +676,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	}
 	pEv := utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -687,7 +688,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -699,7 +700,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	}
 	pEv = utils.MapStorage{}
 	pEv.Set([]string{utils.MetaReq}, passEvent3)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
@@ -852,42 +853,42 @@ func TestActivationIntervalPass(t *testing.T) {
 	}
 	fEv := utils.MapStorage{}
 	fEv.Set([]string{utils.MetaReq}, passEvent)
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*ai:~*req.CustomTime:2013-06-01T00:00:00Z"}, fEv); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*ai:~*req.CustomTime:2013-09-01T00:00:00Z"}, fEv); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*ai:~*req.CustomTime:|2013-09-01T00:00:00Z"}, fEv); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*ai:~*req.CustomTime:|2013-06-01T00:00:00Z"}, fEv); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*ai:~*req.CustomTime:2013-06-01T00:00:00Z|2013-09-01T00:00:00Z"}, fEv); err != nil {
 		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*ai:~*req.CustomTime:2013-08-01T00:00:00Z|2013-09-01T00:00:00Z"}, fEv); err != nil {
 		t.Error(err)
 	} else if pass {
@@ -1033,56 +1034,56 @@ func TestAPIBan(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 	config.CgrConfig().APIBanCfg().Keys = []string{"testKey"}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
 		t.Fatal(err)
 	} else if pass {
 		t.Error("Expected not to pass")
 	}
 	// from cache
-	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err != nil {
 		t.Fatal(err)
 	} else if pass {
 		t.Error("Expected not to pass")
 	}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP2:*single"}, dp); err != nil {
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP2:*single"}, dp); err != nil {
 		t.Fatal(err)
 	} else if pass {
 		t.Error("Expected not to pass")
 	}
 	Cache.Clear([]string{utils.MetaAPIBan})
-	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.bannedIP:*single"}, dp); err != nil {
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.bannedIP:*single"}, dp); err != nil {
 		t.Fatal(err)
 	} else if !pass {
 		t.Error("Expected to pass")
 	}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.bannedIP2:*all"}, dp); err != nil {
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.bannedIP2:*all"}, dp); err != nil {
 		t.Fatal(err)
 	} else if !pass {
 		t.Error("Expected to pass")
 	}
 
-	if pass, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.notFound:*all"}, dp); err != nil {
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.notFound:*all"}, dp); err != nil {
 		t.Fatal(err)
 	} else if pass {
 		t.Error("Expected not to pass")
 	}
 	expErr := "invalid value for apiban filter: <*any>"
-	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*any"}, dp); err == nil || err.Error() != expErr {
+	if _, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*any"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 	baningo.RootURL = "http://127.0.0.1:12345/"
 
 	expErr = `Get "http://127.0.0.1:12345/testKey/banned/100": dial tcp 127.0.0.1:12345: connect: connection refused`
-	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err == nil || err.Error() != expErr {
+	if _, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*all"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 	expErr = `Get "http://127.0.0.1:12345/testKey/check/1.2.3.253": dial tcp 127.0.0.1:12345: connect: connection refused`
-	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.IP:*single"}, dp); err == nil || err.Error() != expErr {
+	if _, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.IP:*single"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 
 	expErr = `invalid converter value in string: <*>, err: unsupported converter definition: <*>`
-	if _, err := filterS.Pass("cgrates.org", []string{"*apiban:~*req.<~*req.IP>{*}:*all"}, dp); err == nil || err.Error() != expErr {
+	if _, err := filterS.Pass(context.TODO(), "cgrates.org", []string{"*apiban:~*req.<~*req.IP>{*}:*all"}, dp); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 }

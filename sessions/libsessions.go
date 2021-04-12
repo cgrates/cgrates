@@ -148,13 +148,13 @@ func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err 
 	var ok bool
 	if pubkey, ok = engine.Cache.Get(utils.CacheSTIR, pi.Header.X5u); !ok {
 		if pubkey, err = utils.NewECDSAPubKey(pi.Header.X5u, timeoutVal); err != nil {
-			if errCh := engine.Cache.Set(utils.CacheSTIR, pi.Header.X5u, nil,
+			if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, pi.Header.X5u, nil,
 				nil, false, utils.NonTransactional); errCh != nil {
 				return errCh
 			}
 			return
 		}
-		if errCh := engine.Cache.Set(utils.CacheSTIR, pi.Header.X5u, pubkey,
+		if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, pi.Header.X5u, pubkey,
 			nil, false, utils.NonTransactional); errCh != nil {
 			return errCh
 		}
@@ -197,13 +197,13 @@ func NewSTIRIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayloa
 	var ok bool
 	if prvKey, ok = engine.Cache.Get(utils.CacheSTIR, prvkeyPath); !ok {
 		if prvKey, err = utils.NewECDSAPrvKey(prvkeyPath, timeout); err != nil {
-			if errCh := engine.Cache.Set(utils.CacheSTIR, prvkeyPath, nil,
+			if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, prvkeyPath, nil,
 				nil, false, utils.NonTransactional); errCh != nil {
 				return utils.EmptyString, errCh
 			}
 			return
 		}
-		if errCh := engine.Cache.Set(utils.CacheSTIR, prvkeyPath, prvKey,
+		if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, prvkeyPath, prvKey,
 			nil, false, utils.NonTransactional); errCh != nil {
 			return utils.EmptyString, errCh
 		}

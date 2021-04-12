@@ -22,13 +22,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentTiming() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.TimingsPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.TimingsPrefix)
 	if err != nil {
 		return err
 	}

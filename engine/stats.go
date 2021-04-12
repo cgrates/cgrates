@@ -96,7 +96,7 @@ func (sS *StatService) storeStats() {
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
 			if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
@@ -142,7 +142,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, actTime *time.Time, evNm utils.MapStorage) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
-		sqIDs, err = MatchingItemIDsForEvent(evNm,
+		sqIDs, err = MatchingItemIDsForEvent(context.TODO(), evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
 			sS.cgrcfg.StatSCfg().SuffixIndexedFields,
@@ -167,7 +167,7 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 			!sqPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
-		if pass, err := sS.filterS.Pass(tnt, sqPrfl.FilterIDs,
+		if pass, err := sS.filterS.Pass(context.TODO(), tnt, sqPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -175,7 +175,7 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 		}
 		var sq *StatQueue
 		lkID := utils.StatQueuePrefix + utils.ConcatenatedKey(sqPrfl.Tenant, sqPrfl.ID)
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
 			sq, err = sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
@@ -252,7 +252,7 @@ func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
 	}
 	lkID := utils.StatQueuePrefix + sq.TenantID()
 	var removed int
-	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
 		removed, err = sq.remExpired()
 		return
 	}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
@@ -300,7 +300,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
-		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
 			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
@@ -481,7 +481,7 @@ func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) 
 		tenant = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := sS.dm.DataDB().GetKeysForPrefix(prfx)
+	keys, err := sS.dm.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 	if err != nil {
 		return err
 	}

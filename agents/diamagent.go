@@ -237,7 +237,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			writeOnConn(c, diamErr)
 		}
 		// cache message data needed for building up the ASR
-		if errCh := engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
+		if errCh := engine.Cache.Set(context.TODO(), utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
 			nil, true, utils.NonTransactional); errCh != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed message: %s to set Cache: %s", utils.DiameterAgent, m, errCh.Error()))
 			writeOnConn(c, diamErr)
@@ -313,7 +313,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := da.filterS.Pass(agReq.Tenant,
+	if pass, err := da.filterS.Pass(context.TODO(), agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}

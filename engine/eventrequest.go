@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -121,7 +122,7 @@ func (eeR *EventRequest) FieldAsString(fldPath []string) (val string, err error)
 //SetFields will populate fields of AgentRequest out of templates
 func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
-		if pass, err := eeR.filterS.Pass(eeR.Tenant,
+		if pass, err := eeR.filterS.Pass(context.TODO(), eeR.Tenant,
 			tplFld.Filters, eeR); err != nil {
 			return err
 		} else if !pass {
@@ -173,7 +174,7 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 func (eeR *EventRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
-		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		return eeR.opts.Set(fullPath.PathSlice[1:], val.Data)
 	default:
@@ -362,7 +363,7 @@ func (eeR *EventRequest) ParseField(
 func (eeR *EventRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
-		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		return eeR.opts.Set(fullPath.PathSlice[1:], val.Data)
 	default:
@@ -389,7 +390,7 @@ func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) 
 		} else {
 			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
 		}
-		return Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
+		return Cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		var prv interface{}
 		if prv, err = eeR.opts.FieldAsInterface(fullPath.PathSlice[1:]); err != nil {

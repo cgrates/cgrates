@@ -377,7 +377,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 // processRequest represents one processor processing the request
 func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := sa.filterS.Pass(agReq.Tenant,
+	if pass, err := sa.filterS.Pass(context.TODO(), agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}

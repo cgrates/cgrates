@@ -713,7 +713,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 	indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule) {
 	indexedFltr = make(map[string][]string)
 	for _, fltrID := range fltrs {
-		f, err := sS.dm.GetFilter(tenant, fltrID,
+		f, err := sS.dm.GetFilter(context.TODO(), tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			continue
@@ -963,7 +963,7 @@ func (sS *SessionS) processChargerS(cgrEv *utils.CGREvent) (chrgrs []*engine.Chr
 		err = utils.NewErrChargerS(err)
 	}
 
-	if errCh := engine.Cache.Set(utils.CacheEventCharges, cgrEv.ID, chrgrs, nil,
+	if errCh := engine.Cache.Set(context.TODO(), utils.CacheEventCharges, cgrEv.ID, chrgrs, nil,
 		true, utils.NonTransactional); errCh != nil {
 		return nil, errCh
 	}
@@ -1362,7 +1362,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 			sr.Event[utils.AnswerTime] = *aTime
 		}
 	}
-	if errCh := engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
+	if errCh := engine.Cache.Set(context.TODO(), utils.CacheClosedSessions, s.CGRID, s,
 		nil, true, utils.NonTransactional); errCh != nil {
 		return errCh
 	}
@@ -1683,7 +1683,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: authReply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -1965,7 +1965,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -2196,7 +2196,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -2332,7 +2332,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -2462,7 +2462,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -2649,7 +2649,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -2854,7 +2854,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt birpc.ClientConnector,
 			}
 			return cachedResp.Error
 		}
-		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer engine.Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: rply, Error: err},
 			nil, true, utils.NonTransactional)
 	}

@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -62,7 +63,7 @@ type v1Stats []*v1Stat
 func (m *Migrator) moveStatQueueProfile() (err error) {
 	//StatQueueProfile
 	var ids []string
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {
@@ -91,7 +92,7 @@ func (m *Migrator) moveStatQueueProfile() (err error) {
 func (m *Migrator) migrateCurrentStats() (err error) {
 	var ids []string
 	//StatQueue
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueuePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {

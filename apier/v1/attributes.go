@@ -36,7 +36,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, re
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	var alsPrf *engine.AttributeProfile
-	if alsPrf, err = apierSv1.DataManager.GetAttributeProfile(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if alsPrf, err = apierSv1.DataManager.GetAttributeProfile(context.TODO(), tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -53,7 +53,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDs(args *utils.PaginatorWithTenant
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (apierSv1 *APIerSv1) GetAttributeProfileIDsCount(args *utils.TenantWithAPIO
 	}
 	var keys []string
 	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx); err != nil {
+	if keys, err = apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
@@ -168,7 +168,7 @@ func (alSv1 *AttributeSv1) Call(ctx *context.Context, serviceMethod string,
 // GetAttributeForEvent  returns matching AttributeProfile for Event
 func (alSv1 *AttributeSv1) GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttributeProfile) (err error) {
-	return alSv1.attrS.V1GetAttributeForEvent(args, reply)
+	return alSv1.attrS.V1GetAttributeForEvent(context.TODO(), args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile

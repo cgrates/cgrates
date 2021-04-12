@@ -48,15 +48,15 @@ type FilterS struct {
 // Pass will check all filters wihin filterIDs and require them passing for dataProvider
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
-func (fS *FilterS) Pass(tenant string, filterIDs []string,
+func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 	ev utils.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
-	dDP := newDynamicDP(fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+	dDP := newDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
 		fS.cfg.FilterSCfg().ApierSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
-		f, err := fS.dm.GetFilter(tenant, fltrID,
+		f, err := fS.dm.GetFilter(ctx, tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -118,11 +118,11 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 		return true, nil, nil
 	}
 	pass = true
-	dDP := newDynamicDP(fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+	dDP := newDynamicDP(context.TODO(), fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
 		fS.cfg.FilterSCfg().ApierSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		var f *Filter
-		f, err = fS.dm.GetFilter(tenant, fltrID,
+		f, err = fS.dm.GetFilter(context.TODO(), tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {

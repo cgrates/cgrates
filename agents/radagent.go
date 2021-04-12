@@ -164,7 +164,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 // processRequest represents one processor processing the request
 func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, rpl *radigo.Packet) (processed bool, err error) {
-	if pass, err := ra.filterS.Pass(agReq.Tenant,
+	if pass, err := ra.filterS.Pass(context.TODO(), agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}

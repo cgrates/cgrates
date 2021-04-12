@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -53,7 +54,8 @@ func (alS *AttributeService) Shutdown() {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, attrsIDs []string, actTime *time.Time, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
+func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, tnt string, ctx *string, attrsIDs []string,
+	actTime *time.Time, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	contextVal := utils.MetaDefault
 	if ctx != nil && *ctx != "" {
@@ -63,7 +65,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 	if len(attrsIDs) != 0 {
 		attrIDs = attrsIDs
 	} else {
-		aPrflIDs, err := MatchingItemIDsForEvent(evNm,
+		aPrflIDs, err := MatchingItemIDsForEvent(apiCtx, evNm,
 			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 			alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
@@ -75,7 +77,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(evNm,
+			if aPrflIDs, err = MatchingItemIDsForEvent(apiCtx, evNm,
 				alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
@@ -89,7 +91,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 		attrIDs = aPrflIDs.AsSlice()
 	}
 	for _, apID := range attrIDs {
-		aPrfl, err := alS.dm.GetAttributeProfile(tnt, apID, true, true, utils.NonTransactional)
+		aPrfl, err := alS.dm.GetAttributeProfile(apiCtx, tnt, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -104,7 +106,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			!aPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
-		if pass, err := alS.filterS.Pass(tnt, aPrfl.FilterIDs,
+		if pass, err := alS.filterS.Pass(apiCtx, tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -199,7 +201,7 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(context.TODO(), tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -212,7 +214,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
 			var pass bool
-			if pass, err = alS.filterS.Pass(tnt, attribute.FilterIDs,
+			if pass, err = alS.filterS.Pass(context.TODO(), tnt, attribute.FilterIDs,
 				evNm); err != nil {
 				return
 			} else if !pass {
@@ -413,7 +415,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
+func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *AttrArgsProcessEvent,
 	attrPrfl *AttributeProfile) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -422,7 +424,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	attrPrf, err := alS.attributeProfileForEvent(tnt, args.Context, args.AttributeIDs, args.Time, utils.MapStorage{
+	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, args.Time, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -468,7 +470,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	var lastID string
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)
-	dynDP := newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
+	dynDP := newDynamicDP(context.TODO(), alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = i + 1

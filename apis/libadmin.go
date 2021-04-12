@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package v1
+package apis
 
 import (
 	"strings"
@@ -28,11 +28,11 @@ import (
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string,
+func (apierSv1 *AdminS) CallCache(cacheopt string, tnt, cacheID, itemID string,
 	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
 	var reply, method string
 	var args interface{}
-	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
+	switch utils.FirstNonEmpty(cacheopt, apierSv1.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:
@@ -65,13 +65,13 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 		}
 
 	}
-	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
+	return apierSv1.connMgr.Call(context.TODO(), apierSv1.cfg.ApierCfg().CachesConns,
 		method, args, &reply)
 }
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
+func (apierSv1 *AdminS) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
 	rpl = utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{
@@ -100,7 +100,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 	indxIDs := make([]string, 0, len(*filterIDs))
 	for _, id := range *filterIDs {
 		var fltr *engine.Filter
-		if fltr, err = apierSv1.DataManager.GetFilter(context.TODO(), tnt, id, true, true, utils.NonTransactional); err != nil {
+		if fltr, err = apierSv1.dm.GetFilter(context.TODO(), tnt, id, true, true, utils.NonTransactional); err != nil {
 			return
 		}
 		for _, flt := range fltr.Rules {
@@ -137,14 +137,15 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 	return
 }
 
+/*
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
-func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
+func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
 	if len(itemIDs) == 0 {
 		return
 	}
 	var reply, method string
 	var args interface{}
-	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
+	switch utils.FirstNonEmpty(cacheopt, apierSv1.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:
@@ -182,6 +183,7 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 			APIOpts:  opts,
 		}
 	}
-	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
+	return apierSv1.ConnMgr.Call(context.TODO(), apierSv1.cfg.ApierCfg().CachesConns,
 		method, args, &reply)
 }
+*/

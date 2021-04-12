@@ -81,7 +81,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantIDWithAPIOpts, repl
 // GetFilter is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetFilter(tntID *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
 	engine.UpdateReplicationFilters(utils.FilterPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetFilterDrv(tntID.Tenant, tntID.ID)
+	rcv, err := rplSv1.dm.DataDB().GetFilterDrv(context.TODO(), tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (rplSv1 *ReplicatorSv1) GetRouteProfile(tntID *utils.TenantIDWithAPIOpts, r
 // GetAttributeProfile is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetAttributeProfile(tntID *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) error {
 	engine.UpdateReplicationFilters(utils.AttributeProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetAttributeProfileDrv(tntID.Tenant, tntID.ID)
+	rcv, err := rplSv1.dm.DataDB().GetAttributeProfileDrv(context.TODO(), tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
@@ -257,7 +257,7 @@ func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(itemID *utils.StringWithAPIOpts, rep
 // GetIndexes is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetIndexes(args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
 	engine.UpdateReplicationFilters(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
-	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey)
+	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(context.TODO(), args.IdxItmType, args.TntCtx, args.IdxKey)
 	if err != nil {
 		return err
 	}
@@ -345,7 +345,7 @@ func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueueWithAPIOpts, reply
 
 // SetFilter is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetFilter(fltr *engine.FilterWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetFilterDrv(fltr.Filter); err != nil {
+	if err = rplSv1.dm.DataDB().SetFilterDrv(context.TODO(), fltr.Filter); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(fltr.APIOpts[utils.CacheOpt]),
@@ -410,7 +410,7 @@ func (rplSv1 *ReplicatorSv1) SetRouteProfile(sp *engine.RouteProfileWithAPIOpts,
 
 // SetAttributeProfile is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ap *engine.AttributeProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetAttributeProfileDrv(ap.AttributeProfile); err != nil {
+	if err = rplSv1.dm.DataDB().SetAttributeProfileDrv(context.TODO(), ap.AttributeProfile); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ap.APIOpts[utils.CacheOpt]),
@@ -518,7 +518,7 @@ func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *s
 
 // SetIndexes is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetIndexes(args *utils.SetIndexesArg, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetIndexesDrv(args.IdxItmType, args.TntCtx, args.Indexes, true, utils.NonTransactional); err != nil {
+	if err = rplSv1.dm.DataDB().SetIndexesDrv(context.TODO(), args.IdxItmType, args.TntCtx, args.Indexes, true, utils.NonTransactional); err != nil {
 		return
 	}
 	cIDs := make([]string, 0, len(args.Indexes))

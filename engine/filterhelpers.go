@@ -21,6 +21,7 @@ package engine
 import (
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -29,7 +30,7 @@ import (
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.GetIndexes, adding utils.MetaAny to list of fields queried
-func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs *[]string,
+func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	itemIDs = make(utils.StringSet)
 	var allFieldIDs []string
@@ -38,10 +39,10 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(ctx, func(guardCtx *context.Context) (_ interface{}, _ error) {
 		if !indexedSelects {
 			var keysWithID []string
-			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID]); err != nil {
+			if keysWithID, err = dm.DataDB().GetKeysForPrefix(guardCtx, utils.CacheIndexesToPrefix[cacheID]); err != nil {
 				return
 			}
 			var sliceIDs []string
@@ -77,7 +78,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, key, true, true); err != nil {
+					if dbIndexes, err = dm.GetIndexes(guardCtx, cacheID, itemIDPrefix, key, true, true); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue
@@ -107,7 +108,7 @@ func WeightFromDynamics(dWs []*utils.DynamicWeight,
 	fltrS *FilterS, tnt string, ev utils.DataProvider) (wg float64, err error) {
 	for _, dW := range dWs {
 		var pass bool
-		if pass, err = fltrS.Pass(tnt, dW.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(context.TODO(), tnt, dW.FilterIDs, ev); err != nil {
 			return
 		} else if pass {
 			return dW.Weight, nil
