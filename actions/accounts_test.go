@@ -116,6 +116,37 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 	}
 }
 
+func TestACExecuteAccountsParseError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	internalChan := make(chan rpcclient.ClientConnector, 1)
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
+	})
+	apAction := &engine.APAction{
+		ID:   "TestACExecuteAccountsRemBalance",
+		Type: utils.MetaSetBalance,
+		Diktats: []*engine.APDiktat{
+			{
+				Path:  "~*balance.TestBalance.Value",
+				Value: "~10",
+			},
+		},
+	}
+
+	actsetBal := &actSetBalance{
+		config:  cfg,
+		connMgr: connMngr,
+		aCfg:    apAction,
+		tnt:     "cgrates.org",
+	}
+	dataStorage := utils.MapStorage{}
+
+	if err := actsetBal.execute(nil, dataStorage, utils.MetaRemBalance); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
+
 func TestACAccountsGetIDs(t *testing.T) {
 	apAction := &engine.APAction{
 		ID: "TestACExecuteAccountsRemBalance",

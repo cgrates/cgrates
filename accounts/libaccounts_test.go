@@ -668,15 +668,15 @@ func TestDebitFromBothBalances(t *testing.T) {
 		},
 	}
 
-		var reply utils.ExtEventCharges
-		exEvCh := utils.ExtEventCharges{
-			Abstracts: utils.Float64Pointer(300),
-		}
-		if err := accnts.V1DebitAbstracts(args, &reply); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(exEvCh, reply) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
-		}
+	var reply utils.ExtEventCharges
+	exEvCh := utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(300),
+	}
+	if err := accnts.V1DebitAbstracts(args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exEvCh, reply) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+	}
 
 	accPrf.Balances["AbstractBalance"].Units = utils.NewDecimal(1200, 0)
 	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(49999999997, 9)
@@ -695,6 +695,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 		t.Error(err)
 	}
 }
+
 */
 
 func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
