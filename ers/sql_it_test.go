@@ -31,7 +31,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 var (
@@ -687,4 +689,73 @@ func TestErsSqlPostCDRS(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, result)
 	}
 	logger.Default = tmp
+}
+
+// type mockDialector interface {
+// 	Name() string
+// 	Initialize(*gorm.DB) error
+// 	Migrator(db *gorm.DB) gorm.Migrator
+// 	DataTypeOf(*schema.Field) string
+// 	DefaultValueOf(*schema.Field) clause.Expression
+// 	BindVarTo(writer clause.Writer, stmt *Statement, v interface{})
+// 	QuoteTo(clause.Writer, string)
+// 	Explain(sql string, vars ...interface{}) string
+// }
+type mockDialect struct{}
+
+func (mockDialect) Name() string                                                        { return "" }
+func (mockDialect) Initialize(db *gorm.DB) error                                        { return nil }
+func (mockDialect) Migrator(db *gorm.DB) gorm.Migrator                                  { return nil }
+func (mockDialect) DataTypeOf(*schema.Field) string                                     { return "" }
+func (mockDialect) DefaultValueOf(*schema.Field) clause.Expression                      { return nil }
+func (mockDialect) BindVarTo(writer clause.Writer, stmt *gorm.Statement, v interface{}) { return }
+func (mockDialect) QuoteTo(clause.Writer, string)                                       { return }
+func (mockDialect) Explain(sql string, vars ...interface{}) string                      { return "" }
+
+func TestMockOpenDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	sqlRdr := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         &engine.FilterS{},
+		connString:    "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+		connType:      utils.MySQL,
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	var mckDlct mockDialect
+	errExpect := "invalid db"
+	if err := sqlRdr.openDB(mckDlct); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestSQLServeErr1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	sqlRdr := &SQLEventReader{
+		cgrCfg:        cfg,
+		cfgIdx:        0,
+		fltrS:         &engine.FilterS{},
+		connString:    "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
+		connType:      utils.MySQL,
+		tableName:     "testName",
+		expConnString: "",
+		expConnType:   utils.Postgres,
+		expTableName:  "",
+		rdrEvents:     nil,
+		rdrExit:       nil,
+		rdrErr:        nil,
+		cap:           nil,
+	}
+	cfg.StorDbCfg().Password = "CGRateS.org"
+	sqlRdr.Config().RunDelay = time.Duration(0)
+	if err := sqlRdr.Serve(); err != nil {
+		t.Error(err)
+	}
 }

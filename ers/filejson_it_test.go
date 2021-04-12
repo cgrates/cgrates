@@ -21,9 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/rpc"
 	"os"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -226,7 +229,6 @@ func testJSONKillEngine(t *testing.T) {
 	}
 }
 
-/*
 func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
@@ -240,7 +242,6 @@ func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
 	}
 }
-
 
 func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -257,47 +258,203 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	}
 }
 
-func TestFileJSONServeTimeDefault(t *testing.T) {
+// func TestFileJSONServeTimeDefault(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	rdr.Config().RunDelay = time.Duration(1)
+// 	result := rdr.Serve()
+// 	if !reflect.DeepEqual(result, nil) {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+// 	}
+// }
+
+// func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdrExit := make(chan struct{}, 1)
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, rdrExit)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	rdrExit <- struct{}{}
+// 	rdr.Config().RunDelay = time.Duration(1)
+// 	result := rdr.Serve()
+// 	if !reflect.DeepEqual(result, nil) {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+// 	}
+// }
+
+// func TestFileJSONProcessFile(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	expected := "open : no such file or directory"
+// 	err2 := rdr.(*JSONFileER).processFile("", "")
+// 	if err2 == nil || err2.Error() != expected {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err2)
+// 	}
+// }
+
+func TestFileJSONProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileJSONProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
 	}
-	rdr.Config().RunDelay = time.Duration(1)
-	result := rdr.Serve()
-	if !reflect.DeepEqual(result, nil) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	file, err := os.Create(path.Join(filePath, "file1.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	fcTemp := map[string]interface{}{
+		"2":  "tor_test",
+		"3":  "originid_test",
+		"4":  "requestType_test",
+		"6":  "tenant_test",
+		"7":  "category_test",
+		"8":  "account_test",
+		"9":  "subject_test",
+		"10": "destination_test",
+		"11": "setupTime_test",
+		"12": "answerTime_test",
+		"13": "usage_test",
+	}
+	rcv, err := json.Marshal(fcTemp)
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(rcv))
+	file.Close()
+	eR := &JSONFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ErsJSON/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	expEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "account_test",
+			utils.AnswerTime:   "answerTime_test",
+			utils.Category:     "category_test",
+			utils.Destination:  "destination_test",
+			utils.OriginID:     "originid_test",
+			utils.RequestType:  "requestType_test",
+			utils.SetupTime:    "setupTime_test",
+			utils.Subject:      "subject_test",
+			utils.Tenant:       "tenant_test",
+			utils.ToR:          "tor_test",
+			utils.Usage:        "usage_test",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	// expEvent := &utils.CGREvent{}
+	eR.conReqs <- struct{}{}
+	fname := "file1.json"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	select {
+	case data := <-eR.rdrEvents:
+		expEvent.ID = data.cgrEvent.ID
+		expEvent.Time = data.cgrEvent.Time
+		if !reflect.DeepEqual(data.cgrEvent, expEvent) {
+			t.Errorf("Expected %v but received %v", utils.ToJSON(expEvent), utils.ToJSON(data.cgrEvent))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Error("Time limit exceeded")
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
 	}
 }
 
-func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
+func TestFileJSONProcessEventReadError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfgIdx := 0
-	rdrExit := make(chan struct{}, 1)
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, rdrExit)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileJSONProcessEvent/"
+	fname := "file2.json"
+	eR := &CSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ErsJSON/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
 	}
-	rdrExit <- struct{}{}
-	rdr.Config().RunDelay = time.Duration(1)
-	result := rdr.Serve()
-	if !reflect.DeepEqual(result, nil) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	eR.conReqs <- struct{}{}
+	errExpect := "open /tmp/TestFileJSONProcessEvent/file2.json: no such file or directory"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
 
-func TestFileJSONProcessFile(t *testing.T) {
+func TestFileJSON(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	fltrs := &engine.FilterS{}
+	eR := &JSONFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ErsJSON/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
 	}
-	expected := "open : no such file or directory"
-	err2 := rdr.(*JSONFileER).processFile("", "")
-	if err2 == nil || err2.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err2)
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/ErsJSON/out/"
+	err := os.MkdirAll(filePath, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(filePath, fmt.Sprintf("file%d.json", i))); err != nil {
+			t.Error(err)
+		}
+	}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	os.Create(path.Join(filePath, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
 	}
 }
-*/
+
+func TestFileJSONExit(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &JSONFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ErsJSON/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	eR.rdrExit <- struct{}{}
+}
