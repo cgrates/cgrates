@@ -79,7 +79,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 	}
 	if len(rPfIDs) == 0 {
 		var rPfIDMp utils.StringSet
-		if rPfIDMp, err = engine.MatchingItemIDsForEvent(
+		if rPfIDMp, err = engine.MatchingItemIDsForEvent(context.TODO(),
 			evNm,
 			rS.cfg.RateSCfg().StringIndexedFields,
 			rS.cfg.RateSCfg().PrefixIndexedFields,
@@ -110,7 +110,7 @@ func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *
 			continue
 		}
 		var pass bool
-		if pass, err = rS.filterS.Pass(tnt, rPf.FilterIDs, evNm); err != nil {
+		if pass, err = rS.filterS.Pass(context.TODO(), tnt, rPf.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -138,7 +138,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *utils.RateProfile, args *utils.A
 		utils.MetaOpts: args.APIOpts,
 	}
 	var rtIDs utils.StringSet
-	if rtIDs, err = engine.MatchingItemIDsForEvent(
+	if rtIDs, err = engine.MatchingItemIDsForEvent(context.TODO(),
 		evNm,
 		rS.cfg.RateSCfg().RateStringIndexedFields,
 		rS.cfg.RateSCfg().RatePrefixIndexedFields,
@@ -155,7 +155,7 @@ func (rS *RateS) rateProfileCostForEvent(rtPfl *utils.RateProfile, args *utils.A
 	for rtID := range rtIDs {
 		rt := rtPfl.Rates[rtID] // pick the rate directly from map based on matched ID
 		var pass bool
-		if pass, err = rS.filterS.Pass(args.CGREvent.Tenant, rt.FilterIDs, evNm); err != nil {
+		if pass, err = rS.filterS.Pass(context.TODO(), args.CGREvent.Tenant, rt.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue

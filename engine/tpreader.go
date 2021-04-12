@@ -1349,7 +1349,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	}
 	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.ArgsCache)
 	for key, val := range cacheLoadIDs {
-		if err = Cache.Set(utils.CacheLoadIDs, key, val, nil,
+		if err = Cache.Set(context.TODO(), utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
 			return
 		}
@@ -1481,7 +1481,7 @@ func (tpr *TpReader) setDestination(dest *Destination, disableReverse bool, tran
 	if err = tpr.dm.SetDestination(dest, transID); err != nil {
 		return
 	}
-	if err = Cache.Set(utils.CacheDestinations, dest.ID, dest, nil,
+	if err = Cache.Set(context.TODO(), utils.CacheDestinations, dest.ID, dest, nil,
 		cacheCommit(transID), transID); err != nil {
 		return
 	}

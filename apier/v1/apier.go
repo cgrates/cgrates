@@ -676,7 +676,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 		switch item {
 		case utils.MetaAttributes:
 			prfx := utils.AttributeProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -697,7 +697,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				attPrf, err := apierSv1.DataManager.GetAttributeProfile(tntID[0], tntID[1],
+				attPrf, err := apierSv1.DataManager.GetAttributeProfile(context.TODO(), tntID[0], tntID[1],
 					true, false, utils.NonTransactional)
 				if err != nil {
 					return err
@@ -714,7 +714,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaChargers:
 			prfx := utils.ChargerProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -752,7 +752,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaDispatchers:
 			prfx := utils.DispatcherProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -790,7 +790,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaDispatcherHosts:
 			prfx := utils.DispatcherHostPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -826,7 +826,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaFilters:
 			prfx := utils.FilterPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -847,7 +847,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			}
 			for _, key := range keys {
 				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
-				fltr, err := apierSv1.DataManager.GetFilter(tntID[0], tntID[1],
+				fltr, err := apierSv1.DataManager.GetFilter(context.TODO(), tntID[0], tntID[1],
 					true, false, utils.NonTransactional)
 				if err != nil {
 					return err
@@ -864,7 +864,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaResources:
 			prfx := utils.ResourceProfilesPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -902,7 +902,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaStats:
 			prfx := utils.StatQueueProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -940,7 +940,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaRoutes:
 			prfx := utils.RouteProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -978,7 +978,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaThresholds:
 			prfx := utils.ThresholdProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -1016,7 +1016,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaRateProfiles:
 			prfx := utils.RateProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -1054,7 +1054,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 
 		case utils.MetaActionProfiles:
 			prfx := utils.ActionProfilePrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}
@@ -1091,7 +1091,7 @@ func (apierSv1 *APIerSv1) ExportToFolder(arg *utils.ArgExportToFolder, reply *st
 			csvWriter.Flush()
 		case utils.MetaAccounts:
 			prfx := utils.AccountPrefix
-			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 			if err != nil {
 				return err
 			}

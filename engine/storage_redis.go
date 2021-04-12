@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -188,7 +189,7 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	var keys []string
-	keys, err = rs.GetKeysForPrefix("")
+	keys, err = rs.GetKeysForPrefix(context.TODO(), "")
 	if err != nil {
 		return
 	}
@@ -200,7 +201,7 @@ func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 
 func (rs *RedisStorage) RemoveKeysForPrefix(prefix string) (err error) {
 	var keys []string
-	if keys, err = rs.GetKeysForPrefix(prefix); err != nil {
+	if keys, err = rs.GetKeysForPrefix(context.TODO(), prefix); err != nil {
 		return
 	}
 	for _, key := range keys {
@@ -226,7 +227,7 @@ func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []stri
 	return
 }
 
-func (rs *RedisStorage) GetKeysForPrefix(prefix string) (keys []string, err error) {
+func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
 	err = rs.Cmd(&keys, redisKEYS, prefix+"*")
 	if err != nil {
 		return
@@ -347,7 +348,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 	var marshaleds [][]byte
 	if err = rs.Cmd(&marshaleds, redisLRANGE,
 		utils.LoadInstKey, "0", strconv.Itoa(limit)); err != nil {
-		if errCh := Cache.Set(utils.LoadInstKey, "", nil, nil,
+		if errCh := Cache.Set(context.TODO(), utils.LoadInstKey, "", nil, nil,
 			cCommit, transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -362,7 +363,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 	if err = Cache.Remove(utils.LoadInstKey, "", cCommit, transactionID); err != nil {
 		return nil, err
 	}
-	if err := Cache.Set(utils.LoadInstKey, "", loadInsts, nil,
+	if err := Cache.Set(context.TODO(), utils.LoadInstKey, "", loadInsts, nil,
 		cCommit, transactionID); err != nil {
 		return nil, err
 	}
@@ -381,7 +382,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	if marshaled, err = rs.ms.Marshal(&ldInst); err != nil {
 		return
 	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+	_, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
 		var histLen int
 		if err := rs.Cmd(&histLen, redisLLEN, utils.LoadInstKey); err != nil {
 			return nil, err
@@ -633,7 +634,7 @@ func (rs *RedisStorage) RemoveThresholdDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
+func (rs *RedisStorage) GetFilterDrv(ctx *context.Context, tenant, id string) (r *Filter, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.FilterPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -645,7 +646,7 @@ func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetFilterDrv(r *Filter) (err error) {
+func (rs *RedisStorage) SetFilterDrv(ctx *context.Context, r *Filter) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -681,7 +682,7 @@ func (rs *RedisStorage) RemoveRouteProfileDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.RouteProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeProfile, err error) {
+func (rs *RedisStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (r *AttributeProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -693,7 +694,7 @@ func (rs *RedisStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeP
 	return
 }
 
-func (rs *RedisStorage) SetAttributeProfileDrv(r *AttributeProfile) (err error) {
+func (rs *RedisStorage) SetAttributeProfileDrv(ctx *context.Context, r *AttributeProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -866,7 +867,7 @@ func (rs *RedisStorage) RemoveActionProfileDrv(tenant, id string) (err error) {
 }
 
 // GetIndexesDrv retrieves Indexes from dataDB
-func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	if len(idxKey) == 0 {
@@ -896,7 +897,7 @@ func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 }
 
 // SetIndexesDrv stores Indexes into DataDB
-func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
+func (rs *RedisStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	dbKey := originKey

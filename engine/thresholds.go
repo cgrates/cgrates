@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -227,7 +228,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 	}
 	tIDs := utils.NewStringSet(args.ThresholdIDs)
 	if len(tIDs) == 0 {
-		tIDs, err = MatchingItemIDsForEvent(evNm,
+		tIDs, err = MatchingItemIDsForEvent(context.TODO(), evNm,
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().SuffixIndexedFields,
@@ -252,7 +253,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 			!tPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
-		if pass, err := tS.filterS.Pass(tnt, tPrfl.FilterIDs,
+		if pass, err := tS.filterS.Pass(context.TODO(), tnt, tPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -425,7 +426,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 		tenant = tS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ThresholdPrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := tS.dm.DataDB().GetKeysForPrefix(prfx)
+	keys, err := tS.dm.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 	if err != nil {
 		return err
 	}

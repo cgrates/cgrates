@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -110,7 +111,7 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 
 func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RouteProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix)
 	if err != nil {
 		return err
 	}

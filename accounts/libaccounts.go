@@ -137,7 +137,7 @@ func costIncrement(cfgCostIncrmts []*utils.CostIncrement,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
 	for _, cIcrm := range cfgCostIncrmts {
 		var pass bool
-		if pass, err = fltrS.Pass(tnt, cIcrm.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(context.TODO(), tnt, cIcrm.FilterIDs, ev); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -162,7 +162,7 @@ func unitFactor(cfgUnitFactors []*utils.UnitFactor,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (uF *utils.UnitFactor, err error) {
 	for _, uFcfg := range cfgUnitFactors {
 		var pass bool
-		if pass, err = fltrS.Pass(tnt, uFcfg.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(context.TODO(), tnt, uFcfg.FilterIDs, ev); err != nil {
 			return
 		} else if !pass {
 			continue

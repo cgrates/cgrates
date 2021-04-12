@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +32,7 @@ func (dbM *DataDBMock) Flush(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetKeysForPrefix(string) ([]string, error) {
+func (dbM *DataDBMock) GetKeysForPrefix(_ *context.Context, _ string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 
@@ -132,11 +133,11 @@ func (dbM *DataDBMock) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetIndexesDrv(idxItmType, tntCtx string,
+func (dbM *DataDBMock) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	return utils.ErrNotImplemented
 }
@@ -193,11 +194,11 @@ func (dbM *DataDBMock) RemoveThresholdDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetFilterDrv(string, string) (*Filter, error) {
+func (dbM *DataDBMock) GetFilterDrv(*context.Context, string, string) (*Filter, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetFilterDrv(*Filter) error {
+func (dbM *DataDBMock) SetFilterDrv(*context.Context, *Filter) error {
 	return utils.ErrNotImplemented
 }
 
@@ -217,11 +218,11 @@ func (dbM *DataDBMock) RemoveRouteProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAttributeProfileDrv(string, string) (*AttributeProfile, error) {
+func (dbM *DataDBMock) GetAttributeProfileDrv(*context.Context, string, string) (*AttributeProfile, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAttributeProfileDrv(*AttributeProfile) error {
+func (dbM *DataDBMock) SetAttributeProfileDrv(*context.Context, *AttributeProfile) error {
 	return utils.ErrNotImplemented
 }
 

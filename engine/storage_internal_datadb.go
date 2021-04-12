@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/utils"
@@ -80,7 +81,7 @@ func (iDB *InternalDB) SelectDatabase(string) (err error) {
 }
 
 // GetKeysForPrefix returns the keys from cache that have the given prefix
-func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error) {
+func (iDB *InternalDB) GetKeysForPrefix(ctx *context.Context, prefix string) (ids []string, err error) {
 	keyLen := len(utils.DestinationPrefix)
 	if len(prefix) < keyLen {
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -97,7 +98,7 @@ func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error)
 
 func (iDB *InternalDB) RemoveKeysForPrefix(prefix string) (err error) {
 	var keys []string
-	if keys, err = iDB.GetKeysForPrefix(prefix); err != nil {
+	if keys, err = iDB.GetKeysForPrefix(context.TODO(), prefix); err != nil {
 		return
 	}
 	for _, key := range keys {
@@ -408,7 +409,7 @@ func (iDB *InternalDB) RemoveThresholdDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetFilterDrv(tenant, id string) (fltr *Filter, err error) {
+func (iDB *InternalDB) GetFilterDrv(ctx *context.Context, tenant, id string) (fltr *Filter, err error) {
 	x, ok := Cache.Get(utils.CacheFilters, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -417,7 +418,7 @@ func (iDB *InternalDB) GetFilterDrv(tenant, id string) (fltr *Filter, err error)
 
 }
 
-func (iDB *InternalDB) SetFilterDrv(fltr *Filter) (err error) {
+func (iDB *InternalDB) SetFilterDrv(ctx *context.Context, fltr *Filter) (err error) {
 	if err = fltr.Compile(); err != nil {
 		return
 	}
@@ -455,7 +456,7 @@ func (iDB *InternalDB) RemoveRouteProfileDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetAttributeProfileDrv(tenant, id string) (attr *AttributeProfile, err error) {
+func (iDB *InternalDB) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (attr *AttributeProfile, err error) {
 	x, ok := Cache.Get(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -463,7 +464,7 @@ func (iDB *InternalDB) GetAttributeProfileDrv(tenant, id string) (attr *Attribut
 	return x.(*AttributeProfile), nil
 }
 
-func (iDB *InternalDB) SetAttributeProfileDrv(attr *AttributeProfile) (err error) {
+func (iDB *InternalDB) SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) (err error) {
 	if err = attr.Compile(); err != nil {
 		return
 	}
@@ -603,7 +604,7 @@ func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (iDB *InternalDB) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	if idxKey == utils.EmptyString { // return all
 		indexes = make(map[string]utils.StringSet)
 		for _, dbKey := range Cache.tCache.GetGroupItemIDs(idxItmType, tntCtx) {
@@ -629,7 +630,7 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 	}, nil
 }
 
-func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
+func (iDB *InternalDB) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	if commit && transactionID != utils.EmptyString {
 		for _, dbKey := range Cache.tCache.GetGroupItemIDs(idxItmType, tntCtx) {

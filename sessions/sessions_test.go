@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1773,7 +1774,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
 	}
 	//t2
-	mpStr.SetFilterDrv(&engine.Filter{
+	mpStr.SetFilterDrv(context.TODO(), &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 		ActivationInterval: &utils.ActivationInterval{
@@ -2412,7 +2413,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -2470,11 +2471,11 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/cert.cer", pubKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", nil,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", nil,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -2488,7 +2489,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 	}, &rcv); err == nil {
 		t.Error("Expected error")
 	}
-	if err := engine.Cache.Set(utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
+	if err := engine.Cache.Set(context.TODO(), utils.CacheSTIR, "https://www.example.org/private.pem", prvKey,
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}

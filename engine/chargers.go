@@ -52,7 +52,7 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *uti
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
-	cpIDs, err := MatchingItemIDsForEvent(evNm,
+	cpIDs, err := MatchingItemIDsForEvent(context.TODO(), evNm,
 		cS.cfg.ChargerSCfg().StringIndexedFields,
 		cS.cfg.ChargerSCfg().PrefixIndexedFields,
 		cS.cfg.ChargerSCfg().SuffixIndexedFields,
@@ -76,7 +76,7 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *uti
 			!cP.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
 			continue
 		}
-		if pass, err := cS.filterS.Pass(tnt, cP.FilterIDs,
+		if pass, err := cS.filterS.Pass(context.TODO(), tnt, cP.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {

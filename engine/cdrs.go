@@ -274,7 +274,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
 						utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))
 				return nil, utils.ErrExists
 			}
-			if errCh := Cache.Set(utils.CacheCDRIDs, uID, true, nil,
+			if errCh := Cache.Set(context.TODO(), utils.CacheCDRIDs, uID, true, nil,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 				return nil, errCh
 			}
@@ -350,7 +350,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
 }
 
 // Call implements the birpc.ClientConnector interface
-func (cdrS *CDRServer) Call(ctx*context.Context,serviceMethod string, args , reply interface{}) error {
+func (cdrS *CDRServer) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -394,7 +394,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithAPIOpts, reply *string) (err err
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -491,7 +491,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: reply, Error: err},
 			nil, true, utils.NonTransactional)
 	}
@@ -566,7 +566,7 @@ func (cdrS *CDRServer) V2ProcessEvent(arg *ArgV1ProcessEvent, evs *[]*utils.Even
 			}
 			return cachedResp.Error
 		}
-		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+		defer Cache.Set(context.TODO(), utils.CacheRPCResponses, cacheKey,
 			&utils.CachedRPCResponse{Result: evs, Error: err},
 			nil, true, utils.NonTransactional)
 	}

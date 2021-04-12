@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -58,7 +59,7 @@ func (apierSv1 *APIerSv1) GetFilter(arg *utils.TenantID, reply *engine.Filter) e
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if fltr, err := apierSv1.DataManager.GetFilter(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if fltr, err := apierSv1.DataManager.GetFilter(context.TODO(), tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *fltr
@@ -73,7 +74,7 @@ func (apierSv1 *APIerSv1) GetFilterIDs(args *utils.PaginatorWithTenant, fltrIDs 
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(context.TODO(), prfx)
 	if err != nil {
 		return err
 	}

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,7 +31,7 @@ import (
 )
 
 func TestFilterPassDestinations(t *testing.T) {
-	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",
+	if err := engine.Cache.Set(context.TODO(), utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -93,7 +94,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dmFilterPass := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := engine.NewFilterS(cfg, connMgr, dmFilterPass)
-	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",
+	if err := engine.Cache.Set(context.TODO(), utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}

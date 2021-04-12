@@ -27,6 +27,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search"
 	"github.com/cgrates/cgrates/config"
@@ -166,7 +168,7 @@ func (aS *AnalyzerService) V1StringQuery(args *QueryArgs, reply *[]map[string]in
 			if err != nil {
 				return err
 			}
-			if pass, err := aS.filterS.Pass(aS.cfg.GeneralCfg().DefaultTenant,
+			if pass, err := aS.filterS.Pass(context.TODO(), aS.cfg.GeneralCfg().DefaultTenant,
 				args.ContentFilters, dp); err != nil {
 				return err
 			} else if !pass {

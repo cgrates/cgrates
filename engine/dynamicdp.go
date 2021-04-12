@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newDynamicDP(resConns, stsConns, apiConns []string,
+func newDynamicDP(ctx *context.Context, resConns, stsConns, apiConns []string,
 	tenant string, initialDP utils.DataProvider) *dynamicDP {
 	return &dynamicDP{
 		resConns:  resConns,
@@ -35,6 +35,7 @@ func newDynamicDP(resConns, stsConns, apiConns []string,
 		tenant:    tenant,
 		initialDP: initialDP,
 		cache:     utils.MapStorage{},
+		ctx:       ctx,
 	}
 }
 
@@ -46,6 +47,7 @@ type dynamicDP struct {
 	initialDP utils.DataProvider
 
 	cache utils.MapStorage
+	ctx   *context.Context
 }
 
 func (dDP *dynamicDP) String() string { return dDP.initialDP.String() }
@@ -92,7 +94,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// fieldNameType (~*accounts), accountID(1001) and queried part (BalanceMap.*monetary[0].Value)
 
 		var account utils.Account
-		if err = connMgr.Call(context.TODO(), dDP.apiConns, utils.APIerSv1GetAccount,
+		if err = connMgr.Call(dDP.ctx, dDP.apiConns, utils.APIerSv1GetAccount,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &account); err != nil {
 			return
 		}
@@ -103,7 +105,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
 		var reply *ResourceWithConfig
-		if err := connMgr.Call(context.TODO(), dDP.resConns, utils.ResourceSv1GetResourceWithConfig,
+		if err := connMgr.Call(dDP.ctx, dDP.resConns, utils.ResourceSv1GetResourceWithConfig,
 			&utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}, &reply); err != nil {
 			return nil, err
 		}
@@ -114,7 +116,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// sample of fieldName : ~*stats.StatID.*acd
 		var statValues map[string]float64
 
-		if err := connMgr.Call(context.TODO(), dDP.stsConns, utils.StatSv1GetQueueFloatMetrics,
+		if err := connMgr.Call(dDP.ctx, dDP.stsConns, utils.StatSv1GetQueueFloatMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err

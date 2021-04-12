@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/utils"
@@ -896,7 +897,7 @@ func TestRSCacheSetGet(t *testing.T) {
 		tUsage: utils.Float64Pointer(2),
 		dirty:  utils.BoolPointer(true),
 	}
-	if err := Cache.Set(utils.CacheResources, r.TenantID(), r, nil, true, ""); err != nil {
+	if err := Cache.Set(context.TODO(), utils.CacheResources, r.TenantID(), r, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 	if x, ok := Cache.Get(utils.CacheResources, r.TenantID()); !ok {
@@ -2776,7 +2777,7 @@ func TestResourceCaching(t *testing.T) {
 		ThresholdIDs:      []string{utils.MetaNone},
 	}
 
-	if err := Cache.Set(utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",
+	if err := Cache.Set(context.TODO(), utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",
 		resProf, nil, cacheCommit(utils.EmptyString), utils.EmptyString); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
@@ -2785,13 +2786,13 @@ func TestResourceCaching(t *testing.T) {
 		ID:     resProf.ID,
 		Usages: make(map[string]*ResourceUsage)}
 
-	if err := Cache.Set(utils.CacheResources, "cgrates.org:ResourceProfileCached",
+	if err := Cache.Set(context.TODO(), utils.CacheResources, "cgrates.org:ResourceProfileCached",
 		res, nil, cacheCommit(utils.EmptyString), utils.EmptyString); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
 	resources := Resources{res}
-	if err := Cache.Set(utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, ""); err != nil {
+	if err := Cache.Set(context.TODO(), utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 

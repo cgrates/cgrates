@@ -943,7 +943,7 @@ func (dbM *dataDBMockError) RemThresholdProfileDrv(tenant, id string) (err error
 	return
 }
 
-func (dbM *dataDBMockError) SetIndexesDrv(idxItmType, tntCtx string,
+func (dbM *dataDBMockError) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	return
 }
@@ -1010,7 +1010,7 @@ func (dbM *dataDBMockError) RemoveResourceDrv(tenant, id string) (err error) {
 	return utils.ErrNoDatabaseConn
 }
 
-func (dbM *dataDBMockError) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *dataDBMockError) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	return nil, nil
 }
 

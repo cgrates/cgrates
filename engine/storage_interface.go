@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ugocodec/codec"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,7 +34,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string) ([]string, error)
+	GetKeysForPrefix(ctx *context.Context, prefix string) ([]string, error)
 	RemoveKeysForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
@@ -64,8 +65,8 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
-	SetIndexesDrv(idxItmType, tntCtx string,
+	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
@@ -80,14 +81,14 @@ type DataDB interface {
 	GetThresholdDrv(string, string) (*Threshold, error)
 	SetThresholdDrv(*Threshold) error
 	RemoveThresholdDrv(string, string) error
-	GetFilterDrv(string, string) (*Filter, error)
-	SetFilterDrv(*Filter) error
+	GetFilterDrv(ctx *context.Context, tnt string, id string) (*Filter, error)
+	SetFilterDrv(ctx *context.Context, f *Filter) error
 	RemoveFilterDrv(string, string) error
 	GetRouteProfileDrv(string, string) (*RouteProfile, error)
 	SetRouteProfileDrv(*RouteProfile) error
 	RemoveRouteProfileDrv(string, string) error
-	GetAttributeProfileDrv(string, string) (*AttributeProfile, error)
-	SetAttributeProfileDrv(*AttributeProfile) error
+	GetAttributeProfileDrv(ctx *context.Context, tnt string, id string) (*AttributeProfile, error)
+	SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error
 	RemoveAttributeProfileDrv(string, string) error
 	GetChargerProfileDrv(string, string) (*ChargerProfile, error)
 	SetChargerProfileDrv(*ChargerProfile) error

@@ -20,6 +20,7 @@ package ers
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -200,7 +201,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 			rdr.fltrS, rdr.headerDP, rdr.trailerDP) // create an AgentRequest
-		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to filter error: <%s>",
@@ -295,7 +296,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, nil, rdr.trailerDP) // create an AgentRequest
-	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
 		return nil
 	}
@@ -335,7 +336,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, rdr.headerDP, nil) // create an AgentRequest
-	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
 		return nil
 	}

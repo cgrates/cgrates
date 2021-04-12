@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -146,7 +147,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
-	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "ALS1",
+	if ap, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "ALS1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
@@ -243,7 +244,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
-	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader2",
+	if ap, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "TestLoader2",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP, ap) {
@@ -1482,12 +1483,12 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	// make sure the first attribute is deleted
-	if _, err := ldr.dm.GetAttributeProfile("cgrates.org", "ALS1",
+	if _, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "ALS1",
 		true, false, utils.NonTransactional); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// the second should be there
-	if rcv, err := ldr.dm.GetAttributeProfile("cgrates.org", "Attr2",
+	if rcv, err := ldr.dm.GetAttributeProfile(context.TODO(), "cgrates.org", "Attr2",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ap, rcv) {

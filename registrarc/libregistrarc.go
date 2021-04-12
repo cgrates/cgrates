@@ -25,6 +25,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -171,7 +172,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		}
 
 		for _, dH := range dH {
-			if err = engine.Cache.Set(utils.CacheDispatcherHosts, dH.TenantID(), dH, nil,
+			if err = engine.Cache.Set(context.TODO(), utils.CacheDispatcherHosts, dH.TenantID(), dH, nil,
 				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
 					utils.RegistrarC, dH.TenantID(), err))

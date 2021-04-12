@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -30,7 +31,7 @@ import (
 
 func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
 	if err != nil {
 		return
 	}
@@ -40,7 +41,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 			return fmt.Errorf("Invalid key <%s> when migrating filters", id)
 		}
 		var fl *engine.Filter
-		if fl, err = m.dmIN.DataManager().GetFilter(tntID[0], tntID[1], false, false,
+		if fl, err = m.dmIN.DataManager().GetFilter(context.TODO(), tntID[0], tntID[1], false, false,
 			utils.NonTransactional); err != nil {
 			return
 		}
@@ -365,7 +366,7 @@ func (m *Migrator) migrateFilters() (err error) {
 
 func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
 	if err != nil {
 		return err
 	}
@@ -394,7 +395,7 @@ func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -423,7 +424,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -477,7 +478,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -486,7 +487,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for attributeProfile", id)
 		}
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -516,7 +517,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -545,7 +546,7 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 
 func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.DispatcherProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -575,7 +576,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 // migrate filters from v2 to v3 for items
 func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting resource profile IDs", err.Error())
 	}
@@ -606,7 +607,7 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting statQueue profile IDs", err.Error())
 	}
@@ -637,7 +638,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting threshold profile IDs", err)
 	}
@@ -694,7 +695,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting attribute profile IDs", err)
 	}
@@ -703,7 +704,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for attributeProfile", id)
 		}
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting attribute profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -735,7 +736,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting charger profile IDs", err)
 	}
@@ -766,7 +767,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 
 func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.DispatcherProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting dispatcher profile IDs", err)
 	}

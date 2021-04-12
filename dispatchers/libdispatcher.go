@@ -247,7 +247,7 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 			continue
 		}
 		if routeID != utils.EmptyString { // cache the discovered route
-			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, routeID, dH,
+			if err = engine.Cache.Set(context.TODO(), utils.CacheDispatcherRoutes, routeID, dH,
 				nil, true, utils.EmptyString); err != nil {
 				return
 			}
@@ -391,7 +391,7 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 			continue
 		}
 		if routeID != utils.EmptyString { // cache the discovered route
-			if err = engine.Cache.Set(utils.CacheDispatcherRoutes, routeID, dH,
+			if err = engine.Cache.Set(context.TODO(), utils.CacheDispatcherRoutes, routeID, dH,
 				nil, true, utils.EmptyString); err != nil {
 				return
 			}
@@ -444,13 +444,13 @@ func (lM *LoadMetrics) getHosts(hostIDs []string) []string {
 func (lM *LoadMetrics) incrementLoad(hostID, tntID string) {
 	lM.mutex.Lock()
 	lM.HostsLoad[hostID]++
-	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
+	engine.Cache.ReplicateSet(context.TODO(), utils.CacheDispatcherLoads, tntID, lM)
 	lM.mutex.Unlock()
 }
 
 func (lM *LoadMetrics) decrementLoad(hostID, tntID string) {
 	lM.mutex.Lock()
 	lM.HostsLoad[hostID]--
-	engine.Cache.ReplicateSet(utils.CacheDispatcherLoads, tntID, lM)
+	engine.Cache.ReplicateSet(context.TODO(), utils.CacheDispatcherLoads, tntID, lM)
 	lM.mutex.Unlock()
 }

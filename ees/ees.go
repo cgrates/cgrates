@@ -161,7 +161,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 			if eeTnt, errTnt := eeCfg.Tenant.ParseDataProvider(cgrDp); errTnt == nil && eeTnt != utils.EmptyString {
 				tnt = eeTnt
 			}
-			if pass, errPass := eeS.filterS.Pass(tnt,
+			if pass, errPass := eeS.filterS.Pass(context.TODO(), tnt,
 				eeCfg.Filters, cgrDp); errPass != nil {
 				return errPass
 			} else if !pass {

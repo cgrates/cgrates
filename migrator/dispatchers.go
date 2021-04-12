@@ -23,13 +23,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (m *Migrator) migrateCurrentDispatcher() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.DispatcherProfilePrefix)
 	if err != nil {
 		return
 	}
@@ -59,7 +60,7 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 
 func (m *Migrator) migrateCurrentDispatcherHost() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherHostPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.DispatcherHostPrefix)
 	if err != nil {
 		return err
 	}

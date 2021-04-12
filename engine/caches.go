@@ -149,10 +149,10 @@ type CacheS struct {
 
 // Set is an exported method from TransCache
 // handled Replicate functionality
-func (chS *CacheS) Set(chID, itmID string, value interface{},
+func (chS *CacheS) Set(ctx *context.Context, chID, itmID string, value interface{},
 	groupIDs []string, commit bool, transID string) (err error) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
-	return chS.ReplicateSet(chID, itmID, value)
+	return chS.ReplicateSet(ctx, chID, itmID, value)
 }
 
 // SetWithoutReplicate is an exported method from TransCache
@@ -426,13 +426,13 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (
 }
 
 // ReplicateSet replicate an item to ReplicationConns
-func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err error) {
+func (chS *CacheS) ReplicateSet(ctx *context.Context, chID, itmID string, value interface{}) (err error) {
 	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
 		return
 	}
 	var reply string
-	return connMgr.Call(context.TODO(), chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
+	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
 		&utils.ArgCacheReplicateSet{
 			CacheID: chID,
 			ItemID:  itmID,

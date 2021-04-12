@@ -155,6 +155,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 	if len(aPrflIDs) == 0 {
 		var aPfIDMp utils.StringSet
 		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
+			context.TODO(),
 			evNm,
 			aS.cfg.ActionSCfg().StringIndexedFields,
 			aS.cfg.ActionSCfg().PrefixIndexedFields,
@@ -184,7 +185,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 			continue
 		}
 		var pass bool
-		if pass, err = aS.fltrS.Pass(tnt, aPf.FilterIDs, evNm); err != nil {
+		if pass, err = aS.fltrS.Pass(context.TODO(), tnt, aPf.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -248,7 +249,7 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
 func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
-	_, err = guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+	_, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
 		var ap *engine.ActionProfile
 		if ap, gErr = aS.dm.GetActionProfile(sActs.tenant, sActs.apID, true, true, utils.NonTransactional); gErr != nil {
 			utils.Logger.Warning(

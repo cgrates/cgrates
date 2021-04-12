@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -193,7 +194,7 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, nil, nil) // create an AgentRequest
 	var pass bool
-	if pass, err = rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
 		return
 	}

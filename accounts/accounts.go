@@ -77,6 +77,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	if len(acntIDs) == 0 {
 		var actIDsMp utils.StringSet
 		if actIDsMp, err = engine.MatchingItemIDsForEvent(
+			context.TODO(),
 			evNm,
 			aS.cfg.AccountSCfg().StringIndexedFields,
 			aS.cfg.AccountSCfg().PrefixIndexedFields,
@@ -115,7 +116,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			continue
 		}
 		var pass bool
-		if pass, err = aS.fltrS.Pass(tnt, qAcnt.FilterIDs, evNm); err != nil {
+		if pass, err = aS.fltrS.Pass(context.TODO(), tnt, qAcnt.FilterIDs, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			unlockAccounts(acnts)
 			return
@@ -380,7 +381,7 @@ func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *stri
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if _, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 		return nil, actSetAccount(aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
 		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
@@ -403,7 +404,7 @@ func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rpl
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
+	if _, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 		qAcnt, err := aS.dm.GetAccount(tnt, args.AccountID)
 		if err != nil {
 			return nil, err

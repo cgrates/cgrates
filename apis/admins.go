@@ -19,32 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 )
 
-func BenchmarkCallAPIerRPC(b *testing.B) {
-	as := NewAttributeSv1(nil)
-	ctx := context.Background()
-	args := &utils.CGREvent{}
-	var reply string
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		as.Call(ctx, utils.AttributeSv1Ping, args, &reply)
-	}
-}
-
-func BenchmarkCallAsRPCService(b *testing.B) {
-	as := NewAttributeSv1(nil)
-	ctx := context.Background()
-	args := &utils.CGREvent{}
-	var reply string
-	b.ResetTimer()
-	srv, _ := birpc.NewService(as, "", false)
-	for i := 0; i < b.N; i++ {
-		srv.Call(ctx, utils.AttributeSv1Ping, args, &reply)
-	}
+type AdminS struct {
+	cfg     *config.CGRConfig
+	dm      *engine.DataManager
+	connMgr *engine.ConnManager
 }

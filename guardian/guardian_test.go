@@ -24,10 +24,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func delayHandler() (interface{}, error) {
+func delayHandler(_ *context.Context) (interface{}, error) {
 	time.Sleep(100 * time.Millisecond)
 	return nil, nil
 }
@@ -42,7 +43,7 @@ func TestGuardianMultipleKeys(t *testing.T) {
 		for _, key := range keys {
 			sg.Add(1)
 			go func(key string) {
-				Guardian.Guard(delayHandler, 0, key)
+				Guardian.Guard(context.TODO(), delayHandler, 0, key)
 				sg.Done()
 			}(key)
 		}
@@ -71,7 +72,7 @@ func TestGuardianTimeout(t *testing.T) {
 		for _, key := range keys {
 			sg.Add(1)
 			go func(key string) {
-				Guardian.Guard(delayHandler, 10*time.Millisecond, key)
+				Guardian.Guard(context.TODO(), delayHandler, 10*time.Millisecond, key)
 				sg.Done()
 			}(key)
 		}
@@ -241,15 +242,15 @@ func TestGuardianGuardIDsTimeoutConcurrent(t *testing.T) {
 // BenchmarkGuard-8      	  200000	     13759 ns/op
 func BenchmarkGuard(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, "1")
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, "2")
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, "1")
@@ -260,7 +261,7 @@ func BenchmarkGuard(b *testing.B) {
 // BenchmarkGuardian-8   	 1000000	      5794 ns/op
 func BenchmarkGuardian(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		go Guardian.Guard(func() (interface{}, error) {
+		go Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 			time.Sleep(time.Microsecond)
 			return 0, nil
 		}, 0, strconv.Itoa(n))
@@ -313,7 +314,7 @@ func TestGuardianGuardUnguardIDs(t *testing.T) {
 func TestGuardianGuardUnguardIDsCase2(t *testing.T) {
 	//for coverage purposes
 	lkIDs := []string{"test1", "test2", "test3"}
-	_, err := Guardian.Guard(func() (interface{}, error) {
+	_, err := Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
 		return nil, utils.ErrNotFound
 	}, 10*time.Millisecond, lkIDs...)
 	if err == nil || err != utils.ErrNotFound {
