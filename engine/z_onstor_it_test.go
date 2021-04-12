@@ -1460,7 +1460,7 @@ func testOnStorITAccount(t *testing.T) {
 	}
 
 	//craft akeysFromPrefix
-	expectedKey := []string{"anp_cgrates.org:RP1"}
+	expectedKey := []string{"acn_cgrates.org:RP1"}
 	if rcv, err := onStor.DataDB().GetKeysForPrefix(utils.AccountPrefix); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedKey, rcv) {
