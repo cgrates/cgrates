@@ -49,4 +49,5 @@ func TestDispatcherCall2(t *testing.T) {
 	if err := dS.Call("DispatcherService.Pong", &utils.CGREvent{}, &reply); err == nil || err.Error() != rpcclient.ErrUnsupporteServiceMethod.Error() {
 		t.Error(err)
 	}
+	dS.Shutdown()
 }
