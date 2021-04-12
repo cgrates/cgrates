@@ -23,8 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cenkalti/rpc2"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -90,7 +88,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	//connect BiJSON
-	client := rpc2.NewClient(nil)
+	client := sessions
 	sessions.OnBiJSONConnect(client)
 
 	//we'll change the connection identifier just for testing
@@ -119,7 +117,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
-	client := rpc2.NewClient(nil)
+	client := sessions
 
 	var reply string
 	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(client, utils.EmptyString, &reply); err != nil {
@@ -1906,7 +1904,7 @@ func TestNewSessionS(t *testing.T) {
 	eOut := &SessionS{
 		cgrCfg:        cgrCGF,
 		dm:            nil,
-		biJClnts:      make(map[rpcclient.ClientConnector]string),
+		biJClnts:      make(map[birpc.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
 		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
@@ -2555,7 +2553,7 @@ func (c clMock) Call(m string, a interface{}, r interface{}) error {
 func TestInitSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	clientConect := make(chan rpcclient.ClientConnector, 1)
+	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- clMock(func(_ string, args interface{}, reply interface{}) error {
 		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 		if !cancast {
@@ -2571,7 +2569,7 @@ func TestInitSession(t *testing.T) {
 		}
 		return nil
 	})
-	conMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	conMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
 	sS := NewSessionS(cfg, nil, conMng)
@@ -2628,7 +2626,7 @@ func TestBiJClntID(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
-	sessions.biJClnts = map[rpcclient.ClientConnector]string{
+	sessions.biJClnts = map[birpc.ClientConnector]string{
 		client: "First_connector",
 	}
 	expected := "First_connector"

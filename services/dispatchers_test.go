@@ -21,13 +21,13 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/dispatchers"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestDispatcherSCoverage for cover testing
@@ -41,9 +41,9 @@ func TestDispatcherSCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
-		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
+		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -55,7 +55,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 		filterSChan: filterSChan,
 		server:      server,
 		connMgr:     nil,
-		connChan:    make(chan rpcclient.ClientConnector, 1),
+		connChan:    make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,
 	}

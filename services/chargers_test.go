@@ -22,8 +22,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -41,15 +40,15 @@ func TestChargerSCoverage(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	server := cores.NewServer(nil)
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	chrS1 := NewChargerService(cfg, db, chS,
-		filterSChan, server, make(chan rpcclient.ClientConnector, 1),
+		filterSChan, server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	if chrS1.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	chrS := &ChargerService{
-		connChan:    make(chan rpcclient.ClientConnector, 1),
+		connChan:    make(chan birpc.ClientConnector, 1),
 		cfg:         cfg,
 		dm:          db,
 		cacheS:      chS,
@@ -75,7 +74,7 @@ func TestChargerSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	chrS.connChan = make(chan rpcclient.ClientConnector, 1)
+	chrS.connChan = make(chan birpc.ClientConnector, 1)
 	chrS.connChan <- chS
 	shutErr := chrS.Shutdown()
 	if shutErr != nil {

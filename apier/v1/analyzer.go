@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,9 +34,9 @@ type AnalyzerSv1 struct {
 	aS *analyzers.AnalyzerService
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (aSv1 *AnalyzerSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (aSv1 *AnalyzerSv1) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)
 }
 

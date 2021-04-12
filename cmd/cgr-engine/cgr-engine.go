@@ -34,6 +34,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/registrarc"
@@ -76,7 +77,7 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 }
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
-func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
+func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 	server *cores.Server, dm *engine.DataManager, shdChan *utils.SyncedChan,
 	anz *services.AnalyzerService,
 	cpS *engine.CapsStats) (chS *engine.CacheS) {
@@ -92,7 +93,7 @@ func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(chSv1)
 	}
-	var rpc rpcclient.ClientConnector = chS
+	var rpc birpc.ClientConnector = chS
 	if anz.IsRunning() {
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
 	}
@@ -100,39 +101,39 @@ func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
 	return
 }
 
-func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, server *cores.Server,
+func initGuardianSv1(internalGuardianSChan chan birpc.ClientConnector, server *cores.Server,
 	anz *services.AnalyzerService) {
 	grdSv1 := v1.NewGuardianSv1()
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(grdSv1)
 	}
-	var rpc rpcclient.ClientConnector = grdSv1
+	var rpc birpc.ClientConnector = grdSv1
 	if anz.IsRunning() {
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.GuardianS)
 	}
 	internalGuardianSChan <- rpc
 }
 
-func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnector,
+func initServiceManagerV1(internalServiceManagerChan chan birpc.ClientConnector,
 	srvMngr *servmanager.ServiceManager, server *cores.Server,
 	anz *services.AnalyzerService) {
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
 	}
-	var rpc rpcclient.ClientConnector = srvMngr
+	var rpc birpc.ClientConnector = srvMngr
 	if anz.IsRunning() {
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
 	}
 	internalServiceManagerChan <- rpc
 }
 
-func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
+func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 	server *cores.Server, anz *services.AnalyzerService) {
 	cfgSv1 := v1.NewConfigSv1(cfg)
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(cfgSv1)
 	}
-	var rpc rpcclient.ClientConnector = cfgSv1
+	var rpc birpc.ClientConnector = cfgSv1
 	if anz.IsRunning() {
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
 	}
@@ -145,7 +146,7 @@ func startRPC(server *cores.Server,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalCacheSChan,
 	internalEEsChan, internalRateSChan, internalActionSChan,
-	internalAccountSChan chan rpcclient.ClientConnector,
+	internalAccountSChan chan birpc.ClientConnector,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -346,7 +347,7 @@ func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 	}
 }
 
-func runPreload(loader *services.LoaderService, internalLoaderSChan chan rpcclient.ClientConnector,
+func runPreload(loader *services.LoaderService, internalLoaderSChan chan birpc.ClientConnector,
 	shdChan *utils.SyncedChan) {
 	if !cfg.LoaderCfg().Enabled() {
 		utils.Logger.Err(fmt.Sprintf("<%s> not enabled but required by preload mechanism", utils.LoaderS))
@@ -472,32 +473,32 @@ func main() {
 	cfg.LazySanityCheck()
 
 	// init the channel here because we need to pass them to connManager
-	internalServeManagerChan := make(chan rpcclient.ClientConnector, 1)
-	internalConfigChan := make(chan rpcclient.ClientConnector, 1)
-	internalCoreSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
-	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
-	internalAnalyzerSChan := make(chan rpcclient.ClientConnector, 1)
-	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)
-	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)
-	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1)
-	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
-	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)
-	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)
-	internalStatSChan := make(chan rpcclient.ClientConnector, 1)
-	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)
-	internalRouteSChan := make(chan rpcclient.ClientConnector, 1)
-	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	internalAPIerSv2Chan := make(chan rpcclient.ClientConnector, 1)
-	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
-	internalEEsChan := make(chan rpcclient.ClientConnector, 1)
-	internalRateSChan := make(chan rpcclient.ClientConnector, 1)
-	internalActionSChan := make(chan rpcclient.ClientConnector, 1)
-	internalAccountSChan := make(chan rpcclient.ClientConnector, 1)
+	internalServeManagerChan := make(chan birpc.ClientConnector, 1)
+	internalConfigChan := make(chan birpc.ClientConnector, 1)
+	internalCoreSv1Chan := make(chan birpc.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
+	internalGuardianSChan := make(chan birpc.ClientConnector, 1)
+	internalAnalyzerSChan := make(chan birpc.ClientConnector, 1)
+	internalCDRServerChan := make(chan birpc.ClientConnector, 1)
+	internalAttributeSChan := make(chan birpc.ClientConnector, 1)
+	internalDispatcherSChan := make(chan birpc.ClientConnector, 1)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
+	internalChargerSChan := make(chan birpc.ClientConnector, 1)
+	internalThresholdSChan := make(chan birpc.ClientConnector, 1)
+	internalStatSChan := make(chan birpc.ClientConnector, 1)
+	internalResourceSChan := make(chan birpc.ClientConnector, 1)
+	internalRouteSChan := make(chan birpc.ClientConnector, 1)
+	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
+	internalAPIerSv2Chan := make(chan birpc.ClientConnector, 1)
+	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
+	internalEEsChan := make(chan birpc.ClientConnector, 1)
+	internalRateSChan := make(chan birpc.ClientConnector, 1)
+	internalActionSChan := make(chan birpc.ClientConnector, 1)
+	internalAccountSChan := make(chan birpc.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
-	connManager := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connManager := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerSv2Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,

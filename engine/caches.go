@@ -27,6 +27,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -112,7 +113,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 				continue
 			}
 			val.OnEvicted = func(itmID string, value interface{}) {
-				if err := connMgr.Call(cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateRemove,
+				if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
 					&utils.ArgCacheReplicateRemove{
 						CacheID: k,
 						ItemID:  itmID,
@@ -254,7 +255,7 @@ func (chS *CacheS) Precache() (err error) {
 // APIs start here
 
 // Call gives the ability of CacheS to be passed as internal RPC
-func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (chS *CacheS) Call(_ *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 
@@ -431,7 +432,7 @@ func (chS *CacheS) ReplicateSet(chID, itmID string, value interface{}) (err erro
 		return
 	}
 	var reply string
-	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateSet,
+	return connMgr.Call(context.TODO(), chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateSet,
 		&utils.ArgCacheReplicateSet{
 			CacheID: chID,
 			ItemID:  itmID,
@@ -458,7 +459,7 @@ func (chS *CacheS) ReplicateRemove(chID, itmID string) (err error) {
 		return
 	}
 	var reply string
-	return connMgr.Call(chS.cfg.CacheCfg().ReplicationConns, nil, utils.CacheSv1ReplicateRemove,
+	return connMgr.Call(context.TODO(), chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
 		&utils.ArgCacheReplicateRemove{
 			CacheID: chID,
 			ItemID:  itmID,

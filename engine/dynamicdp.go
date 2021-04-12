@@ -21,6 +21,7 @@ import (
 
 	"github.com/nyaruka/phonenumbers"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -91,7 +92,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// fieldNameType (~*accounts), accountID(1001) and queried part (BalanceMap.*monetary[0].Value)
 
 		var account utils.Account
-		if err = connMgr.Call(dDP.apiConns, nil, utils.APIerSv1GetAccount,
+		if err = connMgr.Call(context.TODO(), dDP.apiConns, utils.APIerSv1GetAccount,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &account); err != nil {
 			return
 		}
@@ -102,7 +103,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
 		var reply *ResourceWithConfig
-		if err := connMgr.Call(dDP.resConns, nil, utils.ResourceSv1GetResourceWithConfig,
+		if err := connMgr.Call(context.TODO(), dDP.resConns, utils.ResourceSv1GetResourceWithConfig,
 			&utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}, &reply); err != nil {
 			return nil, err
 		}
@@ -113,7 +114,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val interface{}, err e
 		// sample of fieldName : ~*stats.StatID.*acd
 		var statValues map[string]float64
 
-		if err := connMgr.Call(dDP.stsConns, nil, utils.StatSv1GetQueueFloatMetrics,
+		if err := connMgr.Call(context.TODO(), dDP.stsConns, utils.StatSv1GetQueueFloatMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}},
 			&statValues); err != nil {
 			return nil, err

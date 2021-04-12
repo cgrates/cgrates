@@ -21,11 +21,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestCdrsCoverage for cover testing
@@ -43,8 +43,8 @@ func TestCdrsCoverage(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
 	stordb := NewStorDBService(cfg, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	cdrsRPC := make(chan rpcclient.ClientConnector, 1)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		cdrsRPC, nil, anz, srvDep)
 	if cdrS.IsRunning() {
@@ -58,7 +58,7 @@ func TestCdrsCoverage(t *testing.T) {
 		storDB:      stordb,
 		filterSChan: filterSChan,
 		server:      server,
-		connChan:    make(chan rpcclient.ClientConnector, 1),
+		connChan:    make(chan birpc.ClientConnector, 1),
 		connMgr:     nil,
 		stopChan:    make(chan struct{}, 1),
 		anz:         anz,

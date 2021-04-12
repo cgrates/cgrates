@@ -22,11 +22,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestFilterPassDestinations(t *testing.T) {
@@ -35,8 +35,8 @@ func TestFilterPassDestinations(t *testing.T) {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
-	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
 	data := engine.NewInternalDB(nil, nil, true)
@@ -86,8 +86,8 @@ func TestFilterPassDestinations(t *testing.T) {
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
-	internalAPIerSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
 	data := engine.NewInternalDB(nil, nil, true)

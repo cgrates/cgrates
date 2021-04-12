@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -679,31 +680,31 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		case utils.MetaNone:
 			return
 		case utils.MetaReload:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaClear:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 				return
 			}
 		}
 		if len(cacheIDs) != 0 {
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 				CacheIDs: cacheIDs,
 			}, &reply); err != nil {
 				return
@@ -1035,31 +1036,31 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 		case utils.MetaNone:
 			return
 		case utils.MetaReload:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaClear:
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns,
 				utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 				return
 			}
 		}
 		if len(cacheIDs) != 0 {
-			if err = ldr.connMgr.Call(ldr.cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+			if err = ldr.connMgr.Call(context.TODO(), ldr.cacheConns, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
 				CacheIDs: cacheIDs,
 			}, &reply); err != nil {
 				return

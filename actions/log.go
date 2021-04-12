@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -41,7 +41,7 @@ func (aL *actLog) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (actLog) execute(_ context.Context, data utils.MapStorage, _ string) (err error) {
+func (actLog) execute(_ *context.Context, data utils.MapStorage, _ string) (err error) {
 	utils.Logger.Info(fmt.Sprintf("LOG Event: %s", data.String()))
 	return
 }
@@ -63,7 +63,7 @@ func (aL *actCDRLog) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actCDRLog) execute(_ context.Context, data utils.MapStorage, _ string) (err error) {
+func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
 	if len(aL.config.ActionSCfg().CDRsConns) == 0 {
 		return fmt.Errorf("no connection with CDR Server")
 	}
@@ -86,7 +86,7 @@ func (aL *actCDRLog) execute(_ context.Context, data utils.MapStorage, _ string)
 		return
 	}
 	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().CDRsConns, nil,
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().CDRsConns,
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog

@@ -24,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -204,9 +205,9 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 	return
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
+// Call implements birpc.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (sS *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (sS *StatService) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	return utils.RPCCall(sS, serviceMethod, args, reply)
 }
 
@@ -334,7 +335,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 				thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 			}
 			var tIDs []string
-			if err := sS.connMgr.Call(sS.cgrcfg.StatSCfg().ThresholdSConns, nil,
+			if err := sS.connMgr.Call(context.TODO(), sS.cgrcfg.StatSCfg().ThresholdSConns,
 				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(

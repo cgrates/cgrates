@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -76,8 +76,8 @@ func (aS *ActionS) Shutdown() {
 	aS.crnLk.RUnlock()
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (aS *ActionS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (aS *ActionS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	return utils.RPCCall(aS, serviceMethod, args, reply)
 }
 

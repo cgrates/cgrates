@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -42,7 +42,7 @@ func actionTarget(act string) string {
 	}
 }
 
-func newScheduledActs(ctx context.Context, tenant, apID, trgTyp, trgID, schedule string,
+func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID, schedule string,
 	data utils.MapStorage, acts []actioner) (sActs *scheduledActs) {
 	return &scheduledActs{
 		tenant:   tenant,
@@ -64,7 +64,7 @@ type scheduledActs struct {
 	trgTyp   string
 	trgID    string
 	schedule string
-	ctx      context.Context
+	ctx      *context.Context
 	data     utils.MapStorage
 	acts     []actioner
 
@@ -142,5 +142,5 @@ func newActioner(cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataMa
 type actioner interface {
 	id() string
 	cfg() *engine.APAction
-	execute(ctx context.Context, data utils.MapStorage, trgID string) (err error)
+	execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error)
 }

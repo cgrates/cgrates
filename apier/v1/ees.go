@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,7 +32,7 @@ type EeSv1 struct {
 	eeS *ees.EventExporterS
 }
 
-func (eeSv1 *EeSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (eeSv1 *EeSv1) Ping(_ context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

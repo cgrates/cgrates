@@ -29,18 +29,17 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
-	"net/rpc"
 	"os"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
-	"github.com/cenkalti/rpc2"
-	jsonrpc2 "github.com/cenkalti/rpc2/jsonrpc"
 	"golang.org/x/net/websocket"
 )
 
@@ -57,7 +56,7 @@ type Server struct {
 	sync.RWMutex
 	rpcEnabled      bool
 	httpEnabled     bool
-	birpcSrv        *rpc2.Server
+	birpcSrv        *birpc.BirpcServer
 	stopbiRPCServer chan struct{} // used in order to fully stop the biRPC
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
@@ -70,14 +69,14 @@ func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerService) {
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
-	rpc.Register(rcvr)
+	birpc.Register(rcvr)
 	s.Lock()
 	s.rpcEnabled = true
 	s.Unlock()
 }
 
 func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
-	rpc.RegisterName(name, rcvr)
+	birpc.RegisterName(name, rcvr)
 	s.Lock()
 	s.rpcEnabled = true
 	s.Unlock()
@@ -108,19 +107,19 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
+func (s *Server) BiRPCRegisterName(name string, rcv interface{}) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
 	s.RUnlock()
 	if isNil {
 		s.Lock()
-		s.birpcSrv = rpc2.NewServer()
+		s.birpcSrv = birpc.NewBirpcServer()
 		s.Unlock()
 	}
-	s.birpcSrv.Handle(method, handlerFunc)
+	s.birpcSrv.RegisterName(name, rcv)
 }
 
-func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,
 	shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -139,7 +138,7 @@ func (s *Server) serveCodec(addr, codecName string, newCodec func(conn conn, cap
 	s.accept(l, codecName, newCodec, shdChan)
 }
 
-func (s *Server) accept(l net.Listener, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+func (s *Server) accept(l net.Listener, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,
 	shdChan *utils.SyncedChan) {
 	errCnt := 0
 	var lastErrorTime time.Time
@@ -159,7 +158,7 @@ func (s *Server) accept(l net.Listener, codecName string, newCodec func(conn con
 			}
 			continue
 		}
-		go rpc.ServeCodec(newCodec(conn, s.caps, s.anz))
+		go birpc.ServeCodec(newCodec(conn, s.caps, s.anz))
 	}
 }
 
@@ -248,7 +247,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 }
 
 // ServeBiRPC create a goroutine to listen and serve as BiRPC server
-func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) (err error) {
+func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(birpc.ClientConnector), onDis func(birpc.ClientConnector)) (err error) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
 	s.RUnlock()
@@ -260,14 +259,14 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client),
 	s.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
-		if ljson, err = s.listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, jsonrpc2.NewJSONCodec); err != nil {
+		if ljson, err = s.listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, jsonrpc.NewJSONBirpcCodec); err != nil {
 			return
 		}
 		defer ljson.Close()
 	}
 	if addrGOB != utils.EmptyString {
 		var lgob net.Listener
-		if lgob, err = s.listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, rpc2.NewGobCodec); err != nil {
+		if lgob, err = s.listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, birpc.NewGobBirpcCodec); err != nil {
 			return
 		}
 		defer lgob.Close()
@@ -276,7 +275,7 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(*rpc2.Client),
 	return
 }
 
-func (s *Server) listenBiRPC(srv *rpc2.Server, addr, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) (lBiRPC net.Listener, err error) {
+func (s *Server) listenBiRPC(srv *birpc.BirpcServer, addr, codecName string, newCodec func(io.ReadWriteCloser) birpc.BirpcCodec) (lBiRPC net.Listener, err error) {
 	if lBiRPC, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("ServeBi%s listen error: %s \n", codecName, err)
 		return
@@ -286,7 +285,7 @@ func (s *Server) listenBiRPC(srv *rpc2.Server, addr, codecName string, newCodec 
 	return
 }
 
-func (s *Server) acceptBiRPC(srv *rpc2.Server, l net.Listener, codecName string, newCodec func(io.ReadWriteCloser) rpc2.Codec) {
+func (s *Server) acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName string, newCodec func(io.ReadWriteCloser) birpc.BirpcCodec) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -351,7 +350,7 @@ func (r *rpcRequest) Close() error {
 
 // Call invokes the RPC request, waits for it to complete, and returns the results.
 func (r *rpcRequest) Call() io.Reader {
-	rpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
+	birpc.ServeCodec(newCapsJSONCodec(r, r.caps, r.anzWarpper))
 	return r.rw
 }
 
@@ -395,7 +394,7 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 }
 
 func (s *Server) serveCodecTLS(addr, codecName, serverCrt, serverKey, caCert string,
-	serverPolicy int, serverName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) rpc.ServerCodec,
+	serverPolicy int, serverName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.ServerCodec,
 	shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -429,7 +428,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 }
 
 func (s *Server) handleWebSocket(ws *websocket.Conn) {
-	rpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
+	birpc.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 }
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,

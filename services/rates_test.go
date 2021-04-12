@@ -22,13 +22,13 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/rates"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestRateSCoverage for cover testing
@@ -41,8 +41,8 @@ func TestRateSCoverage(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	chS := engine.NewCacheS(cfg, nil, nil)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	rS := NewRateService(cfg, chS, filterSChan, db, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	rS := NewRateService(cfg, chS, filterSChan, db, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -54,7 +54,7 @@ func TestRateSCoverage(t *testing.T) {
 		cacheS:      chS,
 		server:      server,
 		stopChan:    make(chan struct{}),
-		intConnChan: make(chan rpcclient.ClientConnector, 1),
+		intConnChan: make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,
 		rateS:       &rates.RateS{},

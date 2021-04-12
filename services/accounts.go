@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/accounts"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -30,14 +31,13 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, server *cores.Server,
-	internalChan chan rpcclient.ClientConnector,
+	internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AccountService{
 		connChan:    internalChan,
@@ -67,8 +67,8 @@ type AccountService struct {
 	stopChan chan struct{}
 
 	acts     *accounts.AccountS
-	rpc      *v1.AccountSv1                 // useful on restart
-	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
+	rpc      *v1.AccountSv1             // useful on restart
+	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }

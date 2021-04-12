@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -39,15 +39,15 @@ var (
 
 	fltrRplInternalCfgPath string
 	fltrRplInternalCfg     *config.CGRConfig
-	fltrRplInternalRPC     rpcclient.ClientConnector
+	fltrRplInternalRPC     birpc.ClientConnector
 
 	fltrRplEngine1CfgPath string
 	fltrRplEngine1Cfg     *config.CGRConfig
-	fltrRplEngine1RPC     rpcclient.ClientConnector
+	fltrRplEngine1RPC     birpc.ClientConnector
 
 	fltrRplEngine2CfgPath string
 	fltrRplEngine2Cfg     *config.CGRConfig
-	fltrRplEngine2RPC     rpcclient.ClientConnector
+	fltrRplEngine2RPC     birpc.ClientConnector
 
 	sTestsFltrRpl = []func(t *testing.T){
 		testFltrRplInitCfg,

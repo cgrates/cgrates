@@ -24,24 +24,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 	timezone string, connMgr *engine.ConnManager) (fsa *FSsessions) {
-	return &FSsessions{
+	fsa = &FSsessions{
 		cfg:         fsAgentConfig,
 		conns:       make([]*fsock.FSock, len(fsAgentConfig.EventSocketConns)),
 		senderPools: make([]*fsock.FSockPool, len(fsAgentConfig.EventSocketConns)),
 		timezone:    timezone,
 		connMgr:     connMgr,
 	}
+	fsa.ctx = context.WithClient(context.TODO(), fsa)
+	return
 }
 
 // FSsessions is the freeswitch session manager
@@ -53,6 +54,7 @@ type FSsessions struct {
 	senderPools []*fsock.FSockPool // Keep sender pools here
 	timezone    string
 	connMgr     *engine.ConnManager
+	ctx         *context.Context
 }
 
 func (fsa *FSsessions) createHandlers() map[string][]func(string, int) {
@@ -148,7 +150,7 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	authArgs := fsev.V1AuthorizeArgs()
 	authArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
-	if err := fsa.connMgr.Call(fsa.cfg.SessionSConns, fsa, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
@@ -238,7 +240,7 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 	initSessionArgs := fsev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
-	if err := fsa.connMgr.Call(fsa.cfg.SessionSConns, fsa, utils.SessionSv1InitiateSession,
+	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
@@ -262,7 +264,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 	if fsev[VarAnswerEpoch] != "0" {                                                                              // call was answered
 		terminateSessionArgs := fsev.V1TerminateSessionArgs()
 		terminateSessionArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
-		if err := fsa.connMgr.Call(fsa.cfg.SessionSConns, fsa, utils.SessionSv1TerminateSession,
+		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1TerminateSession,
 			terminateSessionArgs, &reply); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
@@ -274,7 +276,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 		if err != nil {
 			return
 		}
-		if err := fsa.connMgr.Call(fsa.cfg.SessionSConns, fsa, utils.SessionSv1ProcessCDR,
+		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
@@ -377,13 +379,13 @@ func (fsa *FSsessions) Shutdown() (err error) {
 	return
 }
 
-// Call implements rpcclient.ClientConnector interface
-func (fsa *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface
+func (fsa *FSsessions) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(fsa, serviceMethod, args, reply)
 }
 
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH
-func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
+func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error) {
 	ev := engine.NewMapEvent(args.EventStart)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
 	connIdx, err := ev.GetTInt64(FsConnID)
@@ -408,7 +410,7 @@ func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, rep
 }
 
 // V1GetActiveSessionIDs used to return all active sessions
-func (fsa *FSsessions) V1GetActiveSessionIDs(_ string,
+func (fsa *FSsessions) V1GetActiveSessionIDs(ctx *context.Context, _ string,
 	sessionIDs *[]*sessions.SessionID) (err error) {
 	var sIDs []*sessions.SessionID
 	for connIdx, senderPool := range fsa.senderPools {
@@ -444,17 +446,17 @@ func (fsa *FSsessions) Reload() {
 }
 
 // V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1ReAuthorize(originID string, reply *string) (err error) {
+func (*FSsessions) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error) {
+func (*FSsessions) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
-func (fsa *FSsessions) V1WarnDisconnect(args map[string]interface{}, reply *string) (err error) {
+func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error) {
 	if fsa.cfg.LowBalanceAnnFile == utils.EmptyString {
 		*reply = utils.OK
 		return
@@ -480,57 +482,4 @@ func (fsa *FSsessions) V1WarnDisconnect(args map[string]interface{}, reply *stri
 	}
 	*reply = utils.OK
 	return
-}
-
-// CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
-func (fsa *FSsessions) CallBiRPC(clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.BiRPCCall(fsa, clnt, serviceMethod, args, reply)
-}
-
-// BiRPCv1DisconnectSession is internal method to disconnect session in asterisk
-func (fsa *FSsessions) BiRPCv1DisconnectSession(clnt rpcclient.ClientConnector, args utils.AttrDisconnectSession, reply *string) error {
-	return fsa.V1DisconnectSession(args, reply)
-}
-
-// BiRPCv1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
-func (fsa *FSsessions) BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string,
-	sessionIDs *[]*sessions.SessionID) error {
-	return fsa.V1GetActiveSessionIDs(ignParam, sessionIDs)
-
-}
-
-// BiRPCv1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (fsa *FSsessions) BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector, originID string, reply *string) (err error) {
-	return fsa.V1ReAuthorize(originID, reply)
-}
-
-// BiRPCv1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (fsa *FSsessions) BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, args *utils.DPRArgs, reply *string) (err error) {
-	return fsa.V1DisconnectPeer(args, reply)
-}
-
-// BiRPCv1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (fsa *FSsessions) BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error) {
-	return fsa.V1WarnDisconnect(args, reply)
-}
-
-// Handlers is used to implement the rpcclient.BiRPCConector interface
-func (fsa *FSsessions) Handlers() map[string]interface{} {
-	return map[string]interface{}{
-		utils.SessionSv1DisconnectSession: func(clnt *rpc2.Client, args utils.AttrDisconnectSession, rply *string) error {
-			return fsa.BiRPCv1DisconnectSession(clnt, args, rply)
-		},
-		utils.SessionSv1GetActiveSessionIDs: func(clnt *rpc2.Client, args string, rply *[]*sessions.SessionID) error {
-			return fsa.BiRPCv1GetActiveSessionIDs(clnt, args, rply)
-		},
-		utils.SessionSv1ReAuthorize: func(clnt *rpc2.Client, args string, rply *string) (err error) {
-			return fsa.BiRPCv1ReAuthorize(clnt, args, rply)
-		},
-		utils.SessionSv1DisconnectPeer: func(clnt *rpc2.Client, args *utils.DPRArgs, rply *string) (err error) {
-			return fsa.BiRPCv1DisconnectPeer(clnt, args, rply)
-		},
-		utils.SessionSv1WarnDisconnect: func(clnt *rpc2.Client, args map[string]interface{}, rply *string) (err error) {
-			return fsa.BiRPCv1WarnDisconnect(clnt, args, rply)
-		},
-	}
 }

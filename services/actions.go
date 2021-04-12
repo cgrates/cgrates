@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/actions"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -30,14 +31,13 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *cores.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
@@ -67,8 +67,8 @@ type ActionService struct {
 	stopChan chan struct{}
 
 	acts     *actions.ActionS
-	rpc      *v1.ActionSv1                  // useful on restart
-	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
+	rpc      *v1.ActionSv1              // useful on restart
+	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }

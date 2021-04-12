@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -54,7 +55,7 @@ type ServiceManager struct {
 }
 
 // Call .
-func (srvMngr *ServiceManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (srvMngr *ServiceManager) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

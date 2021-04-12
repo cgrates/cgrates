@@ -27,12 +27,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestAnalyzerSReload(t *testing.T) {
@@ -51,11 +51,11 @@ func TestAnalyzerSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anzRPC := make(chan rpcclient.ClientConnector, 1)
+	anzRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, anzRPC, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(anz,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -116,7 +116,7 @@ func TestAnalyzerSReload2(t *testing.T) {
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anzRPC := make(chan rpcclient.ClientConnector, 1)
+	anzRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, anzRPC, srvDep)
 	anz.stopChan = make(chan struct{})
 	anz.start()
@@ -146,7 +146,7 @@ func TestAnalyzerSReload3(t *testing.T) {
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anzRPC := make(chan rpcclient.ClientConnector, 1)
+	anzRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, anzRPC, srvDep)
 	anz.stopChan = make(chan struct{})
 	anz.Start()

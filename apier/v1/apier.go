@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -42,9 +43,9 @@ type APIerSv1 struct {
 	StorDBChan chan engine.StorDB
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (apierSv1 *APIerSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (apierSv1 *APIerSv1) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(apierSv1, serviceMethod, args, reply)
 }
 
@@ -87,7 +88,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 				if err = apierSv1.DataManager.UpdateReverseDestination(oldDst, newDst, utils.NonTransactional); err != nil {
 					return
 				}
-				if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+				if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 						ArgsCache: map[string][]string{utils.ReverseDestinationIDs: oldDst.Prefixes,
 							utils.DestinationIDs: {dstID}},
@@ -100,7 +101,7 @@ func (apierSv1 *APIerSv1) RemoveDestination(attr *AttrRemoveDestination, reply *
 		if err = apierSv1.DataManager.RemoveDestination(dstID, utils.NonTransactional); err != nil {
 			return
 		}
-		if err = apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		if err = apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 				ArgsCache: map[string][]string{utils.ReverseDestinationIDs: oldDst.Prefixes,
 					utils.DestinationIDs: {dstID}},
@@ -153,7 +154,7 @@ func (apierSv1 *APIerSv1) SetDestination(attrs *utils.AttrSetDestination, reply 
 	if err = apierSv1.DataManager.UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
 		return
 	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.ReverseDestinationIDs: dest.Prefixes,
 				utils.DestinationIDs: {attrs.Id}},
@@ -186,7 +187,7 @@ func (apierSv1 *APIerSv1) LoadDestination(attrs *AttrLoadDestination, reply *str
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+	if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
 			ArgsCache: map[string][]string{utils.DestinationIDs: {attrs.ID}},
 		}, reply); err != nil {
@@ -1154,7 +1155,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(args *utils.ArgExportCDRs, reply *map[strin
 		if args.Verbose {
 			argCdr.CGREvent.APIOpts[utils.OptsEEsVerbose] = struct{}{}
 		}
-		if err := apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().EEsConns, nil, utils.EeSv1ProcessEvent,
+		if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().EEsConns, utils.EeSv1ProcessEvent,
 			argCdr, &rplyCdr); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> processing event: <%s> with <%s>",
 				utils.ApierS, err.Error(), utils.ToJSON(cdr.AsCGREvent()), utils.EventExporterS))

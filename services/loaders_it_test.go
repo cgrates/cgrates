@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func testCreateDirs(t *testing.T) {
@@ -71,10 +71,10 @@ func TestLoaderSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	conMngr := engine.NewConnManager(cfg, nil)
 	srv := NewLoaderService(cfg, db, filterSChan,
-		server, make(chan rpcclient.ClientConnector, 1),
+		server, make(chan birpc.ClientConnector, 1),
 		conMngr, anz, srvDep)
 	srvMngr.AddServices(srv, db)
 	if err := srvMngr.StartServices(); err != nil {
@@ -153,9 +153,9 @@ func TestLoaderSReload2(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	db.dbchan <- new(engine.DataManager)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db, filterSChan,
-		server, make(chan rpcclient.ClientConnector, 1),
+		server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	err := srv.Start()
 	if err != nil {
@@ -178,9 +178,9 @@ func TestLoaderSReload3(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	db.dbchan <- new(engine.DataManager)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db, filterSChan,
-		server, make(chan rpcclient.ClientConnector, 1),
+		server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	err := srv.Start()
 	if err == nil || err.Error() != "no such file or directory" {

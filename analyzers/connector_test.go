@@ -25,13 +25,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type mockConnector struct{}
 
-func (c *mockConnector) Call(_ string, _, _ interface{}) (err error) {
+func (c *mockConnector) Call(_ *context.Context, _ string, _, _ interface{}) (err error) {
 	return errors.New("error")
 }
 func TestNewAnalyzeConnector(t *testing.T) {
@@ -49,7 +50,7 @@ func TestNewAnalyzeConnector(t *testing.T) {
 		t.Fatal(err)
 	}
 	rpc := anz.NewAnalyzerConnector(new(mockConnector), utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012")
-	if err = rpc.Call(utils.CoreSv1Ping, "args", "reply"); err == nil || err.Error() != "error" {
+	if err = rpc.Call(context.Background(), utils.CoreSv1Ping, "args", "reply"); err == nil || err.Error() != "error" {
 		t.Errorf("Expected 'error' received %v", err)
 	}
 	time.Sleep(100 * time.Millisecond)

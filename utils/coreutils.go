@@ -41,6 +41,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -723,31 +724,17 @@ func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, repl
 	return err
 }
 
-// BiRPCCall is a generic method calling BiRPC on a struct instance
-// serviceMethod is assumed to be in the form InstanceV1.Method
-// where BiRPCV1Method will become RPC method called on instance
-// the subsystem is not checked
-func BiRPCCall(inst interface{}, clnt rpcclient.ClientConnector, serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
+// ApierRPCCall implements generic RPCCall for APIer instances
+func APIerRPCCallCtx(inst interface{}, ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(serviceMethod, ".")
+	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	// get method BiRPCV1.Method
-	method := reflect.ValueOf(inst).MethodByName(
-		"BiRPC" + parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version V1 in the method name and add prefix
+	method := reflect.ValueOf(inst).MethodByName(methodSplit[1])
 	if !method.IsValid() {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	// construct the params
-	var clntVal reflect.Value
-	if clnt == nil {
-		clntVal = reflect.New(
-			reflect.TypeOf(new(rpcclient.BiRPCInternalServer))).Elem() // Kinda cheat since we make up a type here
-	} else {
-		clntVal = reflect.ValueOf(clnt)
-	}
-	params := []reflect.Value{clntVal, reflect.ValueOf(args),
-		reflect.ValueOf(reply)}
+	params := []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(args), reflect.ValueOf(reply)}
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return ErrServerError

@@ -22,19 +22,19 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAPIerSv1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *cores.Server,
-	internalAPIerSv1Chan chan rpcclient.ClientConnector,
+	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *APIerSv1Service {
 	return &APIerSv1Service{
@@ -62,7 +62,7 @@ type APIerSv1Service struct {
 	connMgr     *engine.ConnManager
 
 	api      *v1.APIerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 
 	stopChan chan struct{}
 

@@ -36,7 +36,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -836,12 +835,12 @@ func testApierITSetDestination(t *testing.T) {
 	}
 }
 
-func testApierITGetScheduledActions(t *testing.T) {
-	var rply []*scheduler.ScheduledAction
-	if err := rater.Call(utils.APIerSv1GetScheduledActions, scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
-		t.Error("Unexpected error: ", err)
-	}
-}
+// func testApierITGetScheduledActions(t *testing.T) {
+// 	var rply []*scheduler.ScheduledAction
+// 	if err := rater.Call(utils.APIerSv1GetScheduledActions, scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
+// 		t.Error("Unexpected error: ", err)
+// 	}
+// }
 
 func testApierITGetDataCost(t *testing.T) {
 	attrs := AttrGetDataCost{Category: "data", Tenant: "cgrates.org",

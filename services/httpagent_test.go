@@ -22,11 +22,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestHTTPAgent for cover testing
@@ -36,7 +36,7 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	rpcInternal := map[string]chan rpcclient.ClientConnector{}
+	rpcInternal := map[string]chan birpc.ClientConnector{}
 	cM := engine.NewConnManager(cfg, rpcInternal)
 	srv := NewHTTPAgent(cfg, filterSChan, server, cM, srvDep)
 	if srv == nil {

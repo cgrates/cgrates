@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -110,7 +111,7 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 		ProcessRuns:  procRuns,
 	}
 	var tmpReply engine.AttrSProcessEventReply
-	if err = connMgr.Call(attrSConns, nil, utils.AttributeSv1ProcessEvent,
+	if err = connMgr.Call(context.TODO(), attrSConns, utils.AttributeSv1ProcessEvent,
 		attrArgs, &tmpReply); err != nil {
 		return
 	}
@@ -124,7 +125,7 @@ func rateSCostForEvent(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
 	var tmpReply utils.RateProfileCost
-	if err = connMgr.Call(rateSConns, nil, utils.RateSv1CostForEvent,
+	if err = connMgr.Call(context.TODO(), rateSConns, utils.RateSv1CostForEvent,
 		&utils.ArgsCostForEvent{CGREvent: cgrEv, RateProfileIDs: rpIDs}, &tmpReply); err != nil {
 		return
 	}

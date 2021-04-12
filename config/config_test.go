@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
@@ -5726,7 +5727,7 @@ func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
 func TestCallOnCGRConfig(t *testing.T) {
 	expected := "UNSUPPORTED_SERVICE_METHOD"
 	cgrcfg := NewDefaultCGRConfig()
-	if err := cgrcfg.Call("inexistentMethod", nil, nil); err == nil || err.Error() != expected {
+	if err := cgrcfg.Call(context.Background(), "inexistentMethod", nil, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

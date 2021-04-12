@@ -28,6 +28,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -58,21 +60,21 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 }
 
 type testMockCacheConn struct {
-	calls map[string]func(arg interface{}, rply interface{}) error
+	calls map[string]func(_ *context.Context, _, _ interface{}) error
 }
 
-func (s *testMockCacheConn) Call(method string, arg interface{}, rply interface{}) error {
+func (s *testMockCacheConn) Call(ctx *context.Context, method string, arg, rply interface{}) error {
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(arg, rply)
+		return call(ctx, arg, rply)
 	}
 }
 
 func TestProcessContentCallsLoadCache(t *testing.T) {
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1LoadCache: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1LoadCache: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type: %T", rply)
@@ -80,7 +82,7 @@ func TestProcessContentCallsLoadCache(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -91,14 +93,14 @@ func TestProcessContentCallsLoadCache(t *testing.T) {
 			},
 		},
 	}
-	internalCacheSChann := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChann := make(chan birpc.ClientConnector, 1)
 	internalCacheSChann <- sMock
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsLoadCache",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChann,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -167,8 +169,8 @@ func TestProcessContentCallsReloadCache(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock2 := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1ReloadCache: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1ReloadCache: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -177,7 +179,7 @@ func TestProcessContentCallsReloadCache(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -190,12 +192,12 @@ func TestProcessContentCallsReloadCache(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock2
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCalls",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -265,8 +267,8 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1RemoveItems: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1RemoveItems: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -275,7 +277,7 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -288,12 +290,12 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsRemoveItems",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -378,8 +380,8 @@ func TestProcessContentCallsClear(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -392,12 +394,12 @@ func TestProcessContentCallsClear(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestProcessContentCallsClear",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		dm:         engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
@@ -480,8 +482,8 @@ func TestRemoveContentCallsReload(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1ReloadCache: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1ReloadCache: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -490,7 +492,7 @@ func TestRemoveContentCallsReload(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -503,12 +505,12 @@ func TestRemoveContentCallsReload(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -586,8 +588,8 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1LoadCache: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1LoadCache: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -596,7 +598,7 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -609,12 +611,12 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -692,8 +694,8 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1RemoveItems: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1RemoveItems: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -702,7 +704,7 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 				*prply = utils.OK
 				return nil
 			},
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -715,12 +717,12 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -818,8 +820,8 @@ func TestRemoveContentCallsClear(t *testing.T) {
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 
 	sMock := &testMockCacheConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CacheSv1Clear: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CacheSv1Clear: func(_ *context.Context, _, rply interface{}) error {
 				prply, can := rply.(*string)
 				if !can {
 					t.Errorf("Wrong argument type : %T", rply)
@@ -832,12 +834,12 @@ func TestRemoveContentCallsClear(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, true)
 
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
 	ldr := &Loader{
 		ldrID:         "TestRemoveContentCallsReload",
 		bufLoaderData: make(map[string][]LoaderData),
-		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+		connMgr: engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): internalCacheSChan,
 		}),
 		cacheConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},

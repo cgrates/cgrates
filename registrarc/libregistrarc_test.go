@@ -27,6 +27,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -232,7 +233,7 @@ func TestRegister(t *testing.T) {
 	}
 	errCfg := config.NewDefaultCGRConfig()
 
-	engine.NewConnManager(errCfg, map[string]chan rpcclient.ClientConnector{})
+	engine.NewConnManager(errCfg, map[string]chan birpc.ClientConnector{})
 	errCfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
 	errCfg.RPCConns()["errCon"] = &config.RPCConn{
 		Strategy: utils.MetaFirst,
@@ -516,7 +517,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 			},
 		},
 	}
-	engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	cfg.RPCConns()["errCon"] = config.CgrConfig().RPCConns()["errCon"]
 	cfg.CacheCfg().ReplicationConns = []string{"errCon"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
@@ -618,7 +619,7 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 			},
 		},
 	}
-	engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{})
+	engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	cfg.RPCConns()["errCon1"] = config.CgrConfig().RPCConns()["errCon1"]
 	cfg.CacheCfg().ReplicationConns = []string{"errCon1"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true

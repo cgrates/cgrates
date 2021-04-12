@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +45,7 @@ func (aL *actHTTPPost) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actHTTPPost) execute(_ context.Context, data utils.MapStorage, _ string) (err error) {
+func (aL *actHTTPPost) execute(_ *context.Context, data utils.MapStorage, _ string) (err error) {
 	var body []byte
 	if body, err = json.Marshal(data); err != nil {
 		return
@@ -93,13 +93,13 @@ func (aL *actExport) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actExport) execute(_ context.Context, data utils.MapStorage, _ string) (err error) {
+func (aL *actExport) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
 	var exporterIDs []string
 	if expIDs, has := aL.cfg().Opts[utils.MetaExporterIDs]; has {
 		exporterIDs = strings.Split(utils.IfaceAsString(expIDs), utils.InfieldSep)
 	}
 	var rply map[string]map[string]interface{}
-	return aL.connMgr.Call(aL.config.ActionSCfg().EEsConns, nil,
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().EEsConns,
 		utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
 			EeIDs: exporterIDs,
 			CGREvent: &utils.CGREvent{

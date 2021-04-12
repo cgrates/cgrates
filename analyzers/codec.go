@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package analyzers
 
 import (
-	"net/rpc"
 	"sync"
 	"time"
+
+	"github.com/cgrates/birpc"
 )
 
-func NewAnalyzerServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, to string) rpc.ServerCodec {
+func NewAnalyzerServerCodec(sc birpc.ServerCodec, aS *AnalyzerService, enc, from, to string) birpc.ServerCodec {
 	return &AnalyzerServerCodec{
 		sc:   sc,
 		reqs: make(map[uint64]*rpcAPI),
@@ -36,7 +37,7 @@ func NewAnalyzerServerCodec(sc rpc.ServerCodec, aS *AnalyzerService, enc, from, 
 }
 
 type AnalyzerServerCodec struct {
-	sc rpc.ServerCodec
+	sc birpc.ServerCodec
 
 	// keep the API in memory because the write is async
 	reqs   map[uint64]*rpcAPI
@@ -48,7 +49,7 @@ type AnalyzerServerCodec struct {
 	to     string
 }
 
-func (c *AnalyzerServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
+func (c *AnalyzerServerCodec) ReadRequestHeader(r *birpc.Request) (err error) {
 	err = c.sc.ReadRequestHeader(r)
 	c.reqsLk.Lock()
 	c.reqIdx = r.Seq
@@ -69,7 +70,7 @@ func (c *AnalyzerServerCodec) ReadRequestBody(x interface{}) (err error) {
 	return
 }
 
-func (c *AnalyzerServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *AnalyzerServerCodec) WriteResponse(r *birpc.Response, x interface{}) error {
 	c.reqsLk.Lock()
 	api := c.reqs[r.Seq]
 	delete(c.reqs, r.Seq)

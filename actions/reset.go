@@ -19,8 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
-
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -42,7 +41,7 @@ func (aL *actResetStat) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actResetStat) execute(_ context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actResetStat) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(trgID),
 		APIOpts:  data[utils.MetaOpts].(map[string]interface{}),
@@ -51,7 +50,7 @@ func (aL *actResetStat) execute(_ context.Context, data utils.MapStorage, trgID 
 		args.Tenant = aL.tnt
 	}
 	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().StatSConns, nil,
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().StatSConns,
 		utils.StatSv1ResetStatQueue, args, &rply)
 }
 
@@ -71,7 +70,7 @@ func (aL *actResetThreshold) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actResetThreshold) execute(_ context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actResetThreshold) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(trgID),
 		APIOpts:  data[utils.MetaOpts].(map[string]interface{}),
@@ -80,6 +79,6 @@ func (aL *actResetThreshold) execute(_ context.Context, data utils.MapStorage, t
 		args.Tenant = aL.tnt
 	}
 	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().ThresholdSConns, nil,
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().ThresholdSConns,
 		utils.ThresholdSv1ResetThreshold, args, &rply)
 }

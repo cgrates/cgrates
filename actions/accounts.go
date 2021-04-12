@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +45,7 @@ func (aL *actSetBalance) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
 	if len(aL.config.ActionSCfg().AccountSConns) == 0 {
 		return fmt.Errorf("no connection with AccountS")
 	}
@@ -73,7 +73,7 @@ func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trg
 		}
 	}
 	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().AccountSConns, nil,
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AccountSConns,
 		utils.AccountSv1ActionSetBalance, args, &rply)
 }
 
@@ -94,7 +94,7 @@ func (aL *actRemBalance) cfg() *engine.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actRemBalance) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
 	if len(aL.config.ActionSCfg().AccountSConns) == 0 {
 		return fmt.Errorf("no connection with AccountS")
 	}
@@ -109,6 +109,6 @@ func (aL *actRemBalance) execute(ctx context.Context, data utils.MapStorage, trg
 		args.BalanceIDs[i] = actD.Path
 	}
 	var rply string
-	return aL.connMgr.Call(aL.config.ActionSCfg().AccountSConns, nil,
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AccountSConns,
 		utils.AccountSv1ActionRemoveBalance, args, &rply)
 }

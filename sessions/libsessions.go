@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -44,18 +44,11 @@ var authReqs = engine.MapEvent{
 // BiRPClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type BiRPClient interface {
-	rpcclient.BiRPCConector
-	V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error)
-	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)
-	V1ReAuthorize(originID string, reply *string) (err error)
-	V1DisconnectPeer(args *utils.DPRArgs, reply *string) (err error)
-	V1WarnDisconnect(args map[string]interface{}, reply *string) (err error)
-
-	BiRPCv1DisconnectSession(clnt rpcclient.ClientConnector, args utils.AttrDisconnectSession, reply *string) (err error)
-	BiRPCv1GetActiveSessionIDs(clnt rpcclient.ClientConnector, ignParam string, sessionIDs *[]*SessionID) (err error)
-	BiRPCv1ReAuthorize(clnt rpcclient.ClientConnector, originID string, reply *string) (err error)
-	BiRPCv1DisconnectPeer(clnt rpcclient.ClientConnector, args *utils.DPRArgs, reply *string) (err error)
-	BiRPCv1WarnDisconnect(clnt rpcclient.ClientConnector, args map[string]interface{}, reply *string) (err error)
+	V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error)
+	V1GetActiveSessionIDs(ctx *context.Context, ignParam string, sessionIDs *[]*SessionID) (err error)
+	V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error)
+	V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error)
+	V1WarnDisconnect(ctx *context.Context, args map[string]interface{}, reply *string) (err error)
 }
 
 // GetSetCGRID will populate the CGRID key if not present and return it
