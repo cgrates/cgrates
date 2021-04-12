@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -693,3 +694,224 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
 	}
 }
+
+func TestLibstatsSqID(t *testing.T) {
+	ssq := &StoredStatQueue{
+		ID:     "testID",
+		Tenant: "testTenant",
+	}
+
+	exp := "testTenant:testID"
+	rcv := ssq.SqID()
+
+	if rcv != exp {
+		t.Errorf("\nexpected: %q, \nreceived: %q", exp, rcv)
+	}
+}
+
+type statMetricMock struct{}
+
+func (sMM *statMetricMock) GetValue(roundingDecimal int) interface{} {
+	return nil
+}
+
+func (sMM *statMetricMock) GetStringValue(roundingDecimal int) (val string) {
+	return
+}
+
+func (sMM *statMetricMock) GetFloat64Value(roundingDecimal int) (val float64) {
+	return
+}
+
+func (sMM *statMetricMock) AddEvent(evID string, ev utils.DataProvider) error {
+	return nil
+}
+
+func (sMM *statMetricMock) RemEvent(evTenantID string) error {
+	return nil
+}
+
+func (sMM *statMetricMock) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	err = fmt.Errorf("marshal mock error")
+	return
+}
+
+func (sMM *statMetricMock) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return nil
+}
+
+func (sMM *statMetricMock) GetFilterIDs() (filterIDs []string) {
+	return nil
+}
+
+func (sMM *statMetricMock) GetMinItems() (minIts int) {
+	return 0
+}
+
+func (sMM *statMetricMock) Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string) {
+	return nil
+}
+
+func (sMM *statMetricMock) GetCompressFactor(events map[string]int) map[string]int {
+	return nil
+}
+
+func TestLibstatsNewStoredStatQueue(t *testing.T) {
+	sq := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			"key": &statMetricMock{},
+		},
+	}
+	var ms Marshaler
+
+	experr := "marshal mock error"
+	rcv, err := NewStoredStatQueue(sq, ms)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nreceived: %q, \nexpected: %q", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nreceived: <%+v>, \nexpected: <%+v>", nil, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueNilStoredSq(t *testing.T) {
+	var ssq *StoredStatQueue
+	var ms Marshaler
+
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueSuccess(t *testing.T) {
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+	}
+	var ms Marshaler
+
+	exp := &StatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string]StatMetric{},
+	}
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestLibstatsAsStatQueueUnsupportedMetric(t *testing.T) {
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string][]byte{
+			"key": []byte("sqmetric"),
+		},
+	}
+	var ms Marshaler
+
+	experr := fmt.Sprintf("unsupported metric type <%s>", "key")
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+type marshalMock struct {
+	testcase string
+}
+
+func (mM *marshalMock) Marshal(v interface{}) ([]byte, error) {
+	return nil, nil
+}
+
+func (mM *marshalMock) Unmarshal(data []byte, v interface{}) error {
+	switch mM.testcase {
+	case "LoadMarshaled error":
+		return fmt.Errorf("LoadMarshaled mock error")
+	}
+	return nil
+}
+
+func TestLibstatsAsStatQueueErrLoadMarshaled(t *testing.T) {
+	ssq := &StoredStatQueue{
+		SQItems: []SQItem{
+			{
+				EventID: "testEventID",
+			},
+		},
+		SQMetrics: map[string][]byte{
+			utils.MetaAverage: []byte("{}"),
+		},
+	}
+	ms := &marshalMock{
+		testcase: "LoadMarshaled error",
+	}
+
+	experr := "LoadMarshaled mock error"
+	rcv, err := ssq.AsStatQueue(ms)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+// func TestLibstatsAsStatQueue3(t *testing.T) {
+// 	ssq := &StoredStatQueue{
+// 		SQItems: []SQItem{
+// 			{
+// 				EventID: "testEventID",
+// 			},
+// 		},
+// 		SQMetrics: map[string][]byte{
+// 			utils.MetaAverage: []byte("{}"),
+// 		},
+// 		Compressed: true,
+// 	}
+// 	ms := &marshalMock{}
+
+// 	experr := fmt.Sprintf("unsupported metric type <%s>", "key")
+// 	rcv, err := ssq.AsStatQueue(ms)
+// 	exp := &StatQueue{}
+// 	exp.SQMetrics = rcv.SQMetrics
+
+// 	if err != nil {
+// 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+// 	}
+
+// 	if !reflect.DeepEqual(rcv, exp) {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+// 	}
+// }
