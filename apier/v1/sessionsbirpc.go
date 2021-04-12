@@ -21,7 +21,7 @@ package v1
 import (
 	"time"
 
-	"github.com/cenkalti/rpc2"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -64,7 +64,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	}
 }
 
-func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
+func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(ctx *context.Context, args *sessions.V1AuthorizeArgs,
 	rply *sessions.V1AuthorizeReply) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -72,10 +72,10 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEvent(clnt *rpc2.Client, args *sessions.
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1AuthorizeEvent(clnt, args, rply)
+	return ssv1.sS.BiRPCv1AuthorizeEvent(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
+func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context, args *sessions.V1AuthorizeArgs,
 	rply *sessions.V1AuthorizeReplyWithDigest) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -83,10 +83,10 @@ func (ssv1 *SessionSv1) BiRPCv1AuthorizeEventWithDigest(clnt *rpc2.Client, args 
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
+	return ssv1.sS.BiRPCv1AuthorizeEventWithDigest(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1InitiateSession(ctx *context.Context, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitSessionReply) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -94,10 +94,10 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSession(clnt *rpc2.Client, args *sessions
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1InitiateSession(clnt, args, rply)
+	return ssv1.sS.BiRPCv1InitiateSession(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(ctx *context.Context, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitReplyWithDigest) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -105,10 +105,10 @@ func (ssv1 *SessionSv1) BiRPCv1InitiateSessionWithDigest(clnt *rpc2.Client, args
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
+	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1UpdateSession(ctx *context.Context, args *sessions.V1UpdateSessionArgs,
 	rply *sessions.V1UpdateSessionReply) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -116,10 +116,10 @@ func (ssv1 *SessionSv1) BiRPCv1UpdateSession(clnt *rpc2.Client, args *sessions.V
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1UpdateSession(clnt, args, rply)
+	return ssv1.sS.BiRPCv1UpdateSession(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.TenantWithAPIOpts,
+func (ssv1 *SessionSv1) BiRPCv1SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -127,10 +127,10 @@ func (ssv1 *SessionSv1) BiRPCv1SyncSessions(clnt *rpc2.Client, args *utils.Tenan
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1SyncSessions(clnt, &utils.TenantWithAPIOpts{}, rply)
+	return ssv1.sS.BiRPCv1SyncSessions(ctx.Client, &utils.TenantWithAPIOpts{}, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
+func (ssv1 *SessionSv1) BiRPCv1TerminateSession(ctx *context.Context, args *sessions.V1TerminateSessionArgs,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -138,10 +138,10 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1TerminateSession(clnt, args, rply)
+	return ssv1.sS.BiRPCv1TerminateSession(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREvent,
+func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(ctx *context.Context, cgrEv *utils.CGREvent,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -149,10 +149,10 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREve
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
+	return ssv1.sS.BiRPCv1ProcessCDR(ctx.Client, cgrEv, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.V1ProcessMessageArgs,
+func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(ctx *context.Context, args *sessions.V1ProcessMessageArgs,
 	rply *sessions.V1ProcessMessageReply) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -160,10 +160,10 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1ProcessMessage(clnt, args, rply)
+	return ssv1.sS.BiRPCv1ProcessMessage(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
+func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(ctx *context.Context, args *sessions.V1ProcessEventArgs,
 	rply *sessions.V1ProcessEventReply) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -171,10 +171,10 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1ProcessEvent(clnt, args, rply)
+	return ssv1.sS.BiRPCv1ProcessEvent(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -182,10 +182,10 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1GetActiveSessions(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetActiveSessions(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	rply *int) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -193,10 +193,10 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *u
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetActiveSessionsCount(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -204,10 +204,10 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1GetPassiveSessions(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetPassiveSessions(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	rply *int) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -215,10 +215,10 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
+	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.SessionFilter,
+func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -226,10 +226,10 @@ func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.Se
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1ForceDisconnect(clnt, args, rply)
+	return ssv1.sS.BiRPCv1ForceDisconnect(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, args string,
+func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Context, args string,
 	rply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -237,10 +237,10 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
+	return ssv1.sS.BiRPCv1RegisterInternalBiJSONConn(ctx.Client, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREvent,
+func (ssv1 *SessionSv1) BiRPCPing(ctx *context.Context, ign *utils.CGREvent,
 	reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -251,7 +251,7 @@ func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREvent,
 	return ssv1.Ping(ign, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(ctx *context.Context,
 	args sessions.ArgsReplicateSessions, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -259,10 +259,10 @@ func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.BiRPCv1ReplicateSessions(clnt, args, reply)
+	return ssv1.sS.BiRPCv1ReplicateSessions(ctx.Client, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(ctx *context.Context,
 	args *sessions.Session, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -270,10 +270,10 @@ func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1SetPassiveSession(clnt, args, reply)
+	return ssv1.sS.BiRPCv1SetPassiveSession(ctx.Client, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(ctx *context.Context,
 	args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -281,10 +281,10 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1ActivateSessions(clnt, args, reply)
+	return ssv1.sS.BiRPCv1ActivateSessions(ctx.Client, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(ctx *context.Context,
 	args *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -292,11 +292,11 @@ func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1DeactivateSessions(clnt, args, reply)
+	return ssv1.sS.BiRPCv1DeactivateSessions(ctx.Client, args, reply)
 }
 
 // BiRPCV1ReAuthorize sends the RAR for filterd sessions
-func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(ctx *context.Context,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -304,11 +304,11 @@ func (ssv1 *SessionSv1) BiRPCV1ReAuthorize(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1ReAuthorize(clnt, args, reply)
+	return ssv1.sS.BiRPCv1ReAuthorize(ctx.Client, args, reply)
 }
 
 // BiRPCV1DisconnectPeer sends the DPR for the OriginHost and OriginRealm
-func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(ctx *context.Context,
 	args *utils.DPRArgs, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -316,11 +316,11 @@ func (ssv1 *SessionSv1) BiRPCV1DisconnectPeer(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1DisconnectPeer(clnt, args, reply)
+	return ssv1.sS.BiRPCv1DisconnectPeer(ctx.Client, args, reply)
 }
 
 // BiRPCV1STIRAuthenticate checks the identity using STIR/SHAKEN
-func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(ctx *context.Context,
 	args *sessions.V1STIRAuthenticateArgs, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -328,11 +328,11 @@ func (ssv1 *SessionSv1) BiRPCV1STIRAuthenticate(clnt *rpc2.Client,
 		}
 		defer ssv1.caps.Deallocate()
 	}
-	return ssv1.sS.BiRPCv1STIRAuthenticate(clnt, args, reply)
+	return ssv1.sS.BiRPCv1STIRAuthenticate(ctx.Client, args, reply)
 }
 
 // BiRPCV1STIRIdentity creates the identity for STIR/SHAKEN
-func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
+func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(ctx *context.Context,
 	args *sessions.V1STIRIdentityArgs, reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {
@@ -343,7 +343,7 @@ func (ssv1 *SessionSv1) BiRPCV1STIRIdentity(clnt *rpc2.Client,
 	return ssv1.sS.BiRPCv1STIRIdentity(nil, args, reply)
 }
 
-func (ssv1 *SessionSv1) BiRPCV1Sleep(clnt *rpc2.Client, arg *utils.DurationArgs,
+func (ssv1 *SessionSv1) BiRPCV1Sleep(ctx *context.Context, arg *utils.DurationArgs,
 	reply *string) (err error) {
 	if ssv1.caps.IsLimited() {
 		if err = ssv1.caps.Allocate(); err != nil {

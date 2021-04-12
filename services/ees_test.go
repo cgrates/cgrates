@@ -21,13 +21,13 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/ees"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestEventExporterSCoverage for cover testing
@@ -41,8 +41,8 @@ func TestEventExporterSCoverage(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil), server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -51,7 +51,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 		filterSChan: filterSChan,
 		connMgr:     engine.NewConnManager(cfg, nil),
 		server:      server,
-		intConnChan: make(chan rpcclient.ClientConnector, 1),
+		intConnChan: make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),

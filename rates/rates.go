@@ -24,6 +24,7 @@ import (
 
 	"github.com/ericlagergren/decimal"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -65,8 +66,8 @@ func (rS *RateS) Shutdown() (err error) {
 	return
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rS *RateS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rS *RateS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	return utils.RPCCall(rS, serviceMethod, args, reply)
 }
 

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -231,7 +232,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
@@ -248,7 +249,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
@@ -260,7 +261,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
@@ -275,7 +276,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		var rply string
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1TerminateSession,
 			terminateArgs, &rply)
 		agReq.setCGRReply(nil, err)
@@ -296,7 +297,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
@@ -314,7 +315,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			Paginator: cgrArgs,
 		}
 		rply := new(sessions.V1ProcessEventReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
@@ -330,7 +331,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
 		var rplyCDRs string
-		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+		if err = da.connMgr.Call(context.TODO(), da.cgrCfg.DNSAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())

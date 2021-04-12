@@ -20,9 +20,9 @@ package cores
 
 import (
 	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -36,8 +36,8 @@ type conn interface {
 	RemoteAddr() net.Addr
 }
 
-func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r rpc.ServerCodec) {
-	r = newCapsServerCodec(newGobServerCodec(conn), caps)
+func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.ServerCodec) {
+	r = newCapsServerCodec(birpc.NewServerCodec(conn), caps)
 	if anz != nil {
 		from := conn.RemoteAddr()
 		var fromstr string
@@ -54,7 +54,7 @@ func newCapsGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerServic
 	return
 }
 
-func newCapsJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r rpc.ServerCodec) {
+func newCapsJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.ServerCodec) {
 	r = newCapsServerCodec(jsonrpc.NewServerCodec(conn), caps)
 	if anz != nil {
 		from := conn.RemoteAddr()
@@ -72,7 +72,7 @@ func newCapsJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerServi
 	return
 }
 
-func newCapsServerCodec(sc rpc.ServerCodec, caps *engine.Caps) rpc.ServerCodec {
+func newCapsServerCodec(sc birpc.ServerCodec, caps *engine.Caps) birpc.ServerCodec {
 	if !caps.IsLimited() {
 		return sc
 	}
@@ -83,11 +83,11 @@ func newCapsServerCodec(sc rpc.ServerCodec, caps *engine.Caps) rpc.ServerCodec {
 }
 
 type capsServerCodec struct {
-	sc   rpc.ServerCodec
+	sc   birpc.ServerCodec
 	caps *engine.Caps
 }
 
-func (c *capsServerCodec) ReadRequestHeader(r *rpc.Request) error {
+func (c *capsServerCodec) ReadRequestHeader(r *birpc.Request) error {
 	return c.sc.ReadRequestHeader(r)
 }
 
@@ -97,7 +97,7 @@ func (c *capsServerCodec) ReadRequestBody(x interface{}) error {
 	}
 	return c.sc.ReadRequestBody(x)
 }
-func (c *capsServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *capsServerCodec) WriteResponse(r *birpc.Response, x interface{}) error {
 	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
 	} else {

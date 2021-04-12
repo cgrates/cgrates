@@ -20,7 +20,6 @@ package actions
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -29,6 +28,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cron"
 
 	"github.com/cgrates/rpcclient"
@@ -467,7 +468,7 @@ func TestV1ExecuteActions(t *testing.T) {
 
 func TestActionSCall(t *testing.T) {
 	acts := new(ActionS)
-	if err := acts.Call("UnsupportedServiceMethod", "args", "rply"); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
+	if err := acts.Call(context.Background(), "UnsupportedServiceMethod", "args", "rply"); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
 		t.Errorf("Expected %+q, received %+q", rpcclient.ErrUnsupporteServiceMethod, err)
 	}
 }
@@ -544,7 +545,7 @@ func TestLogActionExecute(t *testing.T) {
 	log.SetOutput(output)
 
 	logAction := actLog{}
-	if err := logAction.execute(nil, evNM, utils.MetaNone); err != nil {
+	if err := logAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 
@@ -558,21 +559,21 @@ func TestLogActionExecute(t *testing.T) {
 }
 
 type testMockCDRsConn struct {
-	calls map[string]func(arg interface{}, rply interface{}) error
+	calls map[string]func(_ *context.Context, _, _ interface{}) error
 }
 
-func (s *testMockCDRsConn) Call(method string, arg interface{}, rply interface{}) error {
+func (s *testMockCDRsConn) Call(ctx *context.Context, method string, arg, rply interface{}) error {
 	call, has := s.calls[method]
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	return call(arg, rply)
+	return call(ctx, arg, rply)
 }
 
 func TestCDRLogActionExecute(t *testing.T) {
 	sMock := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CDRsV1ProcessEvent: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*engine.ArgV1ProcessEvent)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -604,14 +605,14 @@ func TestCDRLogActionExecute(t *testing.T) {
 			},
 		},
 	}
-	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
 	})
 	apA := &engine.APAction{
@@ -634,7 +635,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 		},
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := cdrLogAction.execute(nil, evNM, utils.MetaNone); err != nil {
+	if err := cdrLogAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -643,8 +644,8 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.CDRsV1ProcessEvent: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.CDRsV1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*engine.ArgV1ProcessEvent)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -676,7 +677,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 			},
 		},
 	}
-	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
@@ -717,7 +718,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): internalCDRsChann,
 	})
 	apA := &engine.APAction{
@@ -745,7 +746,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 			"EventFieldOpt": "eventValue",
 		},
 	}
-	if err := cdrLogAction.execute(nil, evNM, utils.MetaNone); err != nil {
+	if err := cdrLogAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -754,8 +755,8 @@ func TestExportAction(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.EeSv1ProcessEvent: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -767,12 +768,12 @@ func TestExportAction(t *testing.T) {
 			},
 		},
 	}
-	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): internalCDRsChann,
 	})
 	apA := &engine.APAction{
@@ -797,7 +798,7 @@ func TestExportAction(t *testing.T) {
 			"EventFieldOpt": "eventValue",
 		},
 	}
-	if err := exportAction.execute(nil, evNM, utils.MetaNone); err != nil {
+	if err := exportAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -806,8 +807,8 @@ func TestExportActionWithEeIDs(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.EeSv1ProcessEvent: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -822,12 +823,12 @@ func TestExportActionWithEeIDs(t *testing.T) {
 			},
 		},
 	}
-	internalCDRsChann := make(chan rpcclient.ClientConnector, 1)
+	internalCDRsChann := make(chan birpc.ClientConnector, 1)
 	internalCDRsChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs): internalCDRsChann,
 	})
 	apA := &engine.APAction{
@@ -855,7 +856,7 @@ func TestExportActionWithEeIDs(t *testing.T) {
 			"EventFieldOpt": "eventValue",
 		},
 	}
-	if err := exportAction.execute(nil, evNM, utils.MetaNone); err != nil {
+	if err := exportAction.execute(context.Background(), evNM, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -864,8 +865,8 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -880,12 +881,12 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 			},
 		},
 	}
-	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
 	})
 	apA := &engine.APAction{
@@ -902,7 +903,7 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM, "cgrates.org:TH1"); err != nil {
+	if err := exportAction.execute(context.Background(), evNM, "cgrates.org:TH1"); err != nil {
 		t.Error(err)
 	}
 }
@@ -911,8 +912,8 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.ThresholdSv1ResetThreshold: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -927,12 +928,12 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 			},
 		},
 	}
-	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): internalChann,
 	})
 	apA := &engine.APAction{
@@ -949,7 +950,7 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM, "TH1"); err != nil {
+	if err := exportAction.execute(context.Background(), evNM, "TH1"); err != nil {
 		t.Error(err)
 	}
 }
@@ -958,8 +959,8 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -974,12 +975,12 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 			},
 		},
 	}
-	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
 	})
 	apA := &engine.APAction{
@@ -996,7 +997,7 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM, "cgrates.org:ST1"); err != nil {
+	if err := exportAction.execute(context.Background(), evNM, "cgrates.org:ST1"); err != nil {
 		t.Error(err)
 	}
 }
@@ -1005,8 +1006,8 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	// Clear cache because connManager sets the internal connection in cache
 	engine.Cache.Clear([]string{utils.CacheRPCConnections})
 	sMock2 := &testMockCDRsConn{
-		calls: map[string]func(arg interface{}, rply interface{}) error{
-			utils.StatSv1ResetStatQueue: func(arg interface{}, rply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply interface{}) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -1021,12 +1022,12 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 			},
 		},
 	}
-	internalChann := make(chan rpcclient.ClientConnector, 1)
+	internalChann := make(chan birpc.ClientConnector, 1)
 	internalChann <- sMock2
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): internalChann,
 	})
 	apA := &engine.APAction{
@@ -1045,7 +1046,7 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 	evNM := utils.MapStorage{
 		utils.MetaOpts: map[string]interface{}{},
 	}
-	if err := exportAction.execute(nil, evNM, "ST1"); err != nil {
+	if err := exportAction.execute(context.Background(), evNM, "ST1"); err != nil {
 		t.Error(err)
 	}
 }

@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/rates"
 
 	"github.com/cgrates/cgrates/utils"
@@ -205,9 +206,9 @@ type RateSv1 struct {
 	rS *rates.RateS
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rSv1 *RateSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rSv1 *RateSv1) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(rSv1, serviceMethod, args, reply)
 }
 

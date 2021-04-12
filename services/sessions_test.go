@@ -22,13 +22,13 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestSessionSCoverage for cover testing
@@ -40,16 +40,16 @@ func TestSessionSCoverage(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	chS := engine.NewCacheS(cfg, nil, nil)
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- chS
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -59,7 +59,7 @@ func TestSessionSCoverage(t *testing.T) {
 		dm:       db,
 		server:   server,
 		shdChan:  shdChan,
-		connChan: make(chan rpcclient.ClientConnector, 1),
+		connChan: make(chan birpc.ClientConnector, 1),
 		connMgr:  nil,
 		caps:     nil,
 		anz:      anz,

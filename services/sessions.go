@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 
@@ -30,12 +31,11 @@ import (
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
-	server *cores.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan birpc.ClientConnector,
 	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
 	caps *engine.Caps, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -64,7 +64,7 @@ type SessionService struct {
 	sm       *sessions.SessionS
 	rpc      *v1.SMGenericV1
 	rpcv1    *v1.SessionSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
@@ -106,12 +106,8 @@ func (smg *SessionService) Start() (err error) {
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != "" {
 		smg.bircpEnabled = true
-		for method, handler := range smg.rpc.Handlers() {
-			smg.server.BiRPCRegisterName(method, handler)
-		}
-		for method, handler := range smg.rpcv1.Handlers() {
-			smg.server.BiRPCRegisterName(method, handler)
-		}
+		smg.server.BiRPCRegisterName("SMGenericV1", smg.rpc)
+		smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
 		// run this in it's own goroutine
 		go smg.start()
 	}

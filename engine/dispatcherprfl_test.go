@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -229,7 +230,7 @@ type testRPCHost struct {
 	reply         interface{}
 }
 
-func (v *testRPCHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (v *testRPCHost) Call(_ *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	v.serviceMethod = serviceMethod
 	v.args = args
 	v.reply = reply
@@ -246,7 +247,7 @@ func TestDispatcherHostCall(t *testing.T) {
 	}
 	var reply string
 	dspHost.rpcConn = tRPC
-	if err := dspHost.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := dspHost.Call(context.Background(), utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(*etRPC, *tRPC) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))

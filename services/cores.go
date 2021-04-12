@@ -22,17 +22,17 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
-	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
 		connChan: internalCoreSChan,
@@ -54,7 +54,7 @@ type CoreService struct {
 
 	cS       *cores.CoreService
 	rpc      *v1.CoreSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }

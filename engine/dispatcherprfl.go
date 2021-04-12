@@ -22,9 +22,10 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type DispatcherHostProfile struct {
@@ -133,7 +134,7 @@ func (dps DispatcherProfiles) Sort() {
 type DispatcherHost struct {
 	Tenant string
 	*config.RemoteHost
-	rpcConn rpcclient.ClientConnector
+	rpcConn birpc.ClientConnector
 }
 
 // DispatcherHostWithOpts is used in replicatorV1 for dispatcher
@@ -148,7 +149,7 @@ func (dH *DispatcherHost) TenantID() string {
 }
 
 // Call will build and cache the connection if it is not defined yet then will execute the method on conn
-func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (dH *DispatcherHost) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	if dH.rpcConn == nil {
 		// connect the rpcConn
 		cfg := config.CgrConfig()
@@ -163,7 +164,7 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 		}
 
 	}
-	return dH.rpcConn.Call(serviceMethod, args, reply)
+	return dH.rpcConn.Call(ctx, serviceMethod, args, reply)
 }
 
 type DispatcherHostIDs []string

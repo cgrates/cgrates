@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -59,8 +60,8 @@ func (aS *AccountS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.AccountS))
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (aS *AccountS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (aS *AccountS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	return utils.RPCCall(aS, serviceMethod, args, reply)
 }
 

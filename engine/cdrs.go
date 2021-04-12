@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -135,7 +136,7 @@ func (cdrS *CDRServer) RegisterHandlersToServer(server utils.Server) {
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns, nil,
+	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		return
@@ -170,7 +171,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 		CGREvent:    cgrEv,
 		ProcessRuns: processRuns,
 	}
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
+	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
@@ -192,7 +193,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 		thArgs.APIOpts = make(map[string]interface{})
 	}
 	thArgs.APIOpts[utils.MetaEventType] = utils.CDR
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns, nil,
+	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -207,7 +208,7 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	statArgs := &StatsArgsProcessEvent{
 		CGREvent: cgrEv.Clone(),
 	}
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().StatSConns, nil,
+	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().StatSConns,
 		utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -219,7 +220,7 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 // eeSProcessEvent will process the event with the EEs component
 func (cdrS *CDRServer) eeSProcessEvent(cgrEv *utils.CGREventWithEeIDs) (err error) {
 	var reply map[string]map[string]interface{}
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().EEsConns, nil,
+	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().EEsConns,
 		utils.EeSv1ProcessEvent,
 		cgrEv, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -348,8 +349,8 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREvent,
 	return
 }
 
-// Call implements the rpcclient.ClientConnector interface
-func (cdrS *CDRServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements the birpc.ClientConnector interface
+func (cdrS *CDRServer) Call(ctx*context.Context,serviceMethod string, args , reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

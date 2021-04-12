@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -31,8 +31,8 @@ import (
 
 func TestACExecuteAccountsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	internalChan := make(chan rpcclient.ClientConnector, 1)
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	internalChan := make(chan birpc.ClientConnector, 1)
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
 	})
 	apAction := &engine.APAction{
@@ -62,28 +62,28 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 	}
 
 	expected := "no connection with AccountS"
-	if err := actCdrLG.execute(nil, dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
+	if err := actCdrLG.execute(context.Background(), dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	actCdrLG.config.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
 	expected = "Closed unspilit syntax "
-	if err := actCdrLG.execute(nil, dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
+	if err := actCdrLG.execute(context.Background(), dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	//invalid to parse a value from diktats
 	actCdrLG.aCfg.Diktats[0].Value = "10"
-	expected = "DISCONNECTED"
-	if err := actCdrLG.execute(nil, dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
+	expected = context.DeadlineExceeded.Error()
+	if err := actCdrLG.execute(context.Background(), dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
 
 func TestACExecuteAccountsRemBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	internalChan := make(chan rpcclient.ClientConnector, 1)
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	internalChan := make(chan birpc.ClientConnector, 1)
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
 	})
 	apAction := &engine.APAction{
@@ -105,13 +105,13 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 	}
 
 	expected := "no connection with AccountS"
-	if err := actRemBal.execute(nil, nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
+	if err := actRemBal.execute(context.Background(), nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	actRemBal.config.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	expected = "DISCONNECTED"
-	if err := actRemBal.execute(nil, nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
+	expected = context.DeadlineExceeded.Error()
+	if err := actRemBal.execute(context.Background(), nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

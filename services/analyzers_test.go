@@ -22,13 +22,13 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/analyzers"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestAnalyzerCoverage for cover testing
@@ -39,7 +39,7 @@ func TestAnalyzerCoverage(t *testing.T) {
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	connChan := make(chan rpcclient.ClientConnector, 1)
+	connChan := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, connChan, srvDep)
 	if anz == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(anz))
@@ -57,7 +57,7 @@ func TestAnalyzerCoverage(t *testing.T) {
 	if anz2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	var rpcClientCnctr rpcclient.ClientConnector
+	var rpcClientCnctr birpc.ClientConnector
 	getIntrnCdc := anz2.GetInternalCodec(rpcClientCnctr, utils.EmptyString)
 	if !reflect.DeepEqual(getIntrnCdc, rpcClientCnctr) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(rpcClientCnctr), utils.ToJSON(getIntrnCdc))
@@ -79,7 +79,7 @@ func TestAnalyzerCoverage(t *testing.T) {
 	if !reflect.DeepEqual(anz2.anz, getAnalyzerS) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(anz2.anz), utils.ToJSON(getAnalyzerS))
 	}
-	var rpcClientCnctr2 rpcclient.ClientConnector
+	var rpcClientCnctr2 birpc.ClientConnector
 	getIntrnCdc2 := anz2.GetInternalCodec(rpcClientCnctr2, utils.EmptyString)
 	expected2 := anz2.anz.NewAnalyzerConnector(nil, utils.MetaInternal, utils.EmptyString, utils.EmptyString)
 	if !reflect.DeepEqual(getIntrnCdc2, expected2) {

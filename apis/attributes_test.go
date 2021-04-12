@@ -16,30 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package v1
+package apis
 
 import (
+	"testing"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewServiceManagerV1(sm *servmanager.ServiceManager) *ServiceManagerV1 {
-	return &ServiceManagerV1{sm: sm}
+func BenchmarkCallAPIerRPC(b *testing.B) {
+	as := NewAttributeSv1(nil)
+	ctx := context.Background()
+	args := &utils.CGREvent{}
+	var reply string
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		as.Call(ctx, utils.AttributeSv1Ping, args, &reply)
+	}
 }
 
-type ServiceManagerV1 struct {
-	sm *servmanager.ServiceManager // Need to have them capitalize so we can export in V2
-}
-
-// Ping return pong if the service is active
-func (servManager *ServiceManagerV1) Ping(ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (servManager *ServiceManagerV1) Call(ctx *context.Context, serviceMethod string,
-	args, reply interface{}) error {
-	return utils.APIerRPCCall(servManager, serviceMethod, args, reply)
+func BenchmarkCallAsRPCService(b *testing.B) {
+	as := NewAttributeSv1(nil)
+	ctx := context.Background()
+	args := &utils.CGREvent{}
+	var reply string
+	b.ResetTimer()
+	srv, _ := birpc.NewService(as, "", false)
+	for i := 0; i < b.N; i++ {
+		srv.Call(ctx, utils.AttributeSv1Ping, args, &reply)
+	}
 }

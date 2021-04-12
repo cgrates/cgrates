@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -80,26 +82,26 @@ func TestCall(t *testing.T) {
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
 	eeS := NewEventExporterS(cgrCfg, filterS, nil)
 	errExpect := "UNSUPPORTED_SERVICE_METHOD"
-	if err := eeS.Call("test", 24532, 43643); err == nil || err.Error() != errExpect {
+	if err := eeS.Call(context.Background(), "test", 24532, 43643); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %q but received %q", errExpect, err)
 	}
 }
 
 type testMockEvent struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(_ *context.Context, _, _ interface{}) error
 }
 
-func (sT *testMockEvent) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockEvent) Call(ctx *context.Context, method string, arg, rply interface{}) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(arg, rply)
+		return call(ctx, arg, rply)
 	}
 }
 func TestAttrSProcessEvent(t *testing.T) {
 	testMock := &testMockEvent{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply interface{}) error {
 				rplyEv := &engine.AttrSProcessEventReply{
 					AlteredFields: []string{"testcase"},
 				}
@@ -118,9 +120,9 @@ func TestAttrSProcessEvent(t *testing.T) {
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cgrCfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cgrCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)
@@ -133,8 +135,8 @@ func TestAttrSProcessEvent(t *testing.T) {
 func TestAttrSProcessEvent2(t *testing.T) {
 	engine.Cache.Clear(nil)
 	testMock := &testMockEvent{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ interface{}) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -144,9 +146,9 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	clientConn := make(chan rpcclient.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
-	connMgr := engine.NewConnManager(cgrCfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cgrCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): clientConn,
 	})
 	eeS := NewEventExporterS(cgrCfg, filterS, connMgr)

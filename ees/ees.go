@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -31,8 +32,7 @@ import (
 
 // onCacheEvicted is called by ltcache when evicting an item
 func onCacheEvicted(itmID string, value interface{}) {
-	ee := value.(EventExporter)
-	ee.OnEvicted(itmID, value)
+	value.(EventExporter).OnEvicted(itmID, value)
 }
 
 // NewEventExporterS instantiates the EventExporterS
@@ -81,8 +81,8 @@ func (eeS *EventExporterS) Shutdown() {
 	eeS.setupCache(nil) // cleanup exporters
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (eeS *EventExporterS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (eeS *EventExporterS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	return utils.RPCCall(eeS, serviceMethod, args, reply)
 }
 
@@ -121,8 +121,8 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 		CGREvent:     cgrEv,
 		ProcessRuns:  processRuns,
 	}
-	if err = eeS.connMgr.Call(
-		eeS.cfg.EEsNoLksCfg().AttributeSConns, nil,
+	if err = eeS.connMgr.Call(context.TODO(),
+		eeS.cfg.EEsNoLksCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 	} else if err != nil &&

@@ -26,8 +26,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -61,14 +60,14 @@ func TestEventExporterSReload(t *testing.T) {
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
+		chS, filterSChan, server, make(chan birpc.ClientConnector, 1),
 		anz, srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
-		server, make(chan rpcclient.ClientConnector, 2), anz, srvDep)
+		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	srvMngr.AddServices(ees, attrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	if err := srvMngr.StartServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -135,9 +134,9 @@ func TestEventExporterSReload2(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
-		server, make(chan rpcclient.ClientConnector, 2), anz, srvDep)
+		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	if ees.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}

@@ -24,6 +24,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -224,7 +225,7 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
 			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
-			if err = dH.Call(serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+			if err = dH.Call(context.TODO(), serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 				return
 			}
 		}
@@ -242,7 +243,7 @@ func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID 
 			return
 		}
 		called = true
-		if err = dH.Call(serviceMethod, args, reply); rpcclient.IsNetworkError(err) {
+		if err = dH.Call(context.TODO(), serviceMethod, args, reply); rpcclient.IsNetworkError(err) {
 			continue
 		}
 		if routeID != utils.EmptyString { // cache the discovered route
@@ -285,7 +286,7 @@ func (b *broadcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID s
 	if !hasHosts { // in case we do not match any host
 		return utils.ErrHostNotFound
 	}
-	return pool.Call(serviceMethod, args, reply)
+	return pool.Call(context.TODO(), serviceMethod, args, reply)
 }
 
 func newSingleStrategyDispatcher(hosts engine.DispatcherHostProfiles, params map[string]interface{}, tntID string) (ls strategyDispatcher, err error) {
@@ -363,7 +364,7 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 			routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
 			lM.incrementLoad(dH.ID, ld.tntID)
-			err = dH.Call(serviceMethod, args, reply)
+			err = dH.Call(context.TODO(), serviceMethod, args, reply)
 			lM.decrementLoad(dH.ID, ld.tntID) // call ended
 			if !rpcclient.IsNetworkError(err) {
 				return
@@ -384,7 +385,7 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID strin
 		}
 		called = true
 		lM.incrementLoad(hostID, ld.tntID)
-		err = dH.Call(serviceMethod, args, reply)
+		err = dH.Call(context.TODO(), serviceMethod, args, reply)
 		lM.decrementLoad(hostID, ld.tntID) // call ended
 		if rpcclient.IsNetworkError(err) {
 			continue

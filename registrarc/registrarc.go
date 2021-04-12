@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -115,7 +116,7 @@ func (dhS *RegistrarCService) registerDispHosts() {
 				continue
 			}
 			var rply string
-			if err := dhS.connMgr.Call([]string{connID}, nil, utils.RegistrarSv1RegisterDispatcherHosts, args, &rply); err != nil {
+			if err := dhS.connMgr.Call(context.TODO(), []string{connID}, utils.RegistrarSv1RegisterDispatcherHosts, args, &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts to the conn with ID <%s> because : %s",
 					utils.RegistrarC, connID, err))
 				continue
@@ -136,7 +137,7 @@ func (dhS *RegistrarCService) registerRPCHosts() {
 				continue
 			}
 			var rply string
-			if err := dhS.connMgr.Call([]string{connID}, nil, utils.RegistrarSv1RegisterRPCHosts, args, &rply); err != nil {
+			if err := dhS.connMgr.Call(context.TODO(), []string{connID}, utils.RegistrarSv1RegisterRPCHosts, args, &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts to the conn with ID <%s> because : %s",
 					utils.RegistrarC, connID, err))
 				continue
@@ -153,7 +154,7 @@ func unregisterHosts(connMgr *engine.ConnManager, regCfg *config.RegistrarCCfg, 
 			if tnt == utils.MetaDefault {
 				tnt = dTnt
 			}
-			if err := connMgr.Call([]string{connID}, nil, method, NewUnregisterArgs(tnt, hostCfgs), &rply); err != nil {
+			if err := connMgr.Call(context.TODO(), []string{connID}, method, NewUnregisterArgs(tnt, hostCfgs), &rply); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to unregister the hosts with tenant<%s> to the conn with ID <%s> because : %s",
 					utils.RegistrarC, tnt, connID, err))
 			}

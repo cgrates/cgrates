@@ -29,6 +29,8 @@ import (
 
 	"github.com/ericlagergren/decimal"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/rpcclient"
@@ -96,14 +98,14 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 }
 
 type testMockCall struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(_ *context.Context, _, _ interface{}) error
 }
 
-func (tS *testMockCall) Call(method string, args interface{}, rply interface{}) error {
+func (tS *testMockCall) Call(ctx *context.Context, method string, args, rply interface{}) error {
 	if call, has := tS.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(args, rply)
+		return call(ctx, args, rply)
 	}
 }
 
@@ -112,15 +114,15 @@ func TestProcessAttributeS(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{ // coverage purpose
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ interface{}) error {
 				return utils.ErrNotImplemented
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 	cgrEvent := &utils.CGREvent{
@@ -143,15 +145,15 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 
 	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, _, _ interface{}) error {
 				return utils.ErrNotImplemented
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
 	})
 	cgrEvent := &utils.CGREvent{
@@ -171,8 +173,8 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 
 	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply interface{}) error {
 				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -187,9 +189,9 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
 	})
 	cgrEvent := &utils.CGREvent{
@@ -266,8 +268,8 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg := config.NewDefaultCGRConfig()
 	sTestMock := &testMockCall{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.RateSv1CostForEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply interface{}) error {
 				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -282,9 +284,9 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): chanInternal,
 	})
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -573,9 +575,9 @@ func TestDebitFromBothBalances(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	rates := rates2.NewRateS(cfg, fltr, dm)
 	//RateS
-	rpcClientConn := make(chan rpcclient.ClientConnector, 1)
+	rpcClientConn := make(chan birpc.ClientConnector, 1)
 	rpcClientConn <- rates
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): rpcClientConn,
 	})
 	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}

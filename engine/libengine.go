@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -32,9 +34,9 @@ import (
 // NewRPCPool returns a new pool of connection with the given configuration
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
-	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool,
-	biRPCClient rpcclient.BiRPCConector, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
-	var rpcClient rpcclient.ClientConnector
+	internalConnChan chan birpc.ClientConnector, lazyConnect bool,
+	biRPCClient interface{}, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
+	var rpcClient birpc.ClientConnector
 	var atLestOneConnected bool // If one connected we don't longer return errors
 	rpcPool = rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	for _, rpcConnCfg := range rpcConnCfgs {
@@ -63,13 +65,13 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 // NewRPCConnection creates a new connection based on the RemoteHost structure
 // connCache is used to cache the connection with ID
 func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
-	connectTimeout, replyTimeout time.Duration, internalConnChan chan rpcclient.ClientConnector, lazyConnect bool,
-	biRPCClient rpcclient.BiRPCConector, poolID, connID string, connCache *ltcache.Cache) (client rpcclient.ClientConnector, err error) {
+	connectTimeout, replyTimeout time.Duration, internalConnChan chan birpc.ClientConnector, lazyConnect bool,
+	biRPCClient interface{}, poolID, connID string, connCache *ltcache.Cache) (client birpc.ClientConnector, err error) {
 	var id string
 	if connID != utils.EmptyString {
 		id = poolID + utils.ConcatenatedKeySep + connID
 		if x, ok := connCache.Get(id); ok && x != nil {
-			return x.(rpcclient.ClientConnector), nil
+			return x.(birpc.ClientConnector), nil
 		}
 	}
 	if cfg.Address == rpcclient.InternalRPC ||
@@ -100,7 +102,7 @@ func NewRPCClientSet() (s RPCClientSet) {
 type RPCClientSet map[string]*rpcclient.RPCClient
 
 // AddInternalRPCClient creates and adds to the set a new rpc client using the provided configuration
-func (s RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.ClientConnector) {
+func (s RPCClientSet) AddInternalRPCClient(name string, connChan chan birpc.ClientConnector) {
 	rpc, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
@@ -114,14 +116,14 @@ func (s RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.
 }
 
 // GetInternalChanel is used when RPCClientSet is passed as internal connection for RPCPool
-func (s RPCClientSet) GetInternalChanel() chan rpcclient.ClientConnector {
-	connChan := make(chan rpcclient.ClientConnector, 1)
+func (s RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
+	connChan := make(chan birpc.ClientConnector, 1)
 	connChan <- s
 	return connChan
 }
 
-// Call the implementation of the rpcclient.ClientConnector interface
-func (s RPCClientSet) Call(method string, args interface{}, reply interface{}) error {
+// Call the implementation of the birpc.ClientConnector interface
+func (s RPCClientSet) Call(ctx *context.Context, method string, args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -130,7 +132,7 @@ func (s RPCClientSet) Call(method string, args interface{}, reply interface{}) e
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	return conn.Call(method, args, reply)
+	return conn.Call(ctx, method, args, reply)
 }
 
 // func (s RPCClientSet) ReconnectInternals(subsystems ...string) (err error) {

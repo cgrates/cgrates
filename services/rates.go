@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/cores"
 
@@ -29,16 +30,14 @@ import (
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-
 	//"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, server *cores.Server,
-	intConnChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
@@ -68,7 +67,7 @@ type RateService struct {
 
 	rateS       *rates.RateS
 	rpc         *v1.RateSv1
-	intConnChan chan rpcclient.ClientConnector
+	intConnChan chan birpc.ClientConnector
 	anz         *AnalyzerService
 	srvDep      map[string]*sync.WaitGroup
 }

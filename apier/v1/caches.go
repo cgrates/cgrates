@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -126,8 +127,8 @@ func (chSv1 *CacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, repl
 	return chSv1.cacheS.V1ReplicateRemove(args, reply)
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (chSv1 *CacheSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (chSv1 *CacheSv1) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(chSv1, serviceMethod, args, reply)
 }

@@ -22,6 +22,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
@@ -30,7 +31,6 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestApiersCoverage for cover testing
@@ -46,10 +46,10 @@ func TestApiersCoverage(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
 	stordb := NewStorDBService(cfg, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server,
-		make(chan rpcclient.ClientConnector, 1), nil, anz, srvDep)
-	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan rpcclient.ClientConnector, 1), anz, srvDep)
+		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	apiSv2 := NewAPIerSv2Service(apiSv1, cfg, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	if apiSv1.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -92,13 +92,13 @@ func TestApiersCoverage(t *testing.T) {
 	//populates apiSv1 and apiSv2 with something in order to call the close function
 	apiSv1.stopChan = make(chan struct{}, 1)
 	apiSv1.stopChan <- struct{}{}
-	apiSv1.connChan = make(chan rpcclient.ClientConnector, 1)
+	apiSv1.connChan = make(chan birpc.ClientConnector, 1)
 	apiSv1.connChan <- chS
 	shutdownApi1 := apiSv1.Shutdown()
 	if shutdownApi1 != nil {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutdownApi1)
 	}
-	apiSv2.connChan = make(chan rpcclient.ClientConnector, 1)
+	apiSv2.connChan = make(chan birpc.ClientConnector, 1)
 	apiSv2.connChan <- chS
 	shutdownApi2 := apiSv2.Shutdown()
 	if shutdownApi2 != nil {

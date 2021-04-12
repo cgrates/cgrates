@@ -23,6 +23,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,9 +34,9 @@ type APIerSv2 struct {
 	v1.APIerSv1
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (apiv2 *APIerSv2) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (apiv2 *APIerSv2) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
 }
 

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -208,7 +209,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
@@ -222,7 +223,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaAccounts),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1InitSessionReply)
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
@@ -231,7 +232,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.Has(utils.MetaAccounts),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
@@ -243,7 +244,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := utils.StringPointer("")
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
@@ -263,7 +264,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			rdrCfg.Flags.ParamValue(utils.MetaRoutesMaxCost),
 		)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -278,7 +279,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 			Paginator: cgrArgs,
 		}
 		rply := new(sessions.V1ProcessEventReply)
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessEvent,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 	case utils.MetaCDRs: // allow CDR processing
 	}
@@ -289,7 +290,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	if rdrCfg.Flags.Has(utils.MetaCDRs) &&
 		!rdrCfg.Flags.Has(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
-		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
+		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, rplyCDRs)
 	}
 

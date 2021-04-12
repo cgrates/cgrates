@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -734,15 +734,15 @@ func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage pur
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ interface{}) error {
 				return utils.ErrNotImplemented
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 
@@ -779,8 +779,8 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 	engine.Cache.Clear(nil)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.AttributeSv1ProcessEvent: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply interface{}) error {
 				rplCast, canCast := reply.(*engine.AttrSProcessEventReply)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -802,9 +802,9 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 			},
 		},
 	}
-	chanInternal := make(chan rpcclient.ClientConnector, 1)
+	chanInternal := make(chan birpc.ClientConnector, 1)
 	chanInternal <- sTestMock
-	connMgr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanInternal,
 	})
 

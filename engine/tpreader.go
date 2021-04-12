@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1277,19 +1278,19 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaLoad:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaRemove:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1RemoveItems, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1RemoveItems, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaClear:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
+		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 			return
 		}
 	}
@@ -1337,7 +1338,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 		APIOpts:  opts,
 		CacheIDs: cacheIDs,
 	}
-	if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
+	if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
 	}
 

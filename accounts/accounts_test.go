@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
@@ -42,7 +43,7 @@ func TestRPCCall(t *testing.T) {
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	method := "ApierSv1Ping"
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := accnts.Call(method, nil, nil); err == nil || err.Error() != expected {
+	if err := accnts.Call(context.Background(), method, nil, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

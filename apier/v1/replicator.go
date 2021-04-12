@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,8 +38,8 @@ type ReplicatorSv1 struct {
 	v1 *APIerSv1 // needed for CallCache only
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (rplSv1 *ReplicatorSv1) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
 	return utils.APIerRPCCall(rplSv1, serviceMethod, args, reply)
 }
 

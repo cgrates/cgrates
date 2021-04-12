@@ -1,4 +1,5 @@
 // +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -26,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -733,9 +735,9 @@ func TestERsProcessEvent11(t *testing.T) {
 			},
 		},
 	}
-	clientChan := make(chan rpcclient.ClientConnector, 1)
+	clientChan := make(chan birpc.ClientConnector, 1)
 	clientChan <- testMockClient
-	connMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): clientChan,
 	})
 	srv := NewERService(cfg, fltrS, connMng)

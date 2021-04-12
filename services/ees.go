@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -29,13 +30,12 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, server *cores.Server,
-	intConnChan chan rpcclient.ClientConnector, anz *AnalyzerService,
+	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
@@ -57,7 +57,7 @@ type EventExporterService struct {
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
 	server      *cores.Server
-	intConnChan chan rpcclient.ClientConnector
+	intConnChan chan birpc.ClientConnector
 	rldChan     chan struct{}
 	stopChan    chan struct{}
 

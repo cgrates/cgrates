@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/actions"
 
 	"github.com/cgrates/cgrates/engine"
@@ -147,9 +148,9 @@ type ActionSv1 struct {
 	aS *actions.ActionS
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (aSv1 *ActionSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (aSv1 *ActionSv1) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)
 }
 

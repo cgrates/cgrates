@@ -19,12 +19,12 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 //TestDispatcherCoverage for cover testing
@@ -35,8 +35,8 @@ func TestDispatcherHCoverage(t *testing.T) {
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	rpcInternal := map[string]chan rpcclient.ClientConnector{}
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	rpcInternal := map[string]chan birpc.ClientConnector{}
 	cM := engine.NewConnManager(cfg, rpcInternal)
 	srv := NewRegistrarCService(cfg, server, cM, anz, srvDep)
 	if srv == nil {

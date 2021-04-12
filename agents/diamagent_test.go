@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -34,18 +36,14 @@ func TestDAsSessionSClientIface(t *testing.T) {
 }
 
 type testMockSessionConn struct {
-	calls map[string]func(arg interface{}, rply interface{}) error
+	calls map[string]func(_ *context.Context, _, _ interface{}) error
 }
 
-func (s *testMockSessionConn) Call(method string, arg interface{}, rply interface{}) error {
+func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg, rply interface{}) error {
 	if call, has := s.calls[method]; has {
-		return call(arg, rply)
+		return call(ctx, arg, rply)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
-}
-
-func (s *testMockSessionConn) CallBiRPC(_ rpcclient.ClientConnector, method string, arg interface{}, rply interface{}) error {
-	return s.Call(method, arg, rply)
 }
 
 func (s *testMockSessionConn) Handlers() (b map[string]interface{}) {
@@ -120,11 +118,11 @@ func TestProcessRequest(t *testing.T) {
 		utils.MetaCmd:     utils.NewLeafNode("cmdR"),
 	}}
 
-	sS := &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
-		utils.SessionSv1RegisterInternalBiJSONConn: func(arg interface{}, rply interface{}) error {
+	sS := &testMockSessionConn{calls: map[string]func(_ *context.Context, _, _ interface{}) error{
+		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ interface{}) error {
 			return nil
 		},
-		utils.SessionSv1AuthorizeEvent: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -166,7 +164,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1InitiateSession: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1InitiateSession: func(_ *context.Context, arg, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -231,7 +229,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1UpdateSession: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1UpdateSession: func(_ *context.Context, arg, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -296,7 +294,7 @@ func TestProcessRequest(t *testing.T) {
 			}
 			return nil
 		},
-		utils.SessionSv1ProcessCDR: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessCDR: func(_ *context.Context, arg, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -333,7 +331,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1TerminateSession: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1TerminateSession: func(_ *context.Context, arg, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -374,7 +372,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = utils.OK
 			return nil
 		},
-		utils.SessionSv1ProcessMessage: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessMessage: func(_ *context.Context, arg, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
@@ -445,9 +443,9 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
 
-	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
+	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
-	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
+	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):      internalSessionSChan,
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
@@ -456,6 +454,7 @@ func TestProcessRequest(t *testing.T) {
 		filterS: filters,
 		connMgr: connMgr,
 	}
+	da.ctx = context.WithClient(context.Background(), da)
 	pr, err := da.processRequest(reqProcessor, agReq)
 	if err != nil {
 		t.Error(err)

@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -78,7 +79,7 @@ func TestSessionSReload1(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
-	clientConect := make(chan rpcclient.ClientConnector, 1)
+	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- &testMockClients{
 		calls: func(args interface{}, reply interface{}) error {
 			rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
@@ -96,11 +97,11 @@ func TestSessionSReload1(t *testing.T) {
 			return nil
 		},
 	}
-	conMng := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	conMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, new(DataDBService), server, make(chan rpcclient.ClientConnector, 1), shdChan, conMng, nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), shdChan, conMng, nil, anz, srvDep)
 	err := srv.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -154,9 +155,9 @@ func TestSessionSReload2(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
@@ -164,8 +165,8 @@ func TestSessionSReload2(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
@@ -208,9 +209,9 @@ func TestSessionSReload3(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
-	internalChan := make(chan rpcclient.ClientConnector, 1)
+	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
+	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
@@ -218,8 +219,8 @@ func TestSessionSReload3(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
-	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}

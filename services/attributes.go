@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalChan chan rpcclient.ClientConnector,
+	server *cores.Server, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
@@ -59,8 +59,8 @@ type AttributeService struct {
 	server      *cores.Server
 
 	attrS    *engine.AttributeService
-	rpc      *v1.AttributeSv1               // useful on restart
-	connChan chan rpcclient.ClientConnector // publish the internal Subsystem when available
+	rpc      *v1.AttributeSv1           // useful on restart
+	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }

@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -139,7 +140,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 			CGREvent:    clonedEv,
 		}
 		var evReply AttrSProcessEventReply
-		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
+		if err = cS.connMgr.Call(context.TODO(), cS.cfg.ChargerSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, args, &evReply); err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {
 				return nil, err

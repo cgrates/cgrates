@@ -22,19 +22,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
 	filterSChan chan *engine.FilterS, shdChan *utils.SyncedChan,
-	internalAnalyzerSChan chan rpcclient.ClientConnector,
+	internalAnalyzerSChan chan birpc.ClientConnector,
 	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
@@ -57,7 +57,7 @@ type AnalyzerService struct {
 
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
-	connChan chan rpcclient.ClientConnector
+	connChan chan birpc.ClientConnector
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -148,7 +148,7 @@ func (anz *AnalyzerService) GetAnalyzerS() *analyzers.AnalyzerService {
 }
 
 // GetInternalCodec returns the connection wrapped in analyzer connector
-func (anz *AnalyzerService) GetInternalCodec(c rpcclient.ClientConnector, to string) rpcclient.ClientConnector {
+func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string) birpc.ClientConnector {
 	if !anz.IsRunning() {
 		return c
 	}

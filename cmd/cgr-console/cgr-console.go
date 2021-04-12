@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -106,7 +107,7 @@ func executeCommand(command string) {
 			param = param.(*console.StringMapWrapper).Items
 		}
 
-		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
+		if rpcErr := client.Call(context.TODO(), cmd.RpcMethod(), param, res); rpcErr != nil {
 			fmt.Println("Error executing command: " + rpcErr.Error())
 		} else {
 			fmt.Println(cmd.GetFormatedResult(res))

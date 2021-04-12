@@ -33,6 +33,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
@@ -1162,9 +1163,9 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (cfg *CGRConfig) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (cfg *CGRConfig) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
 }
 

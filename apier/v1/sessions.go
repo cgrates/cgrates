@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -136,9 +137,9 @@ func (ssv1 *SessionSv1) DeactivateSessions(args *utils.SessionIDsWithAPIOpts, re
 	return ssv1.sS.BiRPCv1DeactivateSessions(nil, args, reply)
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (ssv1 *SessionSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
+// Call implements birpc.ClientConnector interface for internal RPC
+func (ssv1 *SessionSv1) Call(ctx *context.Context, serviceMethod string,
+	args, reply interface{}) error {
 	return utils.APIerRPCCall(ssv1, serviceMethod, args, reply)
 }
 

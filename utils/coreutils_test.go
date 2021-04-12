@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -27,6 +28,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -1421,90 +1423,26 @@ type server struct{}
 
 type client struct{}
 
-func (c client) Call(serviceMethod string, args interface{}, reply interface{}) (err error) {
+func (c client) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) (err error) {
 	err = ErrExists
 	return
 }
 
-func (srv *server) BiRPCv1ValidMethod(cl rpcclient.ClientConnector, args interface{}, req interface{}) error {
+func (srv *server) BiRPCv1ValidMethod(cl birpc.ClientConnector, args interface{}, req interface{}) error {
 	return nil
 }
 
-func (srv *server) BiRPCv1MultipleParams(cl rpcclient.ClientConnector, args interface{}, req interface{}) (int, error) {
+func (srv *server) BiRPCv1MultipleParams(cl birpc.ClientConnector, args interface{}, req interface{}) (int, error) {
 	return 1, nil
 }
 
-func (srv *server) BiRPCv1NoErrorReturn(cl rpcclient.ClientConnector, args interface{}, req interface{}) int {
+func (srv *server) BiRPCv1NoErrorReturn(cl birpc.ClientConnector, args interface{}, req interface{}) int {
 	return 1
 }
 
-func (srv *server) BiRPCv1FinalError(cl rpcclient.ClientConnector, args interface{}, req interface{}) (err error) {
+func (srv *server) BiRPCv1FinalError(cl birpc.ClientConnector, args interface{}, req interface{}) (err error) {
 	err = ErrExists
 	return
-}
-
-func TestCoreUtilsBiRPCCall(t *testing.T) {
-	srv := new(server)
-	var clnt rpcclient.ClientConnector
-	var args int
-	var reply *int
-	serviceMethod := "testv1.v2.v3"
-
-	expected := rpcclient.ErrUnsupporteServiceMethod
-	err := BiRPCCall(srv, clnt, serviceMethod, args, reply)
-
-	if err == nil || err != expected {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
-	}
-
-	serviceMethod = "testv1.fail"
-
-	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
-
-	if err == nil || err != expected {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
-	}
-
-	serviceMethod = "Testv1.ValidMethod"
-
-	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
-
-	if err != nil {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", nil, err)
-	}
-
-	serviceMethod = "Testv1.MultipleParams"
-
-	expected = ErrServerError
-	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
-
-	if err == nil || err != expected {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
-	}
-
-	serviceMethod = "Testv1.NoErrorReturn"
-	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
-
-	expected = ErrServerError
-	if err == nil || err != expected {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
-	}
-
-	serviceMethod = "Testv1.FinalError"
-	err = BiRPCCall(srv, clnt, serviceMethod, args, reply)
-
-	expected = ErrExists
-	if err == nil || err != expected {
-		t.Errorf("\nExpected: <%v>, \nReceived: <%v>", expected, err)
-	}
-
-	var c client
-	c.Call("testString", args, reply)
-
-	err = BiRPCCall(srv, c, serviceMethod, args, reply)
-	if err == nil || err != expected {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err)
-	}
 }
 
 func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {

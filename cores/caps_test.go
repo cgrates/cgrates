@@ -19,12 +19,12 @@ package cores
 
 import (
 	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"reflect"
 	"syscall"
 	"testing"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +32,7 @@ import (
 
 type mockServerCodec struct{}
 
-func (c *mockServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
+func (c *mockServerCodec) ReadRequestHeader(r *birpc.Request) (err error) {
 	r.Seq = 0
 	r.ServiceMethod = utils.CoreSv1Ping
 	return
@@ -41,7 +41,7 @@ func (c *mockServerCodec) ReadRequestHeader(r *rpc.Request) (err error) {
 func (c *mockServerCodec) ReadRequestBody(x interface{}) (err error) {
 	return utils.ErrNotImplemented
 }
-func (c *mockServerCodec) WriteResponse(r *rpc.Response, x interface{}) error {
+func (c *mockServerCodec) WriteResponse(r *birpc.Response, x interface{}) error {
 	return nil
 }
 func (c *mockServerCodec) Close() error { return nil }
@@ -62,8 +62,8 @@ func TestNewCapsServerCodec(t *testing.T) {
 		t.Errorf("Expected: %v ,received:%v", exp, codec)
 	}
 	var err error
-	r := new(rpc.Request)
-	expR := &rpc.Request{
+	r := new(birpc.Request)
+	expR := &birpc.Request{
 		Seq:           0,
 		ServiceMethod: utils.CoreSv1Ping,
 	}
@@ -81,18 +81,16 @@ func TestNewCapsServerCodec(t *testing.T) {
 		t.Errorf("Expected error: %v ,received: %v ", utils.ErrMaxConcurentRPCExceededNoCaps, err)
 	}
 
-	if err = codec.WriteResponse(&rpc.Response{
-		Error:         "error",
-		Seq:           0,
-		ServiceMethod: utils.CoreSv1Ping,
+	if err = codec.WriteResponse(&birpc.Response{
+		Error: "error",
+		Seq:   0,
 	}, "reply"); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = codec.WriteResponse(&rpc.Response{
-		Error:         utils.ErrMaxConcurentRPCExceededNoCaps.Error(),
-		Seq:           0,
-		ServiceMethod: utils.CoreSv1Ping,
+	if err = codec.WriteResponse(&birpc.Response{
+		Error: utils.ErrMaxConcurentRPCExceededNoCaps.Error(),
+		Seq:   0,
 	}, "reply"); err != nil {
 		t.Fatal(err)
 	}
@@ -113,11 +111,11 @@ func TestNewCapsGOBCodec(t *testing.T) {
 	conn := new(mockConn)
 	cr := engine.NewCaps(0, utils.MetaBusy)
 	anz := &analyzers.AnalyzerService{}
-	exp := newGobServerCodec(conn)
+	exp := birpc.NewServerCodec(conn)
 	if r := newCapsGOBCodec(conn, cr, nil); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
 	}
-	exp = analyzers.NewAnalyzerServerCodec(newGobServerCodec(conn), anz, utils.MetaGOB, utils.Local, utils.Local)
+	exp = analyzers.NewAnalyzerServerCodec(birpc.NewServerCodec(conn), anz, utils.MetaGOB, utils.Local, utils.Local)
 	if r := newCapsGOBCodec(conn, cr, anz); !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected: %v ,received:%v", exp, r)
 	}
