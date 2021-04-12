@@ -65,7 +65,7 @@ var (
 	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
 	RateSErrPrfx                     = "RATES_ERROR"
 	ErrUnsupportedFormat             = errors.New("UNSUPPORTED_FORMAT")
-	ErrNoDatabaseConn                = errors.New("NO_DATA_BASE_CONNECTION")
+	ErrNoDatabaseConn                = errors.New("NO_DATABASE_CONNECTION")
 	ErrMaxIncrementsExceeded         = errors.New("MAX_INCREMENTS_EXCEEDED")
 	ErrIndexOutOfBounds              = errors.New("INDEX_OUT_OF_BOUNDS")
 	ErrWrongPath                     = errors.New("WRONG_PATH")
