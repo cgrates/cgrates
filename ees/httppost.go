@@ -33,7 +33,7 @@ func NewHTTPPostEe(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.FilterS
 	dc utils.MapStorage) (httpPost *HTTPPost, err error) {
 	httpPost = &HTTPPost{id: cgrCfg.EEsCfg().Exporters[cfgIdx].ID,
 		cgrCfg: cgrCfg, cfgIdx: cfgIdx, filterS: filterS, dc: dc}
-	httpPost.httpPoster, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
+	httpPost.httpPoster = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
 		cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 		utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)

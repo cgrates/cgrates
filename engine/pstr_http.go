@@ -55,16 +55,13 @@ func HTTPPostJSON(url string, content []byte) (respBody []byte, err error) {
 
 // NewHTTPPoster return a new HTTP poster
 func NewHTTPPoster(replyTimeout time.Duration, addr, contentType string,
-	attempts int) (httposter *HTTPPoster, err error) {
-	if !utils.SliceHasMember([]string{utils.ContentForm, utils.ContentJSON, utils.ContentText}, contentType) {
-		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
-	}
+	attempts int) (httposter *HTTPPoster) {
 	return &HTTPPoster{
 		httpClient:  &http.Client{Transport: httpPstrTransport, Timeout: replyTimeout},
 		addr:        addr,
 		contentType: contentType,
 		attempts:    attempts,
-	}, nil
+	}
 }
 
 // HTTPPoster used to post cdrs

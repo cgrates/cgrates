@@ -154,13 +154,10 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 	keyFunc := func() string { return utils.EmptyString }
 	switch expEv.Format {
 	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.MetaHTTPPost:
-		var pstr *HTTPPoster
-		pstr, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, expEv.Path,
+		pstr := NewHTTPPoster(config.CgrConfig().GeneralCfg().ReplyTimeout, expEv.Path,
 			utils.PosterTransportContentTypes[expEv.Format],
 			config.CgrConfig().GeneralCfg().PosterAttempts)
-		if err != nil {
-			return expEv, err
-		}
+
 		for _, ev := range expEv.Events {
 			req := ev.(*HTTPPosterRequest)
 			err = pstr.PostValues(req.Body, req.Header)

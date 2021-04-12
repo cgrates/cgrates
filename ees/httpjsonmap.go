@@ -39,7 +39,7 @@ func NewHTTPjsonMapEE(cgrCfg *config.CGRConfig, cfgIdx int, filterS *engine.Filt
 		dc:      dc,
 	}
 
-	pstrJSON.pstr, err = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
+	pstrJSON.pstr = engine.NewHTTPPoster(cgrCfg.GeneralCfg().ReplyTimeout,
 		cgrCfg.EEsCfg().Exporters[cfgIdx].ExportPath,
 		utils.PosterTransportContentTypes[cgrCfg.EEsCfg().Exporters[cfgIdx].Type],
 		cgrCfg.EEsCfg().Exporters[cfgIdx].Attempts)
