@@ -526,24 +526,22 @@ func (dbM *dataDBMockError) SetActionProfileDrv(*engine.ActionProfile) error {
 }
 
 func TestLogActionExecute(t *testing.T) {
-	output := new(bytes.Buffer)
-	log.SetOutput(output)
-
-	loggertype := utils.MetaStdLog
-	id := "Engine1"
-	if newLogger, err := utils.Newlogger(loggertype, id); err != nil {
-		t.Error(err)
-	} else {
-		newLogger.SetLogLevel(7)
-		utils.Logger = newLogger
-	}
-
 	evNM := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
 			utils.AccountField: "10",
 		},
 		utils.MetaOpts: map[string]interface{}{},
 	}
+
+	if newLogger, err := utils.Newlogger(utils.MetaStdLog, "Engine1"); err != nil {
+		t.Error(err)
+	} else {
+		newLogger.SetLogLevel(7)
+		utils.Logger = newLogger
+	}
+
+	output := new(bytes.Buffer)
+	log.SetOutput(output)
 
 	logAction := actLog{}
 	if err := logAction.execute(nil, evNM, utils.MetaNone); err != nil {
@@ -554,6 +552,7 @@ func TestLogActionExecute(t *testing.T) {
 	if rcv := output.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
+	output.Reset()
 
 	log.SetOutput(os.Stderr)
 }
@@ -1056,7 +1055,6 @@ func TestACScheduledActions(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, fltrs, dm, nil)
 	actPrf := &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TestACScheduledActions",
@@ -1095,6 +1093,7 @@ func TestACScheduledActions(t *testing.T) {
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
 
+	acts := NewActionS(cfg, fltrs, dm, nil)
 	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
 	if _, err := acts.scheduledActions("cgrates.org", cgrEv, []string{}, true); err != nil {
 		t.Error(err)
