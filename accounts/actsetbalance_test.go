@@ -43,7 +43,7 @@ func TestActSetAccountBalance(t *testing.T) {
 		},
 	}
 
-	expected := "NO_DATA_BASE_CONNECTION"
+	expected := utils.ErrNoDatabaseConn.Error()
 	if err := actSetAccount(nil, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
