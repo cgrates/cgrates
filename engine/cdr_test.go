@@ -93,6 +93,7 @@ func TestNewCDRFromExternalCDRErrors(t *testing.T) {
 	extCdr.AnswerTime = "2013-11-07T08:42:20Z"
 
 	///
+
 	extCdr.CGRID = ""
 	if _, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
 		t.Error(err)
@@ -102,14 +103,15 @@ func TestNewCDRFromExternalCDRErrors(t *testing.T) {
 	///
 	extCdr.Usage = "invalid"
 	errExpect = `time: invalid duration "invalid"`
-	if _, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}
 	extCdr.Usage = "10"
 
 	///
-	extCdr.CostDetails = "CostDetail"
-	if _, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
+	extCdr.CostDetails = "1"
+	errExpect = `json: cannot unmarshal number into Go value of type engine.EventCost`
+	if _, err := NewCDRFromExternalCDR(extCdr, ""); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}
 }
