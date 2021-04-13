@@ -100,6 +100,33 @@ type APIAttributeProfile struct {
 	Weight             float64
 }
 
+type AttributeWithAPIOpts struct {
+	*APIAttributeProfile
+	APIOpts map[string]interface{}
+}
+
+func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
+	ext = &APIAttributeProfile{
+		Tenant:             attr.Tenant,
+		ID:                 attr.ID,
+		Contexts:           attr.Contexts,
+		FilterIDs:          attr.FilterIDs,
+		ActivationInterval: attr.ActivationInterval,
+		Attributes:         make([]*ExternalAttribute, len(attr.Attributes)),
+		Blocker:            attr.Blocker,
+		Weight:             attr.Weight,
+	}
+	for i, at := range attr.Attributes {
+		ext.Attributes[i] = &ExternalAttribute{
+			FilterIDs: at.FilterIDs,
+			Path:      at.Path,
+			Type:      at.Type,
+			Value:     at.Value.GetRule(utils.InfieldSep),
+		}
+	}
+	return
+}
+
 // AsAttributeProfile converts the external attribute format to the actual AttributeProfile
 func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, err error) {
 	attr = new(AttributeProfile)
