@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math"
 	"reflect"
 	"testing"
 
@@ -134,6 +135,109 @@ func TestECAsExtEventChargesSuccess(t *testing.T) {
 			ToJSON(expected),
 			ToJSON(received),
 		)
+	}
+}
+
+func TestAsExtChargingInterval(t *testing.T) {
+	chrgInt := &ChargingInterval{
+		Increments: []*ChargingIncrement{
+			{
+				Units:           NewDecimal(123, 3),
+				AccountChargeID: "ID1",
+				CompressFactor:  40,
+			},
+			{
+				Units:           NewDecimal(15238, 3),
+				AccountChargeID: "ID2",
+			},
+		},
+		CompressFactor: 9,
+	}
+	expChInt := &ExtChargingInterval{
+		Increments: []*ExtChargingIncrement{
+			{
+				Units:           Float64Pointer(0.123),
+				AccountChargeID: "ID1",
+				CompressFactor:  40,
+			},
+			{
+				Units:           Float64Pointer(15.238),
+				AccountChargeID: "ID2",
+				CompressFactor:  0,
+			},
+		},
+		CompressFactor: 9,
+	}
+	if rcv, err := chrgInt.AsExtChargingInterval(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expChInt) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(expChInt), ToJSON(rcv))
+	}
+
+	chrgInt.Increments[0].Units = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected := "Cannot convert decimal ChargingIncrement "
+	if _, err := chrgInt.AsExtChargingInterval(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestAsExtAccountCharge(t *testing.T) {
+	ac := &AccountCharge{
+		AccountID:       "ACCID_1",
+		BalanceID:       "BALID_1",
+		Units:           NewDecimal(123, 4),
+		BalanceLimit:    NewDecimal(10, 1),
+		UnitFactorID:    "seven",
+		AttributeIDs:    []string{"TEST_ID1", "TEST_ID2"},
+		RatingID:        "RTID_1",
+		JoinedChargeIDs: []string{"TEST_ID2", "TEST_ID2"},
+	}
+	expAcc := &ExtAccountCharge{
+		AccountID:       "ACCID_1",
+		BalanceID:       "BALID_1",
+		Units:           Float64Pointer(0.0123),
+		BalanceLimit:    Float64Pointer(1.0),
+		UnitFactorID:    "seven",
+		AttributeIDs:    []string{"TEST_ID1", "TEST_ID2"},
+		RatingID:        "RTID_1",
+		JoinedChargeIDs: []string{"TEST_ID2", "TEST_ID2"},
+	}
+	if rcv, err := ac.AsExtAccountCharge(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expAcc) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expAcc), ToJSON(rcv))
+	}
+
+	ac = &AccountCharge{
+		AccountID:       "ACCID_1",
+		BalanceID:       "BALID_1",
+		Units:           NewDecimal(123, 4),
+		UnitFactorID:    "seven",
+		JoinedChargeIDs: []string{},
+	}
+	expAcc = &ExtAccountCharge{
+		AccountID:       "ACCID_1",
+		BalanceID:       "BALID_1",
+		Units:           Float64Pointer(0.0123),
+		UnitFactorID:    "seven",
+		JoinedChargeIDs: []string{},
+	}
+	if rcv, err := ac.AsExtAccountCharge(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expAcc) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expAcc), ToJSON(rcv))
+	}
+
+	ac.BalanceLimit = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr := "cannot convert decimal BalanceLimit to float64 "
+	if _, err := ac.AsExtAccountCharge(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
+	}
+
+	ac.Units = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "cannot convert decimal Units to float64 "
+	if _, err := ac.AsExtAccountCharge(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
 	}
 }
 
