@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"sort"
 	"time"
 
@@ -98,6 +99,59 @@ func NewDefaultBalance(id string) *Balance {
 	}
 }
 
+type ExtAccount struct {
+	Tenant             string
+	ID                 string // Account identificator, unique within the tenant
+	FilterIDs          []string
+	ActivationInterval *ActivationInterval
+	Weights            DynamicWeights
+	Opts               map[string]interface{}
+	Balances           map[string]*ExtBalance
+	ThresholdIDs       []string
+}
+
+func (aC *Account) AsExtAccount() (eAc *ExtAccount, err error) {
+	eAc = &ExtAccount{
+		Tenant: aC.Tenant,
+		ID:     aC.ID,
+	}
+	if aC.FilterIDs != nil {
+		eAc.FilterIDs = make([]string, len(aC.FilterIDs))
+		for idx, val := range aC.FilterIDs {
+			eAc.FilterIDs[idx] = val
+		}
+	}
+	if aC.ActivationInterval != nil {
+		eAc.ActivationInterval = aC.ActivationInterval
+	}
+	if aC.Weights != nil {
+		eAc.Weights = aC.Weights
+	}
+	if aC.Opts != nil {
+		eAc.Opts = make(map[string]interface{}, len(aC.Opts))
+		for key, val := range aC.Opts {
+			eAc.Opts[key] = val
+		}
+	}
+	if aC.Balances != nil {
+		eAc.Balances = make(map[string]*ExtBalance, len(aC.Balances))
+		for key, val := range aC.Balances {
+			if bal, err := val.AsExtBalance(); err != nil {
+				return nil, err
+			} else {
+				eAc.Balances[key] = bal
+			}
+		}
+	}
+	if aC.ThresholdIDs != nil {
+		eAc.ThresholdIDs = make([]string, len(aC.ThresholdIDs))
+		for idx, val := range aC.ThresholdIDs {
+			eAc.ThresholdIDs[idx] = val
+		}
+	}
+	return
+}
+
 // Balance represents one Balance inside an Account
 type Balance struct {
 	ID             string // Balance identificator, unique within an Account
@@ -112,12 +166,126 @@ type Balance struct {
 	RateProfileIDs []string
 }
 
+type ExtBalance struct {
+	ID             string // Balance identificator, unique within an Account
+	FilterIDs      []string
+	Weights        DynamicWeights
+	Type           string
+	Units          *float64
+	UnitFactors    []*ExtUnitFactor
+	Opts           map[string]interface{}
+	CostIncrements []*ExtCostIncrement
+	AttributeIDs   []string
+	RateProfileIDs []string
+}
+
+func (bL *Balance) AsExtBalance() (eBl *ExtBalance, err error) {
+	eBl = &ExtBalance{
+		ID:   bL.ID,
+		Type: bL.Type,
+	}
+	if bL.FilterIDs != nil {
+		eBl.FilterIDs = make([]string, len(bL.FilterIDs))
+		for idx, val := range bL.FilterIDs {
+			eBl.FilterIDs[idx] = val
+		}
+	}
+	if bL.Weights != nil {
+		eBl.Weights = bL.Weights
+	}
+	if bL.Units != nil {
+		if fltUnits, ok := bL.Units.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Units to float64 ")
+		} else {
+			eBl.Units = &fltUnits
+		}
+	}
+	if bL.UnitFactors != nil {
+		eBl.UnitFactors = make([]*ExtUnitFactor, len(bL.UnitFactors))
+		for idx, val := range bL.UnitFactors {
+			if uFctr, err := val.AsExtUnitFactor(); err != nil {
+				return nil, err
+			} else {
+				eBl.UnitFactors[idx] = uFctr
+			}
+		}
+	}
+	if bL.Opts != nil {
+		eBl.Opts = make(map[string]interface{}, len(bL.Opts))
+		for key, val := range bL.Opts {
+			eBl.Opts[key] = val
+		}
+	}
+	if bL.CostIncrements != nil {
+		eBl.CostIncrements = make([]*ExtCostIncrement, len(bL.CostIncrements))
+		for idx, val := range bL.CostIncrements {
+			if extCstIncr, err := val.AsExtCostIncrement(); err != nil {
+				return nil, err
+			} else {
+				eBl.CostIncrements[idx] = extCstIncr
+			}
+		}
+	}
+	if bL.AttributeIDs != nil {
+		eBl.AttributeIDs = make([]string, len(bL.AttributeIDs))
+		for idx, val := range bL.AttributeIDs {
+			eBl.AttributeIDs[idx] = val
+		}
+	}
+	if bL.RateProfileIDs != nil {
+		eBl.RateProfileIDs = make([]string, len(bL.RateProfileIDs))
+		for idx, val := range bL.RateProfileIDs {
+			eBl.RateProfileIDs[idx] = val
+		}
+	}
+	return
+}
+
 // CostIncrement enforces cost calculation to specific balance increments
 type CostIncrement struct {
 	FilterIDs    []string
 	Increment    *Decimal
 	FixedFee     *Decimal
 	RecurrentFee *Decimal
+}
+
+type ExtCostIncrement struct {
+	FilterIDs    []string
+	Increment    *float64
+	FixedFee     *float64
+	RecurrentFee *float64
+}
+
+func (cI *CostIncrement) AsExtCostIncrement() (eCi *ExtCostIncrement, err error) {
+	eCi = new(ExtCostIncrement)
+	if cI.FilterIDs != nil {
+		eCi.FilterIDs = make([]string, len(cI.FilterIDs))
+		for idx, val := range cI.FilterIDs {
+			eCi.FilterIDs[idx] = val
+		}
+	}
+	if cI.Increment != nil {
+		if fltIncr, ok := cI.Increment.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Increment to float64 ")
+		} else {
+			eCi.Increment = &fltIncr
+		}
+	}
+	if cI.FixedFee != nil {
+		if fltFxdFee, ok := cI.FixedFee.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal FixedFee to float64 ")
+		} else {
+			eCi.FixedFee = &fltFxdFee
+		}
+	}
+	if cI.RecurrentFee != nil {
+		if fltRecFee, ok := cI.RecurrentFee.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal RecurrentFee to float64 ")
+		} else {
+			eCi.RecurrentFee = &fltRecFee
+		}
+	}
+	return
 }
 
 // Clone returns a copy of the CostIncrement
@@ -137,6 +305,29 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 	}
 	if cI.RecurrentFee != nil {
 		cIcln.RecurrentFee = cI.RecurrentFee.Clone()
+	}
+	return
+}
+
+type ExtUnitFactor struct {
+	FilterIDs []string
+	Factor    *float64
+}
+
+func (uF *UnitFactor) AsExtUnitFactor() (eUf *ExtUnitFactor, err error) {
+	eUf = new(ExtUnitFactor)
+	if uF.FilterIDs != nil {
+		eUf.FilterIDs = make([]string, len(uF.FilterIDs))
+		for idx, val := range uF.FilterIDs {
+			eUf.FilterIDs[idx] = val
+		}
+	}
+	if uF.Factor != nil {
+		if fltFct, ok := uF.Factor.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Factor to float64 ")
+		} else {
+			eUf.Factor = &fltFct
+		}
 	}
 	return
 }
