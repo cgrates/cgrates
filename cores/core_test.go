@@ -81,13 +81,6 @@ func TestCoreServiceStatus(t *testing.T) {
 		reply[utils.RunningSince] = "TIME_CHANGED"
 		reply[utils.MemoryUsage] = "CHANGED_MEMORY_USAGE"
 	}
-	goRoutinesInt := (reply[utils.ActiveGoroutines]).(int)
-	if err != nil {
-		t.Error(err)
-	}
-	if goRoutinesInt < 18 {
-		t.Errorf("Expected %+v to be larger than 18", reply[utils.GoVersion])
-	}
 	if !reflect.DeepEqual(expected[utils.GoVersion], reply[utils.GoVersion]) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.GoVersion]), utils.ToJSON(reply[utils.GoVersion]))
 	}
