@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/accounts"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -66,8 +65,8 @@ type AccountService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	acts     *accounts.AccountS
-	rpc      *v1.AccountSv1             // useful on restart
+	acts *accounts.AccountS
+	// rpc      *v1.AccountSv1             // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -95,11 +94,11 @@ func (acts *AccountService) Start() (err error) {
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AccountS))
-	acts.rpc = v1.NewAccountSv1(acts.acts)
-	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.server.RpcRegister(acts.rpc)
-	}
-	acts.connChan <- acts.anz.GetInternalCodec(acts.rpc, utils.AccountS)
+	// acts.rpc = v1.NewAccountSv1(acts.acts)
+	// if !acts.cfg.DispatcherSCfg().Enabled {
+	// acts.server.RpcRegister(acts.rpc)
+	// }
+	// acts.connChan <- acts.anz.GetInternalCodec(acts.rpc, utils.AccountS)
 	return
 }
 
@@ -115,7 +114,7 @@ func (acts *AccountService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	acts.rpc = nil
+	// acts.rpc = nil
 	<-acts.connChan
 	acts.Unlock()
 	return

@@ -23,7 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -59,7 +59,7 @@ type AttributeService struct {
 	server      *cores.Server
 
 	attrS    *engine.AttributeService
-	rpc      *v1.AttributeSv1           // useful on restart
+	rpc      *apis.AttributeSv1         // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -84,11 +84,12 @@ func (attrS *AttributeService) Start() (err error) {
 	defer attrS.Unlock()
 	attrS.attrS = engine.NewAttributeService(datadb, filterS, attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
-	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
+	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
+	srv, _ := birpc.NewService(attrS.rpc, "", false)
 	if !attrS.cfg.DispatcherSCfg().Enabled {
-		attrS.server.RpcRegister(attrS.rpc)
+		attrS.server.RpcRegister(srv)
 	}
-	attrS.connChan <- attrS.anz.GetInternalCodec(attrS.rpc, utils.AttributeS)
+	attrS.connChan <- attrS.anz.GetInternalCodec(srv, utils.AttributeS)
 	return
 }
 
@@ -100,11 +101,12 @@ func (attrS *AttributeService) Reload() (err error) {
 // Shutdown stops the service
 func (attrS *AttributeService) Shutdown() (err error) {
 	attrS.Lock()
-	defer attrS.Unlock()
 	attrS.attrS.Shutdown()
 	attrS.attrS = nil
 	attrS.rpc = nil
 	<-attrS.connChan
+	attrS.server.RpcUnregisterName(utils.AttributeSv1)
+	attrS.Unlock()
 	return
 }
 
@@ -112,7 +114,7 @@ func (attrS *AttributeService) Shutdown() (err error) {
 func (attrS *AttributeService) IsRunning() bool {
 	attrS.RLock()
 	defer attrS.RUnlock()
-	return attrS != nil && attrS.attrS != nil
+	return attrS.attrS != nil
 }
 
 // ServiceName returns the service name

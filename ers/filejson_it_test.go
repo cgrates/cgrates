@@ -27,9 +27,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
-
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"

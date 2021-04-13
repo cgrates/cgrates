@@ -76,7 +76,7 @@
 	"attributes_conns": ["*internal"],
 },
 
-"apiers": {
+"admins": {
 	"enabled": true,
 	"caches_conns":["*localhost"],
 	"scheduler_conns": ["*internal"],

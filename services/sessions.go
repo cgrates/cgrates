@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
@@ -61,9 +60,9 @@ type SessionService struct {
 	shdChan  *utils.SyncedChan
 	stopChan chan struct{}
 
-	sm       *sessions.SessionS
-	rpc      *v1.SMGenericV1
-	rpcv1    *v1.SessionSv1
+	sm *sessions.SessionS
+	// rpc      *v1.SMGenericV1
+	// rpcv1    *v1.SessionSv1
 	connChan chan birpc.ClientConnector
 
 	// in order to stop the bircp server if necesary
@@ -96,20 +95,20 @@ func (smg *SessionService) Start() (err error) {
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
 	// Register RPC handler
-	smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
+	// smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
 
-	smg.rpcv1 = v1.NewSessionSv1(smg.sm, smg.caps) // methods with multiple options
-	if !smg.cfg.DispatcherSCfg().Enabled {
-		smg.server.RpcRegister(smg.rpc)
-		smg.server.RpcRegister(smg.rpcv1)
-	}
+	// smg.rpcv1 = v1.NewSessionSv1(smg.sm, smg.caps) // methods with multiple options
+	// if !smg.cfg.DispatcherSCfg().Enabled {
+	// 	smg.server.RpcRegister(smg.rpc)
+	// 	smg.server.RpcRegister(smg.rpcv1)
+	// }
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != "" {
 		smg.bircpEnabled = true
-		smg.server.BiRPCRegisterName("SMGenericV1", smg.rpc)
-		smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
+		// smg.server.BiRPCRegisterName("SMGenericV1", smg.rpc)
+		// smg.server.BiRPCRegisterName(utils.SessionSv1, smg.rpcv1)
 		// run this in it's own goroutine
-		go smg.start()
+		// go smg.start()
 	}
 	return
 }
@@ -144,8 +143,8 @@ func (smg *SessionService) Shutdown() (err error) {
 		smg.bircpEnabled = false
 	}
 	smg.sm = nil
-	smg.rpc = nil
-	smg.rpcv1 = nil
+	// smg.rpc = nil
+	// smg.rpcv1 = nil
 	<-smg.connChan
 	return
 }

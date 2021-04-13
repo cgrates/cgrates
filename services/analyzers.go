@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/analyzers"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -55,8 +54,8 @@ type AnalyzerService struct {
 	stopChan    chan struct{}
 	shdChan     *utils.SyncedChan
 
-	anz      *analyzers.AnalyzerService
-	rpc      *v1.AnalyzerSv1
+	anz *analyzers.AnalyzerService
+	// rpc      *v1.AnalyzerSv1
 	connChan chan birpc.ClientConnector
 	srvDep   map[string]*sync.WaitGroup
 }
@@ -82,7 +81,7 @@ func (anz *AnalyzerService) Start() (err error) {
 		return
 	}(anz.anz)
 	anz.server.SetAnalyzer(anz.anz)
-	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
+	// anz.rpc = v1.NewAnalyzerSv1(anz.anz)
 	go anz.start()
 	return
 }
@@ -101,10 +100,10 @@ func (anz *AnalyzerService) start() {
 		anz.filterSChan <- fS
 		anz.anz.SetFilterS(fS)
 	}
-	if !anz.cfg.DispatcherSCfg().Enabled {
-		anz.server.RpcRegister(anz.rpc)
-	}
-	anz.connChan <- anz.rpc
+	// if !anz.cfg.DispatcherSCfg().Enabled {
+	// anz.server.RpcRegister(anz.rpc)
+	// }
+	// anz.connChan <- anz.rpc
 }
 
 // Reload handles the change of config
@@ -119,7 +118,7 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
-	anz.rpc = nil
+	// anz.rpc = nil
 	<-anz.connChan
 	anz.Unlock()
 	return

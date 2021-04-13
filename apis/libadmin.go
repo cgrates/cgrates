@@ -28,7 +28,7 @@ import (
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *AdminS) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID string,
+func (apierSv1 *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID string,
 	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
 	var reply, method string
 	var args interface{}
@@ -65,13 +65,13 @@ func (apierSv1 *AdminS) CallCache(ctx *context.Context, cacheopt string, tnt, ca
 		}
 
 	}
-	return apierSv1.connMgr.Call(ctx, apierSv1.cfg.ApierCfg().CachesConns,
+	return apierSv1.connMgr.Call(ctx, apierSv1.cfg.AdminSCfg().CachesConns,
 		method, args, &reply)
 }
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (apierSv1 *AdminS) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
+func (apierSv1 *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
 	rpl = utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{

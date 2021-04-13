@@ -28,6 +28,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -306,7 +307,7 @@ func testLoadItCheckAttributes(t *testing.T) {
 		},
 		Weight: 20.0,
 	}
-	if attr, err := db.GetAttributeProfileDrv("cgrates.org", "ATTR_1001_SIMPLEAUTH"); err != nil {
+	if attr, err := db.GetAttributeProfileDrv(context.Background(), "cgrates.org", "ATTR_1001_SIMPLEAUTH"); err != nil {
 		t.Fatal(err)
 	} else if attr.Compile(); !reflect.DeepEqual(eAttrPrf, attr) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attr))
@@ -328,7 +329,7 @@ func testLoadItStartLoaderRemove(t *testing.T) {
 }
 
 func testLoadItCheckAttributes2(t *testing.T) {
-	if _, err := db.GetAttributeProfileDrv("cgrates.org", "ATTR_1001_SESSIONAUTH"); err != utils.ErrNotFound {
+	if _, err := db.GetAttributeProfileDrv(context.Background(), "cgrates.org", "ATTR_1001_SESSIONAUTH"); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
 }

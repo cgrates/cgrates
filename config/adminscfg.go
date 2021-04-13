@@ -22,8 +22,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// ApierCfg is the configuration of Apier service
-type ApierCfg struct {
+// AdminSCfg is the configuration of Apier service
+type AdminSCfg struct {
 	Enabled         bool
 	CachesConns     []string // connections towards Cache
 	ActionSConns    []string // connections towards Scheduler
@@ -31,7 +31,7 @@ type ApierCfg struct {
 	EEsConns        []string // connections towards EEs
 }
 
-func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
+func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -82,7 +82,7 @@ func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
+func (aCfg *AdminSCfg) AsMapInterface() (initialMap map[string]interface{}) {
 	initialMap = map[string]interface{}{
 		utils.EnabledCfg: aCfg.Enabled,
 	}
@@ -130,8 +130,8 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]interface{}) {
 }
 
 // Clone returns a deep copy of ApierCfg
-func (aCfg ApierCfg) Clone() (cln *ApierCfg) {
-	cln = &ApierCfg{
+func (aCfg AdminSCfg) Clone() (cln *AdminSCfg) {
+	cln = &AdminSCfg{
 		Enabled: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {

@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -58,8 +57,8 @@ type LoaderService struct {
 	server      *cores.Server
 	stopChan    chan struct{}
 
-	ldrs     *loaders.LoaderService
-	rpc      *v1.LoaderSv1
+	ldrs *loaders.LoaderService
+	// rpc      *v1.LoaderSv1
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -90,11 +89,11 @@ func (ldrs *LoaderService) Start() (err error) {
 	if err = ldrs.ldrs.ListenAndServe(ldrs.stopChan); err != nil {
 		return
 	}
-	ldrs.rpc = v1.NewLoaderSv1(ldrs.ldrs)
-	if !ldrs.cfg.DispatcherSCfg().Enabled {
-		ldrs.server.RpcRegister(ldrs.rpc)
-	}
-	ldrs.connChan <- ldrs.anz.GetInternalCodec(ldrs.rpc, utils.LoaderS)
+	// ldrs.rpc = v1.NewLoaderSv1(ldrs.ldrs)
+	// if !ldrs.cfg.DispatcherSCfg().Enabled {
+	// ldrs.server.RpcRegister(ldrs.rpc)
+	// }
+	// ldrs.connChan <- ldrs.anz.GetInternalCodec(ldrs.rpc, utils.LoaderS)
 	return
 }
 
@@ -123,7 +122,7 @@ func (ldrs *LoaderService) Reload() (err error) {
 func (ldrs *LoaderService) Shutdown() (err error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
-	ldrs.rpc = nil
+	// ldrs.rpc = nil
 	close(ldrs.stopChan)
 	<-ldrs.connChan
 	ldrs.Unlock()

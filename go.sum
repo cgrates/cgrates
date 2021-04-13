@@ -83,10 +83,10 @@ github.com/cenkalti/rpc2 v0.0.0-20210220005819-4a29bc83afe1/go.mod h1:v2npkhrXyk
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d h1:1PLz/t3XZy5KF8EY/ShzBZoVLaY50+tnAbE1wu8rCfg=
 github.com/cgrates/aringo v0.0.0-20201113143849-3b299e4e636d/go.mod h1:mMAzSIjK11XfRMrOIa7DXYl64REdPldRCbAgzKB47XQ=
-github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b h1:9IX5Z3Tw7n2QrY7GLGGpqjjC/NVSJvQ7nxLkC2JP4vw=
-github.com/cgrates/baningo v0.0.0-20201105145354-6e3173f6a91b/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
-github.com/cgrates/birpc v1.3.1-0.20210412111352-7281ab41f2fd h1:V8wb43eGTfj8GQ2CX89zwyIjloEE/aHFNC3t5IyJB4Y=
-github.com/cgrates/birpc v1.3.1-0.20210412111352-7281ab41f2fd/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
+github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f h1:dCp5BflGB8I8wlhWn4R5g0o4ok2pZRmcYHyzIks9Pbc=
+github.com/cgrates/baningo v0.0.0-20210413080722-004ffd5e429f/go.mod h1:3SwVROaS1Iml5lqEhj0gRhDRtmbBgypZpKcEkVTSleU=
+github.com/cgrates/birpc v1.3.1-0.20210413080448-f81834a37fd3 h1:AJrOcYMIQ/8X1i/kfqwOkQghxfJcPUloSRfK0n38JhI=
+github.com/cgrates/birpc v1.3.1-0.20210413080448-f81834a37fd3/go.mod h1:z/PmNnDPqSQALedKJv5T8+eXIq6XHa9J0St1YsvAVns=
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70 h1:/O+Dr12jcizDiCoIG2oK6wyE1pNRVQc62Wz+TfPWDhU=
 github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70/go.mod h1:I9cUDn/uzkakr0hmYTjXkQqf6wagg44L2p01gSYRRz0=
 github.com/cgrates/fsock v0.0.0-20191107070144-e7a331109df7 h1:dxtBWRAr62vRRKkExmJZ0u1EbCw/y0vOkSfdFND5qXw=
@@ -97,6 +97,8 @@ github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca h1:Ejj4m0Ccl8dMMVn
 github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca/go.mod h1:q7c996DUu8OrJRnewVSQzM+y/bRcxZAHoo+zCD8bFBo=
 github.com/cgrates/radigo v0.0.0-20201113143731-162035428d72 h1:cTAWQEbab3gKkDSeaxkTaoiP/cNFx+7/kC96wYckk3g=
 github.com/cgrates/radigo v0.0.0-20201113143731-162035428d72/go.mod h1:3IDSbfIqU5VsYKjrwa3HhuAK1jlI65wa1coHetoaN20=
+github.com/cgrates/rpcclient v0.0.0-20210413084509-dc66fe9852ca h1:ucFZvI96qqO9ukR2EF1lyNEl8t8I1GNaxs/zjIAAkZA=
+github.com/cgrates/rpcclient v0.0.0-20210413084509-dc66fe9852ca/go.mod h1:5LEYQt4uXkY4TeYsmAm/2gzAK08igOAblyUPTSh+k3Q=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e h1:izFjZB83/XRXInc+gMIssUxdbleGsGIuGCPj2u7RQo0=
 github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e/go.mod h1:0f2+3dq5Iiv3VlcuY83VPJ0QzqRlzDG1Cr8okogQE3g=
 github.com/cgrates/ugocodec v0.0.0-20201023092048-df93d0123f60 h1:TQDg+HGB17LU8FitLiLvYazYSy62GQ1lO3lGKI3xUrU=

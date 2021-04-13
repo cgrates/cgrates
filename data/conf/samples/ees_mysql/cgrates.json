@@ -146,7 +146,7 @@
 },
 
 
-"apiers": {
+"admins": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 	"ees_conns": ["*localhost"],

@@ -940,7 +940,6 @@ const (
 	AnalyzerS   = "AnalyzerS"
 	CDRServer   = "CDRServer"
 	GuardianS   = "GuardianS"
-	ApierS      = "ApierS"
 )
 
 // Lower service names
@@ -957,7 +956,6 @@ const (
 	SchedulerSLow  = "schedulers"
 	LoaderSLow     = "loaders"
 	ReplicatorLow  = "replicator"
-	ApierSLow      = "apiers"
 	EEsLow         = "ees"
 	RateSLow       = "rates"
 	AccountSLow    = "accounts"
@@ -1168,8 +1166,6 @@ const (
 
 // APIerSv1 APIs
 const (
-	ApierV1                             = "ApierV1"
-	ApierV2                             = "ApierV2"
 	APIerSv1                            = "APIerSv1"
 	APIerSv1ComputeFilterIndexes        = "APIerSv1.ComputeFilterIndexes"
 	APIerSv1ComputeFilterIndexIDs       = "APIerSv1.ComputeFilterIndexIDs"
@@ -1577,6 +1573,12 @@ const (
 	APIerSv1GetActionProfileIDs      = "APIerSv1.GetActionProfileIDs"
 	APIerSv1GetActionProfileIDsCount = "APIerSv1.GetActionProfileIDsCount"
 	APIerSv1RemoveActionProfile      = "APIerSv1.RemoveActionProfile"
+)
+
+// AdminSv1
+const (
+	AdminS   = "AdminS"
+	AdminSv1 = "AdminSv1"
 )
 
 //cgr_ variables

@@ -190,7 +190,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.migratorCgrCfg.OutStorDBOpts = make(map[string]interface{})
 	cfg.mailerCfg = new(MailerCfg)
 	cfg.loaderCfg = make(LoaderSCfgs, 0)
-	cfg.apier = new(ApierCfg)
+	cfg.admS = new(AdminSCfg)
 	cfg.ersCfg = new(ERsCfg)
 	cfg.eesCfg = new(EEsCfg)
 	cfg.eesCfg.Cache = make(map[string]*CacheParamCfg)
@@ -325,7 +325,7 @@ type CGRConfig struct {
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
-	apier            *ApierCfg         // APIer config
+	admS             *AdminSCfg        // APIer config
 	ersCfg           *ERsCfg           // EventReader config
 	eesCfg           *EEsCfg           // EventExporter config
 	rateSCfg         *RateSCfg         // RateS config
@@ -760,11 +760,11 @@ func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 // loadApierCfg loads the Apier section of the configuration
 func (cfg *CGRConfig) loadApierCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnApierCfg *ApierJsonCfg
+	var jsnApierCfg *AdminSJsonCfg
 	if jsnApierCfg, err = jsnCfg.ApierCfgJson(); err != nil {
 		return
 	}
-	return cfg.apier.loadFromJSONCfg(jsnApierCfg)
+	return cfg.admS.loadFromJSONCfg(jsnApierCfg)
 }
 
 // loadCoreSCfg loads the CoreS section of the configuration
@@ -1069,11 +1069,11 @@ func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 	return cfg.analyzerSCfg
 }
 
-// ApierCfg reads the Apier configuration
-func (cfg *CGRConfig) ApierCfg() *ApierCfg {
-	cfg.lks[ApierS].Lock()
-	defer cfg.lks[ApierS].Unlock()
-	return cfg.apier
+// AdminSCfg reads the Apier configuration
+func (cfg *CGRConfig) AdminSCfg() *AdminSCfg {
+	cfg.lks[AdminS].Lock()
+	defer cfg.lks[AdminS].Unlock()
+	return cfg.admS
 }
 
 // ERsCfg reads the EventReader configuration
@@ -1260,7 +1260,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		DispatcherSJson:    cfg.loadDispatcherSCfg,
 		RegistrarCJson:     cfg.loadRegistrarCCfg,
 		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
-		ApierS:             cfg.loadApierCfg,
+		AdminS:             cfg.loadApierCfg,
 		RPCConnsJsonName:   cfg.loadRPCConns,
 		RateSJson:          cfg.loadRateSCfg,
 		SIPAgentJson:       cfg.loadSIPAgentCfg,
@@ -1427,9 +1427,9 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN,
 		CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, ApierS, AccountSCfgJson,
+		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, AdminS, AccountSCfgJson,
 		ActionSJson})
-	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, CDRS_JSN, ApierS})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, CDRS_JSN, AdminS})
 	needsDataDB := false
 	needsStorDB := false
 	for _, section := range sections {
@@ -1505,8 +1505,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[DispatcherSJson] <- struct{}{}
 		case AnalyzerCfgJson:
 			cfg.rldChans[AnalyzerCfgJson] <- struct{}{}
-		case ApierS:
-			cfg.rldChans[ApierS] <- struct{}{}
+		case AdminS:
+			cfg.rldChans[AdminS] <- struct{}{}
 		case EEsJson:
 			cfg.rldChans[EEsJson] <- struct{}{}
 		case SIPAgentJson:
@@ -1558,7 +1558,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		CgrMigratorCfgJson: cfg.migratorCgrCfg.AsMapInterface(),
 		MAILER_JSN:         cfg.mailerCfg.AsMapInterface(),
 		AnalyzerCfgJson:    cfg.analyzerSCfg.AsMapInterface(),
-		ApierS:             cfg.apier.AsMapInterface(),
+		AdminS:             cfg.admS.AsMapInterface(),
 		ERsJson:            cfg.ersCfg.AsMapInterface(separator),
 		APIBanCfgJson:      cfg.apiBanCfg.AsMapInterface(),
 		EEsJson:            cfg.eesCfg.AsMapInterface(separator),
@@ -1701,8 +1701,8 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		mp = cfg.LoaderCgrCfg().AsMapInterface()
 	case CgrMigratorCfgJson:
 		mp = cfg.MigratorCgrCfg().AsMapInterface()
-	case ApierS:
-		mp = cfg.ApierCfg().AsMapInterface()
+	case AdminS:
+		mp = cfg.AdminSCfg().AsMapInterface()
 	case EEsJson:
 		mp = cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case ERsJson:
@@ -1870,8 +1870,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		mp = cfg.LoaderCgrCfg().AsMapInterface()
 	case CgrMigratorCfgJson:
 		mp = cfg.MigratorCgrCfg().AsMapInterface()
-	case ApierS:
-		mp = cfg.ApierCfg().AsMapInterface()
+	case AdminS:
+		mp = cfg.AdminSCfg().AsMapInterface()
 	case EEsJson:
 		mp = cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case ERsJson:
@@ -1985,7 +1985,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		migratorCgrCfg:   cfg.migratorCgrCfg.Clone(),
 		mailerCfg:        cfg.mailerCfg.Clone(),
 		analyzerSCfg:     cfg.analyzerSCfg.Clone(),
-		apier:            cfg.apier.Clone(),
+		admS:             cfg.admS.Clone(),
 		ersCfg:           cfg.ersCfg.Clone(),
 		eesCfg:           cfg.eesCfg.Clone(),
 		rateSCfg:         cfg.rateSCfg.Clone(),

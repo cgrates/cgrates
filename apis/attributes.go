@@ -27,7 +27,7 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile based on the tenant and ID received
-func (admS *AdminS) GetAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.APIAttributeProfile) (err error) {
+func (admS *AdminSv1) GetAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.APIAttributeProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -48,7 +48,7 @@ func (admS *AdminS) GetAttributeProfile(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (admS *AdminS) GetAttributeProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
+func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -71,7 +71,7 @@ func (admS *AdminS) GetAttributeProfileIDs(ctx *context.Context, args *utils.Pag
 
 // GetAttributeProfileIDsCount returns the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (admS *AdminS) GetAttributeProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetAttributeProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -89,7 +89,7 @@ func (admS *AdminS) GetAttributeProfileIDsCount(ctx *context.Context, args *util
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (admS *AdminS) SetAttributeProfile(ctx *context.Context, arg *engine.AttributeWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.AttributeWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -116,8 +116,8 @@ func (admS *AdminS) SetAttributeProfile(ctx *context.Context, arg *engine.Attrib
 	return nil
 }
 
-//RemoveAttributeProfile remove a specific Attribute Profile based on tenant an ID
-func (apierSv1 *AdminS) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+// RemoveAttributeProfile remove a specific Attribute Profile based on tenant an ID
+func (apierSv1 *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

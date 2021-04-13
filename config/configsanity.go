@@ -601,7 +601,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// APIer sanity checks
-	for _, connID := range cfg.apier.AttributeSConns {
+	for _, connID := range cfg.admS.AttributeSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
 			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.APIerSv1)
 		}
@@ -609,7 +609,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.APIerSv1, connID)
 		}
 	}
-	for _, connID := range cfg.apier.ActionSConns {
+	for _, connID := range cfg.admS.ActionSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.actionSCfg.Enabled {
 			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SchedulerS, utils.APIerSv1)
 		}
@@ -663,8 +663,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	for _, connID := range cfg.filterSCfg.ApierSConns {
-		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.apier.Enabled {
-			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ApierS, utils.FilterS)
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.admS.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AdminS, utils.FilterS)
 		}
 		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)

@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -59,8 +58,8 @@ type ResourceService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	reS      *engine.ResourceService
-	rpc      *v1.ResourceSv1
+	reS *engine.ResourceService
+	// rpc      *v1.ResourceSv1
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -88,11 +87,11 @@ func (reS *ResourceService) Start() (err error) {
 	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop()
-	reS.rpc = v1.NewResourceSv1(reS.reS)
-	if !reS.cfg.DispatcherSCfg().Enabled {
-		reS.server.RpcRegister(reS.rpc)
-	}
-	reS.connChan <- reS.anz.GetInternalCodec(reS.rpc, utils.ResourceS)
+	// reS.rpc = v1.NewResourceSv1(reS.reS)
+	// if !reS.cfg.DispatcherSCfg().Enabled {
+	// 	reS.server.RpcRegister(reS.rpc)
+	// }
+	// reS.connChan <- reS.anz.GetInternalCodec(reS.rpc, utils.ResourceS)
 	return
 }
 
@@ -111,7 +110,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 	defer reS.Unlock()
 	reS.reS.Shutdown() //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
-	reS.rpc = nil
+	// reS.rpc = nil
 	<-reS.connChan
 	return
 }

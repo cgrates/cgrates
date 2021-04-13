@@ -170,7 +170,7 @@ func (db *StorDBService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (db *StorDBService) ShouldRun() bool {
-	return db.cfg.CdrsCfg().Enabled || db.cfg.ApierCfg().Enabled
+	return db.cfg.CdrsCfg().Enabled || db.cfg.AdminSCfg().Enabled
 }
 
 // RegisterSyncChan used by dependent subsystems to register a chanel to reload only the storDB(thread safe)

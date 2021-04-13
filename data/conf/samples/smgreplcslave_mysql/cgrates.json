@@ -59,7 +59,7 @@
 	"chargers_conns": ["*internal"],
 },
 
-"apiers": {
+"admins": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },

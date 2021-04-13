@@ -39,7 +39,6 @@ import (
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/registrarc"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
@@ -89,10 +88,10 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 		}
 	}()
 
-	chSv1 := v1.NewCacheSv1(chS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(chSv1)
-	}
+	// chSv1 := v1.NewCacheSv1(chS)
+	// if !cfg.DispatcherSCfg().Enabled {
+	// 	server.RpcRegister(chSv1)
+	// }
 	var rpc birpc.ClientConnector = chS
 	if anz.IsRunning() {
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
@@ -103,23 +102,23 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 
 func initGuardianSv1(internalGuardianSChan chan birpc.ClientConnector, server *cores.Server,
 	anz *services.AnalyzerService) {
-	grdSv1 := v1.NewGuardianSv1()
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(grdSv1)
-	}
-	var rpc birpc.ClientConnector = grdSv1
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.GuardianS)
-	}
-	internalGuardianSChan <- rpc
+	// grdSv1 := v1.NewGuardianSv1()
+	// if !cfg.DispatcherSCfg().Enabled {
+	// server.RpcRegister(grdSv1)
+	// }
+	// var rpc birpc.ClientConnector = grdSv1
+	// if anz.IsRunning() {
+	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.GuardianS)
+	// }
+	// internalGuardianSChan <- rpc
 }
 
 func initServiceManagerV1(internalServiceManagerChan chan birpc.ClientConnector,
 	srvMngr *servmanager.ServiceManager, server *cores.Server,
 	anz *services.AnalyzerService) {
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
-	}
+	// if !cfg.DispatcherSCfg().Enabled {
+	// server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
+	// }
 	var rpc birpc.ClientConnector = srvMngr
 	if anz.IsRunning() {
 		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
@@ -129,15 +128,15 @@ func initServiceManagerV1(internalServiceManagerChan chan birpc.ClientConnector,
 
 func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 	server *cores.Server, anz *services.AnalyzerService) {
-	cfgSv1 := v1.NewConfigSv1(cfg)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(cfgSv1)
-	}
-	var rpc birpc.ClientConnector = cfgSv1
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
-	}
-	internalConfigChan <- rpc
+	// cfgSv1 := v1.NewConfigSv1(cfg)
+	// if !cfg.DispatcherSCfg().Enabled {
+	// server.RpcRegister(cfgSv1)
+	// }
+	// var rpc birpc.ClientConnector = cfgSv1
+	// if anz.IsRunning() {
+	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
+	// }
+	// internalConfigChan <- rpc
 }
 
 func startRPC(server *cores.Server,
@@ -632,10 +631,8 @@ func main() {
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
 		internalRouteSChan, connManager, anz, srvDep)
 
-	apiSv1 := services.NewAPIerSv1Service(cfg, dmService, storDBService, filterSChan, server,
+	admS := services.NewAdminSv1Service(cfg, dmService, storDBService, filterSChan, server,
 		internalAPIerSv1Chan, connManager, anz, srvDep)
-
-	apiSv2 := services.NewAPIerSv2Service(apiSv1, cfg, server, internalAPIerSv2Chan, anz, srvDep)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager, anz, srvDep)
@@ -646,7 +643,7 @@ func main() {
 		internalLoaderSChan, connManager, anz, srvDep)
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, reS, routeS,
-		apiSv1, apiSv2, cdrS, smg, coreS,
+		admS, cdrS, smg, coreS,
 		services.NewEventReaderService(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),

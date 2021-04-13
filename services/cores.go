@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -52,8 +51,8 @@ type CoreService struct {
 	caps     *engine.Caps
 	stopChan chan struct{}
 
-	cS       *cores.CoreService
-	rpc      *v1.CoreSv1
+	cS *cores.CoreService
+	// rpc      *v1.CoreSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -70,11 +69,11 @@ func (cS *CoreService) Start() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.stopChan)
-	cS.rpc = v1.NewCoreSv1(cS.cS)
-	if !cS.cfg.DispatcherSCfg().Enabled {
-		cS.server.RpcRegister(cS.rpc)
-	}
-	cS.connChan <- cS.anz.GetInternalCodec(cS.rpc, utils.CoreS)
+	// cS.rpc = v1.NewCoreSv1(cS.cS)
+	// if !cS.cfg.DispatcherSCfg().Enabled {
+	// cS.server.RpcRegister(cS.rpc)
+	// }
+	// cS.connChan <- cS.anz.GetInternalCodec(cS.rpc, utils.CoreS)
 	return
 }
 
@@ -90,7 +89,7 @@ func (cS *CoreService) Shutdown() (err error) {
 	cS.cS.Shutdown()
 	close(cS.stopChan)
 	cS.cS = nil
-	cS.rpc = nil
+	// cS.rpc = nil
 	<-cS.connChan
 	return
 }

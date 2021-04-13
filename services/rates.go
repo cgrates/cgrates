@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/cores"
 
 	"github.com/cgrates/cgrates/config"
@@ -30,7 +29,6 @@ import (
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
-	//"github.com/cgrates/cgrates/apier/v1"
 )
 
 // NewRateService constructs RateService
@@ -65,8 +63,8 @@ type RateService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	rateS       *rates.RateS
-	rpc         *v1.RateSv1
+	rateS *rates.RateS
+	// rpc         *v1.RateSv1
 	intConnChan chan birpc.ClientConnector
 	anz         *AnalyzerService
 	srvDep      map[string]*sync.WaitGroup
@@ -129,11 +127,11 @@ func (rs *RateService) Start() (err error) {
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
 
-	rs.rpc = v1.NewRateSv1(rs.rateS)
-	if !rs.cfg.DispatcherSCfg().Enabled {
-		rs.server.RpcRegister(rs.rpc)
-	}
+	// rs.rpc = v1.NewRateSv1(rs.rateS)
+	// if !rs.cfg.DispatcherSCfg().Enabled {
+	// rs.server.RpcRegister(rs.rpc)
+	// }
 
-	rs.intConnChan <- rs.anz.GetInternalCodec(rs.rpc, utils.RateS)
+	// rs.intConnChan <- rs.anz.GetInternalCodec(rs.rpc, utils.RateS)
 	return
 }

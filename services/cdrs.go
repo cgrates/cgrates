@@ -24,8 +24,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -61,9 +59,9 @@ type CDRServer struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	cdrS     *engine.CDRServer
-	rpcv1    *v1.CDRsV1
-	rpcv2    *v2.CDRsV2
+	cdrS *engine.CDRServer
+	// rpcv1    *v1.CDRsV1
+	// rpcv2    *v2.CDRsV2
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 
@@ -99,11 +97,11 @@ func (cdrService *CDRServer) Start() (err error) {
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrService.cdrS.RegisterHandlersToServer(cdrService.server)
 	utils.Logger.Info("Registering CDRS RPC service.")
-	cdrService.rpcv1 = v1.NewCDRsV1(cdrService.cdrS)
-	cdrService.rpcv2 = &v2.CDRsV2{CDRsV1: *cdrService.rpcv1}
+	// cdrService.rpcv1 = v1.NewCDRsV1(cdrService.cdrS)
+	// cdrService.rpcv2 = &v2.CDRsV2{CDRsV1: *cdrService.rpcv1}
 	if !cdrService.cfg.DispatcherSCfg().Enabled {
-		cdrService.server.RpcRegister(cdrService.rpcv1)
-		cdrService.server.RpcRegister(cdrService.rpcv2)
+		// cdrService.server.RpcRegister(cdrService.rpcv1)
+		// cdrService.server.RpcRegister(cdrService.rpcv2)
 		// Make the cdr server available for internal communication
 		cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
 	}
@@ -121,8 +119,8 @@ func (cdrService *CDRServer) Shutdown() (err error) {
 	cdrService.Lock()
 	close(cdrService.stopChan)
 	cdrService.cdrS = nil
-	cdrService.rpcv1 = nil
-	cdrService.rpcv2 = nil
+	// cdrService.rpcv1 = nil
+	// cdrService.rpcv2 = nil
 	<-cdrService.connChan
 	cdrService.Unlock()
 	return
