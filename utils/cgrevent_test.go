@@ -355,7 +355,7 @@ func TestCGREventOptAsDurationEmpty(t *testing.T) {
 
 func TestCGREventOptAsDuration(t *testing.T) {
 	ev := &CGREvent{
-		Event: map[string]interface{}{
+		APIOpts: map[string]interface{}{
 			"testKey": 30,
 		},
 	}

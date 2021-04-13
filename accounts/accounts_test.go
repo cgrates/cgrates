@@ -406,23 +406,23 @@ func TestAccountsDebit(t *testing.T) {
 	}
 	delete(cgrEvent.Event, utils.Usage)
 
-	cgrEvent.Event[utils.MetaUsage] = "not_time_format"
+	cgrEvent.APIOpts[utils.MetaUsage] = "not_time_format"
 	expected = "time: invalid duration \"not_time_format\""
 	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, false, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	delete(cgrEvent.Event, utils.MetaUsage)
+	delete(cgrEvent.APIOpts, utils.MetaUsage)
 
 	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, true, false); err != nil {
 		t.Error(err)
 	}
-	cgrEvent.Event[utils.MetaUsage] = "0"
+	cgrEvent.APIOpts[utils.MetaUsage] = "0"
 
 	if _, err := accnts.accountsDebit(accntsPrf, cgrEvent, false, false); err != nil {
 		t.Error(err)
 	}
 
-	cgrEvent.Event[utils.MetaUsage] = "55s"
+	cgrEvent.APIOpts[utils.MetaUsage] = "55s"
 
 	accntsPrf[0].Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{"invalid_filter_format"}
 	expected = "NOT_FOUND:invalid_filter_format"

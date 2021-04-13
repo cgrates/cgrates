@@ -86,7 +86,7 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 
 // OptAsDuration returns an option as Duration instance
 func (ev *CGREvent) OptAsDuration(optName string) (d time.Duration, err error) {
-	iface, has := ev.Event[optName]
+	iface, has := ev.APIOpts[optName]
 	if !has {
 		err = ErrNotFound
 		return
