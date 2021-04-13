@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -4477,7 +4477,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 
 type mkCall struct{}
 
-func (sT *mkCall) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *mkCall) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
 	if arg.(*utils.DPRArgs).OriginHost != "cgrates" {
 		return utils.ErrNoActiveSession
 	}
@@ -4531,7 +4531,7 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 
 type mkCallForces struct{}
 
-func (sT *mkCallForces) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *mkCallForces) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
 	return utils.ErrNoActiveSession
 }
 
@@ -4604,10 +4604,10 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	}
 
 	testMk := &mkCallForces{}
-	clntConn := make(chan rpcclient.ClientConnector, 1)
+	clntConn := make(chan birpc.ClientConnector, 1)
 	clntConn <- testMk
 	sessions.cgrCfg.SessionSCfg().ResSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): clntConn,
 	})
 	sessions.connMgr = connMngr

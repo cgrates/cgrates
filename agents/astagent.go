@@ -324,7 +324,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 
 }
 
-// Call implements rpcclient.ClientConnector interface
+// Call implements birpc.ClientConnector interface
 func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
