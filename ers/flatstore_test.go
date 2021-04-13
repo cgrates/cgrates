@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -118,5 +119,118 @@ func TestFlatstoreServeNil(t *testing.T) {
 	err = result.Serve()
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+}
+
+func TestNewUnpairedRecordErrTimezone(t *testing.T) {
+	record := []string{"TEST1", "TEST2", "TEST3", "TEST4", "TEST5", "TEST6", "TEST7"}
+	timezone, _ := time.Time.Zone(time.Now())
+	fileName := "testfile.csv"
+	errExpect := "unknown time zone EEST"
+	_, err := NewUnpairedRecord(record, timezone, fileName)
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestNewUnpairedRecordErr(t *testing.T) {
+	record := []string{"invalid"}
+	timezone, _ := time.Time.Zone(time.Now())
+	fileName := "testfile.csv"
+	errExpect := "MISSING_IE"
+	_, err := NewUnpairedRecord(record, timezone, fileName)
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestPairToRecord(t *testing.T) {
+	part1 := &UnpairedRecord{
+		Method: "INVITE",
+		Values: []string{"value1", "value2", "value3", "value4", "value5", "value6"},
+	}
+	part2 := &UnpairedRecord{
+		Method: "BYE",
+		Values: []string{"value1", "value2", "value3", "value4", "value5", "value6"},
+	}
+	rcv, err := pairToRecord(part1, part2)
+	rcvExpect := append(part1.Values, "0")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, rcvExpect) {
+		t.Errorf("Expected %v but received %v", rcvExpect, rcv)
+	}
+
+	part1.Values = append(part1.Values, "value7", "value8")
+	part2.Values = append(part2.Values, "value7", "value8")
+	_, err = pairToRecord(part1, part2)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(part1.Values[7], part2.Values[7]) {
+		t.Errorf("Last INVITE value does not match last BYE value")
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().ProcessedPath = "/tmp"
+	part1.FileName = "testfile"
+	eR.dumpToFile("ID1", nil)
+	eR.dumpToFile("ID1", part1)
+	part1.Values = []string{"\n"}
+	eR.dumpToFile("ID1", part1)
+}
+
+func TestPairToRecordReverse(t *testing.T) {
+	part1 := &UnpairedRecord{
+		Method: "BYE",
+		Values: []string{"value1", "value2", "value3", "value4", "value5"},
+	}
+	part2 := &UnpairedRecord{
+		Method: "INVITE",
+		Values: []string{"value1", "value2", "value3", "value4", "value5"},
+	}
+	rcv, err := pairToRecord(part1, part2)
+	rcvExpect := append(part1.Values, "0")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, rcvExpect) {
+		t.Errorf("Expected %v but received %v", rcvExpect, rcv)
+	}
+}
+
+func TestPairToRecordErrors(t *testing.T) {
+	part1 := &UnpairedRecord{
+		Method: "INVITE",
+		Values: []string{"value1", "value2", "value3", "value4", "value5"},
+	}
+	part2 := &UnpairedRecord{
+		Method: "INVITE",
+	}
+	errExpect := "MISSING_BYE"
+	if _, err := pairToRecord(part1, part2); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	errExpect = "INCONSISTENT_VALUES_LENGTH"
+	part2.Method = "BYE"
+	if _, err := pairToRecord(part1, part2); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	part1.Method = "BYE"
+	errExpect = "MISSING_INVITE"
+	if _, err := pairToRecord(part1, part2); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }

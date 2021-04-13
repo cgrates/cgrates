@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestNewInvalidReader(t *testing.T) {
@@ -134,5 +135,111 @@ func TestNewSQLReaderError(t *testing.T) {
 	_, err := NewSQLEventReader(cfg, 0, nil, nil, fltr, nil)
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, err)
+	}
+}
+
+func TestNewPartialCSVReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaPartialCSV
+	cfg.ERsCfg().Readers[0].SourcePath = "/tmp/ers/in"
+	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1024
+	expected, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
+	}
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else {
+		rcv.(*PartialCSVFileER).conReqs = nil
+		rcv.(*PartialCSVFileER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
+		expected.(*PartialCSVFileER).conReqs = nil
+		expected.(*PartialCSVFileER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
+		if !reflect.DeepEqual(expected, rcv) {
+			t.Errorf("Expecting %v but received %v", expected, rcv)
+		}
+	}
+}
+
+func TestNewFileXMLReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaFileXML
+	expected, err := NewXMLFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else {
+		rcv.(*XMLFileER).conReqs = nil
+		expected.(*XMLFileER).conReqs = nil
+		if !reflect.DeepEqual(expected, rcv) {
+			t.Errorf("Expecting %v but received %v", expected, rcv)
+		}
+	}
+}
+
+func TestNewFileFWVReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaFileFWV
+	expected, err := NewFWVFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(nil)
+	} else {
+		rcv.(*FWVFileER).conReqs = nil
+		expected.(*FWVFileER).conReqs = nil
+		if !reflect.DeepEqual(expected, rcv) {
+			t.Errorf("Expecting %v but received %v", expected, rcv)
+		}
+	}
+}
+
+func TestNewFlatstoreReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaFlatstore
+	expected, err := NewFlatstoreER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else {
+		rcv.(*FlatstoreER).conReqs = nil
+		expected.(*FlatstoreER).conReqs = nil
+		rcv.(*FlatstoreER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
+		expected.(*FlatstoreER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
+		if !reflect.DeepEqual(expected, rcv) {
+			t.Errorf("Expecting %v but received %v", expected, rcv)
+		}
+	}
+}
+
+func TestNewJSONReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaFileJSON
+	expected, err := NewJSONFileER(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else {
+		rcv.(*JSONFileER).conReqs = nil
+		expected.(*JSONFileER).conReqs = nil
+		if !reflect.DeepEqual(expected, rcv) {
+			t.Errorf("Expecting %v but received %v", expected, rcv)
+		}
 	}
 }
