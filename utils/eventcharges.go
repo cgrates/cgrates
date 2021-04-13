@@ -141,7 +141,56 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 			eEc.Concretes = &flt
 		}
 	}
-	// add here code for the rest of the fields
+	if ec.ChargingIntervals != nil {
+		eEc.ChargingIntervals = make([]*ExtChargingInterval, len(ec.ChargingIntervals))
+		for idx, val := range ec.ChargingIntervals {
+			if rcv, err := val.AsExtChargingInterval(); err != nil {
+				return nil, err
+			} else {
+				eEc.ChargingIntervals[idx] = rcv
+			}
+		}
+	}
+	if ec.Accounts != nil {
+		eEc.Accounts = make([]*ExtAccount, len(ec.Accounts))
+		for idx, val := range ec.Accounts {
+			if extAccs, err := val.AsExtAccount(); err != nil {
+				return nil, err
+			} else {
+				eEc.Accounts[idx] = extAccs
+			}
+		}
+	}
+	if ec.Accounting != nil {
+		eEc.Accounting = make(map[string]*ExtAccountCharge, len(eEc.Accounting))
+		for key, val := range ec.Accounting {
+			if extAcc, err := val.AsExtAccountCharge(); err != nil {
+				return nil, err
+			} else {
+				eEc.Accounting[key] = extAcc
+			}
+		}
+	}
+	if ec.UnitFactors != nil {
+		eEc.UnitFactors = make(map[string]*ExtUnitFactor, len(ec.UnitFactors))
+		for key, val := range ec.UnitFactors {
+			if extUnit, err := val.AsExtUnitFactor(); err != nil {
+				return nil, err
+			} else {
+				eEc.UnitFactors[key] = extUnit
+			}
+		}
+	}
+	if ec.Rating != nil {
+		eEc.Rating = make(map[string]*ExtRateSInterval, len(ec.Rating))
+		for key, val := range ec.Rating {
+			if extRate, err := val.AsExtRateSInterval(); err != nil {
+				return nil, err
+			} else {
+				eEc.Rating[key] = extRate
+			}
+		}
+	}
 	return
 }
 
@@ -179,6 +228,13 @@ func (ec *EventCharges) accountChargeID(ac *AccountCharge) (acID string) {
 type ExtEventCharges struct {
 	Abstracts *float64
 	Concretes *float64
+
+	ChargingIntervals []*ExtChargingInterval
+	Accounts          []*ExtAccount
+
+	Accounting  map[string]*ExtAccountCharge
+	UnitFactors map[string]*ExtUnitFactor
+	Rating      map[string]*ExtRateSInterval
 }
 
 type ChargingInterval struct {
@@ -199,11 +255,54 @@ func (cIl *ChargingInterval) CompressEquals(nCil *ChargingInterval) (eq bool) {
 	return true
 }
 
+type ExtChargingInterval struct {
+	Increments     []*ExtChargingIncrement
+	CompressFactor int
+}
+
 // ChargingIncrement represents one unit charged inside an interval
 type ChargingIncrement struct {
 	Units           *Decimal // Can differ from AccountCharge due to JoinedCharging
 	AccountChargeID string   // Account charging information
 	CompressFactor  int
+}
+
+type ExtChargingIncrement struct {
+	Units           *float64
+	AccountChargeID string
+	CompressFactor  int
+}
+
+func (cI *ChargingInterval) AsExtChargingInterval() (eCi *ExtChargingInterval, err error) {
+	eCi = &ExtChargingInterval{
+		CompressFactor: cI.CompressFactor,
+	}
+	if cI.Increments != nil {
+		eCi.Increments = make([]*ExtChargingIncrement, len(cI.Increments))
+		for i, val := range cI.Increments {
+			if incr, err := val.AsExtChargingIncrements(); err != nil {
+				return nil, err
+			} else {
+				eCi.Increments[i] = incr
+			}
+		}
+	}
+	return
+}
+
+func (cIn *ChargingIncrement) AsExtChargingIncrements() (eCin *ExtChargingIncrement, err error) {
+	eCin = &ExtChargingIncrement{
+		AccountChargeID: cIn.AccountChargeID,
+		CompressFactor:  cIn.CompressFactor,
+	}
+	if cIn.Units != nil {
+		if fltUnit, ok := cIn.Units.Big.Float64(); !ok {
+			return nil, errors.New("Cannot convert decimal ChargingIncrement ")
+		} else {
+			eCin.Units = &fltUnit
+		}
+	}
+	return
 }
 
 func (cI *ChargingIncrement) CompressEquals(chIh *ChargingIncrement) (eq bool) {
@@ -225,6 +324,53 @@ type AccountCharge struct {
 	AttributeIDs    []string // list of attribute profiles matched
 	RatingID        string   // identificator in cost increments
 	JoinedChargeIDs []string // identificator of extra account charges
+}
+
+type ExtAccountCharge struct {
+	AccountID       string
+	BalanceID       string
+	Units           *float64
+	BalanceLimit    *float64 // the minimum balance value accepted(float64 type)
+	UnitFactorID    string   // identificator in ChargingUnitFactors
+	AttributeIDs    []string // list of attribute profiles matched
+	RatingID        string   // identificator in cost increments
+	JoinedChargeIDs []string // identificator of extra account charges
+}
+
+func (aC *AccountCharge) AsExtAccountCharge() (eAc *ExtAccountCharge, err error) {
+	eAc = &ExtAccountCharge{
+		AccountID:    aC.AccountID,
+		BalanceID:    aC.BalanceID,
+		UnitFactorID: aC.UnitFactorID,
+		RatingID:     aC.RatingID,
+	}
+	if aC.Units != nil {
+		if fltUnit, ok := aC.Units.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal Units to float64 ")
+		} else {
+			eAc.Units = &fltUnit
+		}
+	}
+	if aC.BalanceLimit != nil {
+		if fltBlUnit, ok := aC.BalanceLimit.Big.Float64(); !ok {
+			return nil, errors.New("cannot convert decimal BalanceLimit to float64 ")
+		} else {
+			eAc.BalanceLimit = &fltBlUnit
+		}
+	}
+	if aC.AttributeIDs != nil {
+		eAc.AttributeIDs = make([]string, len(aC.AttributeIDs))
+		for idx, val := range aC.AttributeIDs {
+			eAc.AttributeIDs[idx] = val
+		}
+	}
+	if aC.JoinedChargeIDs != nil {
+		eAc.JoinedChargeIDs = make([]string, len(aC.JoinedChargeIDs))
+		for idx, val := range aC.JoinedChargeIDs {
+			eAc.JoinedChargeIDs[idx] = val
+		}
+	}
+	return
 }
 
 // Equals compares two AccountCharges
