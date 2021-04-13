@@ -6,6 +6,7 @@ go 1.16
 
 replace github.com/cgrates/rpcclient => ../rpcclient
 replace github.com/cgrates/birpc => ../rpc
+replace github.com/cgrates/baningo => ../baningo
 
 require (
 	cloud.google.com/go v0.75.0 // indirect

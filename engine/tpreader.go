@@ -660,7 +660,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoAttributeProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetAttributeProfile(th, true); err != nil {
+		if err = tpr.dm.SetAttributeProfile(context.TODO(), th, true); err != nil {
 			return
 		}
 		if verbose {
@@ -794,7 +794,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		loadIDs[utils.CacheTimings] = loadID
 	}
 
-	return tpr.dm.SetLoadIDs(loadIDs)
+	return tpr.dm.SetLoadIDs(context.TODO(), loadIDs)
 }
 
 func (tpr *TpReader) ShowStatistics() {
@@ -1045,7 +1045,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("AttributeProfiles:")
 	}
 	for _, tpAttr := range tpr.attributeProfiles {
-		if err = tpr.dm.RemoveAttributeProfile(tpAttr.Tenant, tpAttr.ID,
+		if err = tpr.dm.RemoveAttributeProfile(context.TODO(), tpAttr.Tenant, tpAttr.ID,
 			utils.NonTransactional, true); err != nil {
 			return
 		}
@@ -1217,7 +1217,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.timings) != 0 {
 		loadIDs[utils.CacheTimings] = loadID
 	}
-	return tpr.dm.SetLoadIDs(loadIDs)
+	return tpr.dm.SetLoadIDs(context.TODO(), loadIDs)
 }
 
 func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]interface{}) (err error) {

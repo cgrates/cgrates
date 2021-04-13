@@ -173,7 +173,7 @@ func TestFilterpassEqualTo(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(ev); err != nil {
+	if passes, err := rf.Pass(context.TODO(), ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing", passes)
@@ -927,7 +927,7 @@ func TestFilterPassIPNet(t *testing.T) {
 	if err := rf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
-	if passes, err := rf.Pass(cd); err != nil {
+	if passes, err := rf.Pass(context.TODO(), cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
@@ -937,7 +937,7 @@ func TestFilterPassIPNet(t *testing.T) {
 	if err := rf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
-	if passes, err := rf.Pass(cd); err != nil {
+	if passes, err := rf.Pass(context.TODO(), cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -980,7 +980,7 @@ func TestFilterPassIPNet(t *testing.T) {
 	if err := rf.CompileValues(); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := rf.Pass(cd); err == nil {
+	if _, err := rf.Pass(context.TODO(), cd); err == nil {
 		t.Error(err)
 	}
 }

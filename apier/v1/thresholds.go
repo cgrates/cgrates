@@ -138,7 +138,7 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdProfileWithA
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
 	//make 1 insert for both ThresholdProfile and Threshold instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
@@ -182,7 +182,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
 	//make 1 insert for both ThresholdProfile and Threshold instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold

@@ -19,14 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-/*
-// GetAttributeProfile returns an Attribute Profile
-func (admS *AdminS) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) (err error) {
+// GetAttributeProfile returns an Attribute Profile based on the tenant and ID received
+func (admS *AdminS) GetAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.AttributeProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +36,7 @@ func (admS *AdminS) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *e
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var alsPrf *engine.AttributeProfile
-	if alsPrf, err = admS.dm.GetAttributeProfile(tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if alsPrf, err = admS.dm.GetAttributeProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -46,13 +47,13 @@ func (admS *AdminS) GetAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *e
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (admS *AdminS) GetAttributeProfileIDs(args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
+func (admS *AdminS) GetAttributeProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, attrPrfIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := admS.dm.DataDB().GetKeysForPrefix(prfx)
+	keys, err := admS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
 	if err != nil {
 		return err
 	}
@@ -67,16 +68,16 @@ func (admS *AdminS) GetAttributeProfileIDs(args *utils.PaginatorWithTenant, attr
 	return nil
 }
 
-// GetAttributeProfileIDsCount sets in reply var the total number of AttributeProfileIDs registered for a tenant
+// GetAttributeProfileIDsCount returns the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (admS *AdminS) GetAttributeProfileIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminS) GetAttributeProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var keys []string
 	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(prfx); err != nil {
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
@@ -86,8 +87,8 @@ func (admS *AdminS) GetAttributeProfileIDsCount(args *utils.TenantWithAPIOpts, r
 	return
 }
 
-//SetAttributeProfile add/update a new Attribute Profile
-func (admS *AdminS) SetAttributeProfile(alsWrp *engine.AttributeProfileWithAPIOpts, reply *string) error {
+// SetAttributeProfile add/update a new Attribute Profile
+func (admS *AdminS) SetAttributeProfile(ctx *context.Context, alsWrp *engine.AttributeProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{utils.ID, utils.Attributes}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -107,15 +108,15 @@ func (admS *AdminS) SetAttributeProfile(alsWrp *engine.AttributeProfileWithAPIOp
 			}
 		}
 	}
-	if err := admS.dm.SetAttributeProfile(alsWrp.AttributeProfile, true); err != nil {
+	if err := admS.dm.SetAttributeProfile(ctx, alsWrp.AttributeProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := admS.dm.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 
-	if err := admS.CallCache(utils.IfaceAsString(alsWrp.APIOpts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(alsWrp.APIOpts[utils.CacheOpt]), alsWrp.Tenant, utils.CacheAttributeProfiles,
 		alsWrp.TenantID(), &alsWrp.FilterIDs, alsWrp.Contexts, alsWrp.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -123,8 +124,8 @@ func (admS *AdminS) SetAttributeProfile(alsWrp *engine.AttributeProfileWithAPIOp
 	return nil
 }
 
-//RemoveAttributeProfile remove a specific Attribute Profile
-func (apierSv1 *AdminS) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts, reply *string) error {
+//RemoveAttributeProfile remove a specific Attribute Profile based on tenant an ID
+func (apierSv1 *AdminS) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -132,45 +133,46 @@ func (apierSv1 *AdminS) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts, r
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.dm.RemoveAttributeProfile(tnt, arg.ID,
+	if err := apierSv1.dm.RemoveAttributeProfile(ctx, tnt, arg.ID,
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierSv1.dm.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
+	if err := apierSv1.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
-*/
+
 // NewAttributeSv1 returns the RPC Object for AttributeS
 func NewAttributeSv1(attrS *engine.AttributeService) *AttributeSv1 {
 	return &AttributeSv1{attrS: attrS}
 }
 
-// AttributeSv1 exports RPC from RLs
+// AttributeSv1 exports RPC from Attributes service
 type AttributeSv1 struct {
 	attrS *engine.AttributeService
 }
 
-// GetAttributeForEvent  returns matching AttributeProfile for Event
+// GetAttributeForEvent returns matching AttributeProfile for Event
 func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *engine.AttrArgsProcessEvent,
 	reply *engine.AttributeProfile) (err error) {
 	return alSv1.attrS.V1GetAttributeForEvent(ctx, args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile
-func (alSv1 *AttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
+// and return a list of altered fields
+func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) error {
-	return alSv1.attrS.V1ProcessEvent(args, reply)
+	return alSv1.attrS.V1ProcessEvent(ctx, args, reply)
 }
 
-// Ping return pong if the service is active
+// Ping return pong used to determine if the subsystem is active
 func (alSv1 *AttributeSv1) Ping(_ *context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil

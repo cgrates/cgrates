@@ -178,9 +178,9 @@ func (chS *CacheS) GetItemIDs(chID, prfx string) (itmIDs []string) {
 }
 
 // Remove is an exported method from TransCache
-func (chS *CacheS) Remove(chID, itmID string, commit bool, transID string) (err error) {
+func (chS *CacheS) Remove(ctx *context.Context, chID, itmID string, commit bool, transID string) (err error) {
 	chS.tCache.Remove(chID, itmID, commit, transID)
-	return chS.ReplicateRemove(chID, itmID)
+	return chS.ReplicateRemove(ctx, chID, itmID)
 }
 
 // RemoveWithoutReplicate is an exported method from TransCache
@@ -453,13 +453,13 @@ func (chS *CacheS) V1ReplicateSet(args *utils.ArgCacheReplicateSet, reply *strin
 }
 
 // ReplicateRemove replicate an item to ReplicationConns
-func (chS *CacheS) ReplicateRemove(chID, itmID string) (err error) {
+func (chS *CacheS) ReplicateRemove(ctx *context.Context, chID, itmID string) (err error) {
 	if len(chS.cfg.CacheCfg().ReplicationConns) == 0 ||
 		!chS.cfg.CacheCfg().Partitions[chID].Replicate {
 		return
 	}
 	var reply string
-	return connMgr.Call(context.TODO(), chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
+	return connMgr.Call(ctx, chS.cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
 		&utils.ArgCacheReplicateRemove{
 			CacheID: chID,
 			ItemID:  itmID,

@@ -47,7 +47,7 @@ type Storage interface {
 // OnlineStorage contains methods to use for administering online data
 type DataDB interface {
 	Storage
-	HasDataDrv(string, string, string) (bool, error)
+	HasDataDrv(*context.Context, string, string, string) (bool, error)
 	GetDestinationDrv(string, string) (*Destination, error)
 	SetDestinationDrv(*Destination, string) error
 	RemoveDestinationDrv(string, string) error
@@ -89,7 +89,7 @@ type DataDB interface {
 	RemoveRouteProfileDrv(string, string) error
 	GetAttributeProfileDrv(ctx *context.Context, tnt string, id string) (*AttributeProfile, error)
 	SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error
-	RemoveAttributeProfileDrv(string, string) error
+	RemoveAttributeProfileDrv(*context.Context, string, string) error
 	GetChargerProfileDrv(string, string) (*ChargerProfile, error)
 	SetChargerProfileDrv(*ChargerProfile) error
 	RemoveChargerProfileDrv(string, string) error
@@ -97,7 +97,7 @@ type DataDB interface {
 	SetDispatcherProfileDrv(*DispatcherProfile) error
 	RemoveDispatcherProfileDrv(string, string) error
 	GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error)
-	SetLoadIDsDrv(loadIDs map[string]int64) error
+	SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error
 	RemoveLoadIDsDrv() error
 	GetDispatcherHostDrv(string, string) (*DispatcherHost, error)
 	SetDispatcherHostDrv(*DispatcherHost) error

@@ -69,7 +69,7 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 			continue
 		}
 		for _, fltr := range f.Rules {
-			if pass, err = fltr.Pass(dDP); err != nil || !pass {
+			if pass, err = fltr.Pass(ctx, dDP); err != nil || !pass {
 				return pass, err
 			}
 		}
@@ -140,7 +140,7 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 				lazyCheckRules = append(lazyCheckRules, rule)
 				continue
 			}
-			if pass, err = rule.Pass(dDP); err != nil || !pass {
+			if pass, err = rule.Pass(context.TODO(), dDP); err != nil || !pass {
 				return
 			}
 		}
@@ -325,7 +325,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
+func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (result bool, err error) {
 	if fltr.negative == nil {
 		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, utils.MetaNot))
 	}
@@ -344,7 +344,7 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 	case utils.MetaTimings, utils.MetaNotTimings:
 		result, err = fltr.passTimings(dDP)
 	case utils.MetaDestinations, utils.MetaNotDestinations:
-		result, err = fltr.passDestinations(dDP)
+		result, err = fltr.passDestinations(ctx, dDP)
 	case utils.MetaRSR, utils.MetaNotRSR:
 		result, err = fltr.passRSR(dDP)
 	case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
@@ -354,7 +354,7 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 	case utils.MetaIPNet, utils.MetaNotIPNet:
 		result, err = fltr.passIPNet(dDP)
 	case utils.MetaAPIBan, utils.MetaNotAPIBan:
-		result, err = fltr.passAPIBan(dDP)
+		result, err = fltr.passAPIBan(ctx, dDP)
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
 		result, err = fltr.passActivationInterval(dDP)
 	default:
@@ -479,7 +479,7 @@ func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
+func (fltr *FilterRule) passDestinations(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
 	dst, err := fltr.rsrElement.ParseDataProvider(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -489,7 +489,7 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 	}
 	for _, p := range utils.SplitPrefix(dst, utils.MIN_PREFIX_MATCH) {
 		var destIDs []string
-		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
+		if err = connMgr.Call(ctx, config.CgrConfig().FilterSCfg().ApierSConns, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
 			continue
 		}
 		for _, dID := range destIDs {
@@ -619,7 +619,7 @@ func (fltr *FilterRule) passIPNet(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
+func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
 	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -631,7 +631,7 @@ func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
 		fltr.Values[0] != utils.MetaSingle { // force only valid values
 		return false, fmt.Errorf("invalid value for apiban filter: <%s>", fltr.Values[0])
 	}
-	return dm.GetAPIBan(strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
+	return dm.GetAPIBan(ctx, strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
 func (fltr *FilterRule) passActivationInterval(dDp utils.DataProvider) (bool, error) {

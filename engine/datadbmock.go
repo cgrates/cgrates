@@ -61,7 +61,7 @@ func (dbM *DataDBMock) IsDBEmpty() (resp bool, err error) {
 }
 
 //DataDB methods
-func (dbM *DataDBMock) HasDataDrv(string, string, string) (bool, error) {
+func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
@@ -226,7 +226,7 @@ func (dbM *DataDBMock) SetAttributeProfileDrv(*context.Context, *AttributeProfil
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAttributeProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveAttributeProfileDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 
@@ -258,7 +258,7 @@ func (dbM *DataDBMock) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetLoadIDsDrv(loadIDs map[string]int64) error {
+func (dbM *DataDBMock) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
 	return utils.ErrNotImplemented
 }
 

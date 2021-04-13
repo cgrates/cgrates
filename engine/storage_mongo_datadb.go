@@ -628,8 +628,8 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (r
 	return
 }
 
-func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, err error) {
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (has bool, err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		var count int64
 		switch category {
 		case utils.DestinationPrefix:
@@ -815,7 +815,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	cCommit := cacheCommit(transactionID)
 	if err == nil {
 		loadInsts = kv.Value
-		if errCh := Cache.Remove(utils.LoadInstKey, "", cCommit, transactionID); errCh != nil {
+		if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "", cCommit, transactionID); errCh != nil {
 			return nil, errCh
 		}
 		if errCh := Cache.Set(context.TODO(), utils.LoadInstKey, "", loadInsts, nil, cCommit, transactionID); errCh != nil {
@@ -878,7 +878,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 		})
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
 
-	if errCh := Cache.Remove(utils.LoadInstKey, "",
+	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "",
 		cacheCommit(transactionID), transactionID); errCh != nil {
 		return errCh
 	}
@@ -1252,8 +1252,8 @@ func (ms *MongoStorage) SetAttributeProfileDrv(ctx *context.Context, r *Attribut
 	})
 }
 
-func (ms *MongoStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColAttr).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
@@ -1395,8 +1395,8 @@ func (ms *MongoStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 	return
 }
 
-func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColLID).UpdateOne(sctx, bson.D{}, bson.M{"$set": loadIDs},
 			options.Update().SetUpsert(true),
 		)

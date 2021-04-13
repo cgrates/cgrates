@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,11 +28,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/utils"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewJSONFileER(cfg *config.CGRConfig, cfgIdx int,

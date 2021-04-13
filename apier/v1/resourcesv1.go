@@ -122,7 +122,7 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIO
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
-	if err = apierSv1.DataManager.SetLoadIDs(
+	if err = apierSv1.DataManager.SetLoadIDs(context.TODO(),
 		map[string]int64{utils.CacheResourceProfiles: loadID,
 			utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
@@ -177,7 +177,7 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, 
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource

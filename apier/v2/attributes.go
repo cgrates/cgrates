@@ -21,6 +21,7 @@ package v2
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -42,11 +43,11 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithAPIOpts, reply *
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := APIerSv2.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
+	if err := APIerSv2.DataManager.SetAttributeProfile(context.TODO(), alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := APIerSv2.DataManager.SetLoadIDs(
+	if err := APIerSv2.DataManager.SetLoadIDs(context.TODO(),
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}

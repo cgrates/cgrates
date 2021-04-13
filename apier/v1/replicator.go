@@ -501,7 +501,7 @@ func (rplSv1 *ReplicatorSv1) SetAccount(acp *utils.AccountWithAPIOpts, reply *st
 
 // SetLoadIDs is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetLoadIDs(args *utils.LoadIDsWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetLoadIDsDrv(args.LoadIDs); err != nil {
+	if err = rplSv1.dm.DataDB().SetLoadIDsDrv(context.TODO(), args.LoadIDs); err != nil {
 		return
 	}
 	lIDs := make([]string, 0, len(args.LoadIDs))
@@ -665,7 +665,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts,
 
 // RemoveAttributeProfile is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveAttributeProfile(args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveAttributeProfileDrv(args.Tenant, args.ID); err != nil {
+	if err = rplSv1.dm.DataDB().RemoveAttributeProfileDrv(context.TODO(), args.Tenant, args.ID); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),

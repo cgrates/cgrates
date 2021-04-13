@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -58,7 +59,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 	for _, cfgFld := range cfgTpl {
 		// Make sure filters are matching
 		if len(cfgFld.Filters) != 0 {
-			if pass, err := filterS.Pass(tenant,
+			if pass, err := filterS.Pass(context.TODO(), tenant,
 				cfgFld.Filters, csvProvider); err != nil {
 				return err
 			} else if !pass {

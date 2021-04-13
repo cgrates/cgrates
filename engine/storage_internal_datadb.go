@@ -180,7 +180,7 @@ func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
 	return
 }
 
-func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error) {
+func (iDB *InternalDB) HasDataDrv(ctx *context.Context, category, subject, tenant string) (bool, error) {
 	switch category {
 	case utils.DestinationPrefix:
 		return Cache.HasItem(utils.CachePrefixToInstance[category], subject), nil
@@ -473,7 +473,7 @@ func (iDB *InternalDB) SetAttributeProfileDrv(ctx *context.Context, attr *Attrib
 	return
 }
 
-func (iDB *InternalDB) RemoveAttributeProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
@@ -531,7 +531,7 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 	return
 }
 
-func (iDB *InternalDB) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
+func (iDB *InternalDB) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
