@@ -149,36 +149,36 @@ func startRPC(server *cores.Server,
 	shdChan *utils.SyncedChan) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
-		case cdrs := <-internalCdrSChan:
-			internalCdrSChan <- cdrs
-		case smg := <-internalSMGChan:
-			internalSMGChan <- smg
+		// case cdrs := <-internalCdrSChan:
+		// 	internalCdrSChan <- cdrs
+		// case smg := <-internalSMGChan:
+		// 	internalSMGChan <- smg
 		case rls := <-internalRsChan:
 			internalRsChan <- rls
-		case statS := <-internalStatSChan:
-			internalStatSChan <- statS
+		// case statS := <-internalStatSChan:
+		// 	internalStatSChan <- statS
 		case attrS := <-internalAttrSChan:
 			internalAttrSChan <- attrS
-		case chrgS := <-internalChargerSChan:
-			internalChargerSChan <- chrgS
-		case thS := <-internalThdSChan:
-			internalThdSChan <- thS
-		case splS := <-internalSuplSChan:
-			internalSuplSChan <- splS
-		case analyzerS := <-internalAnalyzerSChan:
-			internalAnalyzerSChan <- analyzerS
-		case loaderS := <-internalLoaderSChan:
-			internalLoaderSChan <- loaderS
-		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
-			internalCacheSChan <- chS
-		case eeS := <-internalEEsChan:
-			internalEEsChan <- eeS
-		case rateS := <-internalRateSChan:
-			internalRateSChan <- rateS
-		case actionS := <-internalActionSChan:
-			internalActionSChan <- actionS
-		case accountS := <-internalAccountSChan:
-			internalAccountSChan <- accountS
+		// case chrgS := <-internalChargerSChan:
+		// 	internalChargerSChan <- chrgS
+		// case thS := <-internalThdSChan:
+		// 	internalThdSChan <- thS
+		// case splS := <-internalSuplSChan:
+		// 	internalSuplSChan <- splS
+		// case analyzerS := <-internalAnalyzerSChan:
+		// 	internalAnalyzerSChan <- analyzerS
+		// case loaderS := <-internalLoaderSChan:
+		// 	internalLoaderSChan <- loaderS
+		// case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
+		// 	internalCacheSChan <- chS
+		// case eeS := <-internalEEsChan:
+		// 	internalEEsChan <- eeS
+		// case rateS := <-internalRateSChan:
+		// 	internalRateSChan <- rateS
+		// case actionS := <-internalActionSChan:
+		// 	internalActionSChan <- actionS
+		// case accountS := <-internalAccountSChan:
+		// 	internalAccountSChan <- accountS
 		case <-shdChan.Done():
 			return
 		}
