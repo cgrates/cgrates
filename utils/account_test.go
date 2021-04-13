@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -689,5 +690,153 @@ func TestEqualsUnitFactor(t *testing.T) {
 	uf2.Factor = NewDecimal(10, 0)
 	if uf1.Equals(uf2) {
 		t.Errorf("Unexpected equal result")
+	}
+}
+
+func TestAsExtUnitFactor(t *testing.T) {
+	uF := &UnitFactor{
+		FilterIDs: []string{"test1"},
+		Factor:    NewDecimal(123, 2),
+	}
+	expUf := &ExtUnitFactor{
+		FilterIDs: []string{"test1"},
+		Factor:    Float64Pointer(1.23),
+	}
+	if rcv, err := uF.AsExtUnitFactor(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expUf) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expUf), ToJSON(rcv))
+	}
+
+	uF = &UnitFactor{
+		FilterIDs: []string{},
+	}
+	expUf = &ExtUnitFactor{
+		FilterIDs: []string{},
+	}
+	if rcv, err := uF.AsExtUnitFactor(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expUf) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expUf), ToJSON(rcv))
+	}
+
+	uF.Factor = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr := "cannot convert decimal Factor to float64 "
+	if _, err := uF.AsExtUnitFactor(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
+	}
+}
+
+func TestAsExtAccount(t *testing.T) {
+	acc := &Account{
+		Tenant:    "tcgrates.org",
+		ID:        "TestAsExtAccount",
+		FilterIDs: []string{"fltr1", "fltr2"},
+		ActivationInterval: &ActivationInterval{
+			ActivationTime: time.Date(2021, time.December, 12, 0, 0, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2021, time.May, 12, 10, 0, 0, 0, time.UTC),
+		},
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{},
+				Weight:    20.5,
+			},
+		},
+		Opts: map[string]interface{}{
+			Usage: time.Minute,
+		},
+		Balances: map[string]*Balance{
+			"BL1": {
+				ID:        "BL1",
+				FilterIDs: []string{"fltr3"},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{},
+						Weight:    1.5,
+					},
+				},
+				Type:  MetaAbstract,
+				Units: &Decimal{decimal.New(300, 2)},
+				UnitFactors: []*UnitFactor{
+					{
+						FilterIDs: []string{"uf_fltr1"},
+						Factor:    NewDecimal(13, 4),
+					},
+				},
+				Opts: map[string]interface{}{
+					RequestType: Prepaid,
+				},
+				CostIncrements: []*CostIncrement{
+					{
+						FilterIDs:    []string{},
+						FixedFee:     NewDecimal(int64(time.Minute), 0),
+						Increment:    NewDecimal(int64(time.Minute), 0),
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				AttributeIDs:   []string{},
+				RateProfileIDs: []string{"RT1"},
+			},
+		},
+		ThresholdIDs: []string{},
+	}
+
+	expAcc := &ExtAccount{
+		Tenant:    "tcgrates.org",
+		ID:        "TestAsExtAccount",
+		FilterIDs: []string{"fltr1", "fltr2"},
+		ActivationInterval: &ActivationInterval{
+			ActivationTime: time.Date(2021, time.December, 12, 0, 0, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2021, time.May, 12, 10, 0, 0, 0, time.UTC),
+		},
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{},
+				Weight:    20.5,
+			},
+		},
+		Opts: map[string]interface{}{
+			Usage: time.Minute,
+		},
+		Balances: map[string]*ExtBalance{
+			"BL1": {
+				ID:        "BL1",
+				FilterIDs: []string{"fltr3"},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{},
+						Weight:    1.5,
+					},
+				},
+				Type:  MetaAbstract,
+				Units: Float64Pointer(3.00),
+				UnitFactors: []*ExtUnitFactor{
+					{
+						FilterIDs: []string{"uf_fltr1"},
+						Factor:    Float64Pointer(0.0013),
+					},
+				},
+				Opts: map[string]interface{}{
+					RequestType: Prepaid,
+				},
+				CostIncrements: []*ExtCostIncrement{
+					{
+						FilterIDs:    []string{},
+						FixedFee:     Float64Pointer(float64(time.Minute)),
+						Increment:    Float64Pointer(float64(time.Minute)),
+						RecurrentFee: Float64Pointer(0),
+					},
+				},
+				AttributeIDs:   []string{},
+				RateProfileIDs: []string{"RT1"},
+			},
+		},
+		ThresholdIDs: []string{},
+	}
+
+	if rcv, err := acc.AsExtAccount(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expAcc) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expAcc), ToJSON(rcv))
 	}
 }

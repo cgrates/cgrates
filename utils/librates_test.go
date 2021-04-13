@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -1720,4 +1721,261 @@ func TestRatesIncrementEquals(t *testing.T) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr2.CompressFactor = 2
+}
+
+func TestAsExtRateSInterval(t *testing.T) {
+	minDecimal, err := NewDecimalFromUsage("1m")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := NewDecimalFromUsage("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	rI := &RateSInterval{
+		IntervalStart: NewDecimal(int64(time.Second), 0),
+		Increments: []*RateSIncrement{
+			{
+				IncrementStart: NewDecimal(int64(time.Nanosecond), 0),
+				Usage:          NewDecimal(int64(time.Minute), 0),
+				Rate: &Rate{
+					ID:        "RATE1",
+					FilterIDs: []string{"fltr1"},
+					Weights: DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*IntervalRate{
+						{
+							IntervalStart: NewDecimal(0, 0),
+							RecurrentFee:  NewDecimal(12, 2),
+							FixedFee:      NewDecimal(4, 1),
+							Unit:          minDecimal,
+							Increment:     minDecimal,
+						},
+						{
+							IntervalStart: NewDecimal(int64(time.Minute), 0),
+							Unit:          minDecimal,
+							Increment:     secDecimal,
+						},
+					},
+				},
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+				cost:              NewDecimal(1000, 0).Big,
+			},
+			{
+				IncrementStart: NewDecimal(int64(time.Minute), 0),
+				Usage:          NewDecimal(int64(2*time.Minute), 0),
+				Rate: &Rate{
+					ID:        "RATE2",
+					FilterIDs: []string{},
+					Weights: DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 5",
+					IntervalRates: []*IntervalRate{
+						{
+							RecurrentFee: NewDecimal(12, 2),
+							FixedFee:     NewDecimal(4, 1),
+							Unit:         minDecimal,
+							Increment:    minDecimal,
+						},
+						{
+							IntervalStart: NewDecimal(int64(30*time.Second), 0),
+							Unit:          minDecimal,
+							Increment:     secDecimal,
+						},
+					},
+				},
+				IntervalRateIndex: 2,
+				CompressFactor:    5,
+			},
+		},
+		CompressFactor: 1,
+		cost:           NewDecimal(1234, 1).Big,
+	}
+
+	expRi := &ExtRateSInterval{
+		IntervalStart: Float64Pointer(float64(time.Second)),
+		Increments: []*ExtRateSIncrement{
+			{
+				IncrementStart: Float64Pointer(float64(time.Nanosecond)),
+				Usage:          Float64Pointer(float64(time.Minute)),
+				Rate: &ExtRate{
+					ID:        "RATE1",
+					FilterIDs: []string{"fltr1"},
+					Weights: DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*ExtIntervalRate{
+						{
+							IntervalStart: Float64Pointer(0),
+							RecurrentFee:  Float64Pointer(0.12),
+							FixedFee:      Float64Pointer(0.4),
+							Unit:          Float64Pointer(float64(time.Minute)),
+							Increment:     Float64Pointer(float64(time.Minute)),
+						},
+						{
+							IntervalStart: Float64Pointer(float64(time.Minute)),
+							Unit:          Float64Pointer(float64(time.Minute)),
+							Increment:     Float64Pointer(float64(time.Second)),
+						},
+					},
+				},
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+				cost:              Float64Pointer(1000),
+			},
+			{
+				IncrementStart: Float64Pointer(float64(time.Minute)),
+				Usage:          Float64Pointer(float64(2 * time.Minute)),
+				Rate: &ExtRate{
+					ID:        "RATE2",
+					FilterIDs: []string{},
+					Weights: DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					ActivationTimes: "* * * * 5",
+					IntervalRates: []*ExtIntervalRate{
+						{
+							RecurrentFee: Float64Pointer(0.12),
+							FixedFee:     Float64Pointer(0.4),
+							Unit:         Float64Pointer(float64(time.Minute)),
+							Increment:    Float64Pointer(float64(time.Minute)),
+						},
+						{
+							IntervalStart: Float64Pointer(float64(30 * time.Second)),
+							Unit:          Float64Pointer(float64(time.Minute)),
+							Increment:     Float64Pointer(float64(time.Second)),
+						},
+					},
+				},
+				IntervalRateIndex: 2,
+				CompressFactor:    5,
+			},
+		},
+		CompressFactor: 1,
+		cost:           Float64Pointer(123.4),
+	}
+
+	if rcv, err := rI.AsExtRateSInterval(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expRi) {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(expRi), ToJSON(rcv))
+	}
+}
+
+func TestAsExtRateSIntervalErrorsCheck(t *testing.T) {
+	rI := &RateSInterval{
+		IntervalStart: NewDecimal(int64(math.Inf(1))-1, 0),
+		Increments: []*RateSIncrement{
+			{
+				IncrementStart: NewDecimal(int64(time.Nanosecond), 0),
+				Usage:          NewDecimal(int64(time.Minute), 0),
+				Rate: &Rate{
+					ID:        "RATE1",
+					FilterIDs: []string{"fltr1"},
+					Weights: DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					ActivationTimes: "* * * * *",
+					IntervalRates: []*IntervalRate{
+						{
+							IntervalStart: NewDecimal(0, 0),
+							RecurrentFee:  NewDecimal(12, 2),
+							FixedFee:      NewDecimal(4, 1),
+							//Unit:          minDecimal,
+							//Increment:     minDecimal,
+						},
+					},
+				},
+				IntervalRateIndex: 0,
+				CompressFactor:    1,
+				cost:              NewDecimal(1000, 0).Big,
+			},
+		},
+		CompressFactor: 1,
+		cost:           NewDecimal(1234, 1).Big,
+	}
+
+	expErr := "Cannot convert decimal IntervalStart into float64 "
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
+	}
+	rI.IntervalStart = NewDecimal(0, 0)
+
+	rI.cost = NewDecimal(int64(math.Inf(1))-1, 0).Big
+	expErr = "Cannot convert decimal cost into float64 "
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.cost = NewDecimal(0, 0).Big
+
+	rI.Increments[0].IncrementStart = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "Cannot convert decimal IncrementStart into float64 "
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].IncrementStart = NewDecimal(0, 0)
+
+	rI.Increments[0].Usage = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "Cannot convert decimal Usage into float64 "
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].Usage = NewDecimal(0, 0)
+
+	rI.Increments[0].cost = NewDecimal(int64(math.Inf(1))-1, 0).Big
+	expErr = "Cannot convert decimal cost into float64 "
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].cost = NewDecimal(0, 0).Big
+
+	rI.Increments[0].Rate.IntervalRates[0].IntervalStart = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "cannot convert decimal IntervalStart to float64"
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].Rate.IntervalRates[0].IntervalStart = NewDecimal(0, 0)
+
+	rI.Increments[0].Rate.IntervalRates[0].FixedFee = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "cannot convert decimal FixedFee to float64"
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].Rate.IntervalRates[0].FixedFee = NewDecimal(0, 0)
+
+	rI.Increments[0].Rate.IntervalRates[0].RecurrentFee = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "cannot convert decimal RecurrentFee to float64"
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].Rate.IntervalRates[0].RecurrentFee = NewDecimal(0, 0)
+
+	rI.Increments[0].Rate.IntervalRates[0].Unit = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "cannot convert decimal Unit to float64"
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].Rate.IntervalRates[0].Unit = NewDecimal(0, 0)
+
+	rI.Increments[0].Rate.IntervalRates[0].Increment = NewDecimal(int64(math.Inf(1))-1, 0)
+	expErr = "cannot convert decimal Increment to float64"
+	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+q, received %+q", expErr, err)
+	}
+	rI.Increments[0].Rate.IntervalRates[0].Increment = NewDecimal(0, 0)
 }

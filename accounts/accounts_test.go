@@ -602,7 +602,10 @@ func TestV1MaxAbstracts(t *testing.T) {
 	delete(accPrf.Balances, "ConcreteBalance2")
 
 	exEvCh := utils.ExtEventCharges{
-		Abstracts: utils.Float64Pointer(210),
+		Abstracts:   utils.Float64Pointer(210),
+		Accounting:  map[string]*utils.ExtAccountCharge{},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
 	}
 	if err := accnts.V1MaxAbstracts(args, &reply); err != nil {
 		t.Error(err)
@@ -800,7 +803,10 @@ func TestV1MaxConcretes(t *testing.T) {
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
 	exEvCh := utils.ExtEventCharges{
-		Concretes: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Concretes:   utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Accounting:  map[string]*utils.ExtAccountCharge{},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
 	}
 	if err := accnts.V1MaxConcretes(args, &reply); err != nil {
 		t.Error(err)
@@ -911,7 +917,10 @@ func TestV1DebitConcretes(t *testing.T) {
 	accPrf.Balances["AbstractBalance1"].Weights[0].FilterIDs = []string{}
 
 	exEvCh := utils.ExtEventCharges{
-		Concretes: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Concretes:   utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Accounting:  map[string]*utils.ExtAccountCharge{},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
 	}
 	if err := accnts.V1DebitConcretes(args, &reply); err != nil {
 		t.Error(err)
@@ -1349,8 +1358,11 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	}
 
 	eEvChgs := utils.ExtEventCharges{
-		Abstracts: utils.Float64Pointer(125000000000),
-		Concretes: utils.Float64Pointer(0.8166666666666668),
+		Abstracts:   utils.Float64Pointer(125000000000),
+		Concretes:   utils.Float64Pointer(0.8166666666666668),
+		Accounting:  map[string]*utils.ExtAccountCharge{},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
 	}
 
 	var rply utils.ExtEventCharges
