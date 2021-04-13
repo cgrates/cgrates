@@ -28,7 +28,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1454,15 +1453,15 @@ func testDiamItEmulateTerminate(t *testing.T) {
 	}
 	var result string
 	//add the second charger
-	chargerProfile := &v1.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.com",
-			ID:           "CustomCharger",
-			RunID:        "CustomCharger",
-			AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
-			Weight:       20,
-		},
-	}
+	// chargerProfile := &v1.ChargerWithAPIOpts{
+	// 	ChargerProfile: &engine.ChargerProfile{
+	// 		Tenant:       "cgrates.com",
+	// 		ID:           "CustomCharger",
+	// 		RunID:        "CustomCharger",
+	// 		AttributeIDs: []string{"*constant:*req.Category:custom_charger"},
+	// 		Weight:       20,
+	// 	},
+	// }
 
 	if err := apierRpc.Call(utils.APIerSv1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)

@@ -584,7 +584,7 @@ type AnalyzerSJsonCfg struct {
 	Cleanup_interval *string
 }
 
-type ApierJsonCfg struct {
+type AdminSJsonCfg struct {
 	Enabled          *bool
 	Caches_conns     *[]string
 	Actions_conns    *[]string

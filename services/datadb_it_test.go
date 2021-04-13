@@ -163,9 +163,6 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaActionProfiles: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
 		},
 	}
 	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {

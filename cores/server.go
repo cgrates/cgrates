@@ -82,6 +82,10 @@ func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
 	s.Unlock()
 }
 
+func (s *Server) RpcUnregisterName(name string) {
+	birpc.DefaultServer.UnregisterName(name)
+}
+
 func (s *Server) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	if s.httpMux != nil {
 		s.httpMux.HandleFunc(pattern, handler)

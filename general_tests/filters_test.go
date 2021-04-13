@@ -18,13 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package general_tests
 
+/*
 import (
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -121,3 +121,4 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 }
+*/

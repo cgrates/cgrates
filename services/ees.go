@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
@@ -61,8 +60,8 @@ type EventExporterService struct {
 	rldChan     chan struct{}
 	stopChan    chan struct{}
 
-	eeS    *ees.EventExporterS
-	rpc    *v1.EeSv1
+	eeS *ees.EventExporterS
+	// rpc    *v1.EeSv1
 	anz    *AnalyzerService
 	srvDep map[string]*sync.WaitGroup
 }
@@ -119,10 +118,10 @@ func (es *EventExporterService) Start() (err error) {
 	es.stopChan = make(chan struct{})
 	go es.eeS.ListenAndServe(es.stopChan, es.rldChan)
 
-	es.rpc = v1.NewEeSv1(es.eeS)
-	if !es.cfg.DispatcherSCfg().Enabled {
-		es.server.RpcRegister(es.rpc)
-	}
+	// es.rpc = v1.NewEeSv1(es.eeS)
+	// if !es.cfg.DispatcherSCfg().Enabled {
+	// es.server.RpcRegister(es.rpc)
+	// }
 	es.intConnChan <- es.anz.GetInternalCodec(es.eeS, utils.EventExporterS)
 	return
 }

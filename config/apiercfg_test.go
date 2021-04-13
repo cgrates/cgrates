@@ -25,14 +25,14 @@ import (
 )
 
 func TestApierCfgloadFromJsonCfg(t *testing.T) {
-	jsonCfg := &ApierJsonCfg{
+	jsonCfg := &AdminSJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Caches_conns:     &[]string{utils.MetaInternal, "*conn1"},
 		Actions_conns:    &[]string{utils.MetaInternal, "*conn1"},
 		Attributes_conns: &[]string{utils.MetaInternal, "*conn1"},
 		Ees_conns:        &[]string{utils.MetaInternal, "*conn1"},
 	}
-	expected := &ApierCfg{
+	expected := &AdminSCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		ActionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
@@ -40,16 +40,16 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.apier.loadFromJSONCfg(jsonCfg); err != nil {
+	if err = jsnCfg.admS.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, jsnCfg.apier) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.apier))
+	} else if !reflect.DeepEqual(expected, jsnCfg.admS) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.admS))
 	}
 }
 
 func TestApierCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
-	"apiers": {
+	"admins": {
 		"caches_conns":[],
 	},
 }`
@@ -63,14 +63,14 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(newMap, eMap) {
+	} else if newMap := cgrCfg.admS.AsMapInterface(); !reflect.DeepEqual(newMap, eMap) {
 		t.Errorf("Expected %+v, received %+v", eMap, newMap)
 	}
 }
 
 func TestApierCfgAsMapInterface2(t *testing.T) {
 	myJSONStr := `{
-    "apiers": {
+    "admins": {
        "enabled": true,
        "attributes_conns": ["*internal:*attributes", "*conn1"],
        "ees_conns": ["*internal:*ees", "*conn1"],
@@ -87,13 +87,13 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
-	} else if newMap := cgrCfg.apier.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
+	} else if newMap := cgrCfg.admS.AsMapInterface(); !reflect.DeepEqual(expectedMap, newMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedMap), utils.ToJSON(newMap))
 	}
 }
 
 func TestApierCfgClone(t *testing.T) {
-	sa := &ApierCfg{
+	sa := &AdminSCfg{
 		Enabled:         false,
 		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		ActionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},

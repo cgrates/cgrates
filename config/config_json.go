@@ -55,7 +55,7 @@ const (
 	ChargerSCfgJson    = "chargers"
 	TlsCfgJson         = "tls"
 	AnalyzerCfgJson    = "analyzers"
-	ApierS             = "apiers"
+	AdminS             = "admins"
 	DNSAgentJson       = "dns_agent"
 	ERsJson            = "ers"
 	EEsJson            = "ees"
@@ -75,7 +75,7 @@ var (
 		CACHE_JSN, FilterSjsn, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
 		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, ApierS, EEsJson, RateSJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
+		AnalyzerCfgJson, AdminS, EEsJson, RateSJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
 		ActionSJson, AccountSCfgJson}
 	sortedSectionsSet = utils.NewStringSet(sortedCfgSections)
 )
@@ -480,12 +480,12 @@ func (jsnCfg CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (jsnCfg CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ApierS]
+func (jsnCfg CgrJsonCfg) ApierCfgJson() (*AdminSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[AdminS]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(ApierJsonCfg)
+	cfg := new(AdminSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

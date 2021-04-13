@@ -18,11 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func init() {
 	c := &CmdRemoveFilterIndexes{
 		name:      "filter_indexes_remove",
@@ -64,3 +60,4 @@ func (self *CmdRemoveFilterIndexes) RpcResult() interface{} {
 	var atr string
 	return &atr
 }
+*/

@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -57,8 +56,8 @@ type ThresholdService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	thrs     *engine.ThresholdService
-	rpc      *v1.ThresholdSv1
+	thrs *engine.ThresholdService
+	// rpc      *v1.ThresholdSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -87,11 +86,11 @@ func (thrs *ThresholdService) Start() (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop()
-	thrs.rpc = v1.NewThresholdSv1(thrs.thrs)
-	if !thrs.cfg.DispatcherSCfg().Enabled {
-		thrs.server.RpcRegister(thrs.rpc)
-	}
-	thrs.connChan <- thrs.anz.GetInternalCodec(thrs.rpc, utils.ThresholdS)
+	// thrs.rpc = v1.NewThresholdSv1(thrs.thrs)
+	// if !thrs.cfg.DispatcherSCfg().Enabled {
+	// thrs.server.RpcRegister(thrs.rpc)
+	// }
+	// thrs.connChan <- thrs.anz.GetInternalCodec(thrs.rpc, utils.ThresholdS)
 	return
 }
 
@@ -110,7 +109,7 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown()
 	thrs.thrs = nil
-	thrs.rpc = nil
+	// thrs.rpc = nil
 	<-thrs.connChan
 	return
 }

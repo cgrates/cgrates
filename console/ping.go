@@ -73,8 +73,8 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.AnalyzerSv1Ping
 	case utils.ReplicatorLow:
 		return utils.ReplicatorSv1Ping
-	case utils.ApierSLow:
-		return utils.APIerSv1Ping
+	// case utils.ApierSLow:
+	// return utils.APIerSv1Ping
 	case utils.EEsLow:
 		return utils.EeSv1Ping
 	case utils.RateSLow:

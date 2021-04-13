@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+/*
 import (
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -64,3 +64,4 @@ func (self *CmdGetDestination) RpcResult() interface{} {
 	a := make([]*engine.Destination, 0)
 	return &a
 }
+*/

@@ -22,8 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -61,8 +59,8 @@ type DispatcherService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	dspS     *dispatchers.DispatcherService
-	rpc      *v1.DispatcherSv1
+	dspS *dispatchers.DispatcherService
+	// rpc      *v1.DispatcherSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -91,60 +89,60 @@ func (dspS *DispatcherService) Start() (err error) {
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
+	/*
+		dspS.server.RpcRegister(v1.NewDispatcherSv1(dspS.dspS))
 
-	dspS.server.RpcRegister(v1.NewDispatcherSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.ThresholdSv1,
+			v1.NewDispatcherThresholdSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.ThresholdSv1,
-		v1.NewDispatcherThresholdSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.StatSv1,
+			v1.NewDispatcherStatSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.StatSv1,
-		v1.NewDispatcherStatSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.ResourceSv1,
+			v1.NewDispatcherResourceSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.ResourceSv1,
-		v1.NewDispatcherResourceSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.RouteSv1,
+			v1.NewDispatcherRouteSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.RouteSv1,
-		v1.NewDispatcherRouteSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.AttributeSv1,
+			v1.NewDispatcherAttributeSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.AttributeSv1,
-		v1.NewDispatcherAttributeSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.SessionSv1,
+			v1.NewDispatcherSessionSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.SessionSv1,
-		v1.NewDispatcherSessionSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.ChargerSv1,
+			v1.NewDispatcherChargerSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.ChargerSv1,
-		v1.NewDispatcherChargerSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.CacheSv1,
+			v1.NewDispatcherCacheSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.CacheSv1,
-		v1.NewDispatcherCacheSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.GuardianSv1,
+			v1.NewDispatcherGuardianSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.GuardianSv1,
-		v1.NewDispatcherGuardianSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.CDRsV1,
+			v1.NewDispatcherSCDRsV1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.CDRsV1,
-		v1.NewDispatcherSCDRsV1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.ConfigSv1,
+			v1.NewDispatcherConfigSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.ConfigSv1,
-		v1.NewDispatcherConfigSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.CoreSv1,
+			v1.NewDispatcherCoreSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.CoreSv1,
-		v1.NewDispatcherCoreSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.ReplicatorSv1,
+			v1.NewDispatcherReplicatorSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.ReplicatorSv1,
-		v1.NewDispatcherReplicatorSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.CDRsV2,
+			v2.NewDispatcherSCDRsV2(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.CDRsV2,
-		v2.NewDispatcherSCDRsV2(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.RateSv1,
+			v1.NewDispatcherRateSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.RateSv1,
-		v1.NewDispatcherRateSv1(dspS.dspS))
+		dspS.server.RpcRegisterName(utils.ActionSv1,
+			v1.NewDispatcherActionSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.ActionSv1,
-		v1.NewDispatcherActionSv1(dspS.dspS))
-
-	dspS.server.RpcRegisterName(utils.AccountSv1,
-		v1.NewDispatcherAccountSv1(dspS.dspS))
-
+		dspS.server.RpcRegisterName(utils.AccountSv1,
+			v1.NewDispatcherAccountSv1(dspS.dspS))
+	*/
 	dspS.connChan <- dspS.anz.GetInternalCodec(dspS.dspS, utils.DispatcherS)
 
 	return
@@ -161,7 +159,7 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	defer dspS.Unlock()
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
-	dspS.rpc = nil
+	// dspS.rpc = nil
 	<-dspS.connChan
 	return
 }

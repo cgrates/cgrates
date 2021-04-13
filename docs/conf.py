@@ -217,4 +217,3 @@ man_pages = [
 
 # extensions = ['autoapi.extension']
 # autoapi_type = 'go'
-# autoapi_dirs = ['../apier/v1']

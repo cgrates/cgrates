@@ -215,7 +215,7 @@
 },
 
 
-"apiers": {
+"admins": {
 	"enabled": true,"enabled": true,
 	"scheduler_conns": ["*internal"],
 },

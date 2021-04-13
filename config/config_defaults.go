@@ -926,7 +926,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"apiers": {
+"admins": {
 	"enabled": false,
 	"caches_conns":["*internal"],
 	"actions_conns": [],					// connections to ActionS for reloads

@@ -54,10 +54,10 @@ func TestSupplierSCoverage(t *testing.T) {
 		server:      server,
 		connMgr:     nil,
 		routeS:      &engine.RouteService{},
-		rpc:         nil,
-		connChan:    make(chan birpc.ClientConnector, 1),
-		anz:         anz,
-		srvDep:      srvDep,
+		// rpc:         nil,
+		connChan: make(chan birpc.ClientConnector, 1),
+		anz:      anz,
+		srvDep:   srvDep,
 	}
 	if !supS2.IsRunning() {
 		t.Errorf("Expected service to be running")

@@ -941,7 +941,7 @@
 // },
 
 
-// "apiers": {
+// "admins": {
 // 	"enabled": false,
 // 	"caches_conns":["*internal"],
 // 	"scheduler_conns": [],					// connections to SchedulerS for reloads

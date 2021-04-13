@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+/*
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -63,3 +63,4 @@ func (self *CmdSetDataDBVersions) RpcResult() interface{} {
 	var atr string
 	return &atr
 }
+*/

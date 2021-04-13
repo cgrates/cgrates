@@ -40,7 +40,7 @@
 },
 
 
-"apiers": {
+"admins": {
 	"enabled": true,
 	"caches_conns":["cacheConn"]
 },

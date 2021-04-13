@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -41,11 +42,11 @@ func init() {
 }
 
 type testMockClients struct {
-	calls func(args interface{}, reply interface{}) error
+	calls func(_ *context.Context, _, _ interface{}) error
 }
 
-func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}) error {
-	return sT.calls(arg, rply)
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply interface{}) error {
+	return sT.calls(ctx, arg, rply)
 }
 
 func TestSessionSReload1(t *testing.T) {
@@ -81,7 +82,7 @@ func TestSessionSReload1(t *testing.T) {
 
 	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- &testMockClients{
-		calls: func(args interface{}, reply interface{}) error {
+		calls: func(ctx *context.Context, args, reply interface{}) error {
 			rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
 			if !cancast {
 				return fmt.Errorf("can't cast")

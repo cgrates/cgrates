@@ -63,7 +63,7 @@
 	"rar_template": "*rar",
 },
 
-"apiers": {
+"admins": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },

@@ -68,7 +68,7 @@
 	"forced_disconnect": "*asr",								// the request to send to diameter on DisconnectSession <*none|*asr|*rar>
 },
 
-"apiers": {
+"admins": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },

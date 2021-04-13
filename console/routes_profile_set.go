@@ -18,12 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 func init() {
 	c := &CmdSetRoute{
 		name:      "routes_profile_set",
@@ -67,3 +62,4 @@ func (self *CmdSetRoute) RpcResult() interface{} {
 	var s string
 	return &s
 }
+*/

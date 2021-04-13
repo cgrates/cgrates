@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -28,7 +27,7 @@ func init() {
 	c := &CmdSetAttributes{
 		name:      "attributes_profile_set",
 		rpcMethod: utils.APIerSv2SetAttributeProfile,
-		rpcParams: &v2.AttributeWithAPIOpts{},
+		rpcParams: &engine.AttributeWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdSetAttributes struct {
 	name      string
 	rpcMethod string
-	rpcParams *v2.AttributeWithAPIOpts
+	rpcParams *engine.AttributeWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,7 +50,7 @@ func (self *CmdSetAttributes) RpcMethod() string {
 
 func (self *CmdSetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v2.AttributeWithAPIOpts{APIAttributeProfile: new(engine.APIAttributeProfile)}
+		self.rpcParams = &engine.AttributeWithAPIOpts{APIAttributeProfile: new(engine.APIAttributeProfile)}
 	}
 	return self.rpcParams
 }

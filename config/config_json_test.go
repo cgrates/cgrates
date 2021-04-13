@@ -1851,7 +1851,7 @@ func TestDfAnalyzerCfg(t *testing.T) {
 }
 
 func TestDfApierCfg(t *testing.T) {
-	eCfg := &ApierJsonCfg{
+	eCfg := &AdminSJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Caches_conns:     &[]string{utils.MetaInternal},
 		Actions_conns:    &[]string{},
