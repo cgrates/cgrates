@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -196,5 +197,223 @@ func TestCallCostToDataCostError(t *testing.T) {
 	_, err := cc.ToDataCost()
 	if err == nil {
 		t.Error("Failed to throw error on call to datacost!")
+	}
+}
+
+func TestCallCostCallCostToDataCost(t *testing.T) {
+	cc := &CallCost{
+		Category:         "testCategory",
+		Tenant:           "testTenant",
+		Subject:          "testSubject",
+		Account:          "testAccount",
+		Destination:      "testDestination",
+		ToR:              "testToR",
+		Cost:             10,
+		deductConnectFee: true,
+		Timespans: TimeSpans{
+			{
+				DurationIndex: 10,
+				TimeStart:     time.Date(2021, 1, 1, 10, 25, 0, 0, time.Local),
+				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+				ratingInfo: &RatingInfo{
+					MatchedSubject: "matchedSubj",
+					RatingPlanId:   "rpID",
+					MatchedPrefix:  "matchedPref",
+					MatchedDestId:  "matchedDestID",
+					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+					RateIntervals: RateIntervalList{
+						{
+							Weight: 10,
+							Rating: &RIRate{
+								tag:              "ratingTag",
+								ConnectFee:       15,
+								RoundingMethod:   "up",
+								RoundingDecimals: 1,
+								MaxCost:          100,
+								MaxCostStrategy:  "disconnect",
+								Rates: RateGroups{
+									{
+										GroupIntervalStart: 1 * time.Second,
+										Value:              5,
+										RateIncrement:      60 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+									{
+										GroupIntervalStart: 60 * time.Second,
+										Value:              2,
+										RateIncrement:      1 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+								},
+							},
+						},
+					},
+					FallbackKeys: []string{"key1", "key2"},
+				},
+				Cost: 15,
+				RateInterval: &RateInterval{
+					Timing: &RITiming{
+						ID:  "ritTimingID",
+						tag: "ritTimingTag",
+					},
+					Rating: &RIRate{
+						tag:              "ratingTag",
+						ConnectFee:       15,
+						RoundingMethod:   "up",
+						RoundingDecimals: 1,
+						MaxCost:          100,
+						MaxCostStrategy:  "disconnect",
+						Rates: RateGroups{
+							{
+								GroupIntervalStart: 30 * time.Second,
+								Value:              5,
+								RateIncrement:      60 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+							{
+								GroupIntervalStart: 60 * time.Second,
+								Value:              5,
+								RateIncrement:      1 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+						},
+					},
+					Weight: 10,
+				},
+				RatingPlanId:   "tsRatingPlanID",
+				MatchedDestId:  "tsMatchedDestID",
+				MatchedSubject: "tsMatchedSubj",
+				MatchedPrefix:  "tsMatchedPref",
+				CompressFactor: 5,
+				RoundIncrement: &Increment{
+					Cost: 15,
+					BalanceInfo: &DebitInfo{
+						Unit: &UnitInfo{
+							ID:            "unitID1",
+							UUID:          "unitUUID1",
+							Value:         10,
+							DestinationID: "unitDestID1",
+							Consumed:      20,
+							ToR:           "unitToR1",
+							RateInterval: &RateInterval{
+								Weight: 10,
+								Rating: &RIRate{},
+								Timing: &RITiming{},
+							},
+						},
+					},
+					paid:           false,
+					Duration:       12 * time.Second,
+					CompressFactor: 2,
+				},
+				Increments: Increments{
+					&Increment{
+						Cost: 20,
+						BalanceInfo: &DebitInfo{
+							Unit: &UnitInfo{
+								ID:            "unitID2",
+								UUID:          "unitUUID2",
+								Value:         10,
+								DestinationID: "unitDestID2",
+								Consumed:      20,
+								ToR:           "unitToR2",
+								RateInterval: &RateInterval{
+									Weight: 15,
+									Rating: &RIRate{},
+									Timing: &RITiming{},
+								},
+							},
+						},
+						paid:           true,
+						Duration:       24 * time.Second,
+						CompressFactor: 2,
+					},
+				},
+			},
+		},
+	}
+
+	exp := &DataCost{
+		Category:         "testCategory",
+		Tenant:           "testTenant",
+		Subject:          "testSubject",
+		Account:          "testAccount",
+		Destination:      "testDestination",
+		ToR:              "testToR",
+		Cost:             10,
+		deductConnectFee: true,
+		DataSpans: []*DataSpan{
+			{
+				DataStart: -299999999990,
+				DataEnd:   10,
+				Cost:      15,
+				RateInterval: &RateInterval{
+					Timing: &RITiming{
+						ID:  "ritTimingID",
+						tag: "ritTimingTag",
+					},
+					Rating: &RIRate{
+						tag:              "ratingTag",
+						ConnectFee:       15,
+						RoundingMethod:   "up",
+						RoundingDecimals: 1,
+						MaxCost:          100,
+						MaxCostStrategy:  "disconnect",
+						Rates: RateGroups{
+							{
+								GroupIntervalStart: 30 * time.Second,
+								Value:              5,
+								RateIncrement:      60 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+							{
+								GroupIntervalStart: 60 * time.Second,
+								Value:              5,
+								RateIncrement:      1 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+						},
+					},
+					Weight: 10,
+				},
+				DataIndex: 10,
+				Increments: []*DataIncrement{
+					{
+						Amount: 24000000000,
+						Cost:   20,
+						BalanceInfo: &DebitInfo{
+							Unit: &UnitInfo{
+								ID:            "unitID2",
+								UUID:          "unitUUID2",
+								Value:         10,
+								DestinationID: "unitDestID2",
+								Consumed:      20,
+								ToR:           "unitToR2",
+								RateInterval: &RateInterval{
+									Weight: 15,
+									Rating: &RIRate{},
+									Timing: &RITiming{},
+								},
+							},
+						},
+						CompressFactor: 2,
+					},
+				},
+				MatchedSubject: "tsMatchedSubj",
+				MatchedPrefix:  "tsMatchedPref",
+				MatchedDestId:  "tsMatchedDestID",
+				RatingPlanId:   "tsRatingPlanID",
+			},
+		},
+	}
+	rcv, err := cc.ToDataCost()
+	exp.DataSpans = rcv.DataSpans
+
+	if err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
