@@ -82,7 +82,7 @@ func (apierSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithAPIOpts, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
@@ -108,7 +108,7 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithAPIOpts, r
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile

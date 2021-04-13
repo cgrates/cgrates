@@ -242,7 +242,7 @@ func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (exists bool, err error) {
+func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (exists bool, err error) {
 	var i int
 	switch category {
 	case utils.DestinationPrefix:
@@ -360,7 +360,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 			return nil, err
 		}
 	}
-	if err = Cache.Remove(utils.LoadInstKey, "", cCommit, transactionID); err != nil {
+	if err = Cache.Remove(context.TODO(), utils.LoadInstKey, "", cCommit, transactionID); err != nil {
 		return nil, err
 	}
 	if err := Cache.Set(context.TODO(), utils.LoadInstKey, "", loadInsts, nil,
@@ -395,7 +395,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 		return nil, rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LoadInstKey)
 
-	if errCh := Cache.Remove(utils.LoadInstKey, "",
+	if errCh := Cache.Remove(context.TODO(), utils.LoadInstKey, "",
 		cacheCommit(transactionID), transactionID); errCh != nil {
 		return errCh
 	}
@@ -702,7 +702,7 @@ func (rs *RedisStorage) SetAttributeProfileDrv(ctx *context.Context, r *Attribut
 	return rs.Cmd(nil, redisSET, utils.AttributeProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -810,7 +810,7 @@ func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 	return
 }
 
-func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]int64) error {
+func (rs *RedisStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
 	return rs.FlatCmd(nil, redisHMSET, utils.LoadIDs, loadIDs)
 }
 

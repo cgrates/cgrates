@@ -108,11 +108,11 @@ func (apierSv1 *APIerSv1) SetAttributeProfile(alsWrp *engine.AttributeProfileWit
 			}
 		}
 	}
-	if err := apierSv1.DataManager.SetAttributeProfile(alsWrp.AttributeProfile, true); err != nil {
+	if err := apierSv1.DataManager.SetAttributeProfile(context.TODO(), alsWrp.AttributeProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 
@@ -133,12 +133,12 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts,
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveAttributeProfile(tnt, arg.ID,
+	if err := apierSv1.DataManager.RemoveAttributeProfile(context.TODO(), tnt, arg.ID,
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
@@ -174,7 +174,7 @@ func (alSv1 *AttributeSv1) GetAttributeForEvent(args *engine.AttrArgsProcessEven
 // ProcessEvent will replace event fields with the ones in matching AttributeProfile
 func (alSv1 *AttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) error {
-	return alSv1.attrS.V1ProcessEvent(args, reply)
+	return alSv1.attrS.V1ProcessEvent(context.TODO(), args, reply)
 }
 
 // Ping return pong if the service is active

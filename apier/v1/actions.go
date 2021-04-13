@@ -102,7 +102,7 @@ func (apierSv1 *APIerSv1) SetActionProfile(ap *engine.ActionProfileWithAPIOpts, 
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheActionProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(ap.APIOpts[utils.CacheOpt]), ap.Tenant, utils.CacheActionProfiles,
@@ -127,7 +127,7 @@ func (apierSv1 *APIerSv1) RemoveActionProfile(arg *utils.TenantIDWithAPIOpts, re
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheActionProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheActionProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheActionProfiles,

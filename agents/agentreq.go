@@ -315,7 +315,7 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 	case utils.MetaOpts:
 		return ar.Opts.Remove(fullPath.PathSlice[1:])
 	case utils.MetaUCH:
-		return engine.Cache.Remove(utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
+		return engine.Cache.Remove(context.TODO(), utils.CacheUCH, fullPath.Path[5:], true, utils.NonTransactional)
 	}
 }
 

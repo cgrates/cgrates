@@ -536,7 +536,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
 	if err != nil {
 		if isCached {
-			if errCh := Cache.Remove(utils.CacheEventResources, evUUID,
+			if errCh := Cache.Remove(context.TODO(), utils.CacheEventResources, evUUID,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 				return nil, errCh
 			}

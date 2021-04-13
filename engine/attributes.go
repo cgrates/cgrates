@@ -198,10 +198,10 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
+func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(context.TODO(), tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -214,7 +214,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
 			var pass bool
-			if pass, err = alS.filterS.Pass(context.TODO(), tnt, attribute.FilterIDs,
+			if pass, err = alS.filterS.Pass(ctx, tnt, attribute.FilterIDs,
 				evNm); err != nil {
 				return
 			} else if !pass {
@@ -442,7 +442,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
+func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgsProcessEvent,
 	reply *AttrSProcessEventReply) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -470,12 +470,12 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	var lastID string
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)
-	dynDP := newDynamicDP(context.TODO(), alS.cgrcfg.AttributeSCfg().ResourceSConns,
+	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
-		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID)
+		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)

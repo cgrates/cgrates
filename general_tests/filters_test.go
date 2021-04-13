@@ -58,7 +58,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd); err != nil {
+	if passes, err := rf.Pass(context.TODO(), cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -67,7 +67,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd); err != nil {
+	if passes, err := rf.Pass(context.TODO(), cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -77,7 +77,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd); err != nil {
+	if passes, err := rf.Pass(context.TODO(), cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -108,13 +108,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	fEv := utils.MapStorage{utils.MetaReq: failEvent}
 	pEv := utils.MapStorage{utils.MetaReq: passEvent}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*destinations:~*req.Destination:EU"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org",
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*destinations:~*req.Destination:EU_LANDLINE"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {

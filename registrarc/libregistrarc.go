@@ -157,7 +157,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			return sReq.Id, err
 		}
 		for _, id := range args.IDs {
-			if err = engine.Cache.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(args.Tenant, id), true, utils.NonTransactional); err != nil {
+			if err = engine.Cache.Remove(context.TODO(), utils.CacheDispatcherHosts, utils.ConcatenatedKey(args.Tenant, id), true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove DispatcherHost <%s> from cache because: %s",
 					utils.RegistrarC, id, err))
 				hasErrors = true
@@ -192,7 +192,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		rpcConns := config.CgrConfig().RPCConns()
 		config.CgrConfig().LockSections(config.RPCConnsJsonName)
 		for connID := range config.RemoveRPCCons(rpcConns, utils.NewStringSet(args.IDs)) {
-			if err = engine.Cache.Remove(utils.CacheRPCConnections, connID,
+			if err = engine.Cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove connection <%s> in cache because: %s",
 					utils.RegistrarC, connID, err))
@@ -212,7 +212,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		rpcConns := config.CgrConfig().RPCConns()
 		config.CgrConfig().LockSections(config.RPCConnsJsonName)
 		for connID := range config.UpdateRPCCons(rpcConns, cfgHosts) {
-			if err = engine.Cache.Remove(utils.CacheRPCConnections, connID,
+			if err = engine.Cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove connection <%s> in cache because: %s",
 					utils.RegistrarC, connID, err))

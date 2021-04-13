@@ -477,7 +477,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			})
 
 		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
-			if pass, err = rule.Pass(dynDP); err != nil {
+			if pass, err = rule.Pass(context.TODO(), dynDP); err != nil {
 				return nil, false, err
 			} else if !pass {
 				return nil, false, nil

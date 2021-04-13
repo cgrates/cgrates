@@ -222,7 +222,7 @@ func TestAttributeAddFilters(t *testing.T) {
 
 func TestAttributeCache(t *testing.T) {
 	for _, atr := range atrPs {
-		if err = dmAtr.SetAttributeProfile(atr, true); err != nil {
+		if err = dmAtr.SetAttributeProfile(context.TODO(), atr, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -297,7 +297,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	atrp, err := attrService.processEvent(attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	atrp, err := attrService.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -315,7 +315,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	if _, err := attrService.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM,
+	if _, err := attrService.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM,
 		newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
@@ -336,7 +336,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	if atrp, err := attrService.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
+	if atrp, err := attrService.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
 	}
@@ -452,7 +452,7 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -472,7 +472,7 @@ func TestAttributeIndexer(t *testing.T) {
 	cpAttrPrf := new(AttributeProfile)
 	*cpAttrPrf = *attrPrf
 	cpAttrPrf.Contexts = []string{utils.MetaSessionS}
-	if err := dmAtr.SetAttributeProfile(cpAttrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), cpAttrPrf, true); err != nil {
 		t.Error(err)
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
@@ -549,13 +549,13 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -588,7 +588,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -662,13 +662,13 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -697,7 +697,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -771,13 +771,13 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -806,7 +806,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -864,10 +864,10 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Weight: 20,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -896,7 +896,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -973,13 +973,13 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1008,7 +1008,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1084,13 +1084,13 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf3, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1117,7 +1117,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1160,7 +1160,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1187,7 +1187,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1239,7 +1239,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1267,7 +1267,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1312,7 +1312,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1339,7 +1339,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1388,7 +1388,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1417,7 +1417,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1471,7 +1471,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1500,7 +1500,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Fatalf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1544,7 +1544,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1575,7 +1575,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1619,7 +1619,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1652,7 +1652,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1696,7 +1696,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1729,7 +1729,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1778,7 +1778,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		b.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1795,7 +1795,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	var reply AttrSProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 			b.Errorf("Error: %+v", err)
 		}
 	}
@@ -1837,7 +1837,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1, true); err != nil {
 		b.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1854,7 +1854,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	var reply AttrSProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 			b.Errorf("Error: %+v", err)
 		}
 	}
@@ -1911,7 +1911,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -1932,7 +1932,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1969,7 +1969,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -1992,7 +1992,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2035,7 +2035,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2059,7 +2059,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2097,7 +2097,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2121,7 +2121,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2159,7 +2159,7 @@ func TestProcessAttributeSum(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2183,7 +2183,7 @@ func TestProcessAttributeSum(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2221,7 +2221,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2245,7 +2245,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2283,7 +2283,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2307,7 +2307,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2345,7 +2345,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2369,7 +2369,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2407,7 +2407,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2431,7 +2431,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2469,7 +2469,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2493,7 +2493,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2531,7 +2531,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2554,7 +2554,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2592,7 +2592,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2615,7 +2615,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrService.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2668,7 +2668,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2685,7 +2685,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	}
 
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil || err != utils.ErrNotFound {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected not found, reveiced: %+v", err)
 	}
 
@@ -2727,10 +2727,10 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf2, true); err != nil {
 		t.Error(err)
 	}
 	ev := &AttrArgsProcessEvent{
@@ -2747,7 +2747,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 		},
 	}
 	var rcv AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(ev, &rcv); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), ev, &rcv); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	clnEv := ev.CGREvent.Clone()
@@ -2805,10 +2805,10 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		Weight: 20,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1Exists, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1Exists, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2Exists, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2Exists, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	// Add attribute in DM
@@ -2844,7 +2844,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -2899,10 +2899,10 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		Weight: 20,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1NotEmpty, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(context.TODO(), attrPrf1NotEmpty, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2NotEmpty, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(context.TODO(), attrPrf2NotEmpty, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	// Add attribute in DM
@@ -2938,7 +2938,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrService.V1ProcessEvent(context.TODO(), attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {

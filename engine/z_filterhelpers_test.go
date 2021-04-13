@@ -83,15 +83,15 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	dmMatch.SetFilter(attribSufF, true)
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
-	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
+	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, stringFilterID, []string{"stringFilter"}); err != nil {
 		t.Error(err)
 	}
-	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
+	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, prefixFilterID, []string{"prefFilter"}); err != nil {
 		t.Error(err)
 	}
-	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
+	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, suffixFilterID, []string{"sufFilter"}); err != nil {
 		t.Error(err)
 	}
@@ -177,11 +177,11 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	dmMatch.SetFilter(attribDefaultF, true)
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
-	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
+	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, stringFilterID, []string{"stringFilter"}); err != nil {
 		t.Error(err)
 	}
-	if err = addItemToFilterIndex(dmMatch, utils.CacheAttributeFilterIndexes,
+	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
 		tnt, ctx, prefixFilterID, []string{"prefFilter"}); err != nil {
 		t.Error(err)
 	}

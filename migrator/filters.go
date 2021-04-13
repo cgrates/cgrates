@@ -507,7 +507,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilter(fl)
 			}
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -725,7 +725,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilterV2(fl)
 			}
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting attribute profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}
@@ -914,11 +914,11 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 // setFilterv5WithoutCompile we need a method that get's the filter from DataDB without compiling the filter rules
 func (m *Migrator) setFilterv5WithoutCompile(fltr *engine.Filter) (err error) {
 	var oldFlt *engine.Filter
-	if oldFlt, err = m.dmOut.DataManager().DataDB().GetFilterDrv(fltr.Tenant, fltr.ID); err != nil &&
+	if oldFlt, err = m.dmOut.DataManager().DataDB().GetFilterDrv(context.TODO(), fltr.Tenant, fltr.ID); err != nil &&
 		err != utils.ErrNotFound {
 		return
 	}
-	if err = m.dmOut.DataManager().DataDB().SetFilterDrv(fltr); err != nil {
+	if err = m.dmOut.DataManager().DataDB().SetFilterDrv(context.TODO(), fltr); err != nil {
 		return
 	}
 	return engine.UpdateFilterIndex(m.dmOut.DataManager(), oldFlt, fltr)

@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -165,7 +165,7 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, nil, nil) // create an AgentRequest
 	var pass bool
-	if pass, err = rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
 		return
 	}

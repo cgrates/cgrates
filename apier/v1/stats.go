@@ -80,7 +80,7 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithAP
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
 	loadID := time.Now().UnixNano()
-	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	if err = apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
@@ -141,7 +141,7 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues

@@ -551,7 +551,7 @@ cgrates.org,MOCK_RELOAD_2
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_2",
 	}
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaReload); err != nil {
@@ -574,7 +574,7 @@ cgrates.org,MOCK_RELOAD_2
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
@@ -657,7 +657,7 @@ cgrates.org,MOCK_RELOAD_3
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_3",
 	}
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaLoad); err != nil {
@@ -680,7 +680,7 @@ cgrates.org,MOCK_RELOAD_3
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
@@ -763,7 +763,7 @@ cgrates.org,MOCK_RELOAD_4
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_4",
 	}
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaRemove); err != nil {
@@ -786,7 +786,7 @@ cgrates.org,MOCK_RELOAD_4
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
@@ -807,7 +807,7 @@ cgrates.org,MOCK_RELOAD_4
 			},
 		},
 	}
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaNone); err != nil {
@@ -880,7 +880,7 @@ cgrates.org,MOCK_RELOAD_3
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_3",
 	}
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaClear); err != nil {
@@ -903,7 +903,7 @@ cgrates.org,MOCK_RELOAD_3
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
@@ -924,7 +924,7 @@ cgrates.org,MOCK_RELOAD_3
 			},
 		},
 	}
-	if err := ldr.dm.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected = "UNSUPPORTED_SERVICE_METHOD"
@@ -968,7 +968,7 @@ func (dbM *dataDBMockError) GetThresholdDrv(string, string) (*engine.Threshold, 
 	return nil, utils.ErrNoDatabaseConn
 }
 
-func (dbM *dataDBMockError) HasDataDrv(string, string, string) (bool, error) {
+func (dbM *dataDBMockError) HasDataDrv(*context.Context, string, string, string) (bool, error) {
 	return false, nil
 }
 

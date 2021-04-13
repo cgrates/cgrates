@@ -833,7 +833,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 		ev := utils.MapStorage{utils.MetaReq: me.Data()}
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
-			if pass, err = fltr.Pass(ev); err != nil || !pass {
+			if pass, err = fltr.Pass(context.TODO(), ev); err != nil || !pass {
 				pass = false
 				return
 			}
@@ -889,7 +889,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 		ev := utils.MapStorage{utils.MetaReq: me.Data()}
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
-			if pass, err = fltr.Pass(ev); err != nil || !pass {
+			if pass, err = fltr.Pass(context.TODO(), ev); err != nil || !pass {
 				return
 			}
 		}

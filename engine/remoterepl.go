@@ -33,10 +33,9 @@ func UpdateReplicationFilters(objType, objID, connID string) {
 }
 
 // replicate will call Set/Remove APIs on ReplicatorSv1
-func replicate(connMgr *ConnManager, connIDs []string, filtered bool, objType, objID, method string, args interface{}) (err error) {
+func replicate(ctx *context.Context, connMgr *ConnManager, connIDs []string, filtered bool, objType, objID, method string, args interface{}) (err error) {
 	// the reply is string for Set/Remove APIs
 	// ignored in favor of the error
-	ctx := context.TODO()
 	var reply string
 	if !filtered {
 		// is not partial so send to all defined connections
@@ -56,10 +55,9 @@ func replicate(connMgr *ConnManager, connIDs []string, filtered bool, objType, o
 
 // replicateMultipleIDs will do the same thing as replicate but uses multiple objectIDs
 // used when setting the LoadIDs
-func replicateMultipleIDs(connMgr *ConnManager, connIDs []string, filtered bool, objType string, objIDs []string, method string, args interface{}) (err error) {
+func replicateMultipleIDs(ctx *context.Context, connMgr *ConnManager, connIDs []string, filtered bool, objType string, objIDs []string, method string, args interface{}) (err error) {
 	// the reply is string for Set/Remove APIs
 	// ignored in favor of the error
-	ctx := context.TODO()
 	var reply string
 	if !filtered {
 		// is not partial so send to all defined connections

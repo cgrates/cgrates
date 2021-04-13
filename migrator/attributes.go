@@ -64,10 +64,10 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 		if attrPrf == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveAttributeProfile(tntID[0],
+		if err := m.dmIN.DataManager().RemoveAttributeProfile(context.TODO(), tntID[0],
 			tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
@@ -250,7 +250,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 				}
 			}
 			// Set the fresh-migrated AttributeProfile into DB
-			if err = m.dmOut.DataManager().SetAttributeProfile(v6Attr, true); err != nil {
+			if err = m.dmOut.DataManager().SetAttributeProfile(context.TODO(), v6Attr, true); err != nil {
 				return err
 			}
 		}

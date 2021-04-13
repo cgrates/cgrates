@@ -303,7 +303,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, apf.TenantID())
-				if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
+				if err := ldr.dm.SetAttributeProfile(context.TODO(), apf, true); err != nil {
 					return err
 				}
 			}
@@ -800,7 +800,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveAttributeProfile(tntIDStruct.Tenant, tntIDStruct.ID,
+				if err := ldr.dm.RemoveAttributeProfile(context.TODO(), tntIDStruct.Tenant, tntIDStruct.ID,
 					utils.NonTransactional, true); err != nil {
 					return err
 				}

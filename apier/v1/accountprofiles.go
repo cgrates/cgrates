@@ -104,7 +104,7 @@ func (apierSv1 *APIerSv1) SetAccount(extAp *utils.APIAccountWithOpts, reply *str
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAccounts and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -125,7 +125,7 @@ func (apierSv1 *APIerSv1) RemoveAccount(arg *utils.TenantIDWithAPIOpts, reply *s
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAccounts and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheAccounts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

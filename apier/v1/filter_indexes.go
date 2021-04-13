@@ -444,66 +444,66 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
 	if args.ThresholdS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheThresholdFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheThresholdFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//StatQueueProfile Indexes
 	if args.StatS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheStatFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheStatFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//ResourceProfile Indexes
 	if args.ResourceS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheResourceFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheResourceFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//RouteProfile Indexes
 	if args.RouteS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheRouteFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheRouteFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//Account Indexes
 	if args.AccountS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheAccountsFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheAccountsFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//ActionProfile Indexes
 	if args.ActionS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheActionProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheActionProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//RateProfile Indexes
 	if args.RateS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheRateProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheRateProfilesFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 		for _, val := range ratePrf {
-			if err = apierSv1.DataManager.SetIndexes(utils.CacheRateFilterIndexes, val, nil, true, transactionID); err != nil {
+			if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheRateFilterIndexes, val, nil, true, transactionID); err != nil {
 				return
 			}
 		}
 	}
 	//AttributeProfile Indexes
 	if args.AttributeS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//ChargerProfile Indexes
 	if args.ChargerS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheChargerFilterIndexes, tnt, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheChargerFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
 	//DispatcherProfile Indexes
 	if args.DispatcherS {
-		if err = apierSv1.DataManager.SetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+		if err = apierSv1.DataManager.SetIndexes(context.TODO(), utils.CacheDispatcherFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
 			return
 		}
 	}

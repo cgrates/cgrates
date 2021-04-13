@@ -104,7 +104,7 @@ func (apierSv1 *APIerSv1) SetRateProfile(ext *utils.APIRateProfileWithAPIOpts, r
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(ext.APIOpts[utils.CacheOpt]), rPrf.Tenant, utils.CacheRateProfiles,
@@ -131,7 +131,7 @@ func (apierSv1 *APIerSv1) SetRateProfileRates(ext *utils.APIRateProfileWithAPIOp
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
-	if err = apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
+	if err = apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err = apierSv1.CallCache(utils.IfaceAsString(ext.APIOpts[utils.CacheOpt]), rPrf.Tenant, utils.CacheRateProfiles,
@@ -161,7 +161,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfileRates(args *RemoveRPrfRatesWithAPIOpt
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRateProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,
@@ -186,7 +186,7 @@ func (apierSv1 *APIerSv1) RemoveRateProfile(arg *utils.TenantIDWithAPIOpts, repl
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheRateProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheRateProfiles,

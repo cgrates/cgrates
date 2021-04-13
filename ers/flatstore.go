@@ -31,6 +31,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/ltcache"
 
 	"github.com/cgrates/cgrates/agents"
@@ -198,7 +199,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 			rdr.fltrS, nil, nil) // create an AgentRequest
-		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to filter error: <%s>",

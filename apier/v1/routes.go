@@ -82,7 +82,7 @@ func (apierSv1 *APIerSv1) SetRouteProfile(args *RouteWithAPIOpts, reply *string)
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
@@ -107,7 +107,7 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, re
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
-	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierSv1.DataManager.SetLoadIDs(context.TODO(), map[string]int64{utils.CacheRouteProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
