@@ -27,12 +27,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -1212,9 +1212,9 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	// Set the internal rateS within connMngr
-	rateSConn := make(chan rpcclient.ClientConnector, 1)
+	rateSConn := make(chan birpc.ClientConnector, 1)
 	rateSConn <- rates.NewRateS(cfg, fltrS, dm)
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): rateSConn,
 	})
 	cfg.AccountSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}

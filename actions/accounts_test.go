@@ -119,8 +119,8 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 func TestACExecuteAccountsParseError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
-	internalChan := make(chan rpcclient.ClientConnector, 1)
-	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+	internalChan := make(chan birpc.ClientConnector, 1)
+	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): internalChan,
 	})
 	apAction := &engine.APAction{
