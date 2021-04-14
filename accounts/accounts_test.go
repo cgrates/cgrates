@@ -1303,7 +1303,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Factor: utils.NewDecimal(100, 0), // EuroCents
 					},
 				},
-				Units: utils.NewDecimal(8, 1), // 80 EuroCents for the debit from AB1, rest for 20 seconds of limit
+				Units: utils.NewDecimal(80, 0), // 80 EuroCents for the debit from AB1, rest for 20 seconds of limit
 			},
 			// 2m20s ABSTR, 2.8 CONCR
 			ab2ID: &utils.Balance{ // continues debitting after CB1, 0 cost in increments of seconds, maximum of 1 minute
