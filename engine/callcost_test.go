@@ -200,14 +200,14 @@ func TestCallCostToDataCostError(t *testing.T) {
 	}
 }
 
-func TestCallCostCallCostToDataCost(t *testing.T) {
+func TestCallcostCallCostToDataCost(t *testing.T) {
 	cc := &CallCost{
-		Category:         "testCategory",
-		Tenant:           "testTenant",
-		Subject:          "testSubject",
-		Account:          "testAccount",
-		Destination:      "testDestination",
-		ToR:              "testToR",
+		Category:         "call",
+		Tenant:           "cgrates.org",
+		Subject:          "1001",
+		Account:          "1001",
+		Destination:      "1002",
+		ToR:              "*sms",
 		Cost:             10,
 		deductConnectFee: true,
 		Timespans: TimeSpans{
@@ -216,21 +216,21 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 				TimeStart:     time.Date(2021, 1, 1, 10, 25, 0, 0, time.Local),
 				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
 				ratingInfo: &RatingInfo{
-					MatchedSubject: "matchedSubj",
-					RatingPlanId:   "rpID",
-					MatchedPrefix:  "matchedPref",
-					MatchedDestId:  "matchedDestID",
+					MatchedSubject: "1001",
+					RatingPlanId:   "RT_20CNT",
+					MatchedPrefix:  "1001",
+					MatchedDestId:  "1002",
 					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
 					RateIntervals: RateIntervalList{
 						{
 							Weight: 10,
 							Rating: &RIRate{
-								tag:              "ratingTag",
+								tag:              "RT_20CNT",
 								ConnectFee:       15,
-								RoundingMethod:   "up",
+								RoundingMethod:   "*up",
 								RoundingDecimals: 1,
 								MaxCost:          100,
-								MaxCostStrategy:  "disconnect",
+								MaxCostStrategy:  "*disconnect",
 								Rates: RateGroups{
 									{
 										GroupIntervalStart: 1 * time.Second,
@@ -257,12 +257,12 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 						tag: "ritTimingTag",
 					},
 					Rating: &RIRate{
-						tag:              "ratingTag",
+						tag:              "RT_20CNT",
 						ConnectFee:       15,
-						RoundingMethod:   "up",
+						RoundingMethod:   "*up",
 						RoundingDecimals: 1,
 						MaxCost:          100,
-						MaxCostStrategy:  "disconnect",
+						MaxCostStrategy:  "*disconnect",
 						Rates: RateGroups{
 							{
 								GroupIntervalStart: 30 * time.Second,
@@ -280,21 +280,21 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 					},
 					Weight: 10,
 				},
-				RatingPlanId:   "tsRatingPlanID",
-				MatchedDestId:  "tsMatchedDestID",
-				MatchedSubject: "tsMatchedSubj",
-				MatchedPrefix:  "tsMatchedPref",
+				RatingPlanId:   "RT_20CNT",
+				MatchedDestId:  "1002",
+				MatchedSubject: "1001",
+				MatchedPrefix:  "1001",
 				CompressFactor: 5,
 				RoundIncrement: &Increment{
 					Cost: 15,
 					BalanceInfo: &DebitInfo{
 						Unit: &UnitInfo{
-							ID:            "unitID1",
+							ID:            "1001",
 							UUID:          "unitUUID1",
 							Value:         10,
-							DestinationID: "unitDestID1",
+							DestinationID: "1002",
 							Consumed:      20,
-							ToR:           "unitToR1",
+							ToR:           "*sms",
 							RateInterval: &RateInterval{
 								Weight: 10,
 								Rating: &RIRate{},
@@ -311,12 +311,12 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 						Cost: 20,
 						BalanceInfo: &DebitInfo{
 							Unit: &UnitInfo{
-								ID:            "unitID2",
+								ID:            "1001",
 								UUID:          "unitUUID2",
 								Value:         10,
-								DestinationID: "unitDestID2",
+								DestinationID: "1002",
 								Consumed:      20,
-								ToR:           "unitToR2",
+								ToR:           "*sms",
 								RateInterval: &RateInterval{
 									Weight: 15,
 									Rating: &RIRate{},
@@ -334,12 +334,12 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 	}
 
 	exp := &DataCost{
-		Category:         "testCategory",
-		Tenant:           "testTenant",
-		Subject:          "testSubject",
-		Account:          "testAccount",
-		Destination:      "testDestination",
-		ToR:              "testToR",
+		Category:         "call",
+		Tenant:           "cgrates.org",
+		Subject:          "1001",
+		Account:          "1001",
+		Destination:      "1002",
+		ToR:              "*sms",
 		Cost:             10,
 		deductConnectFee: true,
 		DataSpans: []*DataSpan{
@@ -353,12 +353,12 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 						tag: "ritTimingTag",
 					},
 					Rating: &RIRate{
-						tag:              "ratingTag",
+						tag:              "RT_20CNT",
 						ConnectFee:       15,
-						RoundingMethod:   "up",
+						RoundingMethod:   "*up",
 						RoundingDecimals: 1,
 						MaxCost:          100,
-						MaxCostStrategy:  "disconnect",
+						MaxCostStrategy:  "*disconnect",
 						Rates: RateGroups{
 							{
 								GroupIntervalStart: 30 * time.Second,
@@ -383,12 +383,12 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 						Cost:   20,
 						BalanceInfo: &DebitInfo{
 							Unit: &UnitInfo{
-								ID:            "unitID2",
+								ID:            "1001",
 								UUID:          "unitUUID2",
 								Value:         10,
-								DestinationID: "unitDestID2",
+								DestinationID: "1002",
 								Consumed:      20,
-								ToR:           "unitToR2",
+								ToR:           "*sms",
 								RateInterval: &RateInterval{
 									Weight: 15,
 									Rating: &RIRate{},
@@ -399,10 +399,10 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 						CompressFactor: 2,
 					},
 				},
-				MatchedSubject: "tsMatchedSubj",
-				MatchedPrefix:  "tsMatchedPref",
-				MatchedDestId:  "tsMatchedDestID",
-				RatingPlanId:   "tsRatingPlanID",
+				MatchedSubject: "1001",
+				MatchedPrefix:  "1001",
+				MatchedDestId:  "1002",
+				RatingPlanId:   "RT_20CNT",
 			},
 		},
 	}
@@ -414,6 +414,599 @@ func TestCallCostCallCostToDataCost(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestCallcostUpdateRatedUsage(t *testing.T) {
+	var cc *CallCost
+
+	var exp time.Duration
+	rcv := cc.UpdateRatedUsage()
+
+	if rcv != exp {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCallcostIsPaidFalse(t *testing.T) {
+	cc := &CallCost{
+		Timespans: TimeSpans{
+			{
+				Increments: Increments{
+					&Increment{
+						paid: false,
+					},
+				},
+			},
+		},
+	}
+
+	rcv := cc.IsPaid()
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+	}
+}
+
+func TestCallcostIsPaidTrue(t *testing.T) {
+	cc := &CallCost{
+		Timespans: TimeSpans{
+			{
+				MatchedSubject: "1001",
+				Increments: Increments{
+					&Increment{
+						paid: true,
+					},
+				},
+			},
+			{
+				MatchedSubject: "1002",
+				Increments: Increments{
+					&Increment{
+						paid: true,
+					},
+				},
+			},
+		},
+	}
+
+	rcv := cc.IsPaid()
+
+	if rcv != true {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
+	}
+}
+
+func TestCallcostAsJSON(t *testing.T) {
+	cc := &CallCost{
+		Category:         "call",
+		Tenant:           "cgrates.org",
+		Subject:          "1001",
+		Account:          "1001",
+		Destination:      "1002",
+		ToR:              utils.MetaVoice,
+		Cost:             10,
+		deductConnectFee: true,
+		Timespans: TimeSpans{
+			{
+				DurationIndex: 10,
+				TimeStart:     time.Date(2021, 1, 1, 10, 25, 0, 0, time.Local),
+				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+				ratingInfo: &RatingInfo{
+					MatchedSubject: "1001",
+					RatingPlanId:   "RT_20CNT",
+					MatchedPrefix:  "1001",
+					MatchedDestId:  "1002",
+					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+					RateIntervals: RateIntervalList{
+						{
+							Weight: 10,
+							Rating: &RIRate{
+								tag:              "RT_20CNT",
+								ConnectFee:       15,
+								RoundingMethod:   "*up",
+								RoundingDecimals: 1,
+								MaxCost:          100,
+								MaxCostStrategy:  "*disconnect",
+								Rates: RateGroups{
+									{
+										GroupIntervalStart: 1 * time.Second,
+										Value:              5,
+										RateIncrement:      60 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+									{
+										GroupIntervalStart: 60 * time.Second,
+										Value:              2,
+										RateIncrement:      1 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+								},
+							},
+						},
+					},
+					FallbackKeys: []string{"key1", "key2"},
+				},
+				Cost: 15,
+				RateInterval: &RateInterval{
+					Timing: &RITiming{
+						ID:  "ritTimingID",
+						tag: "ritTimingTag",
+					},
+					Rating: &RIRate{
+						tag:              "RT_20CNT",
+						ConnectFee:       15,
+						RoundingMethod:   "up",
+						RoundingDecimals: 1,
+						MaxCost:          100,
+						MaxCostStrategy:  "*disconnect",
+						Rates: RateGroups{
+							{
+								GroupIntervalStart: 30 * time.Second,
+								Value:              5,
+								RateIncrement:      60 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+							{
+								GroupIntervalStart: 60 * time.Second,
+								Value:              5,
+								RateIncrement:      1 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+						},
+					},
+					Weight: 10,
+				},
+				RatingPlanId:   "RT_20CNT",
+				MatchedDestId:  "1002",
+				MatchedSubject: "1001",
+				MatchedPrefix:  "1001",
+				CompressFactor: 5,
+				RoundIncrement: &Increment{
+					Cost: 15,
+					BalanceInfo: &DebitInfo{
+						Unit: &UnitInfo{
+							ID:            "1001",
+							UUID:          "unitUUID1",
+							Value:         10,
+							DestinationID: "1002",
+							Consumed:      20,
+							ToR:           utils.MetaVoice,
+							RateInterval: &RateInterval{
+								Weight: 10,
+								Rating: &RIRate{},
+								Timing: &RITiming{},
+							},
+						},
+					},
+					paid:           false,
+					Duration:       12 * time.Second,
+					CompressFactor: 2,
+				},
+				Increments: Increments{
+					&Increment{
+						Cost: 20,
+						BalanceInfo: &DebitInfo{
+							Unit: &UnitInfo{
+								ID:            "1001",
+								UUID:          "unitUUID2",
+								Value:         10,
+								DestinationID: "1002",
+								Consumed:      20,
+								ToR:           utils.MetaVoice,
+								RateInterval: &RateInterval{
+									Weight: 15,
+									Rating: &RIRate{},
+									Timing: &RITiming{},
+								},
+							},
+						},
+						paid:           true,
+						Duration:       24 * time.Second,
+						CompressFactor: 2,
+					},
+				},
+			},
+		},
+	}
+
+	exp := `{"Category":"call","Tenant":"cgrates.org","Subject":"1001","Account":"1001","Destination":"1002","ToR":"*voice","Cost":10,"Timespans":[{"TimeStart":"2021-01-01T10:25:00+02:00","TimeEnd":"2021-01-01T10:30:00+02:00","Cost":15,"RateInterval":{"Timing":{"ID":"ritTimingID","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":15,"RoundingMethod":"up","RoundingDecimals":1,"MaxCost":100,"MaxCostStrategy":"*disconnect","Rates":[{"GroupIntervalStart":30000000000,"Value":5,"RateIncrement":60000000000,"RateUnit":60000000000},{"GroupIntervalStart":60000000000,"Value":5,"RateIncrement":1000000000,"RateUnit":60000000000}]},"Weight":10},"DurationIndex":10,"Increments":[{"Duration":24000000000,"Cost":20,"BalanceInfo":{"Unit":{"UUID":"unitUUID2","ID":"1001","Value":10,"DestinationID":"1002","Consumed":20,"ToR":"*voice","RateInterval":{"Timing":{"ID":"","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"","RoundingDecimals":0,"MaxCost":0,"MaxCostStrategy":"","Rates":null},"Weight":15}},"Monetary":null,"AccountID":""},"CompressFactor":2}],"RoundIncrement":{"Duration":12000000000,"Cost":15,"BalanceInfo":{"Unit":{"UUID":"unitUUID1","ID":"1001","Value":10,"DestinationID":"1002","Consumed":20,"ToR":"*voice","RateInterval":{"Timing":{"ID":"","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"","RoundingDecimals":0,"MaxCost":0,"MaxCostStrategy":"","Rates":null},"Weight":10}},"Monetary":null,"AccountID":""},"CompressFactor":2},"MatchedSubject":"1001","MatchedPrefix":"1001","MatchedDestId":"1002","RatingPlanId":"RT_20CNT","CompressFactor":5}],"RatedUsage":0,"AccountSummary":null}`
+	rcv := cc.AsJSON()
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCallcostUpdateCost(t *testing.T) {
+	cc := &CallCost{
+		deductConnectFee: false,
+		Timespans: TimeSpans{
+			{
+				DurationIndex: 10,
+				TimeStart:     time.Date(2021, 1, 1, 10, 25, 0, 0, time.Local),
+				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+				ratingInfo: &RatingInfo{
+					MatchedSubject: "1001",
+					RatingPlanId:   "RT_20CNT",
+					MatchedPrefix:  "1001",
+					MatchedDestId:  "1002",
+					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+					RateIntervals: RateIntervalList{
+						{
+							Weight: 10,
+							Rating: &RIRate{
+								tag:              "RT_20CNT",
+								ConnectFee:       15,
+								RoundingMethod:   "*up",
+								RoundingDecimals: 1,
+								MaxCost:          100,
+								MaxCostStrategy:  "*disconnect",
+								Rates: RateGroups{
+									{
+										GroupIntervalStart: 1 * time.Second,
+										Value:              5,
+										RateIncrement:      60 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+									{
+										GroupIntervalStart: 60 * time.Second,
+										Value:              2,
+										RateIncrement:      1 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+								},
+							},
+						},
+					},
+					FallbackKeys: []string{"key1", "key2"},
+				},
+				Cost: 15,
+				RateInterval: &RateInterval{
+					Timing: &RITiming{
+						ID:  "ritTimingID",
+						tag: "ritTimingTag",
+					},
+					Rating: &RIRate{
+						tag:              "RT_20CNT",
+						ConnectFee:       15,
+						RoundingMethod:   "*up",
+						RoundingDecimals: 1,
+						MaxCost:          100,
+						MaxCostStrategy:  "*disconnect",
+						Rates: RateGroups{
+							{
+								GroupIntervalStart: 30 * time.Second,
+								Value:              5,
+								RateIncrement:      60 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+							{
+								GroupIntervalStart: 60 * time.Second,
+								Value:              5,
+								RateIncrement:      1 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+						},
+					},
+					Weight: 10,
+				},
+				RatingPlanId:   "RT_20CNT",
+				MatchedDestId:  "1002",
+				MatchedSubject: "1001",
+				MatchedPrefix:  "1001",
+				CompressFactor: 5,
+				RoundIncrement: &Increment{
+					Cost: 15,
+					BalanceInfo: &DebitInfo{
+						Unit: &UnitInfo{
+							ID:            "1001",
+							UUID:          "unitUUID1",
+							Value:         10,
+							DestinationID: "1002",
+							Consumed:      20,
+							ToR:           utils.MetaVoice,
+							RateInterval: &RateInterval{
+								Weight: 10,
+								Rating: &RIRate{},
+								Timing: &RITiming{},
+							},
+						},
+					},
+					paid:           false,
+					Duration:       12 * time.Second,
+					CompressFactor: 2,
+				},
+				Increments: Increments{
+					&Increment{
+						Cost: 20,
+						BalanceInfo: &DebitInfo{
+							Unit: &UnitInfo{
+								ID:            "1001",
+								UUID:          "unitUUID2",
+								Value:         10,
+								DestinationID: "1002",
+								Consumed:      20,
+								ToR:           utils.MetaVoice,
+								RateInterval: &RateInterval{
+									Weight: 15,
+									Rating: &RIRate{},
+									Timing: &RITiming{},
+								},
+							},
+						},
+						paid:           true,
+						Duration:       24 * time.Second,
+						CompressFactor: 2,
+					},
+				},
+			},
+		},
+	}
+
+	exp := &CallCost{
+		Cost:             200,
+		deductConnectFee: true,
+		Timespans:        cc.Timespans,
+	}
+	cc.UpdateCost()
+
+	if !reflect.DeepEqual(cc, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, cc)
+	}
+}
+
+func TestCallcostGetStartTimeNil(t *testing.T) {
+	cc := &CallCost{}
+	exp := time.Now()
+	rcv := cc.GetStartTime()
+
+	if timeRcv := exp.Sub(rcv); timeRcv > time.Second {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCallcostGetStartTime(t *testing.T) {
+	cc := &CallCost{
+		Timespans: TimeSpans{
+			{
+				DurationIndex: 10,
+				TimeStart:     time.Date(2021, 1, 1, 10, 25, 0, 0, time.Local),
+				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+				ratingInfo: &RatingInfo{
+					MatchedSubject: "1001",
+					RatingPlanId:   "RT_20CNT",
+					MatchedPrefix:  "1001",
+					MatchedDestId:  "1002",
+					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
+					RateIntervals: RateIntervalList{
+						{
+							Weight: 10,
+							Rating: &RIRate{
+								tag:              "RT_20CNT",
+								ConnectFee:       15,
+								RoundingMethod:   "*up",
+								RoundingDecimals: 1,
+								MaxCost:          100,
+								MaxCostStrategy:  "*disconnect",
+								Rates: RateGroups{
+									{
+										GroupIntervalStart: 1 * time.Second,
+										Value:              5,
+										RateIncrement:      60 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+									{
+										GroupIntervalStart: 60 * time.Second,
+										Value:              2,
+										RateIncrement:      1 * time.Second,
+										RateUnit:           60 * time.Second,
+									},
+								},
+							},
+						},
+					},
+					FallbackKeys: []string{"key1", "key2"},
+				},
+				Cost: 15,
+				RateInterval: &RateInterval{
+					Timing: &RITiming{
+						ID:  "ritTimingID",
+						tag: "ritTimingTag",
+					},
+					Rating: &RIRate{
+						tag:              "RT_20CNT",
+						ConnectFee:       15,
+						RoundingMethod:   "*up",
+						RoundingDecimals: 1,
+						MaxCost:          100,
+						MaxCostStrategy:  "*disconnect",
+						Rates: RateGroups{
+							{
+								GroupIntervalStart: 30 * time.Second,
+								Value:              5,
+								RateIncrement:      60 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+							{
+								GroupIntervalStart: 60 * time.Second,
+								Value:              5,
+								RateIncrement:      1 * time.Second,
+								RateUnit:           60 * time.Second,
+							},
+						},
+					},
+					Weight: 10,
+				},
+				RatingPlanId:   "RT_20CNT",
+				MatchedDestId:  "1002",
+				MatchedSubject: "1001",
+				MatchedPrefix:  "1001",
+				CompressFactor: 5,
+				RoundIncrement: &Increment{
+					Cost: 15,
+					BalanceInfo: &DebitInfo{
+						Unit: &UnitInfo{
+							ID:            "1001",
+							UUID:          "unitUUID1",
+							Value:         10,
+							DestinationID: "1002",
+							Consumed:      20,
+							ToR:           utils.MetaVoice,
+							RateInterval: &RateInterval{
+								Weight: 10,
+								Rating: &RIRate{},
+								Timing: &RITiming{},
+							},
+						},
+					},
+					paid:           false,
+					Duration:       12 * time.Second,
+					CompressFactor: 2,
+				},
+				Increments: Increments{
+					&Increment{
+						Cost: 20,
+						BalanceInfo: &DebitInfo{
+							Unit: &UnitInfo{
+								ID:            "1001",
+								UUID:          "unitUUID2",
+								Value:         10,
+								DestinationID: "1002",
+								Consumed:      20,
+								ToR:           utils.MetaVoice,
+								RateInterval: &RateInterval{
+									Weight: 15,
+									Rating: &RIRate{},
+									Timing: &RITiming{},
+								},
+							},
+						},
+						paid:           true,
+						Duration:       24 * time.Second,
+						CompressFactor: 2,
+					},
+				},
+			},
+		},
+	}
+
+	exp := time.Date(2021, 1, 1, 10, 25, 0, 0, time.Local)
+	rcv := cc.GetStartTime()
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCallcostGetEndTime(t *testing.T) {
+	cc := &CallCost{}
+	exp := time.Now()
+	rcv := cc.GetEndTime()
+
+	if timeRcv := exp.Sub(rcv); timeRcv > time.Second {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCallcostRoundTimeSpansNil(t *testing.T) {
+	cc := &CallCost{
+		deductConnectFee: true,
+		Tenant:           "tenant",
+		Account:          "acc",
+	}
+
+	exp := &CallCost{
+		deductConnectFee: true,
+		Tenant:           "tenant",
+		Account:          "acc",
+	}
+
+	cc.Round()
+
+	if !reflect.DeepEqual(cc, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, cc)
+	}
+}
+
+func TestCallcostRoundNoIncrements(t *testing.T) {
+	cc := &CallCost{
+		Subject:     "1001",
+		Destination: "1002",
+		Timespans: TimeSpans{
+			{
+				Cost: 10,
+			},
+		},
+	}
+
+	exp := &CallCost{
+		Subject:     "1001",
+		Destination: "1002",
+		Timespans: TimeSpans{
+			{
+				Cost: 10,
+			},
+		},
+	}
+	cc.Round()
+
+	if !reflect.DeepEqual(cc, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, cc)
+	}
+}
+
+func TestCallcostRoundNoBalanceInfo(t *testing.T) {
+	cc := &CallCost{
+		Subject:     "1001",
+		Destination: "1002",
+		Timespans: TimeSpans{
+			{
+				Cost: 10,
+				Increments: Increments{
+					{
+						Cost: 5,
+					},
+				},
+			},
+		},
+	}
+
+	exp := &CallCost{
+		Subject:     "1001",
+		Destination: "1002",
+		Timespans: TimeSpans{
+			{
+				Cost: 10,
+				Increments: Increments{
+					{
+						Cost: 5,
+					},
+				},
+			},
+		},
+	}
+	cc.Round()
+
+	if !reflect.DeepEqual(cc, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, cc)
+	}
+}
+
+func TestCallcostMatchCCFilter(t *testing.T) {
+	cc := &CallCost{
+		Category: "call",
+	}
+	bf := &BalanceFilter{
+		Categories: &utils.StringMap{
+			"call": false,
+		},
+	}
+
+	rcv := cc.MatchCCFilter(bf)
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
 	}
 }
