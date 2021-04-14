@@ -23,6 +23,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -648,5 +650,71 @@ func TestLibDispatcherRoundRobinDispatch(t *testing.T) {
 	result := wgDsp.Dispatch("", "", "", "", "")
 	if !reflect.DeepEqual(nil, result) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+
+func TestLibDispatcherSingleResultstrategyDispatcherDispatch(t *testing.T) {
+	wgDsp := &singleResultstrategyDispatcher{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "", "", "", []string{""}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherSingleResultstrategyDispatcherDispatchRouteID(t *testing.T) {
+	wgDsp := &singleResultstrategyDispatcher{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "routeID", "", "", []string{""}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherBroadcastStrategyDispatcherDispatch(t *testing.T) {
+	wgDsp := &broadcastStrategyDispatcher{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "", "", "", []string{""}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherBroadcastStrategyDispatcherDispatchRouteID(t *testing.T) {
+	wgDsp := &broadcastStrategyDispatcher{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "routeID", "", "", []string{""}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherLoadStrategyDispatcherDispatch(t *testing.T) {
+	wgDsp := &loadStrategyDispatcher{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "", "", "", []string{""}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherLoadStrategyDispatcherDispatchHostsID(t *testing.T) {
+	wgDsp := &loadStrategyDispatcher{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "routeID", "", "", []string{"hostID1", "hostID2"}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }

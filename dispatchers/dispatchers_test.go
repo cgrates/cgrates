@@ -21,6 +21,9 @@ package dispatchers
 import (
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -50,4 +53,72 @@ func TestDispatcherCall2(t *testing.T) {
 		t.Error(err)
 	}
 	dS.Shutdown()
+}
+
+func TestDispatcherauthorizeEvent(t *testing.T) {
+	dm := &engine.DataManager{}
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
+	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
+	ev := &utils.CGREvent{}
+	reply := &engine.AttrSProcessEventReply{}
+	err := dsp.authorizeEvent(ev, reply)
+	expected := "MANDATORY_IE_MISSING: [connIDs]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDispatcherAuthorizeEventErr(t *testing.T) {
+	dm := &engine.DataManager{}
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
+	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
+	ev := &utils.CGREvent{}
+	reply := &engine.AttrSProcessEventReply{}
+	err := dsp.authorizeEvent(ev, reply)
+	expected := "MANDATORY_IE_MISSING: [connIDs]"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDispatcherV1GetProfileForEventErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
+	dsp := NewDispatcherService(nil, cfg, nil, nil)
+	ev := &utils.CGREvent{}
+	dPfl := &engine.DispatcherProfile{}
+	err := dsp.V1GetProfileForEvent(ev, dPfl)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDispatcherV1GetProfileForEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
+	dsp := NewDispatcherService(nil, cfg, nil, nil)
+	ev := &utils.CGREvent{}
+	dPfl := &engine.DispatcherProfile{}
+	err := dsp.V1GetProfileForEvent(ev, dPfl)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDispatcherDispatch(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
+	dsp := NewDispatcherService(nil, cfg, nil, nil)
+	ev := &utils.CGREvent{}
+	err := dsp.Dispatch(ev, "", "", "", "")
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
 }
