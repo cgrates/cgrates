@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 )
@@ -55,15 +54,6 @@ func TestNewRateS(t *testing.T) {
 	}
 	if newRateS := NewRateS(config, filters, dataManager); !reflect.DeepEqual(newRateS, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, newRateS)
-	}
-}
-
-func TestCallRates(t *testing.T) {
-	newRates := &RateS{}
-	var reply *string
-	expectedErr := "UNSUPPORTED_SERVICE_METHOD"
-	if err := newRates.Call(context.Background(), "inexistentMethodCall", nil, reply); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 

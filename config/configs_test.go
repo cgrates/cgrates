@@ -89,7 +89,7 @@ func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
   }`
 	cfg := NewDefaultCGRConfig()
 
-	if err = cfg.loadConfigFromReader(strings.NewReader(cfgsJSONStr), []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true); err != nil {
+	if err = cfg.loadConfigFromReader(strings.NewReader(cfgsJSONStr), []func(ConfigDB) error{cfg.loadFromJSONCfg}, true); err != nil {
 		t.Fatal(err)
 	}
 	exp := "*env:NODE_ID"

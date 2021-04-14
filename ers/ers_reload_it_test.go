@@ -130,7 +130,7 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
 	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
 		Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
-		Section: config.ERsJson,
+		Section: config.ERsJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -141,11 +141,11 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 func testReloadVerifyFirstReload(t *testing.T) {
 	var reply map[string]interface{}
 	if err := reloadRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
-		Section: config.ERsJson,
+		Section: config.ERsJSON,
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if mp, can := reply[config.ERsJson].(map[string]interface{}); !can {
-		t.Errorf("expected a map received: %T", reply[config.ERsJson])
+	} else if mp, can := reply[config.ERsJSON].(map[string]interface{}); !can {
+		t.Errorf("expected a map received: %T", reply[config.ERsJSON])
 	} else if mp[utils.EnabledCfg] != true {
 		t.Errorf("Expecting: <true>, received: <%+v>", mp[utils.EnabledCfg])
 	} else if readers, canConvert := mp[utils.ReadersCfg].([]interface{}); !canConvert {

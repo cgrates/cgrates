@@ -20,15 +20,12 @@ package dispatchers
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherService constructs a DispatcherService
@@ -210,125 +207,4 @@ func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREvent,
 	}
 	*dPfl = *retDPfl
 	return
-}
-
-/*
-// V1Apier is a generic way to cover all APIer methods
-func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParameters, reply *interface{}) (err error) {
-
-	parameters, canCast := args.Parameters.(map[string]interface{})
-	if !canCast {
-		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-	}
-
-	var argD *utils.ArgDispatcher
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasAPIKey := parameters[utils.APIKey]
-	if hasAPIKey && apiKeyIface != nil {
-		argD = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := parameters[utils.RouteID]
-	if hasRouteID && routeIDIface != nil {
-		if !hasAPIKey || apiKeyIface == nil { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			argD = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			argD.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
-	}
-
-	tenant := utils.FirstNonEmpty(utils.IfaceAsString(parameters[utils.Tenant]), config.CgrConfig().GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if argD == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(args.Method,
-			tenant,
-			argD.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	// split the method
-	methodSplit := strings.Split(args.Method, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(apier).MethodByName(methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// take the arguments (args + reply)
-	methodType := method.Type()
-	if methodType.NumIn() != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// convert type of reply to the right one based on method
-	realReplyType := methodType.In(1)
-
-	var realReply interface{}
-	if realReplyType.Kind() == reflect.Ptr {
-		trply := reflect.New(realReplyType.Elem()).Elem().Interface()
-		realReply = &trply
-	} else {
-		realReply = reflect.New(realReplyType).Elem().Interface()
-	}
-	//convert parameters so we can unmarshal the informations into to right struct
-	argsByte, err := json.Marshal(parameters)
-	if err != nil {
-		return err
-	}
-	// find the type for arg
-	realArgsType := methodType.In(0)
-	// create the arg with the right type for method
-	var realArgs interface{} = reflect.New(realArgsType).Interface()
-	// populate realArgs with data
-	if err := json.Unmarshal(argsByte, &realArgs); err != nil {
-		return err
-	}
-	if realArgsType.Kind() != reflect.Ptr {
-		realArgs = reflect.ValueOf(realArgs).Elem().Interface()
-	}
-
-	var routeID *string
-	if argD != nil {
-		routeID = argD.RouteID
-	}
-	if err := dS.Dispatch(&utils.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, routeID,
-		args.Method, realArgs, realReply); err != nil {
-		return err
-	}
-	*reply = realReply
-	return nil
-
-}
-*/
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (dS *DispatcherService) Call(ctx *context.Context, serviceMethod string, // all API fuction must be of type: SubsystemMethod
-	args, reply interface{}) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(dS).MethodByName(methodSplit[0] + methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
 }

@@ -16,13 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatchers
+package apis
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) DispatcherServicePing(ev *utils.CGREvent, reply *string) error {
+type ping struct{}
+
+// Ping return pong used to determine if the subsystem is active
+func (ping) Ping(_ *context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

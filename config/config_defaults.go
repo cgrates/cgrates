@@ -83,6 +83,7 @@ const CGRATES_CFG_JSON = `
 	"replication_conns":[],					// the conns the items are replicated
 	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
 	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
+	"update_config": false,					// if the engine should load the config from DataDB
 	"items":{
 		"*accounts":{"remote":false, "replicate":false}, 					
 		"*reverse_destinations": {"remote":false, "replicate":false},

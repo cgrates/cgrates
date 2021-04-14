@@ -35,6 +35,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/registrarc"
@@ -92,11 +93,11 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 	// if !cfg.DispatcherSCfg().Enabled {
 	// 	server.RpcRegister(chSv1)
 	// }
-	var rpc birpc.ClientConnector = chS
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
-	}
-	internalCacheSChan <- rpc
+	// var rpc birpc.ClientConnector = chS
+	// if anz.IsRunning() {
+	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
+	// }
+	// internalCacheSChan <- rpc
 	return
 }
 
@@ -119,27 +120,27 @@ func initServiceManagerV1(internalServiceManagerChan chan birpc.ClientConnector,
 	// if !cfg.DispatcherSCfg().Enabled {
 	// server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
 	// }
-	var rpc birpc.ClientConnector = srvMngr
-	if anz.IsRunning() {
-		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
-	}
-	internalServiceManagerChan <- rpc
+	// var rpc birpc.ClientConnector = srvMngr
+	// if anz.IsRunning() {
+	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ServiceManager)
+	// }
+	// internalServiceManagerChan <- rpc
 }
 
 func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 	server *cores.Server, anz *services.AnalyzerService) {
-	// cfgSv1 := v1.NewConfigSv1(cfg)
-	// if !cfg.DispatcherSCfg().Enabled {
-	// server.RpcRegister(cfgSv1)
-	// }
-	// var rpc birpc.ClientConnector = cfgSv1
-	// if anz.IsRunning() {
-	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
-	// }
-	// internalConfigChan <- rpc
+	cfgSv1, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(cfgSv1)
+	}
+	var rpc birpc.ClientConnector = cfgSv1
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.ConfigSv1)
+	}
+	internalConfigChan <- rpc
 }
 
-func startRPC(server *cores.Server,
+func startRPC(server *cores.Server, internalAdminSChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
@@ -153,10 +154,12 @@ func startRPC(server *cores.Server,
 		// 	internalCdrSChan <- cdrs
 		// case smg := <-internalSMGChan:
 		// 	internalSMGChan <- smg
-		case rls := <-internalRsChan:
-			internalRsChan <- rls
+		// case rls := <-internalRsChan:
+		// internalRsChan <- rls
 		// case statS := <-internalStatSChan:
 		// 	internalStatSChan <- statS
+		case admS := <-internalAdminSChan:
+			internalAdminSChan <- admS
 		case attrS := <-internalAttrSChan:
 			internalAttrSChan <- attrS
 		// case chrgS := <-internalChargerSChan:
@@ -487,8 +490,7 @@ func main() {
 	internalStatSChan := make(chan birpc.ClientConnector, 1)
 	internalResourceSChan := make(chan birpc.ClientConnector, 1)
 	internalRouteSChan := make(chan birpc.ClientConnector, 1)
-	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
-	internalAPIerSv2Chan := make(chan birpc.ClientConnector, 1)
+	internalAdminSChan := make(chan birpc.ClientConnector, 1)
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	internalEEsChan := make(chan birpc.ClientConnector, 1)
 	internalRateSChan := make(chan birpc.ClientConnector, 1)
@@ -499,7 +501,7 @@ func main() {
 	// because we need to pass the connection to it
 	connManager := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerSv2Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAdminSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
@@ -523,8 +525,7 @@ func main() {
 	})
 	srvDep := map[string]*sync.WaitGroup{
 		utils.AnalyzerS:       new(sync.WaitGroup),
-		utils.APIerSv1:        new(sync.WaitGroup),
-		utils.APIerSv2:        new(sync.WaitGroup),
+		utils.AdminS:          new(sync.WaitGroup),
 		utils.AsteriskAgent:   new(sync.WaitGroup),
 		utils.AttributeS:      new(sync.WaitGroup),
 		utils.CDRServer:       new(sync.WaitGroup),
@@ -563,7 +564,7 @@ func main() {
 	dmService := services.NewDataDBService(cfg, connManager, srvDep)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
-		if err = dmService.Start(); err != nil {
+		if err = dmService.Init(false); err != nil {
 			return
 		}
 	}
@@ -632,7 +633,7 @@ func main() {
 		internalRouteSChan, connManager, anz, srvDep)
 
 	admS := services.NewAdminSv1Service(cfg, dmService, storDBService, filterSChan, server,
-		internalAPIerSv1Chan, connManager, anz, srvDep)
+		internalAdminSChan, connManager, anz, srvDep)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager, anz, srvDep)
@@ -671,8 +672,7 @@ func main() {
 	// init internalRPCSet to share internal connections among the engine
 	engine.IntRPC = engine.NewRPCClientSet()
 	engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, internalAnalyzerSChan)
-	engine.IntRPC.AddInternalRPCClient(utils.APIerSv1, internalAPIerSv1Chan)
-	engine.IntRPC.AddInternalRPCClient(utils.APIerSv2, internalAPIerSv2Chan)
+	engine.IntRPC.AddInternalRPCClient(utils.AdminS, internalAdminSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, internalAttributeSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, internalCDRServerChan)
@@ -701,7 +701,7 @@ func main() {
 	}
 
 	// Serve rpc connections
-	go startRPC(server, internalCDRServerChan,
+	go startRPC(server, internalAdminSChan, internalCDRServerChan,
 		internalResourceSChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,

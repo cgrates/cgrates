@@ -34,15 +34,12 @@ import (
 	math_rand "math/rand"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/rpcclient"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -669,84 +666,6 @@ type PaginatorWithTenant struct {
 type TenantWithAPIOpts struct {
 	Tenant  string
 	APIOpts map[string]interface{}
-}
-
-// RPCCall is a generic method calling RPC on a struct instance
-// serviceMethod is assumed to be in the form InstanceV1.Method
-// where V1Method will become RPC method called on instance
-func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(inst).MethodByName(
-		strings.ToUpper(methodSplit[0][len(methodSplit[0])-2:]) + methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return ErrServerError
-	}
-	return err
-}
-
-// ApierRPCCall implements generic RPCCall for APIer instances
-func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, reply interface{}) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(inst).MethodByName(methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return ErrServerError
-	}
-	return err
-}
-
-// ApierRPCCall implements generic RPCCall for APIer instances
-func APIerRPCCallCtx(inst interface{}, ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
-	methodSplit := strings.Split(serviceMethod, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	method := reflect.ValueOf(inst).MethodByName(methodSplit[1])
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	params := []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return ErrServerError
-	}
-	return err
 }
 
 // CachedRPCResponse is used to cache a RPC response

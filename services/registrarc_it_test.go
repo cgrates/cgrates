@@ -70,7 +70,7 @@ func TestDispatcherHReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "registrarc", "all_mongo"),
-		Section: config.RegistrarCJson,
+		Section: config.RegistrarCJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -91,7 +91,7 @@ func TestDispatcherHReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RegistrarCCfg().Dispatcher.Enabled = false
-	cfg.GetReloadChan(config.RegistrarCJson) <- struct{}{}
+	cfg.GetReloadChan(config.RegistrarCJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

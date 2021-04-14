@@ -74,7 +74,7 @@ func TestDNSAgentReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
-		Section: config.DNSAgentJson,
+		Section: config.DNSAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -100,7 +100,7 @@ func TestDNSAgentReload(t *testing.T) {
 	}
 
 	cfg.DNSAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
+	cfg.GetReloadChan(config.DNSAgentJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

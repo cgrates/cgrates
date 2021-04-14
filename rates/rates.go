@@ -66,11 +66,6 @@ func (rS *RateS) Shutdown() (err error) {
 	return
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (rS *RateS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	return utils.RPCCall(rS, serviceMethod, args, reply)
-}
-
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
 func (rS *RateS) matchingRateProfileForEvent(tnt string, rPfIDs []string, args *utils.ArgsCostForEvent) (rtPfl *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{

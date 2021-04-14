@@ -92,7 +92,7 @@ func TestLoaderSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "loaders", "tutinternal"),
-		Section: config.LoaderJson,
+		Section: config.LoaderSJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -121,7 +121,7 @@ func TestLoaderSReload(t *testing.T) {
 		v.Enabled = false
 	}
 	time.Sleep(10 * time.Millisecond)
-	cfg.GetReloadChan(config.LoaderJson) <- struct{}{}
+	cfg.GetReloadChan(config.LoaderSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
 	if srv.IsRunning() {

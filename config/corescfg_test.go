@@ -52,7 +52,7 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.CoreSCfgJson(); err != nil {
+	} else if jsnalS, err := jsnCfg.CoreSJSON(); err != nil {
 		t.Error(err)
 	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
 		t.Error(err)
@@ -93,7 +93,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnalS, err := jsnCfg.CoreSCfgJson(); err != nil {
+	} else if jsnalS, err := jsnCfg.CoreSJSON(); err != nil {
 		t.Error(err)
 	} else if err = alS.loadFromJSONCfg(jsnalS); err != nil {
 		t.Error(err)

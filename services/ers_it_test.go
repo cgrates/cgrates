@@ -78,7 +78,7 @@ func TestEventReaderSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal"),
-		Section: config.ERsJson,
+		Section: config.ERsJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -101,7 +101,7 @@ func TestEventReaderSReload(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ERsCfg().Enabled = false
-	cfg.GetReloadChan(config.ERsJson) <- struct{}{}
+	cfg.GetReloadChan(config.ERsJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")

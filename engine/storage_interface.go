@@ -26,6 +26,7 @@ import (
 	"reflect"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ugocodec/codec"
 	"go.mongodb.org/mongo-driver/bson"
@@ -111,6 +112,12 @@ type DataDB interface {
 	GetAccountDrv(string, string) (*utils.Account, error)
 	SetAccountDrv(profile *utils.Account) error
 	RemoveAccountDrv(string, string) error
+}
+
+// DataDBDriver used as a DataDB but also as a ConfigProvider
+type DataDBDriver interface {
+	DataDB
+	config.ConfigDB
 }
 
 type StorDB interface {

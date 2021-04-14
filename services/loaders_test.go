@@ -83,8 +83,7 @@ func TestLoaderSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", srv.ldrs, srv.GetLoaderS())
 	}
 	srv.stopChan = make(chan struct{}, 1)
-	chS := engine.NewCacheS(cfg, nil, nil)
-	srv.connChan <- chS
+	srv.connChan <- &testMockClients{}
 	srv.Shutdown()
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

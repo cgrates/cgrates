@@ -2639,16 +2639,10 @@ func (dm *DataManager) RemoveActionProfile(tenant, id string,
 }
 
 // Reconnect reconnects to the DB when the config was changed
-func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg) (err error) {
-	d, err := NewDataDBConn(newcfg.Type, newcfg.Host, newcfg.Port, newcfg.Name,
-		newcfg.User, newcfg.Password, marshaller, newcfg.Opts)
-	if err != nil {
-		return
-	}
+func (dm *DataManager) Reconnect(d DataDB) {
 	// ToDo: consider locking
 	dm.dataDB.Close()
 	dm.dataDB = d
-	return
 }
 
 func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxKey string,

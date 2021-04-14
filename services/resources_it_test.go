@@ -73,7 +73,7 @@ func TestResourceSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.RESOURCES_JSON,
+		Section: config.ResourceSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -95,7 +95,7 @@ func TestResourceSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ResourceSCfg().Enabled = false
-	cfg.GetReloadChan(config.RESOURCES_JSON) <- struct{}{}
+	cfg.GetReloadChan(config.ResourceSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if reS.IsRunning() {
 		t.Errorf("Expected service to be down")

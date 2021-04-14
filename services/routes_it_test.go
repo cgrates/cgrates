@@ -67,7 +67,7 @@ func TestRouteSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "cluelrn"),
-		Section: config.RouteSJson,
+		Section: config.RouteSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -90,7 +90,7 @@ func TestRouteSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RouteSCfg().Enabled = false
-	cfg.GetReloadChan(config.RouteSJson) <- struct{}{}
+	cfg.GetReloadChan(config.RouteSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if routeS.IsRunning() {
 		t.Errorf("Expected service to be down")

@@ -122,6 +122,6 @@ func (es *EventExporterService) Start() (err error) {
 	// if !es.cfg.DispatcherSCfg().Enabled {
 	// es.server.RpcRegister(es.rpc)
 	// }
-	es.intConnChan <- es.anz.GetInternalCodec(es.eeS, utils.EventExporterS)
+	// es.intConnChan <- es.anz.GetInternalCodec(es.eeS, utils.EventExporterS)
 	return
 }

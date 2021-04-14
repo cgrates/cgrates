@@ -60,11 +60,6 @@ func (aS *AccountS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.AccountS))
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (aS *AccountS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	return utils.RPCCall(aS, serviceMethod, args, reply)
-}
-
 // matchingAccountsForEvent returns the matched Accounts for the given event
 // if lked option is passed, each Account will be also locked
 //   so it becomes responsibility of upper layers to release the lock

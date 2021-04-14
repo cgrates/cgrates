@@ -190,7 +190,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			return sReq.Id, err
 		}
 		rpcConns := config.CgrConfig().RPCConns()
-		config.CgrConfig().LockSections(config.RPCConnsJsonName)
+		config.CgrConfig().LockSections(config.RPCConnsJSON)
 		for connID := range config.RemoveRPCCons(rpcConns, utils.NewStringSet(args.IDs)) {
 			if err = engine.Cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
@@ -199,7 +199,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 				hasErrors = true
 			}
 		}
-		config.CgrConfig().UnlockSections(config.RPCConnsJsonName)
+		config.CgrConfig().UnlockSections(config.RPCConnsJSON)
 	case utils.RegistrarSv1RegisterRPCHosts:
 		dH, err := unmarshallRegisterArgs(req, *sReq.Params)
 		if err != nil {
@@ -210,7 +210,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 			cfgHosts[dH.ID] = dH.RemoteHost
 		}
 		rpcConns := config.CgrConfig().RPCConns()
-		config.CgrConfig().LockSections(config.RPCConnsJsonName)
+		config.CgrConfig().LockSections(config.RPCConnsJSON)
 		for connID := range config.UpdateRPCCons(rpcConns, cfgHosts) {
 			if err = engine.Cache.Remove(context.TODO(), utils.CacheRPCConnections, connID,
 				true, utils.NonTransactional); err != nil {
@@ -219,7 +219,7 @@ func register(req *http.Request) (*json.RawMessage, error) {
 				hasErrors = true
 			}
 		}
-		config.CgrConfig().UnlockSections(config.RPCConnsJsonName)
+		config.CgrConfig().UnlockSections(config.RPCConnsJSON)
 	}
 	if hasErrors {
 		return sReq.Id, utils.ErrPartiallyExecuted

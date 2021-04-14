@@ -64,7 +64,7 @@ func TestCoreSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue"),
-		Section: config.CoreSCfgJson,
+		Section: config.CoreSJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -91,7 +91,7 @@ func TestCoreSReload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	cfg.GetReloadChan(config.CoreSCfgJson) <- struct{}{}
+	cfg.GetReloadChan(config.CoreSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if !coreS.IsRunning() {
 		t.Fatalf("Expected service to be running")

@@ -73,7 +73,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "fs_evsock", "cgrates", "etc", "cgrates"),
-		Section: config.FreeSWITCHAgentJSN,
+		Section: config.FreeSWITCHAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {

@@ -72,7 +72,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "asterisk_ari", "cgrates", "etc", "cgrates"),
-		Section: config.AsteriskAgentJSN,
+		Section: config.AsteriskAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -91,7 +91,7 @@ func TestAsteriskAgentReload(t *testing.T) {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
+	cfg.GetReloadChan(config.AsteriskAgentJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -138,7 +138,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "asterisk_ari", "cgrates", "etc", "cgrates"),
-		Section: config.AsteriskAgentJSN,
+		Section: config.AsteriskAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -170,7 +170,7 @@ func TestAsteriskAgentReload2(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", srvReload)
 	}
 	cfg.AsteriskAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.AsteriskAgentJSN) <- struct{}{}
+	cfg.GetReloadChan(config.AsteriskAgentJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

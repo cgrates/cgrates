@@ -66,7 +66,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "diamagent_mysql"),
-		Section: config.DA_JSN,
+		Section: config.DiameterAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -86,7 +86,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	}
 
 	cfg.DiameterAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.DA_JSN) <- struct{}{}
+	cfg.GetReloadChan(config.DiameterAgentJSON) <- struct{}{}
 	srv.(*DiameterAgent).lnet = "bad_lnet_test"
 	err2 := srv.Reload()
 	if err != nil {

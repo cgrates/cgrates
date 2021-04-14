@@ -71,7 +71,7 @@ func TestChargerSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.ChargerSCfgJson,
+		Section: config.ChargerSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -93,7 +93,7 @@ func TestChargerSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ChargerSCfg().Enabled = false
-	cfg.GetReloadChan(config.ChargerSCfgJson) <- struct{}{}
+	cfg.GetReloadChan(config.ChargerSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if chrS.IsRunning() {
 		t.Errorf("Expected service to be down")

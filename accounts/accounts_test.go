@@ -28,25 +28,12 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
-
-func TestRPCCall(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(nil, cfg.CacheCfg(), nil)
-	fltr := engine.NewFilterS(cfg, nil, dm)
-	accnts := NewAccountS(cfg, fltr, nil, dm)
-	method := "ApierSv1Ping"
-	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := accnts.Call(context.Background(), method, nil, nil); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
 
 func TestShutDownCoverage(t *testing.T) {
 	//this is called in order to cover the ListenAndServe method
@@ -1222,7 +1209,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	// Set the internal rateS within connMngr
 	rateSConn := make(chan birpc.ClientConnector, 1)
-	rateSConn <- rates.NewRateS(cfg, fltrS, dm)
+	srv, _ := birpc.NewService(rates.NewRateS(cfg, fltrS, dm), "", false)
+	rateSConn <- srv
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): rateSConn,
 	})

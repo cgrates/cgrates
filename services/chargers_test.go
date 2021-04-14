@@ -75,7 +75,7 @@ func TestChargerSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
 	chrS.connChan = make(chan birpc.ClientConnector, 1)
-	chrS.connChan <- chS
+	chrS.connChan <- &testMockClients{}
 	shutErr := chrS.Shutdown()
 	if shutErr != nil {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutErr)

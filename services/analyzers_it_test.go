@@ -66,7 +66,7 @@ func TestAnalyzerSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "analyzers"),
-		Section: config.AnalyzerCfgJson,
+		Section: config.AnalyzerSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -90,7 +90,7 @@ func TestAnalyzerSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.AnalyzerSCfg().Enabled = false
-	cfg.GetReloadChan(config.AnalyzerCfgJson) <- struct{}{}
+	cfg.GetReloadChan(config.AnalyzerSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
 	if anz.IsRunning() {

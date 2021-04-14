@@ -65,7 +65,7 @@ type RPCConn struct {
 	Conns    []*RemoteHost
 }
 
-func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnsJson) {
+func (rC *RPCConn) loadFromJSONCfg(jsnCfg *RPCConnJson) {
 	if jsnCfg == nil {
 		return
 	}

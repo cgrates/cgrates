@@ -31,7 +31,6 @@ import (
 //TestCdrsCoverage for cover testing
 func TestCdrsCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	chS := engine.NewCacheS(cfg, nil, nil)
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -65,7 +64,7 @@ func TestCdrsCoverage(t *testing.T) {
 		srvDep:      srvDep,
 		cdrS:        &engine.CDRServer{},
 	}
-	cdrS2.connChan <- chS
+	cdrS2.connChan <- &testMockClients{}
 	cdrS2.stopChan <- struct{}{}
 	if !cdrS2.IsRunning() {
 		t.Errorf("Expected service to be running")
@@ -73,7 +72,7 @@ func TestCdrsCoverage(t *testing.T) {
 
 	serviceName := cdrS2.ServiceName()
 	if serviceName != utils.CDRServer {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.APIerSv1, serviceName)
+		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AdminS, serviceName)
 	}
 	shouldRun := cdrS.ShouldRun()
 	if shouldRun != false {

@@ -423,14 +423,12 @@ func (fltr *FilterRule) passEmpty(dDP utils.DataProvider) (bool, error) {
 		rval = rval.Elem()
 	}
 	switch rval.Type().Kind() {
-	case reflect.String:
-		return rval.Interface() == "", nil
 	case reflect.Slice:
 		return rval.Len() == 0, nil
 	case reflect.Map:
 		return len(rval.MapKeys()) == 0, nil
 	default:
-		return false, nil
+		return rval.IsZero(), nil
 	}
 }
 

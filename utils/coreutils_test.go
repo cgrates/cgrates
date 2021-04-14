@@ -29,7 +29,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestGetStartTime(t *testing.T) {
@@ -1082,102 +1081,6 @@ func TestTenantIDWithCache(t *testing.T) {
 	eOut = "cgrates.org:id"
 	if rcv := tID.TenantID.TenantID(); rcv != eOut {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
-	}
-}
-
-type TestRPC struct {
-}
-
-func (tRPC *TestRPC) V1Copy(args *string, reply *string) error {
-	*reply = *args
-	return nil
-}
-
-func (tRPC *TestRPC) V1Error(args *string, reply *string) error {
-	return errors.New("V1_err_test")
-}
-
-func (tRPC *TestRPC) Call(args interface{}, reply interface{}) error {
-	return nil
-}
-
-func (tRPC *TestRPC) V1Error2(args interface{}, reply interface{}) (int, error) {
-	return 0, nil
-}
-
-func (tRPC *TestRPC) V1Error3(args interface{}, reply interface{}) int {
-	return 0
-}
-
-func TestRPCCall(t *testing.T) {
-	if err := RPCCall("wrong", "test", nil, nil); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-	var reply string
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Copy", StringPointer("test"), &reply); err != nil {
-		t.Errorf("Expecting: <nil>, received: %+v", err)
-	}
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Error", StringPointer("test"), &reply); err == nil || err.Error() != "V1_err_test" {
-		t.Errorf("Expecting: <V1_err_test>, received: <%+v>", err)
-	}
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Unexist", StringPointer("test"), &reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Error2", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
-
-	if err := RPCCall(&TestRPC{}, "TestRPCV1.Error3", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
-}
-
-type TestRPC2 struct {
-}
-
-func (tRPC *TestRPC2) Copy(args *string, reply *string) error {
-	*reply = *args
-	return nil
-}
-
-func (tRPC *TestRPC2) Error(args *string, reply *string) error {
-	return errors.New("V1_err_test")
-}
-
-func (tRPC *TestRPC2) Call(args interface{}, reply interface{}) error {
-	return nil
-}
-
-func (tRPC *TestRPC2) Error2(args interface{}, reply interface{}) (int, error) {
-	return 0, nil
-}
-
-func (tRPC *TestRPC2) Error3(args interface{}, reply interface{}) int {
-	return 0
-}
-
-func TestRPCAPICall(t *testing.T) {
-	if err := APIerRPCCall("wrong", "test", nil, nil); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-	var reply string
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Copy", StringPointer("test"), &reply); err != nil {
-		t.Errorf("Expecting: <nil>, received: %+v", err)
-	}
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Error", StringPointer("test"), &reply); err == nil || err.Error() != "V1_err_test" {
-		t.Errorf("Expecting: <V1_err_test>, received: <%+v>", err)
-	}
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Unexist", StringPointer("test"), &reply); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Error2", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
-	}
-
-	if err := APIerRPCCall(&TestRPC2{}, "TestRPC2.Error3", StringPointer("test"), &reply); err == nil || err != ErrServerError {
-		t.Errorf("Expecting: %+v, received: %+v", ErrServerError, err)
 	}
 }
 

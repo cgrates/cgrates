@@ -616,7 +616,11 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 		initialMP[utils.SessionSConnsCfg] = sessionSConns
 	}
 	if fscfg.ExtraFields != nil {
-		initialMP[utils.ExtraFieldsCfg] = fscfg.ExtraFields.GetRule(separator)
+		extra := make([]string, len(fscfg.ExtraFields))
+		for i, rsr := range fscfg.ExtraFields {
+			extra[i] = rsr.Rules
+		}
+		initialMP[utils.ExtraFieldsCfg] = extra
 	}
 
 	if fscfg.MaxWaitConnection != 0 {

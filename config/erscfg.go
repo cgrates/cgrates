@@ -296,7 +296,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.SourcePathCfg:               er.SourcePath,
 		utils.ProcessedPathCfg:            er.ProcessedPath,
 		utils.TenantCfg:                   er.Tenant.GetRule(separator),
-		utils.XMLRootPathCfg:              []string(er.XMLRootPath),
+		utils.XMLRootPathCfg:              er.XMLRootPath.AsString("/", len(er.XMLRootPath) != 0 && len(er.XMLRootPath[0]) != 0),
 		utils.TimezoneCfg:                 er.Timezone,
 		utils.FiltersCfg:                  er.Filters,
 		utils.FlagsCfg:                    []string{},

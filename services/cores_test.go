@@ -65,8 +65,7 @@ func TestCoreSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getCoreS)
 	}
 	//populates connChan with something in order to call the shutdown function
-	chS := engine.NewCacheS(cfg, nil, nil)
-	srv.connChan <- chS
+	srv.connChan <- &testMockClients{}
 	srv.stopChan = make(chan struct{})
 	getShut := srv.Shutdown()
 	if getShut != nil {

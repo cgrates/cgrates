@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/config"
@@ -30,6 +31,14 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+type testMockClients struct {
+	calls func(_ *context.Context, _, _ interface{}) error
+}
+
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply interface{}) error {
+	return sT.calls(ctx, arg, rply)
+}
 
 //TestSessionSCoverage for cover testing
 func TestSessionSCoverage(t *testing.T) {
@@ -39,11 +48,6 @@ func TestSessionSCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	internalChan := make(chan birpc.ClientConnector, 1)
-	internalChan <- nil
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)

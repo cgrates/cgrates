@@ -66,7 +66,7 @@ func TestDataDBReload(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.DATADB_JSN,
+		Section: config.DataDBJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -174,7 +174,7 @@ func TestDataDBReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.AttributeSCfg().Enabled = false
-	cfg.GetReloadChan(config.DATADB_JSN) <- struct{}{}
+	cfg.GetReloadChan(config.DataDBJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")

@@ -95,7 +95,7 @@ func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 		utils.ListenCfg:              sa.Listen,
 		utils.ListenNetCfg:           sa.ListenNet,
 		utils.TimezoneCfg:            sa.Timezone,
-		utils.RetransmissionTimerCfg: sa.RetransmissionTimer,
+		utils.RetransmissionTimerCfg: sa.RetransmissionTimer.String(),
 	}
 
 	requestProcessors := make([]map[string]interface{}, len(sa.RequestProcessors))

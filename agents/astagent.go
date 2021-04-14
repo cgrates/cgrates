@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/aringo"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -63,7 +64,8 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 		connMgr:     connMgr,
 		eventsCache: make(map[string]*utils.CGREvent),
 	}
-	sma.ctx = context.WithClient(context.TODO(), sma)
+	srv, _ := birpc.NewService(sma, "", false)
+	sma.ctx = context.WithClient(context.TODO(), srv)
 	return sma
 }
 
@@ -322,11 +324,6 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		}
 	}
 
-}
-
-// Call implements birpc.ClientConnector interface
-func (sma *AsteriskAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
 
 // V1DisconnectSession is internal method to disconnect session in asterisk

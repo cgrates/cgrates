@@ -1166,7 +1166,6 @@ const (
 
 // APIerSv1 APIs
 const (
-	APIerSv1                            = "APIerSv1"
 	APIerSv1ComputeFilterIndexes        = "APIerSv1.ComputeFilterIndexes"
 	APIerSv1ComputeFilterIndexIDs       = "APIerSv1.ComputeFilterIndexIDs"
 	APIerSv1Ping                        = "APIerSv1.Ping"
@@ -1288,28 +1287,6 @@ const (
 	APIerSv1GetTPTimingIds           = "APIerSv1.GetTPTimingIds"
 	APIerSv1LoadTariffPlanFromStorDb = "APIerSv1.LoadTariffPlanFromStorDb"
 	APIerSv1RemoveTPFromFolder       = "APIerSv1.RemoveTPFromFolder"
-)
-
-// APIerSv2 APIs
-const (
-	APIerSv2                         = "APIerSv2"
-	APIerSv2LoadTariffPlanFromFolder = "APIerSv2.LoadTariffPlanFromFolder"
-	APIerSv2GetCDRs                  = "APIerSv2.GetCDRs"
-	APIerSv2CountCDRs                = "APIerSv2.CountCDRs"
-	APIerSv2SetBalance               = "APIerSv2.SetBalance"
-	APIerSv2SetActions               = "APIerSv2.SetActions"
-	APIerSv2RemoveTPTiming           = "APIerSv2.RemoveTPTiming"
-	APIerSv2GetTPDestination         = "APIerSv2.GetTPDestination"
-	APIerSv2SetTPDestination         = "APIerSv2.SetTPDestination"
-	APIerSv2RemoveTPDestination      = "APIerSv2.RemoveTPDestination"
-	APIerSv2GetTPDestinationIDs      = "APIerSv2.GetTPDestinationIDs"
-	APIerSv2GetTPTiming              = "APIerSv2.GetTPTiming"
-	APIerSv2SetTPTiming              = "APIerSv2.SetTPTiming"
-	APIerSv2GetActions               = "APIerSv2.GetActions"
-	APIerSv2GetDestinations          = "APIerSv2.GetDestinations"
-	APIerSv2GetCacheStats            = "APIerSv2.GetCacheStats"
-	APIerSv2ExecuteAction            = "APIerSv2.ExecuteAction"
-	APIerSv2RemoveActions            = "APIerSv2.RemoveActions"
 )
 
 const (

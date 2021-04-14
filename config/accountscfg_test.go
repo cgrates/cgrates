@@ -103,13 +103,8 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1"},
 		utils.NestedFieldsCfg:        true,
 		utils.MaxIterations:          100,
+		utils.MaxUsage:               "259200000000000", // 72h in ns
 	}
-	usage, err := utils.NewDecimalFromUsage("72h")
-	if err != nil {
-		t.Error(err)
-	}
-	eMap[utils.MaxUsage] = usage
-
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.accountSCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {

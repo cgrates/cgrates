@@ -34,7 +34,6 @@ import (
 func TestEventExporterSCoverage(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	chS := engine.NewCacheS(cfg, nil, nil)
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
@@ -69,7 +68,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 	if shouldRun != false {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
-	srv2.intConnChan <- chS
+	srv2.intConnChan <- &testMockClients{}
 	shutErr := srv2.Shutdown()
 	if shutErr != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutErr)
