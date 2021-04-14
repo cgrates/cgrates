@@ -1280,7 +1280,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						FixedFee:     utils.NewDecimal(4, 1),  // 0.4
 						RecurrentFee: utils.NewDecimal(2, 1)}, // 0.2 per minute
 				},
-				Units: utils.NewDecimal(int64(130*time.Second), 0), // 2 Minute 10s
+				Units: utils.NewDecimal(int64(130*time.Second), 0), // 2 Minute 10s, rest 10s
 			},
 			cb1ID: &utils.Balance{ // paying the AB1 plus own debit of 0.1 per second, limit of -200 cents
 				ID:   cb1ID,
@@ -1303,8 +1303,9 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Factor: utils.NewDecimal(100, 0), // EuroCents
 					},
 				},
-				Units: utils.NewDecimal(500, 0), // 500 EuroCents
+				Units: utils.NewDecimal(8, 1), // 80 EuroCents for the debit from AB1, rest for 20 seconds of limit
 			},
+			// 2m20s ABSTR, 2.8 CONCR
 			ab2ID: &utils.Balance{ // continues debitting after CB1, 0 cost in increments of seconds, maximum of 1 minute
 				ID:   ab2ID,
 				Type: utils.MetaAbstract,
@@ -1318,9 +1319,10 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Increment:    utils.NewDecimal(int64(time.Second), 0),
 						RecurrentFee: utils.NewDecimal(0, 0)},
 				},
-				Units: utils.NewDecimal(int64(1*time.Minute), 0), // 1 Minute
+				Units: utils.NewDecimal(int64(1*time.Minute), 0), // 1 Minute, no cost
 			},
-			ab3ID: &utils.Balance{ // never matching due to filter
+			// 3m20s ABSTR, 2.8 CONCR
+			ab3ID: &utils.Balance{ // not matching due to filter
 				ID:        ab3ID,
 				Type:      utils.MetaAbstract,
 				FilterIDs: []string{"*string:*~req.Account:AnotherAccount"},
@@ -1336,11 +1338,12 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				},
 				Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			},
-			cb2ID: &utils.Balance{ // absorb all costs, standard rating used when primary debitting
+			cb2ID: &utils.Balance{ //125s with rating from RateS
 				ID:    cb2ID,
 				Type:  utils.MetaConcrete,
 				Units: utils.NewDecimal(125, 2),
 			},
+			//5m25s ABSTR, 4.05 CONCR
 		},
 	}
 	if err := dm.SetAccount(acnt1, true); err != nil {
@@ -1386,18 +1389,15 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			ID:     "TestV1DebitAbstractsEventCharges",
 			Tenant: utils.CGRateSorg,
-			//APIOpts: map[string]interface{}{
-			//	utils.MetaUsage: "2m5s",
-			//},
-			Event: map[string]interface{}{
-				utils.Usage: "2m5s",
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage: "5m25s",
 			},
 		},
 	}
 
 	eEvChgs := utils.ExtEventCharges{
-		Abstracts:   utils.Float64Pointer(125000000000),
-		Concretes:   utils.Float64Pointer(0.8166666666666668),
+		Abstracts:   utils.Float64Pointer(325000000000),
+		Concretes:   utils.Float64Pointer(4.05),
 		Accounting:  map[string]*utils.ExtAccountCharge{},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
 		Rating:      map[string]*utils.ExtRateSInterval{},
