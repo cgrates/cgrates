@@ -1947,6 +1947,95 @@ func TestCallDescriptorAsCGREvent(t *testing.T) {
 	}
 }
 
+func TestCalldescRefundIncrementsNoBalanceInfo(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		Increments: Increments{
+			{
+				Duration: time.Second,
+				paid:     true,
+				Cost:     5,
+			},
+		},
+	}
+
+	rcv, err := cd.RefundIncrements()
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestCalldescAccountSummaryNilAcc(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "call",
+		Subject:     "1001",
+		Tenant:      "cgrates.org",
+		Destination: "1002",
+	}
+	initialAcc := &AccountSummary{
+		Tenant: "cgrates.org",
+		ID:     "testID",
+	}
+
+	rcv := cd.AccountSummary(initialAcc)
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestCalldescFieldAsInterfaceNilFieldPath(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "call",
+		Subject:     "1001",
+		Tenant:      "cgrates.org",
+		Destination: "1002",
+	}
+	fldPath := []string{}
+
+	experr := utils.ErrNotFound
+	rcv, err := cd.FieldAsInterface(fldPath)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestCalldescFieldAsStringNilFieldPath(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "call",
+		Subject:     "1001",
+		Tenant:      "cgrates.org",
+		Destination: "1002",
+	}
+	fldPath := []string{}
+
+	experr := utils.ErrNotFound
+	exp := utils.EmptyString
+	rcv, err := cd.FieldAsString(fldPath)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
 /*************** BENCHMARKS ********************/
 func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
