@@ -122,17 +122,6 @@ func TestFlatstoreServeNil(t *testing.T) {
 	}
 }
 
-func TestNewUnpairedRecordErrTimezone(t *testing.T) {
-	record := []string{"TEST1", "TEST2", "TEST3", "TEST4", "TEST5", "TEST6", "TEST7"}
-	timezone, _ := time.Time.Zone(time.Now())
-	fileName := "testfile.csv"
-	errExpect := "unknown time zone EEST"
-	_, err := NewUnpairedRecord(record, timezone, fileName)
-	if err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
-}
-
 func TestNewUnpairedRecordErr(t *testing.T) {
 	record := []string{"invalid"}
 	timezone, _ := time.Time.Zone(time.Now())
@@ -231,6 +220,16 @@ func TestPairToRecordErrors(t *testing.T) {
 	part1.Method = "BYE"
 	errExpect = "MISSING_INVITE"
 	if _, err := pairToRecord(part1, part2); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestNewUnpairedRecordErrTimezone(t *testing.T) {
+	record := []string{"TEST1", "TEST2", "TEST3", "TEST4", "TEST5", "TEST6", "TEST7"}
+	timezone, _ := time.Now().UTC().Zone()
+	fileName := "testfile.csv"
+	errExpect := "Unsupported time format"
+	if _, err := NewUnpairedRecord(record, timezone, fileName); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
