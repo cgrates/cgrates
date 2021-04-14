@@ -840,3 +840,92 @@ func TestAsExtAccount(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expAcc), ToJSON(rcv))
 	}
 }
+
+func TestAsExtAccountCheckErrors(t *testing.T) {
+	acc := &Account{
+		Tenant:    "tcgrates.org",
+		ID:        "TestAsExtAccount",
+		FilterIDs: []string{"fltr1", "fltr2"},
+		ActivationInterval: &ActivationInterval{
+			ActivationTime: time.Date(2021, time.December, 12, 0, 0, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2021, time.May, 12, 10, 0, 0, 0, time.UTC),
+		},
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{},
+				Weight:    20.5,
+			},
+		},
+		Opts: map[string]interface{}{
+			Usage: time.Minute,
+		},
+		Balances: map[string]*Balance{
+			"BL1": {
+				ID:        "BL1",
+				FilterIDs: []string{"fltr3"},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{},
+						Weight:    1.5,
+					},
+				},
+				Type:  MetaAbstract,
+				Units: NewDecimal(int64(math.Inf(1))-1, 0),
+				UnitFactors: []*UnitFactor{
+					{
+						FilterIDs: []string{"uf_fltr1"},
+						Factor:    NewDecimal(13, 4),
+					},
+				},
+				Opts: map[string]interface{}{
+					RequestType: Prepaid,
+				},
+				CostIncrements: []*CostIncrement{
+					{
+						FilterIDs:    []string{},
+						FixedFee:     NewDecimal(int64(time.Minute), 0),
+						Increment:    NewDecimal(int64(time.Minute), 0),
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				AttributeIDs:   []string{},
+				RateProfileIDs: []string{"RT1"},
+			},
+		},
+		ThresholdIDs: []string{},
+	}
+
+	expected := "cannot convert decimal Units to float64 "
+	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+	acc.Balances["BL1"].Units = NewDecimal(0, 0)
+
+	acc.Balances["BL1"].CostIncrements[0].FixedFee = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal FixedFee to float64 "
+	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+	acc.Balances["BL1"].CostIncrements[0].FixedFee = NewDecimal(0, 0)
+
+	acc.Balances["BL1"].CostIncrements[0].Increment = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal Increment to float64 "
+	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+	acc.Balances["BL1"].CostIncrements[0].Increment = NewDecimal(0, 0)
+
+	acc.Balances["BL1"].CostIncrements[0].RecurrentFee = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal RecurrentFee to float64 "
+	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+	acc.Balances["BL1"].CostIncrements[0].RecurrentFee = NewDecimal(0, 0)
+
+	acc.Balances["BL1"].UnitFactors[0].Factor = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal Factor to float64 "
+	if _, err := acc.AsExtAccount(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+	acc.Balances["BL1"].UnitFactors[0].Factor = NewDecimal(0, 0)
+}

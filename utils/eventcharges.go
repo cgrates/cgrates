@@ -297,7 +297,7 @@ func (cIn *ChargingIncrement) AsExtChargingIncrements() (eCin *ExtChargingIncrem
 	}
 	if cIn.Units != nil {
 		if fltUnit, ok := cIn.Units.Big.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal ChargingIncrement ")
+			return nil, errors.New("Cannot convert decimal ChargingIncrement into float64 ")
 		} else {
 			eCin.Units = &fltUnit
 		}
