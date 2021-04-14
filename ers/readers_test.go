@@ -243,3 +243,54 @@ func TestNewJSONReader(t *testing.T) {
 		}
 	}
 }
+
+func TestNewAMQPReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaAMQPjsonMap
+	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
+	exp := &AMQPER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+	}
+	exp.dialURL = exp.Config().SourcePath
+	exp.Config().ProcessedPath = ""
+	exp.setOpts(map[string]interface{}{})
+	exp.createPoster()
+	var expected EventReader = exp
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v but received %v", expected, rcv)
+	}
+}
+
+func TestNewAMQPv1Reader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaAMQPV1jsonMap
+	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
+	exp := &AMQPv1ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+	}
+	exp.Config().ProcessedPath = ""
+	exp.Config().Opts = map[string]interface{}{}
+	exp.createPoster()
+	var expected EventReader = exp
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected \n%v but received \n%v", expected, rcv)
+	}
+}
