@@ -3876,3 +3876,104 @@ func TestECnewChargingIncrementNoUnitInfo(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expEC, ec)
 	}
 }
+
+func TestECAsRefundIncrementsNoCharges(t *testing.T) {
+	ec := &EventCost{
+		Charges:   []*ChargingInterval{},
+		CGRID:     "asdfgh",
+		RunID:     "runID",
+		StartTime: time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
+		Usage:     utils.DurationPointer(time.Hour),
+		Cost:      utils.Float64Pointer(10),
+	}
+
+	exp := &CallDescriptor{
+		CgrID:         "asdfgh",
+		RunID:         "runID",
+		ToR:           utils.MetaVoice,
+		TimeStart:     time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
+		TimeEnd:       time.Date(2021, 4, 13, 18, 0, 0, 0, time.Local),
+		DurationIndex: time.Hour,
+	}
+
+	rcv := ec.AsRefundIncrements(utils.MetaVoice)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+}
+
+func TestECAsRefundIncrements2(t *testing.T) {
+	ec := &EventCost{
+		Charges: []*ChargingInterval{
+			{
+				cost:           utils.Float64Pointer(10),
+				CompressFactor: 1,
+				Increments: []*ChargingIncrement{
+					{
+						Cost:           5,
+						Usage:          2 * time.Second,
+						AccountingID:   "accID",
+						CompressFactor: 1,
+					},
+				},
+			},
+		},
+		CGRID:     "asdfgh",
+		RunID:     "runID",
+		StartTime: time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
+		Usage:     utils.DurationPointer(time.Hour),
+		Cost:      utils.Float64Pointer(10),
+		Accounting: Accounting{
+			"accID": &BalanceCharge{
+				AccountID:     "bcAccID",
+				BalanceUUID:   "bcUUID",
+				ExtraChargeID: "extrachargeID",
+			},
+			"extrachargeID": &BalanceCharge{
+				AccountID:   "extraAccID",
+				BalanceUUID: "extraBcUUID",
+			},
+		},
+		AccountSummary: &AccountSummary{
+			BalanceSummaries: BalanceSummaries{
+				{
+					UUID: "bcUUID",
+					Type: utils.MetaSMS,
+				},
+				{
+					UUID: "extraBcUUID",
+					Type: utils.MetaSMS,
+				},
+			},
+		},
+	}
+
+	exp := &CallDescriptor{
+		CgrID:         "asdfgh",
+		RunID:         "runID",
+		ToR:           utils.MetaVoice,
+		TimeStart:     time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
+		TimeEnd:       time.Date(2021, 4, 13, 18, 0, 0, 0, time.Local),
+		DurationIndex: time.Hour,
+		Increments: Increments{
+			{
+				Duration: 2 * time.Second,
+				Cost:     5,
+				BalanceInfo: &DebitInfo{
+					Unit: &UnitInfo{
+						UUID: "extraBcUUID",
+					},
+					AccountID: "bcAccID",
+				},
+				CompressFactor: 1,
+			},
+		},
+	}
+	rcv := ec.AsRefundIncrements(utils.MetaVoice)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
