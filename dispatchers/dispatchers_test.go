@@ -122,3 +122,53 @@ func TestDispatcherDispatch(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+func TestDispatcherAuthorizeError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
+	cfg.RPCConns()["connID"] = &config.RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*config.RemoteHost{
+			{
+				ID:          "",
+				Address:     "error",
+				Transport:   "",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+	connMng := engine.NewConnManager(cfg, nil)
+	dsp := NewDispatcherService(nil, cfg, nil, connMng)
+	err := dsp.authorize("", "cgrates.org", utils.APIMethods, nil)
+	expected := "dial tcp: address error: missing port in address"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestDispatcherAuthorizeError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().AttributeSConns = []string{utils.APIMethods}
+	cfg.RPCConns()[utils.APIMethods] = &config.RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*config.RemoteHost{
+			{
+				ID:          "",
+				Address:     "error",
+				Transport:   "",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+	connMng := engine.NewConnManager(cfg, nil)
+	dsp := NewDispatcherService(nil, cfg, nil, connMng)
+	err := dsp.authorize("", "cgrates.org", utils.APIMethods, nil)
+	expected := "dial tcp: address error: missing port in address"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
