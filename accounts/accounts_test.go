@@ -1338,6 +1338,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				},
 				Units: utils.NewDecimal(int64(60*time.Second), 0), // 1 Minute
 			},
+			//3m20s ABSTR 2.8 CONCR
 			cb2ID: &utils.Balance{ //125s with rating from RateS
 				ID:    cb2ID,
 				Type:  utils.MetaConcrete,
@@ -1397,7 +1398,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 
 	eEvChgs := utils.ExtEventCharges{
 		Abstracts:   utils.Float64Pointer(325000000000),
-		Concretes:   utils.Float64Pointer(4.05),
+		Concretes:   utils.Float64Pointer(3.4), //4.05
 		Accounting:  map[string]*utils.ExtAccountCharge{},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
 		Rating:      map[string]*utils.ExtRateSInterval{},
@@ -1409,5 +1410,4 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	} else if !reflect.DeepEqual(eEvChgs, rply) {
 		t.Errorf("expecting: %s\n, received: %s", utils.ToIJSON(eEvChgs), utils.ToIJSON(rply))
 	}
-
 }
