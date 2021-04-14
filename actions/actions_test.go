@@ -466,13 +466,6 @@ func TestV1ExecuteActions(t *testing.T) {
 	}
 }
 
-func TestActionSCall(t *testing.T) {
-	acts := new(ActionS)
-	if err := acts.Call(context.Background(), "UnsupportedServiceMethod", "args", "rply"); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
-		t.Errorf("Expected %+q, received %+q", rpcclient.ErrUnsupporteServiceMethod, err)
-	}
-}
-
 func TestActionShutDown(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)

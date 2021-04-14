@@ -75,7 +75,7 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if gCfg, err := dfCgrJSONCfg.CoreSCfgJson(); err != nil {
+	if gCfg, err := dfCgrJSONCfg.CoreSJSON(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
@@ -325,6 +325,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_filtered: utils.BoolPointer(false),
 		Remote_conn_id:       utils.StringPointer(""),
 		Replication_cache:    utils.StringPointer(""),
+		Update_config:        utils.BoolPointer(false),
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
 			utils.QueryTimeoutCfg:            "10s",
@@ -427,7 +428,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	if cfg, err := dfCgrJSONCfg.DbJsonCfg(DataDBJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -527,7 +528,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	if cfg, err := dfCgrJSONCfg.DbJsonCfg(StorDBJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected : %+v,\n Received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1862,7 +1863,7 @@ func TestDfApierCfg(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if cfg, err := dfCgrJSONCfg.ApierCfgJson(); err != nil {
+	if cfg, err := dfCgrJSONCfg.AdminSCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -1998,7 +1999,7 @@ func TestDfRateSJsonCfg(t *testing.T) {
 }
 
 func TestDfTemplateSJsonCfg(t *testing.T) {
-	eCfg := map[string][]*FcTemplateJsonCfg{
+	eCfg := FcTemplatesJsonCfg{
 		"*errSip": {
 			{
 				Tag:       utils.StringPointer("Request"),

@@ -76,11 +76,6 @@ func (aS *ActionS) Shutdown() {
 	aS.crnLk.RUnlock()
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (aS *ActionS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	return utils.RPCCall(aS, serviceMethod, args, reply)
-}
-
 // schedInit is called at service start
 func (aS *ActionS) schedInit() {
 	utils.Logger.Info(fmt.Sprintf("<%s> initializing scheduler.", utils.ActionS))

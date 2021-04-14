@@ -253,7 +253,7 @@ func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ConfigPath = path
 
-	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, false); err != nil {
+	if err = cfg.loadConfigFromPath(path, []func(ConfigDB) error{cfg.loadFromJSONCfg}, false); err != nil {
 		return
 	}
 	err = cfg.checkConfigSanity()
@@ -266,7 +266,7 @@ func newCGRConfigFromPathWithoutEnv(path string) (cfg *CGRConfig, err error) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ConfigPath = path
 
-	err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJSONCfg}, true)
+	err = cfg.loadConfigFromPath(path, []func(ConfigDB) error{cfg.loadFromJSONCfg}, true)
 	return
 }
 
@@ -338,6 +338,8 @@ type CGRConfig struct {
 
 	cacheDP    map[string]utils.MapStorage
 	cacheDPMux sync.RWMutex
+
+	db ConfigDB // to store the last dbConn that executed an config update
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -387,10 +389,10 @@ func (cfg *CGRConfig) LazySanityCheck() {
 	}
 }
 
-// Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
-func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
+// loadFromJSONCfg Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
+func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg ConfigDB) (err error) {
 	// Load sections out of JSON config, stop on error
-	for _, loadFunc := range []func(*CgrJsonCfg) error{
+	for _, loadFunc := range []func(ConfigDB) error{
 		cfg.loadRPCConns,
 		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
@@ -415,8 +417,8 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadRPCConns loads the RPCConns section of the configuration
-func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnRPCConns map[string]*RPCConnsJson
+func (cfg *CGRConfig) loadRPCConns(jsnCfg ConfigDB) (err error) {
+	var jsnRPCConns RPCConnsJson
 	if jsnRPCConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
 		return
 	}
@@ -459,7 +461,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadGeneralCfg loads the General section of the configuration
-func (cfg *CGRConfig) loadGeneralCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadGeneralCfg(jsnCfg ConfigDB) (err error) {
 	var jsnGeneralCfg *GeneralJsonCfg
 	if jsnGeneralCfg, err = jsnCfg.GeneralJsonCfg(); err != nil {
 		return
@@ -468,7 +470,7 @@ func (cfg *CGRConfig) loadGeneralCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadCacheCfg loads the Cache section of the configuration
-func (cfg *CGRConfig) loadCacheCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadCacheCfg(jsnCfg ConfigDB) (err error) {
 	var jsnCacheCfg *CacheJsonCfg
 	if jsnCacheCfg, err = jsnCfg.CacheJsonCfg(); err != nil {
 		return
@@ -477,7 +479,7 @@ func (cfg *CGRConfig) loadCacheCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadListenCfg loads the Listen section of the configuration
-func (cfg *CGRConfig) loadListenCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadListenCfg(jsnCfg ConfigDB) (err error) {
 	var jsnListenCfg *ListenJsonCfg
 	if jsnListenCfg, err = jsnCfg.ListenJsonCfg(); err != nil {
 		return
@@ -486,7 +488,7 @@ func (cfg *CGRConfig) loadListenCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadHTTPCfg loads the Http section of the configuration
-func (cfg *CGRConfig) loadHTTPCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadHTTPCfg(jsnCfg ConfigDB) (err error) {
 	var jsnHTTPCfg *HTTPJsonCfg
 	if jsnHTTPCfg, err = jsnCfg.HttpJsonCfg(); err != nil {
 		return
@@ -495,9 +497,9 @@ func (cfg *CGRConfig) loadHTTPCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
-func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadDataDBCfg(jsnCfg ConfigDB) (err error) {
 	var jsnDataDbCfg *DbJsonCfg
-	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(DataDBJSON); err != nil {
 		return
 	}
 	if err = cfg.dataDbCfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
@@ -508,16 +510,16 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadStorDBCfg loads the StorDB section of the configuration
-func (cfg *CGRConfig) loadStorDBCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadStorDBCfg(jsnCfg ConfigDB) (err error) {
 	var jsnDataDbCfg *DbJsonCfg
-	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
 		return
 	}
 	return cfg.storDbCfg.loadFromJSONCfg(jsnDataDbCfg)
 }
 
 // loadFilterSCfg loads the FilterS section of the configuration
-func (cfg *CGRConfig) loadFilterSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadFilterSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnFilterSCfg *FilterSJsonCfg
 	if jsnFilterSCfg, err = jsnCfg.FilterSJsonCfg(); err != nil {
 		return
@@ -526,7 +528,7 @@ func (cfg *CGRConfig) loadFilterSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadCdrsCfg loads the Cdrs section of the configuration
-func (cfg *CGRConfig) loadCdrsCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadCdrsCfg(jsnCfg ConfigDB) (err error) {
 	var jsnCdrsCfg *CdrsJsonCfg
 	if jsnCdrsCfg, err = jsnCfg.CdrsJsonCfg(); err != nil {
 		return
@@ -535,7 +537,7 @@ func (cfg *CGRConfig) loadCdrsCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadSessionSCfg loads the SessionS section of the configuration
-func (cfg *CGRConfig) loadSessionSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadSessionSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnSessionSCfg *SessionSJsonCfg
 	if jsnSessionSCfg, err = jsnCfg.SessionSJsonCfg(); err != nil {
 		return
@@ -544,7 +546,7 @@ func (cfg *CGRConfig) loadSessionSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadFreeswitchAgentCfg loads the FreeswitchAgent section of the configuration
-func (cfg *CGRConfig) loadFreeswitchAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadFreeswitchAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnSmFsCfg *FreeswitchAgentJsonCfg
 	if jsnSmFsCfg, err = jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
 		return
@@ -553,7 +555,7 @@ func (cfg *CGRConfig) loadFreeswitchAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadKamAgentCfg loads the KamAgent section of the configuration
-func (cfg *CGRConfig) loadKamAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadKamAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnKamAgentCfg *KamAgentJsonCfg
 	if jsnKamAgentCfg, err = jsnCfg.KamAgentJsonCfg(); err != nil {
 		return
@@ -562,7 +564,7 @@ func (cfg *CGRConfig) loadKamAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadAsteriskAgentCfg loads the AsteriskAgent section of the configuration
-func (cfg *CGRConfig) loadAsteriskAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadAsteriskAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnSMAstCfg *AsteriskAgentJsonCfg
 	if jsnSMAstCfg, err = jsnCfg.AsteriskAgentJsonCfg(); err != nil {
 		return
@@ -571,7 +573,7 @@ func (cfg *CGRConfig) loadAsteriskAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadDiameterAgentCfg loads the DiameterAgent section of the configuration
-func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnDACfg *DiameterAgentJsonCfg
 	if jsnDACfg, err = jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		return
@@ -580,7 +582,7 @@ func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
-func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnRACfg *RadiusAgentJsonCfg
 	if jsnRACfg, err = jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		return
@@ -589,7 +591,7 @@ func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadDNSAgentCfg loads the DNSAgent section of the configuration
-func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnDNSCfg *DNSAgentJsonCfg
 	if jsnDNSCfg, err = jsnCfg.DNSAgentJsonCfg(); err != nil {
 		return
@@ -598,7 +600,7 @@ func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadHTTPAgentCfg loads the HttpAgent section of the configuration
-func (cfg *CGRConfig) loadHTTPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadHTTPAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnHTTPAgntCfg *[]*HttpAgentJsonCfg
 	if jsnHTTPAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
 		return
@@ -607,7 +609,7 @@ func (cfg *CGRConfig) loadHTTPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
-func (cfg *CGRConfig) loadAttributeSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadAttributeSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnAttributeSCfg *AttributeSJsonCfg
 	if jsnAttributeSCfg, err = jsnCfg.AttributeServJsonCfg(); err != nil {
 		return
@@ -616,7 +618,7 @@ func (cfg *CGRConfig) loadAttributeSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadChargerSCfg loads the ChargerS section of the configuration
-func (cfg *CGRConfig) loadChargerSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadChargerSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnChargerSCfg *ChargerSJsonCfg
 	if jsnChargerSCfg, err = jsnCfg.ChargerServJsonCfg(); err != nil {
 		return
@@ -625,7 +627,7 @@ func (cfg *CGRConfig) loadChargerSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadResourceSCfg loads the ResourceS section of the configuration
-func (cfg *CGRConfig) loadResourceSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadResourceSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnRLSCfg *ResourceSJsonCfg
 	if jsnRLSCfg, err = jsnCfg.ResourceSJsonCfg(); err != nil {
 		return
@@ -634,7 +636,7 @@ func (cfg *CGRConfig) loadResourceSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadStatSCfg loads the StatS section of the configuration
-func (cfg *CGRConfig) loadStatSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadStatSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnStatSCfg *StatServJsonCfg
 	if jsnStatSCfg, err = jsnCfg.StatSJsonCfg(); err != nil {
 		return
@@ -643,7 +645,7 @@ func (cfg *CGRConfig) loadStatSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadThresholdSCfg loads the ThresholdS section of the configuration
-func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnThresholdSCfg *ThresholdSJsonCfg
 	if jsnThresholdSCfg, err = jsnCfg.ThresholdSJsonCfg(); err != nil {
 		return
@@ -652,7 +654,7 @@ func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadRouteSCfg loads the RouteS section of the configuration
-func (cfg *CGRConfig) loadRouteSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadRouteSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnRouteSCfg *RouteSJsonCfg
 	if jsnRouteSCfg, err = jsnCfg.RouteSJsonCfg(); err != nil {
 		return
@@ -661,7 +663,7 @@ func (cfg *CGRConfig) loadRouteSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadLoaderSCfg loads the LoaderS section of the configuration
-func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnLoaderCfg []*LoaderJsonCfg
 	if jsnLoaderCfg, err = jsnCfg.LoaderJsonCfg(); err != nil {
 		return
@@ -678,7 +680,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadMailerCfg loads the Mailer section of the configuration
-func (cfg *CGRConfig) loadMailerCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadMailerCfg(jsnCfg ConfigDB) (err error) {
 	var jsnMailerCfg *MailerJsonCfg
 	if jsnMailerCfg, err = jsnCfg.MailerJsonCfg(); err != nil {
 		return
@@ -687,7 +689,7 @@ func (cfg *CGRConfig) loadMailerCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadSureTaxCfg loads the SureTax section of the configuration
-func (cfg *CGRConfig) loadSureTaxCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadSureTaxCfg(jsnCfg ConfigDB) (err error) {
 	var jsnSureTaxCfg *SureTaxJsonCfg
 	if jsnSureTaxCfg, err = jsnCfg.SureTaxJsonCfg(); err != nil {
 		return
@@ -696,7 +698,7 @@ func (cfg *CGRConfig) loadSureTaxCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadDispatcherSCfg loads the DispatcherS section of the configuration
-func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnDispatcherSCfg *DispatcherSJsonCfg
 	if jsnDispatcherSCfg, err = jsnCfg.DispatcherSJsonCfg(); err != nil {
 		return
@@ -705,7 +707,7 @@ func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadRegistrarCCfg loads the RegistrarC section of the configuration
-func (cfg *CGRConfig) loadRegistrarCCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadRegistrarCCfg(jsnCfg ConfigDB) (err error) {
 	var jsnRegistrarCCfg *RegistrarCJsonCfgs
 	if jsnRegistrarCCfg, err = jsnCfg.RegistrarCJsonCfgs(); err != nil {
 		return
@@ -714,7 +716,7 @@ func (cfg *CGRConfig) loadRegistrarCCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadLoaderCgrCfg loads the Loader section of the configuration
-func (cfg *CGRConfig) loadLoaderCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadLoaderCgrCfg(jsnCfg ConfigDB) (err error) {
 	var jsnLoaderCgrCfg *LoaderCfgJson
 	if jsnLoaderCgrCfg, err = jsnCfg.LoaderCfgJson(); err != nil {
 		return
@@ -723,7 +725,7 @@ func (cfg *CGRConfig) loadLoaderCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadMigratorCgrCfg loads the Migrator section of the configuration
-func (cfg *CGRConfig) loadMigratorCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadMigratorCgrCfg(jsnCfg ConfigDB) (err error) {
 	var jsnMigratorCgrCfg *MigratorCfgJson
 	if jsnMigratorCgrCfg, err = jsnCfg.MigratorCfgJson(); err != nil {
 		return
@@ -732,7 +734,7 @@ func (cfg *CGRConfig) loadMigratorCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadTLSCgrCfg loads the Tls section of the configuration
-func (cfg *CGRConfig) loadTLSCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadTLSCgrCfg(jsnCfg ConfigDB) (err error) {
 	var jsnTLSCgrCfg *TlsJsonCfg
 	if jsnTLSCgrCfg, err = jsnCfg.TlsCfgJson(); err != nil {
 		return
@@ -741,7 +743,7 @@ func (cfg *CGRConfig) loadTLSCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadAnalyzerCgrCfg loads the Analyzer section of the configuration
-func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg ConfigDB) (err error) {
 	var jsnAnalyzerCgrCfg *AnalyzerSJsonCfg
 	if jsnAnalyzerCgrCfg, err = jsnCfg.AnalyzerCfgJson(); err != nil {
 		return
@@ -750,7 +752,7 @@ func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadAPIBanCgrCfg loads the Analyzer section of the configuration
-func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg ConfigDB) (err error) {
 	var jsnAPIBanCfg *APIBanJsonCfg
 	if jsnAPIBanCfg, err = jsnCfg.ApiBanCfgJson(); err != nil {
 		return
@@ -759,25 +761,25 @@ func (cfg *CGRConfig) loadAPIBanCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadApierCfg loads the Apier section of the configuration
-func (cfg *CGRConfig) loadApierCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadApierCfg(jsnCfg ConfigDB) (err error) {
 	var jsnApierCfg *AdminSJsonCfg
-	if jsnApierCfg, err = jsnCfg.ApierCfgJson(); err != nil {
+	if jsnApierCfg, err = jsnCfg.AdminSCfgJson(); err != nil {
 		return
 	}
 	return cfg.admS.loadFromJSONCfg(jsnApierCfg)
 }
 
 // loadCoreSCfg loads the CoreS section of the configuration
-func (cfg *CGRConfig) loadCoreSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadCoreSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnCoreCfg *CoreSJsonCfg
-	if jsnCoreCfg, err = jsnCfg.CoreSCfgJson(); err != nil {
+	if jsnCoreCfg, err = jsnCfg.CoreSJSON(); err != nil {
 		return
 	}
 	return cfg.coreSCfg.loadFromJSONCfg(jsnCoreCfg)
 }
 
 // loadErsCfg loads the Ers section of the configuration
-func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadErsCfg(jsnCfg ConfigDB) (err error) {
 	var jsnERsCfg *ERsJsonCfg
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
@@ -786,7 +788,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadEesCfg loads the Ees section of the configuration
-func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadEesCfg(jsnCfg ConfigDB) (err error) {
 	var jsnEEsCfg *EEsJsonCfg
 	if jsnEEsCfg, err = jsnCfg.EEsJsonCfg(); err != nil {
 		return
@@ -795,7 +797,7 @@ func (cfg *CGRConfig) loadEesCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadRateSCfg loads the rates section of the configuration
-func (cfg *CGRConfig) loadRateSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadRateSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnRateCfg *RateSJsonCfg
 	if jsnRateCfg, err = jsnCfg.RateCfgJson(); err != nil {
 		return
@@ -804,7 +806,7 @@ func (cfg *CGRConfig) loadRateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadSIPAgentCfg loads the sip_agent section of the configuration
-func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg ConfigDB) (err error) {
 	var jsnSIPAgentCfg *SIPAgentJsonCfg
 	if jsnSIPAgentCfg, err = jsnCfg.SIPAgentJsonCfg(); err != nil {
 		return
@@ -813,7 +815,7 @@ func (cfg *CGRConfig) loadSIPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadTemplateSCfg loads the Template section of the configuration
-func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnTemplateCfg map[string][]*FcTemplateJsonCfg
 	if jsnTemplateCfg, err = jsnCfg.TemplateSJsonCfg(); err != nil {
 		return
@@ -826,7 +828,7 @@ func (cfg *CGRConfig) loadTemplateSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return
 }
 
-func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadConfigSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnConfigSCfg *ConfigSCfgJson
 	if jsnConfigSCfg, err = jsnCfg.ConfigSJsonCfg(); err != nil {
 		return
@@ -835,7 +837,7 @@ func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadActionSCfg loads the ActionS section of the configuration
-func (cfg *CGRConfig) loadActionSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadActionSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnActionCfg *ActionSJsonCfg
 	if jsnActionCfg, err = jsnCfg.ActionSCfgJson(); err != nil {
 		return
@@ -844,7 +846,7 @@ func (cfg *CGRConfig) loadActionSCfg(jsnCfg *CgrJsonCfg) (err error) {
 }
 
 // loadAccountSCfg loads the AccountS section of the configuration
-func (cfg *CGRConfig) loadAccountSCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadAccountSCfg(jsnCfg ConfigDB) (err error) {
 	var jsnActionCfg *AccountSJsonCfg
 	if jsnActionCfg, err = jsnCfg.AccountSCfgJson(); err != nil {
 		return
@@ -854,239 +856,239 @@ func (cfg *CGRConfig) loadAccountSCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
 func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
-	cfg.lks[SURETAX_JSON].Lock()
-	defer cfg.lks[SURETAX_JSON].Unlock()
+	cfg.lks[SureTaxJSON].Lock()
+	defer cfg.lks[SureTaxJSON].Unlock()
 	return cfg.sureTaxCfg
 }
 
 // DiameterAgentCfg returns the config for Diameter Agent
 func (cfg *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
-	cfg.lks[DA_JSN].Lock()
-	defer cfg.lks[DA_JSN].Unlock()
+	cfg.lks[DiameterAgentJSON].Lock()
+	defer cfg.lks[DiameterAgentJSON].Unlock()
 	return cfg.diameterAgentCfg
 }
 
 // RadiusAgentCfg returns the config for Radius Agent
 func (cfg *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
-	cfg.lks[RA_JSN].Lock()
-	defer cfg.lks[RA_JSN].Unlock()
+	cfg.lks[RadiusAgentJSON].Lock()
+	defer cfg.lks[RadiusAgentJSON].Unlock()
 	return cfg.radiusAgentCfg
 }
 
 // DNSAgentCfg returns the config for DNS Agent
 func (cfg *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
-	cfg.lks[DNSAgentJson].Lock()
-	defer cfg.lks[DNSAgentJson].Unlock()
+	cfg.lks[DNSAgentJSON].Lock()
+	defer cfg.lks[DNSAgentJSON].Unlock()
 	return cfg.dnsAgentCfg
 }
 
 // AttributeSCfg returns the config for AttributeS
 func (cfg *CGRConfig) AttributeSCfg() *AttributeSCfg {
-	cfg.lks[ATTRIBUTE_JSN].Lock()
-	defer cfg.lks[ATTRIBUTE_JSN].Unlock()
+	cfg.lks[AttributeSJSON].Lock()
+	defer cfg.lks[AttributeSJSON].Unlock()
 	return cfg.attributeSCfg
 }
 
 // ChargerSCfg returns the config for ChargerS
 func (cfg *CGRConfig) ChargerSCfg() *ChargerSCfg {
-	cfg.lks[ChargerSCfgJson].Lock()
-	defer cfg.lks[ChargerSCfgJson].Unlock()
+	cfg.lks[ChargerSJSON].Lock()
+	defer cfg.lks[ChargerSJSON].Unlock()
 	return cfg.chargerSCfg
 }
 
 // ResourceSCfg returns the config for ResourceS
 func (cfg *CGRConfig) ResourceSCfg() *ResourceSConfig { // not done
-	cfg.lks[RESOURCES_JSON].Lock()
-	defer cfg.lks[RESOURCES_JSON].Unlock()
+	cfg.lks[ResourceSJSON].Lock()
+	defer cfg.lks[ResourceSJSON].Unlock()
 	return cfg.resourceSCfg
 }
 
 // StatSCfg returns the config for StatS
 func (cfg *CGRConfig) StatSCfg() *StatSCfg { // not done
-	cfg.lks[STATS_JSON].Lock()
-	defer cfg.lks[STATS_JSON].Unlock()
+	cfg.lks[StatSJSON].Lock()
+	defer cfg.lks[StatSJSON].Unlock()
 	return cfg.statsCfg
 }
 
 // ThresholdSCfg returns the config for ThresholdS
 func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
-	cfg.lks[THRESHOLDS_JSON].Lock()
-	defer cfg.lks[THRESHOLDS_JSON].Unlock()
+	cfg.lks[ThresholdSJSON].Lock()
+	defer cfg.lks[ThresholdSJSON].Unlock()
 	return cfg.thresholdSCfg
 }
 
 // RouteSCfg returns the config for RouteS
 func (cfg *CGRConfig) RouteSCfg() *RouteSCfg {
-	cfg.lks[RouteSJson].Lock()
-	defer cfg.lks[RouteSJson].Unlock()
+	cfg.lks[RouteSJSON].Lock()
+	defer cfg.lks[RouteSJSON].Unlock()
 	return cfg.routeSCfg
 }
 
 // SessionSCfg returns the config for SessionS
 func (cfg *CGRConfig) SessionSCfg() *SessionSCfg {
-	cfg.lks[SessionSJson].Lock()
-	defer cfg.lks[SessionSJson].Unlock()
+	cfg.lks[SessionSJSON].Lock()
+	defer cfg.lks[SessionSJSON].Unlock()
 	return cfg.sessionSCfg
 }
 
 // FsAgentCfg returns the config for FsAgent
 func (cfg *CGRConfig) FsAgentCfg() *FsAgentCfg {
-	cfg.lks[FreeSWITCHAgentJSN].Lock()
-	defer cfg.lks[FreeSWITCHAgentJSN].Unlock()
+	cfg.lks[FreeSWITCHAgentJSON].Lock()
+	defer cfg.lks[FreeSWITCHAgentJSON].Unlock()
 	return cfg.fsAgentCfg
 }
 
 // KamAgentCfg returns the config for KamAgent
 func (cfg *CGRConfig) KamAgentCfg() *KamAgentCfg {
-	cfg.lks[KamailioAgentJSN].Lock()
-	defer cfg.lks[KamailioAgentJSN].Unlock()
+	cfg.lks[KamailioAgentJSON].Lock()
+	defer cfg.lks[KamailioAgentJSON].Unlock()
 	return cfg.kamAgentCfg
 }
 
 // AsteriskAgentCfg returns the config for AsteriskAgent
 func (cfg *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
-	cfg.lks[AsteriskAgentJSN].Lock()
-	defer cfg.lks[AsteriskAgentJSN].Unlock()
+	cfg.lks[AsteriskAgentJSON].Lock()
+	defer cfg.lks[AsteriskAgentJSON].Unlock()
 	return cfg.asteriskAgentCfg
 }
 
 // HTTPAgentCfg returns the config for HttpAgent
 func (cfg *CGRConfig) HTTPAgentCfg() HTTPAgentCfgs {
-	cfg.lks[HttpAgentJson].Lock()
-	defer cfg.lks[HttpAgentJson].Unlock()
+	cfg.lks[HTTPAgentJSON].Lock()
+	defer cfg.lks[HTTPAgentJSON].Unlock()
 	return cfg.httpAgentCfg
 }
 
 // FilterSCfg returns the config for FilterS
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
-	cfg.lks[FilterSjsn].Lock()
-	defer cfg.lks[FilterSjsn].Unlock()
+	cfg.lks[FilterSJSON].Lock()
+	defer cfg.lks[FilterSJSON].Unlock()
 	return cfg.filterSCfg
 }
 
 // CacheCfg returns the config for Cache
 func (cfg *CGRConfig) CacheCfg() *CacheCfg {
-	cfg.lks[CACHE_JSN].Lock()
-	defer cfg.lks[CACHE_JSN].Unlock()
+	cfg.lks[CacheJSON].Lock()
+	defer cfg.lks[CacheJSON].Unlock()
 	return cfg.cacheCfg
 }
 
 // LoaderCfg returns the Loader Service
 func (cfg *CGRConfig) LoaderCfg() LoaderSCfgs {
-	cfg.lks[LoaderJson].Lock()
-	defer cfg.lks[LoaderJson].Unlock()
+	cfg.lks[LoaderSJSON].Lock()
+	defer cfg.lks[LoaderSJSON].Unlock()
 	return cfg.loaderCfg
 }
 
 // LoaderCgrCfg returns the config for cgr-loader
 func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
-	cfg.lks[CgrLoaderCfgJson].Lock()
-	defer cfg.lks[CgrLoaderCfgJson].Unlock()
+	cfg.lks[LoaderJSON].Lock()
+	defer cfg.lks[LoaderJSON].Unlock()
 	return cfg.loaderCgrCfg
 }
 
 // DispatcherSCfg returns the config for DispatcherS
 func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
-	cfg.lks[DispatcherSJson].Lock()
-	defer cfg.lks[DispatcherSJson].Unlock()
+	cfg.lks[DispatcherSJSON].Lock()
+	defer cfg.lks[DispatcherSJSON].Unlock()
 	return cfg.dispatcherSCfg
 }
 
 // RegistrarCCfg returns the config for RegistrarC
 func (cfg *CGRConfig) RegistrarCCfg() *RegistrarCCfgs {
-	cfg.lks[DispatcherSJson].Lock()
-	defer cfg.lks[DispatcherSJson].Unlock()
+	cfg.lks[DispatcherSJSON].Lock()
+	defer cfg.lks[DispatcherSJSON].Unlock()
 	return cfg.registrarCCfg
 }
 
 // MigratorCgrCfg returns the config for Migrator
 func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
-	cfg.lks[CgrMigratorCfgJson].Lock()
-	defer cfg.lks[CgrMigratorCfgJson].Unlock()
+	cfg.lks[MigratorJSON].Lock()
+	defer cfg.lks[MigratorJSON].Unlock()
 	return cfg.migratorCgrCfg
 }
 
 // DataDbCfg returns the config for DataDb
 func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
-	cfg.lks[DATADB_JSN].Lock()
-	defer cfg.lks[DATADB_JSN].Unlock()
+	cfg.lks[DataDBJSON].Lock()
+	defer cfg.lks[DataDBJSON].Unlock()
 	return cfg.dataDbCfg
 }
 
 // StorDbCfg returns the config for StorDb
 func (cfg *CGRConfig) StorDbCfg() *StorDbCfg {
-	cfg.lks[STORDB_JSN].Lock()
-	defer cfg.lks[STORDB_JSN].Unlock()
+	cfg.lks[StorDBJSON].Lock()
+	defer cfg.lks[StorDBJSON].Unlock()
 	return cfg.storDbCfg
 }
 
 // GeneralCfg returns the General config section
 func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
-	cfg.lks[GENERAL_JSN].Lock()
-	defer cfg.lks[GENERAL_JSN].Unlock()
+	cfg.lks[GeneralJSON].Lock()
+	defer cfg.lks[GeneralJSON].Unlock()
 	return cfg.generalCfg
 }
 
 // TLSCfg returns the config for Tls
 func (cfg *CGRConfig) TLSCfg() *TLSCfg {
-	cfg.lks[TlsCfgJson].Lock()
-	defer cfg.lks[TlsCfgJson].Unlock()
+	cfg.lks[TlsJSON].Lock()
+	defer cfg.lks[TlsJSON].Unlock()
 	return cfg.tlsCfg
 }
 
 // ListenCfg returns the server Listen config
 func (cfg *CGRConfig) ListenCfg() *ListenCfg {
-	cfg.lks[LISTEN_JSN].Lock()
-	defer cfg.lks[LISTEN_JSN].Unlock()
+	cfg.lks[ListenJSON].Lock()
+	defer cfg.lks[ListenJSON].Unlock()
 	return cfg.listenCfg
 }
 
 // HTTPCfg returns the config for HTTP
 func (cfg *CGRConfig) HTTPCfg() *HTTPCfg {
-	cfg.lks[HTTP_JSN].Lock()
-	defer cfg.lks[HTTP_JSN].Unlock()
+	cfg.lks[HTTPJSON].Lock()
+	defer cfg.lks[HTTPJSON].Unlock()
 	return cfg.httpCfg
 }
 
 // CdrsCfg returns the config for CDR Server
 func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
-	cfg.lks[CDRS_JSN].Lock()
-	defer cfg.lks[CDRS_JSN].Unlock()
+	cfg.lks[CDRsJSON].Lock()
+	defer cfg.lks[CDRsJSON].Unlock()
 	return cfg.cdrsCfg
 }
 
 // MailerCfg returns the config for Mailer
 func (cfg *CGRConfig) MailerCfg() *MailerCfg {
-	cfg.lks[MAILER_JSN].Lock()
-	defer cfg.lks[MAILER_JSN].Unlock()
+	cfg.lks[MailerJSON].Lock()
+	defer cfg.lks[MailerJSON].Unlock()
 	return cfg.mailerCfg
 }
 
 // AnalyzerSCfg returns the config for AnalyzerS
 func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
-	cfg.lks[AnalyzerCfgJson].Lock()
-	defer cfg.lks[AnalyzerCfgJson].Unlock()
+	cfg.lks[AnalyzerSJSON].Lock()
+	defer cfg.lks[AnalyzerSJSON].Unlock()
 	return cfg.analyzerSCfg
 }
 
 // AdminSCfg reads the Apier configuration
 func (cfg *CGRConfig) AdminSCfg() *AdminSCfg {
-	cfg.lks[AdminS].Lock()
-	defer cfg.lks[AdminS].Unlock()
+	cfg.lks[AdminSJSON].Lock()
+	defer cfg.lks[AdminSJSON].Unlock()
 	return cfg.admS
 }
 
 // ERsCfg reads the EventReader configuration
 func (cfg *CGRConfig) ERsCfg() *ERsCfg {
-	cfg.lks[ERsJson].RLock()
-	defer cfg.lks[ERsJson].RUnlock()
+	cfg.lks[ERsJSON].RLock()
+	defer cfg.lks[ERsJSON].RUnlock()
 	return cfg.ersCfg
 }
 
 // EEsCfg reads the EventExporter configuration
 func (cfg *CGRConfig) EEsCfg() *EEsCfg {
-	cfg.lks[EEsJson].RLock()
-	defer cfg.lks[EEsJson].RUnlock()
+	cfg.lks[EEsJSON].RLock()
+	defer cfg.lks[EEsJSON].RUnlock()
 	return cfg.eesCfg
 }
 
@@ -1097,76 +1099,70 @@ func (cfg *CGRConfig) EEsNoLksCfg() *EEsCfg {
 
 // RateSCfg reads the RateS configuration
 func (cfg *CGRConfig) RateSCfg() *RateSCfg {
-	cfg.lks[RateSJson].RLock()
-	defer cfg.lks[RateSJson].RUnlock()
+	cfg.lks[RateSJSON].RLock()
+	defer cfg.lks[RateSJSON].RUnlock()
 	return cfg.rateSCfg
 }
 
 // ActionSCfg reads the ActionS configuration
 func (cfg *CGRConfig) ActionSCfg() *ActionSCfg {
-	cfg.lks[ActionSJson].RLock()
-	defer cfg.lks[ActionSJson].RUnlock()
+	cfg.lks[ActionSJSON].RLock()
+	defer cfg.lks[ActionSJSON].RUnlock()
 	return cfg.actionSCfg
 }
 
 // AccountSCfg reads the AccountS configuration
 func (cfg *CGRConfig) AccountSCfg() *AccountSCfg {
-	cfg.lks[AccountSCfgJson].RLock()
-	defer cfg.lks[AccountSCfgJson].RUnlock()
+	cfg.lks[AccountSJSON].RLock()
+	defer cfg.lks[AccountSJSON].RUnlock()
 	return cfg.accountSCfg
 }
 
 // SIPAgentCfg reads the Apier configuration
 func (cfg *CGRConfig) SIPAgentCfg() *SIPAgentCfg {
-	cfg.lks[SIPAgentJson].Lock()
-	defer cfg.lks[SIPAgentJson].Unlock()
+	cfg.lks[SIPAgentJSON].Lock()
+	defer cfg.lks[SIPAgentJSON].Unlock()
 	return cfg.sipAgentCfg
 }
 
 // RPCConns reads the RPCConns configuration
 func (cfg *CGRConfig) RPCConns() RPCConns {
-	cfg.lks[RPCConnsJsonName].RLock()
-	defer cfg.lks[RPCConnsJsonName].RUnlock()
+	cfg.lks[RPCConnsJSON].RLock()
+	defer cfg.lks[RPCConnsJSON].RUnlock()
 	return cfg.rpcConns
 }
 
 // TemplatesCfg returns the config for templates
 func (cfg *CGRConfig) TemplatesCfg() FcTemplates {
-	cfg.lks[TemplatesJson].Lock()
-	defer cfg.lks[TemplatesJson].Unlock()
+	cfg.lks[TemplatesJSON].Lock()
+	defer cfg.lks[TemplatesJSON].Unlock()
 	return cfg.templates
 }
 
 // ConfigSCfg returns the configs configuration
 func (cfg *CGRConfig) ConfigSCfg() *ConfigSCfg {
-	cfg.lks[ConfigSJson].RLock()
-	defer cfg.lks[ConfigSJson].RUnlock()
+	cfg.lks[ConfigSJSON].RLock()
+	defer cfg.lks[ConfigSJSON].RUnlock()
 	return cfg.configSCfg
 }
 
 // APIBanCfg reads the ApiBan configuration
 func (cfg *CGRConfig) APIBanCfg() *APIBanCfg {
-	cfg.lks[APIBanCfgJson].Lock()
-	defer cfg.lks[APIBanCfgJson].Unlock()
+	cfg.lks[APIBanJSON].Lock()
+	defer cfg.lks[APIBanJSON].Unlock()
 	return cfg.apiBanCfg
 }
 
 // CoreSCfg reads the CoreS configuration
 func (cfg *CGRConfig) CoreSCfg() *CoreSCfg {
-	cfg.lks[CoreSCfgJson].Lock()
-	defer cfg.lks[CoreSCfgJson].Unlock()
+	cfg.lks[CoreSJSON].Lock()
+	defer cfg.lks[CoreSJSON].Unlock()
 	return cfg.coreSCfg
 }
 
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
-}
-
-// Call implements birpc.ClientConnector interface for internal RPC
-func (cfg *CGRConfig) Call(ctx *context.Context, serviceMethod string,
-	args, reply interface{}) error {
-	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
 }
 
 func (cfg *CGRConfig) rLockSections() {
@@ -1225,56 +1221,56 @@ func (cfg *CGRConfig) UnlockSections(lkIDs ...string) {
 	}
 }
 
-func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
-	return map[string]func(*CgrJsonCfg) error{
-		GENERAL_JSN:        cfg.loadGeneralCfg,
-		DATADB_JSN:         cfg.loadDataDBCfg,
-		STORDB_JSN:         cfg.loadStorDBCfg,
-		LISTEN_JSN:         cfg.loadListenCfg,
-		TlsCfgJson:         cfg.loadTLSCgrCfg,
-		HTTP_JSN:           cfg.loadHTTPCfg,
-		CACHE_JSN:          cfg.loadCacheCfg,
-		FilterSjsn:         cfg.loadFilterSCfg,
-		CDRS_JSN:           cfg.loadCdrsCfg,
-		ERsJson:            cfg.loadErsCfg,
-		EEsJson:            cfg.loadEesCfg,
-		SessionSJson:       cfg.loadSessionSCfg,
-		AsteriskAgentJSN:   cfg.loadAsteriskAgentCfg,
-		FreeSWITCHAgentJSN: cfg.loadFreeswitchAgentCfg,
-		KamailioAgentJSN:   cfg.loadKamAgentCfg,
-		DA_JSN:             cfg.loadDiameterAgentCfg,
-		RA_JSN:             cfg.loadRadiusAgentCfg,
-		HttpAgentJson:      cfg.loadHTTPAgentCfg,
-		DNSAgentJson:       cfg.loadDNSAgentCfg,
-		ATTRIBUTE_JSN:      cfg.loadAttributeSCfg,
-		ChargerSCfgJson:    cfg.loadChargerSCfg,
-		RESOURCES_JSON:     cfg.loadResourceSCfg,
-		STATS_JSON:         cfg.loadStatSCfg,
-		THRESHOLDS_JSON:    cfg.loadThresholdSCfg,
-		RouteSJson:         cfg.loadRouteSCfg,
-		LoaderJson:         cfg.loadLoaderSCfg,
-		MAILER_JSN:         cfg.loadMailerCfg,
-		SURETAX_JSON:       cfg.loadSureTaxCfg,
-		CgrLoaderCfgJson:   cfg.loadLoaderCgrCfg,
-		CgrMigratorCfgJson: cfg.loadMigratorCgrCfg,
-		DispatcherSJson:    cfg.loadDispatcherSCfg,
-		RegistrarCJson:     cfg.loadRegistrarCCfg,
-		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
-		AdminS:             cfg.loadApierCfg,
-		RPCConnsJsonName:   cfg.loadRPCConns,
-		RateSJson:          cfg.loadRateSCfg,
-		SIPAgentJson:       cfg.loadSIPAgentCfg,
-		TemplatesJson:      cfg.loadTemplateSCfg,
-		ConfigSJson:        cfg.loadConfigSCfg,
-		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
-		CoreSCfgJson:       cfg.loadCoreSCfg,
-		ActionSJson:        cfg.loadActionSCfg,
-		AccountSCfgJson:    cfg.loadAccountSCfg,
+func (cfg *CGRConfig) getLoadFunctions() map[string]func(ConfigDB) error {
+	return map[string]func(ConfigDB) error{
+		GeneralJSON:         cfg.loadGeneralCfg,
+		DataDBJSON:          cfg.loadDataDBCfg,
+		StorDBJSON:          cfg.loadStorDBCfg,
+		ListenJSON:          cfg.loadListenCfg,
+		TlsJSON:             cfg.loadTLSCgrCfg,
+		HTTPJSON:            cfg.loadHTTPCfg,
+		CacheJSON:           cfg.loadCacheCfg,
+		FilterSJSON:         cfg.loadFilterSCfg,
+		CDRsJSON:            cfg.loadCdrsCfg,
+		ERsJSON:             cfg.loadErsCfg,
+		EEsJSON:             cfg.loadEesCfg,
+		SessionSJSON:        cfg.loadSessionSCfg,
+		AsteriskAgentJSON:   cfg.loadAsteriskAgentCfg,
+		FreeSWITCHAgentJSON: cfg.loadFreeswitchAgentCfg,
+		KamailioAgentJSON:   cfg.loadKamAgentCfg,
+		DiameterAgentJSON:   cfg.loadDiameterAgentCfg,
+		RadiusAgentJSON:     cfg.loadRadiusAgentCfg,
+		HTTPAgentJSON:       cfg.loadHTTPAgentCfg,
+		DNSAgentJSON:        cfg.loadDNSAgentCfg,
+		AttributeSJSON:      cfg.loadAttributeSCfg,
+		ChargerSJSON:        cfg.loadChargerSCfg,
+		ResourceSJSON:       cfg.loadResourceSCfg,
+		StatSJSON:           cfg.loadStatSCfg,
+		ThresholdSJSON:      cfg.loadThresholdSCfg,
+		RouteSJSON:          cfg.loadRouteSCfg,
+		LoaderSJSON:         cfg.loadLoaderSCfg,
+		MailerJSON:          cfg.loadMailerCfg,
+		SureTaxJSON:         cfg.loadSureTaxCfg,
+		LoaderJSON:          cfg.loadLoaderCgrCfg,
+		MigratorJSON:        cfg.loadMigratorCgrCfg,
+		DispatcherSJSON:     cfg.loadDispatcherSCfg,
+		RegistrarCJSON:      cfg.loadRegistrarCCfg,
+		AnalyzerSJSON:       cfg.loadAnalyzerCgrCfg,
+		AdminSJSON:          cfg.loadApierCfg,
+		RPCConnsJSON:        cfg.loadRPCConns,
+		RateSJSON:           cfg.loadRateSCfg,
+		SIPAgentJSON:        cfg.loadSIPAgentCfg,
+		TemplatesJSON:       cfg.loadTemplateSCfg,
+		ConfigSJSON:         cfg.loadConfigSCfg,
+		APIBanJSON:          cfg.loadAPIBanCgrCfg,
+		CoreSJSON:           cfg.loadCoreSCfg,
+		ActionSJSON:         cfg.loadActionSCfg,
+		AccountSJSON:        cfg.loadAccountSCfg,
 	}
 }
 
 func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
-	var loadFuncs []func(*CgrJsonCfg) error
+	var loadFuncs []func(ConfigDB) error
 	loadMap := cfg.getLoadFunctions()
 	if section == utils.EmptyString || section == utils.MetaAll {
 		cfg.lockSections()
@@ -1292,7 +1288,7 @@ func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 	return cfg.loadConfigFromPath(path, loadFuncs, false)
 }
 
-func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
+func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg ConfigDB) error, envOff bool) (err error) {
 	jsnCfg := new(CgrJsonCfg)
 	var rjr *RjReader
 	if rjr, err = NewRjReader(rdr); err != nil {
@@ -1312,7 +1308,7 @@ func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *C
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
+func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg ConfigDB) error, envOff bool) (err error) {
 	if utils.IsURL(path) {
 		return cfg.loadConfigFromHTTP(path, loadFuncs) // prefix protocol
 	}
@@ -1330,7 +1326,7 @@ func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *C
 	return cfg.loadConfigFromFolder(path, loadFuncs, envOff)
 }
 
-func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
+func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCfg ConfigDB) error, envOff bool) (err error) {
 	jsonFilesFound := false
 	if err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) (werr error) {
 		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
@@ -1363,7 +1359,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 
 // loadConfigFromFile loads the config from a file
 // extracted from a loadConfigFromFolder in order to test all cases
-func (cfg *CGRConfig) loadConfigFromFile(jsonFilePath string, loadFuncs []func(jsnCfg *CgrJsonCfg) error, envOff bool) (err error) {
+func (cfg *CGRConfig) loadConfigFromFile(jsonFilePath string, loadFuncs []func(jsnCfg ConfigDB) error, envOff bool) (err error) {
 	var cfgFile *os.File
 	cfgFile, err = os.Open(jsonFilePath)
 	if err != nil {
@@ -1377,7 +1373,7 @@ func (cfg *CGRConfig) loadConfigFromFile(jsonFilePath string, loadFuncs []func(j
 	return
 }
 
-func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCfg ConfigDB) error) (err error) {
 	for _, urlPath := range strings.Split(urlPaths, utils.InfieldSep) {
 		if _, err = url.ParseRequestURI(urlPath); err != nil {
 			return
@@ -1411,7 +1407,7 @@ func (cfg *CGRConfig) initChanels() {
 }
 
 func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string) (err error) {
-	var loadFuncs []func(*CgrJsonCfg) error
+	var loadFuncs []func(ConfigDB) error
 	loadMap := cfg.getLoadFunctions()
 	cfg.LockSections(sections...)
 	defer cfg.UnlockSections(sections...)
@@ -1424,22 +1420,22 @@ func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string)
 // reloadSections sends a signal to the reload channel for the needed sections
 // the list of sections should be always valid because we load the config first with this list
 func (cfg *CGRConfig) reloadSections(sections ...string) {
-	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN,
-		CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
-		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, DispatcherSJson, RateSJson, AdminS, AccountSCfgJson,
-		ActionSJson})
-	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, CDRS_JSN, AdminS})
+	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DataDBJSON,
+		CDRsJSON, SessionSJSON, AttributeSJSON,
+		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON,
+		RouteSJSON, LoaderSJSON, DispatcherSJSON, RateSJSON, AdminSJSON, AccountSJSON,
+		ActionSJSON})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{StorDBJSON, CDRsJSON, AdminSJSON})
 	needsDataDB := false
 	needsStorDB := false
 	for _, section := range sections {
 		if !needsDataDB && subsystemsThatNeedDataDB.Has(section) {
 			needsDataDB = true
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			cfg.rldChans[DataDBJSON] <- struct{}{} // reload datadb before
 		}
 		if !needsStorDB && subsystemsThatNeedStorDB.Has(section) {
 			needsStorDB = true
-			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload stordb before
+			cfg.rldChans[StorDBJSON] <- struct{}{} // reload stordb before
 		}
 		if needsDataDB && needsStorDB {
 			break
@@ -1448,77 +1444,77 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	runtime.Gosched()
 	for _, section := range sections {
 		switch section {
-		case ConfigSJson:
-		case GENERAL_JSN: // nothing to reload
-		case RPCConnsJsonName: // nothing to reload
-			cfg.rldChans[RPCConnsJsonName] <- struct{}{}
-		case DATADB_JSN: // reloaded before
-		case STORDB_JSN: // reloaded before
-		case LISTEN_JSN:
-		case CACHE_JSN:
-		case FilterSjsn:
-		case MAILER_JSN:
-		case SURETAX_JSON:
-		case CgrLoaderCfgJson:
-		case CgrMigratorCfgJson:
-		case TemplatesJson:
-		case TlsCfgJson: // nothing to reload
-		case APIBanCfgJson: // nothing to reload
-		case CoreSCfgJson: // nothing to reload
-		case HTTP_JSN:
-			cfg.rldChans[HTTP_JSN] <- struct{}{}
-		case CDRS_JSN:
-			cfg.rldChans[CDRS_JSN] <- struct{}{}
-		case ERsJson:
-			cfg.rldChans[ERsJson] <- struct{}{}
-		case SessionSJson:
-			cfg.rldChans[SessionSJson] <- struct{}{}
-		case AsteriskAgentJSN:
-			cfg.rldChans[AsteriskAgentJSN] <- struct{}{}
-		case FreeSWITCHAgentJSN:
-			cfg.rldChans[FreeSWITCHAgentJSN] <- struct{}{}
-		case KamailioAgentJSN:
-			cfg.rldChans[KamailioAgentJSN] <- struct{}{}
-		case DA_JSN:
-			cfg.rldChans[DA_JSN] <- struct{}{}
-		case RA_JSN:
-			cfg.rldChans[RA_JSN] <- struct{}{}
-		case HttpAgentJson:
-			cfg.rldChans[HttpAgentJson] <- struct{}{}
-		case DNSAgentJson:
-			cfg.rldChans[DNSAgentJson] <- struct{}{}
-		case ATTRIBUTE_JSN:
-			cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
-		case ChargerSCfgJson:
-			cfg.rldChans[ChargerSCfgJson] <- struct{}{}
-		case RESOURCES_JSON:
-			cfg.rldChans[RESOURCES_JSON] <- struct{}{}
-		case STATS_JSON:
-			cfg.rldChans[STATS_JSON] <- struct{}{}
-		case THRESHOLDS_JSON:
-			cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
-		case RouteSJson:
-			cfg.rldChans[RouteSJson] <- struct{}{}
-		case LoaderJson:
-			cfg.rldChans[LoaderJson] <- struct{}{}
-		case DispatcherSJson:
-			cfg.rldChans[DispatcherSJson] <- struct{}{}
-		case AnalyzerCfgJson:
-			cfg.rldChans[AnalyzerCfgJson] <- struct{}{}
-		case AdminS:
-			cfg.rldChans[AdminS] <- struct{}{}
-		case EEsJson:
-			cfg.rldChans[EEsJson] <- struct{}{}
-		case SIPAgentJson:
-			cfg.rldChans[SIPAgentJson] <- struct{}{}
-		case RateSJson:
-			cfg.rldChans[RateSJson] <- struct{}{}
-		case RegistrarCJson:
-			cfg.rldChans[RegistrarCJson] <- struct{}{}
-		case AccountSCfgJson:
-			cfg.rldChans[AccountSCfgJson] <- struct{}{}
-		case ActionSJson:
-			cfg.rldChans[ActionSJson] <- struct{}{}
+		case ConfigSJSON:
+		case GeneralJSON: // nothing to reload
+		case RPCConnsJSON: // nothing to reload
+			cfg.rldChans[RPCConnsJSON] <- struct{}{}
+		case DataDBJSON: // reloaded before
+		case StorDBJSON: // reloaded before
+		case ListenJSON:
+		case CacheJSON:
+		case FilterSJSON:
+		case MailerJSON:
+		case SureTaxJSON:
+		case LoaderJSON:
+		case MigratorJSON:
+		case TemplatesJSON:
+		case TlsJSON: // nothing to reload
+		case APIBanJSON: // nothing to reload
+		case CoreSJSON: // nothing to reload
+		case HTTPJSON:
+			cfg.rldChans[HTTPJSON] <- struct{}{}
+		case CDRsJSON:
+			cfg.rldChans[CDRsJSON] <- struct{}{}
+		case ERsJSON:
+			cfg.rldChans[ERsJSON] <- struct{}{}
+		case SessionSJSON:
+			cfg.rldChans[SessionSJSON] <- struct{}{}
+		case AsteriskAgentJSON:
+			cfg.rldChans[AsteriskAgentJSON] <- struct{}{}
+		case FreeSWITCHAgentJSON:
+			cfg.rldChans[FreeSWITCHAgentJSON] <- struct{}{}
+		case KamailioAgentJSON:
+			cfg.rldChans[KamailioAgentJSON] <- struct{}{}
+		case DiameterAgentJSON:
+			cfg.rldChans[DiameterAgentJSON] <- struct{}{}
+		case RadiusAgentJSON:
+			cfg.rldChans[RadiusAgentJSON] <- struct{}{}
+		case HTTPAgentJSON:
+			cfg.rldChans[HTTPAgentJSON] <- struct{}{}
+		case DNSAgentJSON:
+			cfg.rldChans[DNSAgentJSON] <- struct{}{}
+		case AttributeSJSON:
+			cfg.rldChans[AttributeSJSON] <- struct{}{}
+		case ChargerSJSON:
+			cfg.rldChans[ChargerSJSON] <- struct{}{}
+		case ResourceSJSON:
+			cfg.rldChans[ResourceSJSON] <- struct{}{}
+		case StatSJSON:
+			cfg.rldChans[StatSJSON] <- struct{}{}
+		case ThresholdSJSON:
+			cfg.rldChans[ThresholdSJSON] <- struct{}{}
+		case RouteSJSON:
+			cfg.rldChans[RouteSJSON] <- struct{}{}
+		case LoaderSJSON:
+			cfg.rldChans[LoaderSJSON] <- struct{}{}
+		case DispatcherSJSON:
+			cfg.rldChans[DispatcherSJSON] <- struct{}{}
+		case AnalyzerSJSON:
+			cfg.rldChans[AnalyzerSJSON] <- struct{}{}
+		case AdminSJSON:
+			cfg.rldChans[AdminSJSON] <- struct{}{}
+		case EEsJSON:
+			cfg.rldChans[EEsJSON] <- struct{}{}
+		case SIPAgentJSON:
+			cfg.rldChans[SIPAgentJSON] <- struct{}{}
+		case RateSJSON:
+			cfg.rldChans[RateSJSON] <- struct{}{}
+		case RegistrarCJSON:
+			cfg.rldChans[RegistrarCJSON] <- struct{}{}
+		case AccountSJSON:
+			cfg.rldChans[AccountSJSON] <- struct{}{}
+		case ActionSJSON:
+			cfg.rldChans[ActionSJSON] <- struct{}{}
 		}
 	}
 }
@@ -1526,49 +1522,49 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{}) {
 	return map[string]interface{}{
-		LoaderJson:         cfg.loaderCfg.AsMapInterface(separator),
-		HttpAgentJson:      cfg.httpAgentCfg.AsMapInterface(separator),
-		RPCConnsJsonName:   cfg.rpcConns.AsMapInterface(),
-		GENERAL_JSN:        cfg.generalCfg.AsMapInterface(),
-		DATADB_JSN:         cfg.dataDbCfg.AsMapInterface(),
-		STORDB_JSN:         cfg.storDbCfg.AsMapInterface(),
-		TlsCfgJson:         cfg.tlsCfg.AsMapInterface(),
-		CACHE_JSN:          cfg.cacheCfg.AsMapInterface(),
-		LISTEN_JSN:         cfg.listenCfg.AsMapInterface(),
-		HTTP_JSN:           cfg.httpCfg.AsMapInterface(),
-		FilterSjsn:         cfg.filterSCfg.AsMapInterface(),
-		CDRS_JSN:           cfg.cdrsCfg.AsMapInterface(),
-		SessionSJson:       cfg.sessionSCfg.AsMapInterface(),
-		FreeSWITCHAgentJSN: cfg.fsAgentCfg.AsMapInterface(separator),
-		KamailioAgentJSN:   cfg.kamAgentCfg.AsMapInterface(),
-		AsteriskAgentJSN:   cfg.asteriskAgentCfg.AsMapInterface(),
-		DA_JSN:             cfg.diameterAgentCfg.AsMapInterface(separator),
-		RA_JSN:             cfg.radiusAgentCfg.AsMapInterface(separator),
-		DNSAgentJson:       cfg.dnsAgentCfg.AsMapInterface(separator),
-		ATTRIBUTE_JSN:      cfg.attributeSCfg.AsMapInterface(),
-		ChargerSCfgJson:    cfg.chargerSCfg.AsMapInterface(),
-		RESOURCES_JSON:     cfg.resourceSCfg.AsMapInterface(),
-		STATS_JSON:         cfg.statsCfg.AsMapInterface(),
-		THRESHOLDS_JSON:    cfg.thresholdSCfg.AsMapInterface(),
-		RouteSJson:         cfg.routeSCfg.AsMapInterface(),
-		SURETAX_JSON:       cfg.sureTaxCfg.AsMapInterface(separator),
-		DispatcherSJson:    cfg.dispatcherSCfg.AsMapInterface(),
-		RegistrarCJson:     cfg.registrarCCfg.AsMapInterface(),
-		CgrLoaderCfgJson:   cfg.loaderCgrCfg.AsMapInterface(),
-		CgrMigratorCfgJson: cfg.migratorCgrCfg.AsMapInterface(),
-		MAILER_JSN:         cfg.mailerCfg.AsMapInterface(),
-		AnalyzerCfgJson:    cfg.analyzerSCfg.AsMapInterface(),
-		AdminS:             cfg.admS.AsMapInterface(),
-		ERsJson:            cfg.ersCfg.AsMapInterface(separator),
-		APIBanCfgJson:      cfg.apiBanCfg.AsMapInterface(),
-		EEsJson:            cfg.eesCfg.AsMapInterface(separator),
-		RateSJson:          cfg.rateSCfg.AsMapInterface(),
-		SIPAgentJson:       cfg.sipAgentCfg.AsMapInterface(separator),
-		TemplatesJson:      cfg.templates.AsMapInterface(separator),
-		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
-		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
-		ActionSJson:        cfg.actionSCfg.AsMapInterface(),
-		AccountSCfgJson:    cfg.accountSCfg.AsMapInterface(),
+		LoaderSJSON:         cfg.loaderCfg.AsMapInterface(separator),
+		HTTPAgentJSON:       cfg.httpAgentCfg.AsMapInterface(separator),
+		RPCConnsJSON:        cfg.rpcConns.AsMapInterface(),
+		GeneralJSON:         cfg.generalCfg.AsMapInterface(),
+		DataDBJSON:          cfg.dataDbCfg.AsMapInterface(),
+		StorDBJSON:          cfg.storDbCfg.AsMapInterface(),
+		TlsJSON:             cfg.tlsCfg.AsMapInterface(),
+		CacheJSON:           cfg.cacheCfg.AsMapInterface(),
+		ListenJSON:          cfg.listenCfg.AsMapInterface(),
+		HTTPJSON:            cfg.httpCfg.AsMapInterface(),
+		FilterSJSON:         cfg.filterSCfg.AsMapInterface(),
+		CDRsJSON:            cfg.cdrsCfg.AsMapInterface(),
+		SessionSJSON:        cfg.sessionSCfg.AsMapInterface(),
+		FreeSWITCHAgentJSON: cfg.fsAgentCfg.AsMapInterface(separator),
+		KamailioAgentJSON:   cfg.kamAgentCfg.AsMapInterface(),
+		AsteriskAgentJSON:   cfg.asteriskAgentCfg.AsMapInterface(),
+		DiameterAgentJSON:   cfg.diameterAgentCfg.AsMapInterface(separator),
+		RadiusAgentJSON:     cfg.radiusAgentCfg.AsMapInterface(separator),
+		DNSAgentJSON:        cfg.dnsAgentCfg.AsMapInterface(separator),
+		AttributeSJSON:      cfg.attributeSCfg.AsMapInterface(),
+		ChargerSJSON:        cfg.chargerSCfg.AsMapInterface(),
+		ResourceSJSON:       cfg.resourceSCfg.AsMapInterface(),
+		StatSJSON:           cfg.statsCfg.AsMapInterface(),
+		ThresholdSJSON:      cfg.thresholdSCfg.AsMapInterface(),
+		RouteSJSON:          cfg.routeSCfg.AsMapInterface(),
+		SureTaxJSON:         cfg.sureTaxCfg.AsMapInterface(separator),
+		DispatcherSJSON:     cfg.dispatcherSCfg.AsMapInterface(),
+		RegistrarCJSON:      cfg.registrarCCfg.AsMapInterface(),
+		LoaderJSON:          cfg.loaderCgrCfg.AsMapInterface(),
+		MigratorJSON:        cfg.migratorCgrCfg.AsMapInterface(),
+		MailerJSON:          cfg.mailerCfg.AsMapInterface(),
+		AnalyzerSJSON:       cfg.analyzerSCfg.AsMapInterface(),
+		AdminSJSON:          cfg.admS.AsMapInterface(),
+		ERsJSON:             cfg.ersCfg.AsMapInterface(separator),
+		APIBanJSON:          cfg.apiBanCfg.AsMapInterface(),
+		EEsJSON:             cfg.eesCfg.AsMapInterface(separator),
+		RateSJSON:           cfg.rateSCfg.AsMapInterface(),
+		SIPAgentJSON:        cfg.sipAgentCfg.AsMapInterface(separator),
+		TemplatesJSON:       cfg.templates.AsMapInterface(separator),
+		ConfigSJSON:         cfg.configSCfg.AsMapInterface(),
+		CoreSJSON:           cfg.coreSCfg.AsMapInterface(),
+		ActionSJSON:         cfg.actionSCfg.AsMapInterface(),
+		AccountSJSON:        cfg.accountSCfg.AsMapInterface(),
 	}
 }
 
@@ -1623,7 +1619,7 @@ type SectionWithAPIOpts struct {
 }
 
 // V1GetConfig will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1641,98 +1637,12 @@ func (cfg *CGRConfig) V1GetConfig(args *SectionWithAPIOpts, reply *map[string]in
 		cfg.cacheDPMux.Unlock()
 	}()
 	var mp interface{}
-	switch args.Section {
-	case utils.MetaAll:
+	if args.Section == utils.MetaAll {
 		*reply = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		return
-	case GENERAL_JSN:
-		mp = cfg.GeneralCfg().AsMapInterface()
-	case DATADB_JSN:
-		mp = cfg.DataDbCfg().AsMapInterface()
-	case STORDB_JSN:
-		mp = cfg.StorDbCfg().AsMapInterface()
-	case TlsCfgJson:
-		mp = cfg.TLSCfg().AsMapInterface()
-	case CACHE_JSN:
-		mp = cfg.CacheCfg().AsMapInterface()
-	case LISTEN_JSN:
-		mp = cfg.ListenCfg().AsMapInterface()
-	case HTTP_JSN:
-		mp = cfg.HTTPCfg().AsMapInterface()
-	case FilterSjsn:
-		mp = cfg.FilterSCfg().AsMapInterface()
-	case CDRS_JSN:
-		mp = cfg.CdrsCfg().AsMapInterface()
-	case SessionSJson:
-		mp = cfg.SessionSCfg().AsMapInterface()
-	case FreeSWITCHAgentJSN:
-		mp = cfg.FsAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case KamailioAgentJSN:
-		mp = cfg.KamAgentCfg().AsMapInterface()
-	case AsteriskAgentJSN:
-		mp = cfg.AsteriskAgentCfg().AsMapInterface()
-	case DA_JSN:
-		mp = cfg.DiameterAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case RA_JSN:
-		mp = cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case DNSAgentJson:
-		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ATTRIBUTE_JSN:
-		mp = cfg.AttributeSCfg().AsMapInterface()
-	case ChargerSCfgJson:
-		mp = cfg.ChargerSCfg().AsMapInterface()
-	case RESOURCES_JSON:
-		mp = cfg.ResourceSCfg().AsMapInterface()
-	case STATS_JSON:
-		mp = cfg.StatSCfg().AsMapInterface()
-	case THRESHOLDS_JSON:
-		mp = cfg.ThresholdSCfg().AsMapInterface()
-	case RouteSJson:
-		mp = cfg.RouteSCfg().AsMapInterface()
-	case SURETAX_JSON:
-		mp = cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case DispatcherSJson:
-		mp = cfg.DispatcherSCfg().AsMapInterface()
-	case RegistrarCJson:
-		mp = cfg.RegistrarCCfg().AsMapInterface()
-	case LoaderJson:
-		mp = cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case CgrLoaderCfgJson:
-		mp = cfg.LoaderCgrCfg().AsMapInterface()
-	case CgrMigratorCfgJson:
-		mp = cfg.MigratorCgrCfg().AsMapInterface()
-	case AdminS:
-		mp = cfg.AdminSCfg().AsMapInterface()
-	case EEsJson:
-		mp = cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ERsJson:
-		mp = cfg.ERsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case RPCConnsJsonName:
-		mp = cfg.RPCConns().AsMapInterface()
-	case SIPAgentJson:
-		mp = cfg.SIPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case TemplatesJson:
-		mp = cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ConfigSJson:
-		mp = cfg.ConfigSCfg().AsMapInterface()
-	case APIBanCfgJson:
-		mp = cfg.APIBanCfg().AsMapInterface()
-	case HttpAgentJson:
-		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case MAILER_JSN:
-		mp = cfg.MailerCfg().AsMapInterface()
-	case AnalyzerCfgJson:
-		mp = cfg.AnalyzerSCfg().AsMapInterface()
-	case RateSJson:
-		mp = cfg.RateSCfg().AsMapInterface()
-	case CoreSCfgJson:
-		mp = cfg.CoreSCfg().AsMapInterface()
-	case ActionSJson:
-		mp = cfg.ActionSCfg().AsMapInterface()
-	case AccountSCfgJson:
-		mp = cfg.AccountSCfg().AsMapInterface()
-	default:
-		return errors.New("Invalid section ")
+	}
+	if mp, err = cfg.getSectionAsMap(args.Section); err != nil {
+		return
 	}
 	*reply = map[string]interface{}{args.Section: mp}
 	return
@@ -1809,97 +1719,13 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string)
 		cfg.cacheDPMux.Unlock()
 	}()
 	var mp interface{}
-	switch args.Section {
-	case utils.MetaAll:
+	if args.Section == utils.MetaAll {
 		rplyMap = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 		*reply = utils.ToJSON(rplyMap)
 		return
-	case GENERAL_JSN:
-		mp = cfg.GeneralCfg().AsMapInterface()
-	case DATADB_JSN:
-		mp = cfg.DataDbCfg().AsMapInterface()
-	case STORDB_JSN:
-		mp = cfg.StorDbCfg().AsMapInterface()
-	case TlsCfgJson:
-		mp = cfg.TLSCfg().AsMapInterface()
-	case CACHE_JSN:
-		mp = cfg.CacheCfg().AsMapInterface()
-	case LISTEN_JSN:
-		mp = cfg.ListenCfg().AsMapInterface()
-	case HTTP_JSN:
-		mp = cfg.HTTPCfg().AsMapInterface()
-	case FilterSjsn:
-		mp = cfg.FilterSCfg().AsMapInterface()
-	case CDRS_JSN:
-		mp = cfg.CdrsCfg().AsMapInterface()
-	case SessionSJson:
-		mp = cfg.SessionSCfg().AsMapInterface()
-	case FreeSWITCHAgentJSN:
-		mp = cfg.FsAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case KamailioAgentJSN:
-		mp = cfg.KamAgentCfg().AsMapInterface()
-	case AsteriskAgentJSN:
-		mp = cfg.AsteriskAgentCfg().AsMapInterface()
-	case DA_JSN:
-		mp = cfg.DiameterAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case RA_JSN:
-		mp = cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case DNSAgentJson:
-		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ATTRIBUTE_JSN:
-		mp = cfg.AttributeSCfg().AsMapInterface()
-	case ChargerSCfgJson:
-		mp = cfg.ChargerSCfg().AsMapInterface()
-	case RESOURCES_JSON:
-		mp = cfg.ResourceSCfg().AsMapInterface()
-	case STATS_JSON:
-		mp = cfg.StatSCfg().AsMapInterface()
-	case THRESHOLDS_JSON:
-		mp = cfg.ThresholdSCfg().AsMapInterface()
-	case RouteSJson:
-		mp = cfg.RouteSCfg().AsMapInterface()
-	case SURETAX_JSON:
-		mp = cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case DispatcherSJson:
-		mp = cfg.DispatcherSCfg().AsMapInterface()
-	case RegistrarCJson:
-		mp = cfg.RegistrarCCfg().AsMapInterface()
-	case LoaderJson:
-		mp = cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case CgrLoaderCfgJson:
-		mp = cfg.LoaderCgrCfg().AsMapInterface()
-	case CgrMigratorCfgJson:
-		mp = cfg.MigratorCgrCfg().AsMapInterface()
-	case AdminS:
-		mp = cfg.AdminSCfg().AsMapInterface()
-	case EEsJson:
-		mp = cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ERsJson:
-		mp = cfg.ERsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case SIPAgentJson:
-		mp = cfg.SIPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case ConfigSJson:
-		mp = cfg.ConfigSCfg().AsMapInterface()
-	case APIBanCfgJson:
-		mp = cfg.APIBanCfg().AsMapInterface()
-	case RPCConnsJsonName:
-		mp = cfg.RPCConns().AsMapInterface()
-	case TemplatesJson:
-		mp = cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case HttpAgentJson:
-		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case MAILER_JSN:
-		mp = cfg.MailerCfg().AsMapInterface()
-	case AnalyzerCfgJson:
-		mp = cfg.AnalyzerSCfg().AsMapInterface()
-	case RateSJson:
-		mp = cfg.RateSCfg().AsMapInterface()
-	case CoreSCfgJson:
-		mp = cfg.CoreSCfg().AsMapInterface()
-	case AccountSCfgJson:
-		mp = cfg.AccountSCfg().AsMapInterface()
-	default:
-		return errors.New("Invalid section ")
+	}
+	if mp, err = cfg.getSectionAsMap(args.Section); err != nil {
+		return
 	}
 	rplyMap = map[string]interface{}{args.Section: mp}
 	*reply = utils.ToJSON(rplyMap)
@@ -2023,4 +1849,548 @@ func (cfg *CGRConfig) GetDataProvider() utils.DataProvider {
 		cfg.cacheDPMux.Unlock()
 	}
 	return val
+}
+
+// loadFromJSONDB Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
+// this function ignores the data_db section
+// this will be called from the DataDB service
+func (cfg *CGRConfig) LoadFromDB(jsnCfg ConfigDB) (err error) {
+	// Load sections out of JSON config, stop on error
+	cfg.lockSections()
+	defer cfg.unlockSections()
+	cfg.db = jsnCfg
+	for _, loadFunc := range []func(ConfigDB) error{
+		cfg.loadRPCConns,
+		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
+		cfg.loadHTTPCfg, cfg.loadStorDBCfg,
+		cfg.loadFilterSCfg,
+		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
+		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
+		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
+		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
+		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
+		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
+		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
+		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
+		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
+		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg, cfg.loadActionSCfg,
+		cfg.loadAccountSCfg} {
+		if err = loadFunc(jsnCfg); err != nil {
+			return
+		}
+	}
+	return cfg.checkConfigSanity()
+}
+
+// ReloadAllSectionsForDB sends a signal to the reload channel for the all sections except the datadb
+func (cfg *CGRConfig) ReloadAllSectionsForDB() {
+	cfg.rldChans[StorDBJSON] <- struct{}{} // reload stordb before
+	runtime.Gosched()
+	for _, section := range sortedCfgSections {
+		switch section {
+		case ConfigSJSON:
+		case GeneralJSON: // nothing to reload
+		case RPCConnsJSON: // nothing to reload
+			cfg.rldChans[RPCConnsJSON] <- struct{}{}
+		case DataDBJSON: // reloaded before
+		case StorDBJSON: // reloaded before
+		case ListenJSON:
+		case CacheJSON:
+		case FilterSJSON:
+		case MailerJSON:
+		case SureTaxJSON:
+		case LoaderJSON:
+		case MigratorJSON:
+		case TemplatesJSON:
+		case TlsJSON: // nothing to reload
+		case APIBanJSON: // nothing to reload
+		case CoreSJSON: // nothing to reload
+		case HTTPJSON:
+			cfg.rldChans[HTTPJSON] <- struct{}{}
+		case CDRsJSON:
+			cfg.rldChans[CDRsJSON] <- struct{}{}
+		case ERsJSON:
+			cfg.rldChans[ERsJSON] <- struct{}{}
+		case SessionSJSON:
+			cfg.rldChans[SessionSJSON] <- struct{}{}
+		case AsteriskAgentJSON:
+			cfg.rldChans[AsteriskAgentJSON] <- struct{}{}
+		case FreeSWITCHAgentJSON:
+			cfg.rldChans[FreeSWITCHAgentJSON] <- struct{}{}
+		case KamailioAgentJSON:
+			cfg.rldChans[KamailioAgentJSON] <- struct{}{}
+		case DiameterAgentJSON:
+			cfg.rldChans[DiameterAgentJSON] <- struct{}{}
+		case RadiusAgentJSON:
+			cfg.rldChans[RadiusAgentJSON] <- struct{}{}
+		case HTTPAgentJSON:
+			cfg.rldChans[HTTPAgentJSON] <- struct{}{}
+		case DNSAgentJSON:
+			cfg.rldChans[DNSAgentJSON] <- struct{}{}
+		case AttributeSJSON:
+			cfg.rldChans[AttributeSJSON] <- struct{}{}
+		case ChargerSJSON:
+			cfg.rldChans[ChargerSJSON] <- struct{}{}
+		case ResourceSJSON:
+			cfg.rldChans[ResourceSJSON] <- struct{}{}
+		case StatSJSON:
+			cfg.rldChans[StatSJSON] <- struct{}{}
+		case ThresholdSJSON:
+			cfg.rldChans[ThresholdSJSON] <- struct{}{}
+		case RouteSJSON:
+			cfg.rldChans[RouteSJSON] <- struct{}{}
+		case LoaderSJSON:
+			cfg.rldChans[LoaderSJSON] <- struct{}{}
+		case DispatcherSJSON:
+			cfg.rldChans[DispatcherSJSON] <- struct{}{}
+		case AnalyzerSJSON:
+			cfg.rldChans[AnalyzerSJSON] <- struct{}{}
+		case AdminSJSON:
+			cfg.rldChans[AdminSJSON] <- struct{}{}
+		case EEsJSON:
+			cfg.rldChans[EEsJSON] <- struct{}{}
+		case SIPAgentJSON:
+			cfg.rldChans[SIPAgentJSON] <- struct{}{}
+		case RateSJSON:
+			cfg.rldChans[RateSJSON] <- struct{}{}
+		case RegistrarCJSON:
+			cfg.rldChans[RegistrarCJSON] <- struct{}{}
+		case AccountSJSON:
+			cfg.rldChans[AccountSJSON] <- struct{}{}
+		case ActionSJSON:
+			cfg.rldChans[ActionSJSON] <- struct{}{}
+		}
+	}
+}
+
+func (cfg *CGRConfig) V1StoreCfgInDB(ctx *context.Context, args *SectionWithAPIOpts, rply *string) (err error) {
+	if cfg.db == nil {
+		return errors.New("no DB connection for config")
+	}
+	if args.Section != utils.MetaEmpty && args.Section != utils.MetaAll {
+		if args.Section == DataDBJSON {
+			return errors.New("invalid section")
+		}
+		var mp interface{}
+		if mp, err = cfg.getSectionAsMap(args.Section); err != nil {
+			return
+		}
+		var data []byte
+		if data, err = json.Marshal(mp); err != nil {
+			return
+		}
+		var cfgSec interface{}
+		switch args.Section {
+		case GeneralJSON:
+			cfgSec = new(GeneralJsonCfg)
+		case RPCConnsJSON:
+			cfgSec = make(RPCConnsJson)
+		case CacheJSON:
+			cfgSec = new(CacheJsonCfg)
+		case ListenJSON:
+			cfgSec = new(ListenJsonCfg)
+		case HTTPJSON:
+			cfgSec = new(HTTPJsonCfg)
+		case StorDBJSON:
+			cfgSec = new(DbJsonCfg)
+		case FilterSJSON:
+			cfgSec = new(FilterSJsonCfg)
+		case CDRsJSON:
+			cfgSec = new(CdrsJsonCfg)
+		case ERsJSON:
+			cfgSec = new(ERsJsonCfg)
+		case EEsJSON:
+			cfgSec = new(EEsJsonCfg)
+		case SessionSJSON:
+			cfgSec = new(SessionSJsonCfg)
+		case FreeSWITCHAgentJSON:
+			cfgSec = new(FreeswitchAgentJsonCfg)
+		case KamailioAgentJSON:
+			cfgSec = new(KamAgentJsonCfg)
+		case AsteriskAgentJSON:
+			cfgSec = new(AsteriskAgentJsonCfg)
+		case DiameterAgentJSON:
+			cfgSec = new(DiameterAgentJsonCfg)
+		case RadiusAgentJSON:
+			cfgSec = new(RadiusAgentJsonCfg)
+		case HTTPAgentJSON:
+			cfgSec = new([]*HttpAgentJsonCfg)
+		case DNSAgentJSON:
+			cfgSec = new(DNSAgentJsonCfg)
+		case AttributeSJSON:
+			cfgSec = new(AttributeSJsonCfg)
+		case ChargerSJSON:
+			cfgSec = new(ChargerSJsonCfg)
+		case ResourceSJSON:
+			cfgSec = new(ResourceSJsonCfg)
+		case StatSJSON:
+			cfgSec = new(StatServJsonCfg)
+		case ThresholdSJSON:
+			cfgSec = new(ThresholdSJsonCfg)
+		case RouteSJSON:
+			cfgSec = new(RouteSJsonCfg)
+		case LoaderSJSON:
+			cfgSec = make([]*LoaderJsonCfg, 0)
+		case MailerJSON:
+			cfgSec = new(MailerJsonCfg)
+		case SureTaxJSON:
+			cfgSec = new(SureTaxJsonCfg)
+		case DispatcherSJSON:
+			cfgSec = new(DispatcherSJsonCfg)
+		case RegistrarCJSON:
+			cfgSec = new(RegistrarCJsonCfgs)
+		case LoaderJSON:
+			cfgSec = new(LoaderCfgJson)
+		case MigratorJSON:
+			cfgSec = new(MigratorCfgJson)
+		case TlsJSON:
+			cfgSec = new(TlsJsonCfg)
+		case AnalyzerSJSON:
+			cfgSec = new(AnalyzerSJsonCfg)
+		case AdminSJSON:
+			cfgSec = new(AdminSJsonCfg)
+		case RateSJSON:
+			cfgSec = new(RateSJsonCfg)
+		case SIPAgentJSON:
+			cfgSec = new(SIPAgentJsonCfg)
+		case TemplatesJSON:
+			cfgSec = make(FcTemplatesJsonCfg)
+		case ConfigSJSON:
+			cfgSec = new(ConfigSCfgJson)
+		case APIBanJSON:
+			cfgSec = new(APIBanJsonCfg)
+		case CoreSJSON:
+			cfgSec = new(CoreSJsonCfg)
+		case ActionSJSON:
+			cfgSec = new(ActionSJsonCfg)
+		case AccountSJSON:
+			cfgSec = new(AccountSJsonCfg)
+		}
+
+		if err = json.Unmarshal(data, cfgSec); err != nil {
+			return
+		}
+		if err = cfg.db.SetSection(ctx, args.Section, cfgSec); err != nil {
+			return
+		}
+	}
+	cfg.rLockSections()
+	mp := cfg.AsMapInterface(cfg.generalCfg.RSRSep)
+	cfg.rUnlockSections()
+	var data []byte
+	if data, err = json.Marshal(mp); err != nil {
+		return
+	}
+	var dp ConfigDB
+	if dp, err = NewCgrJsonCfgFromBytes(data); err != nil {
+		return
+	}
+	var sc interface{}
+	if sc, err = dp.GeneralJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, GeneralJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.RPCConnJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, RPCConnsJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.CacheJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, CacheJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ListenJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ListenJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.HttpJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, HTTPJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.DbJsonCfg(StorDBJSON); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, StorDBJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.FilterSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, FilterSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.CdrsJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, CDRsJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ERsJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ERsJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.EEsJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, EEsJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.SessionSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, SessionSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.FreeswitchAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, FreeSWITCHAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.KamAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, KamailioAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.AsteriskAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, AsteriskAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.DiameterAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, DiameterAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.RadiusAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, RadiusAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.HttpAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, HTTPAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.DNSAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, DNSAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.AttributeServJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, AttributeSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ChargerServJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ChargerSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ResourceSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ResourceSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.StatSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, StatSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ThresholdSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ThresholdSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.RouteSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, RouteSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.LoaderJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, LoaderSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.MailerJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, MailerJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.SureTaxJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, SureTaxJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.DispatcherSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, DispatcherSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.RegistrarCJsonCfgs(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, RegistrarCJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.LoaderCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, LoaderJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.MigratorCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, MigratorJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.TlsCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, TlsJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.AnalyzerCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, AnalyzerSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.AdminSCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, AdminSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.RateCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, RateSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.SIPAgentJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, SIPAgentJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.TemplateSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, TemplatesJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ConfigSJsonCfg(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ConfigSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ApiBanCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, APIBanJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.CoreSJSON(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, CoreSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.ActionSCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, ActionSJSON, sc); err != nil {
+		return
+	}
+	if sc, err = dp.AccountSCfgJson(); err != nil {
+		return
+	} else if err = cfg.db.SetSection(ctx, AccountSJSON, sc); err != nil {
+		return
+	}
+	*rply = utils.OK
+	return
+}
+
+func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error) {
+	switch section {
+	case GeneralJSON:
+		mp = cfg.GeneralCfg().AsMapInterface()
+	case DataDBJSON:
+		mp = cfg.DataDbCfg().AsMapInterface()
+	case StorDBJSON:
+		mp = cfg.StorDbCfg().AsMapInterface()
+	case TlsJSON:
+		mp = cfg.TLSCfg().AsMapInterface()
+	case CacheJSON:
+		mp = cfg.CacheCfg().AsMapInterface()
+	case ListenJSON:
+		mp = cfg.ListenCfg().AsMapInterface()
+	case HTTPJSON:
+		mp = cfg.HTTPCfg().AsMapInterface()
+	case FilterSJSON:
+		mp = cfg.FilterSCfg().AsMapInterface()
+	case CDRsJSON:
+		mp = cfg.CdrsCfg().AsMapInterface()
+	case SessionSJSON:
+		mp = cfg.SessionSCfg().AsMapInterface()
+	case FreeSWITCHAgentJSON:
+		mp = cfg.FsAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case KamailioAgentJSON:
+		mp = cfg.KamAgentCfg().AsMapInterface()
+	case AsteriskAgentJSON:
+		mp = cfg.AsteriskAgentCfg().AsMapInterface()
+	case DiameterAgentJSON:
+		mp = cfg.DiameterAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case RadiusAgentJSON:
+		mp = cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case DNSAgentJSON:
+		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case AttributeSJSON:
+		mp = cfg.AttributeSCfg().AsMapInterface()
+	case ChargerSJSON:
+		mp = cfg.ChargerSCfg().AsMapInterface()
+	case ResourceSJSON:
+		mp = cfg.ResourceSCfg().AsMapInterface()
+	case StatSJSON:
+		mp = cfg.StatSCfg().AsMapInterface()
+	case ThresholdSJSON:
+		mp = cfg.ThresholdSCfg().AsMapInterface()
+	case RouteSJSON:
+		mp = cfg.RouteSCfg().AsMapInterface()
+	case SureTaxJSON:
+		mp = cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case DispatcherSJSON:
+		mp = cfg.DispatcherSCfg().AsMapInterface()
+	case RegistrarCJSON:
+		mp = cfg.RegistrarCCfg().AsMapInterface()
+	case LoaderSJSON:
+		mp = cfg.LoaderCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case LoaderJSON:
+		mp = cfg.LoaderCgrCfg().AsMapInterface()
+	case MigratorJSON:
+		mp = cfg.MigratorCgrCfg().AsMapInterface()
+	case AdminSJSON:
+		mp = cfg.AdminSCfg().AsMapInterface()
+	case EEsJSON:
+		mp = cfg.EEsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case ERsJSON:
+		mp = cfg.ERsCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case RPCConnsJSON:
+		mp = cfg.RPCConns().AsMapInterface()
+	case SIPAgentJSON:
+		mp = cfg.SIPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case TemplatesJSON:
+		mp = cfg.TemplatesCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case ConfigSJSON:
+		mp = cfg.ConfigSCfg().AsMapInterface()
+	case APIBanJSON:
+		mp = cfg.APIBanCfg().AsMapInterface()
+	case HTTPAgentJSON:
+		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case MailerJSON:
+		mp = cfg.MailerCfg().AsMapInterface()
+	case AnalyzerSJSON:
+		mp = cfg.AnalyzerSCfg().AsMapInterface()
+	case RateSJSON:
+		mp = cfg.RateSCfg().AsMapInterface()
+	case CoreSJSON:
+		mp = cfg.CoreSCfg().AsMapInterface()
+	case ActionSJSON:
+		mp = cfg.ActionSCfg().AsMapInterface()
+	case AccountSJSON:
+		mp = cfg.AccountSCfg().AsMapInterface()
+	default:
+		err = errors.New("Invalid section ")
+	}
+	return
 }

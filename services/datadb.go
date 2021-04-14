@@ -52,14 +52,19 @@ type DataDBService struct {
 }
 
 // Start should handle the sercive start
-func (db *DataDBService) Start() (err error) {
+func (db *DataDBService) Start() error {
+	return db.Init(true)
+}
+
+func (db *DataDBService) Init(reload bool) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-	d, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
+	var d engine.DataDBDriver
+	d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
 		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
 		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
@@ -71,6 +76,15 @@ func (db *DataDBService) Start() (err error) {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s. Some SessionS APIs will not work", err))
 		err = nil // reset the error in case of only SessionS active
 		return
+	}
+	if db.cfg.DataDbCfg().UpdateConfig {
+		if err = db.cfg.LoadFromDB(d); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("Could not load config from dataDB: %s exiting!", err))
+			return
+		}
+		if reload {
+			db.cfg.ReloadAllSectionsForDB()
+		}
 	}
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	engine.SetDataStorage(db.dm)
@@ -87,10 +101,23 @@ func (db *DataDBService) Reload() (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
-		if err = db.dm.Reconnect(db.cfg.GeneralCfg().DBDataEncoding, db.cfg.DataDbCfg()); err != nil {
+		var d engine.DataDBDriver
+		d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
+			db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
+			db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
+			db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
+			db.cfg.DataDbCfg().Opts)
+		if err != nil {
 			return
 		}
+		db.dm.Reconnect(d)
 		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
+		if db.cfg.DataDbCfg().UpdateConfig {
+			if err = db.cfg.LoadFromDB(d); err != nil {
+				return
+			}
+			db.cfg.ReloadAllSectionsForDB()
+		}
 		return
 	}
 	if db.cfg.DataDbCfg().Type == utils.Mongo {
@@ -137,7 +164,7 @@ func (db *DataDBService) ShouldRun() bool {
 
 // mandatoryDB returns if the current configuration needs the DB
 func (db *DataDBService) mandatoryDB() bool {
-	return db.cfg.ChargerSCfg().Enabled ||
+	return db.cfg.DataDbCfg().UpdateConfig || db.cfg.ChargerSCfg().Enabled ||
 		db.cfg.AttributeSCfg().Enabled || db.cfg.ResourceSCfg().Enabled || db.cfg.StatSCfg().Enabled ||
 		db.cfg.ThresholdSCfg().Enabled || db.cfg.RouteSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled ||
 		db.cfg.LoaderCfg().Enabled() || db.cfg.AdminSCfg().Enabled || db.cfg.RateSCfg().Enabled ||

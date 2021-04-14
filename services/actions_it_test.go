@@ -69,7 +69,7 @@ func TestActionSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.ActionSJson,
+		Section: config.ActionSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -96,7 +96,7 @@ func TestActionSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ActionSCfg().Enabled = false
-	cfg.GetReloadChan(config.ActionSJson) <- struct{}{}
+	cfg.GetReloadChan(config.ActionSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
 	if actS.IsRunning() {

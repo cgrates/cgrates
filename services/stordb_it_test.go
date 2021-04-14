@@ -71,7 +71,7 @@ func TestStorDBReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.CDRS_JSN,
+		Section: config.CDRsJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -98,7 +98,7 @@ func TestStorDBReload(t *testing.T) {
 	cfg.StorDbCfg().Password = ""
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.STORDB_JSN,
+		Section: config.StorDBJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -135,7 +135,7 @@ func TestStorDBReload(t *testing.T) {
 	}
 
 	cfg.CdrsCfg().Enabled = false
-	cfg.GetReloadChan(config.CDRS_JSN) <- struct{}{}
+	cfg.GetReloadChan(config.CDRsJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")

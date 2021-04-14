@@ -52,7 +52,7 @@ func TestActionSCoverage(t *testing.T) {
 	//initialises an empty chan to call the reload function
 	testChan := make(chan struct{})
 	//populates actRPC with something in order to call the close function
-	actRPC <- chS
+
 	actS2 := &ActionService{
 		cfg:         cfg,
 		dm:          db,

@@ -75,7 +75,7 @@ func TestRadiusAgentReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql"),
-		Section: config.RA_JSN,
+		Section: config.RadiusAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -96,7 +96,7 @@ func TestRadiusAgentReload(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RadiusAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
+	cfg.GetReloadChan(config.RadiusAgentJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
@@ -143,7 +143,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql"),
-		Section: config.RA_JSN,
+		Section: config.RadiusAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -180,7 +180,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RadiusAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
+	cfg.GetReloadChan(config.RadiusAgentJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,7 +42,8 @@ func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 		timezone:    timezone,
 		connMgr:     connMgr,
 	}
-	fsa.ctx = context.WithClient(context.TODO(), fsa)
+	srv, _ := birpc.NewService(fsa, "", false)
+	fsa.ctx = context.WithClient(context.TODO(), srv)
 	return
 }
 
@@ -377,11 +379,6 @@ func (fsa *FSsessions) Shutdown() (err error) {
 
 	}
 	return
-}
-
-// Call implements birpc.ClientConnector interface
-func (fsa *FSsessions) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.RPCCall(fsa, serviceMethod, args, reply)
 }
 
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH

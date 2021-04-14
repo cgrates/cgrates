@@ -63,7 +63,7 @@ func TestRateSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "rates"),
-		Section: config.RateSJson,
+		Section: config.RateSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -82,7 +82,7 @@ func TestRateSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.RateSCfg().Enabled = false
-	cfg.GetReloadChan(config.RateSJson) <- struct{}{}
+	cfg.GetReloadChan(config.RateSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")

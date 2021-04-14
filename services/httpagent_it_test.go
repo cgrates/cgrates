@@ -71,7 +71,7 @@ func TestHTTPAgentReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "httpagent_mysql_test"),
-		Section: config.HttpAgentJson,
+		Section: config.HTTPAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {

@@ -131,7 +131,7 @@ func (apiService *AdminSv1Service) IsRunning() bool {
 
 // ServiceName returns the service name
 func (apiService *AdminSv1Service) ServiceName() string {
-	return utils.APIerSv1
+	return utils.AdminS
 }
 
 // ShouldRun returns if the service should be running

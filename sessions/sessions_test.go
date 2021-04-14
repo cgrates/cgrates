@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -89,7 +90,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, nil)
 
 	//connect BiJSON
-	client := sessions
+	client := &birpc.Service{}
 	sessions.OnBiJSONConnect(client)
 
 	//we'll change the connection identifier just for testing
@@ -118,7 +119,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
-	client := sessions
+	client := &birpc.Service{}
 
 	var reply string
 	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(client, utils.EmptyString, &reply); err != nil {

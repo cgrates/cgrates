@@ -454,7 +454,8 @@ func TestProcessRequest(t *testing.T) {
 		filterS: filters,
 		connMgr: connMgr,
 	}
-	da.ctx = context.WithClient(context.Background(), da)
+	srv, _ := birpc.NewService(da, "", false)
+	da.ctx = context.WithClient(context.Background(), srv)
 	pr, err := da.processRequest(reqProcessor, agReq)
 	if err != nil {
 		t.Error(err)

@@ -96,6 +96,7 @@ type DbJsonCfg struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
+	Update_config         *bool
 	Items                 *map[string]*ItemOptJson
 	Opts                  map[string]interface{}
 }
@@ -240,7 +241,8 @@ type FsConnJsonCfg struct {
 	Alias      *string
 }
 
-type RPCConnsJson struct {
+type RPCConnsJson map[string]*RPCConnJson
+type RPCConnJson struct {
 	Strategy *string
 	PoolSize *int
 	Conns    *[]*RemoteHostJson
@@ -554,6 +556,7 @@ type MigratorCfgJson struct {
 	Out_storDB_opts     map[string]interface{}
 }
 
+type FcTemplatesJsonCfg map[string][]*FcTemplateJsonCfg
 type FcTemplateJsonCfg struct {
 	Tag                  *string
 	Type                 *string

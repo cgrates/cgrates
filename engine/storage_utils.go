@@ -31,7 +31,7 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler string, opts map[string]interface{}) (d DataDB, err error) {
+	pass, marshaler string, opts map[string]interface{}) (d DataDBDriver, err error) {
 	switch dbType {
 	case utils.Redis:
 		var dbNo int

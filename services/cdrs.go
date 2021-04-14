@@ -105,7 +105,7 @@ func (cdrService *CDRServer) Start() (err error) {
 		// Make the cdr server available for internal communication
 		cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
 	}
-	cdrService.connChan <- cdrService.anz.GetInternalCodec(cdrService.cdrS, utils.CDRServer) // Signal that cdrS is operational
+	// cdrService.connChan <- cdrService.anz.GetInternalCodec(cdrService.cdrS, utils.CDRServer) // Signal that cdrS is operational
 	return
 }
 
@@ -121,7 +121,7 @@ func (cdrService *CDRServer) Shutdown() (err error) {
 	cdrService.cdrS = nil
 	// cdrService.rpcv1 = nil
 	// cdrService.rpcv2 = nil
-	<-cdrService.connChan
+	// <-cdrService.connChan
 	cdrService.Unlock()
 	return
 }

@@ -69,7 +69,7 @@ func TestThresholdSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.THRESHOLDS_JSON,
+		Section: config.ThresholdSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -94,7 +94,7 @@ func TestThresholdSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ThresholdSCfg().Enabled = false
-	cfg.GetReloadChan(config.THRESHOLDS_JSON) <- struct{}{}
+	cfg.GetReloadChan(config.ThresholdSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -137,7 +137,7 @@ func TestThresholdSReload2(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.THRESHOLDS_JSON,
+		Section: config.ThresholdSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -159,7 +159,7 @@ func TestThresholdSReload2(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.ThresholdSCfg().Enabled = false
-	cfg.GetReloadChan(config.THRESHOLDS_JSON) <- struct{}{}
+	cfg.GetReloadChan(config.ThresholdSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")

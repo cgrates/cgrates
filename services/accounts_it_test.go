@@ -69,7 +69,7 @@ func TestAccountSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.AccountSCfgJson,
+		Section: config.AccountSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -96,7 +96,7 @@ func TestAccountSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.AccountSCfg().Enabled = false
-	cfg.GetReloadChan(config.AccountSCfgJson) <- struct{}{}
+	cfg.GetReloadChan(config.AccountSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
 	if acctS.IsRunning() {

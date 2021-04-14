@@ -74,7 +74,7 @@ func TestDispatcherSReload(t *testing.T) {
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path: path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers_mysql"),
 
-		Section: config.DispatcherSJson,
+		Section: config.DispatcherSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -96,7 +96,7 @@ func TestDispatcherSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.DispatcherSCfg().Enabled = false
-	cfg.GetReloadChan(config.DispatcherSJson) <- struct{}{}
+	cfg.GetReloadChan(config.DispatcherSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

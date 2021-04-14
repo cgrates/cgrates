@@ -73,7 +73,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
 
-	srv2.connChan <- chS
+	srv2.connChan <- &testMockClients{}
 	shutErr := srv2.Shutdown()
 	if shutErr != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutErr)

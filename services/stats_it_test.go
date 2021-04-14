@@ -73,7 +73,7 @@ func TestStatSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.STATS_JSON,
+		Section: config.StatSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -95,7 +95,7 @@ func TestStatSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.StatSCfg().Enabled = false
-	cfg.GetReloadChan(config.STATS_JSON) <- struct{}{}
+	cfg.GetReloadChan(config.StatSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if sS.IsRunning() {
 		t.Errorf("Expected service to be down")

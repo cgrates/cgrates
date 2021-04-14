@@ -70,7 +70,7 @@ func TestSIPAgentReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql"),
-		Section: config.SIPAgentJson,
+		Section: config.SIPAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -92,7 +92,7 @@ func TestSIPAgentReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	cfg.SIPAgentCfg().Enabled = false
-	cfg.GetReloadChan(config.SIPAgentJson) <- struct{}{}
+	cfg.GetReloadChan(config.SIPAgentJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")

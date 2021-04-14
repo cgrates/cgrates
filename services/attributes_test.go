@@ -72,7 +72,7 @@ func TestAttributeSCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AttributeS, serviceName)
 	}
 	chS = engine.NewCacheS(cfg, nil, nil)
-	attrS2.connChan <- chS
+	attrS2.connChan <- &testMockClients{}
 	shutdownErr := attrS2.Shutdown()
 	if shutdownErr != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownErr)

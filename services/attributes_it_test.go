@@ -71,7 +71,7 @@ func TestAttributeSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.ATTRIBUTE_JSN,
+		Section: config.AttributeSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -98,7 +98,7 @@ func TestAttributeSReload(t *testing.T) {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.AttributeSCfg().Enabled = false
-	cfg.GetReloadChan(config.ATTRIBUTE_JSN) <- struct{}{}
+	cfg.GetReloadChan(config.AttributeSJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 
 	if attrS.IsRunning() {

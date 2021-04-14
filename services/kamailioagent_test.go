@@ -22,7 +22,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,9 +38,6 @@ func TestKamailioAgentCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewKamailioAgent(cfg, shdChan, nil, srvDep)
 	if srv.IsRunning() {

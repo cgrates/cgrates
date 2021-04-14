@@ -86,7 +86,7 @@ func TestEventExporterSReload(t *testing.T) {
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
-		Section: config.EEsJson,
+		Section: config.EEsJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
@@ -105,7 +105,7 @@ func TestEventExporterSReload(t *testing.T) {
 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	cfg.EEsCfg().Enabled = false
-	cfg.GetReloadChan(config.EEsJson) <- struct{}{}
+	cfg.GetReloadChan(config.EEsJSON) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if ees.IsRunning() {
 		t.Fatalf("Expected service to be down")

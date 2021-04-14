@@ -41,14 +41,6 @@ func init() {
 	log.SetOutput(io.Discard)
 }
 
-type testMockClients struct {
-	calls func(_ *context.Context, _, _ interface{}) error
-}
-
-func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply interface{}) error {
-	return sT.calls(ctx, arg, rply)
-}
-
 func TestSessionSReload1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ChargerSCfg().Enabled = true

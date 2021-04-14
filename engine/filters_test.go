@@ -455,8 +455,6 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"EmptyString":   "nonEmpty",
 		"EmptySlice":    []string{""},
 		"EmptyMap":      map[string]string{"": ""},
-		"EmptyPtr":      &struct{}{},
-		"EmptyPtr2":     &struct{}{},
 		"EmptyPtrSlice": &[]string{""},
 		"EmptyPtrMap":   &map[string]string{"": ""},
 	}
@@ -467,6 +465,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"EmptyMap":      map[string]string{},
 		"EmptyPtr":      testnil,
 		"EmptyPtr2":     nil,
+		"EmptyPtr3":     &struct{}{},
 		"EmptyPtrSlice": &[]string{},
 		"EmptyPtrMap":   &map[string]string{},
 	}

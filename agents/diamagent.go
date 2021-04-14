@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -56,7 +57,8 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		dpa:     make(map[string]chan *diam.Message),
 		peers:   make(map[string]diam.Conn),
 	}
-	da.ctx = context.WithClient(context.TODO(), da)
+	srv, _ := birpc.NewService(da, "", false)
+	da.ctx = context.WithClient(context.TODO(), srv)
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
@@ -485,11 +487,6 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 				utils.DiameterAgent, agReq.Reply))
 	}
 	return true, nil
-}
-
-// Call implements birpc.ClientConnector interface
-func (da *DiameterAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.RPCCall(da, serviceMethod, args, reply)
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient

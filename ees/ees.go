@@ -81,11 +81,6 @@ func (eeS *EventExporterS) Shutdown() {
 	eeS.setupCache(nil) // cleanup exporters
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-func (eeS *EventExporterS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	return utils.RPCCall(eeS, serviceMethod, args, reply)
-}
-
 // setupCache deals with cleanup and initialization of the cache of EventExporters
 func (eeS *EventExporterS) setupCache(chCfgs map[string]*config.CacheParamCfg) {
 	eeS.eesMux.Lock()
@@ -135,8 +130,8 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 // V1ProcessEvent will be called each time a new event is received from readers
 // rply -> map[string]map[string]interface{}
 func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]interface{}) (err error) {
-	eeS.cfg.RLocks(config.EEsJson)
-	defer eeS.cfg.RUnlocks(config.EEsJson)
+	eeS.cfg.RLocks(config.EEsJSON)
+	defer eeS.cfg.RUnlocks(config.EEsJSON)
 
 	expIDs := utils.NewStringSet(cgrEv.EeIDs)
 	lenExpIDs := expIDs.Size()

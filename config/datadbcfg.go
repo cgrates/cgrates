@@ -28,19 +28,20 @@ import (
 
 // DataDbCfg Database config
 type DataDbCfg struct {
-	Type        string
-	Host        string   // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port        string   // The port to bind to.
-	Name        string   // The name of the database to connect to.
-	User        string   // The user to sign in as.
-	Password    string   // The user's password.
-	RmtConns    []string // Remote DataDB  connIDs
-	RmtConnID   string
-	RplConns    []string // Replication connIDs
-	RplFiltered bool
-	RplCache    string
-	Items       map[string]*ItemOpt
-	Opts        map[string]interface{}
+	Type         string
+	Host         string   // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port         string   // The port to bind to.
+	Name         string   // The name of the database to connect to.
+	User         string   // The user to sign in as.
+	Password     string   // The user's password.
+	RmtConns     []string // Remote DataDB  connIDs
+	RmtConnID    string
+	RplConns     []string // Replication connIDs
+	RplFiltered  bool
+	RplCache     string
+	UpdateConfig bool
+	Items        map[string]*ItemOpt
+	Opts         map[string]interface{}
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
@@ -113,6 +114,9 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	if jsnDbCfg.Replication_cache != nil {
 		dbcfg.RplCache = *jsnDbCfg.Replication_cache
+	}
+	if jsnDbCfg.Update_config != nil {
+		dbcfg.UpdateConfig = *jsnDbCfg.Update_config
 	}
 	return
 }

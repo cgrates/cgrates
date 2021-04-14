@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
@@ -53,7 +54,8 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
 		activeSessionIDs: make(chan []*sessions.SessionID),
 	}
-	ka.ctx = context.WithClient(context.TODO(), ka)
+	srv, _ := birpc.NewService(ka, "", false)
+	ka.ctx = context.WithClient(context.TODO(), srv)
 	return
 }
 
@@ -104,11 +106,6 @@ func (self *KamailioAgent) Shutdown() (err error) {
 		}
 	}
 	return
-}
-
-// birpc.ClientConnector interface
-func (ka *KamailioAgent) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.RPCCall(ka, serviceMethod, args, reply)
 }
 
 // onCgrAuth is called when new event of type CGR_AUTH_REQUEST is coming

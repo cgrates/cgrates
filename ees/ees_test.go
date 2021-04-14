@@ -75,18 +75,6 @@ func TestListenAndServe(t *testing.T) {
 	logBuf.Reset()
 }
 
-func TestCall(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true)
-	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrCfg, nil, newDM)
-	eeS := NewEventExporterS(cgrCfg, filterS, nil)
-	errExpect := "UNSUPPORTED_SERVICE_METHOD"
-	if err := eeS.Call(context.Background(), "test", 24532, 43643); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %q but received %q", errExpect, err)
-	}
-}
-
 type testMockEvent struct {
 	calls map[string]func(_ *context.Context, _, _ interface{}) error
 }

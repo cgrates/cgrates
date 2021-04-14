@@ -70,7 +70,7 @@ func TestSupplierSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	supS2.connChan <- chS
+	supS2.connChan <- &testMockClients{}
 	supS2.Shutdown()
 	if supS.IsRunning() {
 		t.Errorf("Expected service to be down")

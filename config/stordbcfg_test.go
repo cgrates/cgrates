@@ -131,7 +131,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
@@ -151,7 +151,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
@@ -171,7 +171,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(StorDBJSON); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)

@@ -1410,11 +1410,6 @@ func (sS *SessionS) chargeEvent(cgrEv *utils.CGREvent, forceDuration bool) (maxU
 
 // APIs start here
 
-// Call is part of RpcClientConnection interface
-func (sS *SessionS) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	return utils.APIerRPCCall(sS, serviceMethod, args, reply)
-}
-
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
 func (sS *SessionS) BiRPCv1GetActiveSessions(clnt birpc.ClientConnector,
 	args *utils.SessionFilter, reply *[]*ExternalSession) (err error) {

@@ -21,64 +21,111 @@ package config
 import (
 	"encoding/json"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 const (
-	GENERAL_JSN        = "general"
-	CACHE_JSN          = "caches"
-	LISTEN_JSN         = "listen"
-	HTTP_JSN           = "http"
-	DATADB_JSN         = "data_db"
-	STORDB_JSN         = "stor_db"
-	FilterSjsn         = "filters"
-	CDRS_JSN           = "cdrs"
-	SessionSJson       = "sessions"
-	FreeSWITCHAgentJSN = "freeswitch_agent"
-	KamailioAgentJSN   = "kamailio_agent"
-	AsteriskAgentJSN   = "asterisk_agent"
-	DA_JSN             = "diameter_agent"
-	RA_JSN             = "radius_agent"
-	HttpAgentJson      = "http_agent"
-	ATTRIBUTE_JSN      = "attributes"
-	RESOURCES_JSON     = "resources"
-	STATS_JSON         = "stats"
-	THRESHOLDS_JSON    = "thresholds"
-	RouteSJson         = "routes"
-	LoaderJson         = "loaders"
-	MAILER_JSN         = "mailer"
-	SURETAX_JSON       = "suretax"
-	DispatcherSJson    = "dispatchers"
-	RegistrarCJson     = "registrarc"
-	CgrLoaderCfgJson   = "loader"
-	CgrMigratorCfgJson = "migrator"
-	ChargerSCfgJson    = "chargers"
-	TlsCfgJson         = "tls"
-	AnalyzerCfgJson    = "analyzers"
-	AdminS             = "admins"
-	DNSAgentJson       = "dns_agent"
-	ERsJson            = "ers"
-	EEsJson            = "ees"
-	RateSJson          = "rates"
-	ActionSJson        = "actions"
-	RPCConnsJsonName   = "rpc_conns"
-	SIPAgentJson       = "sip_agent"
-	TemplatesJson      = "templates"
-	ConfigSJson        = "configs"
-	APIBanCfgJson      = "apiban"
-	CoreSCfgJson       = "cores"
-	AccountSCfgJson    = "accounts"
+	GeneralJSON         = "general"
+	CacheJSON           = "caches"
+	ListenJSON          = "listen"
+	HTTPJSON            = "http"
+	DataDBJSON          = "data_db"
+	StorDBJSON          = "stor_db"
+	FilterSJSON         = "filters"
+	CDRsJSON            = "cdrs"
+	SessionSJSON        = "sessions"
+	FreeSWITCHAgentJSON = "freeswitch_agent"
+	KamailioAgentJSON   = "kamailio_agent"
+	AsteriskAgentJSON   = "asterisk_agent"
+	DiameterAgentJSON   = "diameter_agent"
+	RadiusAgentJSON     = "radius_agent"
+	HTTPAgentJSON       = "http_agent"
+	AttributeSJSON      = "attributes"
+	ResourceSJSON       = "resources"
+	StatSJSON           = "stats"
+	ThresholdSJSON      = "thresholds"
+	RouteSJSON          = "routes"
+	LoaderSJSON         = "loaders"
+	MailerJSON          = "mailer"
+	SureTaxJSON         = "suretax"
+	DispatcherSJSON     = "dispatchers"
+	RegistrarCJSON      = "registrarc"
+	LoaderJSON          = "loader"
+	MigratorJSON        = "migrator"
+	ChargerSJSON        = "chargers"
+	TlsJSON             = "tls"
+	AnalyzerSJSON       = "analyzers"
+	AdminSJSON          = "admins"
+	DNSAgentJSON        = "dns_agent"
+	ERsJSON             = "ers"
+	EEsJSON             = "ees"
+	RateSJSON           = "rates"
+	ActionSJSON         = "actions"
+	RPCConnsJSON        = "rpc_conns"
+	SIPAgentJSON        = "sip_agent"
+	TemplatesJSON       = "templates"
+	ConfigSJSON         = "configs"
+	APIBanJSON          = "apiban"
+	CoreSJSON           = "cores"
+	AccountSJSON        = "accounts"
 )
 
 var (
-	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN,
-		CACHE_JSN, FilterSjsn, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN,
-		KamailioAgentJSN, DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON,
-		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson,
-		AnalyzerCfgJson, AdminS, EEsJson, RateSJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, CoreSCfgJson,
-		ActionSJson, AccountSCfgJson}
+	sortedCfgSections = []string{GeneralJSON, RPCConnsJSON, DataDBJSON, StorDBJSON, ListenJSON, TlsJSON, HTTPJSON,
+		CacheJSON, FilterSJSON, CDRsJSON, ERsJSON, SessionSJSON, AsteriskAgentJSON, FreeSWITCHAgentJSON,
+		KamailioAgentJSON, DiameterAgentJSON, RadiusAgentJSON, HTTPAgentJSON, DNSAgentJSON, AttributeSJSON,
+		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON, RouteSJSON, LoaderSJSON, MailerJSON, SureTaxJSON,
+		LoaderJSON, MigratorJSON, DispatcherSJSON, AnalyzerSJSON, AdminSJSON, EEsJSON, RateSJSON, SIPAgentJSON,
+		RegistrarCJSON, TemplatesJSON, ConfigSJSON, APIBanJSON, CoreSJSON, ActionSJSON, AccountSJSON}
 	sortedSectionsSet = utils.NewStringSet(sortedCfgSections)
 )
+
+type ConfigDB interface {
+	GeneralJsonCfg() (*GeneralJsonCfg, error)
+	RPCConnJsonCfg() (RPCConnsJson, error)
+	CacheJsonCfg() (*CacheJsonCfg, error)
+	ListenJsonCfg() (*ListenJsonCfg, error)
+	HttpJsonCfg() (*HTTPJsonCfg, error)
+	DbJsonCfg(section string) (*DbJsonCfg, error)
+	FilterSJsonCfg() (*FilterSJsonCfg, error)
+	CdrsJsonCfg() (*CdrsJsonCfg, error)
+	ERsJsonCfg() (*ERsJsonCfg, error)
+	EEsJsonCfg() (*EEsJsonCfg, error)
+	SessionSJsonCfg() (*SessionSJsonCfg, error)
+	FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error)
+	KamAgentJsonCfg() (*KamAgentJsonCfg, error)
+	AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error)
+	DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error)
+	RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error)
+	HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error)
+	DNSAgentJsonCfg() (*DNSAgentJsonCfg, error)
+	AttributeServJsonCfg() (*AttributeSJsonCfg, error)
+	ChargerServJsonCfg() (*ChargerSJsonCfg, error)
+	ResourceSJsonCfg() (*ResourceSJsonCfg, error)
+	StatSJsonCfg() (*StatServJsonCfg, error)
+	ThresholdSJsonCfg() (*ThresholdSJsonCfg, error)
+	RouteSJsonCfg() (*RouteSJsonCfg, error)
+	LoaderJsonCfg() ([]*LoaderJsonCfg, error)
+	MailerJsonCfg() (*MailerJsonCfg, error)
+	SureTaxJsonCfg() (*SureTaxJsonCfg, error)
+	DispatcherSJsonCfg() (*DispatcherSJsonCfg, error)
+	RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error)
+	LoaderCfgJson() (*LoaderCfgJson, error)
+	MigratorCfgJson() (*MigratorCfgJson, error)
+	TlsCfgJson() (*TlsJsonCfg, error)
+	AnalyzerCfgJson() (*AnalyzerSJsonCfg, error)
+	AdminSCfgJson() (*AdminSJsonCfg, error)
+	RateCfgJson() (*RateSJsonCfg, error)
+	SIPAgentJsonCfg() (*SIPAgentJsonCfg, error)
+	TemplateSJsonCfg() (FcTemplatesJsonCfg, error)
+	ConfigSJsonCfg() (*ConfigSCfgJson, error)
+	ApiBanCfgJson() (*APIBanJsonCfg, error)
+	CoreSJSON() (*CoreSJsonCfg, error)
+	ActionSCfgJson() (*ActionSJsonCfg, error)
+	AccountSCfgJson() (*AccountSJsonCfg, error)
+	SetSection(*context.Context, string, interface{}) error
+}
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
 func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
@@ -91,7 +138,7 @@ func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
 type CgrJsonCfg map[string]*json.RawMessage
 
 func (jsnCfg CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[GENERAL_JSN]
+	rawCfg, hasKey := jsnCfg[GeneralJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -102,12 +149,12 @@ func (jsnCfg CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
 	return cfg, nil
 }
 
-func (jsnCfg CgrJsonCfg) RPCConnJsonCfg() (map[string]*RPCConnsJson, error) {
-	rawCfg, hasKey := jsnCfg[RPCConnsJsonName]
+func (jsnCfg CgrJsonCfg) RPCConnJsonCfg() (RPCConnsJson, error) {
+	rawCfg, hasKey := jsnCfg[RPCConnsJSON]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := make(map[string]*RPCConnsJson)
+	cfg := make(RPCConnsJson)
 	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}
@@ -115,7 +162,7 @@ func (jsnCfg CgrJsonCfg) RPCConnJsonCfg() (map[string]*RPCConnsJson, error) {
 }
 
 func (jsnCfg CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[CACHE_JSN]
+	rawCfg, hasKey := jsnCfg[CacheJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -127,7 +174,7 @@ func (jsnCfg CgrJsonCfg) CacheJsonCfg() (*CacheJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[LISTEN_JSN]
+	rawCfg, hasKey := jsnCfg[ListenJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -139,7 +186,7 @@ func (jsnCfg CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) HttpJsonCfg() (*HTTPJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[HTTP_JSN]
+	rawCfg, hasKey := jsnCfg[HTTPJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -163,7 +210,7 @@ func (jsnCfg CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) FilterSJsonCfg() (*FilterSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[FilterSjsn]
+	rawCfg, hasKey := jsnCfg[FilterSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -175,7 +222,7 @@ func (jsnCfg CgrJsonCfg) FilterSJsonCfg() (*FilterSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[CDRS_JSN]
+	rawCfg, hasKey := jsnCfg[CDRsJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -187,7 +234,7 @@ func (jsnCfg CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
-	rawCfg, hasKey := jsnCfg[ERsJson]
+	rawCfg, hasKey := jsnCfg[ERsJSON]
 	if !hasKey {
 		return
 	}
@@ -197,7 +244,7 @@ func (jsnCfg CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
 }
 
 func (jsnCfg CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
-	rawCfg, hasKey := jsnCfg[EEsJson]
+	rawCfg, hasKey := jsnCfg[EEsJSON]
 	if !hasKey {
 		return
 	}
@@ -207,7 +254,7 @@ func (jsnCfg CgrJsonCfg) EEsJsonCfg() (erSCfg *EEsJsonCfg, err error) {
 }
 
 func (jsnCfg CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SessionSJson]
+	rawCfg, hasKey := jsnCfg[SessionSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -219,7 +266,7 @@ func (jsnCfg CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[FreeSWITCHAgentJSN]
+	rawCfg, hasKey := jsnCfg[FreeSWITCHAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -231,7 +278,7 @@ func (jsnCfg CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, erro
 }
 
 func (jsnCfg CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[KamailioAgentJSN]
+	rawCfg, hasKey := jsnCfg[KamailioAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -243,7 +290,7 @@ func (jsnCfg CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AsteriskAgentJSN]
+	rawCfg, hasKey := jsnCfg[AsteriskAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -255,7 +302,7 @@ func (jsnCfg CgrJsonCfg) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[DA_JSN]
+	rawCfg, hasKey := jsnCfg[DiameterAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -267,7 +314,7 @@ func (jsnCfg CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RA_JSN]
+	rawCfg, hasKey := jsnCfg[RadiusAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -279,7 +326,7 @@ func (jsnCfg CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[HttpAgentJson]
+	rawCfg, hasKey := jsnCfg[HTTPAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -291,7 +338,7 @@ func (jsnCfg CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
-	rawCfg, hasKey := jsnCfg[DNSAgentJson]
+	rawCfg, hasKey := jsnCfg[DNSAgentJSON]
 	if !hasKey {
 		return
 	}
@@ -301,7 +348,7 @@ func (jsnCfg CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
 }
 
 func (jsnCfg CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ATTRIBUTE_JSN]
+	rawCfg, hasKey := jsnCfg[AttributeSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -313,7 +360,7 @@ func (jsnCfg CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ChargerSCfgJson]
+	rawCfg, hasKey := jsnCfg[ChargerSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -325,7 +372,7 @@ func (jsnCfg CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RESOURCES_JSON]
+	rawCfg, hasKey := jsnCfg[ResourceSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -337,7 +384,7 @@ func (jsnCfg CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[STATS_JSON]
+	rawCfg, hasKey := jsnCfg[StatSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -349,7 +396,7 @@ func (jsnCfg CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[THRESHOLDS_JSON]
+	rawCfg, hasKey := jsnCfg[ThresholdSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -361,7 +408,7 @@ func (jsnCfg CgrJsonCfg) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RouteSJson]
+	rawCfg, hasKey := jsnCfg[RouteSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -373,7 +420,7 @@ func (jsnCfg CgrJsonCfg) RouteSJsonCfg() (*RouteSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[LoaderJson]
+	rawCfg, hasKey := jsnCfg[LoaderSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -385,7 +432,7 @@ func (jsnCfg CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[MAILER_JSN]
+	rawCfg, hasKey := jsnCfg[MailerJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -397,7 +444,7 @@ func (jsnCfg CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SURETAX_JSON]
+	rawCfg, hasKey := jsnCfg[SureTaxJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -409,7 +456,7 @@ func (jsnCfg CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[DispatcherSJson]
+	rawCfg, hasKey := jsnCfg[DispatcherSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -421,7 +468,7 @@ func (jsnCfg CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
-	rawCfg, hasKey := jsnCfg[RegistrarCJson]
+	rawCfg, hasKey := jsnCfg[RegistrarCJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -433,7 +480,7 @@ func (jsnCfg CgrJsonCfg) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
 }
 
 func (jsnCfg CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
-	rawCfg, hasKey := jsnCfg[CgrLoaderCfgJson]
+	rawCfg, hasKey := jsnCfg[LoaderJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -445,7 +492,7 @@ func (jsnCfg CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
 }
 
 func (jsnCfg CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
-	rawCfg, hasKey := jsnCfg[CgrMigratorCfgJson]
+	rawCfg, hasKey := jsnCfg[MigratorJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -457,7 +504,7 @@ func (jsnCfg CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
 }
 
 func (jsnCfg CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[TlsCfgJson]
+	rawCfg, hasKey := jsnCfg[TlsJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -469,7 +516,7 @@ func (jsnCfg CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AnalyzerCfgJson]
+	rawCfg, hasKey := jsnCfg[AnalyzerSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -480,8 +527,8 @@ func (jsnCfg CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (jsnCfg CgrJsonCfg) ApierCfgJson() (*AdminSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AdminS]
+func (jsnCfg CgrJsonCfg) AdminSCfgJson() (*AdminSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[AdminSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -493,7 +540,7 @@ func (jsnCfg CgrJsonCfg) ApierCfgJson() (*AdminSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[RateSJson]
+	rawCfg, hasKey := jsnCfg[RateSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -505,7 +552,7 @@ func (jsnCfg CgrJsonCfg) RateCfgJson() (*RateSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[SIPAgentJson]
+	rawCfg, hasKey := jsnCfg[SIPAgentJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -516,12 +563,12 @@ func (jsnCfg CgrJsonCfg) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
 	return sipAgnt, nil
 }
 
-func (jsnCfg CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[TemplatesJson]
+func (jsnCfg CgrJsonCfg) TemplateSJsonCfg() (FcTemplatesJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[TemplatesJSON]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := make(map[string][]*FcTemplateJsonCfg)
+	cfg := make(FcTemplatesJsonCfg)
 	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}
@@ -529,7 +576,7 @@ func (jsnCfg CgrJsonCfg) TemplateSJsonCfg() (map[string][]*FcTemplateJsonCfg, er
 }
 
 func (jsnCfg CgrJsonCfg) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
-	rawCfg, hasKey := jsnCfg[ConfigSJson]
+	rawCfg, hasKey := jsnCfg[ConfigSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -541,7 +588,7 @@ func (jsnCfg CgrJsonCfg) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[APIBanCfgJson]
+	rawCfg, hasKey := jsnCfg[APIBanJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -552,8 +599,8 @@ func (jsnCfg CgrJsonCfg) ApiBanCfgJson() (*APIBanJsonCfg, error) {
 	return cfg, nil
 }
 
-func (jsnCfg CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[CoreSCfgJson]
+func (jsnCfg CgrJsonCfg) CoreSJSON() (*CoreSJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[CoreSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -565,7 +612,7 @@ func (jsnCfg CgrJsonCfg) CoreSCfgJson() (*CoreSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ActionSJson]
+	rawCfg, hasKey := jsnCfg[ActionSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -577,7 +624,7 @@ func (jsnCfg CgrJsonCfg) ActionSCfgJson() (*ActionSJsonCfg, error) {
 }
 
 func (jsnCfg CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[AccountSCfgJson]
+	rawCfg, hasKey := jsnCfg[AccountSJSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -586,4 +633,14 @@ func (jsnCfg CgrJsonCfg) AccountSCfgJson() (*AccountSJsonCfg, error) {
 		return nil, err
 	}
 	return cfg, nil
+}
+
+func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn interface{}) error {
+	data, err := json.Marshal(jsn)
+	if err != nil {
+		return err
+	}
+	d := json.RawMessage(data)
+	jsnCfg[section] = &d
+	return nil
 }

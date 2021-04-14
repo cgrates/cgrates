@@ -27,7 +27,7 @@ import (
 )
 
 func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
-	cfgJSON := &RPCConnsJson{
+	cfgJSON := &RPCConnJson{
 		Strategy: utils.StringPointer(utils.MetaFirst),
 		PoolSize: utils.IntPointer(1),
 		Conns: &[]*RemoteHostJson{

@@ -170,7 +170,7 @@ func (acS *AccountSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
 	if acS.MaxUsage != nil {
-		initialMP[utils.MaxUsage] = acS.MaxUsage
+		initialMP[utils.MaxUsage] = acS.MaxUsage.String()
 	}
 	return
 }

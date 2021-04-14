@@ -70,7 +70,7 @@ func TestRateSCoverage(t *testing.T) {
 	if !reflect.DeepEqual(shouldRun, false) {
 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
 	}
-	rS2.intConnChan <- chS
+	rS2.intConnChan <- &testMockClients{}
 	rS2.Shutdown()
 	if rS.IsRunning() {
 		t.Errorf("Expected service to be down")

@@ -205,12 +205,6 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 	return
 }
 
-// Call implements birpc.ClientConnector interface for internal RPC
-// here for cases when passing StatsService as rpccclient.RpcClientConnection
-func (sS *StatService) Call(ctx *context.Context, serviceMethod string, args, reply interface{}) error {
-	return utils.RPCCall(sS, serviceMethod, args, reply)
-}
-
 // StatsArgsProcessEvent the arguments for processing the event with stats
 type StatsArgsProcessEvent struct {
 	StatIDs []string

@@ -148,6 +148,7 @@ func NewAttributeSv1(attrS *engine.AttributeService) *AttributeSv1 {
 
 // AttributeSv1 exports RPC from Attributes service
 type AttributeSv1 struct {
+	ping
 	attrS *engine.AttributeService
 }
 
@@ -162,10 +163,4 @@ func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *engi
 func (alSv1 *AttributeSv1) ProcessEvent(ctx *context.Context, args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return alSv1.attrS.V1ProcessEvent(ctx, args, reply)
-}
-
-// Ping return pong used to determine if the subsystem is active
-func (alSv1 *AttributeSv1) Ping(_ *context.Context, _ *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
 }

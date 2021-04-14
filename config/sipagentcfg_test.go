@@ -162,7 +162,7 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*internal"},
 		utils.TimezoneCfg:            "",
-		utils.RetransmissionTimerCfg: 2 * time.Second,
+		utils.RetransmissionTimerCfg: "2s",
 		utils.RequestProcessorsCfg:   []map[string]interface{}{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -212,7 +212,7 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*internal"},
 		utils.TimezoneCfg:            "UTC",
-		utils.RetransmissionTimerCfg: 5 * time.Second,
+		utils.RetransmissionTimerCfg: "5s",
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -266,7 +266,7 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
 		utils.TimezoneCfg:            "",
-		utils.RetransmissionTimerCfg: time.Second,
+		utils.RetransmissionTimerCfg: "1s",
 		utils.RequestProcessorsCfg: []map[string]interface{}{
 			{
 				utils.IDCfg:            "Register",
