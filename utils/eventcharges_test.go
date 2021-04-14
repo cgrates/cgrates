@@ -22,6 +22,7 @@ import (
 	"math"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/ericlagergren/decimal"
 )
@@ -175,7 +176,7 @@ func TestAsExtChargingInterval(t *testing.T) {
 	}
 
 	chrgInt.Increments[0].Units = NewDecimal(int64(math.Inf(1))-1, 0)
-	expected := "Cannot convert decimal ChargingIncrement "
+	expected := "Cannot convert decimal ChargingIncrement into float64 "
 	if _, err := chrgInt.AsExtChargingInterval(); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -472,3 +473,156 @@ func TestCompressEqualsChargingInterval(t *testing.T) {
 	}
 }
 */
+
+func TestAsExtEventCharges(t *testing.T) {
+	evCh := &EventCharges{
+		ChargingIntervals: []*ChargingInterval{
+			{
+				Increments: []*ChargingIncrement{
+					{
+						Units: NewDecimal(1, 0),
+					},
+				},
+				CompressFactor: 2,
+			},
+		},
+		Accounts: []*Account{
+			{
+				Balances: map[string]*Balance{
+					"BL1": {
+						Units: NewDecimal(300, 0),
+					},
+				},
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"first_accounting": {
+				BalanceLimit: NewDecimal(2, 0),
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"first_factor": {
+				Factor: NewDecimal(10, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"first_rates_interval": {
+				IntervalStart: NewDecimal(int64(time.Minute), 0),
+			},
+		},
+	}
+
+	expEvCh := &ExtEventCharges{
+		ChargingIntervals: []*ExtChargingInterval{
+			{
+				Increments: []*ExtChargingIncrement{
+					{
+						Units: Float64Pointer(1.0),
+					},
+				},
+				CompressFactor: 2,
+			},
+		},
+		Accounts: []*ExtAccount{
+			{
+				Balances: map[string]*ExtBalance{
+					"BL1": {
+						Units: Float64Pointer(300),
+					},
+				},
+			},
+		},
+		Accounting: map[string]*ExtAccountCharge{
+			"first_accounting": {
+				BalanceLimit: Float64Pointer(2),
+			},
+		},
+		UnitFactors: map[string]*ExtUnitFactor{
+			"first_factor": {
+				Factor: Float64Pointer(10),
+			},
+		},
+		Rating: map[string]*ExtRateSInterval{
+			"first_rates_interval": {
+				IntervalStart: Float64Pointer(float64(time.Minute)),
+			},
+		},
+	}
+	if rcv, err := evCh.AsExtEventCharges(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expEvCh) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expEvCh), ToJSON(rcv))
+	}
+}
+
+func TestAsExtEventChargersCheckErrors(t *testing.T) {
+	evCh := &EventCharges{
+		ChargingIntervals: []*ChargingInterval{
+			{
+				Increments: []*ChargingIncrement{
+					{
+						Units: NewDecimal(int64(math.Inf(1))-1, 0),
+					},
+				},
+				CompressFactor: 2,
+			},
+		},
+		Accounts: []*Account{
+			{
+				Balances: map[string]*Balance{
+					"BL1": {
+						Units: NewDecimal(300, 0),
+					},
+				},
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"first_accounting": {
+				BalanceLimit: NewDecimal(2, 0),
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"first_factor": {
+				Factor: NewDecimal(10, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"first_rates_interval": {
+				IntervalStart: NewDecimal(int64(time.Minute), 0),
+			},
+		},
+	}
+	expected := "Cannot convert decimal ChargingIncrement into float64 "
+	if _, err := evCh.AsExtEventCharges(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	evCh.ChargingIntervals[0].Increments[0].Units = NewDecimal(0, 0)
+
+	evCh.Accounts[0].Balances["BL1"].Units = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal Units to float64 "
+	if _, err := evCh.AsExtEventCharges(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	evCh.Accounts[0].Balances["BL1"].Units = NewDecimal(0, 0)
+
+	evCh.Accounting["first_accounting"].BalanceLimit = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal BalanceLimit to float64 "
+	if _, err := evCh.AsExtEventCharges(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	evCh.Accounting["first_accounting"].BalanceLimit = NewDecimal(0, 0)
+
+	evCh.UnitFactors["first_factor"].Factor = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "cannot convert decimal Factor to float64 "
+	if _, err := evCh.AsExtEventCharges(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	evCh.UnitFactors["first_factor"].Factor = NewDecimal(0, 0)
+
+	evCh.Rating["first_rates_interval"].IntervalStart = NewDecimal(int64(math.Inf(1))-1, 0)
+	expected = "Cannot convert decimal IntervalStart into float64 "
+	if _, err := evCh.AsExtEventCharges(); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+q, received %+q", expected, err)
+	}
+	evCh.Rating["first_rates_interval"].IntervalStart = NewDecimal(0, 0)
+}
