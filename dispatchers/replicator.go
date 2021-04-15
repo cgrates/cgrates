@@ -623,7 +623,9 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(args *engine.Disp
 
 func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *utils.RateProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.RateProfileWithAPIOpts{}
+		args = &utils.RateProfileWithAPIOpts{
+			RateProfile: &utils.RateProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -640,7 +642,9 @@ func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *utils.RateProfile
 
 func (dS *DispatcherService) ReplicatorSv1SetActionProfile(args *engine.ActionProfileWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &engine.ActionProfileWithAPIOpts{}
+		args = &engine.ActionProfileWithAPIOpts{
+			ActionProfile: &engine.ActionProfile{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
