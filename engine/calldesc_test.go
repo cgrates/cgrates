@@ -2036,6 +2036,355 @@ func TestCalldescFieldAsStringNilFieldPath(t *testing.T) {
 	}
 }
 
+func TestCalldescSetRoundingDecimals(t *testing.T) {
+	exp := 6
+	SetRoundingDecimals(6)
+
+	if globalRoundingDecimals != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, globalRoundingDecimals)
+	}
+}
+
+func TestCalldescSetRpSubjectPrefixMatching(t *testing.T) {
+	SetRpSubjectPrefixMatching(false)
+
+	if rpSubjectPrefixMatching != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+			false, rpSubjectPrefixMatching)
+	}
+}
+
+func TestCalldescNewCallDescriptorFromCGREventNoAccount(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			"testKey": 5,
+		},
+	}
+	timezone := ""
+
+	experr := utils.ErrNotFound
+	exp := &CallDescriptor{}
+	rcv, err := NewCallDescriptorFromCGREvent(cgrEv, timezone)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescNewCallDescriptorFromCGREventNoDestination(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Category:     "catField",
+			utils.AccountField: "accField",
+		},
+	}
+	timezone := ""
+
+	experr := utils.ErrNotFound
+	var exp *CallDescriptor
+	rcv, err := NewCallDescriptorFromCGREvent(cgrEv, timezone)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescNewCallDescriptorFromCGREventNoTimeStart(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Category:     "catField",
+			utils.AccountField: "accField",
+			utils.Destination:  "destField",
+		},
+	}
+	timezone := ""
+
+	experr := utils.ErrNotFound
+	var exp *CallDescriptor
+	rcv, err := NewCallDescriptorFromCGREvent(cgrEv, timezone)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescNewCallDescriptorFromCGREventInvalidAnswerTime(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Category:     "catField",
+			utils.AccountField: "accField",
+			utils.Destination:  "destField",
+			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local),
+			utils.AnswerTime:   5,
+		},
+	}
+	timezone := "UTC"
+
+	experr := "cannot convert field: 5 to time.Time"
+	var exp *CallDescriptor
+	rcv, err := NewCallDescriptorFromCGREvent(cgrEv, timezone)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescNewCallDescriptorFromCGREventNoUsage(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Category:     "catField",
+			utils.AccountField: "accField",
+			utils.Destination:  "destField",
+			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local),
+			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+		},
+	}
+	timezone := "UTC"
+
+	experr := utils.ErrNotFound
+	var exp *CallDescriptor
+	rcv, err := NewCallDescriptorFromCGREvent(cgrEv, timezone)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescNewCallDescriptorFromCGREvent(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Category:     "catField",
+			utils.AccountField: "accField",
+			utils.Destination:  "destField",
+			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local),
+			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			utils.Usage:        100,
+			utils.ToR:          utils.MetaVoice,
+		},
+		Tenant: "cgrates.org",
+	}
+	timezone := "UTC"
+
+	exp := &CallDescriptor{
+		Category:    "catField",
+		Subject:     "accField",
+		Account:     "accField",
+		Destination: "destField",
+		TimeStart:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+		TimeEnd:     time.Date(2021, 1, 5, 23, 59, 59, 100, time.Local),
+		ToR:         utils.MetaVoice,
+		Tenant:      "cgrates.org",
+	}
+	rcv, err := NewCallDescriptorFromCGREvent(cgrEv, timezone)
+
+	if err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescAsCGREvent(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "catField",
+		Subject:     "accField",
+		Account:     "accField",
+		Destination: "destField",
+		TimeStart:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+		TimeEnd:     time.Date(2021, 1, 5, 23, 59, 59, 100, time.Local),
+		ToR:         utils.MetaVoice,
+		Tenant:      "cgrates.org",
+		ExtraFields: map[string]string{
+			"eventKey1": "eventValue1",
+			"eventKey2": "eventValue2",
+			"eventKey3": "eventValue3",
+		},
+	}
+	opts := make(map[string]interface{})
+
+	exp := &utils.CGREvent{
+		Event: map[string]interface{}{
+			utils.Category:     "catField",
+			utils.Subject:      "accField",
+			utils.AccountField: "accField",
+			utils.Destination:  "destField",
+			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			utils.Usage:        100 * time.Nanosecond,
+			utils.ToR:          utils.MetaVoice,
+			utils.Tenant:       "cgrates.org",
+			"eventKey1":        "eventValue1",
+			"eventKey2":        "eventValue2",
+			"eventKey3":        "eventValue3",
+		},
+		APIOpts: opts,
+		Tenant:  "cgrates.org",
+	}
+	rcv := cd.AsCGREvent(opts)
+	exp.ID = rcv.ID
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestCalldescAddRatingInfo(t *testing.T) {
+	cd := &CallDescriptor{
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+	}
+	ris := []*RatingInfo{
+		{
+			MatchedSubject: "1001",
+			RatingPlanId:   "RP_1001",
+			MatchedPrefix:  "1001",
+			MatchedDestId:  "1002",
+			ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			RateIntervals: RateIntervalList{
+				{
+					Rating: &RIRate{
+						ConnectFee:       0.4,
+						tag:              "tag",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          100,
+						MaxCostStrategy:  "*disconnect",
+						Rates: RateGroups{
+							{
+								Value:         10,
+								RateIncrement: 60,
+								RateUnit:      60,
+							},
+						},
+					},
+				},
+			},
+			FallbackKeys: []string{"key1", "key2"},
+		},
+		{
+			MatchedSubject: "1002",
+			RatingPlanId:   "RP_1002",
+			MatchedPrefix:  "1002",
+			MatchedDestId:  "1003",
+			ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			RateIntervals: RateIntervalList{
+				{
+					Rating: &RIRate{
+						ConnectFee:       0.3,
+						tag:              "tag",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 7,
+						MaxCost:          150,
+						MaxCostStrategy:  "*disconnect",
+						Rates: RateGroups{
+							{
+								Value:         10,
+								RateIncrement: 1,
+								RateUnit:      60,
+							},
+						},
+					},
+				},
+			},
+			FallbackKeys: []string{"key3"},
+		},
+	}
+
+	exp := &CallDescriptor{
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		RatingInfos: RatingInfos{
+			{
+				MatchedSubject: "1001",
+				RatingPlanId:   "RP_1001",
+				MatchedPrefix:  "1001",
+				MatchedDestId:  "1002",
+				ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+				RateIntervals: RateIntervalList{
+					{
+						Rating: &RIRate{
+							ConnectFee:       0.4,
+							tag:              "tag",
+							RoundingMethod:   "*up",
+							RoundingDecimals: 4,
+							MaxCost:          100,
+							MaxCostStrategy:  "*disconnect",
+							Rates: RateGroups{
+								{
+									Value:         10,
+									RateIncrement: 60,
+									RateUnit:      60,
+								},
+							},
+						},
+					},
+				},
+				FallbackKeys: []string{"key1", "key2"},
+			},
+			{
+				MatchedSubject: "1002",
+				RatingPlanId:   "RP_1002",
+				MatchedPrefix:  "1002",
+				MatchedDestId:  "1003",
+				ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+				RateIntervals: RateIntervalList{
+					{
+						Rating: &RIRate{
+							ConnectFee:       0.3,
+							tag:              "tag",
+							RoundingMethod:   "*up",
+							RoundingDecimals: 7,
+							MaxCost:          150,
+							MaxCostStrategy:  "*disconnect",
+							Rates: RateGroups{
+								{
+									Value:         10,
+									RateIncrement: 1,
+									RateUnit:      60,
+								},
+							},
+						},
+					},
+				},
+				FallbackKeys: []string{"key3"},
+			},
+		},
+	}
+	cd.AddRatingInfo(ris[0], ris[1])
+
+	if !reflect.DeepEqual(cd, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, cd)
+	}
+
+}
+
 /*************** BENCHMARKS ********************/
 func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
