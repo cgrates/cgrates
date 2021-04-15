@@ -217,7 +217,7 @@ func TestCallcostCallCostToDataCost(t *testing.T) {
 				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
 				ratingInfo: &RatingInfo{
 					MatchedSubject: "1001",
-					RatingPlanId:   "RT_20CNT",
+					RatingPlanId:   "RP_1001",
 					MatchedPrefix:  "1001",
 					MatchedDestId:  "1002",
 					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
@@ -280,7 +280,7 @@ func TestCallcostCallCostToDataCost(t *testing.T) {
 					},
 					Weight: 10,
 				},
-				RatingPlanId:   "RT_20CNT",
+				RatingPlanId:   "RP_1001",
 				MatchedDestId:  "1002",
 				MatchedSubject: "1001",
 				MatchedPrefix:  "1001",
@@ -402,7 +402,7 @@ func TestCallcostCallCostToDataCost(t *testing.T) {
 				MatchedSubject: "1001",
 				MatchedPrefix:  "1001",
 				MatchedDestId:  "1002",
-				RatingPlanId:   "RT_20CNT",
+				RatingPlanId:   "RP_1001",
 			},
 		},
 	}
@@ -495,7 +495,7 @@ func TestCallcostAsJSON(t *testing.T) {
 				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
 				ratingInfo: &RatingInfo{
 					MatchedSubject: "1001",
-					RatingPlanId:   "RT_20CNT",
+					RatingPlanId:   "RP_1001",
 					MatchedPrefix:  "1001",
 					MatchedDestId:  "1002",
 					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
@@ -558,7 +558,7 @@ func TestCallcostAsJSON(t *testing.T) {
 					},
 					Weight: 10,
 				},
-				RatingPlanId:   "RT_20CNT",
+				RatingPlanId:   "RP_1001",
 				MatchedDestId:  "1002",
 				MatchedSubject: "1001",
 				MatchedPrefix:  "1001",
@@ -611,7 +611,7 @@ func TestCallcostAsJSON(t *testing.T) {
 		},
 	}
 
-	exp := `{"Category":"call","Tenant":"cgrates.org","Subject":"1001","Account":"1001","Destination":"1002","ToR":"*voice","Cost":10,"Timespans":[{"TimeStart":"2021-01-01T10:25:00+02:00","TimeEnd":"2021-01-01T10:30:00+02:00","Cost":15,"RateInterval":{"Timing":{"ID":"ritTimingID","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":15,"RoundingMethod":"up","RoundingDecimals":1,"MaxCost":100,"MaxCostStrategy":"*disconnect","Rates":[{"GroupIntervalStart":30000000000,"Value":5,"RateIncrement":60000000000,"RateUnit":60000000000},{"GroupIntervalStart":60000000000,"Value":5,"RateIncrement":1000000000,"RateUnit":60000000000}]},"Weight":10},"DurationIndex":10,"Increments":[{"Duration":24000000000,"Cost":20,"BalanceInfo":{"Unit":{"UUID":"unitUUID2","ID":"1001","Value":10,"DestinationID":"1002","Consumed":20,"ToR":"*voice","RateInterval":{"Timing":{"ID":"","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"","RoundingDecimals":0,"MaxCost":0,"MaxCostStrategy":"","Rates":null},"Weight":15}},"Monetary":null,"AccountID":""},"CompressFactor":2}],"RoundIncrement":{"Duration":12000000000,"Cost":15,"BalanceInfo":{"Unit":{"UUID":"unitUUID1","ID":"1001","Value":10,"DestinationID":"1002","Consumed":20,"ToR":"*voice","RateInterval":{"Timing":{"ID":"","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"","RoundingDecimals":0,"MaxCost":0,"MaxCostStrategy":"","Rates":null},"Weight":10}},"Monetary":null,"AccountID":""},"CompressFactor":2},"MatchedSubject":"1001","MatchedPrefix":"1001","MatchedDestId":"1002","RatingPlanId":"RT_20CNT","CompressFactor":5}],"RatedUsage":0,"AccountSummary":null}`
+	exp := `{"Category":"call","Tenant":"cgrates.org","Subject":"1001","Account":"1001","Destination":"1002","ToR":"*voice","Cost":10,"Timespans":[{"TimeStart":"2021-01-01T10:25:00+02:00","TimeEnd":"2021-01-01T10:30:00+02:00","Cost":15,"RateInterval":{"Timing":{"ID":"ritTimingID","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":15,"RoundingMethod":"up","RoundingDecimals":1,"MaxCost":100,"MaxCostStrategy":"*disconnect","Rates":[{"GroupIntervalStart":30000000000,"Value":5,"RateIncrement":60000000000,"RateUnit":60000000000},{"GroupIntervalStart":60000000000,"Value":5,"RateIncrement":1000000000,"RateUnit":60000000000}]},"Weight":10},"DurationIndex":10,"Increments":[{"Duration":24000000000,"Cost":20,"BalanceInfo":{"Unit":{"UUID":"unitUUID2","ID":"1001","Value":10,"DestinationID":"1002","Consumed":20,"ToR":"*voice","RateInterval":{"Timing":{"ID":"","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"","RoundingDecimals":0,"MaxCost":0,"MaxCostStrategy":"","Rates":null},"Weight":15}},"Monetary":null,"AccountID":""},"CompressFactor":2}],"RoundIncrement":{"Duration":12000000000,"Cost":15,"BalanceInfo":{"Unit":{"UUID":"unitUUID1","ID":"1001","Value":10,"DestinationID":"1002","Consumed":20,"ToR":"*voice","RateInterval":{"Timing":{"ID":"","Years":null,"Months":null,"MonthDays":null,"WeekDays":null,"StartTime":"","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"","RoundingDecimals":0,"MaxCost":0,"MaxCostStrategy":"","Rates":null},"Weight":10}},"Monetary":null,"AccountID":""},"CompressFactor":2},"MatchedSubject":"1001","MatchedPrefix":"1001","MatchedDestId":"1002","RatingPlanId":"RP_1001","CompressFactor":5}],"RatedUsage":0,"AccountSummary":null}`
 	rcv := cc.AsJSON()
 
 	if rcv != exp {
@@ -629,7 +629,7 @@ func TestCallcostUpdateCost(t *testing.T) {
 				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
 				ratingInfo: &RatingInfo{
 					MatchedSubject: "1001",
-					RatingPlanId:   "RT_20CNT",
+					RatingPlanId:   "RP_1001",
 					MatchedPrefix:  "1001",
 					MatchedDestId:  "1002",
 					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
@@ -692,7 +692,7 @@ func TestCallcostUpdateCost(t *testing.T) {
 					},
 					Weight: 10,
 				},
-				RatingPlanId:   "RT_20CNT",
+				RatingPlanId:   "RP_1001",
 				MatchedDestId:  "1002",
 				MatchedSubject: "1001",
 				MatchedPrefix:  "1001",
@@ -776,7 +776,7 @@ func TestCallcostGetStartTime(t *testing.T) {
 				TimeEnd:       time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
 				ratingInfo: &RatingInfo{
 					MatchedSubject: "1001",
-					RatingPlanId:   "RT_20CNT",
+					RatingPlanId:   "RP_1001",
 					MatchedPrefix:  "1001",
 					MatchedDestId:  "1002",
 					ActivationTime: time.Date(2021, 1, 1, 10, 30, 0, 0, time.Local),
@@ -839,7 +839,7 @@ func TestCallcostGetStartTime(t *testing.T) {
 					},
 					Weight: 10,
 				},
-				RatingPlanId:   "RT_20CNT",
+				RatingPlanId:   "RP_1001",
 				MatchedDestId:  "1002",
 				MatchedSubject: "1001",
 				MatchedPrefix:  "1001",
