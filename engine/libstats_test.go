@@ -762,7 +762,7 @@ func (sMM *statMetricMock) GetMinItems() (minIts int) {
 func (sMM *statMetricMock) Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string) {
 	switch sMM.testcase {
 	case "populate idMap":
-		eventIDs = []string{"id1", "id2"}
+		eventIDs = []string{"id1", "id2", "id3", "id4", "id5", "id6"}
 		return
 	}
 	return
@@ -1057,27 +1057,85 @@ func TestLibstatsProcessEventaddStatEvent(t *testing.T) {
 }
 
 func TestLibstatsCompress(t *testing.T) {
+	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	ttl := time.Millisecond
+	expiryTime1 := time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local)
+	expiryTime2 := time.Date(2021, 1, 2, 23, 59, 59, 0, time.Local)
+	expiryTime3 := time.Date(2021, 1, 3, 23, 59, 59, 0, time.Local)
+	expiryTime4 := time.Date(2021, 1, 4, 23, 59, 59, 0, time.Local)
 	sq := &StatQueue{
 		SQItems: []SQItem{
 			{
-				EventID: "evID",
+				EventID:    "id1",
+				ExpiryTime: &expiryTime1,
+			},
+			{
+				EventID:    "id2",
+				ExpiryTime: &expiryTime2,
+			},
+			{
+				EventID:    "id3",
+				ExpiryTime: &expiryTime3,
+			},
+			{
+				EventID:    "id4",
+				ExpiryTime: &expiryTime4,
+			},
+			{
+				EventID: "id5",
 			},
 		},
 		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: &statMetricMock{
 				testcase: "populate idMap",
 			},
+			utils.MetaReq: sm,
 		},
 		ttl: &ttl,
 	}
 
 	maxQL := int64(1)
 	roundDec := 1
+
+	exp := []SQItem{
+		{
+			EventID:    "id1",
+			ExpiryTime: &expiryTime1,
+		},
+		{
+			EventID:    "id2",
+			ExpiryTime: &expiryTime2,
+		},
+		{
+			EventID:    "id3",
+			ExpiryTime: &expiryTime3,
+		},
+		{
+			EventID:    "id4",
+			ExpiryTime: &expiryTime4,
+		},
+		{
+			EventID: "id5",
+		},
+		{
+			EventID: "id6",
+		},
+	}
 	rcv := sq.Compress(maxQL, roundDec)
 	if rcv != true {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
 	}
+
+	if len(sq.SQItems) != len(exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq.SQItems)
+	}
+	// if !reflect.DeepEqual(sq.SQItems, exp) {
+	// 	t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq.SQItems)
+	// }
 }
 
 func TestLibstatsaddStatEventPassErr(t *testing.T) {
@@ -1115,14 +1173,19 @@ func TestLibstatsaddStatEventPassErr(t *testing.T) {
 }
 
 func TestLibstatsaddStatEvent2(t *testing.T) {
+	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	sq := &StatQueue{
 		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: &statMetricMock{
-				testcase: "pass error",
-			},
+			utils.MetaTCD: sm,
 		},
 	}
-	tnt, evID := "tenant", "eventID"
+	sq.Lock()
+
+	tnt, evID := "cgrates.org", "eventID"
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
@@ -1140,11 +1203,25 @@ func TestLibstatsaddStatEvent2(t *testing.T) {
 		},
 	}
 
-	experr := "NOT_FOUND:filter1"
-	err := sq.addStatEvent(tnt, evID, filters, evNm)
+	exp := &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaTCD: sm,
+		},
+		SQItems: []SQItem{
+			{
+				EventID: "eventID",
+			},
+		},
+	}
+	err = sq.addStatEvent(tnt, evID, filters, evNm)
+	sq.Unlock()
 
-	if err == nil || err.Error() != experr {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if !reflect.DeepEqual(sq, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq)
 	}
 }
 
