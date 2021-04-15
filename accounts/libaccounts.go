@@ -255,6 +255,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		}
 		if calculateCost {
 			var rplyCost *utils.RateProfileCost
+			cgrEv.APIOpts[utils.OptsRatesUsage] = aUnits
 			if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
 				err = utils.NewErrRateS(err)
 				return

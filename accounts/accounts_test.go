@@ -1342,7 +1342,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			cb2ID: &utils.Balance{ //125s with rating from RateS
 				ID:    cb2ID,
 				Type:  utils.MetaConcrete,
-				Units: utils.NewDecimal(125, 2),
+				Units: utils.NewDecimal(125, 2), // 1.25
 			},
 			//5m25s ABSTR, 4.05 CONCR
 		},
@@ -1356,11 +1356,11 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		ID:     "TestV1DebitAbstractsEventCharges2",
 		Balances: map[string]*utils.Balance{
 			ab1ID: &utils.Balance{ // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10s
-				ID:   ab1ID,
+				ID:   "NEWBAL",
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
 					{
-						Weight: 40,
+						Weight: 30,
 					},
 				},
 				CostIncrements: []*utils.CostIncrement{
@@ -1369,16 +1369,15 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						FixedFee:     utils.NewDecimal(4, 1),  // 0.4
 						RecurrentFee: utils.NewDecimal(2, 1)}, // 0.2 per minute
 				},
-				Units: utils.NewDecimal(int64(130*time.Second), 0), // 2 Minute 10s
+				Units: utils.NewDecimal(int64(130*time.Second), 0), // 70 left
 			},
 			cb1ID: &utils.Balance{ // absorb all costs, standard rating used when primary debiting
-
 				ID:   cb1ID,
 				Type: utils.MetaConcrete,
 				Opts: map[string]interface{}{
 					utils.MetaBalanceUnlimited: true,
 				},
-				Units: utils.NewDecimal(125, 2),
+				Units: utils.NewDecimal(125, 2), //0.65
 			},
 		},
 	}
@@ -1391,14 +1390,14 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			ID:     "TestV1DebitAbstractsEventCharges",
 			Tenant: utils.CGRateSorg,
 			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "5m25s",
+				utils.MetaUsage: "5m25s", //try with 6m25s to switch the profile
 			},
 		},
 	}
 
 	eEvChgs := utils.ExtEventCharges{
 		Abstracts:   utils.Float64Pointer(325000000000),
-		Concretes:   utils.Float64Pointer(3.4), //4.05
+		Concretes:   utils.Float64Pointer(4.05),
 		Accounting:  map[string]*utils.ExtAccountCharge{},
 		UnitFactors: map[string]*utils.ExtUnitFactor{},
 		Rating:      map[string]*utils.ExtRateSInterval{},
@@ -1410,4 +1409,17 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	} else if !reflect.DeepEqual(eEvChgs, rply) {
 		t.Errorf("expecting: %s\n, received: %s", utils.ToIJSON(eEvChgs), utils.ToIJSON(rply))
 	}
+
+	/*
+		acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
+		acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
+		acnt1.Balances[ab2ID].Units = utils.NewDecimal(0, 0)
+		acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
+		if rcv, err := dm.GetAccount(acnt1.Tenant, acnt1.ID); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(rcv, acnt1) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt1), utils.ToJSON(rcv))
+		}
+
+	*/
 }
