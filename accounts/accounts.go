@@ -120,7 +120,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			continue
 		}
 		var weight float64
-		if weight, err = engine.WeightFromDynamics(qAcnt.Weights,
+		if weight, err = engine.WeightFromDynamics(context.TODO(), qAcnt.Weights,
 			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			unlockAccounts(acnts)
@@ -202,7 +202,7 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
 		var weight float64
-		if weight, err = engine.WeightFromDynamics(blnCfg.Weights,
+		if weight, err = engine.WeightFromDynamics(context.TODO(), blnCfg.Weights,
 			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
 			return
 		}

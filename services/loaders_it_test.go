@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -90,7 +91,7 @@ func TestLoaderSReload(t *testing.T) {
 	}
 
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "loaders", "tutinternal"),
 		Section: config.LoaderSJSON,
 	}, &reply); err != nil {

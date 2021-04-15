@@ -53,11 +53,11 @@ func newConcreteBalanceOperator(acntID string, blnCfg *utils.Balance,
 
 // concreteBalance is the operator for *concrete balance type
 type concreteBalance struct {
-	acntID  string
-	blnCfg  *utils.Balance
-	fltrS   *engine.FilterS
-	connMgr *engine.ConnManager
-	attrSConns,
+	acntID     string
+	blnCfg     *utils.Balance
+	fltrS      *engine.FilterS
+	connMgr    *engine.ConnManager
+	attrSConns []string
 	rateSConns []string
 }
 

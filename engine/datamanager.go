@@ -204,7 +204,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.RateProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetRateProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetRateProfile(context.TODO(), tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ActionProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1021,7 +1021,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		if oldTh != nil {
 			oldFiltersIDs = &oldTh.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheThresholdFilterIndexes, th.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheThresholdFilterIndexes, th.Tenant,
 			utils.EmptyString, th.ID, oldFiltersIDs, th.FilterIDs, false); err != nil {
 			return err
 		}
@@ -1149,7 +1149,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		if oldSts != nil {
 			oldFiltersIDs = &oldSts.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheStatFilterIndexes, sqp.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheStatFilterIndexes, sqp.Tenant,
 			utils.EmptyString, sqp.ID, oldFiltersIDs, sqp.FilterIDs, false); err != nil {
 			return err
 		}
@@ -1483,7 +1483,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		if oldRes != nil {
 			oldFiltersIDs = &oldRes.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheResourceFilterIndexes, rp.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheResourceFilterIndexes, rp.Tenant,
 			utils.EmptyString, rp.ID, oldFiltersIDs, rp.FilterIDs, false); err != nil {
 			return err
 		}
@@ -1622,7 +1622,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheRouteFilterIndexes, rpp.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheRouteFilterIndexes, rpp.Tenant,
 			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs, false); err != nil {
 			return err
 		}
@@ -1887,7 +1887,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		if oldCpp != nil {
 			oldFiltersIDs = &oldCpp.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheChargerFilterIndexes, cpp.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheChargerFilterIndexes, cpp.Tenant,
 			utils.EmptyString, cpp.ID, oldFiltersIDs, cpp.FilterIDs, false); err != nil {
 			return err
 		}
@@ -2243,7 +2243,7 @@ func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64
 	return
 }
 
-func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rpp *utils.RateProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -2258,10 +2258,10 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	rpp, err = dm.dataDB.GetRateProfileDrv(tenant, id)
+	rpp, err = dm.dataDB.GetRateProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetRateProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2270,13 +2270,13 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &rpp); err == nil {
 				rpp.Sort()
-				err = dm.dataDB.SetRateProfileDrv(rpp)
+				err = dm.dataDB.SetRateProfileDrv(ctx, rpp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
-				if errCh := Cache.Set(context.TODO(), utils.CacheRateProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheRateProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2289,7 +2289,7 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 		return nil, err
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheRateProfiles, tntID, rpp, nil,
+		if errCh := Cache.Set(ctx, utils.CacheRateProfiles, tntID, rpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2297,30 +2297,30 @@ func (dm *DataManager) GetRateProfile(tenant, id string, cacheRead, cacheWrite b
 	return
 }
 
-func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, rpp.TenantID())
 		}
 		for _, rate := range rpp.Rates {
-			if brokenReference := dm.checkFilters(context.TODO(), rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
+			if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
 				// if we get a broken filter do not update the rates
 				return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
 					brokenReference, rate.ID)
 			}
 		}
 	}
-	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRateProfile(ctx, rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	rpp.Sort()
-	if err = dm.DataDB().SetRateProfileDrv(rpp); err != nil {
+	if err = dm.DataDB().SetRateProfileDrv(ctx, rpp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2328,7 +2328,7 @@ func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (e
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheRateProfilesFilterIndexes, rpp.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheRateProfilesFilterIndexes, rpp.Tenant,
 			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs, false); err != nil {
 			return err
 		}
@@ -2338,7 +2338,7 @@ func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (e
 				if _, has := rpp.Rates[key]; has {
 					continue
 				}
-				if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheRateFilterIndexes,
+				if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
 					rpp.Tenant, rpp.ID, key, rate.FilterIDs); err != nil {
 					return
 				}
@@ -2353,7 +2353,7 @@ func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (e
 				}
 			}
 			// when we create the indexes for rates we use RateProfile ID as context
-			if err := updatedIndexes(dm, utils.CacheRateFilterIndexes, rpp.Tenant,
+			if err := updatedIndexes(ctx, dm, utils.CacheRateFilterIndexes, rpp.Tenant,
 				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs, true); err != nil {
 				return err
 			}
@@ -2361,7 +2361,7 @@ func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (e
 
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
@@ -2373,16 +2373,16 @@ func (dm *DataManager) SetRateProfile(rpp *utils.RateProfile, withIndex bool) (e
 	return
 }
 
-func (dm *DataManager) RemoveRateProfile(tenant, id string,
+func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetRateProfile(tenant, id, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRateProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveRateProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRpp == nil {
@@ -2390,18 +2390,18 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 	}
 	if withIndex {
 		for key, rate := range oldRpp.Rates {
-			if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheRateFilterIndexes,
+			if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
 				oldRpp.Tenant, oldRpp.ID, key, rate.FilterIDs); err != nil {
 				return
 			}
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheRateProfilesFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateProfilesFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRateProfile,
@@ -2413,18 +2413,18 @@ func (dm *DataManager) RemoveRateProfile(tenant, id string,
 	return
 }
 
-func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id string, rateIDs []string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetRateProfile(tenant, id, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRateProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
 	if len(rateIDs) == 0 {
 		if withIndex {
 			for key, rate := range oldRpp.Rates {
-				if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheRateFilterIndexes,
+				if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
 					tenant, id, key, rate.FilterIDs); err != nil {
 					return
 				}
@@ -2438,7 +2438,7 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 			}
 			if withIndex {
 
-				if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheRateFilterIndexes,
+				if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
 					tenant, id, rateID, oldRpp.Rates[rateID].FilterIDs); err != nil {
 					return
 				}
@@ -2446,12 +2446,12 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 			delete(oldRpp.Rates, rateID)
 		}
 	}
-	if err = dm.DataDB().SetRateProfileDrv(oldRpp); err != nil {
+	if err = dm.DataDB().SetRateProfileDrv(ctx, oldRpp); err != nil {
 		return err
 	}
 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
@@ -2463,20 +2463,20 @@ func (dm *DataManager) RemoveRateProfileRates(tenant, id string, rateIDs []strin
 	return
 }
 
-func (dm *DataManager) SetRateProfileRates(rpp *utils.RateProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRateProfileRates(ctx *context.Context, rpp *utils.RateProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
 		for _, rate := range rpp.Rates {
-			if brokenReference := dm.checkFilters(context.TODO(), rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
+			if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
 				// if we get a broken filter do not update the rates
 				return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
 					brokenReference, rate.ID)
 			}
 		}
 	}
-	oldRpp, err := dm.GetRateProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRateProfile(ctx, rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -2488,7 +2488,7 @@ func (dm *DataManager) SetRateProfileRates(rpp *utils.RateProfile, withIndex boo
 				oldRateFiltersIDs = &oldRate.FilterIDs
 			}
 			// when we create the indexes for rates we use RateProfile ID as context
-			if err := updatedIndexes(dm, utils.CacheRateFilterIndexes, rpp.Tenant,
+			if err := updatedIndexes(ctx, dm, utils.CacheRateFilterIndexes, rpp.Tenant,
 				rpp.ID, key, oldRateFiltersIDs, rate.FilterIDs, true); err != nil {
 				return err
 			}
@@ -2496,12 +2496,12 @@ func (dm *DataManager) SetRateProfileRates(rpp *utils.RateProfile, withIndex boo
 		oldRpp.Rates[key] = rate
 	}
 
-	if err = dm.DataDB().SetRateProfileDrv(oldRpp); err != nil {
+	if err = dm.DataDB().SetRateProfileDrv(ctx, oldRpp); err != nil {
 		return err
 	}
 
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
@@ -2586,7 +2586,7 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
 			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}
@@ -2875,7 +2875,7 @@ func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error)
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(dm, utils.CacheAccountsFilterIndexes, ap.Tenant,
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheAccountsFilterIndexes, ap.Tenant,
 			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}

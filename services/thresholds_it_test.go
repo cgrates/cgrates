@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -67,7 +68,7 @@ func TestThresholdSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.ThresholdSJSON,
 	}, &reply); err != nil {
@@ -135,7 +136,7 @@ func TestThresholdSReload2(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.ThresholdSJSON,
 	}, &reply); err != nil {

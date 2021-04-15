@@ -182,16 +182,16 @@ func removeItemFromFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmT
 // newFilterIDs - the filtersIDs for the object that will be set
 // useCtx - in case of subindexes(e.g. Rate from RateProfiles) need to add the ctx to the itemID when reverse filter indexes are set
 // 			used when updating the filters
-func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string, useCtx bool) (err error) {
+func updatedIndexes(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string, useCtx bool) (err error) {
 	itmCtx := itemID
 	if useCtx {
 		itmCtx = utils.ConcatenatedKey(itemID, ctx)
 	}
 	if oldFilterIds == nil { // nothing to remove so just create the new indexes
-		if err = addIndexFiltersItem(context.TODO(), dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
+		if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
 			return
 		}
-		return addItemToFilterIndex(context.TODO(), dm, idxItmType, tnt, ctx, itemID, newFilterIDs)
+		return addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs)
 	}
 	if len(*oldFilterIds) == 0 && len(newFilterIDs) == 0 { // nothing to update
 		return
@@ -219,10 +219,10 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 	if len(oldFilterIDs) != 0 || oldFltrs.Size() == 0 {
 		// has some indexes to remove or
 		// the old profile doesn't have filters but the new one has so remove the *none index
-		if err = removeIndexFiltersItem(context.TODO(), dm, idxItmType, tnt, itmCtx, oldFilterIDs); err != nil {
+		if err = removeIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itmCtx, oldFilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, idxItmType, tnt, ctx, itemID, oldFilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, oldFilterIDs); err != nil {
 			return
 		}
 	}
@@ -230,10 +230,10 @@ func updatedIndexes(dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFil
 	if len(newFilterIDs) != 0 || newFltrs.Size() == 0 {
 		// has some indexes to add or
 		// the old profile has filters but the new one does not so add the *none index
-		if err = addIndexFiltersItem(context.TODO(), dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
+		if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
 			return
 		}
-		if err = addItemToFilterIndex(context.TODO(), dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
+		if err = addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
 			return
 		}
 	}
@@ -742,7 +742,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 			idxSlice := indx.AsSlice()
 			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					rp, e := dm.GetRateProfile(tnt, id, true, false, utils.NonTransactional)
+					rp, e := dm.GetRateProfile(context.TODO(), tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -774,7 +774,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 					return
 				}
 				var rp *utils.RateProfile
-				if rp, err = dm.GetRateProfile(newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
+				if rp, err = dm.GetRateProfile(context.TODO(), newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
 					return
 				}
 				for itemID := range ids {

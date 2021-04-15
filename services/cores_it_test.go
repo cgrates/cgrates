@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -62,7 +63,7 @@ func TestCoreSReload(t *testing.T) {
 	}
 
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue"),
 		Section: config.CoreSJSON,
 	}, &reply); err != nil {

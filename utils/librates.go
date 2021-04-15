@@ -497,11 +497,7 @@ type APIRateProfile struct {
 	MaxCost            *float64
 	MaxCostStrategy    string
 	Rates              map[string]*APIRate
-}
-
-type APIRateProfileWithAPIOpts struct {
-	*APIRateProfile
-	APIOpts map[string]interface{}
+	APIOpts            map[string]interface{}
 }
 
 func (ext *APIRate) AsRate() (rate *Rate, err error) {
@@ -562,4 +558,11 @@ type APIIntervalRate struct {
 	RecurrentFee  *float64
 	Unit          *float64 // RateUnit
 	Increment     *float64 // RateIncrement
+}
+
+type RemoveRPrfRates struct {
+	Tenant  string
+	ID      string
+	RateIDs []string
+	APIOpts map[string]interface{}
 }

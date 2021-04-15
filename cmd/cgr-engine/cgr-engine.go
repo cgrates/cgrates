@@ -35,6 +35,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/loaders"
@@ -176,8 +177,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		// 	internalCacheSChan <- chS
 		// case eeS := <-internalEEsChan:
 		// 	internalEEsChan <- eeS
-		// case rateS := <-internalRateSChan:
-		// 	internalRateSChan <- rateS
+		case rateS := <-internalRateSChan:
+			internalRateSChan <- rateS
 		// case actionS := <-internalActionSChan:
 		// 	internalActionSChan <- actionS
 		// case accountS := <-internalAccountSChan:
@@ -336,7 +337,7 @@ func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
-				if err := config.CgrConfig().V1ReloadConfig(
+				if err := config.CgrConfig().V1ReloadConfig(context.Background(),
 					&config.ReloadArgs{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path

@@ -599,11 +599,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				// get IDs so we can reload in cache
 				ids = append(ids, rpl.TenantID())
 				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
-					if err := ldr.dm.SetRateProfileRates(rpl, true); err != nil {
+					if err := ldr.dm.SetRateProfileRates(context.TODO(), rpl, true); err != nil {
 						return err
 					}
 				} else {
-					if err := ldr.dm.SetRateProfile(rpl, true); err != nil {
+					if err := ldr.dm.SetRateProfile(context.TODO(), rpl, true); err != nil {
 						return err
 					}
 				}
@@ -979,12 +979,12 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					if err != nil {
 						return err
 					}
-					if err := ldr.dm.RemoveRateProfileRates(tntIDStruct.Tenant,
+					if err := ldr.dm.RemoveRateProfileRates(context.TODO(), tntIDStruct.Tenant,
 						tntIDStruct.ID, rateIDs, true); err != nil {
 						return err
 					}
 				} else {
-					if err := ldr.dm.RemoveRateProfile(tntIDStruct.Tenant,
+					if err := ldr.dm.RemoveRateProfile(context.TODO(), tntIDStruct.Tenant,
 						tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 						return err
 					}

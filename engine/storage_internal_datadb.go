@@ -557,7 +557,7 @@ func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
+func (iDB *InternalDB) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
 	x, ok := Cache.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -565,7 +565,7 @@ func (iDB *InternalDB) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProf
 	return x.(*utils.RateProfile), nil
 }
 
-func (iDB *InternalDB) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
+func (iDB *InternalDB) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
 	if err = rpp.Compile(); err != nil {
 		return
 	}
@@ -574,7 +574,7 @@ func (iDB *InternalDB) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
 	return
 }
 
-func (iDB *InternalDB) RemoveRateProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveRateProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

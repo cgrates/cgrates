@@ -28,26 +28,26 @@ import (
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apierSv1 *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID string,
+func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID string,
 	filters *[]string, contexts []string, opts map[string]interface{}) (err error) {
 	var reply, method string
 	var args interface{}
-	switch utils.FirstNonEmpty(cacheopt, apierSv1.cfg.GeneralCfg().DefaultCaching) {
+	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
-		if args, err = apierSv1.composeArgsReload(ctx, tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+		if args, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters, contexts, opts); err != nil {
 			return
 		}
 	case utils.MetaLoad:
 		method = utils.CacheSv1LoadCache
-		if args, err = apierSv1.composeArgsReload(ctx, tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+		if args, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters, contexts, opts); err != nil {
 			return
 		}
 	case utils.MetaRemove:
 		method = utils.CacheSv1RemoveItems
-		if args, err = apierSv1.composeArgsReload(ctx, tnt, cacheID, itemID, filters, contexts, opts); err != nil {
+		if args, err = admS.composeArgsReload(ctx, tnt, cacheID, itemID, filters, contexts, opts); err != nil {
 			return
 		}
 	case utils.MetaClear:
@@ -65,13 +65,13 @@ func (apierSv1 *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, 
 		}
 
 	}
-	return apierSv1.connMgr.Call(ctx, apierSv1.cfg.AdminSCfg().CachesConns,
+	return admS.connMgr.Call(ctx, admS.cfg.AdminSCfg().CachesConns,
 		method, args, &reply)
 }
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (apierSv1 *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
+func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
 	rpl = utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{
@@ -100,7 +100,7 @@ func (apierSv1 *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, 
 	indxIDs := make([]string, 0, len(*filterIDs))
 	for _, id := range *filterIDs {
 		var fltr *engine.Filter
-		if fltr, err = apierSv1.dm.GetFilter(ctx, tnt, id, true, true, utils.NonTransactional); err != nil {
+		if fltr, err = admS.dm.GetFilter(ctx, tnt, id, true, true, utils.NonTransactional); err != nil {
 			return
 		}
 		for _, flt := range fltr.Rules {

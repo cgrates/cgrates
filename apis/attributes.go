@@ -117,23 +117,23 @@ func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.Attr
 }
 
 // RemoveAttributeProfile remove a specific Attribute Profile based on tenant an ID
-func (apierSv1 *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
-		tnt = apierSv1.cfg.GeneralCfg().DefaultTenant
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.dm.RemoveAttributeProfile(ctx, tnt, arg.ID,
+	if err := admS.dm.RemoveAttributeProfile(ctx, tnt, arg.ID,
 		utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierSv1.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := admS.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
+	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheAttributeProfiles,
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}

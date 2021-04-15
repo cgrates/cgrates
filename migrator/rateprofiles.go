@@ -38,17 +38,17 @@ func (m *Migrator) migrateCurrentRateProfiles() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating rate profiles", id)
 		}
-		rp, err := m.dmIN.DataManager().GetRateProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		rp, err := m.dmIN.DataManager().GetRateProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if rp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetRateProfile(rp, true); err != nil {
+		if err := m.dmOut.DataManager().SetRateProfile(context.TODO(), rp, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveRateProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveRateProfile(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.RateProfiles]++

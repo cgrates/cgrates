@@ -37,32 +37,32 @@ type ConfigSv1 struct {
 }
 
 // GetConfig will return the CGRConfig section as a map
-// if the section is empty or *all all config is stored in DB
+// if the section is empty or *all all config is returned
 func (cSv1 *ConfigSv1) GetConfig(ctx *context.Context, section *config.SectionWithAPIOpts, reply *map[string]interface{}) (err error) {
 	return cSv1.cfg.V1GetConfig(ctx, section, reply)
 }
 
-/*
-// ReloadConfig reloads the configuration
-func (cSv1 *ConfigSv1) ReloadConfig(args *config.ReloadArgs, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadConfig(args, reply)
+// ReloadConfig reloads the configuration at path
+// if the section is empty or *all all config is reload
+func (cSv1 *ConfigSv1) ReloadConfig(ctx *context.Context, args *config.ReloadArgs, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfig(ctx, args, reply)
 }
 
-// SetConfig reloads the sections of config
-func (cSv1 *ConfigSv1) SetConfig(args *config.SetConfigArgs, reply *string) (err error) {
-	return cSv1.cfg.V1SetConfig(args, reply)
+// SetConfig sets the config received and reloads the received section
+func (cSv1 *ConfigSv1) SetConfig(ctx *context.Context, args *config.SetConfigArgs, reply *string) (err error) {
+	return cSv1.cfg.V1SetConfig(ctx, args, reply)
 }
 
-// SetConfigFromJSON reloads the sections of config
-func (cSv1 *ConfigSv1) SetConfigFromJSON(args *config.SetConfigFromJSONArgs, reply *string) (err error) {
-	return cSv1.cfg.V1SetConfigFromJSON(args, reply)
+// SetConfigFromJSON sets the config received as a string but reloads all config sections
+func (cSv1 *ConfigSv1) SetConfigFromJSON(ctx *context.Context, args *config.SetConfigFromJSONArgs, reply *string) (err error) {
+	return cSv1.cfg.V1SetConfigFromJSON(ctx, args, reply)
 }
 
-// GetConfigAsJSON will retrieve from CGRConfig a section
-func (cSv1 *ConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, reply *string) (err error) {
-	return cSv1.cfg.V1GetConfigAsJSON(args, reply)
+// GetConfigAsJSON will retrieve from CGRConfig a section as a string
+// if the section is empty or *all all config is returned
+func (cSv1 *ConfigSv1) GetConfigAsJSON(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
+	return cSv1.cfg.V1GetConfigAsJSON(ctx, args, reply)
 }
-*/
 
 // StoreCfgInDB will store the config section in the dataDB
 // if the section is empty or *all all config is stored in DB

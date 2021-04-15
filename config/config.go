@@ -1578,7 +1578,7 @@ type ReloadArgs struct {
 }
 
 // V1ReloadConfig reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfig(args *ReloadArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -1657,7 +1657,7 @@ type SetConfigArgs struct {
 }
 
 // V1SetConfig reloads the sections of config
-func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return
@@ -1700,7 +1700,7 @@ func (cfg *CGRConfig) V1SetConfig(args *SetConfigArgs, reply *string) (err error
 }
 
 //V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
-func (cfg *CGRConfig) V1GetConfigAsJSON(args *SectionWithAPIOpts, reply *string) (err error) {
+func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithAPIOpts, reply *string) (err error) {
 	args.Section = utils.FirstNonEmpty(args.Section, utils.MetaAll)
 	cfg.cacheDPMux.RLock()
 	if mp, has := cfg.cacheDP[args.Section]; has && mp != nil {
@@ -1741,7 +1741,7 @@ type SetConfigFromJSONArgs struct {
 }
 
 // V1SetConfigFromJSON reloads the sections of config
-func (cfg *CGRConfig) V1SetConfigFromJSON(args *SetConfigFromJSONArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1SetConfigFromJSON(ctx *context.Context, args *SetConfigFromJSONArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return

@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
@@ -1209,7 +1210,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	// Set the internal rateS within connMngr
 	rateSConn := make(chan birpc.ClientConnector, 1)
-	srv, _ := birpc.NewService(rates.NewRateS(cfg, fltrS, dm), "", false)
+	srv, _ := birpc.NewService(rates.NewRateS(cfg, fltrS, dm), utils.RateSv1, true)
+	srv.UpdateMethodName(func(key string) (newKey string) { return strings.TrimPrefix(key, "V1") }) // update the name of the functions
 	rateSConn <- srv
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS): rateSConn,
@@ -1233,7 +1235,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(rtPfl, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rtPfl, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1254,7 +1256,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			},
 		},
 		Balances: map[string]*utils.Balance{
-			ab1ID: &utils.Balance{ // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10s
+			ab1ID: { // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10s
 				ID:   ab1ID,
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
@@ -1270,7 +1272,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				},
 				Units: utils.NewDecimal(int64(130*time.Second), 0), // 2 Minute 10s, rest 10s
 			},
-			cb1ID: &utils.Balance{ // paying the AB1 plus own debit of 0.1 per second, limit of -200 cents
+			cb1ID: { // paying the AB1 plus own debit of 0.1 per second, limit of -200 cents
 				ID:   cb1ID,
 				Type: utils.MetaConcrete,
 				Weights: utils.DynamicWeights{
@@ -1294,7 +1296,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Units: utils.NewDecimal(80, 0), // 80 EuroCents for the debit from AB1, rest for 20 seconds of limit
 			},
 			// 2m20s ABSTR, 2.8 CONCR
-			ab2ID: &utils.Balance{ // continues debitting after CB1, 0 cost in increments of seconds, maximum of 1 minute
+			ab2ID: { // continues debitting after CB1, 0 cost in increments of seconds, maximum of 1 minute
 				ID:   ab2ID,
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
@@ -1310,7 +1312,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Units: utils.NewDecimal(int64(1*time.Minute), 0), // 1 Minute, no cost
 			},
 			// 3m20s ABSTR, 2.8 CONCR
-			ab3ID: &utils.Balance{ // not matching due to filter
+			ab3ID: { // not matching due to filter
 				ID:        ab3ID,
 				Type:      utils.MetaAbstract,
 				FilterIDs: []string{"*string:*~req.Account:AnotherAccount"},

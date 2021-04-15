@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -49,9 +50,6 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
@@ -71,7 +69,7 @@ func TestFreeSwitchAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "fs_evsock", "cgrates", "etc", "cgrates"),
 		Section: config.FreeSWITCHAgentJSON,
 	}, &reply); err != nil {
@@ -95,9 +93,6 @@ func TestFreeSwitchAgentReload2(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
 
@@ -127,9 +122,6 @@ func TestFreeSwitchAgentReload3(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
 
@@ -158,9 +150,6 @@ func TestFreeSwitchAgentReload4(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
 	if srv.IsRunning() {
@@ -200,9 +189,6 @@ func TestFreeSwitchAgentReload5(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
 	if srv.IsRunning() {
@@ -224,9 +210,6 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewFreeswitchAgent(cfg, shdChan, nil, srvDep)
 	if srv.IsRunning() {

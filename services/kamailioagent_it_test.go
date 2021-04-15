@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 
 	"github.com/cgrates/cgrates/config"
@@ -47,10 +48,6 @@ func TestKamailioAgentReload(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
-
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
@@ -71,7 +68,7 @@ func TestKamailioAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "tutorial_tests", "kamevapi", "cgrates", "etc", "cgrates"),
 		Section: config.KamailioAgentJSON,
 	}, &reply); err != nil {
