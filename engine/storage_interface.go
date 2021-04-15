@@ -103,9 +103,9 @@ type DataDB interface {
 	GetDispatcherHostDrv(string, string) (*DispatcherHost, error)
 	SetDispatcherHostDrv(*DispatcherHost) error
 	RemoveDispatcherHostDrv(string, string) error
-	GetRateProfileDrv(string, string) (*utils.RateProfile, error)
-	SetRateProfileDrv(*utils.RateProfile) error
-	RemoveRateProfileDrv(string, string) error
+	GetRateProfileDrv(*context.Context, string, string) (*utils.RateProfile, error)
+	SetRateProfileDrv(*context.Context, *utils.RateProfile) error
+	RemoveRateProfileDrv(*context.Context, string, string) error
 	GetActionProfileDrv(string, string) (*ActionProfile, error)
 	SetActionProfileDrv(*ActionProfile) error
 	RemoveActionProfileDrv(string, string) error

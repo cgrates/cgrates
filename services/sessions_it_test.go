@@ -150,8 +150,6 @@ func TestSessionSReload2(t *testing.T) {
 
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
 
@@ -204,8 +202,6 @@ func TestSessionSReload3(t *testing.T) {
 
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
 

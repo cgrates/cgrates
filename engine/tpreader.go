@@ -730,7 +730,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoRateProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetRateProfile(th, true); err != nil {
+		if err = tpr.dm.SetRateProfile(context.Background(), th, true); err != nil {
 			return
 		}
 		if verbose {
@@ -1096,7 +1096,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("RateProfiles:")
 	}
 	for _, tpRp := range tpr.rateProfiles {
-		if err = tpr.dm.RemoveRateProfile(tpRp.Tenant, tpRp.ID,
+		if err = tpr.dm.RemoveRateProfile(context.TODO(), tpRp.Tenant, tpRp.ID,
 			utils.NonTransactional, true); err != nil {
 			return
 		}

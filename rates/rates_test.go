@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -35,7 +36,7 @@ func TestListenAndServe(t *testing.T) {
 	stopChan := make(chan struct{}, 1)
 	cfgRld <- struct{}{}
 	go func() {
-		time.Sleep(10)
+		time.Sleep(10 * time.Nanosecond)
 		stopChan <- struct{}{}
 	}()
 	newRates.ListenAndServe(stopChan, cfgRld)
@@ -84,11 +85,11 @@ func TestMatchingRateProfileForEventActivationInterval(t *testing.T) {
 		},
 	}
 
-	err := dm.SetRateProfile(rPrf, true)
+	err := dm.SetRateProfile(context.Background(), rPrf, true)
 	if err != nil {
 		t.Error(err)
 	}
-	if _, err := rateS.matchingRateProfileForEvent("cgrates.org", []string{},
+	if _, err := rateS.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -104,7 +105,7 @@ func TestMatchingRateProfileForEventActivationInterval(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
+	err = dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -151,7 +152,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	}
 
 	//MatchItmID before setting
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "RATE_1",
@@ -160,7 +161,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rateS.dm.SetRateProfile(rPrf, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -185,7 +186,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	}
 	expectedRPCost.RateSIntervals[0].Cost()
 
-	if rcv, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "RATE_1",
@@ -197,7 +198,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 	}
 
 	expRpCostAfterV1 := expectedRPCost
-	if err := rateS.V1CostForEvent(&utils.ArgsCostForEvent{
+	if err := rateS.V1CostForEvent(context.Background(), &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -209,7 +210,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRpCostAfterV1), utils.ToJSON(expectedRPCost))
 	}
 
-	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -273,13 +274,13 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(rPrf, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 
 	expectedErr := "invalid converter terminator in rule: <~*req.Cost{*>"
 	rPrf.Rates["RATE2"].FilterIDs = []string{"*gt:~*req.Cost{*:10"}
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -293,7 +294,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 	}
 	rPrf.Rates["RATE2"].FilterIDs = []string{"*prefix:~*req.CustomValue:randomValue"}
 
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -306,7 +307,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rateS.dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := rateS.dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -335,12 +336,12 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 			ExpiryTime: t1,
 		},
 	}
-	err := dm.SetRateProfile(rpp, true)
+	err := dm.SetRateProfile(context.Background(), rpp, true)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if rtPRf, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
+	if rtPRf, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -358,7 +359,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp), utils.ToJSON(rtPRf))
 	}
 
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -373,7 +374,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -388,7 +389,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		}); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -404,7 +405,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp2"},
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{"rp2"},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -420,7 +421,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003", "*gt:~*req.Cost{*:10"}
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{},
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -438,7 +439,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003"}
 
 	rate.dm = nil
-	if _, err := rate.matchingRateProfileForEvent("cgrates.org", []string{"rp3"},
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{"rp3"},
 		&utils.ArgsCostForEvent{
 
 			CGREvent: &utils.CGREvent{
@@ -454,7 +455,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = dm.RemoveRateProfile(rpp.Tenant, rpp.ID, utils.NonTransactional, true)
+	err = dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, utils.NonTransactional, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -500,10 +501,10 @@ func TestV1CostForEventError(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(rPrf, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
-	rcv, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -516,7 +517,7 @@ func TestV1CostForEventError(t *testing.T) {
 
 	expectedErr := "SERVER_ERROR: NOT_IMPLEMENTED:*notAType"
 	rPrf.FilterIDs = []string{"*notAType:~*req.Account:1001"}
-	if err := rateS.V1CostForEvent(&utils.ArgsCostForEvent{
+	if err := rateS.V1CostForEvent(context.Background(), &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -530,7 +531,7 @@ func TestV1CostForEventError(t *testing.T) {
 
 	expectedErr = "SERVER_ERROR: zero increment to be charged within rate: <cgrates.org:RATE_1:RATE1>"
 	rPrf.Rates["RATE1"].IntervalRates[0].Increment = utils.NewDecimal(0, 0)
-	if err := rateS.V1CostForEvent(&utils.ArgsCostForEvent{
+	if err := rateS.V1CostForEvent(context.Background(), &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "RATE_1",
@@ -540,7 +541,7 @@ func TestV1CostForEventError(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
-	if err := rateS.dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := rateS.dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -575,7 +576,7 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 			},
 		},
 		Rates: map[string]*utils.Rate{
-			"RATE1": &utils.Rate{
+			"RATE1": {
 				ID: "RATE1",
 				Weights: utils.DynamicWeights{
 					{
@@ -598,7 +599,7 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 					},
 				},
 			},
-			"RATE_CHRISTMAS": &utils.Rate{
+			"RATE_CHRISTMAS": {
 				ID: "RT_CHRISTMAS",
 				Weights: utils.DynamicWeights{
 					{
@@ -615,13 +616,13 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(rPrf, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		b.Error(err)
 	}
 	if err := rPrf.Compile(); err != nil {
 		b.Fatal(err)
 	}
-	if rcv, err := dm.GetRateProfile("cgrates.org", "RateChristmas",
+	if rcv, err := dm.GetRateProfile(context.TODO(), "cgrates.org", "RateChristmas",
 		true, true, utils.NonTransactional); err != nil {
 		b.Error(err)
 	} else if !reflect.DeepEqual(rPrf, rcv) {
@@ -644,7 +645,7 @@ func BenchmarkRateS_V1CostForEvent(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := rateS.V1CostForEvent(argsRt, rply); err != nil {
+		if err := rateS.V1CostForEvent(context.Background(), argsRt, rply); err != nil {
 			b.Error(err)
 		}
 	}
@@ -682,7 +683,7 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 			},
 		},
 		Rates: map[string]*utils.Rate{
-			"RATE1": &utils.Rate{
+			"RATE1": {
 				ID: "RATE1",
 				Weights: utils.DynamicWeights{
 					{
@@ -707,13 +708,13 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(rPrf, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		b.Error(err)
 	}
 	if err := rPrf.Compile(); err != nil {
 		b.Fatal(err)
 	}
-	if rcv, err := dm.GetRateProfile("cgrates.org", "RateAlways",
+	if rcv, err := dm.GetRateProfile(context.TODO(), "cgrates.org", "RateAlways",
 		true, true, utils.NonTransactional); err != nil {
 		b.Error(err)
 	} else if !reflect.DeepEqual(rPrf, rcv) {
@@ -736,7 +737,7 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := rateS.V1CostForEvent(argsRt, rply); err != nil {
+		if err := rateS.V1CostForEvent(context.Background(), argsRt, rply); err != nil {
 			b.Error(err)
 		}
 	}
@@ -792,12 +793,12 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(rPrf, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 
 	expected := "can't convert <invalidUsageFormat> to decimal"
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -811,7 +812,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	}
 
 	expected = "Unsupported time format"
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -824,7 +825,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -870,12 +871,12 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 		},
 	}
 
-	if err := rateS.dm.SetRateProfile(rPrf, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 
 	expected := "zero increment to be charged within rate: <cgrates.org:RATE_1:RATE1>"
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -887,7 +888,7 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -932,13 +933,13 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 			},
 		},
 	}
-	if err := rateS.dm.SetRateProfile(rPrf, true); err != nil {
+	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 	rateS.cfg.RateSCfg().Verbosity = 10
 
 	expected := "maximum iterations reached"
-	if _, err := rateS.rateProfileCostForEvent(rPrf, &utils.ArgsCostForEvent{
+	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -951,7 +952,7 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := dm.RemoveRateProfile(rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }

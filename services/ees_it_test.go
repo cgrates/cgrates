@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -84,7 +85,7 @@ func TestEventExporterSReload(t *testing.T) {
 	fcTmp.ComputePath()
 	cfg.TemplatesCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
 		Section: config.EEsJSON,
 	}, &reply); err != nil {

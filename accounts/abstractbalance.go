@@ -40,7 +40,7 @@ type abstractBalance struct {
 	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
 	connMgr    *engine.ConnManager
-	attrSConns,
+	attrSConns []string
 	rateSConns []string
 }
 

@@ -1411,9 +1411,9 @@ func (ms *MongoStorage) RemoveLoadIDsDrv() (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *utils.RateProfile, err error) {
+func (ms *MongoStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
 	rpp = new(utils.RateProfile)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColRpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(rpp); err != nil {
 			rpp = nil
@@ -1427,8 +1427,8 @@ func (ms *MongoStorage) GetRateProfileDrv(tenant, id string) (rpp *utils.RatePro
 	return
 }
 
-func (ms *MongoStorage) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColRpp).UpdateOne(sctx, bson.M{"tenant": rpp.Tenant, "id": rpp.ID},
 			bson.M{"$set": rpp},
 			options.Update().SetUpsert(true),
@@ -1437,8 +1437,8 @@ func (ms *MongoStorage) SetRateProfileDrv(rpp *utils.RateProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveRateProfileDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColRpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

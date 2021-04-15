@@ -1700,7 +1700,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+	rcv, err := ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -1886,7 +1886,7 @@ cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 			},
 		},
 	}
-	rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+	rcv, err := ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -1988,7 +1988,7 @@ cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 			},
 		},
 	}
-	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP1",
+	rcv, err = ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -2087,7 +2087,7 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.dm.SetRateProfile(rPfr, true); err != nil {
+	if err := ldr.dm.SetRateProfile(context.Background(), rPfr, true); err != nil {
 		t.Error(err)
 	}
 	rPfr2 := &utils.RateProfile{
@@ -2148,7 +2148,7 @@ func TestLoaderRemoveRateProfileRates(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.dm.SetRateProfile(rPfr2, true); err != nil {
+	if err := ldr.dm.SetRateProfile(context.Background(), rPfr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2221,7 +2221,7 @@ cgrates.org,RP1,
 			},
 		},
 	}
-	rcv, err := ldr.dm.GetRateProfile("cgrates.org", "RP1",
+	rcv, err := ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -2278,7 +2278,7 @@ cgrates.org,RP1,
 			},
 		},
 	}
-	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP2",
+	rcv, err = ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP2",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -2301,7 +2301,7 @@ cgrates.org,RP1,
 		MaxCostStrategy: "*free",
 		Rates:           map[string]*utils.Rate{},
 	}
-	rcv, err = ldr.dm.GetRateProfile("cgrates.org", "RP1",
+	rcv, err = ldr.dm.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -2344,7 +2344,7 @@ cgrates.org,RP2
 		Tenant: "cgrates.org",
 		ID:     "RP1",
 	}
-	if err := ldr.dm.SetRateProfile(rPfr, true); err != nil {
+	if err := ldr.dm.SetRateProfile(context.Background(), rPfr, true); err != nil {
 		t.Error(err)
 	}
 
@@ -4540,7 +4540,7 @@ cgrates.org,REM_RATEPROFILE_1
 		Tenant: "cgrates.org",
 		ID:     "REM_RATEPROFILE_1",
 	}
-	if err := ldr.dm.SetRateProfile(expRtPrf, true); err != nil {
+	if err := ldr.dm.SetRateProfile(context.Background(), expRtPrf, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -4948,7 +4948,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 	}
 
 	ldr.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	if err := ldr.dm.SetRateProfile(expRtPrf, true); err != nil {
+	if err := ldr.dm.SetRateProfile(context.Background(), expRtPrf, true); err != nil {
 		t.Error(err)
 	}
 

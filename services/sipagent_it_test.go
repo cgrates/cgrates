@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -45,10 +46,6 @@ func TestSIPAgentReload(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	shdWg := new(sync.WaitGroup)
-	chS := engine.NewCacheS(cfg, nil, nil)
-
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
@@ -68,7 +65,7 @@ func TestSIPAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ReloadArgs{
+	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql"),
 		Section: config.SIPAgentJSON,
 	}, &reply); err != nil {
@@ -110,9 +107,6 @@ func TestSIPAgentReload2(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	if srv.IsRunning() {
@@ -143,9 +137,6 @@ func TestSIPAgentReload3(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	chS := engine.NewCacheS(cfg, nil, nil)
-	cacheSChan := make(chan birpc.ClientConnector, 1)
-	cacheSChan <- chS
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewSIPAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	if srv.IsRunning() {
