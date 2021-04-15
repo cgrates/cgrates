@@ -102,6 +102,7 @@ func (rs *RateService) Shutdown() (err error) {
 	rs.rateS.Shutdown() //we don't verify the error because shutdown never returns an err
 	rs.rateS = nil
 	<-rs.intConnChan
+	rs.server.RpcUnregisterName(utils.RateSv1)
 	return
 }
 
