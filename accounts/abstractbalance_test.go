@@ -774,6 +774,7 @@ func TestABCostWithFiltersNotMatch(t *testing.T) {
 		Event: map[string]interface{}{
 			"CustomField2": "CustomValue2",
 		},
+		APIOpts: map[string]interface{}{},
 	}
 	if _, err := aB.debitAbstracts(decimal.New(int64(10*time.Second), 0),
 		cgrEv); err == nil || err.Error() != "RATES_ERROR:NOT_CONNECTED: RateS" {

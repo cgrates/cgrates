@@ -121,8 +121,12 @@ func IfaceAsBig(itm interface{}) (b *decimal.Big, err error) {
 			return nil, fmt.Errorf("can't convert <%+v> to decimal", it)
 		}
 		return z, nil
+	case *Decimal:
+		return it.Big, nil
+	case *decimal.Big:
+		return it, nil
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to time.Duration", it)
+		err = fmt.Errorf("cannot convert field: %T to decimal.Big", it)
 	}
 	return
 }

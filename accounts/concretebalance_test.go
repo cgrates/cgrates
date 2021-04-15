@@ -795,6 +795,7 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 						Event: map[string]interface{}{
 							"CustomField2": "CustomValue2",
 						},
+						APIOpts: map[string]interface{}{},
 					},
 				}
 				*rplCast = *customEv
