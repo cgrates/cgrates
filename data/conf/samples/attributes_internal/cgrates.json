@@ -1,0 +1,25 @@
+{
+  // CGRateS Configuration file
+  // will be used in apis/attributes_it_test.go
+
+  "general": {
+    "log_level": 7,
+    "reply_timeout": "50s"
+  },
+
+  "listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+  },
+
+  "attributes": {
+    "enabled": true,
+    "apiers_conns": ["*localhost"]
+  },
+
+  "sessions": {
+    "enabled": true,
+    "attributes_conns": ["*internal"],
+  }
+},
