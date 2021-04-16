@@ -153,7 +153,7 @@ func (dH *DispatcherHost) Call(ctx *context.Context, serviceMethod string, args 
 	if dH.rpcConn == nil {
 		// connect the rpcConn
 		cfg := config.CgrConfig()
-		if dH.rpcConn, err = NewRPCConnection(dH.RemoteHost,
+		if dH.rpcConn, err = NewRPCConnection(ctx, dH.RemoteHost,
 			cfg.TLSCfg().ClientKey,
 			cfg.TLSCfg().ClientCerificate, cfg.TLSCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
