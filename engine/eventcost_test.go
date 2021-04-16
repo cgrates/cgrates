@@ -3882,7 +3882,7 @@ func TestECAsRefundIncrementsNoCharges(t *testing.T) {
 		Charges:   []*ChargingInterval{},
 		CGRID:     "asdfgh",
 		RunID:     "runID",
-		StartTime: time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
+		StartTime: time.Date(2021, 4, 13, 17, 0, 0, 0, time.UTC),
 		Usage:     utils.DurationPointer(time.Hour),
 		Cost:      utils.Float64Pointer(10),
 	}
@@ -3891,8 +3891,8 @@ func TestECAsRefundIncrementsNoCharges(t *testing.T) {
 		CgrID:         "asdfgh",
 		RunID:         "runID",
 		ToR:           utils.MetaVoice,
-		TimeStart:     time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
-		TimeEnd:       time.Date(2021, 4, 13, 18, 0, 0, 0, time.Local),
+		TimeStart:     time.Date(2021, 4, 13, 17, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2021, 4, 13, 18, 0, 0, 0, time.UTC),
 		DurationIndex: time.Hour,
 	}
 
@@ -3922,7 +3922,7 @@ func TestECAsRefundIncrements2(t *testing.T) {
 		},
 		CGRID:     "asdfgh",
 		RunID:     "runID",
-		StartTime: time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
+		StartTime: time.Date(2021, 4, 13, 17, 0, 0, 0, time.UTC),
 		Usage:     utils.DurationPointer(time.Hour),
 		Cost:      utils.Float64Pointer(10),
 		Accounting: Accounting{
@@ -3954,8 +3954,8 @@ func TestECAsRefundIncrements2(t *testing.T) {
 		CgrID:         "asdfgh",
 		RunID:         "runID",
 		ToR:           utils.MetaVoice,
-		TimeStart:     time.Date(2021, 4, 13, 17, 0, 0, 0, time.Local),
-		TimeEnd:       time.Date(2021, 4, 13, 18, 0, 0, 0, time.Local),
+		TimeStart:     time.Date(2021, 4, 13, 17, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2021, 4, 13, 18, 0, 0, 0, time.UTC),
 		DurationIndex: time.Hour,
 		Increments: Increments{
 			{
@@ -3977,3 +3977,215 @@ func TestECAsRefundIncrements2(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
+
+func TestECratingGetIDFromEventCostPause(t *testing.T) {
+	ec := &EventCost{
+		Timings: ChargedTimings{
+			utils.MetaPause: &ChargedTiming{},
+		},
+		RatingFilters: RatingFilters{
+			utils.MetaPause: RatingMatchedFilters{},
+		},
+		Rates: ChargedRates{
+			utils.MetaPause: RateGroups{},
+		},
+		Rating: Rating{
+			utils.MetaPause: &RatingUnit{},
+		},
+	}
+	oEC := &EventCost{
+		Rating: Rating{
+			utils.MetaPause: &RatingUnit{
+				ConnectFee:       0.4,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MaxCost:          100,
+				MaxCostStrategy:  "*disconnect",
+				TimingID:         "TM_NOON",
+			},
+		},
+		Timings: ChargedTimings{
+			utils.MetaPause: &ChargedTiming{
+				Years:     utils.Years{2010, 2011},
+				Months:    utils.Months{1, 2},
+				MonthDays: utils.MonthDays{24, 25},
+				WeekDays:  utils.WeekDays{2},
+				StartTime: "00:00:00",
+			},
+		},
+	}
+	oRatingID := utils.MetaPause
+
+	exp := utils.MetaPause
+	rcv := ec.ratingGetIDFromEventCost(oEC, oRatingID)
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestECaccountingGetIDFromEventCostPause(t *testing.T) {
+	ec := &EventCost{
+		Timings: ChargedTimings{
+			utils.MetaPause: &ChargedTiming{},
+		},
+		RatingFilters: RatingFilters{
+			utils.MetaPause: RatingMatchedFilters{},
+		},
+		Rates: ChargedRates{
+			utils.MetaPause: RateGroups{},
+		},
+		Rating: Rating{
+			utils.MetaPause: &RatingUnit{},
+		},
+		Accounting: Accounting{
+			utils.MetaPause: &BalanceCharge{},
+		},
+	}
+	oEC := &EventCost{
+		Accounting: Accounting{
+			utils.MetaPause: &BalanceCharge{
+				AccountID:     "1001",
+				BalanceUUID:   "asdfg",
+				RatingID:      utils.MetaPause,
+				Units:         10,
+				ExtraChargeID: "extra",
+			},
+		},
+		Rating: Rating{
+			utils.MetaPause: &RatingUnit{
+				ConnectFee:       0.4,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MaxCost:          100,
+				MaxCostStrategy:  "*disconnect",
+				TimingID:         "TM_NOON",
+			},
+		},
+	}
+	oAccountingID := utils.MetaPause
+
+	exp := utils.MetaPause
+	rcv := ec.accountingGetIDFromEventCost(oEC, oAccountingID)
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestECappendChargingIntervalFromEventCost(t *testing.T) {
+	ec := &EventCost{
+		Charges: []*ChargingInterval{
+			{
+				RatingID:       "RT_ID",
+				CompressFactor: 1,
+			},
+		},
+	}
+	oEC := &EventCost{
+		Charges: []*ChargingInterval{
+			{},
+			{
+				RatingID: "RT_ID",
+			},
+		},
+	}
+
+	cIlIdx := 1
+
+	exp := &EventCost{
+		Charges: []*ChargingInterval{
+			{
+				RatingID:       "RT_ID",
+				CompressFactor: 2,
+			},
+		},
+	}
+	ec.appendChargingIntervalFromEventCost(oEC, cIlIdx)
+
+	if !reflect.DeepEqual(ec, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, ec)
+	}
+}
+
+func TestECratingIDForRateIntervalPause(t *testing.T) {
+	ec := &EventCost{
+		RatingFilters: RatingFilters{},
+		Rating:        Rating{},
+		Rates:         ChargedRates{},
+	}
+	ri := &RateInterval{
+		Rating: &RIRate{
+			ConnectFee:       0.4,
+			RoundingMethod:   "*up",
+			MaxCost:          100,
+			MaxCostStrategy:  "*disconnect",
+			RoundingDecimals: 4,
+			Rates: RateGroups{
+				{
+					RateIncrement:      60,
+					RateUnit:           60,
+					Value:              10,
+					GroupIntervalStart: 1,
+				},
+			},
+		},
+	}
+	rf := RatingMatchedFilters{
+		"key": "filter",
+	}
+
+	exp := utils.MetaPause
+	expEC := &EventCost{
+		Rating: Rating{
+			utils.MetaPause: &RatingUnit{
+				ConnectFee:       0.4,
+				RoundingMethod:   "*up",
+				MaxCost:          100,
+				MaxCostStrategy:  "*disconnect",
+				RoundingDecimals: 4,
+				RatesID:          utils.MetaPause,
+				RatingFiltersID:  utils.MetaPause,
+			},
+		},
+		RatingFilters: RatingFilters{
+			utils.MetaPause: RatingMatchedFilters{
+				"key": "filter",
+			},
+		},
+		Rates: ChargedRates{
+			utils.MetaPause: RateGroups{
+				{
+					RateIncrement:      60,
+					RateUnit:           60,
+					Value:              10,
+					GroupIntervalStart: 1,
+				},
+			},
+		},
+	}
+	rcv := ec.ratingIDForRateInterval(ri, rf, true)
+
+	if rcv != exp {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+
+	if !reflect.DeepEqual(ec, expEC) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expEC, ec)
+	}
+
+}
+
+// func TestECAsCallCost4(t *testing.T) {
+// 	ec := &EventCost{}
+// 	tor := ""
+
+// 	exp := &CallCost{
+// 		ToR: utils.MetaVoice,
+// 	}
+// 	rcv := ec.AsCallCost(tor)
+
+// 	if !reflect.DeepEqual(rcv, exp) {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+// 	}
+// }

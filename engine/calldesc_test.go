@@ -2126,7 +2126,7 @@ func TestCalldescNewCallDescriptorFromCGREventInvalidAnswerTime(t *testing.T) {
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
 			utils.Destination:  "destField",
-			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local),
+			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC),
 			utils.AnswerTime:   5,
 		},
 	}
@@ -2151,8 +2151,8 @@ func TestCalldescNewCallDescriptorFromCGREventNoUsage(t *testing.T) {
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
 			utils.Destination:  "destField",
-			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local),
-			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 		},
 	}
 	timezone := "UTC"
@@ -2176,8 +2176,8 @@ func TestCalldescNewCallDescriptorFromCGREvent(t *testing.T) {
 			utils.Category:     "catField",
 			utils.AccountField: "accField",
 			utils.Destination:  "destField",
-			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local),
-			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			utils.SetupTime:    time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 			utils.Usage:        100,
 			utils.ToR:          utils.MetaVoice,
 		},
@@ -2190,8 +2190,8 @@ func TestCalldescNewCallDescriptorFromCGREvent(t *testing.T) {
 		Subject:     "accField",
 		Account:     "accField",
 		Destination: "destField",
-		TimeStart:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
-		TimeEnd:     time.Date(2021, 1, 5, 23, 59, 59, 100, time.Local),
+		TimeStart:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
+		TimeEnd:     time.Date(2021, 1, 5, 23, 59, 59, 100, time.UTC),
 		ToR:         utils.MetaVoice,
 		Tenant:      "cgrates.org",
 	}
@@ -2212,8 +2212,8 @@ func TestCalldescAsCGREvent(t *testing.T) {
 		Subject:     "accField",
 		Account:     "accField",
 		Destination: "destField",
-		TimeStart:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
-		TimeEnd:     time.Date(2021, 1, 5, 23, 59, 59, 100, time.Local),
+		TimeStart:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
+		TimeEnd:     time.Date(2021, 1, 5, 23, 59, 59, 100, time.UTC),
 		ToR:         utils.MetaVoice,
 		Tenant:      "cgrates.org",
 		ExtraFields: map[string]string{
@@ -2230,7 +2230,7 @@ func TestCalldescAsCGREvent(t *testing.T) {
 			utils.Subject:      "accField",
 			utils.AccountField: "accField",
 			utils.Destination:  "destField",
-			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			utils.AnswerTime:   time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 			utils.Usage:        100 * time.Nanosecond,
 			utils.ToR:          utils.MetaVoice,
 			utils.Tenant:       "cgrates.org",
@@ -2263,7 +2263,7 @@ func TestCalldescAddRatingInfo(t *testing.T) {
 			RatingPlanId:   "RP_1001",
 			MatchedPrefix:  "1001",
 			MatchedDestId:  "1002",
-			ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 			RateIntervals: RateIntervalList{
 				{
 					Rating: &RIRate{
@@ -2290,7 +2290,7 @@ func TestCalldescAddRatingInfo(t *testing.T) {
 			RatingPlanId:   "RP_1002",
 			MatchedPrefix:  "1002",
 			MatchedDestId:  "1003",
-			ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+			ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 			RateIntervals: RateIntervalList{
 				{
 					Rating: &RIRate{
@@ -2326,7 +2326,7 @@ func TestCalldescAddRatingInfo(t *testing.T) {
 				RatingPlanId:   "RP_1001",
 				MatchedPrefix:  "1001",
 				MatchedDestId:  "1002",
-				ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+				ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 				RateIntervals: RateIntervalList{
 					{
 						Rating: &RIRate{
@@ -2353,7 +2353,7 @@ func TestCalldescAddRatingInfo(t *testing.T) {
 				RatingPlanId:   "RP_1002",
 				MatchedPrefix:  "1002",
 				MatchedDestId:  "1003",
-				ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.Local),
+				ActivationTime: time.Date(2021, 1, 5, 23, 59, 59, 0, time.UTC),
 				RateIntervals: RateIntervalList{
 					{
 						Rating: &RIRate{
