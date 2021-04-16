@@ -718,3 +718,51 @@ func TestLibDispatcherLoadStrategyDispatcherDispatchHostsID(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+func TestLibDispatcherLoadStrategyDispatchCaseHosts(t *testing.T) {
+	wgDsp := &loadStrategyDispatcher{
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "testID",
+				FilterIDs: []string{"filterID"},
+				Weight:    4,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 1,
+				},
+				Blocker: false,
+			},
+		},
+		defaultRatio: 1,
+	}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	err := wgDsp.dispatch(dM, "", "", "", []string{"testID"}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+/*
+func TestLibDispatcherLoadStrategyDispatchCaseHostsError(t *testing.T) {
+	wgDsp := &loadStrategyDispatcher{
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "testID",
+				FilterIDs: []string{"filterID"},
+				Weight:    4,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 1,
+				},
+				Blocker: false,
+			},
+		},
+		defaultRatio: 1,
+	}
+	err := wgDsp.dispatch(nil, "", "", "", []string{"testID"}, "", "", "")
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+*/
