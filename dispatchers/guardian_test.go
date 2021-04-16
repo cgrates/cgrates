@@ -25,21 +25,32 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestDspRateSv1PingErrorCase2(t *testing.T) {
+func TestDspRateSv1CostForEventCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &utils.CGREvent{
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.RateSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NOT_FOUND"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspRateSv1PingErrorNil(t *testing.T) {
+func TestDspGuardianSv1PingNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	var reply *string
+	result := dspSrv.GuardianSv1Ping(nil, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspGuardianSv1PingErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
@@ -47,62 +58,65 @@ func TestDspRateSv1PingErrorNil(t *testing.T) {
 		Tenant: "tenant",
 	}
 	var reply *string
-	result := dspSrv.RateSv1Ping(CGREvent, reply)
+	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspRateSv1CostForEventCaseNil(t *testing.T) {
+func TestDspGuardianSv1RemoteLockCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := AttrRemoteLockWithAPIOpts{
+		Tenant: "tenant",
+	}
 	var reply *string
-	result := dspSrv.RateSv1Ping(nil, reply)
+	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
 	expected := "DISPATCHER_ERROR:NOT_FOUND"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestDspRateSv1CostForEventCase2(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
-	}
-	var reply *utils.RateProfileCost
-	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspRateSv1PingNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	var reply *utils.RateProfileCost
-	result := dspSrv.RateSv1CostForEvent(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspRateSv1CostForEventErrorNil(t *testing.T) {
+func TestDspGuardianSv1RemoteLockErrorNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.ArgsCostForEvent{
-		CGREvent: &utils.CGREvent{
-			Tenant: "tenant",
-		},
+	CGREvent := AttrRemoteLockWithAPIOpts{
+		Tenant: "tenant",
 	}
-	var reply *utils.RateProfileCost
-	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)
+	var reply *string
+	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
+	expected := "MANDATORY_IE_MISSING: [ApiKey]"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspGuardianSv1RemoteUnlockCase(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	CGREvent := AttrRemoteUnlockWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]string
+	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
+	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestDspGuardianSv1RemoteUnlockErrorNil(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
+	CGREvent := AttrRemoteUnlockWithAPIOpts{
+		Tenant: "tenant",
+	}
+	var reply *[]string
+	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)

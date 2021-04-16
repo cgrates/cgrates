@@ -38,7 +38,9 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREvent, rpl *string) (err
 
 func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) (err error) {
 	if args == nil {
-		args = new(utils.ArgsCostForEvent)
+		args = &utils.ArgsCostForEvent{
+			CGREvent: &utils.CGREvent{},
+		}
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
