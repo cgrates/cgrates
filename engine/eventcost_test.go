@@ -4176,16 +4176,446 @@ func TestECratingIDForRateIntervalPause(t *testing.T) {
 
 }
 
-// func TestECAsCallCost4(t *testing.T) {
-// 	ec := &EventCost{}
-// 	tor := ""
+func TestECAsCallCost4(t *testing.T) {
+	ec := &EventCost{
+		Charges: []*ChargingInterval{
+			{
+				Increments: []*ChargingIncrement{
+					{
+						Usage:          100,
+						Cost:           10,
+						AccountingID:   "accID1",
+						CompressFactor: 1,
+					},
+					{
+						Usage:          150,
+						Cost:           15,
+						AccountingID:   "accID2",
+						CompressFactor: 1,
+					},
+				},
+			},
+		},
+		Accounting: Accounting{
+			"accID1": &BalanceCharge{
+				RatingID:    utils.MetaRounding,
+				BalanceUUID: "asdfgh1",
+			},
+			"accID2": &BalanceCharge{
+				RatingID:    utils.MetaRounding,
+				BalanceUUID: "asdfgh2",
+			},
+		},
+		Rating: Rating{
+			utils.MetaRounding: &RatingUnit{
+				ConnectFee:       0.4,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MaxCost:          100,
+				MaxCostStrategy:  "*disconnect",
+				RatesID:          "RT_ID",
+				TimingID:         "TM_NOON",
+			},
+		},
+		Timings: ChargedTimings{
+			"TM_NOON": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
+	tor := utils.MetaVoice
 
-// 	exp := &CallCost{
-// 		ToR: utils.MetaVoice,
+	exp := &CallCost{
+		ToR: utils.MetaVoice,
+		Timespans: TimeSpans{
+			{
+				Cost:          25,
+				DurationIndex: 250,
+				Increments: Increments{
+					{
+						Cost:     10,
+						Duration: 100,
+						BalanceInfo: &DebitInfo{
+							Monetary: &MonetaryInfo{
+								UUID: "asdfgh1",
+								RateInterval: &RateInterval{
+									Timing: &RITiming{
+										ID:        "TM_NOON",
+										StartTime: "00:00:00",
+									},
+									Rating: &RIRate{
+										ConnectFee:       0.4,
+										RoundingMethod:   "*up",
+										RoundingDecimals: 4,
+										MaxCost:          100,
+										MaxCostStrategy:  "*disconnect",
+									},
+								},
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				RoundIncrement: &Increment{
+					BalanceInfo: &DebitInfo{
+						Monetary: &MonetaryInfo{
+							UUID: "asdfgh1",
+							RateInterval: &RateInterval{
+								Timing: &RITiming{
+									ID:        "TM_NOON",
+									StartTime: "00:00:00",
+								},
+								Rating: &RIRate{
+									ConnectFee:       0.4,
+									RoundingMethod:   "*up",
+									RoundingDecimals: 4,
+									MaxCost:          100,
+									MaxCostStrategy:  "*disconnect",
+								},
+							},
+						},
+					},
+					Cost:           -10,
+					Duration:       100,
+					CompressFactor: 1,
+				},
+			},
+		},
+	}
+	rcv := ec.AsCallCost(tor)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestECnewIntervalFromCharge(t *testing.T) {
+	ec := &EventCost{
+		Charges: []*ChargingInterval{
+			{
+				Increments: []*ChargingIncrement{
+					{
+						Usage:          100,
+						Cost:           10,
+						AccountingID:   "accID1",
+						CompressFactor: 1,
+					},
+					{
+						Usage:          150,
+						Cost:           15,
+						AccountingID:   "accID2",
+						CompressFactor: 1,
+					},
+				},
+			},
+		},
+		Accounting: Accounting{
+			"accID1": &BalanceCharge{
+				RatingID:    utils.MetaRounding,
+				BalanceUUID: "asdfgh1",
+				AccountID:   "1001",
+			},
+			"accID2": &BalanceCharge{
+				RatingID:    utils.MetaRounding,
+				BalanceUUID: "asdfgh2",
+				AccountID:   "1001",
+			},
+		},
+		Rating: Rating{
+			utils.MetaRounding: &RatingUnit{
+				ConnectFee:       0.4,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MaxCost:          100,
+				MaxCostStrategy:  "*disconnect",
+				RatesID:          "RT_ID",
+				TimingID:         "TM_NOON",
+			},
+		},
+		Timings: ChargedTimings{
+			"TM_NOON": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant:        "cgrates.org",
+			ID:            "1001",
+			AllowNegative: true,
+			BalanceSummaries: BalanceSummaries{
+				&BalanceSummary{
+					UUID:     "asdfgh1",
+					ID:       "bsID",
+					Type:     utils.MetaData,
+					Initial:  0,
+					Value:    10,
+					Disabled: true,
+				},
+			},
+		},
+	}
+	cInc := &ChargingIncrement{
+		AccountingID: "accID1",
+	}
+
+	exp := &Increment{
+		BalanceInfo: &DebitInfo{
+			AccountID: "1001",
+			Unit: &UnitInfo{
+				UUID: "asdfgh1",
+				RateInterval: &RateInterval{
+					Rating: &RIRate{
+						RoundingDecimals: 4,
+						RoundingMethod:   "*up",
+						ConnectFee:       0.4,
+						MaxCost:          100,
+						MaxCostStrategy:  "*disconnect",
+					},
+					Timing: &RITiming{
+						ID:        "TM_NOON",
+						StartTime: "00:00:00",
+					},
+				},
+			},
+		},
+	}
+	rcv := ec.newIntervalFromCharge(cInc)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+}
+
+func TestECRemoveStaleReferences(t *testing.T) {
+	ec := &EventCost{
+		Rating: Rating{
+			"unusedKey1": &RatingUnit{
+				ConnectFee:       0.4,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 4,
+				MaxCost:          100,
+				MaxCostStrategy:  "*disconnect",
+				TimingID:         "TM_MORNING",
+				RatesID:          "RT_ID",
+				RatingFiltersID:  "RF_ID",
+			},
+		},
+		RatingFilters: RatingFilters{
+			"unusedKey2": RatingMatchedFilters{},
+		},
+		Rates: ChargedRates{
+			"unusedKey3": RateGroups{
+				{
+					RateIncrement: 60,
+					RateUnit:      60,
+					Value:         10,
+				},
+			},
+		},
+		Timings: ChargedTimings{
+			"unusedKey4": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
+
+	exp := &EventCost{
+		Rating:        Rating{},
+		RatingFilters: RatingFilters{},
+		Rates:         ChargedRates{},
+		Timings: ChargedTimings{
+			"unusedKey4": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
+	ec.RemoveStaleReferences()
+
+	if !reflect.DeepEqual(ec, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(ec))
+	}
+}
+
+func TestECTrimUnreachableLastChargingInterval(t *testing.T) {
+	ec := &EventCost{
+		Usage:          utils.DurationPointer(30 * time.Second),
+		AccountSummary: &AccountSummary{},
+		Charges: []*ChargingInterval{
+			{
+				RatingID:   "RT_ID",
+				cost:       utils.Float64Pointer(10),
+				ecUsageIdx: utils.DurationPointer(1),
+			},
+		},
+	}
+	atUsage := 15 * time.Second
+
+	experr := "cannot find last active ChargingInterval"
+	rcv, err := ec.Trim(atUsage)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestECTrimNoActiveIncrement(t *testing.T) {
+	ec := &EventCost{
+		Usage:          utils.DurationPointer(30 * time.Second),
+		AccountSummary: &AccountSummary{},
+		Charges: []*ChargingInterval{
+			{
+				RatingID:       "RT_ID",
+				cost:           utils.Float64Pointer(10),
+				ecUsageIdx:     utils.DurationPointer(1 * time.Second),
+				CompressFactor: 4,
+				usage:          utils.DurationPointer(45 * time.Second),
+			},
+		},
+	}
+	atUsage := 15 * time.Second
+
+	experr := "no active increment found"
+	rcv, err := ec.Trim(atUsage)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestECTrimFailDetectLastActiveChargingInterval(t *testing.T) {
+	ec := &EventCost{
+		Usage:          utils.DurationPointer(30 * time.Second),
+		AccountSummary: &AccountSummary{},
+		Charges: []*ChargingInterval{
+			{
+				RatingID:       "RT_ID1",
+				cost:           utils.Float64Pointer(10),
+				ecUsageIdx:     utils.DurationPointer(30 * time.Second),
+				CompressFactor: 0,
+				usage:          utils.DurationPointer(45 * time.Second),
+			},
+			{
+				RatingID:       "RT_ID2",
+				cost:           utils.Float64Pointer(10),
+				ecUsageIdx:     utils.DurationPointer(25 * time.Second),
+				CompressFactor: 4,
+				usage:          utils.DurationPointer(45 * time.Second),
+			},
+		},
+	}
+	atUsage := 15 * time.Second
+
+	experr := "failed detecting last active ChargingInterval"
+	rcv, err := ec.Trim(atUsage)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+// func TestECTrim2(t *testing.T) {
+// 	ec := &EventCost{
+// 		Usage:          utils.DurationPointer(30 * time.Second),
+// 		AccountSummary: &AccountSummary{},
+// 		Charges: []*ChargingInterval{
+// 			{
+// 				RatingID:       "RT_ID1",
+// 				cost:           utils.Float64Pointer(10),
+// 				ecUsageIdx:     utils.DurationPointer(12 * time.Second),
+// 				CompressFactor: 0,
+// 				usage:          utils.DurationPointer(45 * time.Second),
+// 			},
+// 			{
+// 				RatingID:       "RT_ID2",
+// 				cost:           utils.Float64Pointer(10),
+// 				ecUsageIdx:     utils.DurationPointer(8 * time.Second),
+// 				CompressFactor: 0,
+// 				usage:          utils.DurationPointer(45 * time.Second),
+// 			},
+// 		},
 // 	}
-// 	rcv := ec.AsCallCost(tor)
+// 	atUsage := 13 * time.Second
 
-// 	if !reflect.DeepEqual(rcv, exp) {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+// 	experr := "failed detecting last active ChargingInterval"
+// 	rcv, err := ec.Trim(atUsage)
+
+// 	if err == nil || err.Error() != experr {
+// 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+// 	}
+
+// 	if rcv != nil {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+// 	}
+// }
+
+func TestECFieldAsInterfaceEmptyFieldPath(t *testing.T) {
+	ec := &EventCost{}
+	fldPath := []string{}
+
+	experr := "empty field path"
+	rcv, err := ec.FieldAsInterface(fldPath)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestECfieldAsInterfaceNilECUsage(t *testing.T) {
+	ec := &EventCost{}
+	fldPath := []string{utils.Usage}
+
+	rcv, err := ec.fieldAsInterface(fldPath)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestECfieldAsInterfaceNilECCost(t *testing.T) {
+	ec := &EventCost{}
+	fldPath := []string{utils.Cost}
+
+	rcv, err := ec.fieldAsInterface(fldPath)
+
+	if err != nil {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+// func TestECfieldAsInterfaceUnsupportedField(t *testing.T) {
+// 	ec := &EventCost{}
+// 	fldPath := []string{utils.Charges}
+
+// 	rcv, err := ec.fieldAsInterface(fldPath)
+
+// 	if err != nil {
+// 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+// 	}
+
+// 	if rcv != nil {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 // 	}
 // }
