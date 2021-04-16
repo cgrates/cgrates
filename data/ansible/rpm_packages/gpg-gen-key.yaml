@@ -26,17 +26,9 @@
     state: present
   ignore_errors: true
 
-- name: Add HRNGDEVICE=/dev/urandom so we can execute rngd
-  become: true
-  lineinfile:
-    path: /etc/default/rng-tools
-    line: HRNGDEVICE=/dev/urandom
-    insertafter: last
-    create: yes
-
 - name: generate randomness
   become: true
-  shell: "sudo /etc/init.d/rng-tools restart"
+  shell: "sudo rngd -r /dev/urandom"
   ignore_errors: true
 
 - name: generate gpg key
