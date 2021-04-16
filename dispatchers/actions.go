@@ -36,7 +36,9 @@ func (dS *DispatcherService) ActionSv1Ping(args *utils.CGREvent, rpl *string) (e
 
 func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
 	if args == nil {
-		args = new(utils.ArgActionSv1ScheduleActions)
+		args = &utils.ArgActionSv1ScheduleActions{
+			CGREvent: &utils.CGREvent{},
+		}
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
@@ -53,7 +55,9 @@ func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1Sc
 
 func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
 	if args == nil {
-		args = new(utils.ArgActionSv1ScheduleActions)
+		args = &utils.ArgActionSv1ScheduleActions{
+			CGREvent: &utils.CGREvent{},
+		}
 	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
