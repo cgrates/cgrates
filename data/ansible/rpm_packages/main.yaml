@@ -309,6 +309,14 @@
       with_items: "{{ rmpFileName.stdout_lines }}"
       when: cgrates_branch != "master" and gitTagVar.stdout_lines|length == 0
 
+    - name: Nginx on CentOS needs additional permissions for the new rpmfile
+      become: true
+      shell: "sudo chcon -t httpd_sys_content_t /var/packages/ -R"
+
+    - name: Nginx on CentOS needs additional permissions2 for the new rpmfile
+      become: true
+      shell: "sudo chcon -t httpd_sys_rw_content_t /var/packages/ -R"
+
 - hosts: pkg
   remote_user: '{{ user }}'
   tasks:
