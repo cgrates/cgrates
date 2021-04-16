@@ -966,7 +966,7 @@ func TestLibstatsNewStatQueue(t *testing.T) {
 func TestLibstatsProcessEventremExpiredErr(t *testing.T) {
 	tnt, evID := "tenant", "eventID"
 	filters := &FilterS{}
-	expiry := time.Date(2021, 1, 1, 23, 59, 59, 10, time.Local)
+	expiry := time.Date(2021, 1, 1, 23, 59, 59, 10, time.UTC)
 	evNm := utils.MapStorage{
 		"key": nil,
 	}
@@ -1063,10 +1063,10 @@ func TestLibstatsCompress(t *testing.T) {
 	}
 
 	ttl := time.Millisecond
-	expiryTime1 := time.Date(2021, 1, 1, 23, 59, 59, 0, time.Local)
-	expiryTime2 := time.Date(2021, 1, 2, 23, 59, 59, 0, time.Local)
-	expiryTime3 := time.Date(2021, 1, 3, 23, 59, 59, 0, time.Local)
-	expiryTime4 := time.Date(2021, 1, 4, 23, 59, 59, 0, time.Local)
+	expiryTime1 := time.Date(2021, 1, 1, 23, 59, 59, 0, time.UTC)
+	expiryTime2 := time.Date(2021, 1, 2, 23, 59, 59, 0, time.UTC)
+	expiryTime3 := time.Date(2021, 1, 3, 23, 59, 59, 0, time.UTC)
+	expiryTime4 := time.Date(2021, 1, 4, 23, 59, 59, 0, time.UTC)
 	sq := &StatQueue{
 		SQItems: []SQItem{
 			{
@@ -1172,7 +1172,7 @@ func TestLibstatsaddStatEventPassErr(t *testing.T) {
 	}
 }
 
-func TestLibstatsaddStatEvent2(t *testing.T) {
+func TestLibstatsaddStatEventNoPass(t *testing.T) {
 	sm, err := NewStatMetric(utils.MetaTCD, 0, []string{"*string:~*req.Account:1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1224,10 +1224,3 @@ func TestLibstatsaddStatEvent2(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, sq)
 	}
 }
-
-// func TestLibstatsLockUnlock(t *testing.T) {
-// 	sq := &StatQueue{}
-// 	sq.lk.Lock()
-// 	sq.ID = "id"
-// 	sq.lk.Unlock()
-// }
