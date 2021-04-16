@@ -979,7 +979,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(args *utils.Tenan
 
 func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -996,7 +998,9 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(args *utils.TenantID
 
 func (dS *DispatcherService) ReplicatorSv1RemoveActionProfile(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {
 	if args == nil {
-		args = &utils.TenantIDWithAPIOpts{}
+		args = &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{},
+		}
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
