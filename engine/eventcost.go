@@ -493,8 +493,8 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 	return
 }
 
-// ratingGetIDFomEventCost retrieves UUID based on data from another EventCost
-func (ec *EventCost) ratingGetIDFomEventCost(oEC *EventCost, oRatingID string) string {
+// ratingGetIDFromEventCost retrieves UUID based on data from another EventCost
+func (ec *EventCost) ratingGetIDFromEventCost(oEC *EventCost, oRatingID string) string {
 	if oRatingID == utils.EmptyString {
 		return utils.EmptyString
 	} else if oRatingID == utils.MetaPause {
@@ -521,12 +521,12 @@ func (ec *EventCost) accountingGetIDFromEventCost(oEC *EventCost, oAccountingID 
 		return ""
 	} else if oAccountingID == utils.MetaPause { // *pause represent a pause in debited session
 		oBC := oEC.Accounting[oAccountingID].Clone()
-		oBC.RatingID = ec.ratingGetIDFomEventCost(oEC, oBC.RatingID)
+		oBC.RatingID = ec.ratingGetIDFromEventCost(oEC, oBC.RatingID)
 		ec.Accounting[utils.MetaPause] = oBC
 		return utils.MetaPause
 	}
 	oBC := oEC.Accounting[oAccountingID].Clone()
-	oBC.RatingID = ec.ratingGetIDFomEventCost(oEC, oBC.RatingID)
+	oBC.RatingID = ec.ratingGetIDFromEventCost(oEC, oBC.RatingID)
 	oBC.ExtraChargeID = ec.accountingGetIDFromEventCost(oEC, oBC.ExtraChargeID)
 	return ec.Accounting.GetIDWithSet(oBC)
 }
@@ -536,7 +536,7 @@ func (ec *EventCost) accountingGetIDFromEventCost(oEC *EventCost, oAccountingID 
 func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 	cIl := oEC.Charges[cIlIdx]
 	cIlCln := cIl.Clone() // add/modify data on clone instead of original
-	cIlCln.RatingID = ec.ratingGetIDFomEventCost(oEC, cIl.RatingID)
+	cIlCln.RatingID = ec.ratingGetIDFromEventCost(oEC, cIl.RatingID)
 	lastCIl := ec.Charges[len(ec.Charges)-1]
 	lastCIt := lastCIl.Increments[len(lastCIl.Increments)-1]
 	appendChargingIncrement := lastCIl.CompressFactor == 1 &&
@@ -944,7 +944,7 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 	}
 	// close surplus with missing cache
 	for _, cIl := range srplusEC.Charges {
-		cIl.RatingID = srplusEC.ratingGetIDFomEventCost(ec, cIl.RatingID)
+		cIl.RatingID = srplusEC.ratingGetIDFromEventCost(ec, cIl.RatingID)
 		for _, incr := range cIl.Increments {
 			incr.AccountingID = srplusEC.accountingGetIDFromEventCost(ec, incr.AccountingID)
 		}
