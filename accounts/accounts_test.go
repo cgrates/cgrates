@@ -1340,8 +1340,13 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			},
 			//3m20s ABSTR 2.8 CONCR
 			cb2ID: &utils.Balance{ //125s with rating from RateS
-				ID:    cb2ID,
-				Type:  utils.MetaConcrete,
+				ID:   cb2ID,
+				Type: utils.MetaConcrete,
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(-1, 0)},
+				},
 				Units: utils.NewDecimal(125, 2), // 1.25
 			},
 			//5m25s ABSTR, 4.05 CONCR
@@ -1356,7 +1361,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		ID:     "TestV1DebitAbstractsEventCharges2",
 		Balances: map[string]*utils.Balance{
 			ab1ID: &utils.Balance{ // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10s
-				ID:   "NEWBAL",
+				ID:   ab1ID,
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
 					{
@@ -1369,40 +1374,46 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						FixedFee:     utils.NewDecimal(4, 1),  // 0.4
 						RecurrentFee: utils.NewDecimal(2, 1)}, // 0.2 per minute
 				},
-				Units: utils.NewDecimal(int64(130*time.Second), 0), // 70 left
+				Units: utils.NewDecimal(int64(130*time.Second), 0),
 			},
+			//7m25s ABSTR, 4.85 CONCR
 			cb1ID: &utils.Balance{ // absorb all costs, standard rating used when primary debiting
 				ID:   cb1ID,
 				Type: utils.MetaConcrete,
 				Opts: map[string]interface{}{
 					utils.MetaBalanceUnlimited: true,
 				},
-				Units: utils.NewDecimal(125, 2), //0.65
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(-1, 0)},
+				},
+				Units: utils.NewDecimal(1, 0), //0.8 covering the first balance 20s on it's own with RateS
 			},
+			//7m45s ABSTR, 5.05 CONCR on 0 for CB1
+			//7m55s ABSTR, 5.15 CONCR on -0.1 for CB1
 		},
 	}
 	if err := dm.SetAccount(acnt2, true); err != nil {
 		t.Error(err)
 	}
 
+	eEvChgs := utils.ExtEventCharges{
+		Abstracts:   utils.Float64Pointer(475000000000),
+		Concretes:   utils.Float64Pointer(5.15),
+		Accounting:  map[string]*utils.ExtAccountCharge{},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+	}
 	args := &utils.ArgsAccountsForEvent{
 		CGREvent: &utils.CGREvent{
 			ID:     "TestV1DebitAbstractsEventCharges",
 			Tenant: utils.CGRateSorg,
 			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "5m25s", //try with 6m25s to switch the profile
+				utils.MetaUsage: "7m55s", // 7m55s to debit both accounts
 			},
 		},
 	}
-
-	eEvChgs := utils.ExtEventCharges{
-		Abstracts:   utils.Float64Pointer(325000000000),
-		Concretes:   utils.Float64Pointer(4.05),
-		Accounting:  map[string]*utils.ExtAccountCharge{},
-		UnitFactors: map[string]*utils.ExtUnitFactor{},
-		Rating:      map[string]*utils.ExtRateSInterval{},
-	}
-
 	var rply utils.ExtEventCharges
 	if err := accnts.V1DebitAbstracts(args, &rply); err != nil {
 		t.Error(err)
@@ -1410,16 +1421,22 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		t.Errorf("expecting: %s\n, received: %s", utils.ToIJSON(eEvChgs), utils.ToIJSON(rply))
 	}
 
-	/*
-		acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
-		acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
-		acnt1.Balances[ab2ID].Units = utils.NewDecimal(0, 0)
-		acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
-		if rcv, err := dm.GetAccount(acnt1.Tenant, acnt1.ID); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(rcv, acnt1) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt1), utils.ToJSON(rcv))
-		}
+	acnt1.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
+	acnt1.Balances[cb1ID].Units = utils.NewDecimal(-200, 0)
+	acnt1.Balances[ab2ID].Units = &utils.Decimal{new(decimal.Big).CopySign(decimal.New(0, 0), decimal.New(-1, 0))} // negative 0
+	acnt1.Balances[cb2ID].Units = utils.NewDecimal(0, 0)
+	if rcv, err := dm.GetAccount(acnt1.Tenant, acnt1.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt1) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt1), utils.ToJSON(rcv))
+	}
 
-	*/
+	acnt2.Balances[ab1ID].Units = utils.NewDecimal(int64(10*time.Second), 0)
+	acnt2.Balances[cb1ID].Units = utils.NewDecimal(-1, 1)
+	if rcv, err := dm.GetAccount(acnt2.Tenant, acnt2.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt2), utils.ToJSON(rcv))
+	}
+
 }

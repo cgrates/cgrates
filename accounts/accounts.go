@@ -202,7 +202,6 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 // accountDebit will debit the usage out of an Account
 func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
-
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
