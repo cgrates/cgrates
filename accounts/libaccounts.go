@@ -151,9 +151,6 @@ func costIncrement(cfgCostIncrmts []*utils.CostIncrement,
 	if costIcrm.Increment == nil {
 		costIcrm.Increment = utils.NewDecimal(1, 0)
 	}
-	if costIcrm.RecurrentFee == nil {
-		costIcrm.RecurrentFee = utils.NewDecimal(-1, 0)
-	}
 	return
 }
 
@@ -227,7 +224,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
 	// Init EventCharges
-	calculateCost := costIcrm.RecurrentFee.Cmp(decimal.New(-1, 0)) == 0 && costIcrm.FixedFee == nil
+	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	//var attrIDs []string // will be populated if attributes are processed successfully
 	// process AttributeS if needed
 	if calculateCost && len(attributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
@@ -271,7 +268,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 			cUnits = costIcrm.FixedFee.Big
 		}
 		// RecurrentFee is configured, used it with increments
-		if costIcrm.RecurrentFee.Big.Cmp(decimal.New(-1, 0)) != 0 {
+		if costIcrm.RecurrentFee != nil {
 			rcrntCost := utils.MultiplyBig(
 				utils.DivideBig(aUnits, costIcrm.Increment.Big),
 				costIcrm.RecurrentFee.Big)

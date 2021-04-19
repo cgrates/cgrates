@@ -754,8 +754,7 @@ func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage pur
 			Units: utils.NewDecimal(500, 0), // 500 Units
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(5, 0),
-					RecurrentFee: utils.NewDecimal(-1, 0),
+					Increment: utils.NewDecimal(5, 0),
 				},
 			},
 			AttributeIDs: []string{"CustomAttr"},
@@ -817,8 +816,7 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 			Units: utils.NewDecimal(500, 0), // 500 Units
 			CostIncrements: []*utils.CostIncrement{
 				{
-					Increment:    utils.NewDecimal(5, 0),
-					RecurrentFee: utils.NewDecimal(-1, 0),
+					Increment: utils.NewDecimal(5, 0),
 				},
 			},
 			AttributeIDs: []string{"CustomAttr"},

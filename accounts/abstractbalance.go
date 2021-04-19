@@ -95,7 +95,8 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
 		usage = roundUnitsWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
 	}
-	if costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
+	if costIcrm.RecurrentFee != nil &&
+		costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
 		(costIcrm.FixedFee == nil ||
 			costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
 		// cost 0, no need of concrete

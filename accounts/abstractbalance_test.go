@@ -668,9 +668,8 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 			Type: utils.MetaAbstract,
 			CostIncrements: []*utils.CostIncrement{
 				{
-					FilterIDs:    []string{"INVALID_FILTER_FORMAT"},
-					Increment:    utils.NewDecimal(int64(1*time.Second), 0),
-					RecurrentFee: utils.NewDecimal(2, 0),
+					FilterIDs: []string{"INVALID_FILTER_FORMAT"},
+					Increment: utils.NewDecimal(int64(1*time.Second), 0),
 				},
 			},
 			Units: utils.NewDecimal(int64(60*time.Second), 0),
@@ -691,7 +690,7 @@ func TestDebitUsageCostIncrementError(t *testing.T) {
 
 	//Will check the error by making the event charge
 	//the cost is unknown, will use attributes to query from rates
-	aB.blnCfg.CostIncrements = nil
+	aB.blnCfg.CostIncrements[0].FilterIDs = []string{}
 	aB.blnCfg.AttributeIDs = []string{"attr11"}
 	expected := "NOT_CONNECTED: AttributeS"
 	if _, err := aB.debitAbstracts(decimal.New(int64(20*time.Second), 0), cgrEv); err == nil ||

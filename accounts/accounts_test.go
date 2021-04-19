@@ -68,6 +68,7 @@ func TestShutDownCoverage(t *testing.T) {
 	}
 
 	log.SetOutput(os.Stderr)
+	utils.Logger.SetLogLevel(6)
 }
 
 type dataDBMockErrorNotFound struct {
@@ -448,6 +449,7 @@ func TestAccountsDebit(t *testing.T) {
 	}
 
 	log.SetOutput(os.Stderr)
+	utils.Logger.SetLogLevel(6)
 }
 
 func TestV1AccountsForEvent(t *testing.T) {
@@ -1334,8 +1336,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				Type: utils.MetaConcrete,
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						RecurrentFee: utils.NewDecimal(-1, 0)},
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
 				},
 				Units: utils.NewDecimal(125, 2), // 1.25
 			},
@@ -1375,8 +1377,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 				},
 				CostIncrements: []*utils.CostIncrement{
 					{
-						Increment:    utils.NewDecimal(int64(time.Second), 0),
-						RecurrentFee: utils.NewDecimal(-1, 0)},
+						Increment: utils.NewDecimal(int64(time.Second), 0),
+					},
 				},
 				Units: utils.NewDecimal(1, 0), //0.8 covering the first balance 20s on it's own with RateS
 			},
@@ -1429,4 +1431,78 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(acnt2), utils.ToJSON(rcv))
 	}
 
+}
+
+func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltrS, nil, dm)
+
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
+		Balances: map[string]*utils.Balance{
+			"ab1": &utils.Balance{
+				ID:   "ab1",
+				Type: utils.MetaAbstract,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(1, 0)}, // 1.0 per minute
+				},
+				Units: utils.NewDecimal(int64(40*time.Second), 0),
+			},
+			"cb1": &utils.Balance{
+				ID:   "cb1",
+				Type: utils.MetaConcrete,
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee: utils.NewDecimal(-1, 0),
+					},
+				},
+				Units: utils.NewDecimal(1, 0),
+			},
+		},
+	}
+	if err := dm.SetAccount(acnt, true); err != nil {
+		t.Error(err)
+	}
+	args := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestV1DebitAbstractsWithRecurrentFeeNegative",
+			Tenant: "cgrates.org",
+			APIOpts: map[string]interface{}{
+				utils.MetaUsage: "72h",
+			},
+		},
+	}
+	expEvCh := &utils.ExtEventCharges{
+		Abstracts:   utils.Float64Pointer(259200000000000),
+		Concretes:   utils.Float64Pointer(-259198),
+		Accounting:  map[string]*utils.ExtAccountCharge{},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{}}
+	ev := &utils.ExtEventCharges{}
+	if err := accnts.V1DebitAbstracts(args, ev); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ev, expEvCh) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expEvCh), utils.ToJSON(ev))
+	}
+
+	acnt.Balances["ab1"].Units = utils.NewDecimal(int64(39*time.Second), 0)
+	acnt.Balances["cb1"].Units = utils.NewDecimal(259199, 0)
+	if rcv, err := dm.GetAccount(acnt.Tenant, acnt.ID); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, acnt) {
+		t.Errorf("Expected %+v,received %+v", utils.ToJSON(acnt), utils.ToJSON(rcv))
+	}
 }
