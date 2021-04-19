@@ -434,7 +434,9 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 	if _, err := maxDebitAbstractsFromConcretes(decimal.New(1100, 0), utils.EmptyString,
-		[]*concreteBalance{cb1, cb2}, nil, new(utils.CGREvent),
+		[]*concreteBalance{cb1, cb2}, nil, &utils.CGREvent{
+			ID: "Unique_id",
+		},
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
@@ -532,6 +534,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	}
 
 	log.SetOutput(os.Stderr)
+	utils.Logger.SetLogLevel(6)
 }
 
 func TestRestoreAccount3(t *testing.T) { //coverage purpose
