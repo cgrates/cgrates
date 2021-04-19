@@ -74,10 +74,12 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 
 	//invalid to parse a value from diktats
 	actCdrLG.aCfg.Diktats[0].Value = "10"
+	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = context.DeadlineExceeded.Error()
-	if err := actCdrLG.execute(context.Background(), dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
+	if err := actCdrLG.execute(ctx, dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+	cancel()
 }
 
 func TestACExecuteAccountsRemBalance(t *testing.T) {
@@ -110,10 +112,12 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 	}
 
 	actRemBal.config.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = context.DeadlineExceeded.Error()
-	if err := actRemBal.execute(context.Background(), nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
+	if err := actRemBal.execute(ctx, nil, utils.MetaRemBalance); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
+	cancel()
 }
 
 func TestACExecuteAccountsParseError(t *testing.T) {

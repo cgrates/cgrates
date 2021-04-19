@@ -32,7 +32,7 @@ import (
 )
 
 // NewRPCPool returns a new pool of connection with the given configuration
-func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
+func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan birpc.ClientConnector, lazyConnect bool,
 	biRPCClient interface{}, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
@@ -46,7 +46,7 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 			err = rpcclient.ErrDisconnected
 			continue
 		}
-		if rpcClient, err = NewRPCConnection(rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
+		if rpcClient, err = NewRPCConnection(ctx, rpcConnCfg, keyPath, certPath, caPath, connAttempts, reconnects,
 			connectTimeout, replyTimeout, internalConnChan, lazyConnect, biRPCClient,
 			poolID, rpcConnCfg.ID, connCache); err == rpcclient.ErrUnsupportedCodec {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
@@ -64,7 +64,7 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 
 // NewRPCConnection creates a new connection based on the RemoteHost structure
 // connCache is used to cache the connection with ID
-func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
+func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, internalConnChan chan birpc.ClientConnector, lazyConnect bool,
 	biRPCClient interface{}, poolID, connID string, connCache *ltcache.Cache) (client birpc.ClientConnector, err error) {
 	var id string
@@ -76,10 +76,10 @@ func NewRPCConnection(cfg *config.RemoteHost, keyPath, certPath, caPath string, 
 	}
 	if cfg.Address == rpcclient.InternalRPC ||
 		cfg.Address == rpcclient.BiRPCInternal {
-		client, err = rpcclient.NewRPCClient("", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
+		client, err = rpcclient.NewRPCClient(ctx, "", "", cfg.TLS, keyPath, certPath, caPath, connAttempts,
 			reconnects, connectTimeout, replyTimeout, cfg.Address, internalConnChan, lazyConnect, biRPCClient)
 	} else {
-		client, err = rpcclient.NewRPCClient(utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
+		client, err = rpcclient.NewRPCClient(ctx, utils.TCP, cfg.Address, cfg.TLS, keyPath, certPath, caPath,
 			connAttempts, reconnects, connectTimeout, replyTimeout,
 			utils.FirstNonEmpty(cfg.Transport, rpcclient.GOBrpc), nil, lazyConnect, biRPCClient)
 	}
@@ -103,7 +103,7 @@ type RPCClientSet map[string]*rpcclient.RPCClient
 
 // AddInternalRPCClient creates and adds to the set a new rpc client using the provided configuration
 func (s RPCClientSet) AddInternalRPCClient(name string, connChan chan birpc.ClientConnector) {
-	rpc, err := rpcclient.NewRPCClient(utils.EmptyString, utils.EmptyString, false,
+	rpc, err := rpcclient.NewRPCClient(context.Background(), utils.EmptyString, utils.EmptyString, false,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
