@@ -22,7 +22,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type DataDBMock struct{}
+type DataDBMock struct {
+	GetKeysForPrefixF     func(string) ([]string, error)
+	GetChargerProfileDrvF func(string, string) (*ChargerProfile, error)
+	GetFilterDrvF         func(string, string) (*Filter, error)
+}
 
 //Storage methods
 func (dbM *DataDBMock) Close() {}
@@ -31,7 +35,10 @@ func (dbM *DataDBMock) Flush(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetKeysForPrefix(string) ([]string, error) {
+func (dbM *DataDBMock) GetKeysForPrefix(prf string) ([]string, error) {
+	if dbM.GetKeysForPrefixF != nil {
+		return dbM.GetKeysForPrefixF(prf)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
@@ -298,7 +305,10 @@ func (dbM *DataDBMock) RemoveThresholdDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetFilterDrv(string, string) (*Filter, error) {
+func (dbM *DataDBMock) GetFilterDrv(tnt string, id string) (*Filter, error) {
+	if dbM.GetFilterDrvF != nil {
+		return dbM.GetFilterDrvF(tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
@@ -334,7 +344,10 @@ func (dbM *DataDBMock) RemoveAttributeProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetChargerProfileDrv(string, string) (*ChargerProfile, error) {
+func (dbM *DataDBMock) GetChargerProfileDrv(tnt string, id string) (*ChargerProfile, error) {
+	if dbM.GetChargerProfileDrvF != nil {
+		return dbM.GetChargerProfileDrvF(tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
