@@ -392,6 +392,7 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 			} else {
 				rply.CGREvent.Tenant = substitute
 			}
+			evNm[utils.MetaTenant] = substitute
 			continue
 		}
 		if substitute == utils.MetaRemove {
@@ -466,6 +467,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: 0,
 		},
+		utils.MetaTenant: tnt,
 	}
 	var lastID string
 	matchedIDs := make([]string, 0, processRuns)
