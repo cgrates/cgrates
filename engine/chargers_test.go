@@ -486,3 +486,146 @@ func TestChargerProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(rpl[0]), utils.ToJSON(rcv[0]))
 	}
 }
+
+func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+		"string",
+	}
+	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	defaultCfg.ChargerSCfg().IndexedSelects = false
+	defaultCfg.ChargerSCfg().NestedFields = false
+
+	dataDB := NewInternalDB(nil, nil, true)
+	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	cS := &ChargerService{
+		dm: dmCharger,
+		filterS: &FilterS{
+			dm:  dmCharger,
+			cfg: defaultCfg,
+		},
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event: map[string]interface{}{
+			"Charger":        "ChargerProfile1",
+			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "10.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+
+	experr := utils.ErrNotFound
+	rcv, err := cS.matchingChargerProfilesForEvent("tnt", cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+		"string",
+	}
+	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	defaultCfg.ChargerSCfg().IndexedSelects = false
+	defaultCfg.ChargerSCfg().NestedFields = false
+
+	dataDB := NewInternalDB(nil, nil, true)
+	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	cS := &ChargerService{
+		dm: dmCharger,
+		filterS: &FilterS{
+			dm:  dmCharger,
+			cfg: defaultCfg,
+		},
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event: map[string]interface{}{
+			"Charger":        "ChargerProfile1",
+			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "10.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+
+	experr := utils.ErrNotFound
+	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+		"string",
+	}
+	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	defaultCfg.ChargerSCfg().IndexedSelects = false
+	defaultCfg.ChargerSCfg().NestedFields = false
+
+	dbm := &DataDBMock{
+		GetKeysForPrefixF: func(s string) ([]string, error) {
+			return []string{":"}, nil
+		},
+	}
+	dmCharger := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	cS := &ChargerService{
+		dm: dmCharger,
+		filterS: &FilterS{
+			dm:  dmCharger,
+			cfg: defaultCfg,
+		},
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event: map[string]interface{}{
+			"Charger":        "ChargerProfile1",
+			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "10.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+
+	experr := utils.ErrNotImplemented
+	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+}

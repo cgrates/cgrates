@@ -4524,41 +4524,6 @@ func TestECTrimFailDetectLastActiveChargingInterval(t *testing.T) {
 	}
 }
 
-// func TestECTrim2(t *testing.T) {
-// 	ec := &EventCost{
-// 		Usage:          utils.DurationPointer(30 * time.Second),
-// 		AccountSummary: &AccountSummary{},
-// 		Charges: []*ChargingInterval{
-// 			{
-// 				RatingID:       "RT_ID1",
-// 				cost:           utils.Float64Pointer(10),
-// 				ecUsageIdx:     utils.DurationPointer(12 * time.Second),
-// 				CompressFactor: 0,
-// 				usage:          utils.DurationPointer(45 * time.Second),
-// 			},
-// 			{
-// 				RatingID:       "RT_ID2",
-// 				cost:           utils.Float64Pointer(10),
-// 				ecUsageIdx:     utils.DurationPointer(8 * time.Second),
-// 				CompressFactor: 0,
-// 				usage:          utils.DurationPointer(45 * time.Second),
-// 			},
-// 		},
-// 	}
-// 	atUsage := 13 * time.Second
-
-// 	experr := "failed detecting last active ChargingInterval"
-// 	rcv, err := ec.Trim(atUsage)
-
-// 	if err == nil || err.Error() != experr {
-// 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
-// 	}
-
-// 	if rcv != nil {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
-// 	}
-// }
-
 func TestECFieldAsInterfaceEmptyFieldPath(t *testing.T) {
 	ec := &EventCost{}
 	fldPath := []string{}
@@ -4604,18 +4569,3 @@ func TestECfieldAsInterfaceNilECCost(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
 }
-
-// func TestECfieldAsInterfaceUnsupportedField(t *testing.T) {
-// 	ec := &EventCost{}
-// 	fldPath := []string{utils.Charges}
-
-// 	rcv, err := ec.fieldAsInterface(fldPath)
-
-// 	if err != nil {
-// 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-// 	}
-
-// 	if rcv != nil {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
-// 	}
-// }
