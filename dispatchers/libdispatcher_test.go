@@ -844,3 +844,32 @@ func TestLibDispatcherSingleResultStrategyDispatcherCastError(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
+
+/*
+func TestLibDispatcherSingleResultStrategyDispatcherCastError2(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &singleResultstrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, utils.AttributeSv1Ping, &utils.CGREvent{}, "")
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+*/
