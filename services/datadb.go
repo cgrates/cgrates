@@ -52,11 +52,7 @@ type DataDBService struct {
 }
 
 // Start should handle the sercive start
-func (db *DataDBService) Start() error {
-	return db.Init(true)
-}
-
-func (db *DataDBService) Init(reload bool) (err error) {
+func (db *DataDBService) Start() (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -77,15 +73,7 @@ func (db *DataDBService) Init(reload bool) (err error) {
 		err = nil // reset the error in case of only SessionS active
 		return
 	}
-	if db.cfg.DataDbCfg().UpdateConfig {
-		if err = db.cfg.LoadFromDB(d); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("Could not load config from dataDB: %s exiting!", err))
-			return
-		}
-		if reload {
-			db.cfg.ReloadAllSectionsForDB()
-		}
-	}
+
 	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	engine.SetDataStorage(db.dm)
 	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
@@ -112,12 +100,6 @@ func (db *DataDBService) Reload() (err error) {
 		}
 		db.dm.Reconnect(d)
 		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-		if db.cfg.DataDbCfg().UpdateConfig {
-			if err = db.cfg.LoadFromDB(d); err != nil {
-				return
-			}
-			db.cfg.ReloadAllSectionsForDB()
-		}
 		return
 	}
 	if db.cfg.DataDbCfg().Type == utils.Mongo {
@@ -164,7 +146,7 @@ func (db *DataDBService) ShouldRun() bool {
 
 // mandatoryDB returns if the current configuration needs the DB
 func (db *DataDBService) mandatoryDB() bool {
-	return db.cfg.DataDbCfg().UpdateConfig || db.cfg.ChargerSCfg().Enabled ||
+	return db.cfg.ChargerSCfg().Enabled ||
 		db.cfg.AttributeSCfg().Enabled || db.cfg.ResourceSCfg().Enabled || db.cfg.StatSCfg().Enabled ||
 		db.cfg.ThresholdSCfg().Enabled || db.cfg.RouteSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled ||
 		db.cfg.LoaderCfg().Enabled() || db.cfg.AdminSCfg().Enabled || db.cfg.RateSCfg().Enabled ||

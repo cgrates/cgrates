@@ -96,7 +96,6 @@ type DbJsonCfg struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
-	Update_config         *bool
 	Items                 *map[string]*ItemOptJson
 	Opts                  map[string]interface{}
 }
@@ -676,4 +675,9 @@ type AccountSJsonCfg struct {
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Max_iterations        *int
 	Max_usage             *string
+}
+
+type ConfigDBJsonCfg struct {
+	Enabled *bool
+	*DbJsonCfg
 }

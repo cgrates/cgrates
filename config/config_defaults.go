@@ -83,7 +83,6 @@ const CGRATES_CFG_JSON = `
 	"replication_conns":[],					// the conns the items are replicated
 	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
 	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
-	"update_config": false,					// if the engine should load the config from DataDB
 	"items":{
 		"*accounts":{"remote":false, "replicate":false}, 					
 		"*reverse_destinations": {"remote":false, "replicate":false},
@@ -1095,6 +1094,33 @@ const CGRATES_CFG_JSON = `
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
     "max_iterations": 1000,                 // maximum number of iterations
     "max_usage": "72h",                     // maximum time of usage
+},
+
+
+"config_db": {								// database used to store runtime data (eg: accounts)
+	"enabled": false,						// starts service: <true|false>
+	"db_type": "*redis",					// data_db type: <*redis|*mongo>
+	"db_host": "127.0.0.1",					// data_db host address
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_password": "", 						// password to use when connecting to data_db
+	"remote_conns":[],						// the conns that are queried when the items are not found in local DB 
+	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
+	"replication_conns":[],					// the conns the items are replicated
+	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
+	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
+	"opts":{
+		"redis_sentinel": "",					// the name of sentinel when used
+		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
+		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
+		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"query_timeout":"10s",
+		"redis_tls": false,						// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
+		"redis_client_certificate":"",			// path to client certificate
+		"redis_client_key":"",					// path to client key
+		"redis_ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+	}
 },
 
 

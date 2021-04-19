@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/migrator"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -143,6 +144,21 @@ func main() {
 	if *cfgPath != utils.EmptyString {
 		if mgrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
+		}
+		if mgrCfg.ConfigDBCfg().Enabled {
+			d, err := engine.NewDataDBConn(mgrCfg.ConfigDBCfg().Type,
+				mgrCfg.ConfigDBCfg().Host, mgrCfg.ConfigDBCfg().Port,
+				mgrCfg.ConfigDBCfg().Name, mgrCfg.ConfigDBCfg().User,
+				mgrCfg.ConfigDBCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
+				mgrCfg.ConfigDBCfg().Opts)
+			if err != nil { // Cannot configure getter database, show stopper
+				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
+				return
+			}
+			if err = mgrCfg.LoadFromDB(d); err != nil {
+				log.Fatalf("Could not parse config: <%s>", err.Error())
+				return
+			}
 		}
 		config.SetCgrConfig(mgrCfg)
 	}
