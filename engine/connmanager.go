@@ -106,7 +106,7 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 			err = fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 			return
 		}
-		if conn, err = rpcclient.NewRPCParallelClientPool(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
+		if conn, err = rpcclient.NewRPCParallelClientPool(ctx, utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
 			cM.cfg.TLSCfg().ClientKey, cM.cfg.TLSCfg().ClientCerificate,
 			cM.cfg.TLSCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
 			cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
@@ -114,7 +114,7 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 			return
 		}
 	} else {
-		if conn, err = NewRPCPool(connCfg.Strategy,
+		if conn, err = NewRPCPool(ctx, connCfg.Strategy,
 			cM.cfg.TLSCfg().ClientKey,
 			cM.cfg.TLSCfg().ClientCerificate, cM.cfg.TLSCfg().CaCertificate,
 			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,

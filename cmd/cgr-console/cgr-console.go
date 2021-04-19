@@ -131,7 +131,7 @@ func main() {
 	}
 	var err error
 
-	client, err = rpcclient.NewRPCClient(utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
+	client, err = rpcclient.NewRPCClient(context.Background(), utils.TCP, *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
 		time.Second, time.Duration(*replyTimeOut)*time.Second, *rpcEncoding, nil, false, nil)
 	if err != nil {
 		cgrConsoleFlags.PrintDefaults()
