@@ -743,9 +743,37 @@ func TestLibDispatcherLoadStrategyDispatchCaseHosts(t *testing.T) {
 	}
 }
 
-/*
 func TestLibDispatcherLoadStrategyDispatchCaseHostsError(t *testing.T) {
 	wgDsp := &loadStrategyDispatcher{
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "testID2",
+				FilterIDs: []string{"filterID"},
+				Weight:    4,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 1,
+				},
+				Blocker: false,
+			},
+		},
+		defaultRatio: 1,
+	}
+	err := wgDsp.dispatch(nil, "", "", "", []string{"testID2"}, "", "", "")
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestLibDispatcherLoadStrategyDispatchCaseHostsCastError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	newCache := engine.NewCacheS(cfg, nil, nil)
+	engine.Cache = newCache
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherLoads, "testID",
+		false, nil, true, utils.NonTransactional)
+	wgDsp := &loadStrategyDispatcher{
+		tntID: "testID",
 		hosts: engine.DispatcherHostProfiles{
 			{
 				ID:        "testID",
@@ -760,9 +788,59 @@ func TestLibDispatcherLoadStrategyDispatchCaseHostsError(t *testing.T) {
 		defaultRatio: 1,
 	}
 	err := wgDsp.dispatch(nil, "", "", "", []string{"testID"}, "", "", "")
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	expected := "cannot cast false to *LoadMetrics"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+
+func TestLibDispatcherLoadStrategyDispatchCaseHostsCastError2(t *testing.T) {
+	wgDsp := &loadStrategyDispatcher{
+		tntID: "testID",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "testID",
+				FilterIDs: []string{"filterID"},
+				Weight:    4,
+				Params: map[string]interface{}{
+					utils.MetaRatio: false,
+				},
+				Blocker: false,
+			},
+		},
+		defaultRatio: 1,
+	}
+	err := wgDsp.dispatch(nil, "", "", "", []string{"testID"}, "", "", "")
+	expected := "cannot convert field<bool>: false to int"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
-*/
+
+func TestLibDispatcherSingleResultStrategyDispatcherCastError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &singleResultstrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, "", "", "")
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
