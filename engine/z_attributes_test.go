@@ -29,7 +29,7 @@ import (
 
 var (
 	expTimeAttributes = time.Now().Add(20 * time.Minute)
-	attrService       *AttributeService
+	attrS             *AttributeService
 	dmAtr             *DataManager
 	attrEvs           = []*AttrArgsProcessEvent{
 		{
@@ -155,7 +155,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 }
 
 func TestAttributeAddFilters(t *testing.T) {
@@ -237,7 +237,7 @@ func TestAttributeCache(t *testing.T) {
 }
 
 func TestAttributeProfileForEvent(t *testing.T) {
-	atrp, err := attrService.attributeProfileForEvent(attrEvs[0].Tenant, attrEvs[0].Context,
+	atrp, err := attrS.attributeProfileForEvent(attrEvs[0].Tenant, attrEvs[0].Context,
 		attrEvs[0].AttributeIDs, attrEvs[0].Time, utils.MapStorage{
 			utils.MetaReq:  attrEvs[0].CGREvent.Event,
 			utils.MetaOpts: attrEvs[0].APIOpts,
@@ -251,7 +251,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	if !reflect.DeepEqual(atrPs[0], atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrp))
 	}
-	atrp, err = attrService.attributeProfileForEvent(attrEvs[1].Tenant, attrEvs[1].Context,
+	atrp, err = attrS.attributeProfileForEvent(attrEvs[1].Tenant, attrEvs[1].Context,
 		attrEvs[1].AttributeIDs, attrEvs[1].Time, utils.MapStorage{
 			utils.MetaReq:  attrEvs[1].CGREvent.Event,
 			utils.MetaOpts: attrEvs[1].APIOpts,
@@ -266,7 +266,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[1]), utils.ToJSON(atrp))
 	}
 
-	atrp, err = attrService.attributeProfileForEvent(attrEvs[2].Tenant, attrEvs[2].Context,
+	atrp, err = attrS.attributeProfileForEvent(attrEvs[2].Tenant, attrEvs[2].Context,
 		attrEvs[2].AttributeIDs, attrEvs[2].Time, utils.MapStorage{
 			utils.MetaReq:  attrEvs[2].CGREvent.Event,
 			utils.MetaOpts: attrEvs[2].APIOpts,
@@ -296,7 +296,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	atrp, err := attrService.processEvent(attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -314,7 +314,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	if _, err := attrService.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM,
+	if _, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM,
 		newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Error: %+v", err)
 	}
@@ -335,7 +335,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	if atrp, err := attrService.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
+	if atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
 	}
@@ -587,7 +587,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -696,7 +696,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -805,7 +805,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -895,7 +895,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1007,7 +1007,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1116,7 +1116,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1186,7 +1186,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1266,7 +1266,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1338,7 +1338,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1416,7 +1416,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1499,7 +1499,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Fatalf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1574,7 +1574,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1651,7 +1651,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1728,7 +1728,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -1747,7 +1747,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	//refresh the DM
 	if err := dmAtr.DataDB().Flush(""); err != nil {
 		b.Error(err)
@@ -1794,7 +1794,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	var reply AttrSProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 			b.Errorf("Error: %+v", err)
 		}
 	}
@@ -1805,7 +1805,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 
 	//refresh the DM
 	if err := dmAtr.DataDB().Flush(""); err != nil {
@@ -1853,7 +1853,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	var reply AttrSProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 			b.Errorf("Error: %+v", err)
 		}
 	}
@@ -1894,7 +1894,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_CONSTANT",
@@ -1931,7 +1931,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1952,7 +1952,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_VARIABLE",
@@ -1991,7 +1991,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2013,7 +2013,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_COMPOSED",
@@ -2058,7 +2058,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2080,7 +2080,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_USAGE_DIFF",
@@ -2120,7 +2120,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2142,7 +2142,7 @@ func TestProcessAttributeSum(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_SUM",
@@ -2182,7 +2182,7 @@ func TestProcessAttributeSum(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2204,7 +2204,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_DIFF",
@@ -2244,7 +2244,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2266,7 +2266,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_MULTIPLY",
@@ -2306,7 +2306,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2328,7 +2328,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_DIVIDE",
@@ -2368,7 +2368,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2390,7 +2390,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_VAL_EXP",
@@ -2430,7 +2430,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2452,7 +2452,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_UNIX_TIMESTAMP",
@@ -2492,7 +2492,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2514,7 +2514,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_PREFIX",
@@ -2553,7 +2553,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2575,7 +2575,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_SUFFIX",
@@ -2614,7 +2614,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 			utils.ProcessRuns: 0,
 		},
 	}
-	rcv, err := attrService.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
+	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2639,7 +2639,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	defaultCfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 
 	//refresh the DM
 	if err := dmAtr.DataDB().Flush(""); err != nil {
@@ -2684,7 +2684,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	}
 
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil || err != utils.ErrNotFound {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected not found, reveiced: %+v", err)
 	}
 
@@ -2696,7 +2696,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
@@ -2746,7 +2746,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 		},
 	}
 	var rcv AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(ev, &rcv); err != nil {
+	if err := attrS.V1ProcessEvent(ev, &rcv); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	clnEv := ev.CGREvent.Clone()
@@ -2770,7 +2770,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf1Exists := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1_EXISTS",
@@ -2843,7 +2843,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -2864,7 +2864,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	data := NewInternalDB(nil, nil, true)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	Cache.Clear(nil)
-	attrService = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	attrPrf1NotEmpty := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1_NOTEMPTY",
@@ -2937,7 +2937,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		},
 	}
 	var reply AttrSProcessEventReply
-	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+	if err := attrS.V1ProcessEvent(attrArgs, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
@@ -2949,5 +2949,57 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+}
+
+func TestAttributeMetaTenant(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AttributeSCfg().IndexedSelects = false
+	dm := NewDataManager(NewInternalDB(nil, nil, true), config.CgrConfig().CacheCfg(), nil)
+	Cache.Clear(nil)
+	attrS = NewAttributeService(dm, &FilterS{dm: dm, cfg: cfg}, cfg)
+	attr1 := &AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_TNT",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{},
+		Attributes: []*Attribute{{
+			Type:  utils.MetaPrefix,
+			Path:  utils.MetaTenant,
+			Value: config.NewRSRParsersMustCompile("prfx_", utils.InfieldSep),
+		}},
+		Weight: 10,
+	}
+
+	// Add attribute in DM
+	if err := dm.SetAttributeProfile(attr1, true); err != nil {
+		t.Error(err)
+	}
+	if _, err := dm.GetAttributeProfile(attr1.Tenant, attr1.ID, true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	args := &AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: &utils.CGREvent{
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
+		},
+	}
+	eRply := AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_TNT"},
+		AlteredFields:   []string{utils.MetaTenant},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "prfx_" + config.CgrConfig().GeneralCfg().DefaultTenant,
+			Event:   map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrS.V1ProcessEvent(args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(eRply, reply) {
+		t.Errorf("Expecting %s, received: %s", utils.ToJSON(eRply), utils.ToJSON(reply))
 	}
 }
