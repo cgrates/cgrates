@@ -138,7 +138,7 @@ func testSCncrLoadTP(t *testing.T) {
 		},
 	}
 	var resAttrSet string
-	if err := sCncrRPC.Call(utils.APIerSv2SetAttributeProfile, attrPrfl, &resAttrSet); err != nil {
+	if err := sCncrRPC.Call(utils.APIerSv1SetAttributeProfile, attrPrfl, &resAttrSet); err != nil {
 		t.Error(err)
 	} else if resAttrSet != utils.OK {
 		t.Errorf("unexpected reply returned: <%s>", resAttrSet)

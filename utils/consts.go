@@ -1347,11 +1347,10 @@ const (
 
 // AttributeS APIs
 const (
-	APIerSv1SetAttributeProfile      = "APIerSv1.SetAttributeProfile"
-	APIerSv1GetAttributeProfile      = "APIerSv1.GetAttributeProfile"
+	AdminSv1SetAttributeProfile      = "AdminSv1.SetAttributeProfile"
+	AdminSv1GetAttributeProfile      = "AdminSv1.GetAttributeProfile"
 	APIerSv1GetAttributeProfileIDs   = "APIerSv1.GetAttributeProfileIDs"
 	APIerSv1RemoveAttributeProfile   = "APIerSv1.RemoveAttributeProfile"
-	APIerSv2SetAttributeProfile      = "APIerSv2.SetAttributeProfile"
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
 	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
 	AttributeSv1Ping                 = "AttributeSv1.Ping"
