@@ -52,7 +52,6 @@ fi
 /bin/chown -R %{name}:%{name} %{_logdir}
 /bin/chown -R %{name}:%{name} %{_spooldir}
 /bin/chown -R %{name}:%{name} %{_libdir}
-sudo systemctl restart syslog
 sudo systemctl restart rsyslog
 
 %preun
