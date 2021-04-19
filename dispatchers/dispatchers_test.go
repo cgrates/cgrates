@@ -172,3 +172,28 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+/*
+func TestDispatcherDispatchCache(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().PrefixIndexedFields = &[]string{"pf"}
+	cfg.DispatcherSCfg().StringIndexedFields = &[]string{"indx"}
+	cfg.DispatcherSCfg().SuffixIndexedFields = &[]string{"sfx"}
+	cfg.DispatcherSCfg().IndexedSelects = true
+	cfg.DispatcherSCfg().NestedFields = true
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
+	dsp := NewDispatcherService(nil, cfg, nil, nil)
+	err := dsp.Dispatch(&utils.CGREvent{
+		Tenant: "tenant",
+	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessions, "", "")
+	expected := ""
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+*/
