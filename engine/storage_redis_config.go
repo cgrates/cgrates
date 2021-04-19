@@ -21,6 +21,7 @@ package engine
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -29,9 +30,7 @@ const (
 
 func (rs *RedisStorage) GeneralJsonCfg() (r *config.GeneralJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.GeneralJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.GeneralJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -39,9 +38,7 @@ func (rs *RedisStorage) GeneralJsonCfg() (r *config.GeneralJsonCfg, err error) {
 }
 func (rs *RedisStorage) RPCConnJsonCfg() (r config.RPCConnsJson, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.RPCConnsJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.RPCConnsJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -49,9 +46,7 @@ func (rs *RedisStorage) RPCConnJsonCfg() (r config.RPCConnsJson, err error) {
 }
 func (rs *RedisStorage) CacheJsonCfg() (r *config.CacheJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.CacheJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.CacheJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -59,9 +54,7 @@ func (rs *RedisStorage) CacheJsonCfg() (r *config.CacheJsonCfg, err error) {
 }
 func (rs *RedisStorage) ListenJsonCfg() (r *config.ListenJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ListenJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ListenJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -69,9 +62,7 @@ func (rs *RedisStorage) ListenJsonCfg() (r *config.ListenJsonCfg, err error) {
 }
 func (rs *RedisStorage) HttpJsonCfg() (r *config.HTTPJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.HTTPJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.HTTPJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -79,9 +70,7 @@ func (rs *RedisStorage) HttpJsonCfg() (r *config.HTTPJsonCfg, err error) {
 }
 func (rs *RedisStorage) DbJsonCfg(section string) (r *config.DbJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+section); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+section); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -89,9 +78,7 @@ func (rs *RedisStorage) DbJsonCfg(section string) (r *config.DbJsonCfg, err erro
 }
 func (rs *RedisStorage) FilterSJsonCfg() (r *config.FilterSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.FilterSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.FilterSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -99,9 +86,7 @@ func (rs *RedisStorage) FilterSJsonCfg() (r *config.FilterSJsonCfg, err error) {
 }
 func (rs *RedisStorage) CdrsJsonCfg() (r *config.CdrsJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.CDRsJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.CDRsJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -109,9 +94,7 @@ func (rs *RedisStorage) CdrsJsonCfg() (r *config.CdrsJsonCfg, err error) {
 }
 func (rs *RedisStorage) ERsJsonCfg() (r *config.ERsJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ERsJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ERsJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -119,9 +102,7 @@ func (rs *RedisStorage) ERsJsonCfg() (r *config.ERsJsonCfg, err error) {
 }
 func (rs *RedisStorage) EEsJsonCfg() (r *config.EEsJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.EEsJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.EEsJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -129,9 +110,7 @@ func (rs *RedisStorage) EEsJsonCfg() (r *config.EEsJsonCfg, err error) {
 }
 func (rs *RedisStorage) SessionSJsonCfg() (r *config.SessionSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.SessionSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.SessionSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -139,9 +118,7 @@ func (rs *RedisStorage) SessionSJsonCfg() (r *config.SessionSJsonCfg, err error)
 }
 func (rs *RedisStorage) FreeswitchAgentJsonCfg() (r *config.FreeswitchAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.FreeSWITCHAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.FreeSWITCHAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -149,9 +126,7 @@ func (rs *RedisStorage) FreeswitchAgentJsonCfg() (r *config.FreeswitchAgentJsonC
 }
 func (rs *RedisStorage) KamAgentJsonCfg() (r *config.KamAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.KamailioAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.KamailioAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -159,9 +134,7 @@ func (rs *RedisStorage) KamAgentJsonCfg() (r *config.KamAgentJsonCfg, err error)
 }
 func (rs *RedisStorage) AsteriskAgentJsonCfg() (r *config.AsteriskAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.AsteriskAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.AsteriskAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -169,9 +142,7 @@ func (rs *RedisStorage) AsteriskAgentJsonCfg() (r *config.AsteriskAgentJsonCfg, 
 }
 func (rs *RedisStorage) DiameterAgentJsonCfg() (r *config.DiameterAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.DiameterAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.DiameterAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -179,9 +150,7 @@ func (rs *RedisStorage) DiameterAgentJsonCfg() (r *config.DiameterAgentJsonCfg, 
 }
 func (rs *RedisStorage) RadiusAgentJsonCfg() (r *config.RadiusAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.RadiusAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.RadiusAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -189,9 +158,7 @@ func (rs *RedisStorage) RadiusAgentJsonCfg() (r *config.RadiusAgentJsonCfg, err 
 }
 func (rs *RedisStorage) HttpAgentJsonCfg() (r *[]*config.HttpAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.HTTPAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.HTTPAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -199,9 +166,7 @@ func (rs *RedisStorage) HttpAgentJsonCfg() (r *[]*config.HttpAgentJsonCfg, err e
 }
 func (rs *RedisStorage) DNSAgentJsonCfg() (r *config.DNSAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.DNSAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.DNSAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -209,9 +174,7 @@ func (rs *RedisStorage) DNSAgentJsonCfg() (r *config.DNSAgentJsonCfg, err error)
 }
 func (rs *RedisStorage) AttributeServJsonCfg() (r *config.AttributeSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.AttributeSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.AttributeSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -219,9 +182,7 @@ func (rs *RedisStorage) AttributeServJsonCfg() (r *config.AttributeSJsonCfg, err
 }
 func (rs *RedisStorage) ChargerServJsonCfg() (r *config.ChargerSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ChargerSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ChargerSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -229,9 +190,7 @@ func (rs *RedisStorage) ChargerServJsonCfg() (r *config.ChargerSJsonCfg, err err
 }
 func (rs *RedisStorage) ResourceSJsonCfg() (r *config.ResourceSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ResourceSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ResourceSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -239,9 +198,7 @@ func (rs *RedisStorage) ResourceSJsonCfg() (r *config.ResourceSJsonCfg, err erro
 }
 func (rs *RedisStorage) StatSJsonCfg() (r *config.StatServJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.StatSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.StatSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -249,9 +206,7 @@ func (rs *RedisStorage) StatSJsonCfg() (r *config.StatServJsonCfg, err error) {
 }
 func (rs *RedisStorage) ThresholdSJsonCfg() (r *config.ThresholdSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ThresholdSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ThresholdSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -259,9 +214,7 @@ func (rs *RedisStorage) ThresholdSJsonCfg() (r *config.ThresholdSJsonCfg, err er
 }
 func (rs *RedisStorage) RouteSJsonCfg() (r *config.RouteSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.RouteSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.RouteSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -269,9 +222,7 @@ func (rs *RedisStorage) RouteSJsonCfg() (r *config.RouteSJsonCfg, err error) {
 }
 func (rs *RedisStorage) LoaderJsonCfg() (r []*config.LoaderJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.LoaderSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.LoaderSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -279,9 +230,7 @@ func (rs *RedisStorage) LoaderJsonCfg() (r []*config.LoaderJsonCfg, err error) {
 }
 func (rs *RedisStorage) MailerJsonCfg() (r *config.MailerJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.MailerJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.MailerJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -289,9 +238,7 @@ func (rs *RedisStorage) MailerJsonCfg() (r *config.MailerJsonCfg, err error) {
 }
 func (rs *RedisStorage) SureTaxJsonCfg() (r *config.SureTaxJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.SureTaxJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.SureTaxJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -299,9 +246,7 @@ func (rs *RedisStorage) SureTaxJsonCfg() (r *config.SureTaxJsonCfg, err error) {
 }
 func (rs *RedisStorage) DispatcherSJsonCfg() (r *config.DispatcherSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.DispatcherSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.DispatcherSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -309,9 +254,7 @@ func (rs *RedisStorage) DispatcherSJsonCfg() (r *config.DispatcherSJsonCfg, err 
 }
 func (rs *RedisStorage) RegistrarCJsonCfgs() (r *config.RegistrarCJsonCfgs, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.RegistrarCJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.RegistrarCJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -319,9 +262,7 @@ func (rs *RedisStorage) RegistrarCJsonCfgs() (r *config.RegistrarCJsonCfgs, err 
 }
 func (rs *RedisStorage) LoaderCfgJson() (r *config.LoaderCfgJson, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.LoaderJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.LoaderJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -329,9 +270,7 @@ func (rs *RedisStorage) LoaderCfgJson() (r *config.LoaderCfgJson, err error) {
 }
 func (rs *RedisStorage) MigratorCfgJson() (r *config.MigratorCfgJson, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.MigratorJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.MigratorJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -339,9 +278,7 @@ func (rs *RedisStorage) MigratorCfgJson() (r *config.MigratorCfgJson, err error)
 }
 func (rs *RedisStorage) TlsCfgJson() (r *config.TlsJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.TlsJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.TlsJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -349,9 +286,7 @@ func (rs *RedisStorage) TlsCfgJson() (r *config.TlsJsonCfg, err error) {
 }
 func (rs *RedisStorage) AnalyzerCfgJson() (r *config.AnalyzerSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.AnalyzerSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.AnalyzerSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -359,9 +294,7 @@ func (rs *RedisStorage) AnalyzerCfgJson() (r *config.AnalyzerSJsonCfg, err error
 }
 func (rs *RedisStorage) AdminSCfgJson() (r *config.AdminSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.AdminSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.AdminSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -369,9 +302,7 @@ func (rs *RedisStorage) AdminSCfgJson() (r *config.AdminSJsonCfg, err error) {
 }
 func (rs *RedisStorage) RateCfgJson() (r *config.RateSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.RateSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.RateSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -379,9 +310,7 @@ func (rs *RedisStorage) RateCfgJson() (r *config.RateSJsonCfg, err error) {
 }
 func (rs *RedisStorage) SIPAgentJsonCfg() (r *config.SIPAgentJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.SIPAgentJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.SIPAgentJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -389,9 +318,7 @@ func (rs *RedisStorage) SIPAgentJsonCfg() (r *config.SIPAgentJsonCfg, err error)
 }
 func (rs *RedisStorage) TemplateSJsonCfg() (r config.FcTemplatesJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.TemplatesJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.TemplatesJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -399,9 +326,7 @@ func (rs *RedisStorage) TemplateSJsonCfg() (r config.FcTemplatesJsonCfg, err err
 }
 func (rs *RedisStorage) ConfigSJsonCfg() (r *config.ConfigSCfgJson, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ConfigSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ConfigSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -409,9 +334,7 @@ func (rs *RedisStorage) ConfigSJsonCfg() (r *config.ConfigSCfgJson, err error) {
 }
 func (rs *RedisStorage) ApiBanCfgJson() (r *config.APIBanJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.APIBanJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.APIBanJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -419,9 +342,7 @@ func (rs *RedisStorage) ApiBanCfgJson() (r *config.APIBanJsonCfg, err error) {
 }
 func (rs *RedisStorage) CoreSJSON() (r *config.CoreSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.CoreSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.CoreSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -429,9 +350,7 @@ func (rs *RedisStorage) CoreSJSON() (r *config.CoreSJsonCfg, err error) {
 }
 func (rs *RedisStorage) ActionSCfgJson() (r *config.ActionSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.ActionSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.ActionSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -439,9 +358,7 @@ func (rs *RedisStorage) ActionSCfgJson() (r *config.ActionSJsonCfg, err error) {
 }
 func (rs *RedisStorage) AccountSCfgJson() (r *config.AccountSJsonCfg, err error) {
 	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.AccountSJSON); err != nil {
-		return
-	} else if len(values) == 0 {
+	if err = rs.Cmd(&values, redisGET, configPrefix+config.AccountSJSON); err != nil || len(values) == 0 {
 		return
 	}
 	err = rs.ms.Unmarshal(values, &r)
@@ -454,4 +371,7 @@ func (rs *RedisStorage) SetSection(_ *context.Context, section string, jsn inter
 		return
 	}
 	return rs.Cmd(nil, redisSET, configPrefix+section, string(result))
+}
+func (rs *RedisStorage) ConfigDBJsonCfg() (*config.ConfigDBJsonCfg, error) {
+	return nil, utils.ErrNotImplemented
 }

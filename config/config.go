@@ -201,6 +201,10 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.coreSCfg = new(CoreSCfg)
 	cfg.accountSCfg = new(AccountSCfg)
+	cfg.configDBCfg = new(ConfigDBCfg)
+	cfg.configDBCfg.DataDbCfg = new(DataDbCfg)
+	cfg.configDBCfg.DataDbCfg.Items = make(map[string]*ItemOpt)
+	cfg.configDBCfg.DataDbCfg.Opts = make(map[string]interface{})
 
 	cfg.cacheDP = make(map[string]utils.MapStorage)
 
@@ -335,6 +339,7 @@ type CGRConfig struct {
 	apiBanCfg        *APIBanCfg        // APIBan config
 	coreSCfg         *CoreSCfg         // CoreS config
 	accountSCfg      *AccountSCfg      // AccountS config
+	configDBCfg      *ConfigDBCfg      // ConfigDB conifg
 
 	cacheDP    map[string]utils.MapStorage
 	cacheDPMux sync.RWMutex
@@ -408,7 +413,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg ConfigDB) (err error) {
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
 		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadCoreSCfg, cfg.loadActionSCfg,
-		cfg.loadAccountSCfg} {
+		cfg.loadAccountSCfg, cfg.loadConfigDBCfg} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -854,6 +859,15 @@ func (cfg *CGRConfig) loadAccountSCfg(jsnCfg ConfigDB) (err error) {
 	return cfg.accountSCfg.loadFromJSONCfg(jsnActionCfg)
 }
 
+// loadConfigDBCfg loads the ConfigDB section of the configuration
+func (cfg *CGRConfig) loadConfigDBCfg(jsnCfg ConfigDB) (err error) {
+	var jsnDBCfg *ConfigDBJsonCfg
+	if jsnDBCfg, err = jsnCfg.ConfigDBJsonCfg(); err != nil {
+		return
+	}
+	return cfg.configDBCfg.loadFromJSONCfg(jsnDBCfg)
+}
+
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
 func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
 	cfg.lks[SureTaxJSON].Lock()
@@ -1160,6 +1174,13 @@ func (cfg *CGRConfig) CoreSCfg() *CoreSCfg {
 	return cfg.coreSCfg
 }
 
+// ConfigDBCfg reads the CoreS configuration
+func (cfg *CGRConfig) ConfigDBCfg() *ConfigDBCfg {
+	cfg.lks[ConfigDBJSON].Lock()
+	defer cfg.lks[ConfigDBJSON].Unlock()
+	return cfg.configDBCfg
+}
+
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
@@ -1266,6 +1287,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(ConfigDB) error {
 		CoreSJSON:           cfg.loadCoreSCfg,
 		ActionSJSON:         cfg.loadActionSCfg,
 		AccountSJSON:        cfg.loadAccountSCfg,
+		ConfigDBJSON:        cfg.loadConfigDBCfg,
 	}
 }
 
@@ -1515,6 +1537,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[AccountSJSON] <- struct{}{}
 		case ActionSJSON:
 			cfg.rldChans[ActionSJSON] <- struct{}{}
+		case ConfigDBJSON: // no reload for this
 		}
 	}
 }
@@ -1565,6 +1588,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		CoreSJSON:           cfg.coreSCfg.AsMapInterface(),
 		ActionSJSON:         cfg.actionSCfg.AsMapInterface(),
 		AccountSJSON:        cfg.accountSCfg.AsMapInterface(),
+		ConfigDBJSON:        cfg.configDBCfg.AsMapInterface(),
 	}
 }
 
@@ -1821,6 +1845,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		coreSCfg:         cfg.coreSCfg.Clone(),
 		actionSCfg:       cfg.actionSCfg.Clone(),
 		accountSCfg:      cfg.accountSCfg.Clone(),
+		configDBCfg:      cfg.configDBCfg.Clone(),
 
 		cacheDP: make(map[string]utils.MapStorage),
 	}
@@ -1862,7 +1887,7 @@ func (cfg *CGRConfig) LoadFromDB(jsnCfg ConfigDB) (err error) {
 	for _, loadFunc := range []func(ConfigDB) error{
 		cfg.loadRPCConns,
 		cfg.loadGeneralCfg, cfg.loadTemplateSCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
-		cfg.loadHTTPCfg, cfg.loadStorDBCfg,
+		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg,
 		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
@@ -1960,6 +1985,7 @@ func (cfg *CGRConfig) ReloadAllSectionsForDB() {
 			cfg.rldChans[AccountSJSON] <- struct{}{}
 		case ActionSJSON:
 			cfg.rldChans[ActionSJSON] <- struct{}{}
+		case ConfigDBJSON: // no reload for this
 		}
 	}
 }
@@ -2389,6 +2415,8 @@ func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error
 		mp = cfg.ActionSCfg().AsMapInterface()
 	case AccountSJSON:
 		mp = cfg.AccountSCfg().AsMapInterface()
+	case ConfigDBJSON:
+		mp = cfg.ConfigDBCfg().AsMapInterface()
 	default:
 		err = errors.New("Invalid section ")
 	}

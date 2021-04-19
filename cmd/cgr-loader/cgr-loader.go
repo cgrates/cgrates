@@ -120,6 +120,21 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err)
 		}
+		if ldrCfg.ConfigDBCfg().Enabled {
+			d, err := engine.NewDataDBConn(ldrCfg.ConfigDBCfg().Type,
+				ldrCfg.ConfigDBCfg().Host, ldrCfg.ConfigDBCfg().Port,
+				ldrCfg.ConfigDBCfg().Name, ldrCfg.ConfigDBCfg().User,
+				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
+				ldrCfg.ConfigDBCfg().Opts)
+			if err != nil { // Cannot configure getter database, show stopper
+				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
+				return
+			}
+			if err = ldrCfg.LoadFromDB(d); err != nil {
+				log.Fatalf("Could not parse config: <%s>", err.Error())
+				return
+			}
+		}
 		config.SetCgrConfig(ldrCfg)
 	}
 	// Data for DataDB

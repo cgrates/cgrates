@@ -26,134 +26,221 @@ import (
 
 // no config for internal
 
-func (iDB *InternalDB) GeneralJsonCfg() (*config.GeneralJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) GeneralJsonCfg() (*config.GeneralJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.GeneralJSON)
+	v, _ := cfg.(*config.GeneralJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) RPCConnJsonCfg() (config.RPCConnsJson, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) RPCConnJsonCfg() (config.RPCConnsJson, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.CacheJSON)
+	v, _ := cfg.(config.RPCConnsJson)
+	return v, nil
 }
-func (iDB *InternalDB) CacheJsonCfg() (*config.CacheJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) CacheJsonCfg() (*config.CacheJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ListenJSON)
+	v, _ := cfg.(*config.CacheJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ListenJsonCfg() (*config.ListenJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ListenJsonCfg() (*config.ListenJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.HTTPJSON)
+	v, _ := cfg.(*config.ListenJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) HttpJsonCfg() (*config.HTTPJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) HttpJsonCfg() (*config.HTTPJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.StorDBJSON)
+	v, _ := cfg.(*config.HTTPJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) DbJsonCfg(section string) (*config.DbJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) DbJsonCfg(section string) (*config.DbJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, section)
+	v, _ := cfg.(*config.DbJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) FilterSJsonCfg() (*config.FilterSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) FilterSJsonCfg() (*config.FilterSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.CDRsJSON)
+	v, _ := cfg.(*config.FilterSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) CdrsJsonCfg() (*config.CdrsJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) CdrsJsonCfg() (*config.CdrsJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.SessionSJSON)
+	v, _ := cfg.(*config.CdrsJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ERsJsonCfg() (*config.ERsJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ERsJsonCfg() (*config.ERsJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.FreeSWITCHAgentJSON)
+	v, _ := cfg.(*config.ERsJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) EEsJsonCfg() (*config.EEsJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) EEsJsonCfg() (*config.EEsJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.KamailioAgentJSON)
+	v, _ := cfg.(*config.EEsJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) SessionSJsonCfg() (*config.SessionSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) SessionSJsonCfg() (*config.SessionSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.AsteriskAgentJSON)
+	v, _ := cfg.(*config.SessionSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) FreeswitchAgentJsonCfg() (*config.FreeswitchAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) FreeswitchAgentJsonCfg() (*config.FreeswitchAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.DiameterAgentJSON)
+	v, _ := cfg.(*config.FreeswitchAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) KamAgentJsonCfg() (*config.KamAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) KamAgentJsonCfg() (*config.KamAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.RadiusAgentJSON)
+	v, _ := cfg.(*config.KamAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) AsteriskAgentJsonCfg() (*config.AsteriskAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) AsteriskAgentJsonCfg() (*config.AsteriskAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.HTTPAgentJSON)
+	v, _ := cfg.(*config.AsteriskAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) DiameterAgentJsonCfg() (*config.DiameterAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) DiameterAgentJsonCfg() (*config.DiameterAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.AttributeSJSON)
+	v, _ := cfg.(*config.DiameterAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) RadiusAgentJsonCfg() (*config.RadiusAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) RadiusAgentJsonCfg() (*config.RadiusAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ResourceSJSON)
+	v, _ := cfg.(*config.RadiusAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) HttpAgentJsonCfg() (*[]*config.HttpAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) HttpAgentJsonCfg() (*[]*config.HttpAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.StatSJSON)
+	v, _ := cfg.(*[]*config.HttpAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) DNSAgentJsonCfg() (*config.DNSAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) DNSAgentJsonCfg() (*config.DNSAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ThresholdSJSON)
+	v, _ := cfg.(*config.DNSAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) AttributeServJsonCfg() (*config.AttributeSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) AttributeServJsonCfg() (*config.AttributeSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.RouteSJSON)
+	v, _ := cfg.(*config.AttributeSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ChargerServJsonCfg() (*config.ChargerSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ChargerServJsonCfg() (*config.ChargerSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.LoaderSJSON)
+	v, _ := cfg.(*config.ChargerSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ResourceSJsonCfg() (*config.ResourceSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ResourceSJsonCfg() (*config.ResourceSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.MailerJSON)
+	v, _ := cfg.(*config.ResourceSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) StatSJsonCfg() (*config.StatServJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) StatSJsonCfg() (*config.StatServJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.SureTaxJSON)
+	v, _ := cfg.(*config.StatServJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ThresholdSJsonCfg() (*config.ThresholdSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ThresholdSJsonCfg() (*config.ThresholdSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.DispatcherSJSON)
+	v, _ := cfg.(*config.ThresholdSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) RouteSJsonCfg() (*config.RouteSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) RouteSJsonCfg() (*config.RouteSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.RegistrarCJSON)
+	v, _ := cfg.(*config.RouteSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) LoaderJsonCfg() ([]*config.LoaderJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) LoaderJsonCfg() ([]*config.LoaderJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.LoaderJSON)
+	v, _ := cfg.([]*config.LoaderJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) MailerJsonCfg() (*config.MailerJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) MailerJsonCfg() (*config.MailerJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.MigratorJSON)
+	v, _ := cfg.(*config.MailerJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) SureTaxJsonCfg() (*config.SureTaxJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) SureTaxJsonCfg() (*config.SureTaxJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ChargerSJSON)
+	v, _ := cfg.(*config.SureTaxJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) DispatcherSJsonCfg() (*config.DispatcherSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) DispatcherSJsonCfg() (*config.DispatcherSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.TlsJSON)
+	v, _ := cfg.(*config.DispatcherSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) RegistrarCJsonCfgs() (*config.RegistrarCJsonCfgs, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) RegistrarCJsonCfgs() (*config.RegistrarCJsonCfgs, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.AnalyzerSJSON)
+	v, _ := cfg.(*config.RegistrarCJsonCfgs)
+	return v, nil
 }
-func (iDB *InternalDB) LoaderCfgJson() (*config.LoaderCfgJson, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) LoaderCfgJson() (*config.LoaderCfgJson, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.AdminSJSON)
+	v, _ := cfg.(*config.LoaderCfgJson)
+	return v, nil
 }
-func (iDB *InternalDB) MigratorCfgJson() (*config.MigratorCfgJson, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) MigratorCfgJson() (*config.MigratorCfgJson, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.DNSAgentJSON)
+	v, _ := cfg.(*config.MigratorCfgJson)
+	return v, nil
 }
-func (iDB *InternalDB) TlsCfgJson() (*config.TlsJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) TlsCfgJson() (*config.TlsJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ERsJSON)
+	v, _ := cfg.(*config.TlsJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) AnalyzerCfgJson() (*config.AnalyzerSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) AnalyzerCfgJson() (*config.AnalyzerSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.EEsJSON)
+	v, _ := cfg.(*config.AnalyzerSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) AdminSCfgJson() (*config.AdminSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) AdminSCfgJson() (*config.AdminSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.RateSJSON)
+	v, _ := cfg.(*config.AdminSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) RateCfgJson() (*config.RateSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) RateCfgJson() (*config.RateSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ActionSJSON)
+	v, _ := cfg.(*config.RateSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) SIPAgentJsonCfg() (*config.SIPAgentJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) SIPAgentJsonCfg() (*config.SIPAgentJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.RPCConnsJSON)
+	v, _ := cfg.(*config.SIPAgentJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) TemplateSJsonCfg() (config.FcTemplatesJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) TemplateSJsonCfg() (config.FcTemplatesJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.SIPAgentJSON)
+	v, _ := cfg.(config.FcTemplatesJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ConfigSJsonCfg() (*config.ConfigSCfgJson, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ConfigSJsonCfg() (*config.ConfigSCfgJson, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.TemplatesJSON)
+	v, _ := cfg.(*config.ConfigSCfgJson)
+	return v, nil
 }
-func (iDB *InternalDB) ApiBanCfgJson() (*config.APIBanJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ApiBanCfgJson() (*config.APIBanJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.ConfigSJSON)
+	v, _ := cfg.(*config.APIBanJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) CoreSJSON() (*config.CoreSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) CoreSJSON() (*config.CoreSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.APIBanJSON)
+	v, _ := cfg.(*config.CoreSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) ActionSCfgJson() (*config.ActionSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) ActionSCfgJson() (*config.ActionSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.CoreSJSON)
+	v, _ := cfg.(*config.ActionSJsonCfg)
+	return v, nil
 }
-func (iDB *InternalDB) AccountSCfgJson() (*config.AccountSJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
+func (*InternalDB) AccountSCfgJson() (*config.AccountSJsonCfg, error) {
+	cfg, _ := Cache.Get(utils.MetaConfig, config.AccountSJSON)
+	v, _ := cfg.(*config.AccountSJsonCfg)
+	return v, nil
 }
 
-func (iDB *InternalDB) SetSection(_ *context.Context, section string, jsn interface{}) error {
-	return utils.ErrNotImplemented
-
+func (*InternalDB) SetSection(_ *context.Context, section string, jsn interface{}) error {
+	Cache.SetWithoutReplicate(utils.MetaConfig, section, jsn, nil, true, utils.NonTransactional)
+	return nil
+}
+func (*InternalDB) ConfigDBJsonCfg() (*config.ConfigDBJsonCfg, error) {
+	return nil, utils.ErrNotImplemented
 }

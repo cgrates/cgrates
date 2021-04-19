@@ -449,6 +449,21 @@ func main() {
 		cfg.GeneralCfg().NodeID = *nodeID
 	}
 
+	if cfg.ConfigDBCfg().Enabled {
+		d, err := engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
+			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
+			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
+			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.ConfigDBCfg().Opts)
+		if err != nil { // Cannot configure getter database, show stopper
+			utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
+			return
+		}
+		if err = cfg.LoadFromDB(d); err != nil {
+			log.Fatalf("Could not parse config: <%s>", err.Error())
+			return
+		}
+	}
 	config.SetCgrConfig(cfg) // Share the config object
 
 	// init syslog
@@ -565,7 +580,7 @@ func main() {
 	dmService := services.NewDataDBService(cfg, connManager, srvDep)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  ERs
 		shdWg.Add(1)
-		if err = dmService.Init(false); err != nil {
+		if err = dmService.Start(); err != nil {
 			return
 		}
 	}

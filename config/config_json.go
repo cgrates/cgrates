@@ -69,6 +69,7 @@ const (
 	APIBanJSON          = "apiban"
 	CoreSJSON           = "cores"
 	AccountSJSON        = "accounts"
+	ConfigDBJSON        = "config_db"
 )
 
 var (
@@ -77,7 +78,7 @@ var (
 		KamailioAgentJSON, DiameterAgentJSON, RadiusAgentJSON, HTTPAgentJSON, DNSAgentJSON, AttributeSJSON,
 		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON, RouteSJSON, LoaderSJSON, MailerJSON, SureTaxJSON,
 		LoaderJSON, MigratorJSON, DispatcherSJSON, AnalyzerSJSON, AdminSJSON, EEsJSON, RateSJSON, SIPAgentJSON,
-		RegistrarCJSON, TemplatesJSON, ConfigSJSON, APIBanJSON, CoreSJSON, ActionSJSON, AccountSJSON}
+		RegistrarCJSON, TemplatesJSON, ConfigSJSON, APIBanJSON, CoreSJSON, ActionSJSON, AccountSJSON, ConfigDBJSON}
 	sortedSectionsSet = utils.NewStringSet(sortedCfgSections)
 )
 
@@ -125,6 +126,7 @@ type ConfigDB interface {
 	ActionSCfgJson() (*ActionSJsonCfg, error)
 	AccountSCfgJson() (*AccountSJsonCfg, error)
 	SetSection(*context.Context, string, interface{}) error
+	ConfigDBJsonCfg() (*ConfigDBJsonCfg, error) // only used when loading from file
 }
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -643,4 +645,16 @@ func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn inte
 	d := json.RawMessage(data)
 	jsnCfg[section] = &d
 	return nil
+}
+
+func (jsnCfg CgrJsonCfg) ConfigDBJsonCfg() (*ConfigDBJsonCfg, error) {
+	rawCfg, hasKey := jsnCfg[ConfigDBJSON]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ConfigDBJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
