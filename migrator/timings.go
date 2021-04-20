@@ -42,7 +42,7 @@ func (m *Migrator) migrateCurrentTiming() (err error) {
 		if tm == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetTiming(tm); err != nil {
+		if err := m.dmOut.DataManager().SetTiming(context.TODO(), tm); err != nil {
 			return err
 		}
 		m.stats[utils.Timing]++

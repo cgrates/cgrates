@@ -90,15 +90,18 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 		}
 	}()
 
-	// chSv1 := v1.NewCacheSv1(chS)
-	// if !cfg.DispatcherSCfg().Enabled {
-	// 	server.RpcRegister(chSv1)
-	// }
-	// var rpc birpc.ClientConnector = chS
-	// if anz.IsRunning() {
-	// rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
-	// }
-	// internalCacheSChan <- rpc
+	chSv1, err := birpc.NewService(apis.NewCacheSv1(chS), "", false)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(chSv1)
+	}
+	var rpc birpc.ClientConnector = chSv1
+	if anz.IsRunning() {
+		rpc = anz.GetAnalyzerS().NewAnalyzerConnector(rpc, utils.MetaInternal, utils.EmptyString, utils.CacheS)
+	}
+	internalCacheSChan <- rpc
 	return
 }
 
@@ -173,8 +176,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		// 	internalAnalyzerSChan <- analyzerS
 		// case loaderS := <-internalLoaderSChan:
 		// 	internalLoaderSChan <- loaderS
-		// case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
-		// 	internalCacheSChan <- chS
+		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
+			internalCacheSChan <- chS
 		// case eeS := <-internalEEsChan:
 		// 	internalEEsChan <- eeS
 		case rateS := <-internalRateSChan:

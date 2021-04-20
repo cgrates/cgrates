@@ -103,7 +103,7 @@ func (dm *DataManager) DataDB() DataDB {
 	return nil
 }
 
-func (dm *DataManager) LoadDataDBCache(attr map[string][]string) (err error) {
+func (dm *DataManager) LoadDataDBCache(ctx *context.Context, attr map[string][]string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -111,14 +111,14 @@ func (dm *DataManager) LoadDataDBCache(attr map[string][]string) (err error) {
 		return // all the data is in cache already
 	}
 	for key, ids := range attr {
-		if err = dm.CacheDataFromDB(key, ids, false); err != nil {
+		if err = dm.CacheDataFromDB(ctx, key, ids, false); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
+func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []string, mustBeCached bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -137,7 +137,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
-			if ids, err = dm.DataDB().GetKeysForPrefix(context.TODO(), prfx); err != nil {
+			if ids, err = dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 				return utils.NewCGRError(utils.DataManager,
 					utils.ServerErrorCaps,
 					err.Error(),
@@ -186,13 +186,13 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetFilter(context.TODO(), tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetFilter(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.RouteProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetRouteProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetAttributeProfile(context.TODO(), tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetAttributeProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ChargerProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -204,7 +204,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.RateProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetRateProfile(context.TODO(), tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetRateProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ActionProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -213,78 +213,78 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheAttributeFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ResourceFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheResourceFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheResourceFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.StatFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheStatFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheStatFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ThresholdFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheThresholdFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheThresholdFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.RouteFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheRouteFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheRouteFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ChargerFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheChargerFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheChargerFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.DispatcherFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.RateProfilesFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheRateProfilesFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheRateProfilesFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.RateFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheRateFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheRateFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.ActionProfilesFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheActionProfilesFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.AccountFilterIndexPrfx:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheAccountsFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheAccountsFilterIndexes, tntCtx, idxKey, false, true)
 		case utils.FilterIndexPrfx:
 			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
 			if idx < 0 {
 				err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", dataID)
 				return
 			}
-			_, err = dm.GetIndexes(context.TODO(), utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
+			_, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		case utils.MetaAPIBan:
-			_, err = dm.GetAPIBan(context.TODO(), utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
+			_, err = dm.GetAPIBan(ctx, utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
 		}
 		if err != nil {
 			if err != utils.ErrNotFound {
@@ -293,7 +293,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 					err.Error(),
 					fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
 			}
-			if err = Cache.Remove(context.TODO(), utils.CachePrefixToInstance[prfx], dataID,
+			if err = Cache.Remove(ctx, utils.CachePrefixToInstance[prfx], dataID,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
 				return
 			}
@@ -1251,14 +1251,14 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 	return
 }
 
-func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
+func (dm *DataManager) SetTiming(ctx *context.Context, t *utils.TPTiming) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if err = dm.DataDB().SetTimingDrv(t); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true); err != nil {
+	if err = dm.CacheDataFromDB(ctx, utils.TimingsPrefix, []string{t.ID}, true); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; itm.Replicate {

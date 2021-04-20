@@ -128,7 +128,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 		return
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if err = sS.dm.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, true); err != nil {
+	if err = sS.dm.CacheDataFromDB(context.TODO(), utils.StatQueuePrefix, []string{sq.TenantID()}, true); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed caching StatQueue with ID: %s, error: %s",
 				sq.TenantID(), err.Error()))
