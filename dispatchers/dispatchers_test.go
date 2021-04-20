@@ -173,27 +173,96 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 	}
 }
 
-/*
-func TestDispatcherDispatchCache(t *testing.T) {
+func TestDispatcherServiceAuthorizeEvenError1(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
-	cfg.DispatcherSCfg().PrefixIndexedFields = &[]string{"pf"}
-	cfg.DispatcherSCfg().StringIndexedFields = &[]string{"indx"}
-	cfg.DispatcherSCfg().SuffixIndexedFields = &[]string{"sfx"}
-	cfg.DispatcherSCfg().IndexedSelects = true
-	cfg.DispatcherSCfg().NestedFields = true
 	dm := engine.NewDataManager(nil, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
-	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
-	dsp := NewDispatcherService(nil, cfg, nil, nil)
-	err := dsp.Dispatch(&utils.CGREvent{
-		Tenant: "tenant",
-	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessions, "", "")
-	expected := ""
+	fltr := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
+	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
+	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
+	ev := &utils.CGREvent{}
+	reply := &engine.AttrSProcessEventReply{}
+	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
+		nil, nil, true, utils.NonTransactional)
+	err := dsp.authorizeEvent(ev, reply)
+	expected := "UNKNOWN_API_KEY"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
+}
+
+func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	fltr := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
+	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
+	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
+	ev := &utils.CGREvent{}
+	reply := &engine.AttrSProcessEventReply{}
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
+		value, nil, true, utils.NonTransactional)
+	err := dsp.authorizeEvent(ev, reply)
+	expected := "dial tcp: missing address"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+
+/*
+func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	fltr := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
+	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
+	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
+	ev := &utils.CGREvent{}
+	reply := &engine.AttrSProcessEventReply{}
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	tmp := engine.IntRPC
+	engine.IntRPC = map[string]*rpcclient.RPCClient{}
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeCon)
+	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
+	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
+		value, nil, true, utils.NonTransactional)
+	err := dsp.authorizeEvent(ev, reply)
+	expected := "dial tcp: missing address"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+	engine.IntRPC = tmp
 }
 */
