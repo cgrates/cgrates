@@ -20,9 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
 	"net/rpc"
 	"os"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -283,4 +285,413 @@ func testXMLITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestNewXMLFileER(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].SourcePath = "/tmp/xmlErs/out/"
+	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1
+	fltrs := &engine.FilterS{}
+	expEr := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out",
+		rdrEvents: nil,
+		rdrError:  nil,
+		rdrExit:   nil,
+		conReqs:   make(chan struct{}, 1),
+	}
+	var value struct{}
+	expEr.conReqs <- value
+	eR, err := NewXMLFileER(cfg, 0, nil, nil, fltrs, nil)
+	expConReq := make(chan struct{}, 1)
+	expConReq <- struct{}{}
+	if <-expConReq != <-eR.(*XMLFileER).conReqs {
+		t.Errorf("Expected %v but received %v", <-expConReq, <-eR.(*XMLFileER).conReqs)
+	}
+	expEr.conReqs = nil
+	eR.(*XMLFileER).conReqs = nil
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eR.(*XMLFileER), expEr) {
+		t.Errorf("Expected %v but received %v", expEr.conReqs, eR.(*XMLFileER).conReqs)
+	}
+}
+
+func TestFileXMLProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileXMLProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.xml"))
+	if err != nil {
+		t.Error(err)
+	}
+	xmlData := `<?xml version="1.0" encoding="ISO-8859-1"?>
+  <!DOCTYPE broadWorksCDR>
+  <broadWorksCDR version="19.0">
+    <cdrData>
+      <basicModule>
+        <localCallId>
+          <localCallId>25160047719:0</localCallId>
+        </localCallId>
+      </basicModule>
+    </cdrData>
+  </broadWorksCDR>
+  `
+	file.Write([]byte(xmlData))
+	file.Close()
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+
+	//or set the default Fields of cfg.ERsCfg().Readers[0].Fields
+	eR.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:       "OriginID",
+			Type:      utils.MetaConstant,
+			Path:      "*cgreq.OriginID",
+			Value:     config.NewRSRParsersMustCompile("25160047719:0", utils.InfieldSep),
+			Mandatory: true,
+		},
+	}
+
+	eR.Config().Fields[0].ComputePath()
+
+	eR.conReqs <- struct{}{}
+	fileName := "file1.xml"
+	if err := eR.processFile(filePath, fileName); err != nil {
+		t.Error(err)
+	}
+	expEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"OriginID": "25160047719:0",
+		},
+		APIOpts: make(map[string]interface{}),
+	}
+	select {
+	case data := <-eR.rdrEvents:
+		expEvent.ID = data.cgrEvent.ID
+		expEvent.Time = data.cgrEvent.Time
+		if !reflect.DeepEqual(data.cgrEvent, expEvent) {
+			t.Errorf("Expected %v but received %v", utils.ToJSON(expEvent), utils.ToJSON(data.cgrEvent))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Error("Time limit exceeded")
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileXMLProcessEventError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileXMLProcessEvent/"
+	fname := "file1.xml"
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	errExpect := "open /tmp/TestFileXMLProcessEvent/file1.xml: no such file or directory"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestFileXMLProcessEVentError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filePath := "/tmp/TestFileXMLProcessEvent/"
+	fname := "file1.xml"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.xml"))
+	if err != nil {
+		t.Error(err)
+	}
+	xmlData := `<?xml version="1.0" encoding="ISO-8859-1"?>
+  <!DOCTYPE broadWorksCDR>
+  <broadWorksCDR version="19.0">
+    <cdrData>
+      <basicModule>
+        <localCallId>
+          <localCallId>25160047719:0</localCallId>
+        </localCallId>
+      </basicModule>
+    </cdrData>
+  </broadWorksCDR>
+  `
+	file.Write([]byte(xmlData))
+	file.Close()
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().Tenant = config.RSRParsers{
+		{
+			Rules: "test",
+		},
+	}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	//
+	eR.Config().Filters = []string{"*exists:~*req..Account:"}
+	errExpect = "rename /tmp/TestFileXMLProcessEvent/file1.xml /var/spool/cgrates/ers/out/file1.xml: no such file or directory"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileXMLProcessEVentError3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	// fltrs := &engine.FilterS{}
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileXMLProcessEvent/"
+	fname := "file1.xml"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.xml"))
+	if err != nil {
+		t.Error(err)
+	}
+	xmlData := `<?xml version="1.0" encoding="ISO-8859-1"?>
+  <!DOCTYPE broadWorksCDR>
+  <broadWorksCDR version="19.0">
+    <cdrData>
+      <basicModule>
+        <localCallId>
+          <localCallId>25160047719:0</localCallId>
+        </localCallId>
+      </basicModule>
+    </cdrData>
+  </broadWorksCDR>
+  `
+	file.Write([]byte(xmlData))
+	file.Close()
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:       "OriginID",
+			Type:      utils.MetaConstant,
+			Path:      "*cgreq.OriginID",
+			Value:     nil,
+			Mandatory: true,
+		},
+	}
+
+	eR.Config().Fields[0].ComputePath()
+	errExpect := "Empty source value for fieldID: <OriginID>"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileXMLProcessEventParseError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileXMLProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.xml"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`
+  <XMLField>test/XMLField>`))
+	file.Close()
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	fileName := "file1.xml"
+	errExpect := "XML syntax error on line 2: unexpected EOF"
+	if err := eR.processFile(filePath, fileName); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileXML(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	err := os.MkdirAll(eR.rdrDir, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:       "OriginID",
+			Type:      utils.MetaConstant,
+			Path:      "*cgreq.OriginID",
+			Value:     config.NewRSRParsersMustCompile("25160047719:0", utils.InfieldSep),
+			Mandatory: true,
+		},
+	}
+
+	eR.Config().Fields[0].ComputePath()
+
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(eR.rdrDir, fmt.Sprintf("file%d.xml", i))); err != nil {
+			t.Error(err)
+		}
+	}
+
+	eR.Config().RunDelay = time.Duration(-1)
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	os.Create(path.Join(eR.rdrDir, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileXMLError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErsError/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	err := os.MkdirAll(eR.rdrDir, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:       "OriginID",
+			Type:      utils.MetaConstant,
+			Path:      "*cgreq.OriginID",
+			Value:     config.NewRSRParsersMustCompile("25160047719:0", utils.InfieldSep),
+			Mandatory: true,
+		},
+	}
+
+	eR.Config().Fields[0].ComputePath()
+
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(eR.rdrDir, fmt.Sprintf("file%d.xml", i))); err != nil {
+			t.Error(err)
+		}
+	}
+	os.Create(path.Join(eR.rdrDir, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileXMLExit(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &XMLFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/xmlErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	eR.rdrExit <- struct{}{}
 }
