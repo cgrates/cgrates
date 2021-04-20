@@ -71,8 +71,8 @@ func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cach
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
-	rpl = utils.AttrReloadCacheWithAPIOpts{
+func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl *utils.AttrReloadCacheWithAPIOpts, err error) {
+	rpl = &utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{
 			utils.CacheInstanceToArg[cacheID]: {itemID},
