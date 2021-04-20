@@ -845,7 +845,12 @@ func TestLibDispatcherSingleResultStrategyDispatcherCastError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-/*
+type mockTypeCon struct{}
+
+func (*mockTypeCon) Call(serviceMethod string, args, reply interface{}) error {
+	return utils.ErrNotFound
+}
+
 func TestLibDispatcherSingleResultStrategyDispatcherCastError2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
@@ -856,20 +861,26 @@ func TestLibDispatcherSingleResultStrategyDispatcherCastError2(t *testing.T) {
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:          "testID",
-			Address:     "",
-			Transport:   "",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
 			Synchronous: false,
 			TLS:         false,
 		},
 	}
+
+	tmp := engine.IntRPC
+	engine.IntRPC = map[string]*rpcclient.RPCClient{}
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeCon)
+	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
 	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
 		value, nil, true, utils.NonTransactional)
 	wgDsp := &singleResultstrategyDispatcher{}
-	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, utils.AttributeSv1Ping, &utils.CGREvent{}, "")
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
+	expected := "UNSUPPORTED_SERVICE_METHOD"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
+	engine.IntRPC = tmp
 }
-*/

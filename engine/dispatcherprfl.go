@@ -161,7 +161,6 @@ func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply int
 			utils.EmptyString, utils.EmptyString, nil); err != nil {
 			return
 		}
-
 	}
 	return dH.rpcConn.Call(serviceMethod, args, reply)
 }
