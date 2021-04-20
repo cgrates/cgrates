@@ -230,7 +230,7 @@ func (chS *CacheS) Precache() (err error) {
 		}
 		wg.Add(1)
 		go func(cacheID string) {
-			errCache := chS.dm.CacheDataFromDB(
+			errCache := chS.dm.CacheDataFromDB(context.TODO(),
 				utils.CacheInstanceToPrefix[cacheID], nil,
 				false)
 			if errCache != nil {
@@ -300,7 +300,7 @@ func (chS *CacheS) V1RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithAPIOpts,
+func (chS *CacheS) V1Clear(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) (err error) {
 	chS.tCache.Clear(args.CacheIDs)
 	*reply = utils.OK
@@ -356,10 +356,10 @@ func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+func (chS *CacheS) V1ReloadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {
-			if err = chS.dm.CacheDataFromDB(prfx, ids, true); err != nil {
+			if err = chS.dm.CacheDataFromDB(ctx, prfx, ids, true); err != nil {
 				return
 			}
 		}
@@ -381,14 +381,14 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithAPIOpts, reply *
 	return nil
 }
 
-func (chS *CacheS) V1LoadCache(attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	args := make(map[string][]string)
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {
 			args[prfx] = ids
 		}
 	}
-	if err = chS.dm.LoadDataDBCache(args); err != nil {
+	if err = chS.dm.LoadDataDBCache(ctx, args); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//get loadIDs for all types

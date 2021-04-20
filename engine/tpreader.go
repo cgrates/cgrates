@@ -783,7 +783,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
-		if err = tpr.dm.SetTiming(t); err != nil {
+		if err = tpr.dm.SetTiming(context.Background(), t); err != nil {
 			return
 		}
 		if verbose {

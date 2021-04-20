@@ -348,7 +348,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *ThresholdsArgsProcess
 				withErrors = true
 			}
 			//since we don't handle in DataManager caching we do a manual remove here
-			if err = tS.dm.CacheDataFromDB(utils.ThresholdPrefix, []string{t.TenantID()}, true); err != nil {
+			if err = tS.dm.CacheDataFromDB(context.TODO(), utils.ThresholdPrefix, []string{t.TenantID()}, true); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing from cache non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
