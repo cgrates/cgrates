@@ -1098,18 +1098,12 @@ const CGRATES_CFG_JSON = `
 
 
 "config_db": {								// database used to store runtime data (eg: accounts)
-	"enabled": false,						// starts service: <true|false>
-	"db_type": "*redis",					// data_db type: <*redis|*mongo>
-	"db_host": "127.0.0.1",					// data_db host address
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
-	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_type": "*internal",					// data_db type: <*redis|*mongo>
+	"db_host": "",							// data_db host address
+	"db_port": 0,	 						// data_db port to reach the database
+	"db_name": "",	 						// data_db database name to connect to
+	"db_user": "",		 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
-	"remote_conns":[],						// the conns that are queried when the items are not found in local DB 
-	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
-	"replication_conns":[],					// the conns the items are replicated
-	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
-	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
 	"opts":{
 		"redis_sentinel": "",					// the name of sentinel when used
 		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster

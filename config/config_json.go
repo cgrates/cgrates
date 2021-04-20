@@ -126,7 +126,6 @@ type ConfigDB interface {
 	ActionSCfgJson() (*ActionSJsonCfg, error)
 	AccountSCfgJson() (*AccountSJsonCfg, error)
 	SetSection(*context.Context, string, interface{}) error
-	ConfigDBJsonCfg() (*ConfigDBJsonCfg, error) // only used when loading from file
 }
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -645,16 +644,4 @@ func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn inte
 	d := json.RawMessage(data)
 	jsnCfg[section] = &d
 	return nil
-}
-
-func (jsnCfg CgrJsonCfg) ConfigDBJsonCfg() (*ConfigDBJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[ConfigDBJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(ConfigDBJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
 }

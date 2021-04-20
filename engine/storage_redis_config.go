@@ -21,7 +21,6 @@ package engine
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -371,7 +370,4 @@ func (rs *RedisStorage) SetSection(_ *context.Context, section string, jsn inter
 		return
 	}
 	return rs.Cmd(nil, redisSET, configPrefix+section, string(result))
-}
-func (rs *RedisStorage) ConfigDBJsonCfg() (*config.ConfigDBJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
 }

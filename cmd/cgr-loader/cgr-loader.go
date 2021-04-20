@@ -120,7 +120,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err)
 		}
-		if ldrCfg.ConfigDBCfg().Enabled {
+		if ldrCfg.ConfigDBCfg().Type != utils.MetaInternal {
 			d, err := engine.NewDataDBConn(ldrCfg.ConfigDBCfg().Type,
 				ldrCfg.ConfigDBCfg().Host, ldrCfg.ConfigDBCfg().Port,
 				ldrCfg.ConfigDBCfg().Name, ldrCfg.ConfigDBCfg().User,

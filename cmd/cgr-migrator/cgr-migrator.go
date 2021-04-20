@@ -145,7 +145,7 @@ func main() {
 		if mgrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
-		if mgrCfg.ConfigDBCfg().Enabled {
+		if mgrCfg.ConfigDBCfg().Type != utils.MetaInternal {
 			d, err := engine.NewDataDBConn(mgrCfg.ConfigDBCfg().Type,
 				mgrCfg.ConfigDBCfg().Host, mgrCfg.ConfigDBCfg().Port,
 				mgrCfg.ConfigDBCfg().Name, mgrCfg.ConfigDBCfg().User,

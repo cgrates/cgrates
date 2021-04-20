@@ -241,6 +241,3 @@ func (*InternalDB) SetSection(_ *context.Context, section string, jsn interface{
 	Cache.SetWithoutReplicate(utils.MetaConfig, section, jsn, nil, true, utils.NonTransactional)
 	return nil
 }
-func (*InternalDB) ConfigDBJsonCfg() (*config.ConfigDBJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
-}
