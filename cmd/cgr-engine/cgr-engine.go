@@ -452,7 +452,7 @@ func main() {
 		cfg.GeneralCfg().NodeID = *nodeID
 	}
 
-	if cfg.ConfigDBCfg().Enabled {
+	if cfg.ConfigDBCfg().Type != utils.MetaInternal {
 		d, err := engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
 			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,

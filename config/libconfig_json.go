@@ -676,8 +676,3 @@ type AccountSJsonCfg struct {
 	Max_iterations        *int
 	Max_usage             *string
 }
-
-type ConfigDBJsonCfg struct {
-	Enabled *bool
-	*DbJsonCfg
-}

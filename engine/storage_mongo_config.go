@@ -21,7 +21,6 @@ package engine
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -841,7 +840,4 @@ func (ms *MongoStorage) SetSection(ctx *context.Context, section string, jsn int
 		)
 		return err
 	})
-}
-func (ms *MongoStorage) ConfigDBJsonCfg() (*config.ConfigDBJsonCfg, error) {
-	return nil, utils.ErrNotImplemented
 }
