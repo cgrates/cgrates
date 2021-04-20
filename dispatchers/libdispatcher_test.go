@@ -884,3 +884,74 @@ func TestLibDispatcherSingleResultStrategyDispatcherCastError2(t *testing.T) {
 	engine.Cache = cacheInit
 	engine.IntRPC = tmp
 }
+
+func TestLibDispatcherBroadcastStrategyDispatcherDispatchError1(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &broadcastStrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, "", "", "")
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+
+func TestLibDispatcherBroadcastStrategyDispatcherDispatchError2(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
+		nil, nil, true, utils.NonTransactional)
+	wgDsp := &broadcastStrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+
+func TestLibDispatcherBroadcastStrategyDispatcherDispatchError3(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &broadcastStrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, "", "", "")
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	engine.Cache = cacheInit
+}
