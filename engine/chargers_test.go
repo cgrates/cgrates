@@ -629,3 +629,45 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	}
 
 }
+
+func TestChargersprocessEvent(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	cS := &ChargerService{
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
+		},
+	}
+
+	experr := utils.ErrNotFound
+	rcv, err := cS.processEvent(cgrEv.Tenant, cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
+	cS := &ChargerService{}
+	args := &utils.CGREvent{}
+	var reply *[]*ChrgSProcessEventReply
+
+	experr := "MANDATORY_IE_MISSING: [Event]"
+	err := cS.V1ProcessEvent(args, reply)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+// func TestChargersShutdown(t *testing.T) {
+// 	cS := &ChargerService{}
+// 	cS.Shutdown()
+// }
