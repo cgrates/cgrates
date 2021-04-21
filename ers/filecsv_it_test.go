@@ -21,7 +21,6 @@ package ers
 
 import (
 	"fmt"
-	"io"
 	"net/rpc"
 	"os"
 	"path"
@@ -377,6 +376,7 @@ func testCsvITKillEngine(t *testing.T) {
 func TestFileCSVProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	cfg.ERsCfg().Readers[0].HeaderDefineChar = ":"
 	fltrs := &engine.FilterS{}
 	filePath := "/tmp/TestFileCSVProcessEvent/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {
@@ -386,7 +386,8 @@ func TestFileCSVProcessEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	file.Write([]byte(",a,ToR,b,c,d,e,f,g,h,i,j,k,l"))
+	file.Write([]byte(`:Test,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m
+	:Test2,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
 	file.Close()
 	eR := &CSVFileER{
 		cgrCfg:    cfg,
@@ -401,25 +402,109 @@ func TestFileCSVProcessEvent(t *testing.T) {
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.AccountField: "g",
-			utils.AnswerTime:   "k",
-			utils.Category:     "f",
-			utils.Destination:  "i",
-			utils.OriginID:     "b",
-			utils.RequestType:  "c",
-			utils.SetupTime:    "j",
-			utils.Subject:      "h",
-			utils.Tenant:       "e",
-			utils.ToR:          "ToR",
-			utils.Usage:        "l",
+			utils.AccountField: "1001",
+			utils.AnswerTime:   "2021-01-07 17:00:04 +0000 UTC",
+			utils.Category:     "*call",
+			utils.Destination:  "1002",
+			utils.OriginID:     "OriginCDR1",
+			utils.RequestType:  "*prepaid",
+			utils.SetupTime:    "2021-01-07 17:00:02 +0000 UTC",
+			utils.Subject:      "SUBJECT_TEST_1001",
+			utils.Tenant:       "cgrates.org",
+			utils.ToR:          "*voice",
+			utils.Usage:        "1h2m",
 		},
 		APIOpts: map[string]interface{}{},
 	}
 	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:       "ToR",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.ToR",
+			Value:     config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "OriginID",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.OriginID",
+			Value:     config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "RequestType",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.RequestType",
+			Value:     config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "Tenant",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.Tenant",
+			Value:     config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "Category",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.Category",
+			Value:     config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "Account",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.Account",
+			Value:     config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "Subject",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.Subject",
+			Value:     config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "Destination",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.Destination",
+			Value:     config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "SetupTime",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.SetupTime",
+			Value:     config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "AnswerTime",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.AnswerTime",
+			Value:     config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
+			Mandatory: true,
+		},
+		{
+			Tag:       "Usage",
+			Type:      utils.MetaVariable,
+			Path:      "*cgreq.Usage",
+			Value:     config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
+			Mandatory: true,
+		},
+	}
+
+	for idx := range eR.Config().Fields {
+		eR.Config().Fields[idx].ComputePath()
+	}
+
 	fname := "file1.csv"
-	errExpect := io.EOF
-	if err := eR.processFile(filePath, fname); err == nil || err != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
 	}
 	select {
 	case data := <-eR.rdrEvents:
@@ -455,6 +540,96 @@ func TestFileCSVProcessEventError(t *testing.T) {
 	errExpect := "open /tmp/TestFileCSVProcessEvent/file1.csv: no such file or directory"
 	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestFileCSVProcessEventError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileCSVProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &CSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{},
+	}
+
+	errExpect := "unsupported type: <>"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileCSVProcessEventError3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filePath := "/tmp/TestFileCSVProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &CSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	//
+	eR.Config().Filters = []string{"*exists:~*req..Account:"}
+	errExpect = "Invalid fieldPath [ Account]"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -503,9 +678,6 @@ func TestFileCSV(t *testing.T) {
 		}
 	}
 	eR.Config().RunDelay = 1 * time.Millisecond
-	if err := eR.Serve(); err != nil {
-		t.Error(err)
-	}
 	os.Create(path.Join(filePath, "file1.txt"))
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
