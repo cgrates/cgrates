@@ -227,42 +227,50 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-/*
+type mockTypeCon2 struct{}
+
+func (*mockTypeCon2) Call(serviceMethod string, args, reply interface{}) error {
+	return nil
+}
+
 func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	dm := engine.NewDataManager(nil, nil, nil)
-	newCache := engine.NewCacheS(cfg, dm, nil)
-	engine.Cache = newCache
-	fltr := &engine.FilterS{}
-	connMgr := &engine.ConnManager{}
-	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
-	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
-	ev := &utils.CGREvent{}
-	reply := &engine.AttrSProcessEventReply{}
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeCon2)
+	rpcInt := map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
+	}
+	connMgr := engine.NewConnManager(cfg, rpcInt)
+
+	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
+	ev := &utils.CGREvent{
+		Tenant:  "testTenant",
+		ID:      "testID",
+		Time:    nil,
+		Event:   map[string]interface{}{},
+		APIOpts: nil,
+	}
 	value := &engine.DispatcherHost{
 		Tenant: "testTenant",
 		RemoteHost: &config.RemoteHost{
 			ID:          "testID",
-			Address:     "",
-			Transport:   "",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
 			Synchronous: false,
 			TLS:         false,
 		},
 	}
-	tmp := engine.IntRPC
-	engine.IntRPC = map[string]*rpcclient.RPCClient{}
-	chanRPC := make(chan rpcclient.ClientConnector, 1)
-	chanRPC <- new(mockTypeCon)
-	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
-	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorizeEvent(ev, reply)
-	expected := "dial tcp: missing address"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	rply := &engine.AttrSProcessEventReply{}
+	err := dsp.authorizeEvent(ev, rply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit
-	engine.IntRPC = tmp
 }
-*/
