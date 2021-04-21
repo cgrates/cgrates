@@ -1072,3 +1072,57 @@ func TestLibDispatcherLoadStrategyDispatcherCacheError3(t *testing.T) {
 	engine.Cache = cacheInit
 	engine.IntRPC = tmp
 }
+
+/*
+func TestLibDispatcherLoadStrategyDispatcherCacheError4(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().ReplicationConns = []string{"notZero"}
+	cfg.CacheCfg().Partitions[utils.CacheDispatcherRoutes].Replicate = true
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTENANT:testID",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &loadStrategyDispatcher{
+		tntID: "testTENANT",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "testID",
+				FilterIDs: []string{"filterID1", "filterID2"},
+				Weight:    3,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 1,
+				},
+				Blocker: true,
+			},
+			{
+				ID:        "testID2",
+				FilterIDs: []string{"filterID1", "filterID2"},
+				Weight:    3,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 2,
+				},
+				Blocker: true,
+			},
+		},
+		defaultRatio: 0,
+	}
+	err := wgDsp.dispatch(dm, "testID", utils.MetaAttributes, "testTENANT", []string{"testID", "testID2"}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	engine.Cache = cacheInit
+}
+*/
