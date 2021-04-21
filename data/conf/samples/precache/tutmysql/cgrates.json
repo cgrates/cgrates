@@ -50,12 +50,6 @@
 	},
 },
 
-
-"rals": {
-	"enabled": true,
-},
-
-
 "schedulers": {
 	"enabled": true,
 },
