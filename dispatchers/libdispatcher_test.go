@@ -955,3 +955,120 @@ func TestLibDispatcherBroadcastStrategyDispatcherDispatchError3(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
+
+func TestLibDispatcherLoadStrategyDispatcherCacheError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     "",
+			Transport:   "",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &loadStrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, "", "", "")
+	expected := "HOST_NOT_FOUND"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+
+func TestLibDispatcherLoadStrategyDispatcherCacheError2(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+
+	tmp := engine.IntRPC
+	engine.IntRPC = map[string]*rpcclient.RPCClient{}
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeCon)
+	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherRoutes, "testID:*attributes",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &loadStrategyDispatcher{}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
+	expected := "UNSUPPORTED_SERVICE_METHOD"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+	engine.IntRPC = tmp
+}
+
+func TestLibDispatcherLoadStrategyDispatcherCacheError3(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+
+	tmp := engine.IntRPC
+	engine.IntRPC = map[string]*rpcclient.RPCClient{}
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeCon)
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTENANT:testID",
+		value, nil, true, utils.NonTransactional)
+	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1Ping, chanRPC)
+	wgDsp := &loadStrategyDispatcher{
+		tntID: "testTENANT",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:        "testID",
+				FilterIDs: []string{"filterID1", "filterID2"},
+				Weight:    3,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 1,
+				},
+				Blocker: true,
+			},
+			{
+				ID:        "testID2",
+				FilterIDs: []string{"filterID1", "filterID2"},
+				Weight:    3,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 2,
+				},
+				Blocker: true,
+			},
+		},
+		defaultRatio: 0,
+	}
+	err := wgDsp.dispatch(dm, "testID", utils.MetaAttributes, "testTENANT", []string{"testID", "testID2"}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	engine.Cache = cacheInit
+	engine.IntRPC = tmp
+}
