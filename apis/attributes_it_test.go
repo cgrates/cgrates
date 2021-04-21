@@ -41,7 +41,6 @@ var (
 	alsPrfCfgPath   string
 	alsPrfCfg       *config.CGRConfig
 	attrSRPC        *birpc.Client
-	alsPrf          *engine.AttributeProfileWithAPIOpts
 	alsPrfConfigDIR string //run tests for specific configuration
 
 	sTestsAlsPrf = []func(t *testing.T){

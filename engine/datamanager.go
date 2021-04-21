@@ -282,7 +282,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			}
 			_, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
 		case utils.LoadIDPrefix:
-			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
+			_, err = dm.GetItemLoadIDs(ctx, utils.EmptyString, true)
 		case utils.MetaAPIBan:
 			_, err = dm.GetAPIBan(ctx, utils.EmptyString, config.CgrConfig().APIBanCfg().Keys, false, false, true)
 		}
@@ -2172,7 +2172,7 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 	return
 }
 
-func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
+func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -2180,7 +2180,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetItemLoadIDs,
 				&utils.StringWithAPIOpts{
 					Arg:    itemIDPrefix,
@@ -2189,14 +2189,14 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &loadIDs); err == nil {
-				err = dm.dataDB.SetLoadIDsDrv(context.TODO(), loadIDs)
+				err = dm.dataDB.SetLoadIDsDrv(ctx, loadIDs)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				for key := range loadIDs {
-					if errCh := Cache.Set(context.TODO(), utils.CacheLoadIDs, key, nil, nil,
+					if errCh := Cache.Set(ctx, utils.CacheLoadIDs, key, nil, nil,
 						cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 						return nil, errCh
 					}
@@ -2208,7 +2208,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	}
 	if cacheWrite {
 		for key, val := range loadIDs {
-			if errCh := Cache.Set(context.TODO(), utils.CacheLoadIDs, key, val, nil,
+			if errCh := Cache.Set(ctx, utils.CacheLoadIDs, key, val, nil,
 				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
 				return nil, errCh
 			}
