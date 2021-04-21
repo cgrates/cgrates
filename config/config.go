@@ -1653,6 +1653,6 @@ func (cfg *CGRConfig) GetDataProvider() utils.DataProvider {
 		cfg.cacheDP = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
 	}
 	mp := cfg.cacheDP.Clone()
-	cfg.cacheDPMux.Unlock()
+	cfg.cacheDPMux.RUnlock()
 	return mp
 }

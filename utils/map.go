@@ -178,3 +178,15 @@ func (fWp FlagsWithParams) Clone() (cln FlagsWithParams) {
 	}
 	return
 }
+
+func MapStringStringEqual(v1, v2 map[string]string) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for k, val2 := range v2 {
+		if val1, has := v1[k]; !has || val1 != val2 {
+			return false
+		}
+	}
+	return true
+}
