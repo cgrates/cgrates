@@ -366,7 +366,7 @@ func (chS *CacheS) V1ReloadCache(ctx *context.Context, attrs utils.AttrReloadCac
 	}
 	//get loadIDs from database for all types
 	var loadIDs map[string]int64
-	if loadIDs, err = chS.dm.GetItemLoadIDs(utils.EmptyString, false); err != nil {
+	if loadIDs, err = chS.dm.GetItemLoadIDs(ctx, utils.EmptyString, false); err != nil {
 		if err != utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
 			return
 		}
@@ -393,7 +393,7 @@ func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs utils.AttrReloadCache
 	}
 	//get loadIDs for all types
 	var loadIDs map[string]int64
-	if loadIDs, err = chS.dm.GetItemLoadIDs(utils.EmptyString, false); err != nil {
+	if loadIDs, err = chS.dm.GetItemLoadIDs(ctx, utils.EmptyString, false); err != nil {
 		if err != utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
 			return
 		}

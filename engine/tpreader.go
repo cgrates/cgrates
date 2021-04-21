@@ -1220,7 +1220,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	return tpr.dm.SetLoadIDs(context.TODO(), loadIDs)
 }
 
-func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]interface{}) (err error) {
+func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose bool, opts map[string]interface{}) (err error) {
 	if tpr.isInternalDB {
 		return
 	}
@@ -1278,19 +1278,19 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	case utils.MetaNone:
 		return
 	case utils.MetaReload:
-		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(ctx, tpr.cacheConns, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaLoad:
-		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(ctx, tpr.cacheConns, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaRemove:
-		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1RemoveItems, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(ctx, tpr.cacheConns, utils.CacheSv1RemoveItems, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaClear:
-		if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
+		if err = connMgr.Call(ctx, tpr.cacheConns, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
 			return
 		}
 	}
@@ -1338,18 +1338,18 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 		APIOpts:  opts,
 		CacheIDs: cacheIDs,
 	}
-	if err = connMgr.Call(context.TODO(), tpr.cacheConns, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
+	if err = connMgr.Call(ctx, tpr.cacheConns, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
 	}
 
 	//get loadIDs for all types
 	var loadIDs map[string]int64
-	if loadIDs, err = tpr.dm.GetItemLoadIDs(utils.EmptyString, false); err != nil {
+	if loadIDs, err = tpr.dm.GetItemLoadIDs(ctx, utils.EmptyString, false); err != nil {
 		return
 	}
 	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.ArgsCache)
 	for key, val := range cacheLoadIDs {
-		if err = Cache.Set(context.TODO(), utils.CacheLoadIDs, key, val, nil,
+		if err = Cache.Set(ctx, utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
 			return
 		}

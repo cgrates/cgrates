@@ -44,13 +44,13 @@ func (chSv1 *CacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 }
 
 // HasItem verifies the existence of an Item in cache
-func (chSv1 *CacheSv1) HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chSv1 *CacheSv1) HasItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) error {
 	return chSv1.cacheS.V1HasItem(args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts, //
 	reply *time.Time) error {
 	return chSv1.cacheS.V1GetItemExpiryTime(args, reply)
 }
@@ -74,30 +74,30 @@ func (chSv1 *CacheSv1) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithA
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts,
+func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts, //
 	rply *map[string]*ltcache.CacheStats) error {
 	return chSv1.cacheS.V1GetCacheStats(args, rply)
 }
 
 // PrecacheStatus checks status of active precache processes
-func (chSv1 *CacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) error {
+func (chSv1 *CacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) error { //
 	return chSv1.cacheS.V1PrecacheStatus(args, rply)
 }
 
 // HasGroup checks existence of a group in cache
-func (chSv1 *CacheSv1) HasGroup(args *utils.ArgsGetGroupWithAPIOpts,
+func (chSv1 *CacheSv1) HasGroup(args *utils.ArgsGetGroupWithAPIOpts, //
 	rply *bool) (err error) {
 	return chSv1.cacheS.V1HasGroup(args, rply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (chSv1 *CacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts,
+func (chSv1 *CacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithAPIOpts, //
 	rply *[]string) (err error) {
 	return chSv1.cacheS.V1GetGroupItemIDs(args, rply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts, //
 	rply *string) (err error) {
 	return chSv1.cacheS.V1RemoveGroup(args, rply)
 }
@@ -113,11 +113,11 @@ func (chSv1 *CacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCac
 }
 
 // ReplicateSet replicate an item
-func (chSv1 *CacheSv1) ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) {
+func (chSv1 *CacheSv1) ReplicateSet(args *utils.ArgCacheReplicateSet, reply *string) (err error) { //
 	return chSv1.cacheS.V1ReplicateSet(args, reply)
 }
 
 // ReplicateRemove remove an item
-func (chSv1 *CacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
+func (chSv1 *CacheSv1) ReplicateRemove(args *utils.ArgCacheReplicateRemove, reply *string) (err error) { //
 	return chSv1.cacheS.V1ReplicateRemove(args, reply)
 }
