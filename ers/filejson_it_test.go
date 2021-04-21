@@ -403,6 +403,126 @@ func TestFileJSONProcessEventReadError(t *testing.T) {
 	}
 }
 
+func TestFileJSONProcessEventError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileJSONProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	fcTemp := map[string]interface{}{
+		"2":  "tor_test",
+		"3":  "originid_test",
+		"4":  "requestType_test",
+		"6":  "tenant_test",
+		"7":  "category_test",
+		"8":  "account_test",
+		"9":  "subject_test",
+		"10": "destination_test",
+		"11": "setupTime_test",
+		"12": "answerTime_test",
+		"13": "usage_test",
+	}
+	rcv, err := json.Marshal(fcTemp)
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(rcv))
+	file.Close()
+	eR := &JSONFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ErsJSON/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{},
+	}
+	fname := "file1.json"
+	errExpect := "unsupported type: <>"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileJSONProcessEventError3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filePath := "/tmp/TestFileJSONProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.json"))
+	if err != nil {
+		t.Error(err)
+	}
+	fcTemp := map[string]interface{}{
+		"2":  "tor_test",
+		"3":  "originid_test",
+		"4":  "requestType_test",
+		"6":  "tenant_test",
+		"7":  "category_test",
+		"8":  "account_test",
+		"9":  "subject_test",
+		"10": "destination_test",
+		"11": "setupTime_test",
+		"12": "answerTime_test",
+		"13": "usage_test",
+	}
+	rcv, err := json.Marshal(fcTemp)
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(rcv))
+	file.Close()
+	eR := &JSONFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ErsJSON/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	fname := "file1.json"
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	//
+	eR.Config().Filters = []string{"*exists:~*req..Account:"}
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestFileJSON(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltrs := &engine.FilterS{}
