@@ -130,7 +130,7 @@ func FCTemplatesFromFCTemplatesJSONCfg(jsnCfgFlds []*FcTemplateJsonCfg, separato
 }
 
 // InflateTemplates will replace the *template fields with template content out msgTpls
-func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*FCTemplate, error) {
+func InflateTemplates(fcts []*FCTemplate, msgTpls FCTemplates) ([]*FCTemplate, error) {
 	var hasTpl bool
 	for i := 0; i < len(fcts); {
 		if fcts[i].Type == utils.MetaTemplate {
@@ -193,11 +193,11 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 	return
 }
 
-// FcTemplates the config for the templates
-type FcTemplates map[string][]*FCTemplate
+// FCTemplates the config for the templates
+type FCTemplates map[string][]*FCTemplate
 
 // AsMapInterface returns the config as a map[string]interface{}
-func (sCft FcTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]interface{}) {
+func (sCft FCTemplates) AsMapInterface(separator string) (initialMP map[string][]map[string]interface{}) {
 	initialMP = make(map[string][]map[string]interface{})
 	for key, value := range sCft {
 		initialMP[key] = make([]map[string]interface{}, len(value))
@@ -279,8 +279,8 @@ func (fc *FCTemplate) ComputePath() {
 }
 
 // Clone returns a deep copy of FcTemplates
-func (sCft FcTemplates) Clone() (cln FcTemplates) {
-	cln = make(FcTemplates)
+func (sCft FCTemplates) Clone() (cln FCTemplates) {
+	cln = make(FCTemplates)
 	for k, fcs := range sCft {
 		fcln := make([]*FCTemplate, len(fcs))
 		for i, fc := range fcs {
@@ -408,6 +408,16 @@ func diffFcTemplateJsonCfg(d []*FcTemplateJsonCfg, v1, v2 []*FCTemplate, separat
 				d[i].Mask_length = utils.IntPointer(v.MaskLen)
 			}
 		}
+	}
+	return d
+}
+
+func diffFcTemplatesJsonCfg(d FcTemplatesJsonCfg, v1, v2 FCTemplates, separator string) FcTemplatesJsonCfg {
+	if d == nil {
+		d = make(FcTemplatesJsonCfg)
+	}
+	for k, val := range v2 {
+		d[k] = diffFcTemplateJsonCfg(d[k], v1[k], val, separator)
 	}
 	return d
 }

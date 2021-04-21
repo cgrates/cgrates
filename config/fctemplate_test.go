@@ -484,7 +484,7 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 }
 
 func TestFCTemplatesClone(t *testing.T) {
-	smpl := FcTemplates{
+	smpl := FCTemplates{
 		utils.MetaErr: {{
 			Tag:              "Tenant",
 			Type:             "*composed",
@@ -499,7 +499,7 @@ func TestFCTemplatesClone(t *testing.T) {
 	if !reflect.DeepEqual(cloned, smpl) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
 	}
-	initialSmpl := FcTemplates{
+	initialSmpl := FCTemplates{
 		utils.MetaErr: {{
 			Tag:              "Tenant",
 			Type:             "*composed",

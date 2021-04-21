@@ -102,13 +102,12 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 // Clone returns a deep copy of EEsCfg
 func (eeS *EEsCfg) Clone() (cln *EEsCfg) {
 	cln = &EEsCfg{
-		Enabled:         eeS.Enabled,
-		AttributeSConns: make([]string, len(eeS.AttributeSConns)),
-		Cache:           make(map[string]*CacheParamCfg),
-		Exporters:       make([]*EventExporterCfg, len(eeS.Exporters)),
+		Enabled:   eeS.Enabled,
+		Cache:     make(map[string]*CacheParamCfg),
+		Exporters: make([]*EventExporterCfg, len(eeS.Exporters)),
 	}
-	for idx, sConn := range eeS.AttributeSConns {
-		cln.AttributeSConns[idx] = sConn
+	if eeS.AttributeSConns != nil {
+		cln.AttributeSConns = utils.CloneStringSlice(eeS.AttributeSConns)
 	}
 	for key, value := range eeS.Cache {
 		cln.Cache[key] = value.Clone()
@@ -294,16 +293,10 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	}
 
 	if eeC.Filters != nil {
-		cln.Filters = make([]string, len(eeC.Filters))
-		for idx, val := range eeC.Filters {
-			cln.Filters[idx] = val
-		}
+		cln.Filters = utils.CloneStringSlice(eeC.Filters)
 	}
 	if eeC.AttributeSIDs != nil {
-		cln.AttributeSIDs = make([]string, len(eeC.AttributeSIDs))
-		for idx, val := range eeC.AttributeSIDs {
-			cln.AttributeSIDs[idx] = val
-		}
+		cln.AttributeSIDs = utils.CloneStringSlice(eeC.AttributeSIDs)
 	}
 
 	for idx, fld := range eeC.Fields {
@@ -358,4 +351,133 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		initialMP[utils.FieldsCfg] = fields
 	}
 	return
+}
+
+// EventExporterJsonCfg is the configuration of a single EventExporter
+type EventExporterJsonCfg struct {
+	Id                *string
+	Type              *string
+	Export_path       *string
+	Opts              map[string]interface{}
+	Tenant            *string
+	Timezone          *string
+	Filters           *[]string
+	Flags             *[]string
+	Attribute_ids     *[]string
+	Attribute_context *string
+	Synchronous       *bool
+	Attempts          *int
+	Field_separator   *string
+	Fields            *[]*FcTemplateJsonCfg
+}
+
+func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg, separator string) *EventExporterJsonCfg {
+	if d == nil {
+		d = new(EventExporterJsonCfg)
+	}
+	if v1.ID != v2.ID {
+		d.Id = utils.StringPointer(v2.ID)
+	}
+	if v1.Type != v2.Type {
+		d.Type = utils.StringPointer(v2.Type)
+	}
+	if v1.ExportPath != v2.ExportPath {
+		d.Export_path = utils.StringPointer(v2.ExportPath)
+	}
+	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
+	tnt1 := v1.Tenant.GetRule(separator)
+	tnt2 := v2.Tenant.GetRule(separator)
+	if tnt1 != tnt2 {
+		d.Tenant = utils.StringPointer(tnt2)
+	}
+	if v1.Timezone != v2.Timezone {
+		d.Timezone = utils.StringPointer(v2.Timezone)
+	}
+	if !utils.SliceStringEqual(v1.Filters, v2.Filters) {
+		d.Filters = &v2.Filters
+	}
+	flgs1 := v1.Flags.SliceFlags()
+	flgs2 := v2.Flags.SliceFlags()
+	if !utils.SliceStringEqual(flgs1, flgs2) {
+		d.Flags = &flgs2
+	}
+	if !utils.SliceStringEqual(v1.AttributeSIDs, v2.AttributeSIDs) {
+		d.Attribute_ids = &v2.AttributeSIDs
+	}
+	if v1.AttributeSCtx != v2.AttributeSCtx {
+		d.Attribute_context = utils.StringPointer(v2.AttributeSCtx)
+	}
+	if v1.Synchronous != v2.Synchronous {
+		d.Synchronous = utils.BoolPointer(v2.Synchronous)
+	}
+	if v1.Attempts != v2.Attempts {
+		d.Attempts = utils.IntPointer(v2.Attempts)
+	}
+	if v1.FieldSep != v2.FieldSep {
+		d.Field_separator = utils.StringPointer(v2.FieldSep)
+	}
+	var flds []*FcTemplateJsonCfg
+	if d.Fields != nil {
+		flds = *d.Fields
+	}
+	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
+	d.Fields = &flds
+	return d
+}
+
+func getEventExporterJsonCfg(d []*EventExporterJsonCfg, id string) (*EventExporterJsonCfg, int) {
+	for i, v := range d {
+		if v.Id != nil && *v.Id == id {
+			return v, i
+		}
+	}
+	return nil, -1
+}
+
+func getEventExporterCfg(d []*EventExporterCfg, id string) *EventExporterCfg {
+	for _, v := range d {
+		if v.ID == id {
+			return v
+		}
+	}
+	return new(EventExporterCfg)
+}
+
+func diffEventExportersJsonCfg(d *[]*EventExporterJsonCfg, v1, v2 []*EventExporterCfg, separator string) *[]*EventExporterJsonCfg {
+	if d == nil || *d == nil {
+		d = &[]*EventExporterJsonCfg{}
+	}
+	for _, val := range v2 {
+		dv, i := getEventExporterJsonCfg(*d, val.ID)
+		dv = diffEventExporterJsonCfg(dv, getEventExporterCfg(v1, val.ID), val, separator)
+		if i == -1 {
+			*d = append(*d, dv)
+		} else {
+			(*d)[i] = dv
+		}
+	}
+
+	return d
+}
+
+// EEsJsonCfg contains the configuration of EventExporterService
+type EEsJsonCfg struct {
+	Enabled          *bool
+	Attributes_conns *[]string
+	Cache            *map[string]*CacheParamJsonCfg
+	Exporters        *[]*EventExporterJsonCfg
+}
+
+func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg, separator string) *EEsJsonCfg {
+	if d == nil {
+		d = new(EEsJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+		d.Attributes_conns = &v2.AttributeSConns
+	}
+	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters, separator)
+	return d
 }

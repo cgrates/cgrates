@@ -293,7 +293,7 @@ type CGRConfig struct {
 
 	rpcConns RPCConns
 
-	templates FcTemplates
+	templates FCTemplates
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
@@ -1142,7 +1142,7 @@ func (cfg *CGRConfig) RPCConns() RPCConns {
 }
 
 // TemplatesCfg returns the config for templates
-func (cfg *CGRConfig) TemplatesCfg() FcTemplates {
+func (cfg *CGRConfig) TemplatesCfg() FCTemplates {
 	cfg.lks[TemplatesJSON].Lock()
 	defer cfg.lks[TemplatesJSON].Unlock()
 	return cfg.templates

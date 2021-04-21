@@ -336,7 +336,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			utils.RedisClientKey:             "",
 			utils.RedisCACertificate:         "",
 		},
-		Items: &map[string]*ItemOptJson{
+		Items: map[string]*ItemOptJson{
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
@@ -452,7 +452,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			utils.SSLModeCfg:         utils.PostgressSSLModeDisable,
 			utils.MysqlLocation:      "Local",
 		},
-		Items: &map[string]*ItemOptJson{
+		Items: map[string]*ItemOptJson{
 			utils.CacheTBLTPTimings: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
