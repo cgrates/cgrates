@@ -35,13 +35,13 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
 	}
 	expected := &HTTPCfg{
-		HTTPJsonRPCURL:        "/jsonrpc",
-		HTTPWSURL:             "/ws",
-		RegistrarSURL:         "/randomUrl",
-		HTTPFreeswitchCDRsURL: "/freeswitch_json",
-		HTTPCDRsURL:           "/cdr_http",
-		HTTPUseBasicAuth:      false,
-		HTTPAuthUsers:         map[string]string{},
+		JsonRPCURL:        "/jsonrpc",
+		WSURL:             "/ws",
+		RegistrarSURL:     "/randomUrl",
+		FreeswitchCDRsURL: "/freeswitch_json",
+		CDRsURL:           "/cdr_http",
+		UseBasicAuth:      false,
+		AuthUsers:         map[string]string{},
 		ClientOpts: map[string]interface{}{
 			utils.HTTPClientTLSClientConfigCfg:       false,
 			utils.HTTPClientTLSHandshakeTimeoutCfg:   "10s",
@@ -149,13 +149,13 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 
 func TestHTTPCfgClone(t *testing.T) {
 	ban := &HTTPCfg{
-		HTTPJsonRPCURL:        "/jsonrpc",
-		HTTPWSURL:             "/ws",
-		RegistrarSURL:         "/randomUrl",
-		HTTPFreeswitchCDRsURL: "/freeswitch_json",
-		HTTPCDRsURL:           "/cdr_http",
-		HTTPUseBasicAuth:      false,
-		HTTPAuthUsers: map[string]string{
+		JsonRPCURL:        "/jsonrpc",
+		WSURL:             "/ws",
+		RegistrarSURL:     "/randomUrl",
+		FreeswitchCDRsURL: "/freeswitch_json",
+		CDRsURL:           "/cdr_http",
+		UseBasicAuth:      false,
+		AuthUsers: map[string]string{
 			"user": "pass",
 		},
 		ClientOpts: map[string]interface{}{
@@ -169,7 +169,7 @@ func TestHTTPCfgClone(t *testing.T) {
 	if rcv.ClientOpts[utils.HTTPClientTLSClientConfigCfg] = ""; ban.ClientOpts[utils.HTTPClientTLSClientConfigCfg] != false {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
-	if rcv.HTTPAuthUsers["user"] = ""; ban.HTTPAuthUsers["user"] != "pass" {
+	if rcv.AuthUsers["user"] = ""; ban.AuthUsers["user"] != "pass" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

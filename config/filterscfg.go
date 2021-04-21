@@ -106,22 +106,36 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	cln = new(FilterSCfg)
 	if fSCfg.StatSConns != nil {
-		cln.StatSConns = make([]string, len(fSCfg.StatSConns))
-		for i, con := range fSCfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		cln.StatSConns = utils.CloneStringSlice(fSCfg.StatSConns)
 	}
 	if fSCfg.ResourceSConns != nil {
-		cln.ResourceSConns = make([]string, len(fSCfg.ResourceSConns))
-		for i, con := range fSCfg.ResourceSConns {
-			cln.ResourceSConns[i] = con
-		}
+		cln.ResourceSConns = utils.CloneStringSlice(fSCfg.ResourceSConns)
 	}
 	if fSCfg.ApierSConns != nil {
-		cln.ApierSConns = make([]string, len(fSCfg.ApierSConns))
-		for i, con := range fSCfg.ApierSConns {
-			cln.ApierSConns[i] = con
-		}
+		cln.ApierSConns = utils.CloneStringSlice(fSCfg.ApierSConns)
 	}
 	return
+}
+
+// Filters config
+type FilterSJsonCfg struct {
+	Stats_conns     *[]string
+	Resources_conns *[]string
+	Apiers_conns    *[]string
+}
+
+func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
+	if d == nil {
+		d = new(FilterSJsonCfg)
+	}
+	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+		d.Stats_conns = &v2.StatSConns
+	}
+	if !utils.SliceStringEqual(v1.ResourceSConns, v2.ResourceSConns) {
+		d.Resources_conns = &v2.ResourceSConns
+	}
+	if !utils.SliceStringEqual(v1.ApierSConns, v2.ApierSConns) {
+		d.Apiers_conns = &v2.ApierSConns
+	}
+	return d
 }

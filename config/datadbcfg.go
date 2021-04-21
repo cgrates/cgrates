@@ -91,7 +91,7 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 	if jsnDbCfg.Items != nil {
-		for kJsn, vJsn := range *jsnDbCfg.Items {
+		for kJsn, vJsn := range jsnDbCfg.Items {
 			val, has := dbcfg.Items[kJsn]
 			if val == nil || !has {
 				val = new(ItemOpt)
@@ -140,16 +140,10 @@ func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 	}
 
 	if dbcfg.RmtConns != nil {
-		cln.RmtConns = make([]string, len(dbcfg.RmtConns))
-		for i, conn := range dbcfg.RmtConns {
-			cln.RmtConns[i] = conn
-		}
+		cln.RmtConns = utils.CloneStringSlice(dbcfg.RmtConns)
 	}
 	if dbcfg.RplConns != nil {
-		cln.RplConns = make([]string, len(dbcfg.RplConns))
-		for i, conn := range dbcfg.RplConns {
-			cln.RplConns[i] = conn
-		}
+		cln.RplConns = utils.CloneStringSlice(dbcfg.RplConns)
 	}
 	return
 }
@@ -236,4 +230,114 @@ func (itm *ItemOpt) Clone() *ItemOpt {
 		APIKey:    itm.APIKey,
 		RouteID:   itm.RouteID,
 	}
+}
+
+func (itm *ItemOpt) Equals(itm2 *ItemOpt) bool {
+	return (itm == nil && itm2 == nil) ||
+		(itm != nil && itm2 != nil &&
+			itm.Remote != itm2.Remote &&
+			itm.Replicate != itm2.Replicate &&
+			itm.RouteID != itm2.RouteID &&
+			itm.APIKey != itm2.APIKey)
+}
+
+type ItemOptJson struct {
+	Remote    *bool
+	Replicate *bool
+	// used for ArgDispatcher in case we send this to a dispatcher engine
+	Route_id *string
+	Api_key  *string
+}
+
+func diffItemOptJson(d *ItemOptJson, v1, v2 *ItemOpt) *ItemOptJson {
+	if d == nil {
+		d = new(ItemOptJson)
+	}
+	if v2.Remote != v1.Remote {
+		d.Remote = utils.BoolPointer(v2.Remote)
+	}
+	if v2.Replicate != v1.Replicate {
+		d.Replicate = utils.BoolPointer(v2.Replicate)
+	}
+	if v2.RouteID != v1.RouteID {
+		d.Route_id = utils.StringPointer(v2.RouteID)
+	}
+	if v2.APIKey != v1.APIKey {
+		d.Api_key = utils.StringPointer(v2.APIKey)
+	}
+	return d
+}
+
+func diffMapItemOptJson(d map[string]*ItemOptJson, v1, v2 map[string]*ItemOpt) map[string]*ItemOptJson {
+	if d == nil {
+		d = make(map[string]*ItemOptJson)
+	}
+	for k, val2 := range v2 {
+		if val1, has := v1[k]; !has || !val1.Equals(val2) {
+			d[k] = diffItemOptJson(d[k], val2, val2)
+		}
+	}
+	return d
+}
+
+// Database config
+type DbJsonCfg struct {
+	Db_type               *string
+	Db_host               *string
+	Db_port               *int
+	Db_name               *string
+	Db_user               *string
+	Db_password           *string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Remote_conns          *[]string
+	Remote_conn_id        *string
+	Replication_conns     *[]string
+	Replication_filtered  *bool
+	Replication_cache     *string
+	Items                 map[string]*ItemOptJson
+	Opts                  map[string]interface{}
+}
+
+func diffDataDbJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
+	if d == nil {
+		d = new(DbJsonCfg)
+	}
+	if v1.Type != v2.Type {
+		d.Db_type = utils.StringPointer(v2.Type)
+	}
+	if v1.Host != v2.Host {
+		d.Db_host = utils.StringPointer(v2.Host)
+	}
+	if v1.Port != v2.Port {
+		port, _ := strconv.Atoi(v2.Port)
+		d.Db_port = utils.IntPointer(port)
+	}
+	if v1.Name != v2.Name {
+		d.Db_name = utils.StringPointer(v2.Name)
+	}
+	if v1.User != v2.User {
+		d.Db_user = utils.StringPointer(v2.User)
+	}
+	if v1.Password != v2.Password {
+		d.Db_password = utils.StringPointer(v2.Password)
+	}
+	if !utils.SliceStringEqual(v1.RmtConns, v2.RmtConns) {
+		d.Remote_conns = &v2.RmtConns
+	}
+	if v1.RmtConnID != v2.RmtConnID {
+		d.Remote_conn_id = utils.StringPointer(v2.RmtConnID)
+	}
+	if !utils.SliceStringEqual(v1.RplConns, v2.RplConns) {
+		d.Replication_conns = &v2.RplConns
+	}
+	if v1.RplFiltered != v2.RplFiltered {
+		d.Replication_filtered = utils.BoolPointer(v2.RplFiltered)
+	}
+	if v1.RplCache != v2.RplCache {
+		d.Replication_cache = utils.StringPointer(v2.RplCache)
+	}
+	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
+	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
+	return d
 }

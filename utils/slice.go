@@ -76,3 +76,15 @@ func CloneStringSlice(in []string) (cl []string) {
 	copy(cl, in)
 	return
 }
+
+func SliceStringEqual(v1, v2 []string) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v1 {
+		if v1[i] != v2[i] {
+			return false
+		}
+	}
+	return true
+}

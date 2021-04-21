@@ -87,7 +87,7 @@ func TestGetConnPort(t *testing.T) {
 	cfg.ListenCfg().RPCGOBListen = ":2013"
 	cfg.ListenCfg().HTTPTLSListen = ":2081"
 	cfg.ListenCfg().HTTPListen = ":2080"
-	cfg.HTTPCfg().HTTPJsonRPCURL = "/json_rpc"
+	cfg.HTTPCfg().JsonRPCURL = "/json_rpc"
 
 	if port, err := getConnPort(cfg, utils.MetaJSON, false); err != nil {
 		t.Fatal(err)

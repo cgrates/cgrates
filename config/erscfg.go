@@ -86,12 +86,11 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 // Clone returns a deep copy of ERsCfg
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
-		Enabled:       erS.Enabled,
-		SessionSConns: make([]string, len(erS.SessionSConns)),
-		Readers:       make([]*EventReaderCfg, len(erS.Readers)),
+		Enabled: erS.Enabled,
+		Readers: make([]*EventReaderCfg, len(erS.Readers)),
 	}
-	for idx, sConn := range erS.SessionSConns {
-		cln.SessionSConns[idx] = sConn
+	if erS.SessionSConns != nil {
+		cln.SessionSConns = utils.CloneStringSlice(erS.SessionSConns)
 	}
 	for idx, rdr := range erS.Readers {
 		cln.Readers[idx] = rdr.Clone()
@@ -261,10 +260,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		Opts:                     make(map[string]interface{}),
 	}
 	if er.Filters != nil {
-		cln.Filters = make([]string, len(er.Filters))
-		for idx, val := range er.Filters {
-			cln.Filters[idx] = val
-		}
+		cln.Filters = utils.CloneStringSlice(er.Filters)
 	}
 	if er.Fields != nil {
 		cln.Fields = make([]*FCTemplate, len(er.Fields))

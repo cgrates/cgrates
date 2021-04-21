@@ -215,47 +215,84 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 		SMCostRetries: cdrscfg.SMCostRetries,
 	}
 	if cdrscfg.ChargerSConns != nil {
-		cln.ChargerSConns = make([]string, len(cdrscfg.ChargerSConns))
-		for i, con := range cdrscfg.ChargerSConns {
-			cln.ChargerSConns[i] = con
-		}
+		cln.ChargerSConns = utils.CloneStringSlice(cdrscfg.ChargerSConns)
 	}
 	if cdrscfg.AttributeSConns != nil {
-		cln.AttributeSConns = make([]string, len(cdrscfg.AttributeSConns))
-		for i, con := range cdrscfg.AttributeSConns {
-			cln.AttributeSConns[i] = con
-		}
+		cln.AttributeSConns = utils.CloneStringSlice(cdrscfg.AttributeSConns)
 	}
 	if cdrscfg.ThresholdSConns != nil {
-		cln.ThresholdSConns = make([]string, len(cdrscfg.ThresholdSConns))
-		for i, con := range cdrscfg.ThresholdSConns {
-			cln.ThresholdSConns[i] = con
-		}
+		cln.ThresholdSConns = utils.CloneStringSlice(cdrscfg.ThresholdSConns)
 	}
 	if cdrscfg.StatSConns != nil {
-		cln.StatSConns = make([]string, len(cdrscfg.StatSConns))
-		for i, con := range cdrscfg.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		cln.StatSConns = utils.CloneStringSlice(cdrscfg.StatSConns)
 	}
 	if cdrscfg.OnlineCDRExports != nil {
-		cln.OnlineCDRExports = make([]string, len(cdrscfg.OnlineCDRExports))
-		for i, con := range cdrscfg.OnlineCDRExports {
-			cln.OnlineCDRExports[i] = con
-		}
+		cln.OnlineCDRExports = utils.CloneStringSlice(cdrscfg.OnlineCDRExports)
 	}
 	if cdrscfg.ActionSConns != nil {
-		cln.ActionSConns = make([]string, len(cdrscfg.ActionSConns))
-		for i, con := range cdrscfg.ActionSConns {
-			cln.ActionSConns[i] = con
-		}
+		cln.ActionSConns = utils.CloneStringSlice(cdrscfg.ActionSConns)
 	}
 	if cdrscfg.EEsConns != nil {
-		cln.EEsConns = make([]string, len(cdrscfg.EEsConns))
-		for i, con := range cdrscfg.EEsConns {
-			cln.EEsConns[i] = con
-		}
+		cln.EEsConns = utils.CloneStringSlice(cdrscfg.EEsConns)
 	}
 
 	return
+}
+
+// Cdrs config section
+type CdrsJsonCfg struct {
+	Enabled              *bool
+	Extra_fields         *[]string
+	Store_cdrs           *bool
+	Session_cost_retries *int
+	Chargers_conns       *[]string
+	Attributes_conns     *[]string
+	Thresholds_conns     *[]string
+	Stats_conns          *[]string
+	Online_cdr_exports   *[]string
+	Actions_conns        *[]string
+	Ees_conns            *[]string
+}
+
+func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
+	if d == nil {
+		d = new(CdrsJsonCfg)
+	}
+
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	extra1 := v1.ExtraFields.AsStringSlice()
+	extra2 := v2.ExtraFields.AsStringSlice()
+	if !utils.SliceStringEqual(extra1, extra2) {
+		d.Extra_fields = &extra2
+	}
+	if v1.StoreCdrs != v2.StoreCdrs {
+		d.Store_cdrs = utils.BoolPointer(v2.StoreCdrs)
+	}
+	if v1.SMCostRetries != v2.SMCostRetries {
+		d.Session_cost_retries = utils.IntPointer(v2.SMCostRetries)
+	}
+	if !utils.SliceStringEqual(v1.ChargerSConns, v2.ChargerSConns) {
+		d.Chargers_conns = &v2.ChargerSConns
+	}
+	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+		d.Attributes_conns = &v2.AttributeSConns
+	}
+	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.Thresholds_conns = &v2.ThresholdSConns
+	}
+	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+		d.Stats_conns = &v2.StatSConns
+	}
+	if !utils.SliceStringEqual(v1.OnlineCDRExports, v2.OnlineCDRExports) {
+		d.Online_cdr_exports = &v2.OnlineCDRExports
+	}
+	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+		d.Actions_conns = &v2.ActionSConns
+	}
+	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = &v2.EEsConns
+	}
+	return d
 }

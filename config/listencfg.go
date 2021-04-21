@@ -79,3 +79,38 @@ func (lstcfg ListenCfg) Clone() *ListenCfg {
 		HTTPTLSListen:    lstcfg.HTTPTLSListen,
 	}
 }
+
+// Listen config section
+type ListenJsonCfg struct {
+	Rpc_json     *string
+	Rpc_gob      *string
+	Http         *string
+	Rpc_json_tls *string
+	Rpc_gob_tls  *string
+	Http_tls     *string
+}
+
+func diffListenJsonCfg(d *ListenJsonCfg, v1, v2 *ListenCfg) *ListenJsonCfg {
+	if d == nil {
+		d = new(ListenJsonCfg)
+	}
+	if v1.RPCJSONListen != v2.RPCJSONListen {
+		d.Rpc_json = utils.StringPointer(v2.RPCJSONListen)
+	}
+	if v1.RPCGOBListen != v2.RPCGOBListen {
+		d.Rpc_gob = utils.StringPointer(v2.RPCGOBListen)
+	}
+	if v1.HTTPListen != v2.HTTPListen {
+		d.Http = utils.StringPointer(v2.HTTPListen)
+	}
+	if v1.RPCJSONTLSListen != v2.RPCJSONTLSListen {
+		d.Rpc_json_tls = utils.StringPointer(v2.RPCJSONTLSListen)
+	}
+	if v1.RPCGOBTLSListen != v2.RPCGOBTLSListen {
+		d.Rpc_gob_tls = utils.StringPointer(v2.RPCGOBTLSListen)
+	}
+	if v1.HTTPTLSListen != v2.HTTPTLSListen {
+		d.Http_tls = utils.StringPointer(v2.HTTPTLSListen)
+	}
+	return d
+}

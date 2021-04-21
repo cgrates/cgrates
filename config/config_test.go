@@ -852,23 +852,23 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsHTTP(t *testing.T) {
-	if cgrCfg.HTTPCfg().HTTPJsonRPCURL != "/jsonrpc" {
-		t.Errorf("expecting: /jsonrpc , received: %+v", cgrCfg.HTTPCfg().HTTPJsonRPCURL)
+	if cgrCfg.HTTPCfg().JsonRPCURL != "/jsonrpc" {
+		t.Errorf("expecting: /jsonrpc , received: %+v", cgrCfg.HTTPCfg().JsonRPCURL)
 	}
-	if cgrCfg.HTTPCfg().HTTPWSURL != "/ws" {
-		t.Errorf("expecting: /ws , received: %+v", cgrCfg.HTTPCfg().HTTPWSURL)
+	if cgrCfg.HTTPCfg().WSURL != "/ws" {
+		t.Errorf("expecting: /ws , received: %+v", cgrCfg.HTTPCfg().WSURL)
 	}
-	if cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL != "/freeswitch_json" {
-		t.Errorf("expecting: /freeswitch_json , received: %+v", cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL)
+	if cgrCfg.HTTPCfg().FreeswitchCDRsURL != "/freeswitch_json" {
+		t.Errorf("expecting: /freeswitch_json , received: %+v", cgrCfg.HTTPCfg().FreeswitchCDRsURL)
 	}
-	if cgrCfg.HTTPCfg().HTTPCDRsURL != "/cdr_http" {
-		t.Errorf("expecting: /cdr_http , received: %+v", cgrCfg.HTTPCfg().HTTPCDRsURL)
+	if cgrCfg.HTTPCfg().CDRsURL != "/cdr_http" {
+		t.Errorf("expecting: /cdr_http , received: %+v", cgrCfg.HTTPCfg().CDRsURL)
 	}
-	if cgrCfg.HTTPCfg().HTTPUseBasicAuth != false {
-		t.Errorf("expecting: false , received: %+v", cgrCfg.HTTPCfg().HTTPUseBasicAuth)
+	if cgrCfg.HTTPCfg().UseBasicAuth != false {
+		t.Errorf("expecting: false , received: %+v", cgrCfg.HTTPCfg().UseBasicAuth)
 	}
-	if !reflect.DeepEqual(cgrCfg.HTTPCfg().HTTPAuthUsers, map[string]string{}) {
-		t.Errorf("expecting: %+v , received: %+v", map[string]string{}, cgrCfg.HTTPCfg().HTTPAuthUsers)
+	if !reflect.DeepEqual(cgrCfg.HTTPCfg().AuthUsers, map[string]string{}) {
+		t.Errorf("expecting: %+v , received: %+v", map[string]string{}, cgrCfg.HTTPCfg().AuthUsers)
 	}
 }
 

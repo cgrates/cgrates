@@ -99,7 +99,7 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 	if jsnDbCfg.Items != nil {
-		for kJsn, vJsn := range *jsnDbCfg.Items {
+		for kJsn, vJsn := range jsnDbCfg.Items {
 			val := new(ItemOpt)
 			val.loadFromJSONCfg(vJsn) //To review if the function signature changes
 			dbcfg.Items[kJsn] = val
@@ -184,4 +184,48 @@ func (dbcfg *StorDbCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.DataDbPortCfg] = dbPort
 	}
 	return
+}
+
+func diffStorDBDbJsonCfg(d *DbJsonCfg, v1, v2 *StorDbCfg) *DbJsonCfg {
+	if d == nil {
+		d = new(DbJsonCfg)
+	}
+	if v1.Type != v2.Type {
+		d.Db_type = utils.StringPointer(v2.Type)
+	}
+	if v1.Host != v2.Host {
+		d.Db_host = utils.StringPointer(v2.Host)
+	}
+	if v1.Port != v2.Port {
+		port, _ := strconv.Atoi(v2.Port)
+		d.Db_port = utils.IntPointer(port)
+	}
+	if v1.Name != v2.Name {
+		d.Db_name = utils.StringPointer(v2.Name)
+	}
+	if v1.User != v2.User {
+		d.Db_user = utils.StringPointer(v2.User)
+	}
+	if v1.Password != v2.Password {
+		d.Db_password = utils.StringPointer(v2.Password)
+	}
+	if !utils.SliceStringEqual(v1.RmtConns, v2.RmtConns) {
+		d.Remote_conns = &v2.RmtConns
+	}
+
+	if !utils.SliceStringEqual(v1.RplConns, v2.RplConns) {
+		d.Replication_conns = &v2.RplConns
+	}
+
+	if !utils.SliceStringEqual(v1.StringIndexedFields, v2.StringIndexedFields) {
+		d.String_indexed_fields = &v2.StringIndexedFields
+	}
+	if !utils.SliceStringEqual(v1.PrefixIndexedFields, v2.PrefixIndexedFields) {
+		d.Prefix_indexed_fields = &v2.PrefixIndexedFields
+	}
+
+	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
+	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
+
+	return d
 }

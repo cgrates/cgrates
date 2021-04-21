@@ -192,6 +192,14 @@ func (prsrs RSRParsers) Clone() (cln RSRParsers) {
 	return
 }
 
+func (prsrs RSRParsers) AsStringSlice() (v []string) {
+	v = make([]string, len(prsrs))
+	for i, val := range prsrs {
+		v[i] = val.Rules
+	}
+	return
+}
+
 // NewRSRParser builds one RSRParser
 func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {

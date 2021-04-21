@@ -214,3 +214,107 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 		MaxParallelConns: gencfg.MaxParallelConns,
 	}
 }
+
+// General config section
+type GeneralJsonCfg struct {
+	Node_id              *string
+	Logger               *string
+	Log_level            *int
+	Rounding_decimals    *int
+	Dbdata_encoding      *string
+	Tpexport_dir         *string
+	Poster_attempts      *int
+	Failed_posts_dir     *string
+	Failed_posts_ttl     *string
+	Default_request_type *string
+	Default_category     *string
+	Default_tenant       *string
+	Default_timezone     *string
+	Default_caching      *string
+	Connect_attempts     *int
+	Reconnects           *int
+	Connect_timeout      *string
+	Reply_timeout        *string
+	Locking_timeout      *string
+	Digest_separator     *string
+	Digest_equal         *string
+	Rsr_separator        *string
+	Max_parallel_conns   *int
+}
+
+func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
+	if d == nil {
+		d = new(GeneralJsonCfg)
+	}
+
+	if v1.NodeID != v2.NodeID {
+		d.Node_id = utils.StringPointer(v2.NodeID)
+	}
+	if v1.Logger != v2.Logger {
+		d.Logger = utils.StringPointer(v2.Logger)
+	}
+	if v1.LogLevel != v2.LogLevel {
+		d.Log_level = utils.IntPointer(v2.LogLevel)
+	}
+	if v1.RoundingDecimals != v2.RoundingDecimals {
+		d.Rounding_decimals = utils.IntPointer(v2.RoundingDecimals)
+	}
+	if v1.DBDataEncoding != v2.DBDataEncoding {
+		d.Dbdata_encoding = utils.StringPointer(v2.DBDataEncoding)
+	}
+	if v1.TpExportPath != v2.TpExportPath {
+		d.Tpexport_dir = utils.StringPointer(v2.TpExportPath)
+	}
+	if v1.PosterAttempts != v2.PosterAttempts {
+		d.Poster_attempts = utils.IntPointer(v2.PosterAttempts)
+	}
+	if v1.FailedPostsDir != v2.FailedPostsDir {
+		d.Failed_posts_dir = utils.StringPointer(v2.FailedPostsDir)
+	}
+	if v1.FailedPostsTTL != v2.FailedPostsTTL {
+		d.Failed_posts_ttl = utils.StringPointer(v2.FailedPostsTTL.String())
+	}
+	if v1.DefaultReqType != v2.DefaultReqType {
+		d.Default_request_type = utils.StringPointer(v2.DefaultReqType)
+	}
+	if v1.DefaultCategory != v2.DefaultCategory {
+		d.Default_category = utils.StringPointer(v2.DefaultCategory)
+	}
+	if v1.DefaultTenant != v2.DefaultTenant {
+		d.Default_tenant = utils.StringPointer(v2.DefaultTenant)
+	}
+	if v1.DefaultTimezone != v2.DefaultTimezone {
+		d.Default_timezone = utils.StringPointer(v2.DefaultTimezone)
+	}
+	if v1.DefaultCaching != v2.DefaultCaching {
+		d.Default_caching = utils.StringPointer(v2.DefaultCaching)
+	}
+	if v1.ConnectAttempts != v2.ConnectAttempts {
+		d.Connect_attempts = utils.IntPointer(v2.ConnectAttempts)
+	}
+	if v1.Reconnects != v2.Reconnects {
+		d.Reconnects = utils.IntPointer(v2.Reconnects)
+	}
+	if v1.ConnectTimeout != v2.ConnectTimeout {
+		d.Connect_timeout = utils.StringPointer(v2.ConnectTimeout.String())
+	}
+	if v1.ReplyTimeout != v2.ReplyTimeout {
+		d.Reply_timeout = utils.StringPointer(v2.ReplyTimeout.String())
+	}
+	if v1.LockingTimeout != v2.LockingTimeout {
+		d.Locking_timeout = utils.StringPointer(v2.LockingTimeout.String())
+	}
+	if v1.DigestSeparator != v2.DigestSeparator {
+		d.Digest_separator = utils.StringPointer(v2.DigestSeparator)
+	}
+	if v1.DigestEqual != v2.DigestEqual {
+		d.Digest_equal = utils.StringPointer(v2.DigestEqual)
+	}
+	if v1.RSRSep != v2.RSRSep {
+		d.Rsr_separator = utils.StringPointer(v2.RSRSep)
+	}
+	if v1.MaxParallelConns != v2.MaxParallelConns {
+		d.Max_parallel_conns = utils.IntPointer(v2.MaxParallelConns)
+	}
+	return d
+}

@@ -202,10 +202,10 @@ func startRPC(server *cores.Server, internalAdminSChan,
 	go server.ServeGOB(cfg.ListenCfg().RPCGOBListen, shdChan)
 	go server.ServeHTTP(
 		cfg.ListenCfg().HTTPListen,
-		cfg.HTTPCfg().HTTPJsonRPCURL,
-		cfg.HTTPCfg().HTTPWSURL,
-		cfg.HTTPCfg().HTTPUseBasicAuth,
-		cfg.HTTPCfg().HTTPAuthUsers,
+		cfg.HTTPCfg().JsonRPCURL,
+		cfg.HTTPCfg().WSURL,
+		cfg.HTTPCfg().UseBasicAuth,
+		cfg.HTTPCfg().AuthUsers,
 		shdChan,
 	)
 	if (len(cfg.ListenCfg().RPCGOBTLSListen) != 0 ||
@@ -246,10 +246,10 @@ func startRPC(server *cores.Server, internalAdminSChan,
 			cfg.TLSCfg().CaCertificate,
 			cfg.TLSCfg().ServerPolicy,
 			cfg.TLSCfg().ServerName,
-			cfg.HTTPCfg().HTTPJsonRPCURL,
-			cfg.HTTPCfg().HTTPWSURL,
-			cfg.HTTPCfg().HTTPUseBasicAuth,
-			cfg.HTTPCfg().HTTPAuthUsers,
+			cfg.HTTPCfg().JsonRPCURL,
+			cfg.HTTPCfg().WSURL,
+			cfg.HTTPCfg().UseBasicAuth,
+			cfg.HTTPCfg().AuthUsers,
 			shdChan,
 		)
 	}

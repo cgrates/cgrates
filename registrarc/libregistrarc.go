@@ -249,7 +249,7 @@ func getConnPort(cfg *config.CGRConfig, transport string, tls bool) (port string
 		} else {
 			address = cfg.ListenCfg().HTTPListen
 		}
-		extraPath = cfg.HTTPCfg().HTTPJsonRPCURL
+		extraPath = cfg.HTTPCfg().JsonRPCURL
 	case rpcclient.BiRPCJSON:
 		address = cfg.SessionSCfg().ListenBijson
 	case rpcclient.BiRPCGOB:

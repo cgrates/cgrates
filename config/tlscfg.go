@@ -85,3 +85,41 @@ func (tls TLSCfg) Clone() *TLSCfg {
 		CaCertificate:    tls.CaCertificate,
 	}
 }
+
+type TlsJsonCfg struct {
+	Server_certificate *string
+	Server_key         *string
+	Server_policy      *int
+	Server_name        *string
+	Client_certificate *string
+	Client_key         *string
+	Ca_certificate     *string
+}
+
+func diffTlsJsonCfg(d *TlsJsonCfg, v1, v2 *TLSCfg) *TlsJsonCfg {
+	if d == nil {
+		d = new(TlsJsonCfg)
+	}
+	if v2.ServerCerificate != v1.ServerCerificate {
+		d.Server_certificate = utils.StringPointer(v2.ServerCerificate)
+	}
+	if v2.ServerKey != v1.ServerKey {
+		d.Server_key = utils.StringPointer(v2.ServerKey)
+	}
+	if v2.ServerPolicy != v1.ServerPolicy {
+		d.Server_policy = utils.IntPointer(v2.ServerPolicy)
+	}
+	if v2.ServerName != v1.ServerName {
+		d.Server_name = utils.StringPointer(v2.ServerName)
+	}
+	if v2.ClientCerificate != v1.ClientCerificate {
+		d.Client_certificate = utils.StringPointer(v2.ClientCerificate)
+	}
+	if v2.ClientKey != v1.ClientKey {
+		d.Client_key = utils.StringPointer(v2.ClientKey)
+	}
+	if v2.CaCertificate != v1.CaCertificate {
+		d.Ca_certificate = utils.StringPointer(v2.CaCertificate)
+	}
+	return d
+}

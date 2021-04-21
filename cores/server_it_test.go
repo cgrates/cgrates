@@ -226,10 +226,10 @@ func testServeHHTPPass(t *testing.T) {
 
 	go server.ServeHTTP(
 		":6555",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -247,10 +247,10 @@ func testServeHHTPPassUseBasicAuth(t *testing.T) {
 
 	go server.ServeHTTP(
 		":56432",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		!cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -270,8 +270,8 @@ func testServeHHTPEnableHttp(t *testing.T) {
 		":45779",
 		utils.EmptyString,
 		utils.EmptyString,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		!cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -289,10 +289,10 @@ func testServeHHTPFail(t *testing.T) {
 
 	go server.ServeHTTP(
 		"invalid_port_format",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	runtime.Gosched()
@@ -313,10 +313,10 @@ func testServeHHTPFailEnableRpc(t *testing.T) {
 	server.rpcEnabled = false
 
 	go server.ServeHTTP(":1000",
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	shdChan.CloseOnce()
@@ -623,10 +623,10 @@ func testServeHTTPTLS(t *testing.T) {
 		"/usr/share/cgrates/tls/ca.crt",
 		cfgDflt.TLSCfg().ServerPolicy,
 		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	//Invalid port address
@@ -638,10 +638,10 @@ func testServeHTTPTLS(t *testing.T) {
 		"/usr/share/cgrates/tls/ca.crt",
 		cfgDflt.TLSCfg().ServerPolicy,
 		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 	runtime.Gosched()
 
@@ -668,10 +668,10 @@ func testServeHTTPTLSWithBasicAuth(t *testing.T) {
 		"/usr/share/cgrates/tls/ca.crt",
 		cfgDflt.TLSCfg().ServerPolicy,
 		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		!cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 	runtime.Gosched()
 
@@ -697,10 +697,10 @@ func testServeHTTPTLSError(t *testing.T) {
 		"/usr/share/cgrates/tls/ca.crt",
 		cfgDflt.TLSCfg().ServerPolicy,
 		cfgDflt.TLSCfg().ServerName,
-		cfgDflt.HTTPCfg().HTTPJsonRPCURL,
-		cfgDflt.HTTPCfg().HTTPWSURL,
-		!cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().JsonRPCURL,
+		cfgDflt.HTTPCfg().WSURL,
+		!cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 	runtime.Gosched()
 
@@ -728,8 +728,8 @@ func testServeHTTPTLSHttpNotEnabled(t *testing.T) {
 		cfgDflt.TLSCfg().ServerName,
 		utils.EmptyString,
 		utils.EmptyString,
-		cfgDflt.HTTPCfg().HTTPUseBasicAuth,
-		cfgDflt.HTTPCfg().HTTPAuthUsers,
+		cfgDflt.HTTPCfg().UseBasicAuth,
+		cfgDflt.HTTPCfg().AuthUsers,
 		shdChan)
 
 	shdChan.CloseOnce()
