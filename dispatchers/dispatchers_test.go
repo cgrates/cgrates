@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -280,7 +279,6 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 type mockTypeCon3 struct{}
 
 func (*mockTypeCon3) Call(serviceMethod string, args, reply interface{}) error {
-	fmt.Println("yayCall")
 	eVreply := &engine.AttrSProcessEventReply{
 		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
@@ -326,9 +324,25 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey", &time.Time{})
 	expected := "UNAUTHORIZED_API"
 	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
+}
+
+type mockTypeCon4 struct{}
+
+func (*mockTypeCon4) Call(serviceMethod string, args, reply interface{}) error {
+	eVreply := &engine.AttrSProcessEventReply{
+		CGREvent: &utils.CGREvent{
+			Tenant:  "testTenant",
+			ID:      "testID",
+			Time:    nil,
+			Event:   map[string]interface{}{},
+			APIOpts: nil,
+		},
+	}
+	*reply.(*engine.AttrSProcessEventReply) = *eVreply
+	return nil
 }
 
 func TestDispatcherServiceAuthorizeError2(t *testing.T) {
@@ -337,7 +351,7 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	cfg.DispatcherSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	dm := engine.NewDataManager(nil, nil, nil)
 	chanRPC := make(chan rpcclient.ClientConnector, 1)
-	chanRPC <- new(mockTypeCon3)
+	chanRPC <- new(mockTypeCon4)
 	rpcInt := map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
 	}
@@ -359,8 +373,60 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
 	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey", &time.Time{})
-	expected := "UNAUTHORIZED_API"
+	expected := "NOT_FOUND"
 	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	engine.Cache = cacheInit
+}
+
+type mockTypeCon5 struct{}
+
+func (*mockTypeCon5) Call(serviceMethod string, args, reply interface{}) error {
+	eVreply := &engine.AttrSProcessEventReply{
+		CGREvent: &utils.CGREvent{
+			Tenant: "testTenant",
+			ID:     "testID",
+			Time:   nil,
+			Event: map[string]interface{}{
+				utils.APIMethods: "testMethod",
+			},
+			APIOpts: nil,
+		},
+	}
+	*reply.(*engine.AttrSProcessEventReply) = *eVreply
+	return nil
+}
+
+func TestDispatcherServiceAuthorizeError3(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
+	dm := engine.NewDataManager(nil, nil, nil)
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeCon5)
+	rpcInt := map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanRPC,
+	}
+	connMgr := engine.NewConnManager(cfg, rpcInt)
+
+	dsp := NewDispatcherService(dm, cfg, nil, connMgr)
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
+		value, nil, true, utils.NonTransactional)
+	err := dsp.authorize("testMethod", "testTenant", "apikey", &time.Time{})
+	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit
