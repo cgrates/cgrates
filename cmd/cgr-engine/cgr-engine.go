@@ -90,10 +90,7 @@ func initCacheS(internalCacheSChan chan birpc.ClientConnector,
 		}
 	}()
 
-	chSv1, err := birpc.NewService(apis.NewCacheSv1(chS), "", false)
-	if err != nil {
-		log.Fatal(err)
-	}
+	chSv1, _ := birpc.NewService(apis.NewCacheSv1(chS), "", false)
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(chSv1)
 	}

@@ -1466,8 +1466,8 @@ const (
 
 // RateProfile APIs
 const (
-	APIerSv1SetRateProfile         = "APIerSv1.SetRateProfile"
-	APIerSv1GetRateProfile         = "APIerSv1.GetRateProfile"
+	AdminSv1SetRateProfile         = "AdminSv1.SetRateProfile"
+	AdminSv1GetRateProfile         = "AdminSv1.GetRateProfile"
 	APIerSv1GetRateProfileIDs      = "APIerSv1.GetRateProfileIDs"
 	APIerSv1GetRateProfileIDsCount = "APIerSv1.GetRateProfileIDsCount"
 	APIerSv1RemoveRateProfile      = "APIerSv1.RemoveRateProfile"

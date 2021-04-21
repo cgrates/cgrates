@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdSetRateProfile{
 		name:      "rates_profile_set",
-		rpcMethod: utils.APIerSv1SetRateProfile,
+		rpcMethod: utils.AdminSv1SetRateProfile,
 		rpcParams: &utils.APIRateProfile{},
 	}
 	commands[c.Name()] = c

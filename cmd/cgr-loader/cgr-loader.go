@@ -26,6 +26,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -401,7 +403,7 @@ func main() {
 	}
 
 	// reload cache
-	if err = tpReader.ReloadCache(ldrCfg.GeneralCfg().DefaultCaching, *verbose, map[string]interface{}{
+	if err = tpReader.ReloadCache(context.Background(), ldrCfg.GeneralCfg().DefaultCaching, *verbose, map[string]interface{}{
 		utils.OptsAPIKey:  *apiKey,
 		utils.OptsRouteID: *routeID,
 	}); err != nil {
