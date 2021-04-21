@@ -36,7 +36,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Remote_conns:          &[]string{"*conn1"},
 		Replication_conns:     &[]string{"*conn1"},
-		Items: &map[string]*ItemOptJson{
+		Items: map[string]*ItemOptJson{
 			utils.MetaCDRs: {
 				Remote:    utils.BoolPointer(true),
 				Replicate: utils.BoolPointer(false),

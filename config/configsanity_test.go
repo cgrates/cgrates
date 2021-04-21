@@ -256,7 +256,7 @@ func TestConfigSanityAsteriskAgent(t *testing.T) {
 func TestConfigSanityDAgent(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 
-	cfg.templates = FcTemplates{
+	cfg.templates = FCTemplates{
 		utils.MetaEEs: {
 			{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
 				Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},

@@ -153,10 +153,45 @@ func (cCfg CacheCfg) Clone() (cln *CacheCfg) {
 		cln.Partitions[key] = par.Clone()
 	}
 	if cCfg.ReplicationConns != nil {
-		cln.ReplicationConns = make([]string, len(cCfg.ReplicationConns))
-		for i, c := range cCfg.ReplicationConns {
-			cln.ReplicationConns[i] = c
-		}
+		cln.ReplicationConns = utils.CloneStringSlice(cCfg.ReplicationConns)
 	}
 	return
 }
+
+type CacheParamJsonCfg struct {
+	Limit      *int
+	Ttl        *string
+	Static_ttl *bool
+	Precache   *bool
+	Replicate  *bool
+}
+
+func diffCacheParamJsonCfg(d *CacheParamJsonCfg, v1, v2 *CacheParamCfg, separator string) *CacheParamJsonCfg {
+	if d == nil {
+		d = new(CacheParamJsonCfg)
+	}
+	if v1.Limit != v2.Limit {
+		d.Limit = utils.IntPointer(v2.Limit)
+	}
+	if v1.TTL != v2.TTL {
+		d.Ttl = utils.StringPointer(v2.TTL.String())
+	}
+	if v1.StaticTTL != v2.StaticTTL {
+		d.Static_ttl = utils.BoolPointer(v2.StaticTTL)
+	}
+	if v1.Precache != v2.Precache {
+		d.Precache = utils.BoolPointer(v2.Precache)
+	}
+	if v1.Replicate != v2.Replicate {
+		d.Replicate = utils.BoolPointer(v2.Replicate)
+	}
+	return d
+}
+
+// func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v1, v2 map[string]*CacheParamCfg, separator string) map[string]*CacheParamJsonCfg {
+// 	if d == nil {
+// 		d = make(map[string]*CacheParamJsonCfg)
+// 	}
+// 	for
+// 	return d
+// }

@@ -338,3 +338,161 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	}
 	return
 }
+
+// EventReaderSJsonCfg is the configuration of a single EventReader
+type EventReaderJsonCfg struct {
+	Id                          *string
+	Type                        *string
+	Row_length                  *int
+	Field_separator             *string
+	Header_define_character     *string
+	Run_delay                   *string
+	Concurrent_requests         *int
+	Source_path                 *string
+	Processed_path              *string
+	Opts                        map[string]interface{}
+	Xml_root_path               *string
+	Tenant                      *string
+	Timezone                    *string
+	Filters                     *[]string
+	Flags                       *[]string
+	Failed_calls_prefix         *string
+	Partial_record_cache        *string
+	Partial_cache_expiry_action *string
+	Fields                      *[]*FcTemplateJsonCfg
+	Cache_dump_fields           *[]*FcTemplateJsonCfg
+}
+
+func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separator string) *EventReaderJsonCfg {
+	if d == nil {
+		d = new(EventReaderJsonCfg)
+	}
+	if v1.ID != v2.ID {
+		d.Id = utils.StringPointer(v2.ID)
+	}
+	if v1.Type != v2.Type {
+		d.Type = utils.StringPointer(v2.Type)
+	}
+	if v1.RowLength != v2.RowLength {
+		d.Row_length = utils.IntPointer(v2.RowLength)
+	}
+	if v1.FieldSep != v2.FieldSep {
+		d.Field_separator = utils.StringPointer(v2.FieldSep)
+	}
+	if v1.HeaderDefineChar != v2.HeaderDefineChar {
+		d.Header_define_character = utils.StringPointer(v2.HeaderDefineChar)
+	}
+	if v1.RunDelay != v2.RunDelay {
+		d.Run_delay = utils.StringPointer(v2.RunDelay.String())
+	}
+	if v1.ConcurrentReqs != v2.ConcurrentReqs {
+		d.Concurrent_requests = utils.IntPointer(v2.ConcurrentReqs)
+	}
+	if v1.SourcePath != v2.SourcePath {
+		d.Source_path = utils.StringPointer(v2.SourcePath)
+	}
+	if v1.ProcessedPath != v2.ProcessedPath {
+		d.Processed_path = utils.StringPointer(v2.ProcessedPath)
+	}
+	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
+	xml1 := v1.XMLRootPath.AsString("/", len(v1.XMLRootPath) != 0 && len(v1.XMLRootPath[0]) != 0)
+	xml2 := v2.XMLRootPath.AsString("/", len(v2.XMLRootPath) != 0 && len(v2.XMLRootPath[0]) != 0)
+	if xml1 != xml2 {
+		d.Xml_root_path = utils.StringPointer(xml2)
+	}
+	tnt1 := v1.Tenant.GetRule(separator)
+	tnt2 := v2.Tenant.GetRule(separator)
+	if tnt1 != tnt2 {
+		d.Tenant = utils.StringPointer(tnt2)
+	}
+	if v1.Timezone != v2.Timezone {
+		d.Timezone = utils.StringPointer(v2.Timezone)
+	}
+	if !utils.SliceStringEqual(v1.Filters, v2.Filters) {
+		d.Filters = &v2.Filters
+	}
+	flgs1 := v1.Flags.SliceFlags()
+	flgs2 := v2.Flags.SliceFlags()
+	if !utils.SliceStringEqual(flgs1, flgs2) {
+		d.Flags = &flgs2
+	}
+	if v1.FailedCallsPrefix != v2.FailedCallsPrefix {
+		d.Failed_calls_prefix = utils.StringPointer(v2.FailedCallsPrefix)
+	}
+	if v1.PartialRecordCache != v2.PartialRecordCache {
+		d.Partial_record_cache = utils.StringPointer(v2.PartialRecordCache.String())
+	}
+	if v1.PartialCacheExpiryAction != v2.PartialCacheExpiryAction {
+		d.Partial_cache_expiry_action = utils.StringPointer(v2.PartialCacheExpiryAction)
+	}
+	var flds []*FcTemplateJsonCfg
+	if d.Fields != nil {
+		flds = *d.Fields
+	}
+	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
+	d.Fields = &flds
+
+	var cdf []*FcTemplateJsonCfg
+	if d.Cache_dump_fields != nil {
+		cdf = *d.Cache_dump_fields
+	}
+	cdf = diffFcTemplateJsonCfg(cdf, v1.CacheDumpFields, v2.CacheDumpFields, separator)
+	d.Cache_dump_fields = &cdf
+	return d
+}
+
+func getEventReaderJsonCfg(d []*EventReaderJsonCfg, id string) (*EventReaderJsonCfg, int) {
+	for i, v := range d {
+		if v.Id != nil && *v.Id == id {
+			return v, i
+		}
+	}
+	return nil, -1
+}
+
+func getEventReaderCfg(d []*EventReaderCfg, id string) *EventReaderCfg {
+	for _, v := range d {
+		if v.ID == id {
+			return v
+		}
+	}
+	return new(EventReaderCfg)
+}
+
+func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg, separator string) *[]*EventReaderJsonCfg {
+	if d == nil || *d == nil {
+		d = &[]*EventReaderJsonCfg{}
+	}
+	for _, val := range v2 {
+		dv, i := getEventReaderJsonCfg(*d, val.ID)
+		dv = diffEventReaderJsonCfg(dv, getEventReaderCfg(v1, val.ID), val, separator)
+		if i == -1 {
+			*d = append(*d, dv)
+		} else {
+			(*d)[i] = dv
+		}
+	}
+
+	return d
+}
+
+// EventReaderSJsonCfg contains the configuration of EventReaderService
+type ERsJsonCfg struct {
+	Enabled        *bool
+	Sessions_conns *[]string
+	Readers        *[]*EventReaderJsonCfg
+}
+
+func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg {
+	if d == nil {
+		d = new(ERsJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+		d.Sessions_conns = &v2.SessionSConns
+	}
+	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers, separator)
+	return d
+}

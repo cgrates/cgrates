@@ -22,63 +22,6 @@ import (
 	"encoding/json"
 )
 
-// EventReaderSJsonCfg contains the configuration of EventReaderService
-type ERsJsonCfg struct {
-	Enabled        *bool
-	Sessions_conns *[]string
-	Readers        *[]*EventReaderJsonCfg
-}
-
-// EventReaderSJsonCfg is the configuration of a single EventReader
-type EventReaderJsonCfg struct {
-	Id                          *string
-	Type                        *string
-	Row_length                  *int
-	Field_separator             *string
-	Header_define_character     *string
-	Run_delay                   *string
-	Concurrent_requests         *int
-	Source_path                 *string
-	Processed_path              *string
-	Opts                        map[string]interface{}
-	Xml_root_path               *string
-	Tenant                      *string
-	Timezone                    *string
-	Filters                     *[]string
-	Flags                       *[]string
-	Failed_calls_prefix         *string
-	Partial_record_cache        *string
-	Partial_cache_expiry_action *string
-	Fields                      *[]*FcTemplateJsonCfg
-	Cache_dump_fields           *[]*FcTemplateJsonCfg
-}
-
-// EEsJsonCfg contains the configuration of EventExporterService
-type EEsJsonCfg struct {
-	Enabled          *bool
-	Attributes_conns *[]string
-	Cache            *map[string]*CacheParamJsonCfg
-	Exporters        *[]*EventExporterJsonCfg
-}
-
-// EventExporterJsonCfg is the configuration of a single EventExporter
-type EventExporterJsonCfg struct {
-	Id                *string
-	Type              *string
-	Export_path       *string
-	Opts              map[string]interface{}
-	Tenant            *string
-	Timezone          *string
-	Filters           *[]string
-	Flags             *[]string
-	Attribute_ids     *[]string
-	Attribute_context *string
-	Synchronous       *bool
-	Attempts          *int
-	Field_separator   *string
-	Fields            *[]*FcTemplateJsonCfg
-}
-
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
 	Enabled                *bool
@@ -162,14 +105,6 @@ type AsteriskAgentJsonCfg struct {
 	Sessions_conns *[]string
 	Create_cdr     *bool
 	Asterisk_conns *[]*AstConnJsonCfg
-}
-
-type CacheParamJsonCfg struct {
-	Limit      *int
-	Ttl        *string
-	Static_ttl *bool
-	Precache   *bool
-	Replicate  *bool
 }
 
 type CacheJsonCfg struct {

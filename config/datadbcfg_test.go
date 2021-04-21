@@ -34,7 +34,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		Db_password:       utils.StringPointer("password"),
 		Remote_conns:      &[]string{"*conn1"},
 		Replication_conns: &[]string{"*conn1"},
-		Items: &map[string]*ItemOptJson{
+		Items: map[string]*ItemOptJson{
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
@@ -531,7 +531,7 @@ func TestCloneDataDB(t *testing.T) {
 		Db_password:       utils.StringPointer("password"),
 		Remote_conns:      &[]string{"*conn1"},
 		Replication_conns: &[]string{"*conn1"},
-		Items: &map[string]*ItemOptJson{
+		Items: map[string]*ItemOptJson{
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
