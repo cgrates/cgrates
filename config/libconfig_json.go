@@ -23,60 +23,8 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
-
-// SessionSJsonCfg config section
-type SessionSJsonCfg struct {
-	Enabled                *bool
-	Listen_bijson          *string
-	Listen_bigob           *string
-	Chargers_conns         *[]string
-	Resources_conns        *[]string
-	Thresholds_conns       *[]string
-	Stats_conns            *[]string
-	Routes_conns           *[]string
-	Cdrs_conns             *[]string
-	Replication_conns      *[]string
-	Attributes_conns       *[]string
-	Debit_interval         *string
-	Store_session_costs    *bool
-	Session_ttl            *string
-	Session_ttl_max_delay  *string
-	Session_ttl_last_used  *string
-	Session_ttl_usage      *string
-	Session_ttl_last_usage *string
-	Session_indexes        *[]string
-	Client_protocol        *float64
-	Channel_sync_interval  *string
-	Terminate_attempts     *int
-	Alterable_fields       *[]string
-	Min_dur_low_balance    *string
-	Actions_conns          *[]string
-	Stir                   *STIRJsonCfg
-	Default_usage          *map[string]string
-}
-
-// FreeSWITCHAgent config section
-type FreeswitchAgentJsonCfg struct {
-	Enabled                *bool
-	Sessions_conns         *[]string
-	Subscribe_park         *bool
-	Create_cdr             *bool
-	Extra_fields           *[]string
-	Low_balance_ann_file   *string
-	Empty_balance_context  *string
-	Empty_balance_ann_file *string
-	Max_wait_connection    *string
-	Event_socket_conns     *[]*FsConnJsonCfg
-}
-
-// Represents one connection instance towards FreeSWITCH
-type FsConnJsonCfg struct {
-	Address    *string
-	Password   *string
-	Reconnects *int
-	Alias      *string
-}
 
 type RPCConnsJson map[string]*RPCConnJson
 type RPCConnJson struct {
@@ -92,22 +40,6 @@ type RemoteHostJson struct {
 	Transport   *string
 	Synchronous *bool
 	Tls         *bool
-}
-
-type AstConnJsonCfg struct {
-	Alias            *string
-	Address          *string
-	User             *string
-	Password         *string
-	Connect_attempts *int
-	Reconnects       *int
-}
-
-type AsteriskAgentJsonCfg struct {
-	Enabled        *bool
-	Sessions_conns *[]string
-	Create_cdr     *bool
-	Asterisk_conns *[]*AstConnJsonCfg
 }
 
 // SM-Kamailio config section
@@ -375,14 +307,6 @@ type AnalyzerSJsonCfg struct {
 	Cleanup_interval *string
 }
 
-type STIRJsonCfg struct {
-	Allowed_attest      *[]string
-	Payload_maxduration *string
-	Default_attest      *string
-	Publickey_path      *string
-	Privatekey_path     *string
-}
-
 type RateSJsonCfg struct {
 	Enabled                    *bool
 	Indexed_selects            *bool
@@ -460,12 +384,40 @@ func updateInternalConns(conns []string, subsystem string) (c []string) {
 	return
 }
 
+// updateInternalConns updates the connection list by specifying the subsystem for internal connections
+func updateBiRPCInternalConns(conns []string, subsystem string) (c []string) {
+	subsystem = utils.ConcatenatedKeySep + subsystem
+	c = make([]string, len(conns))
+	for i, conn := range conns {
+		c[i] = conn
+		// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+		if conn == utils.MetaInternal ||
+			conn == rpcclient.BiRPCInternal {
+			c[i] += subsystem
+		}
+	}
+	return
+}
+
 func getInternalJSONConns(conns []string) (c []string) {
 	c = make([]string, len(conns))
 	for i, conn := range conns {
 		c[i] = conn
 		if strings.HasPrefix(conn, utils.MetaInternal) {
 			c[i] = utils.MetaInternal
+		}
+	}
+	return
+}
+
+func getBiRPCInternalJSONConns(conns []string) (c []string) {
+	c = make([]string, len(conns))
+	for i, conn := range conns {
+		c[i] = conn
+		if strings.HasPrefix(conn, utils.MetaInternal) {
+			c[i] = utils.MetaInternal
+		} else if strings.HasPrefix(conn, rpcclient.BiRPCInternal) {
+			c[i] = rpcclient.BiRPCInternal
 		}
 	}
 	return

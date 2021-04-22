@@ -291,7 +291,7 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 
 func TestSessionSCfgloadFromJsonCfgCase12(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
-		Default_usage: &map[string]string{
+		Default_usage: map[string]string{
 			utils.MetaAny:   "1ss",
 			utils.MetaVoice: "1ss",
 			utils.MetaData:  "1ss",

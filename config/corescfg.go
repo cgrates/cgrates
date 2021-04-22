@@ -89,7 +89,7 @@ type CoreSJsonCfg struct {
 	Shutdown_timeout    *string
 }
 
-func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 CoreSCfg) *CoreSJsonCfg {
+func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
 	if d == nil {
 		d = new(CoreSJsonCfg)
 	}

@@ -34,10 +34,7 @@ func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 		ban.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Keys != nil {
-		ban.Keys = make([]string, len(*jsnCfg.Keys))
-		for i, key := range *jsnCfg.Keys {
-			ban.Keys[i] = key
-		}
+		ban.Keys = utils.CloneStringSlice(*jsnCfg.Keys)
 	}
 	return nil
 }
@@ -63,7 +60,7 @@ type APIBanJsonCfg struct {
 	Keys    *[]string
 }
 
-func diffAPIBanJsonCfg(d *APIBanJsonCfg, v1, v2 APIBanCfg) *APIBanJsonCfg {
+func diffAPIBanJsonCfg(d *APIBanJsonCfg, v1, v2 *APIBanCfg) *APIBanJsonCfg {
 	if d == nil {
 		d = new(APIBanJsonCfg)
 	}

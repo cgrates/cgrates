@@ -123,3 +123,16 @@ func JoinStringSet(s ...StringSet) (conc StringSet) {
 	}
 	return
 }
+
+// Equals returns true if the set are the same
+func (s StringSet) Equals(s2 StringSet) bool {
+	if s.Size() != s2.Size() {
+		return false
+	}
+	for k := range s2 {
+		if !s.Has(k) {
+			return false
+		}
+	}
+	return true
+}

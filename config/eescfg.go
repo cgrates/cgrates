@@ -177,10 +177,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.Timezone = *jsnEec.Timezone
 	}
 	if jsnEec.Filters != nil {
-		eeC.Filters = make([]string, len(*jsnEec.Filters))
-		for i, fltr := range *jsnEec.Filters {
-			eeC.Filters[i] = fltr
-		}
+		eeC.Filters = utils.CloneStringSlice(*jsnEec.Filters)
 	}
 	if jsnEec.Flags != nil {
 		eeC.Flags = utils.FlagsWithParamsFromSlice(*jsnEec.Flags)
@@ -189,10 +186,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.AttributeSCtx = *jsnEec.Attribute_context
 	}
 	if jsnEec.Attribute_ids != nil {
-		eeC.AttributeSIDs = make([]string, len(*jsnEec.Attribute_ids))
-		for i, fltr := range *jsnEec.Attribute_ids {
-			eeC.AttributeSIDs[i] = fltr
-		}
+		eeC.AttributeSIDs = utils.CloneStringSlice(*jsnEec.Attribute_ids)
 	}
 	if jsnEec.Synchronous != nil {
 		eeC.Synchronous = *jsnEec.Synchronous
