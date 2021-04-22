@@ -229,8 +229,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
-	dfltRemoteHost = new(RemoteHost)
-	*dfltRemoteHost = *cfg.rpcConns[utils.MetaLocalHost].Conns[0]
+	dfltRemoteHost = cfg.rpcConns[utils.MetaLocalHost].Conns[0].Clone()
 	err = cfg.checkConfigSanity()
 	return
 }
