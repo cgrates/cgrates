@@ -152,6 +152,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
 			if err == io.EOF {
+				err = nil //If it reaches the end of the file, return nil
 				break
 			}
 			return

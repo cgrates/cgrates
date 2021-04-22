@@ -21,16 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"bytes"
 	"fmt"
-	"io"
+	"log"
 	"net/rpc"
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/ltcache"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -212,37 +215,16 @@ func testFlatstoreITKillEngine(t *testing.T) {
 	}
 }
 
-func TestFlatstoreProcessEventError(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	fltrs := &engine.FilterS{}
-	filePath := "/tmp/invalid/"
-	fname := "file1.csv"
-	eR := &CSVFileER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     fltrs,
-		rdrDir:    "/tmp/flatstoreErs/out",
-		rdrEvents: make(chan *erEvent, 1),
-		rdrError:  make(chan error, 1),
-		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
-	}
-	eR.conReqs <- struct{}{}
-	errExpect := "open /tmp/invalid/file1.csv: no such file or directory"
-	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
-}
-
 func TestFlatstoreProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := &engine.FilterS{}
 	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
 	}
-	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	file, err := os.Create(path.Join(filePath, fname))
 	if err != nil {
 		t.Error(err)
 	}
@@ -276,11 +258,8 @@ func TestFlatstoreProcessEvent(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	eR.conReqs <- struct{}{}
-	fname := "file1.csv"
-	errExpect := io.EOF
-	// eR.Config().FailedCallsPrefix = "randomPrefix"
-	if err := eR.processFile(filePath, fname); err == nil || err != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
 	}
 	select {
 	case data := <-eR.rdrEvents:
@@ -294,6 +273,348 @@ func TestFlatstoreProcessEvent(t *testing.T) {
 	}
 	if err := os.RemoveAll(filePath); err != nil {
 		t.Error(err)
+	}
+}
+
+//Test the case in which the file name does not match a prefix
+func TestFlatstoreProcessEvent2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	//baToR
+	file.Write([]byte("INVITE,a,ToR,b,c,d,2013-12-30T15:00:01Z,f,g,h,i,j,k,l"))
+	file.Close()
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	record := []string{"BYE", "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
+	pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(eR.Config().Timezone,
+		eR.cgrCfg.GeneralCfg().DefaultTimezone), fname)
+	if err != nil {
+		t.Error(err)
+	}
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache.Set("baToR", pr, nil)
+	expEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.AccountField: "g",
+			utils.AnswerTime:   "k",
+			utils.Category:     "f",
+			utils.Destination:  "i",
+			utils.OriginID:     "b",
+			utils.RequestType:  "c",
+			utils.SetupTime:    "j",
+			utils.Subject:      "h",
+			utils.Tenant:       "2013-12-30T15:00:01Z",
+			utils.ToR:          "ToR",
+			utils.Usage:        "3600",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().FailedCallsPrefix = "x"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	select {
+	case data := <-eR.rdrEvents:
+		expEvent.ID = data.cgrEvent.ID
+		expEvent.Time = data.cgrEvent.Time
+		if !reflect.DeepEqual(data.cgrEvent, expEvent) {
+			t.Errorf("Expected %v but received %v", utils.ToJSON(expEvent), utils.ToJSON(data.cgrEvent))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Error("Time limit exceeded")
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFlatstoreProcessEvent2CacheNotSet(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte("INVITE,a,ToR,b,c,d,2013-12-30T15:00:01Z,f,g,h,i,j,k,l"))
+	file.Close()
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+
+	eR.conReqs <- struct{}{}
+	eR.Config().FailedCallsPrefix = "x"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+//Test unsupported time format err while making the unpaired record.
+func TestFlatstoreProcessEvent2Error1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	//Create new logger
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	file.Write([]byte("INVITE,a,ToR,b,c,d,invalid_time,f,g,h,i,j,k,l"))
+	file.Close()
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	record := []string{"BYE", "a", "ToR", "b", "c", "d", "invalid_time", "f", "g", "h", "i", "j", "k", "l"}
+	pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(eR.Config().Timezone,
+		eR.cgrCfg.GeneralCfg().DefaultTimezone), fname)
+	errExpect := "Unsupported time format"
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache.Set("baToR", pr, nil)
+
+	eR.conReqs <- struct{}{}
+	eR.Config().FailedCallsPrefix = "x"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	errExpect = "[WARNING] <ERs> Converting row : <[INVITE a ToR b c d invalid_time f g h i j k l]> to unpairedRecord , ignoring due to error: <Unsupported time format>"
+	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
+		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+	buf.Reset()
+}
+
+//Test pairToRecord() error, where both methods of unpaired record object are INVITE
+func TestFlatstoreProcessEvent2Error2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	//Create new logger
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	//baToR
+	file.Write([]byte("INVITE,a,ToR,b,c,d,2013-12-30T15:00:01Z,f,g,h,i,j,k,l"))
+	file.Close()
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	record := []string{"INVITE", "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
+	pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(eR.Config().Timezone,
+		eR.cgrCfg.GeneralCfg().DefaultTimezone), fname)
+	if err != nil {
+		t.Error(err)
+	}
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache.Set("baToR", pr, nil)
+	eR.conReqs <- struct{}{}
+	eR.Config().FailedCallsPrefix = "x"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	errExpect := "[WARNING] <ERs> Merging unpairedRecords"
+	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
+		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+	buf.Reset()
+}
+
+//Fields in template are empty in order to trigger SetFields() error
+func TestFlatstoreProcessEventError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{},
+	}
+
+	errExpect := "unsupported type: <>"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+//Test invalid filters in order to trigger Pass() function error
+func TestFlatstoreProcessEventError3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	//
+	eR.Config().Filters = []string{"*exists:~*req..Account:"}
+	errExpect = "Invalid fieldPath [ Account]"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFlatstoreProcessEventDirError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFlatstoreProcessEvent/"
+	fname := "file1.csv"
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	errExpect := "open /tmp/TestFlatstoreProcessEvent/file1.csv: no such file or directory"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
 
