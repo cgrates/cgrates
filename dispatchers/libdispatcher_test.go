@@ -1073,13 +1073,28 @@ func TestLibDispatcherLoadStrategyDispatcherCacheError3(t *testing.T) {
 	engine.IntRPC = tmp
 }
 
-/*
 func TestLibDispatcherLoadStrategyDispatcherCacheError4(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
-	cfg.CacheCfg().ReplicationConns = []string{"notZero"}
+	cfg.CacheCfg().ReplicationConns = []string{"con"}
 	cfg.CacheCfg().Partitions[utils.CacheDispatcherRoutes].Replicate = true
-	dm := engine.NewDataManager(nil, nil, nil)
+	cfg.RPCConns()["con"] = &config.RPCConn{
+		Strategy: "",
+		PoolSize: 0,
+		Conns: []*config.RemoteHost{
+			{
+				ID:          "testID",
+				Address:     "",
+				Transport:   "",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+	rpcCl := map[string]chan rpcclient.ClientConnector{}
+	connMng := engine.NewConnManager(cfg, rpcCl)
+	dm := engine.NewDataManager(nil, nil, connMng)
+
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	value := &engine.DispatcherHost{
@@ -1125,4 +1140,3 @@ func TestLibDispatcherLoadStrategyDispatcherCacheError4(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
-*/
