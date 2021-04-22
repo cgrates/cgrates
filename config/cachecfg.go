@@ -205,7 +205,7 @@ type CacheJsonCfg struct {
 	Replication_conns *[]string
 }
 
-func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 CacheCfg) *CacheJsonCfg {
+func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 *CacheCfg) *CacheJsonCfg {
 	if d == nil {
 		d = new(CacheJsonCfg)
 	}

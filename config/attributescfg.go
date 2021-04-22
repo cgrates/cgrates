@@ -145,7 +145,7 @@ type AttributeSJsonCfg struct {
 	Process_runs          *int
 }
 
-func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 AttributeSCfg) *AttributeSJsonCfg {
+func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
 	if d == nil {
 		d = new(AttributeSJsonCfg)
 	}

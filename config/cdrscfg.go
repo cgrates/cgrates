@@ -84,22 +84,12 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:       cdrscfg.Enabled,
-		utils.StoreCdrsCfg:     cdrscfg.StoreCdrs,
-		utils.SMCostRetriesCfg: cdrscfg.SMCostRetries,
+		utils.EnabledCfg:          cdrscfg.Enabled,
+		utils.StoreCdrsCfg:        cdrscfg.StoreCdrs,
+		utils.SMCostRetriesCfg:    cdrscfg.SMCostRetries,
+		utils.ExtraFieldsCfg:      cdrscfg.ExtraFields.AsStringSlice(),
+		utils.OnlineCDRExportsCfg: utils.CloneStringSlice(cdrscfg.OnlineCDRExports),
 	}
-
-	extraFields := make([]string, len(cdrscfg.ExtraFields))
-	for i, item := range cdrscfg.ExtraFields {
-		extraFields[i] = item.Rules
-	}
-	initialMP[utils.ExtraFieldsCfg] = extraFields
-
-	onlineCDRExports := make([]string, len(cdrscfg.OnlineCDRExports))
-	for i, item := range cdrscfg.OnlineCDRExports {
-		onlineCDRExports[i] = item
-	}
-	initialMP[utils.OnlineCDRExportsCfg] = onlineCDRExports
 
 	if cdrscfg.ChargerSConns != nil {
 		initialMP[utils.ChargerSConnsCfg] = getInternalJSONConns(cdrscfg.ChargerSConns)

@@ -580,7 +580,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Channel_sync_interval: utils.StringPointer("0"),
 		Terminate_attempts:    utils.IntPointer(5),
 		Alterable_fields:      &[]string{},
-		Default_usage: &map[string]string{
+		Default_usage: map[string]string{
 			utils.MetaAny:   "3h",
 			utils.MetaVoice: "3h",
 			utils.MetaData:  "1048576",

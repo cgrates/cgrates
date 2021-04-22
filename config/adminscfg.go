@@ -101,7 +101,7 @@ type AdminSJsonCfg struct {
 	Ees_conns        *[]string
 }
 
-func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 AdminSCfg) *AdminSJsonCfg {
+func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
 	if d == nil {
 		d = new(AdminSJsonCfg)
 	}

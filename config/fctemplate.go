@@ -41,10 +41,7 @@ func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.Tag = *jsnCfg.Tag
 	}
 	if jsnCfg.Filters != nil {
-		fcTmp.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			fcTmp.Filters[i] = fltr
-		}
+		fcTmp.Filters = utils.CloneStringSlice(*jsnCfg.Filters)
 	}
 	if jsnCfg.Value != nil {
 		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, separator); err != nil {

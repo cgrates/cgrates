@@ -178,10 +178,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		er.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Filters != nil {
-		er.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			er.Filters[i] = fltr
-		}
+		er.Filters = utils.CloneStringSlice(*jsnCfg.Filters)
 	}
 	if jsnCfg.Flags != nil {
 		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
