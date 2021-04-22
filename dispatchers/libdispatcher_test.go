@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"net/rpc"
 	"reflect"
 	"sync"
 	"testing"
@@ -1135,8 +1136,62 @@ func TestLibDispatcherLoadStrategyDispatcherCacheError4(t *testing.T) {
 		defaultRatio: 0,
 	}
 	err := wgDsp.dispatch(dm, "testID", utils.MetaAttributes, "testTENANT", []string{"testID", "testID2"}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	expected := "DISCONNECTED"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	engine.Cache = cacheInit
+}
+
+type mockTypeConDispatch struct{}
+
+func (*mockTypeConDispatch) Call(serviceMethod string, args, reply interface{}) error {
+	return rpc.ErrShutdown
+}
+
+func TestLibDispatcherLoadStrategyDispatcherCacheError5(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+
+	dm := engine.NewDataManager(nil, nil, nil)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	value := &engine.DispatcherHost{
+		Tenant: "testTenant",
+		RemoteHost: &config.RemoteHost{
+			ID:          "testID",
+			Address:     rpcclient.InternalRPC,
+			Transport:   utils.MetaInternal,
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+
+	tmp := engine.IntRPC
+	engine.IntRPC = map[string]*rpcclient.RPCClient{}
+	chanRPC := make(chan rpcclient.ClientConnector, 1)
+	chanRPC <- new(mockTypeConDispatch)
+	engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, chanRPC)
+	engine.Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, "testTenant:testID",
+		value, nil, true, utils.NonTransactional)
+	wgDsp := &loadStrategyDispatcher{
+		tntID: "testTenant",
+		hosts: engine.DispatcherHostProfiles{
+			{
+				ID:     "testID",
+				Weight: 3,
+				Params: map[string]interface{}{
+					utils.MetaRatio: 1,
+				},
+				Blocker: true,
+			},
+		},
+		defaultRatio: 0,
+	}
+	err := wgDsp.dispatch(nil, "testID", utils.MetaAttributes, "testTenant", []string{"testID"}, utils.AttributeSv1Ping, &utils.CGREvent{}, &wgDsp)
+	if err == nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "connection is shut down", err)
+	}
+	engine.Cache = cacheInit
+	engine.IntRPC = tmp
 }
