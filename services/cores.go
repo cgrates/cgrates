@@ -58,7 +58,7 @@ type CoreService struct {
 	srvDep   map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (cS *CoreService) Start() (err error) {
 	if cS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -90,7 +90,7 @@ func (cS *CoreService) Shutdown() (err error) {
 	close(cS.stopChan)
 	cS.cS = nil
 	// cS.rpc = nil
-	<-cS.connChan
+	//<-cS.connChan
 	return
 }
 
