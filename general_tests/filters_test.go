@@ -35,10 +35,10 @@ func TestFilterPassDestinations(t *testing.T) {
 		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
+	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
 	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
 	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS): internalAPIerSv1Chan,
 	})
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
@@ -86,10 +86,10 @@ func TestFilterPassDestinations(t *testing.T) {
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
+	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
 	internalAPIerSv1Chan := make(chan birpc.ClientConnector, 1)
 	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS): internalAPIerSv1Chan,
 	})
 	data := engine.NewInternalDB(nil, nil, true)
 	dmFilterPass := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)

@@ -54,7 +54,7 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 		return true, nil
 	}
 	dDP := newDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
-		fS.cfg.FilterSCfg().ApierSConns, tenant, ev)
+		fS.cfg.FilterSCfg().AdminSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		f, err := fS.dm.GetFilter(ctx, tenant, fltrID,
 			true, true, utils.NonTransactional)
@@ -119,7 +119,7 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 	}
 	pass = true
 	dDP := newDynamicDP(context.TODO(), fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
-		fS.cfg.FilterSCfg().ApierSConns, tenant, ev)
+		fS.cfg.FilterSCfg().AdminSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		var f *Filter
 		f, err = fS.dm.GetFilter(context.TODO(), tenant, fltrID,
@@ -487,7 +487,7 @@ func (fltr *FilterRule) passDestinations(ctx *context.Context, dDP utils.DataPro
 	}
 	for _, p := range utils.SplitPrefix(dst, utils.MIN_PREFIX_MATCH) {
 		var destIDs []string
-		if err = connMgr.Call(ctx, config.CgrConfig().FilterSCfg().ApierSConns, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
+		if err = connMgr.Call(ctx, config.CgrConfig().FilterSCfg().AdminSConns, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
 			continue
 		}
 		for _, dID := range destIDs {

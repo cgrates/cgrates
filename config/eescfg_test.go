@@ -248,7 +248,7 @@ func TestEventExporterloadFromJsonCfg(t *testing.T) {
 
 func TestEESCacheloadFromJsonCfg(t *testing.T) {
 	eesCfg := &EEsJsonCfg{
-		Cache: &map[string]*CacheParamJsonCfg{
+		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Ttl: utils.StringPointer("1ss"),
 			},
@@ -378,7 +378,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
 		Enabled:          utils.BoolPointer(true),
 		Attributes_conns: &[]string{"*conn1", "*conn2"},
-		Cache: &map[string]*CacheParamJsonCfg{
+		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-2),
 				Ttl:        utils.StringPointer("1s"),
@@ -489,7 +489,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 	jsonCfg := &EEsJsonCfg{
 		Enabled:          utils.BoolPointer(true),
 		Attributes_conns: &[]string{"*conn1", "*conn2"},
-		Cache: &map[string]*CacheParamJsonCfg{
+		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-2),
 				Ttl:        utils.StringPointer("1s"),

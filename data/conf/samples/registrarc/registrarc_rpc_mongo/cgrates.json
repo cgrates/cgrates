@@ -93,7 +93,7 @@
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"apiers_conns": ["*localhost"]
+	"admins_conns": ["*localhost"]
 },
 
 
@@ -139,7 +139,7 @@
 
 
 "filters": {								
-	"apiers_conns": ["*internal"],
+	"admins_conns": ["*internal"],
 },
 
 "registrarc":{

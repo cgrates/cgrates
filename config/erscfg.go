@@ -39,14 +39,7 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		erS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		erS.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for i, fID := range *jsnCfg.Sessions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			erS.SessionSConns[i] = fID
-			if fID == utils.MetaInternal {
-				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			}
-		}
+		erS.SessionSConns = updateInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
 }
@@ -104,14 +97,7 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 		utils.EnabledCfg: erS.Enabled,
 	}
 	if erS.SessionSConns != nil {
-		sessionSConns := make([]string, len(erS.SessionSConns))
-		for i, item := range erS.SessionSConns {
-			sessionSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		initialMP[utils.SessionSConnsCfg] = getInternalJSONConns(erS.SessionSConns)
 	}
 	if erS.Readers != nil {
 		readers := make([]map[string]interface{}, len(erS.Readers))
@@ -491,7 +477,7 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = &v2.SessionSConns
+		d.Sessions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.SessionSConns))
 	}
 	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers, separator)
 	return d

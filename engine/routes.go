@@ -470,7 +470,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
 		dynDP := newDynamicDP(context.TODO(), rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
-			rpS.cgrcfg.FilterSCfg().ApierSConns,
+			rpS.cgrcfg.FilterSCfg().AdminSConns,
 			ev.Tenant, utils.MapStorage{
 				utils.MetaReq:  ev.Event,
 				utils.MetaVars: sortedSpl.SortingData,

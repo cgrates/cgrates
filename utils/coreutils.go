@@ -448,6 +448,10 @@ func DurationPointer(d time.Duration) *time.Duration {
 	return &d
 }
 
+func SliceStringPointer(d []string) *[]string {
+	return &d
+}
+
 func ToIJSON(v interface{}) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)

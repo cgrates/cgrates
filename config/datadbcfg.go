@@ -73,7 +73,6 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
 		for idx, rmtConn := range *jsnDbCfg.Remote_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if rmtConn == utils.MetaInternal {
 				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
 			}
@@ -83,7 +82,6 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Replication_conns != nil {
 		dbcfg.RplConns = make([]string, len(*jsnDbCfg.Replication_conns))
 		for idx, rplConn := range *jsnDbCfg.Replication_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if rplConn == utils.MetaInternal {
 				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
 			}

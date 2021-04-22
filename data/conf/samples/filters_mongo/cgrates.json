@@ -43,7 +43,7 @@
 "filters": {								
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"apiers_conns": ["*localhost"],
+	"admins_conns": ["*localhost"],
 },
 
 

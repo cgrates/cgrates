@@ -39,44 +39,16 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Caches_conns != nil {
-		aCfg.CachesConns = make([]string, len(*jsnCfg.Caches_conns))
-		for idx, conn := range *jsnCfg.Caches_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			aCfg.CachesConns[idx] = conn
-			if conn == utils.MetaInternal {
-				aCfg.CachesConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			}
-		}
+		aCfg.CachesConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
 	if jsnCfg.Actions_conns != nil {
-		aCfg.ActionSConns = make([]string, len(*jsnCfg.Actions_conns))
-		for idx, conn := range *jsnCfg.Actions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			aCfg.ActionSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				aCfg.ActionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
-			}
-		}
+		aCfg.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCfg.Attributes_conns != nil {
-		aCfg.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for idx, conn := range *jsnCfg.Attributes_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			aCfg.AttributeSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				aCfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			}
-		}
+		aCfg.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Ees_conns != nil {
-		aCfg.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
-		for idx, connID := range *jsnCfg.Ees_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			aCfg.EEsConns[idx] = connID
-			if connID == utils.MetaInternal {
-				aCfg.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
-			}
-		}
+		aCfg.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	return nil
 }
@@ -87,44 +59,16 @@ func (aCfg *AdminSCfg) AsMapInterface() (initialMap map[string]interface{}) {
 		utils.EnabledCfg: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {
-		cachesConns := make([]string, len(aCfg.CachesConns))
-		for i, item := range aCfg.CachesConns {
-			cachesConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cachesConns[i] = utils.MetaInternal
-			}
-		}
-		initialMap[utils.CachesConnsCfg] = cachesConns
+		initialMap[utils.CachesConnsCfg] = getInternalJSONConns(aCfg.CachesConns)
 	}
 	if aCfg.ActionSConns != nil {
-		actionsConns := make([]string, len(aCfg.ActionSConns))
-		for i, item := range aCfg.ActionSConns {
-			actionsConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
-				actionsConns[i] = utils.MetaInternal
-			}
-		}
-		initialMap[utils.ActionSConnsCfg] = actionsConns
+		initialMap[utils.ActionSConnsCfg] = getInternalJSONConns(aCfg.ActionSConns)
 	}
 	if aCfg.AttributeSConns != nil {
-		attributeSConns := make([]string, len(aCfg.AttributeSConns))
-		for i, item := range aCfg.AttributeSConns {
-			attributeSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMap[utils.AttributeSConnsCfg] = attributeSConns
+		initialMap[utils.AttributeSConnsCfg] = getInternalJSONConns(aCfg.AttributeSConns)
 	}
 	if aCfg.EEsConns != nil {
-		eesConns := make([]string, len(aCfg.EEsConns))
-		for i, item := range aCfg.EEsConns {
-			eesConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
-				eesConns[i] = utils.MetaInternal
-			}
-		}
-		initialMap[utils.EEsConnsCfg] = eesConns
+		initialMap[utils.EEsConnsCfg] = getInternalJSONConns(aCfg.EEsConns)
 	}
 	return
 }
@@ -135,28 +79,46 @@ func (aCfg AdminSCfg) Clone() (cln *AdminSCfg) {
 		Enabled: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {
-		cln.CachesConns = make([]string, len(aCfg.CachesConns))
-		for i, k := range aCfg.CachesConns {
-			cln.CachesConns[i] = k
-		}
+		cln.CachesConns = utils.CloneStringSlice(aCfg.CachesConns)
 	}
 	if aCfg.ActionSConns != nil {
-		cln.ActionSConns = make([]string, len(aCfg.ActionSConns))
-		for i, k := range aCfg.ActionSConns {
-			cln.ActionSConns[i] = k
-		}
+		cln.ActionSConns = utils.CloneStringSlice(aCfg.ActionSConns)
 	}
 	if aCfg.AttributeSConns != nil {
-		cln.AttributeSConns = make([]string, len(aCfg.AttributeSConns))
-		for i, k := range aCfg.AttributeSConns {
-			cln.AttributeSConns[i] = k
-		}
+		cln.AttributeSConns = utils.CloneStringSlice(aCfg.AttributeSConns)
 	}
 	if aCfg.EEsConns != nil {
-		cln.EEsConns = make([]string, len(aCfg.EEsConns))
-		for i, k := range aCfg.EEsConns {
-			cln.EEsConns[i] = k
-		}
+		cln.EEsConns = utils.CloneStringSlice(aCfg.EEsConns)
 	}
 	return
+}
+
+type AdminSJsonCfg struct {
+	Enabled          *bool
+	Caches_conns     *[]string
+	Actions_conns    *[]string
+	Attributes_conns *[]string
+	Ees_conns        *[]string
+}
+
+func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 AdminSCfg) *AdminSJsonCfg {
+	if d == nil {
+		d = new(AdminSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.CachesConns, v2.CachesConns) {
+		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CachesConns))
+	}
+	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+	}
+	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+	}
+	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+	}
+	return d
 }

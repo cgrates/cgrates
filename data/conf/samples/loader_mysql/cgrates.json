@@ -109,7 +109,7 @@
 
 
 "filters": {								
-	"apiers_conns": ["*internal"],
+	"admins_conns": ["*internal"],
 },
 
 "loader": {											// loader for tariff plans out of .csv files

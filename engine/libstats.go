@@ -255,7 +255,7 @@ func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils
 	var pass bool
 	// recreate the request without *opts
 	dDP := newDynamicDP(context.TODO(), config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
-		config.CgrConfig().FilterSCfg().ApierSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]})
+		config.CgrConfig().FilterSCfg().AdminSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]})
 	for metricID, metric := range sq.SQMetrics {
 		if pass, err = filterS.Pass(context.TODO(), tnt, metric.GetFilterIDs(),
 			evNm); err != nil {

@@ -1185,12 +1185,12 @@ func TestConfigSanityFilterS(t *testing.T) {
 	}
 	cfg.filterSCfg.ResourceSConns = []string{}
 
-	cfg.filterSCfg.ApierSConns = []string{utils.MetaInternal}
+	cfg.filterSCfg.AdminSConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AdminS> not enabled but requested by <FilterS> component" {
 		t.Error(err)
 	}
-	cfg.filterSCfg.ApierSConns = []string{"test"}
+	cfg.filterSCfg.AdminSConns = []string{"test"}
 	expected = "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
