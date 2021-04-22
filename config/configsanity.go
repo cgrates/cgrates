@@ -662,7 +662,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
 		}
 	}
-	for _, connID := range cfg.filterSCfg.ApierSConns {
+	for _, connID := range cfg.filterSCfg.AdminSConns {
 		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.admS.Enabled {
 			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AdminS, utils.FilterS)
 		}

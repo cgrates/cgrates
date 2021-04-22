@@ -47,24 +47,15 @@ func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 	if jsnCfg.Enabled != nil {
 		eeS.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Cache != nil {
-		for kJsn, vJsn := range *jsnCfg.Cache {
-			val := new(CacheParamCfg)
-			if err := val.loadFromJSONCfg(vJsn); err != nil {
-				return err
-			}
-			eeS.Cache[kJsn] = val
+	for kJsn, vJsn := range jsnCfg.Cache {
+		val := new(CacheParamCfg)
+		if err := val.loadFromJSONCfg(vJsn); err != nil {
+			return err
 		}
+		eeS.Cache[kJsn] = val
 	}
 	if jsnCfg.Attributes_conns != nil {
-		eeS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for i, fID := range *jsnCfg.Attributes_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			eeS.AttributeSConns[i] = fID
-			if fID == utils.MetaInternal {
-				eeS.AttributeSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			}
-		}
+		eeS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates, sep, dfltExpCfg)
 }
@@ -124,14 +115,7 @@ func (eeS *EEsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 		utils.EnabledCfg: eeS.Enabled,
 	}
 	if eeS.AttributeSConns != nil {
-		attributeSConns := make([]string, len(eeS.AttributeSConns))
-		for i, item := range eeS.AttributeSConns {
-			attributeSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(eeS.AttributeSConns)
 	}
 	if eeS.Cache != nil {
 		cache := make(map[string]interface{}, len(eeS.Cache))
@@ -464,7 +448,7 @@ func diffEventExportersJsonCfg(d *[]*EventExporterJsonCfg, v1, v2 []*EventExport
 type EEsJsonCfg struct {
 	Enabled          *bool
 	Attributes_conns *[]string
-	Cache            *map[string]*CacheParamJsonCfg
+	Cache            map[string]*CacheParamJsonCfg
 	Exporters        *[]*EventExporterJsonCfg
 }
 
@@ -476,8 +460,9 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg, separator string) *EEsJsonCfg
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = &v2.AttributeSConns
+		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
+	d.Cache = diffCacheParamsJsonCfg(d.Cache, v1.Cache, v2.Cache)
 	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters, separator)
 	return d
 }

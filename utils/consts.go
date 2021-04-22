@@ -441,6 +441,7 @@ const (
 	ServiceAlreadyRunning    = "service already running"
 	RunningCaps              = "RUNNING"
 	StoppedCaps              = "STOPPED"
+	MetaAdminS               = "*admins"
 	MetaReplicator           = "*replicator"
 	MetaRerate               = "*rerate"
 	MetaRefund               = "*refund"
@@ -749,7 +750,6 @@ const (
 	Flags                 = "Flags"
 	Service               = "Service"
 	ApierV                = "ApierV"
-	MetaApier             = "*apier"
 	MetaAnalyzer          = "*analyzer"
 	CGREventString        = "CGREvent"
 	MetaTextPlain         = "*text_plain"
@@ -1857,7 +1857,7 @@ const (
 const (
 	StatSConnsCfg     = "stats_conns"
 	ResourceSConnsCfg = "resources_conns"
-	ApierSConnsCfg    = "apiers_conns"
+	AdminSConnsCfg    = "admins_conns"
 )
 
 const (

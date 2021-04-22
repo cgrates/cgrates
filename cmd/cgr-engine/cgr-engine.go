@@ -517,7 +517,7 @@ func main() {
 	// because we need to pass the connection to it
 	connManager := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAdminSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS):         internalAdminSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,

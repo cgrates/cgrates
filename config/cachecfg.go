@@ -96,14 +96,12 @@ func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.Partitions != nil {
-		for kJsn, vJsn := range *jsnCfg.Partitions {
-			val := new(CacheParamCfg)
-			if err := val.loadFromJSONCfg(vJsn); err != nil {
-				return err
-			}
-			cCfg.Partitions[kJsn] = val
+	for kJsn, vJsn := range jsnCfg.Partitions {
+		val := new(CacheParamCfg)
+		if err := val.loadFromJSONCfg(vJsn); err != nil {
+			return err
 		}
+		cCfg.Partitions[kJsn] = val
 	}
 	if jsnCfg.Replication_conns != nil {
 		cCfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
@@ -166,7 +164,7 @@ type CacheParamJsonCfg struct {
 	Replicate  *bool
 }
 
-func diffCacheParamJsonCfg(d *CacheParamJsonCfg, v1, v2 *CacheParamCfg, separator string) *CacheParamJsonCfg {
+func diffCacheParamJsonCfg(d *CacheParamJsonCfg, v1, v2 *CacheParamCfg) *CacheParamJsonCfg {
 	if d == nil {
 		d = new(CacheParamJsonCfg)
 	}
@@ -188,10 +186,32 @@ func diffCacheParamJsonCfg(d *CacheParamJsonCfg, v1, v2 *CacheParamCfg, separato
 	return d
 }
 
-// func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v1, v2 map[string]*CacheParamCfg, separator string) map[string]*CacheParamJsonCfg {
-// 	if d == nil {
-// 		d = make(map[string]*CacheParamJsonCfg)
-// 	}
-// 	for
-// 	return d
-// }
+func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v1, v2 map[string]*CacheParamCfg) map[string]*CacheParamJsonCfg {
+	if d == nil {
+		d = make(map[string]*CacheParamJsonCfg)
+	}
+	for k, val2 := range v2 {
+		val1, has := v1[k]
+		if !has || val1 == nil {
+			val1 = new(CacheParamCfg)
+		}
+		d[k] = diffCacheParamJsonCfg(d[k], val1, val2)
+	}
+	return d
+}
+
+type CacheJsonCfg struct {
+	Partitions        map[string]*CacheParamJsonCfg
+	Replication_conns *[]string
+}
+
+func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 CacheCfg) *CacheJsonCfg {
+	if d == nil {
+		d = new(CacheJsonCfg)
+	}
+	d.Partitions = diffCacheParamsJsonCfg(d.Partitions, v1.Partitions, v2.Partitions)
+	if !utils.SliceStringEqual(v1.ReplicationConns, v2.ReplicationConns) {
+		d.Replication_conns = &v2.ReplicationConns
+	}
+	return d
+}

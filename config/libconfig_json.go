@@ -20,6 +20,9 @@ package config
 
 import (
 	"encoding/json"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // SessionSJsonCfg config section
@@ -107,11 +110,6 @@ type AsteriskAgentJsonCfg struct {
 	Asterisk_conns *[]*AstConnJsonCfg
 }
 
-type CacheJsonCfg struct {
-	Partitions        *map[string]*CacheParamJsonCfg
-	Replication_conns *[]string
-}
-
 // SM-Kamailio config section
 type KamAgentJsonCfg struct {
 	Enabled        *bool
@@ -194,20 +192,6 @@ type ReqProcessorJsnCfg struct {
 	Flags          *[]string
 	Request_fields *[]*FcTemplateJsonCfg
 	Reply_fields   *[]*FcTemplateJsonCfg
-}
-
-// Attribute service config section
-type AttributeSJsonCfg struct {
-	Enabled               *bool
-	Stats_conns           *[]string
-	Resources_conns       *[]string
-	Apiers_conns          *[]string
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Process_runs          *int
 }
 
 // ChargerSJsonCfg service config section
@@ -391,14 +375,6 @@ type AnalyzerSJsonCfg struct {
 	Cleanup_interval *string
 }
 
-type AdminSJsonCfg struct {
-	Enabled          *bool
-	Caches_conns     *[]string
-	Actions_conns    *[]string
-	Attributes_conns *[]string
-	Ees_conns        *[]string
-}
-
 type STIRJsonCfg struct {
 	Allowed_attest      *[]string
 	Payload_maxduration *string
@@ -439,18 +415,6 @@ type ConfigSCfgJson struct {
 	Root_dir *string
 }
 
-type APIBanJsonCfg struct {
-	Enabled *bool
-	Keys    *[]string
-}
-
-type CoreSJsonCfg struct {
-	Caps                *int
-	Caps_strategy       *string
-	Caps_stats_interval *string
-	Shutdown_timeout    *string
-}
-
 // Action service config section
 type ActionSJsonCfg struct {
 	Enabled               *bool
@@ -480,4 +444,29 @@ type AccountSJsonCfg struct {
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Max_iterations        *int
 	Max_usage             *string
+}
+
+// updateInternalConns updates the connection list by specifying the subsystem for internal connections
+func updateInternalConns(conns []string, subsystem string) (c []string) {
+	subsystem = utils.MetaInternal + utils.ConcatenatedKeySep + subsystem
+	c = make([]string, len(conns))
+	for i, conn := range conns {
+		c[i] = conn
+		// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+		if conn == utils.MetaInternal {
+			c[i] = subsystem
+		}
+	}
+	return
+}
+
+func getInternalJSONConns(conns []string) (c []string) {
+	c = make([]string, len(conns))
+	for i, conn := range conns {
+		c[i] = conn
+		if strings.HasPrefix(conn, utils.MetaInternal) {
+			c[i] = utils.MetaInternal
+		}
+	}
+	return
 }

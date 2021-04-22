@@ -81,3 +81,29 @@ func (cS CoreSCfg) Clone() *CoreSCfg {
 		ShutdownTimeout:   cS.ShutdownTimeout,
 	}
 }
+
+type CoreSJsonCfg struct {
+	Caps                *int
+	Caps_strategy       *string
+	Caps_stats_interval *string
+	Shutdown_timeout    *string
+}
+
+func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 CoreSCfg) *CoreSJsonCfg {
+	if d == nil {
+		d = new(CoreSJsonCfg)
+	}
+	if v1.Caps != v2.Caps {
+		d.Caps = utils.IntPointer(v2.Caps)
+	}
+	if v1.CapsStrategy != v2.CapsStrategy {
+		d.Caps_strategy = utils.StringPointer(v2.CapsStrategy)
+	}
+	if v1.CapsStatsInterval != v2.CapsStatsInterval {
+		d.Caps_stats_interval = utils.StringPointer(v2.CapsStatsInterval.String())
+	}
+	if v1.ShutdownTimeout != v2.ShutdownTimeout {
+		d.Shutdown_timeout = utils.StringPointer(v2.ShutdownTimeout.String())
+	}
+	return d
+}

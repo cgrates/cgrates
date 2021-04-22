@@ -84,7 +84,7 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 
 func TestCacheJsonCfg(t *testing.T) {
 	eCfg := &CacheJsonCfg{
-		Partitions: &map[string]*CacheParamJsonCfg{
+		Partitions: map[string]*CacheParamJsonCfg{
 			utils.CacheDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -781,7 +781,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		Stats_conns:           &[]string{},
 		Resources_conns:       &[]string{},
-		Apiers_conns:          &[]string{},
+		Admins_conns:          &[]string{},
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
@@ -825,7 +825,7 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns:     &[]string{},
 		Resources_conns: &[]string{},
-		Apiers_conns:    &[]string{},
+		Admins_conns:    &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -1934,7 +1934,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 	eCfg := &EEsJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Attributes_conns: &[]string{},
-		Cache: &map[string]*CacheParamJsonCfg{
+		Cache: map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-1),
 				Ttl:        utils.StringPointer("5s"),

@@ -47,7 +47,7 @@
 "filters": {								
 	"stats_conns": ["conn1"],
 	"resources_conns": ["conn1"],
-	"apiers_conns": ["conn1"],
+	"admins_conns": ["conn1"],
 },
 
 

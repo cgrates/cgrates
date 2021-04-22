@@ -52,7 +52,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 
 func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &CacheJsonCfg{
-		Partitions: &map[string]*CacheParamJsonCfg{
+		Partitions: map[string]*CacheParamJsonCfg{
 			utils.MetaDestinations: {
 				Limit:      utils.IntPointer(10),
 				Ttl:        utils.StringPointer("2"),
@@ -120,7 +120,7 @@ func TestCacheParamCfgloadFromJsonCfg1(t *testing.T) {
 
 func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
 	jsonCfg := &CacheJsonCfg{
-		Partitions: &map[string]*CacheParamJsonCfg{
+		Partitions: map[string]*CacheParamJsonCfg{
 			utils.MetaDestinations: {
 				Ttl: utils.StringPointer("1ss"),
 			},

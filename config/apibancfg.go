@@ -52,12 +52,26 @@ func (ban *APIBanCfg) AsMapInterface() map[string]interface{} {
 
 // Clone returns a deep copy of APIBanCfg
 func (ban APIBanCfg) Clone() (cln *APIBanCfg) {
-	cln = &APIBanCfg{
+	return &APIBanCfg{
 		Enabled: ban.Enabled,
-		Keys:    make([]string, len(ban.Keys)),
+		Keys:    utils.CloneStringSlice(ban.Keys),
 	}
-	for i, k := range ban.Keys {
-		cln.Keys[i] = k
+}
+
+type APIBanJsonCfg struct {
+	Enabled *bool
+	Keys    *[]string
+}
+
+func diffAPIBanJsonCfg(d *APIBanJsonCfg, v1, v2 APIBanCfg) *APIBanJsonCfg {
+	if d == nil {
+		d = new(APIBanJsonCfg)
 	}
-	return
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.Keys, v2.Keys) {
+		d.Keys = &v2.Keys
+	}
+	return d
 }
