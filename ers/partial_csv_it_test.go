@@ -23,7 +23,6 @@ package ers
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"net/rpc"
 	"os"
@@ -632,9 +631,8 @@ func TestPartialCSVProcessEvent(t *testing.T) {
 	}
 	eR.conReqs <- struct{}{}
 	fname := "file1.csv"
-	errExpect := io.EOF
-	if err := eR.processFile(filePath, fname); err == nil || err != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
 		t.Error(err)
@@ -655,6 +653,132 @@ func TestPartialCSVProcessEvent(t *testing.T) {
 	}
 	eR.Config().ProcessedPath = "/tmp"
 	eR.dumpToFile("ID1", value)
+}
+
+func TestPartialCSVProcessEventPrefix(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	cfg.ERsCfg().Readers[0].HeaderDefineChar = ":"
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`:Test,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m
+	:Test2,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	fname := "file1.csv"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPartialCSVProcessEventError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{},
+	}
+
+	errExpect := "unsupported type: <>"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPartialCSVProcessEventError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	//
+	eR.Config().Filters = []string{"*exists:~*req..Account:"}
+	errExpect = "Invalid fieldPath [ Account]"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestPartialCSVDumpToFileErr1(t *testing.T) {

@@ -552,7 +552,7 @@ func TestFileCSVProcessEventError2(t *testing.T) {
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
 	}
-	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	file, err := os.Create(path.Join(filePath, fname))
 	if err != nil {
 		t.Error(err)
 	}
