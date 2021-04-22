@@ -40,89 +40,38 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
-	if jsnCfg.Cdrs_conns != nil {
-		acS.CDRsConns = make([]string, len(*jsnCfg.Cdrs_conns))
-		for idx, connID := range *jsnCfg.Cdrs_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			acS.CDRsConns[idx] = connID
-			if connID == utils.MetaInternal {
-				acS.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
-			}
-		}
-	}
-	if jsnCfg.Ees_conns != nil {
-		acS.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
-		for idx, connID := range *jsnCfg.Ees_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			acS.EEsConns[idx] = connID
-			if connID == utils.MetaInternal {
-				acS.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
-			}
-		}
-	}
-	if jsnCfg.Thresholds_conns != nil {
-		acS.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
-		for idx, connID := range *jsnCfg.Thresholds_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			acS.ThresholdSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				acS.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			}
-		}
-	}
-	if jsnCfg.Stats_conns != nil {
-		acS.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
-		for idx, connID := range *jsnCfg.Stats_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			acS.StatSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				acS.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
-			}
-		}
-	}
-	if jsnCfg.Accounts_conns != nil {
-		acS.AccountSConns = make([]string, len(*jsnCfg.Accounts_conns))
-		for idx, connID := range *jsnCfg.Accounts_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			acS.AccountSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				acS.AccountSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)
-			}
-		}
-	}
 	if jsnCfg.Enabled != nil {
 		acS.Enabled = *jsnCfg.Enabled
 	}
+	if jsnCfg.Cdrs_conns != nil {
+		acS.CDRsConns = updateInternalConns(*jsnCfg.Cdrs_conns, utils.MetaCDRs)
+	}
+	if jsnCfg.Ees_conns != nil {
+		acS.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	}
+	if jsnCfg.Thresholds_conns != nil {
+		acS.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+	}
+	if jsnCfg.Stats_conns != nil {
+		acS.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+	}
+	if jsnCfg.Accounts_conns != nil {
+		acS.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+	}
 	if jsnCfg.Tenants != nil {
-		tnt := make([]string, len(*jsnCfg.Tenants))
-		for i, fID := range *jsnCfg.Tenants {
-			tnt[i] = fID
-		}
-		acS.Tenants = &tnt
+		acS.Tenants = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Tenants))
 	}
 	if jsnCfg.Indexed_selects != nil {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		acS.StringIndexedFields = &sif
+		acS.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		acS.PrefixIndexedFields = &pif
+		acS.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		acS.SuffixIndexedFields = &sif
+		acS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		acS.NestedFields = *jsnCfg.Nested_fields
@@ -138,82 +87,31 @@ func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.NestedFieldsCfg:   acS.NestedFields,
 	}
 	if acS.CDRsConns != nil {
-		CDRsConns := make([]string, len(acS.CDRsConns))
-		for i, item := range acS.CDRsConns {
-			CDRsConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs) {
-				CDRsConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.CDRsConnsCfg] = CDRsConns
+		initialMP[utils.CDRsConnsCfg] = getInternalJSONConns(acS.CDRsConns)
 	}
 	if acS.ThresholdSConns != nil {
-		threshSConns := make([]string, len(acS.ThresholdSConns))
-		for i, item := range acS.ThresholdSConns {
-			threshSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				threshSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ThresholdSConnsCfg] = threshSConns
+		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
 	}
 	if acS.StatSConns != nil {
-		statSConns := make([]string, len(acS.StatSConns))
-		for i, item := range acS.StatSConns {
-			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
-				statSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.StatSConnsCfg] = statSConns
+		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(acS.StatSConns)
 	}
 	if acS.AccountSConns != nil {
-		accountSConns := make([]string, len(acS.AccountSConns))
-		for i, item := range acS.AccountSConns {
-			accountSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
-				accountSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.AccountSConnsCfg] = accountSConns
+		initialMP[utils.AccountSConnsCfg] = getInternalJSONConns(acS.AccountSConns)
 	}
 	if acS.EEsConns != nil {
-		eesConns := make([]string, len(acS.EEsConns))
-		for i, item := range acS.EEsConns {
-			eesConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
-				eesConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.EEsConnsCfg] = eesConns
+		initialMP[utils.EEsConnsCfg] = getInternalJSONConns(acS.EEsConns)
 	}
 	if acS.Tenants != nil {
-		Tenants := make([]string, len(*acS.Tenants))
-		for i, item := range *acS.Tenants {
-			Tenants[i] = item
-		}
-		initialMP[utils.Tenants] = Tenants
+		initialMP[utils.Tenants] = utils.CloneStringSlice(*acS.Tenants)
 	}
 	if acS.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*acS.StringIndexedFields))
-		for i, item := range *acS.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*acS.StringIndexedFields)
 	}
 	if acS.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*acS.PrefixIndexedFields))
-		for i, item := range *acS.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.PrefixIndexedFields)
 	}
 	if acS.SuffixIndexedFields != nil {
-		suffixIndexedFields := make([]string, len(*acS.SuffixIndexedFields))
-		for i, item := range *acS.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*acS.SuffixIndexedFields)
 	}
 	return
 }
@@ -226,62 +124,91 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 		NestedFields:   acS.NestedFields,
 	}
 	if acS.CDRsConns != nil {
-		cln.CDRsConns = make([]string, len(acS.CDRsConns))
-		for i, con := range acS.CDRsConns {
-			cln.CDRsConns[i] = con
-		}
+		cln.CDRsConns = utils.CloneStringSlice(acS.CDRsConns)
 	}
 	if acS.ThresholdSConns != nil {
-		cln.ThresholdSConns = make([]string, len(acS.ThresholdSConns))
-		for i, con := range acS.ThresholdSConns {
-			cln.ThresholdSConns[i] = con
-		}
+		cln.ThresholdSConns = utils.CloneStringSlice(acS.ThresholdSConns)
 	}
 	if acS.StatSConns != nil {
-		cln.StatSConns = make([]string, len(acS.StatSConns))
-		for i, con := range acS.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		cln.StatSConns = utils.CloneStringSlice(acS.StatSConns)
 	}
 	if acS.AccountSConns != nil {
-		cln.AccountSConns = make([]string, len(acS.AccountSConns))
-		for i, con := range acS.AccountSConns {
-			cln.AccountSConns[i] = con
-		}
+		cln.AccountSConns = utils.CloneStringSlice(acS.AccountSConns)
 	}
 	if acS.EEsConns != nil {
-		cln.EEsConns = make([]string, len(acS.EEsConns))
-		for i, k := range acS.EEsConns {
-			cln.EEsConns[i] = k
-		}
+		cln.EEsConns = utils.CloneStringSlice(acS.EEsConns)
 	}
 	if acS.Tenants != nil {
-		tnt := make([]string, len(*acS.Tenants))
-		for i, dx := range *acS.Tenants {
-			tnt[i] = dx
-		}
-		cln.Tenants = &tnt
+		cln.Tenants = utils.SliceStringPointer(utils.CloneStringSlice(*acS.Tenants))
 	}
 	if acS.StringIndexedFields != nil {
-		idx := make([]string, len(*acS.StringIndexedFields))
-		for i, dx := range *acS.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.StringIndexedFields))
 	}
 	if acS.PrefixIndexedFields != nil {
-		idx := make([]string, len(*acS.PrefixIndexedFields))
-		for i, dx := range *acS.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.PrefixIndexedFields))
 	}
 	if acS.SuffixIndexedFields != nil {
-		idx := make([]string, len(*acS.SuffixIndexedFields))
-		for i, dx := range *acS.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.SuffixIndexedFields))
 	}
 	return
+}
+
+// Action service config section
+type ActionSJsonCfg struct {
+	Enabled               *bool
+	Cdrs_conns            *[]string
+	Ees_conns             *[]string
+	Thresholds_conns      *[]string
+	Stats_conns           *[]string
+	Accounts_conns        *[]string
+	Tenants               *[]string
+	Indexed_selects       *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+}
+
+func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
+	if d == nil {
+		d = new(ActionSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.CDRsConns, v2.CDRsConns) {
+		d.Cdrs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CDRsConns))
+	}
+	if !utils.SliceStringEqual(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+	}
+	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+	}
+	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+	}
+	if !utils.SliceStringEqual(v1.AccountSConns, v2.AccountSConns) {
+		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+	}
+
+	if v1.Tenants != v2.Tenants {
+		d.Tenants = utils.SliceStringPointer(utils.CloneStringSlice(*v2.Tenants))
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	if v1.StringIndexedFields != v2.StringIndexedFields {
+		d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	}
+	if v1.PrefixIndexedFields != v2.PrefixIndexedFields {
+		d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	}
+	if v1.SuffixIndexedFields != v2.SuffixIndexedFields {
+		d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	}
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	return d
 }

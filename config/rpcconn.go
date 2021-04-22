@@ -28,8 +28,7 @@ func NewDfltRemoteHost() *RemoteHost {
 	if dfltRemoteHost == nil {
 		return new(RemoteHost) // No defaults, most probably we are building the defaults now
 	}
-	dfltVal := *dfltRemoteHost // Copy the value instead of it's pointer
-	return &dfltVal
+	return dfltRemoteHost.Clone()
 }
 
 // NewDfltRPCConn returns the default value for a RPCConn
@@ -214,4 +213,99 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 		}
 	}
 	return
+}
+
+// Represents one connection instance towards a rater/cdrs server
+type RemoteHostJson struct {
+	Id          *string
+	Address     *string
+	Transport   *string
+	Synchronous *bool
+	Tls         *bool
+}
+
+func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
+	d = new(RemoteHostJson)
+	if v1.ID != v2.ID {
+		d.Id = utils.StringPointer(v2.ID)
+	}
+	if v1.Address != v2.Address {
+		d.Address = utils.StringPointer(v2.Address)
+	}
+	if v1.Transport != v2.Transport {
+		d.Transport = utils.StringPointer(v2.Transport)
+	}
+	if v1.Synchronous != v2.Synchronous {
+		d.Synchronous = utils.BoolPointer(v2.Synchronous)
+	}
+	if v1.TLS != v2.TLS {
+		d.Tls = utils.BoolPointer(v2.TLS)
+	}
+	return
+}
+
+type RPCConnJson struct {
+	Strategy *string
+	PoolSize *int
+	Conns    *[]*RemoteHostJson
+}
+
+func diffRPCConnJson(d *RPCConnJson, v1, v2 *RPCConn) *RPCConnJson {
+	if d == nil {
+		d = new(RPCConnJson)
+	}
+	if v1.Strategy != v2.Strategy {
+		d.Strategy = utils.StringPointer(v2.Strategy)
+	}
+	if v1.PoolSize != v2.PoolSize {
+		d.PoolSize = utils.IntPointer(v2.PoolSize)
+	}
+	if v2.Conns != nil {
+		conns := make([]*RemoteHostJson, len(v2.Conns))
+		dft := NewDfltRemoteHost()
+		for i, conn := range v2.Conns {
+			conns[i] = diffRemoteHostJson(dft, conn)
+		}
+		d.Conns = &conns
+	}
+	return d
+}
+
+func equalsRemoteHosts(v1, v2 []*RemoteHost) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v2 {
+		if v1[i].ID != v2[i].ID ||
+			v1[i].Address != v2[i].Address ||
+			v1[i].Transport != v2[i].Transport ||
+			v1[i].Synchronous != v2[i].Synchronous ||
+			v1[i].TLS != v2[i].TLS {
+			return false
+		}
+	}
+	return true
+}
+
+func equalsRPCConn(v1, v2 *RPCConn) bool {
+	return (v1 == nil && v2 == nil) ||
+		(v1 != nil && v2 != nil &&
+			v1.Strategy == v2.Strategy &&
+			v1.PoolSize == v2.PoolSize &&
+			equalsRemoteHosts(v1.Conns, v2.Conns))
+}
+
+type RPCConnsJson map[string]*RPCConnJson
+
+func diffRPCConnsJson(d RPCConnsJson, v1, v2 RPCConns) RPCConnsJson {
+	if d == nil {
+		d = make(RPCConnsJson)
+	}
+	dft := NewDfltRPCConn()
+	for k, val := range v2 {
+		if !equalsRPCConn(v1[k], val) {
+			d[k] = diffRPCConnJson(d[k], dft, val)
+		}
+	}
+	return d
 }

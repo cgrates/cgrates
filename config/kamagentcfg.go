@@ -20,7 +20,6 @@ package config
 
 import (
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDfltKamConnConfig returns the first cached default value for a KamConnCfg connection
@@ -28,8 +27,7 @@ func NewDfltKamConnConfig() *KamConnCfg {
 	if dfltKamConnConfig == nil {
 		return new(KamConnCfg) // No defaults, most probably we are building the defaults now
 	}
-	dfltVal := *dfltKamConnConfig
-	return &dfltVal
+	return dfltKamConnConfig.Clone()
 }
 
 // KamConnCfg represents one connection instance towards Kamailio
@@ -90,15 +88,7 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ka.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, attrConn := range *jsnCfg.Sessions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			ka.SessionSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal ||
-				attrConn == rpcclient.BiRPCInternal {
-				ka.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
-			}
-		}
+		ka.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Create_cdr != nil {
 		ka.CreateCdr = *jsnCfg.Create_cdr
@@ -131,16 +121,7 @@ func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.EvapiConnsCfg] = evapiConns
 	}
 	if ka.SessionSConns != nil {
-		sessionSConns := make([]string, len(ka.SessionSConns))
-		for i, item := range ka.SessionSConns {
-			sessionSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = utils.MetaInternal
-			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
-				sessionSConns[i] = rpcclient.BiRPCInternal
-			}
-		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ka.SessionSConns)
 	}
 	return
 }
@@ -153,10 +134,7 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 		Timezone:  ka.Timezone,
 	}
 	if ka.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(ka.SessionSConns))
-		for i, con := range ka.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		cln.SessionSConns = utils.CloneStringSlice(ka.SessionSConns)
 	}
 	if ka.EvapiConns != nil {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
@@ -165,4 +143,75 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 		}
 	}
 	return
+}
+
+// Represents one connection instance towards Kamailio
+type KamConnJsonCfg struct {
+	Alias      *string
+	Address    *string
+	Reconnects *int
+}
+
+func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
+	d = new(KamConnJsonCfg)
+	if v1.Alias != v2.Alias {
+		d.Alias = utils.StringPointer(v2.Alias)
+	}
+	if v1.Address != v2.Address {
+		d.Address = utils.StringPointer(v2.Address)
+	}
+	if v1.Reconnects != v2.Reconnects {
+		d.Reconnects = utils.IntPointer(v2.Reconnects)
+	}
+	return
+}
+
+// KamAgentJsonCfg kamailio config section
+type KamAgentJsonCfg struct {
+	Enabled        *bool
+	Sessions_conns *[]string
+	Create_cdr     *bool
+	Evapi_conns    *[]*KamConnJsonCfg
+	Timezone       *string
+}
+
+func equalsKamConnsCfg(v1, v2 []*KamConnCfg) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v2 {
+		if v1[i].Alias != v2[i].Alias ||
+			v1[i].Address != v2[i].Address ||
+			v1[i].Reconnects != v2[i].Reconnects {
+			return false
+		}
+	}
+	return true
+}
+
+func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonCfg {
+	if d == nil {
+		d = new(KamAgentJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+	}
+	if v1.CreateCdr != v2.CreateCdr {
+		d.Create_cdr = utils.BoolPointer(v2.CreateCdr)
+	}
+	if !equalsKamConnsCfg(v1.EvapiConns, v2.EvapiConns) {
+		dft := NewDfltKamConnConfig()
+		conns := make([]*KamConnJsonCfg, len(v2.EvapiConns))
+		for i, conn := range v2.EvapiConns {
+			conns[i] = diffKamConnJsonCfg(dft, conn)
+		}
+		d.Evapi_conns = &conns
+	}
+	if v1.Timezone != v2.Timezone {
+		d.Timezone = utils.StringPointer(v2.Timezone)
+	}
+	return d
 }

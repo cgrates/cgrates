@@ -26,63 +26,6 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-type RPCConnsJson map[string]*RPCConnJson
-type RPCConnJson struct {
-	Strategy *string
-	PoolSize *int
-	Conns    *[]*RemoteHostJson
-}
-
-// Represents one connection instance towards a rater/cdrs server
-type RemoteHostJson struct {
-	Id          *string
-	Address     *string
-	Transport   *string
-	Synchronous *bool
-	Tls         *bool
-}
-
-// SM-Kamailio config section
-type KamAgentJsonCfg struct {
-	Enabled        *bool
-	Sessions_conns *[]string
-	Create_cdr     *bool
-	Evapi_conns    *[]*KamConnJsonCfg
-	Timezone       *string
-}
-
-// Represents one connection instance towards Kamailio
-type KamConnJsonCfg struct {
-	Alias      *string
-	Address    *string
-	Reconnects *int
-}
-
-// Represents one connection instance towards OpenSIPS
-type OsipsConnJsonCfg struct {
-	Mi_addr    *string
-	Reconnects *int
-}
-
-// DiameterAgent configuration
-type DiameterAgentJsonCfg struct {
-	Enabled              *bool
-	Listen               *string
-	Listen_net           *string
-	Dictionaries_path    *string
-	Sessions_conns       *[]string
-	Origin_host          *string
-	Origin_realm         *string
-	Vendor_id            *int
-	Product_name         *string
-	Concurrent_requests  *int
-	Synced_conn_requests *bool
-	Asr_template         *string
-	Rar_template         *string
-	Forced_disconnect    *string
-	Request_processors   *[]*ReqProcessorJsnCfg
-}
-
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
 	Enabled             *bool
@@ -114,16 +57,6 @@ type DNSAgentJsonCfg struct {
 	Sessions_conns     *[]string
 	Timezone           *string
 	Request_processors *[]*ReqProcessorJsnCfg
-}
-
-type ReqProcessorJsnCfg struct {
-	ID             *string
-	Filters        *[]string
-	Tenant         *string
-	Timezone       *string
-	Flags          *[]string
-	Request_fields *[]*FcTemplateJsonCfg
-	Reply_fields   *[]*FcTemplateJsonCfg
 }
 
 // ChargerSJsonCfg service config section
@@ -337,37 +270,6 @@ type ConfigSCfgJson struct {
 	Enabled  *bool
 	Url      *string
 	Root_dir *string
-}
-
-// Action service config section
-type ActionSJsonCfg struct {
-	Enabled               *bool
-	Cdrs_conns            *[]string
-	Ees_conns             *[]string
-	Thresholds_conns      *[]string
-	Stats_conns           *[]string
-	Accounts_conns        *[]string
-	Tenants               *[]string
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-}
-
-// Account service config section
-type AccountSJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	Attributes_conns      *[]string
-	Rates_conns           *[]string
-	Thresholds_conns      *[]string
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
-	Max_iterations        *int
-	Max_usage             *string
 }
 
 // updateInternalConns updates the connection list by specifying the subsystem for internal connections

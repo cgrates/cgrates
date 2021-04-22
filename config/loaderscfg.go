@@ -29,8 +29,7 @@ func NewDfltLoaderSCfg() *LoaderSCfg {
 	if dfltLoaderConfig == nil {
 		return new(LoaderSCfg)
 	}
-	dfltVal := *dfltLoaderConfig
-	return &dfltVal
+	return dfltLoaderConfig.Clone()
 }
 
 // LoaderSCfgs to export some methods for LoaderS profiles
@@ -196,7 +195,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		DryRun:         l.DryRun,
 		RunDelay:       l.RunDelay,
 		LockFileName:   l.LockFileName,
-		CacheSConns:    make([]string, len(l.CacheSConns)),
+		CacheSConns:    utils.CloneStringSlice(l.CacheSConns),
 		FieldSeparator: l.FieldSeparator,
 		TpInDir:        l.TpInDir,
 		TpOutDir:       l.TpOutDir,

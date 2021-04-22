@@ -20,7 +20,6 @@ package config
 
 import (
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // DiameterAgentCfg the config section that describes the Diameter Agent
@@ -59,15 +58,7 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 		da.DictionariesPath = *jsnCfg.Dictionaries_path
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, attrConn := range *jsnCfg.Sessions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			da.SessionSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal ||
-				attrConn == rpcclient.BiRPCInternal {
-				da.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
-			}
-		}
+		da.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Origin_host != nil {
 		da.OriginHost = *jsnCfg.Origin_host
@@ -143,16 +134,7 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 
 	if da.SessionSConns != nil {
-		sessionSConns := make([]string, len(da.SessionSConns))
-		for i, item := range da.SessionSConns {
-			sessionSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = utils.MetaInternal
-			} else if item == utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS) {
-				sessionSConns[i] = rpcclient.BiRPCInternal
-			}
-		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
 	}
 	return
 }
@@ -175,10 +157,7 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 		ForcedDisconnect: da.ForcedDisconnect,
 	}
 	if da.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(da.SessionSConns))
-		for i, con := range da.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		cln.SessionSConns = utils.CloneStringSlice(da.SessionSConns)
 	}
 	if da.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -187,4 +166,73 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 		}
 	}
 	return
+}
+
+// DiameterAgent configuration
+type DiameterAgentJsonCfg struct {
+	Enabled              *bool
+	Listen               *string
+	Listen_net           *string
+	Dictionaries_path    *string
+	Sessions_conns       *[]string
+	Origin_host          *string
+	Origin_realm         *string
+	Vendor_id            *int
+	Product_name         *string
+	Concurrent_requests  *int
+	Synced_conn_requests *bool
+	Asr_template         *string
+	Rar_template         *string
+	Forced_disconnect    *string
+	Request_processors   *[]*ReqProcessorJsnCfg
+}
+
+func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg, separator string) *DiameterAgentJsonCfg {
+	if d == nil {
+		d = new(DiameterAgentJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.ListenNet != v2.ListenNet {
+		d.Listen_net = utils.StringPointer(v2.ListenNet)
+	}
+	if v1.Listen != v2.Listen {
+		d.Listen = utils.StringPointer(v2.Listen)
+	}
+	if v1.DictionariesPath != v2.DictionariesPath {
+		d.Dictionaries_path = utils.StringPointer(v2.DictionariesPath)
+	}
+	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+	}
+	if v1.OriginHost != v2.OriginHost {
+		d.Origin_host = utils.StringPointer(v2.OriginHost)
+	}
+	if v1.OriginRealm != v2.OriginRealm {
+		d.Origin_realm = utils.StringPointer(v2.OriginRealm)
+	}
+	if v1.VendorID != v2.VendorID {
+		d.Vendor_id = utils.IntPointer(v2.VendorID)
+	}
+	if v1.ProductName != v2.ProductName {
+		d.Product_name = utils.StringPointer(v2.ProductName)
+	}
+	if v1.ConcurrentReqs != v2.ConcurrentReqs {
+		d.Concurrent_requests = utils.IntPointer(v2.ConcurrentReqs)
+	}
+	if v1.SyncedConnReqs != v2.SyncedConnReqs {
+		d.Synced_conn_requests = utils.BoolPointer(v2.SyncedConnReqs)
+	}
+	if v1.ASRTemplate != v2.ASRTemplate {
+		d.Asr_template = utils.StringPointer(v2.ASRTemplate)
+	}
+	if v1.RARTemplate != v2.RARTemplate {
+		d.Rar_template = utils.StringPointer(v2.RARTemplate)
+	}
+	if v1.ForcedDisconnect != v2.ForcedDisconnect {
+		d.Forced_disconnect = utils.StringPointer(v2.ForcedDisconnect)
+	}
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	return d
 }
