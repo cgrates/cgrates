@@ -139,15 +139,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 		l.LockFileName = *jsnCfg.Lock_filename
 	}
 	if jsnCfg.Caches_conns != nil {
-		l.CacheSConns = make([]string, len(*jsnCfg.Caches_conns))
-		for idx, connID := range *jsnCfg.Caches_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			if connID == utils.MetaInternal {
-				l.CacheSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			} else {
-				l.CacheSConns[idx] = connID
-			}
-		}
+		l.CacheSConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
 	if jsnCfg.Field_separator != nil {
 		l.FieldSeparator = *jsnCfg.Field_separator
@@ -201,9 +193,6 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 		TpOutDir:       l.TpOutDir,
 		Data:           make([]*LoaderDataType, len(l.Data)),
 	}
-	for idx, connID := range l.CacheSConns {
-		cln.CacheSConns[idx] = connID
-	}
 	for idx, fld := range l.Data {
 		cln.Data[idx] = fld.Clone()
 	}
@@ -250,14 +239,127 @@ func (l *LoaderSCfg) AsMapInterface(separator string) (initialMP map[string]inte
 		initialMP[utils.RunDelayCfg] = l.RunDelay.String()
 	}
 	if l.CacheSConns != nil {
-		cacheSConns := make([]string, len(l.CacheSConns))
-		for i, item := range l.CacheSConns {
-			cacheSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cacheSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.CachesConnsCfg] = cacheSConns
+		initialMP[utils.CachesConnsCfg] = getInternalJSONConns(l.CacheSConns)
 	}
 	return
+}
+
+type LoaderJsonDataType struct {
+	Type      *string
+	File_name *string
+	Flags     *[]string
+	Fields    *[]*FcTemplateJsonCfg
+}
+
+type LoaderJsonCfg struct {
+	ID              *string
+	Enabled         *bool
+	Tenant          *string
+	Dry_run         *bool
+	Run_delay       *string
+	Lock_filename   *string
+	Caches_conns    *[]string
+	Field_separator *string
+	Tp_in_dir       *string
+	Tp_out_dir      *string
+	Data            *[]*LoaderJsonDataType
+}
+
+func equalsLoaderDatasType(v1, v2 []*LoaderDataType) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v2 {
+		if v1[i].Type != v2[i].Type ||
+			v1[i].Filename != v2[i].Filename ||
+			!utils.SliceStringEqual(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
+			!fcTemplatesEqual(v1[i].Fields, v2[i].Fields) {
+			return false
+		}
+	}
+	return true
+}
+
+func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) {
+	d = new(LoaderJsonCfg)
+	if v1.ID != v2.ID {
+		d.ID = utils.StringPointer(v2.ID)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	tnt1 := v1.Tenant.GetRule(separator)
+	tnt2 := v2.Tenant.GetRule(separator)
+	if tnt1 != tnt2 {
+		d.Tenant = utils.StringPointer(tnt2)
+	}
+	if v1.DryRun != v2.DryRun {
+		d.Dry_run = utils.BoolPointer(v2.DryRun)
+	}
+	if v1.RunDelay != v2.RunDelay {
+		d.Run_delay = utils.StringPointer(v2.RunDelay.String())
+	}
+	if v1.LockFileName != v2.LockFileName {
+		d.Lock_filename = utils.StringPointer(v2.LockFileName)
+	}
+	if !utils.SliceStringEqual(v1.CacheSConns, v2.CacheSConns) {
+		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CacheSConns))
+	}
+	if v1.FieldSeparator != v2.FieldSeparator {
+		d.Field_separator = utils.StringPointer(v2.FieldSeparator)
+	}
+	if v1.TpInDir != v2.TpInDir {
+		d.Tp_in_dir = utils.StringPointer(v2.TpInDir)
+	}
+	if v1.TpOutDir != v2.TpOutDir {
+		d.Tp_out_dir = utils.StringPointer(v2.TpOutDir)
+	}
+	if !equalsLoaderDatasType(v1.Data, v2.Data) {
+		data := make([]*LoaderJsonDataType, len(v2.Data))
+		for i, val2 := range v2.Data {
+			var req []*FcTemplateJsonCfg
+			req = diffFcTemplateJsonCfg(req, nil, val2.Fields, separator)
+			data[i] = &LoaderJsonDataType{
+				Type:      utils.StringPointer(val2.Type),
+				File_name: utils.StringPointer(val2.Filename),
+				Flags:     utils.SliceStringPointer(val2.Flags.SliceFlags()),
+				Fields:    &req,
+			}
+		}
+		d.Data = &data
+	}
+	return
+}
+
+func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v2 {
+		if v1[i].ID != v2[i].ID ||
+			v1[i].Enabled != v2[i].Enabled ||
+			!utils.SliceStringEqual(v1[i].Tenant.AsStringSlice(), v2[i].Tenant.AsStringSlice()) ||
+			v1[i].DryRun != v2[i].DryRun ||
+			v1[i].RunDelay != v2[i].RunDelay ||
+			v1[i].LockFileName != v2[i].LockFileName ||
+			!utils.SliceStringEqual(v1[i].CacheSConns, v2[i].CacheSConns) ||
+			v1[i].FieldSeparator != v2[i].FieldSeparator ||
+			v1[i].TpInDir != v2[i].TpInDir ||
+			v1[i].TpOutDir != v2[i].TpOutDir ||
+			!equalsLoaderDatasType(v1[i].Data, v2[i].Data) {
+			return false
+		}
+	}
+	return true
+}
+func diffLoadersJsonCfg(d []*LoaderJsonCfg, v1, v2 LoaderSCfgs, separator string) []*LoaderJsonCfg {
+	if equalsLoadersJsonCfg(v1, v2) {
+		return d
+	}
+	d = make([]*LoaderJsonCfg, len(v2))
+	dft := NewDfltLoaderSCfg()
+	for i, val2 := range v2 {
+		d[i] = diffLoaderJsonCfg(dft, val2, separator)
+	}
+	return d
 }

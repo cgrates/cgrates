@@ -811,14 +811,6 @@ const CGRATES_CFG_JSON = `
 ],
 
 
-"mailer": {
-	"server": "localhost",								// the server to use when sending emails out
-	"auth_user": "cgrates",								// authenticate to email server using this user
-	"auth_password": "CGRateS.org",						// authenticate to email server with this password
-	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
-},
-
-
 "suretax": {
 	"url": "",								// API url
 	"client_number": "",					// client number, provided by SureTax

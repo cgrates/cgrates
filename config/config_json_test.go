@@ -722,12 +722,12 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Listen_net:  utils.StringPointer("udp"),
 		Listen_auth: utils.StringPointer("127.0.0.1:1812"),
 		Listen_acct: utils.StringPointer("127.0.0.1:1813"),
-		Client_secrets: utils.MapStringStringPointer(map[string]string{
+		Client_secrets: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
-		}),
-		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
+		},
+		Client_dictionaries: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
-		}),
+		},
 		Sessions_conns:     &[]string{utils.MetaInternal},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
@@ -1627,24 +1627,6 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s ",
 			utils.ToJSON(eCfg), utils.ToJSON(cfg))
-	}
-}
-
-func TestDfMailerJsonCfg(t *testing.T) {
-	eCfg := &MailerJsonCfg{
-		Server:        utils.StringPointer("localhost"),
-		Auth_user:     utils.StringPointer("cgrates"),
-		Auth_password: utils.StringPointer("CGRateS.org"),
-		From_address:  utils.StringPointer("cgr-mailer@localhost.localdomain"),
-	}
-	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
-	if err != nil {
-		t.Error(err)
-	}
-	if cfg, err := dfCgrJSONCfg.MailerJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
 	}
 }
 

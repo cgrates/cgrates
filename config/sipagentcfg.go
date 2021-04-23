@@ -52,39 +52,14 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 		sa.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Sessions_conns != nil {
-		sa.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, connID := range *jsnCfg.Sessions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			sa.SessionSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				sa.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			}
-		}
+		sa.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Retransmission_timer != nil {
 		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(RequestProcessor)
-			var haveID bool
-			for _, rpSet := range sa.RequestProcessors {
-				if reqProcJsn.ID != nil && rpSet.ID == *reqProcJsn.ID {
-					rp = rpSet // Will load data into the one set
-					haveID = true
-					break
-				}
-			}
-			if err = rp.loadFromJSONCfg(reqProcJsn, sep); err != nil {
-				return
-			}
-			if !haveID {
-				sa.RequestProcessors = append(sa.RequestProcessors, rp)
-			}
-		}
-	}
+	sa.RequestProcessors, err = appendRequestProcessors(sa.RequestProcessors, jsnCfg.Request_processors, sep)
 	return
 }
 
@@ -105,14 +80,7 @@ func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 
 	if sa.SessionSConns != nil {
-		sessionSConns := make([]string, len(sa.SessionSConns))
-		for i, item := range sa.SessionSConns {
-			sessionSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(sa.SessionSConns)
 	}
 	return
 }
@@ -127,10 +95,7 @@ func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
 		RetransmissionTimer: sa.RetransmissionTimer,
 	}
 	if sa.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(sa.SessionSConns))
-		for i, c := range sa.SessionSConns {
-			cln.SessionSConns[i] = c
-		}
+		cln.SessionSConns = utils.CloneStringSlice(sa.SessionSConns)
 	}
 	if sa.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
@@ -139,4 +104,41 @@ func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
 		}
 	}
 	return
+}
+
+// SIPAgentJsonCfg
+type SIPAgentJsonCfg struct {
+	Enabled              *bool
+	Listen               *string
+	Listen_net           *string
+	Sessions_conns       *[]string
+	Timezone             *string
+	Retransmission_timer *string
+	Request_processors   *[]*ReqProcessorJsnCfg
+}
+
+func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg, separator string) *SIPAgentJsonCfg {
+	if d == nil {
+		d = new(SIPAgentJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.Listen != v2.Listen {
+		d.Listen = utils.StringPointer(v2.Listen)
+	}
+	if v1.ListenNet != v2.ListenNet {
+		d.Listen_net = utils.StringPointer(v2.ListenNet)
+	}
+	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+	}
+	if v1.Timezone != v2.Timezone {
+		d.Timezone = utils.StringPointer(v2.Timezone)
+	}
+	if v1.RetransmissionTimer != v2.RetransmissionTimer {
+		d.Retransmission_timer = utils.StringPointer(v2.RetransmissionTimer.String())
+	}
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	return d
 }

@@ -54,24 +54,10 @@ func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 		ld.FieldSeparator = rune(sepStr[0])
 	}
 	if jsnCfg.Caches_conns != nil {
-		ld.CachesConns = make([]string, len(*jsnCfg.Caches_conns))
-		for idx, conn := range *jsnCfg.Caches_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			ld.CachesConns[idx] = conn
-			if conn == utils.MetaInternal {
-				ld.CachesConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			}
-		}
+		ld.CachesConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
 	if jsnCfg.Actions_conns != nil {
-		ld.ActionSConns = make([]string, len(*jsnCfg.Actions_conns))
-		for idx, conn := range *jsnCfg.Actions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			ld.ActionSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				ld.ActionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)
-			}
-		}
+		ld.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCfg.Gapi_credentials != nil {
 		ld.GapiCredentials = *jsnCfg.Gapi_credentials
@@ -91,24 +77,10 @@ func (ld *LoaderCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.FieldSepCfg:       string(ld.FieldSeparator),
 	}
 	if ld.CachesConns != nil {
-		cacheSConns := make([]string, len(ld.CachesConns))
-		for i, item := range ld.CachesConns {
-			cacheSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cacheSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.CachesConnsCfg] = cacheSConns
+		initialMP[utils.CachesConnsCfg] = getInternalJSONConns(ld.CachesConns)
 	}
 	if ld.ActionSConns != nil {
-		schedulerSConns := make([]string, len(ld.ActionSConns))
-		for i, item := range ld.ActionSConns {
-			schedulerSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions) {
-				schedulerSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ActionSConnsCfg] = schedulerSConns
+		initialMP[utils.ActionSConnsCfg] = getInternalJSONConns(ld.ActionSConns)
 	}
 	if ld.GapiCredentials != nil {
 		initialMP[utils.GapiCredentialsCfg] = ld.GapiCredentials
@@ -131,16 +103,58 @@ func (ld LoaderCgrCfg) Clone() (cln *LoaderCgrCfg) {
 	}
 
 	if ld.CachesConns != nil {
-		cln.CachesConns = make([]string, len(ld.CachesConns))
-		for i, k := range ld.CachesConns {
-			cln.CachesConns[i] = k
-		}
+		cln.CachesConns = utils.CloneStringSlice(ld.CachesConns)
 	}
 	if ld.ActionSConns != nil {
-		cln.ActionSConns = make([]string, len(ld.ActionSConns))
-		for i, k := range ld.ActionSConns {
-			cln.ActionSConns[i] = k
-		}
+		cln.ActionSConns = utils.CloneStringSlice(ld.ActionSConns)
 	}
 	return
+}
+
+type LoaderCfgJson struct {
+	Tpid             *string
+	Data_path        *string
+	Disable_reverse  *bool
+	Field_separator  *string
+	Caches_conns     *[]string
+	Actions_conns    *[]string
+	Gapi_credentials *json.RawMessage
+	Gapi_token       *json.RawMessage
+}
+
+func diffLoaderCfgJson(d *LoaderCfgJson, v1, v2 *LoaderCgrCfg) *LoaderCfgJson {
+	if d == nil {
+		d = new(LoaderCfgJson)
+	}
+	if v1.TpID != v2.TpID {
+		d.Tpid = utils.StringPointer(v2.TpID)
+	}
+	if v1.DataPath != v2.DataPath {
+		d.Data_path = utils.StringPointer(v2.DataPath)
+	}
+	if v1.DisableReverse != v2.DisableReverse {
+		d.Disable_reverse = utils.BoolPointer(v2.DisableReverse)
+	}
+	if v1.FieldSeparator != v2.FieldSeparator {
+		d.Field_separator = utils.StringPointer(string(v2.FieldSeparator))
+	}
+	if !utils.SliceStringEqual(v1.CachesConns, v2.CachesConns) {
+		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CachesConns))
+	}
+	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+	}
+	gc1 := string(v1.GapiCredentials)
+	gc2 := string(v2.GapiCredentials)
+	if gc1 != gc2 {
+		rw := json.RawMessage(gc2)
+		d.Gapi_credentials = &rw
+	}
+	gt1 := string(v1.GapiToken)
+	gt2 := string(v2.GapiToken)
+	if gt1 != gt2 {
+		rw := json.RawMessage(gt2)
+		d.Gapi_token = &rw
+	}
+	return d
 }

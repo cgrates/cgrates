@@ -44,35 +44,16 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 		cS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Attributes_conns != nil {
-		cS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for idx, attrConn := range *jsnCfg.Attributes_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			cS.AttributeSConns[idx] = attrConn
-			if attrConn == utils.MetaInternal {
-				cS.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			}
-		}
+		cS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		cS.StringIndexedFields = &sif
+		cS.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		cS.PrefixIndexedFields = &pif
+		cS.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		cS.SuffixIndexedFields = &sif
+		cS.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		cS.NestedFields = *jsnCfg.Nested_fields
@@ -88,35 +69,16 @@ func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.NestedFieldsCfg:   cS.NestedFields,
 	}
 	if cS.AttributeSConns != nil {
-		attributeSConns := make([]string, len(cS.AttributeSConns))
-		for i, item := range cS.AttributeSConns {
-			attributeSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(cS.AttributeSConns)
 	}
 	if cS.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*cS.StringIndexedFields))
-		for i, item := range *cS.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*cS.StringIndexedFields)
 	}
 	if cS.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*cS.PrefixIndexedFields))
-		for i, item := range *cS.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.PrefixIndexedFields)
 	}
 	if cS.SuffixIndexedFields != nil {
-		sufixIndexedFields := make([]string, len(*cS.SuffixIndexedFields))
-		for i, item := range *cS.SuffixIndexedFields {
-			sufixIndexedFields[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = sufixIndexedFields
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*cS.SuffixIndexedFields)
 	}
 	return
 }
@@ -129,32 +91,50 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 		NestedFields:   cS.NestedFields,
 	}
 	if cS.AttributeSConns != nil {
-		cln.AttributeSConns = make([]string, len(cS.AttributeSConns))
-		for i, con := range cS.AttributeSConns {
-			cln.AttributeSConns[i] = con
-		}
+		cln.AttributeSConns = utils.CloneStringSlice(cS.AttributeSConns)
 	}
 
 	if cS.StringIndexedFields != nil {
-		idx := make([]string, len(*cS.StringIndexedFields))
-		for i, dx := range *cS.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.StringIndexedFields))
 	}
 	if cS.PrefixIndexedFields != nil {
-		idx := make([]string, len(*cS.PrefixIndexedFields))
-		for i, dx := range *cS.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.PrefixIndexedFields))
 	}
 	if cS.SuffixIndexedFields != nil {
-		idx := make([]string, len(*cS.SuffixIndexedFields))
-		for i, dx := range *cS.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*cS.SuffixIndexedFields))
 	}
 	return
+}
+
+// ChargerSJsonCfg service config section
+type ChargerSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	Attributes_conns      *[]string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+}
+
+func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonCfg {
+	if d == nil {
+		d = new(ChargerSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	return d
 }

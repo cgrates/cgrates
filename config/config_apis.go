@@ -105,8 +105,6 @@ func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error
 		mp = cfg.APIBanCfg().AsMapInterface()
 	case HTTPAgentJSON:
 		mp = cfg.HTTPAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
-	case MailerJSON:
-		mp = cfg.MailerCfg().AsMapInterface()
 	case AnalyzerSJSON:
 		mp = cfg.AnalyzerSCfg().AsMapInterface()
 	case RateSJSON:
@@ -377,7 +375,7 @@ func (cfg *CGRConfig) LoadFromDB(jsnCfg ConfigDB) (err error) {
 		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
 		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
-		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
+		cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
@@ -569,11 +567,6 @@ func (cfg *CGRConfig) V1StoreCfgInDB(ctx *context.Context, args *SectionWithAPIO
 	} else if err = cfg.db.SetSection(ctx, LoaderSJSON, sc); err != nil {
 		return
 	}
-	if sc, err = dp.MailerJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, MailerJSON, sc); err != nil {
-		return
-	}
 	if sc, err = dp.SureTaxJsonCfg(); err != nil {
 		return
 	} else if err = cfg.db.SetSection(ctx, SureTaxJSON, sc); err != nil {
@@ -716,8 +709,6 @@ func prepareSectionFromMap(section string, mp interface{}) (cfgSec interface{}, 
 		cfgSec = new(RouteSJsonCfg)
 	case LoaderSJSON:
 		cfgSec = make([]*LoaderJsonCfg, 0)
-	case MailerJSON:
-		cfgSec = new(MailerJsonCfg)
 	case SureTaxJSON:
 		cfgSec = new(SureTaxJsonCfg)
 	case DispatcherSJSON:
@@ -830,8 +821,6 @@ func prepareSectionFromDB(section string, db ConfigDB) (cfgSec interface{}, err 
 		cfgSec, err = db.RouteSJsonCfg()
 	case LoaderSJSON:
 		cfgSec, err = db.LoaderJsonCfg()
-	case MailerJSON:
-		cfgSec, err = db.MailerJsonCfg()
 	case SureTaxJSON:
 		cfgSec, err = db.SureTaxJsonCfg()
 	case DispatcherSJSON:

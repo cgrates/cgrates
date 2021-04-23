@@ -29,13 +29,13 @@ type DispatcherSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
-	AttributeSConns     []string
 	NestedFields        bool
+	AttributeSConns     []string
 }
 
 func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		dps.Enabled = *jsnCfg.Enabled
@@ -44,40 +44,21 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		dps.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		dps.StringIndexedFields = &sif
+		dps.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		dps.PrefixIndexedFields = &pif
+		dps.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		dps.SuffixIndexedFields = &sif
+		dps.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Attributes_conns != nil {
-		dps.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for idx, connID := range *jsnCfg.Attributes_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			dps.AttributeSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				dps.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			}
-		}
+		dps.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Nested_fields != nil {
 		dps.NestedFields = *jsnCfg.Nested_fields
 	}
-	return nil
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -88,35 +69,16 @@ func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.NestedFieldsCfg:   dps.NestedFields,
 	}
 	if dps.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*dps.StringIndexedFields))
-		for i, item := range *dps.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*dps.StringIndexedFields)
 	}
 	if dps.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*dps.PrefixIndexedFields))
-		for i, item := range *dps.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.PrefixIndexedFields)
 	}
 	if dps.SuffixIndexedFields != nil {
-		suffixIndexedFields := make([]string, len(*dps.SuffixIndexedFields))
-		for i, item := range *dps.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*dps.SuffixIndexedFields)
 	}
 	if dps.AttributeSConns != nil {
-		attributeSConns := make([]string, len(dps.AttributeSConns))
-		for i, item := range dps.AttributeSConns {
-			attributeSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(dps.AttributeSConns)
 	}
 	return
 }
@@ -130,31 +92,48 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 	}
 
 	if dps.AttributeSConns != nil {
-		cln.AttributeSConns = make([]string, len(dps.AttributeSConns))
-		for i, conn := range dps.AttributeSConns {
-			cln.AttributeSConns[i] = conn
-		}
+		cln.AttributeSConns = utils.CloneStringSlice(dps.AttributeSConns)
 	}
 	if dps.StringIndexedFields != nil {
-		idx := make([]string, len(*dps.StringIndexedFields))
-		for i, dx := range *dps.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*dps.StringIndexedFields))
 	}
 	if dps.PrefixIndexedFields != nil {
-		idx := make([]string, len(*dps.PrefixIndexedFields))
-		for i, dx := range *dps.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*dps.PrefixIndexedFields))
 	}
 	if dps.SuffixIndexedFields != nil {
-		idx := make([]string, len(*dps.SuffixIndexedFields))
-		for i, dx := range *dps.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*dps.SuffixIndexedFields))
 	}
 	return
+}
+
+type DispatcherSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+	Attributes_conns      *[]string
+}
+
+func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *DispatcherSJsonCfg {
+	if d == nil {
+		d = new(DispatcherSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+	}
+	return d
 }

@@ -84,32 +84,6 @@ type HTTPAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (ha *HTTPAgentCfg) appendHTTPAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separator string) (err error) {
-	if hps == nil {
-		return
-	}
-	for _, reqProcJsn := range *hps {
-		rp := new(RequestProcessor)
-		var haveID bool
-		if reqProcJsn.ID != nil {
-			for _, rpSet := range ha.RequestProcessors {
-				if rpSet.ID == *reqProcJsn.ID {
-					rp = rpSet // Will load data into the one set
-					haveID = true
-					break
-				}
-			}
-		}
-		if err = rp.loadFromJSONCfg(reqProcJsn, separator); err != nil {
-			return
-		}
-		if !haveID {
-			ha.RequestProcessors = append(ha.RequestProcessors, rp)
-		}
-	}
-	return
-}
-
 func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
@@ -137,10 +111,8 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	if jsnCfg.Reply_payload != nil {
 		ha.ReplyPayload = *jsnCfg.Reply_payload
 	}
-	if err = ha.appendHTTPAgntProcCfgs(jsnCfg.Request_processors, separator); err != nil {
-		return err
-	}
-	return nil
+	ha.RequestProcessors, err = appendRequestProcessors(ha.RequestProcessors, jsnCfg.Request_processors, separator)
+	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
@@ -191,4 +163,90 @@ func (ha HTTPAgentCfg) Clone() (cln *HTTPAgentCfg) {
 		cln.RequestProcessors[i] = req.Clone()
 	}
 	return
+}
+
+// Conecto Agent configuration section
+type HttpAgentJsonCfg struct {
+	Id                 *string
+	Url                *string
+	Sessions_conns     *[]string
+	Request_payload    *string
+	Reply_payload      *string
+	Request_processors *[]*ReqProcessorJsnCfg
+}
+
+func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg, separator string) *HttpAgentJsonCfg {
+	if d == nil {
+		d = new(HttpAgentJsonCfg)
+	}
+	if v1.ID != v2.ID {
+		d.Id = utils.StringPointer(v2.ID)
+	}
+	if v1.URL != v2.URL {
+		d.Url = utils.StringPointer(v2.URL)
+	}
+	if v1.RequestPayload != v2.RequestPayload {
+		d.Request_payload = utils.StringPointer(v2.RequestPayload)
+	}
+	if v1.ReplyPayload != v2.ReplyPayload {
+		d.Reply_payload = utils.StringPointer(v2.ReplyPayload)
+	}
+	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+	}
+
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	return d
+}
+
+func equalsHTTPAgentCfgs(v1, v2 HTTPAgentCfgs) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v2 {
+		if v1[i].ID != v2[i].ID ||
+			v1[i].URL != v2[i].URL ||
+			!utils.SliceStringEqual(v1[i].SessionSConns, v2[i].SessionSConns) ||
+			v1[i].RequestPayload != v2[i].RequestPayload ||
+			v1[i].ReplyPayload != v2[i].ReplyPayload ||
+			!equalsRequestProcessors(v1[i].RequestProcessors, v2[i].RequestProcessors) {
+			return false
+		}
+	}
+	return true
+}
+
+func getHttpAgentJsonCfg(d []*HttpAgentJsonCfg, id string) (*HttpAgentJsonCfg, int) {
+	for i, v := range d {
+		if v.Id != nil && *v.Id == id {
+			return v, i
+		}
+	}
+	return nil, -1
+}
+
+func getHTTPAgentCfg(d HTTPAgentCfgs, id string) *HTTPAgentCfg {
+	for _, v := range d {
+		if v.ID == id {
+			return v
+		}
+	}
+	return new(HTTPAgentCfg)
+}
+func diffHttpAgentsJsonCfg(d *[]*HttpAgentJsonCfg, v1, v2 HTTPAgentCfgs, separator string) *[]*HttpAgentJsonCfg {
+	if d == nil {
+		d = new([]*HttpAgentJsonCfg)
+	}
+	if !equalsHTTPAgentCfgs(v1, v2) {
+		for _, val := range v2 {
+			dv, i := getHttpAgentJsonCfg(*d, val.ID)
+			dv = diffHttpAgentJsonCfg(dv, getHTTPAgentCfg(v1, val.ID), val, separator)
+			if i == -1 {
+				*d = append(*d, dv)
+			} else {
+				(*d)[i] = dv
+			}
+		}
+	}
+	return d
 }

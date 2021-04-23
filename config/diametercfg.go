@@ -87,25 +87,7 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Forced_disconnect != nil {
 		da.ForcedDisconnect = *jsnCfg.Forced_disconnect
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(RequestProcessor)
-			var haveID bool
-			for _, rpSet := range da.RequestProcessors {
-				if reqProcJsn.ID != nil && rpSet.ID == *reqProcJsn.ID {
-					rp = rpSet // Will load data into the one set
-					haveID = true
-					break
-				}
-			}
-			if err = rp.loadFromJSONCfg(reqProcJsn, separator); err != nil {
-				return
-			}
-			if !haveID {
-				da.RequestProcessors = append(da.RequestProcessors, rp)
-			}
-		}
-	}
+	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors, separator)
 	return
 }
 

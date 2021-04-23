@@ -72,8 +72,7 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 		dps.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Registrars_conns != nil {
-		dps.RegistrarSConns = make([]string, len(*jsnCfg.Registrars_conns))
-		copy(dps.RegistrarSConns, *jsnCfg.Registrars_conns)
+		dps.RegistrarSConns = utils.CloneStringSlice(*jsnCfg.Registrars_conns)
 	}
 	if jsnCfg.Hosts != nil {
 		for tnt, hosts := range jsnCfg.Hosts {
@@ -96,7 +95,7 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
 		utils.EnabledCfg:         dps.Enabled,
-		utils.RegistrarsConnsCfg: dps.RegistrarSConns,
+		utils.RegistrarsConnsCfg: utils.CloneStringSlice(dps.RegistrarSConns),
 		utils.RefreshIntervalCfg: dps.RefreshInterval.String(),
 	}
 	if dps.RefreshInterval == 0 {
@@ -124,10 +123,7 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 		Hosts:           make(map[string][]*RemoteHost),
 	}
 	if dps.RegistrarSConns != nil {
-		cln.RegistrarSConns = make([]string, len(dps.RegistrarSConns))
-		for i, k := range dps.RegistrarSConns {
-			cln.RegistrarSConns[i] = k
-		}
+		cln.RegistrarSConns = utils.CloneStringSlice(dps.RegistrarSConns)
 	}
 	for tnt, hosts := range dps.Hosts {
 		clnH := make([]*RemoteHost, len(hosts))
@@ -137,4 +133,52 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 		cln.Hosts[tnt] = clnH
 	}
 	return
+}
+
+type RegistrarCJsonCfg struct {
+	Enabled          *bool
+	Registrars_conns *[]string
+	Hosts            map[string][]*RemoteHostJson
+	Refresh_interval *string
+}
+
+func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *RegistrarCJsonCfg {
+	if d == nil {
+		d = new(RegistrarCJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if !utils.SliceStringEqual(v1.RegistrarSConns, v2.RegistrarSConns) {
+		d.Registrars_conns = utils.SliceStringPointer(utils.CloneStringSlice(v2.RegistrarSConns))
+	}
+	if d.Hosts == nil {
+		d.Hosts = make(map[string][]*RemoteHostJson)
+	}
+	for k, host := range v2.Hosts {
+		dft := new(RemoteHost)
+		conns := make([]*RemoteHostJson, len(host))
+		for i, conn := range host {
+			conns[i] = diffRemoteHostJson(dft, conn)
+		}
+		d.Hosts[k] = conns
+	}
+	if v1.RefreshInterval != v2.RefreshInterval {
+		d.Refresh_interval = utils.StringPointer(v2.RefreshInterval.String())
+	}
+	return d
+}
+
+type RegistrarCJsonCfgs struct {
+	RPC        *RegistrarCJsonCfg
+	Dispatcher *RegistrarCJsonCfg
+}
+
+func diffRegistrarCJsonCfgs(d *RegistrarCJsonCfgs, v1, v2 *RegistrarCCfgs) *RegistrarCJsonCfgs {
+	if d == nil {
+		d = new(RegistrarCJsonCfgs)
+	}
+	d.RPC = diffRegistrarCJsonCfg(d.RPC, v1.RPC, v2.RPC)
+	d.Dispatcher = diffRegistrarCJsonCfg(d.Dispatcher, v1.Dispatcher, v2.Dispatcher)
+	return d
 }

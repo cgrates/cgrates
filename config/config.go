@@ -166,6 +166,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
+	cfg.radiusAgentCfg.ClientDictionaries = make(map[string]string)
+	cfg.radiusAgentCfg.ClientSecrets = make(map[string]string)
 	cfg.dnsAgentCfg = new(DNSAgentCfg)
 	cfg.attributeSCfg = new(AttributeSCfg)
 	cfg.chargerSCfg = new(ChargerSCfg)
@@ -184,7 +186,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.migratorCgrCfg.OutDataDBOpts = make(map[string]interface{})
 	cfg.migratorCgrCfg.OutStorDBOpts = make(map[string]interface{})
-	cfg.mailerCfg = new(MailerCfg)
 	cfg.loaderCfg = make(LoaderSCfgs, 0)
 	cfg.admS = new(AdminSCfg)
 	cfg.ersCfg = new(ERsCfg)
@@ -321,7 +322,6 @@ type CGRConfig struct {
 	registrarCCfg    *RegistrarCCfgs   // RegistrarC config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
-	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 	admS             *AdminSCfg        // APIer config
 	ersCfg           *ERsCfg           // EventReader config
@@ -402,7 +402,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg ConfigDB) (err error) {
 		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
 		cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
-		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
+		cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadRateSCfg, cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg,
@@ -676,15 +676,6 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg ConfigDB) (err error) {
 		cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use append so the loaderS profile to be loaded from multiple files
 	}
 	return
-}
-
-// loadMailerCfg loads the Mailer section of the configuration
-func (cfg *CGRConfig) loadMailerCfg(jsnCfg ConfigDB) (err error) {
-	var jsnMailerCfg *MailerJsonCfg
-	if jsnMailerCfg, err = jsnCfg.MailerJsonCfg(); err != nil {
-		return
-	}
-	return cfg.mailerCfg.loadFromJSONCfg(jsnMailerCfg)
 }
 
 // loadSureTaxCfg loads the SureTax section of the configuration
@@ -1065,13 +1056,6 @@ func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
 	return cfg.cdrsCfg
 }
 
-// MailerCfg returns the config for Mailer
-func (cfg *CGRConfig) MailerCfg() *MailerCfg {
-	cfg.lks[MailerJSON].Lock()
-	defer cfg.lks[MailerJSON].Unlock()
-	return cfg.mailerCfg
-}
-
 // AnalyzerSCfg returns the config for AnalyzerS
 func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 	cfg.lks[AnalyzerSJSON].Lock()
@@ -1264,7 +1248,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(ConfigDB) error {
 		ThresholdSJSON:      cfg.loadThresholdSCfg,
 		RouteSJSON:          cfg.loadRouteSCfg,
 		LoaderSJSON:         cfg.loadLoaderSCfg,
-		MailerJSON:          cfg.loadMailerCfg,
 		SureTaxJSON:         cfg.loadSureTaxCfg,
 		LoaderJSON:          cfg.loadLoaderCgrCfg,
 		MigratorJSON:        cfg.loadMigratorCgrCfg,
@@ -1469,7 +1452,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		case ListenJSON:
 		case CacheJSON:
 		case FilterSJSON:
-		case MailerJSON:
 		case SureTaxJSON:
 		case LoaderJSON:
 		case MigratorJSON:
@@ -1569,7 +1551,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]interface{
 		RegistrarCJSON:      cfg.registrarCCfg.AsMapInterface(),
 		LoaderJSON:          cfg.loaderCgrCfg.AsMapInterface(),
 		MigratorJSON:        cfg.migratorCgrCfg.AsMapInterface(),
-		MailerJSON:          cfg.mailerCfg.AsMapInterface(),
 		AnalyzerSJSON:       cfg.analyzerSCfg.AsMapInterface(),
 		AdminSJSON:          cfg.admS.AsMapInterface(),
 		ERsJSON:             cfg.ersCfg.AsMapInterface(separator),
@@ -1625,7 +1606,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		registrarCCfg:    cfg.registrarCCfg.Clone(),
 		loaderCgrCfg:     cfg.loaderCgrCfg.Clone(),
 		migratorCgrCfg:   cfg.migratorCgrCfg.Clone(),
-		mailerCfg:        cfg.mailerCfg.Clone(),
 		analyzerSCfg:     cfg.analyzerSCfg.Clone(),
 		admS:             cfg.admS.Clone(),
 		ersCfg:           cfg.ersCfg.Clone(),

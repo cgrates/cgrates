@@ -200,3 +200,47 @@ func diffReqProcessorsJsnCfg(d *[]*ReqProcessorJsnCfg, v1, v2 []*RequestProcesso
 	}
 	return d
 }
+
+func appendRequestProcessors(to []*RequestProcessor, from *[]*ReqProcessorJsnCfg, separator string) (_ []*RequestProcessor, err error) {
+	if from == nil {
+		return to, nil
+	}
+	for _, rpJsn := range *from {
+		rp := new(RequestProcessor)
+		var haveID bool
+		if rpJsn.ID != nil {
+			for _, rpTo := range to {
+				if rpTo.ID == *rpJsn.ID {
+					rp = rpTo // Will load data into the one set
+					haveID = true
+					break
+				}
+			}
+		}
+		if err = rp.loadFromJSONCfg(rpJsn, separator); err != nil {
+			return
+		}
+		if !haveID {
+			to = append(to, rp)
+		}
+	}
+	return to, nil
+}
+
+func equalsRequestProcessors(v1, v2 []*RequestProcessor) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+	for i := range v2 {
+		if v1[i].ID != v2[i].ID ||
+			!utils.SliceStringEqual(v1[i].Tenant.AsStringSlice(), v2[i].Tenant.AsStringSlice()) ||
+			!utils.SliceStringEqual(v1[i].Filters, v2[i].Filters) ||
+			!utils.SliceStringEqual(v1[i].Flags.SliceFlags(), v2[i].Flags.SliceFlags()) ||
+			v1[i].Timezone != v2[i].Timezone ||
+			!fcTemplatesEqual(v1[i].RequestFields, v2[i].RequestFields) ||
+			!fcTemplatesEqual(v1[i].ReplyFields, v2[i].ReplyFields) {
+			return false
+		}
+	}
+	return true
+}

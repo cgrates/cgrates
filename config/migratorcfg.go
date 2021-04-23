@@ -88,10 +88,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 		mg.OutStorDBPassword = *jsnCfg.Out_storDB_password
 	}
 	if jsnCfg.Users_filters != nil && len(*jsnCfg.Users_filters) != 0 {
-		mg.UsersFilters = make([]string, len(*jsnCfg.Users_filters))
-		for i, v := range *jsnCfg.Users_filters {
-			mg.UsersFilters[i] = v
-		}
+		mg.UsersFilters = utils.CloneStringSlice(*jsnCfg.Users_filters)
 	}
 
 	if jsnCfg.Out_dataDB_opts != nil {
@@ -109,10 +106,6 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
-	fltrs := make([]string, 0)
-	if mg.UsersFilters != nil {
-		fltrs = mg.UsersFilters
-	}
 	outDataDBOpts := make(map[string]interface{})
 	for k, v := range mg.OutDataDBOpts {
 		outDataDBOpts[k] = v
@@ -137,7 +130,7 @@ func (mg *MigratorCgrCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.OutStorDBPasswordCfg: mg.OutStorDBPassword,
 		utils.OutDataDBOptsCfg:     outDataDBOpts,
 		utils.OutStorDBOptsCfg:     outStorDBOpts,
-		utils.UsersFiltersCfg:      fltrs,
+		utils.UsersFiltersCfg:      utils.CloneStringSlice(mg.UsersFilters),
 	}
 }
 
@@ -161,10 +154,7 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		OutStorDBOpts:     make(map[string]interface{}),
 	}
 	if mg.UsersFilters != nil {
-		cln.UsersFilters = make([]string, len(mg.UsersFilters))
-		for i, f := range mg.UsersFilters {
-			cln.UsersFilters[i] = f
-		}
+		cln.UsersFilters = utils.CloneStringSlice(mg.UsersFilters)
 	}
 	for k, v := range mg.OutDataDBOpts {
 		cln.OutDataDBOpts[k] = v
@@ -173,4 +163,74 @@ func (mg MigratorCgrCfg) Clone() (cln *MigratorCgrCfg) {
 		cln.OutStorDBOpts[k] = v
 	}
 	return
+}
+
+type MigratorCfgJson struct {
+	Out_dataDB_type     *string
+	Out_dataDB_host     *string
+	Out_dataDB_port     *string
+	Out_dataDB_name     *string
+	Out_dataDB_user     *string
+	Out_dataDB_password *string
+	Out_dataDB_encoding *string
+	Out_storDB_type     *string
+	Out_storDB_host     *string
+	Out_storDB_port     *string
+	Out_storDB_name     *string
+	Out_storDB_user     *string
+	Out_storDB_password *string
+	Users_filters       *[]string
+	Out_dataDB_opts     map[string]interface{}
+	Out_storDB_opts     map[string]interface{}
+}
+
+func diffMigratorCfgJson(d *MigratorCfgJson, v1, v2 *MigratorCgrCfg) *MigratorCfgJson {
+	if d == nil {
+		d = new(MigratorCfgJson)
+	}
+	if v1.OutDataDBType != v2.OutDataDBType {
+		d.Out_dataDB_type = utils.StringPointer(v2.OutDataDBType)
+	}
+	if v1.OutDataDBHost != v2.OutDataDBHost {
+		d.Out_dataDB_host = utils.StringPointer(v2.OutDataDBHost)
+	}
+	if v1.OutDataDBPort != v2.OutDataDBPort {
+		d.Out_dataDB_port = utils.StringPointer(v2.OutDataDBPort)
+	}
+	if v1.OutDataDBName != v2.OutDataDBName {
+		d.Out_dataDB_name = utils.StringPointer(v2.OutDataDBName)
+	}
+	if v1.OutDataDBUser != v2.OutDataDBUser {
+		d.Out_dataDB_user = utils.StringPointer(v2.OutDataDBUser)
+	}
+	if v1.OutDataDBPassword != v2.OutDataDBPassword {
+		d.Out_dataDB_password = utils.StringPointer(v2.OutDataDBPassword)
+	}
+	if v1.OutDataDBEncoding != v2.OutDataDBEncoding {
+		d.Out_dataDB_encoding = utils.StringPointer(v2.OutDataDBEncoding)
+	}
+	if v1.OutStorDBType != v2.OutStorDBType {
+		d.Out_storDB_type = utils.StringPointer(v2.OutStorDBType)
+	}
+	if v1.OutStorDBHost != v2.OutStorDBHost {
+		d.Out_storDB_host = utils.StringPointer(v2.OutStorDBHost)
+	}
+	if v1.OutStorDBPort != v2.OutStorDBPort {
+		d.Out_storDB_port = utils.StringPointer(v2.OutStorDBPort)
+	}
+	if v1.OutStorDBName != v2.OutStorDBName {
+		d.Out_storDB_name = utils.StringPointer(v2.OutStorDBName)
+	}
+	if v1.OutStorDBUser != v2.OutStorDBUser {
+		d.Out_storDB_user = utils.StringPointer(v2.OutStorDBUser)
+	}
+	if v1.OutStorDBPassword != v2.OutStorDBPassword {
+		d.Out_storDB_password = utils.StringPointer(v2.OutStorDBPassword)
+	}
+	if !utils.SliceStringEqual(v1.UsersFilters, v2.UsersFilters) {
+		d.Users_filters = utils.SliceStringPointer(utils.CloneStringSlice(v2.UsersFilters))
+	}
+	d.Out_dataDB_opts = diffMap(d.Out_dataDB_opts, v1.OutDataDBOpts, v2.OutDataDBOpts)
+	d.Out_storDB_opts = diffMap(d.Out_storDB_opts, v1.OutStorDBOpts, v2.OutStorDBOpts)
+	return d
 }
