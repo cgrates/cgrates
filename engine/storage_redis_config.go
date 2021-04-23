@@ -227,14 +227,6 @@ func (rs *RedisStorage) LoaderJsonCfg() (r []*config.LoaderJsonCfg, err error) {
 	err = rs.ms.Unmarshal(values, &r)
 	return
 }
-func (rs *RedisStorage) MailerJsonCfg() (r *config.MailerJsonCfg, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redisGET, configPrefix+config.MailerJSON); err != nil || len(values) == 0 {
-		return
-	}
-	err = rs.ms.Unmarshal(values, &r)
-	return
-}
 func (rs *RedisStorage) SureTaxJsonCfg() (r *config.SureTaxJsonCfg, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, configPrefix+config.SureTaxJSON); err != nil || len(values) == 0 {

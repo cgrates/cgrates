@@ -35,7 +35,7 @@ type ConfigSCfg struct {
 // loadFromJSONCfg loads Database config from JsonCfg
 func (cScfg *ConfigSCfg) loadFromJSONCfg(jsnCfg *ConfigSCfgJson) (err error) {
 	if jsnCfg == nil {
-		return nil
+		return
 	}
 	if jsnCfg.Enabled != nil {
 		cScfg.Enabled = *jsnCfg.Enabled
@@ -121,4 +121,26 @@ func (cScfg *ConfigSCfg) Clone() *ConfigSCfg {
 		URL:     cScfg.URL,
 		RootDir: cScfg.RootDir,
 	}
+}
+
+type ConfigSCfgJson struct {
+	Enabled  *bool
+	Url      *string
+	Root_dir *string
+}
+
+func diffConfigSCfgJson(d *ConfigSCfgJson, v1, v2 *ConfigSCfg) *ConfigSCfgJson {
+	if d == nil {
+		d = new(ConfigSCfgJson)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.URL != v2.URL {
+		d.Url = utils.StringPointer(v2.URL)
+	}
+	if v1.RootDir != v2.RootDir {
+		d.Root_dir = utils.StringPointer(v2.RootDir)
+	}
+	return d
 }

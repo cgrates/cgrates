@@ -29,11 +29,11 @@ type RouteSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	NestedFields        bool
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
 	DefaultRatio        int
-	NestedFields        bool
 }
 
 func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
@@ -47,55 +47,22 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 		rts.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		rts.StringIndexedFields = &sif
+		rts.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		rts.PrefixIndexedFields = &pif
+		rts.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		rts.SuffixIndexedFields = &sif
+		rts.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Attributes_conns != nil {
-		rts.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
-		for idx, conn := range *jsnCfg.Attributes_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			rts.AttributeSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				rts.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
-			}
-		}
+		rts.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Resources_conns != nil {
-		rts.ResourceSConns = make([]string, len(*jsnCfg.Resources_conns))
-		for idx, conn := range *jsnCfg.Resources_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			rts.ResourceSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				rts.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
-			}
-		}
+		rts.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
 	if jsnCfg.Stats_conns != nil {
-		rts.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
-		for idx, conn := range *jsnCfg.Stats_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			rts.StatSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				rts.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
-			}
-		}
+		rts.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
@@ -115,55 +82,22 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.NestedFieldsCfg:   rts.NestedFields,
 	}
 	if rts.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*rts.StringIndexedFields))
-		for i, item := range *rts.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rts.StringIndexedFields)
 	}
 	if rts.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*rts.PrefixIndexedFields))
-		for i, item := range *rts.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.PrefixIndexedFields)
 	}
 	if rts.SuffixIndexedFields != nil {
-		suffixIndexedFieldsCfg := make([]string, len(*rts.SuffixIndexedFields))
-		for i, item := range *rts.SuffixIndexedFields {
-			suffixIndexedFieldsCfg[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFieldsCfg
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rts.SuffixIndexedFields)
 	}
 	if rts.AttributeSConns != nil {
-		attributeSConns := make([]string, len(rts.AttributeSConns))
-		for i, item := range rts.AttributeSConns {
-			attributeSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes) {
-				attributeSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.AttributeSConnsCfg] = attributeSConns
+		initialMP[utils.AttributeSConnsCfg] = getInternalJSONConns(rts.AttributeSConns)
 	}
 	if rts.ResourceSConns != nil {
-		resourceSConns := make([]string, len(rts.ResourceSConns))
-		for i, item := range rts.ResourceSConns {
-			resourceSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources) {
-				resourceSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ResourceSConnsCfg] = resourceSConns
+		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(rts.ResourceSConns)
 	}
 	if rts.StatSConns != nil {
-		statSConns := make([]string, len(rts.StatSConns))
-		for i, item := range rts.StatSConns {
-			statSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats) {
-				statSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.StatSConnsCfg] = statSConns
+		initialMP[utils.StatSConnsCfg] = getInternalJSONConns(rts.StatSConns)
 	}
 	return
 }
@@ -177,43 +111,67 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		NestedFields:   rts.NestedFields,
 	}
 	if rts.AttributeSConns != nil {
-		cln.AttributeSConns = make([]string, len(rts.AttributeSConns))
-		for i, con := range rts.AttributeSConns {
-			cln.AttributeSConns[i] = con
-		}
+		cln.AttributeSConns = utils.CloneStringSlice(rts.AttributeSConns)
 	}
 	if rts.ResourceSConns != nil {
-		cln.ResourceSConns = make([]string, len(rts.ResourceSConns))
-		for i, con := range rts.ResourceSConns {
-			cln.ResourceSConns[i] = con
-		}
+		cln.ResourceSConns = utils.CloneStringSlice(rts.ResourceSConns)
 	}
 	if rts.StatSConns != nil {
-		cln.StatSConns = make([]string, len(rts.StatSConns))
-		for i, con := range rts.StatSConns {
-			cln.StatSConns[i] = con
-		}
+		cln.StatSConns = utils.CloneStringSlice(rts.StatSConns)
 	}
 	if rts.StringIndexedFields != nil {
-		idx := make([]string, len(*rts.StringIndexedFields))
-		for i, dx := range *rts.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.StringIndexedFields))
 	}
 	if rts.PrefixIndexedFields != nil {
-		idx := make([]string, len(*rts.PrefixIndexedFields))
-		for i, dx := range *rts.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.PrefixIndexedFields))
 	}
 	if rts.SuffixIndexedFields != nil {
-		idx := make([]string, len(*rts.SuffixIndexedFields))
-		for i, dx := range *rts.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rts.SuffixIndexedFields))
 	}
 	return
+}
+
+// Route service config section
+type RouteSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+	Attributes_conns      *[]string
+	Resources_conns       *[]string
+	Stats_conns           *[]string
+	Default_ratio         *int
+}
+
+func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
+	if d == nil {
+		d = new(RouteSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
+		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+	}
+	if !utils.SliceStringEqual(v1.ResourceSConns, v2.ResourceSConns) {
+		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+	}
+	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
+		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+	}
+	if v1.DefaultRatio != v2.DefaultRatio {
+		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)
+	}
+	return d
 }

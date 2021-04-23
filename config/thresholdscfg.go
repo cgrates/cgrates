@@ -51,25 +51,13 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		t.StringIndexedFields = &sif
+		t.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		t.PrefixIndexedFields = &pif
+		t.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		t.SuffixIndexedFields = &sif
+		t.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		t.NestedFields = *jsnCfg.Nested_fields
@@ -90,25 +78,13 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	}
 
 	if t.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*t.StringIndexedFields))
-		for i, item := range *t.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*t.StringIndexedFields)
 	}
 	if t.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*t.PrefixIndexedFields))
-		for i, item := range *t.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*t.PrefixIndexedFields)
 	}
 	if t.SuffixIndexedFields != nil {
-		suffixIndexedFields := make([]string, len(*t.SuffixIndexedFields))
-		for i, item := range *t.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*t.SuffixIndexedFields)
 	}
 	return
 }
@@ -123,25 +99,46 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	}
 
 	if t.StringIndexedFields != nil {
-		idx := make([]string, len(*t.StringIndexedFields))
-		for i, dx := range *t.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.StringIndexedFields))
 	}
 	if t.PrefixIndexedFields != nil {
-		idx := make([]string, len(*t.PrefixIndexedFields))
-		for i, dx := range *t.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.PrefixIndexedFields))
 	}
 	if t.SuffixIndexedFields != nil {
-		idx := make([]string, len(*t.SuffixIndexedFields))
-		for i, dx := range *t.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.SuffixIndexedFields))
 	}
 	return
+}
+
+// Threshold service config section
+type ThresholdSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	Store_interval        *string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+}
+
+func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *ThresholdSJsonCfg {
+	if d == nil {
+		d = new(ThresholdSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	if v1.StoreInterval != v2.StoreInterval {
+		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())
+	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	return d
 }

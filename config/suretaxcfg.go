@@ -243,3 +243,150 @@ func (st SureTaxCfg) Clone() (cln *SureTaxCfg) {
 		TaxExemptionCodeList: st.TaxExemptionCodeList.Clone(),
 	}
 }
+
+// SureTax config section
+type SureTaxJsonCfg struct {
+	Url                     *string
+	Client_number           *string
+	Validation_key          *string
+	Business_unit           *string
+	Timezone                *string
+	Include_local_cost      *bool
+	Return_file_code        *string
+	Response_group          *string
+	Response_type           *string
+	Regulatory_code         *string
+	Client_tracking         *string
+	Customer_number         *string
+	Orig_number             *string
+	Term_number             *string
+	Bill_to_number          *string
+	Zipcode                 *string
+	Plus4                   *string
+	P2PZipcode              *string
+	P2PPlus4                *string
+	Units                   *string
+	Unit_type               *string
+	Tax_included            *string
+	Tax_situs_rule          *string
+	Trans_type_code         *string
+	Sales_type_code         *string
+	Tax_exemption_code_list *string
+}
+
+func diffSureTaxJsonCfg(d *SureTaxJsonCfg, v1, v2 *SureTaxCfg, separator string) *SureTaxJsonCfg {
+	if d == nil {
+		d = new(SureTaxJsonCfg)
+	}
+	if v1.URL != v2.URL {
+		d.Url = utils.StringPointer(v2.URL)
+	}
+	if v1.ClientNumber != v2.ClientNumber {
+		d.Client_number = utils.StringPointer(v2.ClientNumber)
+	}
+	if v1.ValidationKey != v2.ValidationKey {
+		d.Validation_key = utils.StringPointer(v2.ValidationKey)
+	}
+	if v1.BusinessUnit != v2.BusinessUnit {
+		d.Business_unit = utils.StringPointer(v2.BusinessUnit)
+	}
+	if v1.Timezone != v2.Timezone {
+		d.Timezone = utils.StringPointer(v2.Timezone.String())
+	}
+	if v1.IncludeLocalCost != v2.IncludeLocalCost {
+		d.Include_local_cost = utils.BoolPointer(v2.IncludeLocalCost)
+	}
+	if v1.ReturnFileCode != v2.ReturnFileCode {
+		d.Return_file_code = utils.StringPointer(v2.ReturnFileCode)
+	}
+	if v1.ResponseGroup != v2.ResponseGroup {
+		d.Response_group = utils.StringPointer(v2.ResponseGroup)
+	}
+	if v1.ResponseType != v2.ResponseType {
+		d.Response_type = utils.StringPointer(v2.ResponseType)
+	}
+	if v1.RegulatoryCode != v2.RegulatoryCode {
+		d.Regulatory_code = utils.StringPointer(v2.RegulatoryCode)
+	}
+	rs1 := v1.ClientTracking.GetRule(separator)
+	rs2 := v2.ClientTracking.GetRule(separator)
+	if rs1 != rs2 {
+		d.Client_tracking = utils.StringPointer(rs2)
+	}
+	rs1 = v1.CustomerNumber.GetRule(separator)
+	rs2 = v2.CustomerNumber.GetRule(separator)
+	if rs1 != rs2 {
+		d.Customer_number = utils.StringPointer(rs2)
+	}
+	rs1 = v1.OrigNumber.GetRule(separator)
+	rs2 = v2.OrigNumber.GetRule(separator)
+	if rs1 != rs2 {
+		d.Orig_number = utils.StringPointer(rs2)
+	}
+	rs1 = v1.TermNumber.GetRule(separator)
+	rs2 = v2.TermNumber.GetRule(separator)
+	if rs1 != rs2 {
+		d.Term_number = utils.StringPointer(rs2)
+	}
+	rs1 = v1.BillToNumber.GetRule(separator)
+	rs2 = v2.BillToNumber.GetRule(separator)
+	if rs1 != rs2 {
+		d.Bill_to_number = utils.StringPointer(rs2)
+	}
+	rs1 = v1.Zipcode.GetRule(separator)
+	rs2 = v2.Zipcode.GetRule(separator)
+	if rs1 != rs2 {
+		d.Zipcode = utils.StringPointer(rs2)
+	}
+	rs1 = v1.Plus4.GetRule(separator)
+	rs2 = v2.Plus4.GetRule(separator)
+	if rs1 != rs2 {
+		d.Plus4 = utils.StringPointer(rs2)
+	}
+	rs1 = v1.P2PZipcode.GetRule(separator)
+	rs2 = v2.P2PZipcode.GetRule(separator)
+	if rs1 != rs2 {
+		d.P2PZipcode = utils.StringPointer(rs2)
+	}
+	rs1 = v1.P2PPlus4.GetRule(separator)
+	rs2 = v2.P2PPlus4.GetRule(separator)
+	if rs1 != rs2 {
+		d.P2PPlus4 = utils.StringPointer(rs2)
+	}
+	rs1 = v1.Units.GetRule(separator)
+	rs2 = v2.Units.GetRule(separator)
+	if rs1 != rs2 {
+		d.Units = utils.StringPointer(rs2)
+	}
+	rs1 = v1.UnitType.GetRule(separator)
+	rs2 = v2.UnitType.GetRule(separator)
+	if rs1 != rs2 {
+		d.Unit_type = utils.StringPointer(rs2)
+	}
+	rs1 = v1.TaxIncluded.GetRule(separator)
+	rs2 = v2.TaxIncluded.GetRule(separator)
+	if rs1 != rs2 {
+		d.Tax_included = utils.StringPointer(rs2)
+	}
+	rs1 = v1.TaxSitusRule.GetRule(separator)
+	rs2 = v2.TaxSitusRule.GetRule(separator)
+	if rs1 != rs2 {
+		d.Tax_situs_rule = utils.StringPointer(rs2)
+	}
+	rs1 = v1.TransTypeCode.GetRule(separator)
+	rs2 = v2.TransTypeCode.GetRule(separator)
+	if rs1 != rs2 {
+		d.Trans_type_code = utils.StringPointer(rs2)
+	}
+	rs1 = v1.SalesTypeCode.GetRule(separator)
+	rs2 = v2.SalesTypeCode.GetRule(separator)
+	if rs1 != rs2 {
+		d.Sales_type_code = utils.StringPointer(rs2)
+	}
+	rs1 = v1.TaxExemptionCodeList.GetRule(separator)
+	rs2 = v2.TaxExemptionCodeList.GetRule(separator)
+	if rs1 != rs2 {
+		d.Tax_exemption_code_list = utils.StringPointer(rs2)
+	}
+	return d
+}

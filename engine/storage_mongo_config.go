@@ -505,25 +505,7 @@ func (ms *MongoStorage) LoaderJsonCfg() (cfg []*config.LoaderJsonCfg, err error)
 	})
 	return
 }
-func (ms *MongoStorage) MailerJsonCfg() (cfg *config.MailerJsonCfg, err error) {
-	cfg = new(config.MailerJsonCfg)
-	r := &struct {
-		Section string
-		Cfg     *config.MailerJsonCfg
-	}{Cfg: cfg}
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColCfg).FindOne(sctx, bson.M{"section": config.MailerJSON})
-		if err := cur.Decode(r); err != nil {
-			cfg = nil
-			if err == mongo.ErrNoDocuments {
-				return nil
-			}
-			return err
-		}
-		return nil
-	})
-	return
-}
+
 func (ms *MongoStorage) SureTaxJsonCfg() (cfg *config.SureTaxJsonCfg, err error) {
 	cfg = new(config.SureTaxJsonCfg)
 	r := &struct {

@@ -80,3 +80,34 @@ func (alS AnalyzerSCfg) Clone() *AnalyzerSCfg {
 		CleanupInterval: alS.CleanupInterval,
 	}
 }
+
+// Analyzer service json config section
+type AnalyzerSJsonCfg struct {
+	Enabled          *bool
+	Db_path          *string
+	Index_type       *string
+	Ttl              *string
+	Cleanup_interval *string
+}
+
+func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJsonCfg {
+	if d == nil {
+		d = new(AnalyzerSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.DBPath != v2.DBPath {
+		d.Db_path = utils.StringPointer(v2.DBPath)
+	}
+	if v1.IndexType != v2.IndexType {
+		d.Index_type = utils.StringPointer(v2.IndexType)
+	}
+	if v1.TTL != v2.TTL {
+		d.Ttl = utils.StringPointer(v2.TTL.String())
+	}
+	if v1.CleanupInterval != v2.CleanupInterval {
+		d.Cleanup_interval = utils.StringPointer(v2.CleanupInterval.String())
+	}
+	return d
+}

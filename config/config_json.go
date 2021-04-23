@@ -47,7 +47,6 @@ const (
 	ThresholdSJSON      = "thresholds"
 	RouteSJSON          = "routes"
 	LoaderSJSON         = "loaders"
-	MailerJSON          = "mailer"
 	SureTaxJSON         = "suretax"
 	DispatcherSJSON     = "dispatchers"
 	RegistrarCJSON      = "registrarc"
@@ -76,7 +75,7 @@ var (
 	sortedCfgSections = []string{GeneralJSON, RPCConnsJSON, DataDBJSON, StorDBJSON, ListenJSON, TlsJSON, HTTPJSON,
 		CacheJSON, FilterSJSON, CDRsJSON, ERsJSON, SessionSJSON, AsteriskAgentJSON, FreeSWITCHAgentJSON,
 		KamailioAgentJSON, DiameterAgentJSON, RadiusAgentJSON, HTTPAgentJSON, DNSAgentJSON, AttributeSJSON,
-		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON, RouteSJSON, LoaderSJSON, MailerJSON, SureTaxJSON,
+		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON, RouteSJSON, LoaderSJSON, SureTaxJSON,
 		LoaderJSON, MigratorJSON, DispatcherSJSON, AnalyzerSJSON, AdminSJSON, EEsJSON, RateSJSON, SIPAgentJSON,
 		RegistrarCJSON, TemplatesJSON, ConfigSJSON, APIBanJSON, CoreSJSON, ActionSJSON, AccountSJSON, ConfigDBJSON}
 	sortedSectionsSet = utils.NewStringSet(sortedCfgSections)
@@ -108,7 +107,6 @@ type ConfigDB interface {
 	ThresholdSJsonCfg() (*ThresholdSJsonCfg, error)
 	RouteSJsonCfg() (*RouteSJsonCfg, error)
 	LoaderJsonCfg() ([]*LoaderJsonCfg, error)
-	MailerJsonCfg() (*MailerJsonCfg, error)
 	SureTaxJsonCfg() (*SureTaxJsonCfg, error)
 	DispatcherSJsonCfg() (*DispatcherSJsonCfg, error)
 	RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error)
@@ -427,18 +425,6 @@ func (jsnCfg CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
 	}
 	cfg := make([]*LoaderJsonCfg, 0)
 	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (jsnCfg CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
-	rawCfg, hasKey := jsnCfg[MailerJSON]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(MailerJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}
 	return cfg, nil

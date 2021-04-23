@@ -32,8 +32,8 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Listen_net:          utils.StringPointer(utils.UDP),
 		Listen_auth:         utils.StringPointer("127.0.0.1:1812"),
 		Listen_acct:         utils.StringPointer("127.0.0.1:1813"),
-		Client_secrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
-		Client_dictionaries: &map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		Client_secrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		Client_dictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
 		Sessions_conns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Request_processors: &[]*ReqProcessorJsnCfg{
 			{

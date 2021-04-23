@@ -49,34 +49,9 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 		da.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, connID := range *jsnCfg.Sessions_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			da.SessionSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
-			}
-		}
+		da.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(RequestProcessor)
-			var haveID bool
-			for _, rpSet := range da.RequestProcessors {
-				if reqProcJsn.ID != nil && rpSet.ID == *reqProcJsn.ID {
-					rp = rpSet // Will load data into the one set
-					haveID = true
-					break
-				}
-			}
-			if err = rp.loadFromJSONCfg(reqProcJsn, sep); err != nil {
-				return
-			}
-			if !haveID {
-				da.RequestProcessors = append(da.RequestProcessors, rp)
-			}
-		}
-	}
+	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors, sep)
 	return
 }
 
@@ -96,14 +71,7 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]in
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 
 	if da.SessionSConns != nil {
-		sessionSConns := make([]string, len(da.SessionSConns))
-		for i, item := range da.SessionSConns {
-			sessionSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
-				sessionSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		initialMP[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
 	}
 	return
 }
@@ -117,10 +85,7 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 		Timezone:  da.Timezone,
 	}
 	if da.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(da.SessionSConns))
-		for i, con := range da.SessionSConns {
-			cln.SessionSConns[i] = con
-		}
+		cln.SessionSConns = utils.CloneStringSlice(da.SessionSConns)
 	}
 	if da.RequestProcessors != nil {
 		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -129,4 +94,37 @@ func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
 		}
 	}
 	return
+}
+
+// DNSAgentJsonCfg
+type DNSAgentJsonCfg struct {
+	Enabled            *bool
+	Listen             *string
+	Listen_net         *string
+	Sessions_conns     *[]string
+	Timezone           *string
+	Request_processors *[]*ReqProcessorJsnCfg
+}
+
+func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg, separator string) *DNSAgentJsonCfg {
+	if d == nil {
+		d = new(DNSAgentJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.Listen != v2.Listen {
+		d.Listen = utils.StringPointer(v2.Listen)
+	}
+	if v1.ListenNet != v2.ListenNet {
+		d.Listen_net = utils.StringPointer(v2.ListenNet)
+	}
+	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
+		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+	}
+	if v1.Timezone != v2.Timezone {
+		d.Timezone = utils.StringPointer(v2.Timezone)
+	}
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	return d
 }

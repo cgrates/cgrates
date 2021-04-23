@@ -49,25 +49,13 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 		rCfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		rCfg.StringIndexedFields = &sif
+		rCfg.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		rCfg.PrefixIndexedFields = &pif
+		rCfg.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		rCfg.SuffixIndexedFields = &sif
+		rCfg.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		rCfg.NestedFields = *jsnCfg.Nested_fields
@@ -77,25 +65,13 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 		rCfg.RateIndexedSelects = *jsnCfg.Rate_indexed_selects
 	}
 	if jsnCfg.Rate_string_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Rate_string_indexed_fields))
-		for i, fID := range *jsnCfg.Rate_string_indexed_fields {
-			sif[i] = fID
-		}
-		rCfg.RateStringIndexedFields = &sif
+		rCfg.RateStringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_string_indexed_fields))
 	}
 	if jsnCfg.Rate_prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Rate_prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Rate_prefix_indexed_fields {
-			pif[i] = fID
-		}
-		rCfg.RatePrefixIndexedFields = &pif
+		rCfg.RatePrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_prefix_indexed_fields))
 	}
 	if jsnCfg.Rate_suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Rate_suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Rate_suffix_indexed_fields {
-			sif[i] = fID
-		}
-		rCfg.RateSuffixIndexedFields = &sif
+		rCfg.RateSuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Rate_suffix_indexed_fields))
 	}
 	if jsnCfg.Rate_nested_fields != nil {
 		rCfg.RateNestedFields = *jsnCfg.Rate_nested_fields
@@ -117,46 +93,22 @@ func (rCfg *RateSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.Verbosity:             rCfg.Verbosity,
 	}
 	if rCfg.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*rCfg.StringIndexedFields))
-		for i, item := range *rCfg.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.StringIndexedFields)
 	}
 	if rCfg.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*rCfg.PrefixIndexedFields))
-		for i, item := range *rCfg.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.PrefixIndexedFields)
 	}
 	if rCfg.SuffixIndexedFields != nil {
-		sufixIndexedFields := make([]string, len(*rCfg.SuffixIndexedFields))
-		for i, item := range *rCfg.SuffixIndexedFields {
-			sufixIndexedFields[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = sufixIndexedFields
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.SuffixIndexedFields)
 	}
 	if rCfg.RateStringIndexedFields != nil {
-		rateStringIndexedFields := make([]string, len(*rCfg.RateStringIndexedFields))
-		for i, item := range *rCfg.RateStringIndexedFields {
-			rateStringIndexedFields[i] = item
-		}
-		initialMP[utils.RateStringIndexedFieldsCfg] = rateStringIndexedFields
+		initialMP[utils.RateStringIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateStringIndexedFields)
 	}
 	if rCfg.RatePrefixIndexedFields != nil {
-		ratePrefixIndexedFields := make([]string, len(*rCfg.RatePrefixIndexedFields))
-		for i, item := range *rCfg.RatePrefixIndexedFields {
-			ratePrefixIndexedFields[i] = item
-		}
-		initialMP[utils.RatePrefixIndexedFieldsCfg] = ratePrefixIndexedFields
+		initialMP[utils.RatePrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RatePrefixIndexedFields)
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
-		rateSufixIndexedFields := make([]string, len(*rCfg.RateSuffixIndexedFields))
-		for i, item := range *rCfg.RateSuffixIndexedFields {
-			rateSufixIndexedFields[i] = item
-		}
-		initialMP[utils.RateSuffixIndexedFieldsCfg] = rateSufixIndexedFields
+		initialMP[utils.RateSuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields)
 	}
 	return
 }
@@ -172,47 +124,69 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 		Verbosity:          rCfg.Verbosity,
 	}
 	if rCfg.StringIndexedFields != nil {
-		idx := make([]string, len(*rCfg.StringIndexedFields))
-		for i, dx := range *rCfg.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.StringIndexedFields))
 	}
 	if rCfg.PrefixIndexedFields != nil {
-		idx := make([]string, len(*rCfg.PrefixIndexedFields))
-		for i, dx := range *rCfg.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.PrefixIndexedFields))
 	}
 	if rCfg.SuffixIndexedFields != nil {
-		idx := make([]string, len(*rCfg.SuffixIndexedFields))
-		for i, dx := range *rCfg.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.SuffixIndexedFields))
 	}
 
 	if rCfg.RateStringIndexedFields != nil {
-		idx := make([]string, len(*rCfg.RateStringIndexedFields))
-		for i, dx := range *rCfg.RateStringIndexedFields {
-			idx[i] = dx
-		}
-		cln.RateStringIndexedFields = &idx
+		cln.RateStringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateStringIndexedFields))
 	}
 	if rCfg.RatePrefixIndexedFields != nil {
-		idx := make([]string, len(*rCfg.RatePrefixIndexedFields))
-		for i, dx := range *rCfg.RatePrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.RatePrefixIndexedFields = &idx
+		cln.RatePrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RatePrefixIndexedFields))
 	}
 	if rCfg.RateSuffixIndexedFields != nil {
-		idx := make([]string, len(*rCfg.RateSuffixIndexedFields))
-		for i, dx := range *rCfg.RateSuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.RateSuffixIndexedFields = &idx
+		cln.RateSuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rCfg.RateSuffixIndexedFields))
 	}
 	return
+}
+
+type RateSJsonCfg struct {
+	Enabled                    *bool
+	Indexed_selects            *bool
+	String_indexed_fields      *[]string
+	Prefix_indexed_fields      *[]string
+	Suffix_indexed_fields      *[]string
+	Nested_fields              *bool // applies when indexed fields is not defined
+	Rate_indexed_selects       *bool
+	Rate_string_indexed_fields *[]string
+	Rate_prefix_indexed_fields *[]string
+	Rate_suffix_indexed_fields *[]string
+	Rate_nested_fields         *bool // applies when indexed fields is not defined
+	Verbosity                  *int
+}
+
+func diffRateSJsonCfg(d *RateSJsonCfg, v1, v2 *RateSCfg) *RateSJsonCfg {
+	if d == nil {
+		d = new(RateSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	if v1.RateIndexedSelects != v2.RateIndexedSelects {
+		d.Rate_indexed_selects = utils.BoolPointer(v2.RateIndexedSelects)
+	}
+	d.Rate_string_indexed_fields = diffIndexSlice(d.Rate_string_indexed_fields, v1.RateStringIndexedFields, v2.RateStringIndexedFields)
+	d.Rate_prefix_indexed_fields = diffIndexSlice(d.Rate_prefix_indexed_fields, v1.RatePrefixIndexedFields, v2.RatePrefixIndexedFields)
+	d.Rate_suffix_indexed_fields = diffIndexSlice(d.Rate_suffix_indexed_fields, v1.RateSuffixIndexedFields, v2.RateSuffixIndexedFields)
+	if v1.RateNestedFields != v2.RateNestedFields {
+		d.Rate_nested_fields = utils.BoolPointer(v2.RateNestedFields)
+	}
+	if v1.Verbosity != v2.Verbosity {
+		d.Verbosity = utils.IntPointer(v2.Verbosity)
+	}
+	return d
 }

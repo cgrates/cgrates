@@ -47,14 +47,7 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 		rlcfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		rlcfg.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
-		for idx, conn := range *jsnCfg.Thresholds_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			rlcfg.ThresholdSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				rlcfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
-			}
-		}
+		rlcfg.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.Store_interval != nil {
 		if rlcfg.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
@@ -62,25 +55,13 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.String_indexed_fields))
-		for i, fID := range *jsnCfg.String_indexed_fields {
-			sif[i] = fID
-		}
-		rlcfg.StringIndexedFields = &sif
+		rlcfg.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.String_indexed_fields))
 	}
 	if jsnCfg.Prefix_indexed_fields != nil {
-		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
-		for i, fID := range *jsnCfg.Prefix_indexed_fields {
-			pif[i] = fID
-		}
-		rlcfg.PrefixIndexedFields = &pif
+		rlcfg.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Prefix_indexed_fields))
 	}
 	if jsnCfg.Suffix_indexed_fields != nil {
-		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
-		for i, fID := range *jsnCfg.Suffix_indexed_fields {
-			sif[i] = fID
-		}
-		rlcfg.SuffixIndexedFields = &sif
+		rlcfg.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*jsnCfg.Suffix_indexed_fields))
 	}
 	if jsnCfg.Nested_fields != nil {
 		rlcfg.NestedFields = *jsnCfg.Nested_fields
@@ -97,35 +78,16 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]interface{}
 		utils.StoreIntervalCfg:  utils.EmptyString,
 	}
 	if rlcfg.ThresholdSConns != nil {
-		thresholdSConns := make([]string, len(rlcfg.ThresholdSConns))
-		for i, item := range rlcfg.ThresholdSConns {
-			thresholdSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds) {
-				thresholdSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
+		initialMP[utils.ThresholdSConnsCfg] = getInternalJSONConns(rlcfg.ThresholdSConns)
 	}
 	if rlcfg.StringIndexedFields != nil {
-		stringIndexedFields := make([]string, len(*rlcfg.StringIndexedFields))
-		for i, item := range *rlcfg.StringIndexedFields {
-			stringIndexedFields[i] = item
-		}
-		initialMP[utils.StringIndexedFieldsCfg] = stringIndexedFields
+		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.StringIndexedFields)
 	}
 	if rlcfg.PrefixIndexedFields != nil {
-		prefixIndexedFields := make([]string, len(*rlcfg.PrefixIndexedFields))
-		for i, item := range *rlcfg.PrefixIndexedFields {
-			prefixIndexedFields[i] = item
-		}
-		initialMP[utils.PrefixIndexedFieldsCfg] = prefixIndexedFields
+		initialMP[utils.PrefixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.PrefixIndexedFields)
 	}
 	if rlcfg.SuffixIndexedFields != nil {
-		suffixIndexedFields := make([]string, len(*rlcfg.SuffixIndexedFields))
-		for i, item := range *rlcfg.SuffixIndexedFields {
-			suffixIndexedFields[i] = item
-		}
-		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*rlcfg.SuffixIndexedFields)
 	}
 	if rlcfg.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = rlcfg.StoreInterval.String()
@@ -142,32 +104,54 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 		NestedFields:   rlcfg.NestedFields,
 	}
 	if rlcfg.ThresholdSConns != nil {
-		cln.ThresholdSConns = make([]string, len(rlcfg.ThresholdSConns))
-		for i, con := range rlcfg.ThresholdSConns {
-			cln.ThresholdSConns[i] = con
-		}
+		cln.ThresholdSConns = utils.CloneStringSlice(rlcfg.ThresholdSConns)
 	}
 
 	if rlcfg.StringIndexedFields != nil {
-		idx := make([]string, len(*rlcfg.StringIndexedFields))
-		for i, dx := range *rlcfg.StringIndexedFields {
-			idx[i] = dx
-		}
-		cln.StringIndexedFields = &idx
+		cln.StringIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.StringIndexedFields))
 	}
 	if rlcfg.PrefixIndexedFields != nil {
-		idx := make([]string, len(*rlcfg.PrefixIndexedFields))
-		for i, dx := range *rlcfg.PrefixIndexedFields {
-			idx[i] = dx
-		}
-		cln.PrefixIndexedFields = &idx
+		cln.PrefixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.PrefixIndexedFields))
 	}
 	if rlcfg.SuffixIndexedFields != nil {
-		idx := make([]string, len(*rlcfg.SuffixIndexedFields))
-		for i, dx := range *rlcfg.SuffixIndexedFields {
-			idx[i] = dx
-		}
-		cln.SuffixIndexedFields = &idx
+		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*rlcfg.SuffixIndexedFields))
 	}
 	return
+}
+
+// ResourceLimiter service config section
+type ResourceSJsonCfg struct {
+	Enabled               *bool
+	Indexed_selects       *bool
+	Thresholds_conns      *[]string
+	Store_interval        *string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Suffix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
+}
+
+func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *ResourceSJsonCfg {
+	if d == nil {
+		d = new(ResourceSJsonCfg)
+	}
+	if v1.Enabled != v2.Enabled {
+		d.Enabled = utils.BoolPointer(v2.Enabled)
+	}
+	if v1.IndexedSelects != v2.IndexedSelects {
+		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
+	}
+	if !utils.SliceStringEqual(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+	}
+	if v1.StoreInterval != v2.StoreInterval {
+		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())
+	}
+	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
+	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)
+	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
+	if v1.NestedFields != v2.NestedFields {
+		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	return d
 }

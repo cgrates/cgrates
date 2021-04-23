@@ -487,6 +487,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 			break
 		}
 		args.CGREvent.Tenant = evRply.CGREvent.Tenant
+		tnt = evRply.CGREvent.Tenant
 		lastID = evRply.MatchedProfiles[0]
 		matchedIDs = append(matchedIDs, lastID)
 		for _, fldName := range evRply.AlteredFields {
