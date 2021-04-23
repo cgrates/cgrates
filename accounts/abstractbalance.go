@@ -61,6 +61,8 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
+	dbtUnits := new(decimal.Big).Copy(usage)
+
 	// balanceLimit
 	var hasLmt bool
 	var blncLmt *utils.Decimal
@@ -71,16 +73,6 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, blncLmt.Big)
 		hasLmt = true
 	}
-	// unitFactor
-	var uF *utils.UnitFactor
-	if uF, err = unitFactor(aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
-		return
-	}
-	var hasUF bool
-	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		usage = utils.MultiplyBig(usage, uF.Factor.Big)
-		hasUF = true
-	}
 
 	// costIncrement
 	var costIcrm *utils.CostIncrement
@@ -88,71 +80,62 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-
+	// unitFactor
+	var uF *utils.UnitFactor
+	if uF, err = unitFactor(aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
+		return
+	}
+	var hasUF bool
+	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+		dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
+		hasUF = true
+	}
 	// balance smaller than usage, correct usage if the balance has limit
-	if aB.blnCfg.Units.Big.Cmp(usage) == -1 && blncLmt != nil {
+	if aB.blnCfg.Units.Big.Cmp(dbtUnits) == -1 && blncLmt != nil {
 		// decrease the usage to match the maximum increments
 		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		usage = roundUnitsWithIncrements(aB.blnCfg.Units.Big, costIcrm.Increment.Big)
-	}
-	if costIcrm.RecurrentFee != nil &&
-		costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
-		(costIcrm.FixedFee == nil ||
-			costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
-		// cost 0, no need of concrete
-		ec = utils.NewEventCharges()
-		ec.Abstracts = &utils.Decimal{usage}
-		// UnitFactors
-		var ufID string
+		maxDbt := new(decimal.Big).Copy(aB.blnCfg.Units.Big)
 		if hasUF {
-			ufID = utils.UUIDSha1Prefix()
-			ec.UnitFactors[ufID] = uF
+			maxDbt = utils.DivideBig(maxDbt, uF.Factor.Big)
 		}
-		// Rating
-		ratingID := utils.UUIDSha1Prefix()
-		ec.Rating[ratingID] = &utils.RateSInterval{
-			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrement{
+		usage = roundUnitsWithIncrements(maxDbt, costIcrm.Increment.Big)
+	}
+
+	/*
+		if costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
+			(costIcrm.FixedFee == nil ||
+				costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
+
+			acntID := utils.UUIDSha1Prefix()
+			ec.Accounting[acntID] = &utils.AccountCharge{
+				AccountID:    aB.acntID,
+				BalanceID:    aB.blnCfg.ID,
+				Units:        &utils.Decimal{usage},
+				BalanceLimit: blncLmt,
+				UnitFactorID: ufID,
+				RatingID:     ratingID,
+			}
+			ec.ChargingIntervals = []*utils.ChargingInterval{
 				{
-					IncrementStart: utils.NewDecimal(0, 0),
-					Rate: &utils.Rate{
-						ID: utils.MetaCostIncrement,
-						IntervalRates: []*utils.IntervalRate{
-							{
-								FixedFee: utils.NewDecimal(0, 0),
-							},
+					Increments: []*utils.ChargingIncrement{
+						{
+							Units:           &utils.Decimal{usage},
+							AccountChargeID: acntID,
+							CompressFactor:  1,
 						},
 					},
 					CompressFactor: 1,
-					Usage:          &utils.Decimal{usage},
 				},
-			},
-			CompressFactor: 1,
-		}
-		acntID := utils.UUIDSha1Prefix()
-		ec.Accounting[acntID] = &utils.AccountCharge{
-			AccountID:    aB.acntID,
-			BalanceID:    aB.blnCfg.ID,
-			Units:        &utils.Decimal{usage},
-			BalanceLimit: blncLmt,
-			UnitFactorID: ufID,
-			RatingID:     ratingID,
-		}
-		ec.ChargingIntervals = []*utils.ChargingInterval{
-			{
-				Increments: []*utils.ChargingIncrement{
-					{
-						Units:           &utils.Decimal{usage},
-						AccountChargeID: acntID,
-						CompressFactor:  1,
-					},
-				},
-				CompressFactor: 1,
-			},
-		}
-	} else {
+			}
+	*/
+	var ecCost *utils.EventCharges
+	if (costIcrm.FixedFee != nil &&
+		costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
+		(costIcrm.RecurrentFee != nil &&
+			costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0) {
+
 		// attempt to debit usage with cost
-		if ec, err = maxDebitAbstractsFromConcretes(usage,
+		if ecCost, err = maxDebitAbstractsFromConcretes(usage,
 			aB.acntID, aB.cncrtBlncs,
 			aB.connMgr, cgrEv,
 			aB.attrSConns, aB.blnCfg.AttributeIDs,
@@ -160,16 +143,95 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 			costIcrm); err != nil {
 			return
 		}
+
 	}
 
-	if ec.Abstracts.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, ec.Abstracts.Big)
+	if ecCost != nil {
+		usage = ecCost.Abstracts.Big
+		dbtUnits = ecCost.Abstracts.Big
+		if hasUF {
+			dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
+		}
+	}
+	if dbtUnits.Cmp(decimal.New(0, 0)) != 0 {
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, dbtUnits)
 	}
 	if hasLmt { // put back the limit
 		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)
 	}
+
+	// EvenCharges building
+	ec = utils.NewEventCharges()
+	ec.Abstracts = &utils.Decimal{usage}
+	if ecCost != nil {
+		ec.Concretes = ecCost.Concretes
+	}
+	// UnitFactors
+	var ufID string
 	if hasUF {
-		usage = utils.DivideBig(usage, uF.Factor.Big)
+		ufID = utils.UUIDSha1Prefix()
+		ec.UnitFactors[ufID] = uF
+	}
+	// RatingID
+	var ratingID string
+	if costIcrm != nil {
+		ratingID = utils.UUIDSha1Prefix()
+		ec.Rating[ratingID] = &utils.RateSInterval{
+			Increments: []*utils.RateSIncrement{
+				{
+					Rate: &utils.Rate{
+						ID: utils.MetaCostIncrement,
+						IntervalRates: []*utils.IntervalRate{
+							{
+								FixedFee:     costIcrm.FixedFee,
+								RecurrentFee: costIcrm.RecurrentFee,
+							},
+						},
+					},
+					CompressFactor: 1,
+				},
+			},
+			CompressFactor: 1,
+		}
+	} else { // take it from first increment, not copying since it will be done bellow
+		ratingID = ecCost.Accounting[ecCost.ChargingIntervals[0].Increments[0].AccountChargeID].RatingID
+	}
+	// AccountingID
+	acntID := utils.UUIDSha1Prefix()
+	ec.Accounting[acntID] = &utils.AccountCharge{
+		AccountID:    aB.acntID,
+		BalanceID:    aB.blnCfg.ID,
+		BalanceLimit: blncLmt,
+		UnitFactorID: ufID,
+		RatingID:     ratingID,
+	}
+	if ecCost != nil {
+		for _, ival := range ecCost.ChargingIntervals {
+			for _, icrm := range ival.Increments {
+				ec.Accounting[acntID].JoinedChargeIDs = append(ec.Accounting[acntID].JoinedChargeIDs, icrm.AccountChargeID)
+				ec.Accounting[icrm.AccountChargeID] = ecCost.Accounting[icrm.AccountChargeID]
+				// Copy the unitFactor data
+				if ecCost.Accounting[icrm.AccountChargeID].UnitFactorID != utils.EmptyString {
+					ec.UnitFactors[ecCost.Accounting[icrm.AccountChargeID].UnitFactorID] = ecCost.UnitFactors[ecCost.Accounting[icrm.AccountChargeID].UnitFactorID]
+				}
+				// Copy the Rating data
+				if ecCost.Accounting[icrm.AccountChargeID].RatingID != utils.EmptyString {
+					ec.Rating[ecCost.Accounting[icrm.AccountChargeID].RatingID] = ecCost.Rating[ecCost.Accounting[icrm.AccountChargeID].RatingID]
+				}
+			}
+		}
+	}
+	ec.ChargingIntervals = []*utils.ChargingInterval{
+		{
+			Increments: []*utils.ChargingIncrement{
+				{
+					Units:           &utils.Decimal{usage},
+					AccountChargeID: acntID,
+					CompressFactor:  1,
+				},
+			},
+			CompressFactor: 1,
+		},
 	}
 	return
 }

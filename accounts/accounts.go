@@ -245,6 +245,7 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 		}
 		usage = utils.SubstractBig(usage, used)
 		ec.Merge(ecDbt)
+		ec.Accounts[acnt.ID] = acnt
 	}
 	return
 }

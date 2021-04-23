@@ -22,11 +22,11 @@ import (
 	"math"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/ericlagergren/decimal"
 )
 
+/*
 func TestECNewEventCharges(t *testing.T) {
 	expected := &EventCharges{
 		Accounting:  make(map[string]*AccountCharge),
@@ -39,6 +39,7 @@ func TestECNewEventCharges(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
 	}
 }
+*/
 
 func TestECMergeAbstractsEmpty(t *testing.T) {
 	ec1 := &EventCharges{
@@ -473,7 +474,7 @@ func TestCompressEqualsChargingInterval(t *testing.T) {
 	}
 }
 */
-
+/*
 func TestAsExtEventCharges(t *testing.T) {
 	evCh := &EventCharges{
 		ChargingIntervals: []*ChargingInterval{
@@ -626,3 +627,4 @@ func TestAsExtEventChargersCheckErrors(t *testing.T) {
 	}
 	evCh.Rating["first_rates_interval"].IntervalStart = NewDecimal(0, 0)
 }
+*/

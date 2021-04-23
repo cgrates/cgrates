@@ -28,6 +28,7 @@ func NewEventCharges() (ec *EventCharges) {
 		Accounting:  make(map[string]*AccountCharge),
 		UnitFactors: make(map[string]*UnitFactor),
 		Rating:      make(map[string]*RateSInterval),
+		Accounts:    make(map[string]*Account),
 	}
 	return
 }
@@ -38,16 +39,16 @@ type EventCharges struct {
 	Concretes *Decimal // total concrete units charged
 
 	ChargingIntervals []*ChargingInterval
-	Accounts          []*Account
 
 	Accounting  map[string]*AccountCharge
 	UnitFactors map[string]*UnitFactor
 	Rating      map[string]*RateSInterval
+	Accounts    map[string]*Account
 }
 
 // Merge will merge the event charges into existing
 func (ec *EventCharges) Merge(eCs ...*EventCharges) {
-	ec.syncIDs(eCs...) // so we can compare properly
+	//ec.SyncIDs(eCs...) // so we can compare properly
 	for _, nEc := range eCs {
 		if sumAbst := SumDecimalAsBig(ec.Abstracts, nEc.Abstracts); sumAbst != nil {
 			ec.Abstracts = &Decimal{sumAbst}
@@ -55,7 +56,19 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 		if sumCrct := SumDecimalAsBig(ec.Concretes, nEc.Concretes); sumCrct != nil {
 			ec.Concretes = &Decimal{sumCrct}
 		}
-		ec.appendChargingIntervals(ec.ChargingIntervals...)
+		ec.appendChargingIntervals(nEc.ChargingIntervals...)
+		for acntID, acntChrg := range nEc.Accounting {
+			ec.Accounting[acntID] = acntChrg
+		}
+		for ufID, uF := range nEc.UnitFactors {
+			ec.UnitFactors[ufID] = uF
+		}
+		for riID, rI := range nEc.Rating {
+			ec.Rating[riID] = rI
+		}
+		for acntID, acnt := range nEc.Accounts {
+			ec.Accounts[acntID] = acnt
+		}
 	}
 }
 
@@ -75,8 +88,8 @@ func (ec *EventCharges) appendChargingIntervals(cIls ...*ChargingInterval) {
 	}
 }
 
-// syncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
-func (ec *EventCharges) syncIDs(eCs ...*EventCharges) {
+// SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
+func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
 		for _, cIl := range nEc.ChargingIntervals {
 			for _, cIcrm := range cIl.Increments {
@@ -151,16 +164,6 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 			}
 		}
 	}
-	if ec.Accounts != nil {
-		eEc.Accounts = make([]*ExtAccount, len(ec.Accounts))
-		for idx, val := range ec.Accounts {
-			if extAccs, err := val.AsExtAccount(); err != nil {
-				return nil, err
-			} else {
-				eEc.Accounts[idx] = extAccs
-			}
-		}
-	}
 	if ec.Accounting != nil {
 		eEc.Accounting = make(map[string]*ExtAccountCharge, len(eEc.Accounting))
 		for key, val := range ec.Accounting {
@@ -188,6 +191,16 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 				return nil, err
 			} else {
 				eEc.Rating[key] = extRate
+			}
+		}
+	}
+	if ec.Accounts != nil {
+		eEc.Accounts = make(map[string]*ExtAccount, len(ec.Accounts))
+		for acntID, acnt := range ec.Accounts {
+			if extAccs, err := acnt.AsExtAccount(); err != nil {
+				return nil, err
+			} else {
+				eEc.Accounts[acntID] = extAccs
 			}
 		}
 	}
@@ -230,11 +243,11 @@ type ExtEventCharges struct {
 	Concretes *float64
 
 	ChargingIntervals []*ExtChargingInterval
-	Accounts          []*ExtAccount
 
 	Accounting  map[string]*ExtAccountCharge
 	UnitFactors map[string]*ExtUnitFactor
 	Rating      map[string]*ExtRateSInterval
+	Accounts    map[string]*ExtAccount
 }
 
 type ChargingInterval struct {
