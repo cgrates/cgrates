@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/ltcache"
+
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/engine"
@@ -48,8 +50,15 @@ var (
 		testCacheSStartEngine,
 		testCacheSRpcConn,
 		testCacheSSetAttributeProfile,
-		testCacheSSetRateProfile,
 		testCacheSHasItemAttributeProfile,
+		testCacheSRemoveItemAttributeProfile,
+		testCacheSLoadCache,
+		testCacheSRemoveItemsAndReloadCache,
+		testCacheSSetRateProfile,
+		testCacheSSetMoreAttributeProfiles,
+		testCacheGetStatusMoreIDs,
+		testCacheSClearCache,
+
 		testCacheSStopEngine,
 	}
 )
@@ -141,37 +150,6 @@ func testCacheSSetAttributeProfile(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
-
-	expectedAttr := &engine.APIAttributeProfile{
-		Tenant:    utils.CGRateSorg,
-		ID:        "TEST_ATTRIBUTES_IT_TEST",
-		Contexts:  []string{"*any"},
-		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Attributes: []*engine.ExternalAttribute{
-			{
-				Path:  utils.AccountField,
-				Type:  utils.MetaConstant,
-				Value: "1002",
-			},
-			{
-				Path:  "*tenant",
-				Type:  utils.MetaConstant,
-				Value: "cgrates.itsyscom",
-			},
-		},
-	}
-	var result *engine.APIAttributeProfile
-	if err := chcRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: utils.CGRateSorg,
-				ID:     "TEST_ATTRIBUTES_IT_TEST",
-			},
-		}, &result); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(result, expectedAttr) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
-	}
 }
 
 func testCacheSSetRateProfile(t *testing.T) {
@@ -225,6 +203,7 @@ func testCacheSSetRateProfile(t *testing.T) {
 
 func testCacheSHasItemAttributeProfile(t *testing.T) {
 	var reply bool
+	//it is not cached, so he cannot take it from cache
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheAttributeProfiles,
@@ -234,10 +213,354 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem,
 		args, &reply); err != nil {
 		t.Error(err)
+	} else if reply {
+		t.Errorf("Unexpected reply result")
+	}
+
+	//also cannot take any itemIDs
+	argsIds := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	var result []string
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+		argsIds, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+
+	expectedAttr := &engine.APIAttributeProfile{
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_ATTRIBUTES_IT_TEST",
+		Contexts:  []string{"*any"},
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		Attributes: []*engine.ExternalAttribute{
+			{
+				Path:  utils.AccountField,
+				Type:  utils.MetaConstant,
+				Value: "1002",
+			},
+			{
+				Path:  "*tenant",
+				Type:  utils.MetaConstant,
+				Value: "cgrates.itsyscom",
+			},
+		},
+	}
+	var resultAtr *engine.APIAttributeProfile
+	if err := chcRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "TEST_ATTRIBUTES_IT_TEST",
+			},
+		}, &resultAtr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resultAtr, expectedAttr) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedAttr), utils.ToJSON(result))
+	}
+
+	args = &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
+		},
+	}
+	//Getting an profile from db will set it in cache
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem,
+		args, &reply); err != nil {
+		t.Error(err)
 	} else if !reply {
 		t.Errorf("Unexpected reply result")
 	}
 
+	//also can take from cache now
+	expectedResult := []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"}
+	argsIds = &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+		argsIds, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedResult, result) {
+		t.Errorf("Expected %+v, received %+v", expectedResult, result)
+	}
+}
+
+func testCacheSRemoveItemAttributeProfile(t *testing.T) {
+	var reply string
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
+		},
+	}
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1RemoveItem,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	//as we removed it, we cannot take it from cache
+	var result bool
+	//it is not cached, so he cannot take it from cache
+	argsHasItm := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
+		},
+	}
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem,
+		argsHasItm, &result); err != nil {
+		t.Error(err)
+	} else if result {
+		t.Errorf("Unexpected reply result")
+	}
+
+	//also cannot take any itemIDs
+	argsIds := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	var resultIDs []string
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+		argsIds, &resultIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func testCacheSLoadCache(t *testing.T) {
+	var reply string
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache,
+		utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	var rcvStats map[string]*ltcache.CacheStats
+	expstats := engine.GetDefaultEmptyCacheStats()
+	expstats[utils.CacheAttributeProfiles].Items = 1
+	expstats[utils.CacheAttributeFilterIndexes].Groups = 1
+	expstats[utils.CacheAttributeFilterIndexes].Items = 1
+	expstats[utils.CacheLoadIDs].Items = 26
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
+		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvStats, expstats) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expstats), utils.ToJSON(rcvStats))
+	}
+}
+
+func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
+	//as we loaded it, we can take the item
+	var result []string
+	expectedResult := []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"}
+	argsIds := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+		argsIds, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedResult, result) {
+		t.Errorf("Expected %+v, received %+v", expectedResult, result)
+	}
+
+	//remove all items
+	argsRemove := utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
+		},
+	}
+	var replyRem string
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1RemoveItems,
+		argsRemove, &replyRem); err != nil {
+		t.Error(err)
+	} else if replyRem != utils.OK {
+		t.Errorf("Unexpected reply return")
+	}
+
+	//as we removed the items, we cannot take it from cache
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+		argsIds, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, result)
+	}
+
+	//reload cache
+	var reply string
+	argsReload := &utils.AttrReloadCacheWithAPIOpts{
+		ArgsCache: map[string][]string{
+			utils.AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
+		},
+	}
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache,
+		argsReload, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	args := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TEST_ATTRIBUTES_IT_TEST",
+		},
+	}
+	var replyBool bool
+	//Getting an profile from db will set it in cache
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1HasItem,
+		args, &replyBool); err != nil {
+		t.Error(err)
+	} else if !replyBool {
+		t.Errorf("Unexpected reply result")
+	}
+
+	//also can take from cache now
+	expectedResult = []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"}
+	argsIds = &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetItemIDs,
+		argsIds, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedResult, result) {
+		t.Errorf("Expected %+v, received %+v", expectedResult, result)
+	}
+}
+
+func testCacheSSetMoreAttributeProfiles(t *testing.T) {
+	attrPrf1 := &engine.AttributeWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field1",
+					Value: "Value1",
+				},
+			},
+			Weight: 10,
+		},
+	}
+	attrPrf2 := &engine.AttributeWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_2",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~*req.Field1:Value1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field2",
+					Value: "Value2",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	attrPrf3 := &engine.AttributeWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_3",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~*req.Field2:Value2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + "Field3",
+					Value: "Value3",
+				},
+			},
+			Weight: 30,
+		},
+	}
+	// Add attributeProfiles
+	var result string
+	if err := chcRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := chcRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := chcRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		attrPrf3, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testCacheGetStatusMoreIDs(t *testing.T) {
+	var reply string
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache,
+		utils.NewAttrReloadCacheWithOpts(), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	var rcvStats map[string]*ltcache.CacheStats
+	expstats := engine.GetDefaultEmptyCacheStats()
+	expstats[utils.CacheAttributeProfiles].Items = 4
+	expstats[utils.CacheAttributeFilterIndexes].Groups = 2
+	expstats[utils.CacheAttributeFilterIndexes].Items = 4
+	expstats[utils.CacheRateProfiles].Items = 1
+	expstats[utils.CacheRateProfilesFilterIndexes].Groups = 1
+	expstats[utils.CacheRateProfilesFilterIndexes].Items = 1
+	expstats[utils.CacheRateFilterIndexes].Groups = 1
+	expstats[utils.CacheRateFilterIndexes].Items = 1
+	expstats[utils.CacheFilters].Items = 4
+	expstats[utils.CacheRPCConnections].Items = 1
+	expstats[utils.CacheLoadIDs].Items = 26
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
+		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvStats, expstats) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expstats), utils.ToJSON(rcvStats))
+	}
+}
+
+func testCacheSClearCache(t *testing.T) {
+	var reply string
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1Clear,
+		&utils.AttrCacheIDsWithAPIOpts{
+			CacheIDs: nil,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//all cache cleared, empty items in cache
+	var rcvStats map[string]*ltcache.CacheStats
+	expStats := engine.GetDefaultEmptyCacheStats()
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
+		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvStats, expStats) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
+	}
 }
 
 func testCacheSStopEngine(t *testing.T) {
