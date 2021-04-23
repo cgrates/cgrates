@@ -38,7 +38,7 @@ func NewCacheSv1(cacheS *engine.CacheS) *CacheSv1 {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (chSv1 *CacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
+func (chSv1 *CacheSv1) GetItemIDs(_ *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) error {
 	return chSv1.cacheS.V1GetItemIDs(args, reply)
 }
@@ -56,13 +56,13 @@ func (chSv1 *CacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts
 }
 
 // RemoveItem removes the Item with ID from cache
-func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItem(args, reply)
 }
 
 // RemoveItems removes the Items with ID from cache
-func (chSv1 *CacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveItems(_ *context.Context, args utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItems(args, reply)
 }
@@ -74,7 +74,7 @@ func (chSv1 *CacheSv1) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithA
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (chSv1 *CacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithAPIOpts, //
+func (chSv1 *CacheSv1) GetCacheStats(_ *context.Context, args *utils.AttrCacheIDsWithAPIOpts, //
 	rply *map[string]*ltcache.CacheStats) error {
 	return chSv1.cacheS.V1GetCacheStats(args, rply)
 }
