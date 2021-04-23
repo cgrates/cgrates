@@ -431,3 +431,25 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
+
+func TestDispatcherServiceCall1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rpcCl := map[string]chan rpcclient.ClientConnector{}
+	connMng := engine.NewConnManager(cfg, rpcCl)
+	dm := engine.NewDataManager(nil, nil, nil)
+	dsp := NewDispatcherService(dm, cfg, nil, connMng)
+	reply := "reply"
+	args := &utils.CGREvent{
+		Tenant: "tenantTest",
+		ID:     "tenantID",
+		Time:   nil,
+		Event: map[string]interface{}{
+			"event": "value",
+		},
+		APIOpts: nil,
+	}
+	err := dsp.Call(utils.DispatcherServicePing, args, &reply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
