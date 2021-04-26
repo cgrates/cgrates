@@ -62,7 +62,7 @@ func TestDspResponderPingErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ResponderPing(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -95,7 +95,7 @@ func TestDspResponderDebitErrorNil(t *testing.T) {
 	}
 	var reply *engine.CallCost
 	result := dspSrv.ResponderDebit(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -128,7 +128,7 @@ func TestDspResponderGetCostErrorNil(t *testing.T) {
 	}
 	var reply *engine.CallCost
 	result := dspSrv.ResponderGetCost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -161,7 +161,7 @@ func TestDspResponderMaxDebitErrorNil(t *testing.T) {
 	}
 	var reply *engine.CallCost
 	result := dspSrv.ResponderMaxDebit(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -194,7 +194,7 @@ func TestDspResponderRefundIncrementsErrorNil(t *testing.T) {
 	}
 	var reply *engine.Account
 	result := dspSrv.ResponderRefundIncrements(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -227,7 +227,7 @@ func TestDspResponderRefundRoundingErrorNil(t *testing.T) {
 	}
 	var reply *float64
 	result := dspSrv.ResponderRefundRounding(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -260,7 +260,7 @@ func TestDspResponderGetMaxSessionTimeErrorNil(t *testing.T) {
 	}
 	var reply *time.Duration
 	result := dspSrv.ResponderGetMaxSessionTime(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -289,7 +289,7 @@ func TestDspResponderShutdownErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ResponderShutdown(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

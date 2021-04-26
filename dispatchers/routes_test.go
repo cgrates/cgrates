@@ -61,7 +61,7 @@ func TestDspRouteSv1PingErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.RouteSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -94,7 +94,7 @@ func TestDspRouteSv1GetRoutesErrorNil(t *testing.T) {
 	}
 	var reply *engine.SortedRoutesList
 	result := dspSrv.RouteSv1GetRoutes(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -127,7 +127,7 @@ func TestDspRouteSv1GetRoutesListErrorNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.RouteSv1GetRoutesList(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -156,7 +156,7 @@ func TestDspRouteSv1GetRouteProfilesForEventErrorNil(t *testing.T) {
 	}
 	var reply *[]*engine.RouteProfile
 	result := dspSrv.RouteSv1GetRouteProfilesForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

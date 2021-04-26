@@ -31,7 +31,7 @@ func TestDspThresholdSv1PingNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ThresholdSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -45,7 +45,7 @@ func TestDspThresholdSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ThresholdSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -74,7 +74,7 @@ func TestDspThresholdSv1GetThresholdsForEventNil(t *testing.T) {
 	}
 	var reply *engine.Thresholds
 	result := dspSrv.ThresholdSv1GetThresholdsForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -107,7 +107,7 @@ func TestDspThresholdSv1ProcessEventNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.ThresholdSv1ProcessEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -138,7 +138,7 @@ func TestDspThresholdSv1GetThresholdIDsNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.ThresholdSv1GetThresholdIDs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -169,7 +169,7 @@ func TestDspThresholdSv1GetThresholdNil(t *testing.T) {
 	}
 	var reply *engine.Threshold
 	result := dspSrv.ThresholdSv1GetThreshold(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

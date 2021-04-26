@@ -50,7 +50,7 @@ func TestRALsRALsV1PingErr2(t *testing.T) {
 	}
 	var reply *string
 
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	result := dspSrv.RALsV1Ping(CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
@@ -94,7 +94,7 @@ func TestRALsRALsV1GetRatingPlansCostErr2(t *testing.T) {
 	CGREvent := &utils.RatingPlanCostArg{}
 	var reply *RatingPlanCost
 
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	result := dspSrv.RALsV1GetRatingPlansCost(CGREvent, reply)
 
 	if result == nil || result.Error() != expected {

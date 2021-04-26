@@ -39,7 +39,7 @@ func TestDspCacheSv1PingError(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -50,7 +50,7 @@ func TestDspCacheSv1PingErrorArgs(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.CacheSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -96,7 +96,7 @@ func TestDspCacheSv1GetItemIDsErrorArgsNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.CacheSv1GetItemIDs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -123,7 +123,7 @@ func TestDspCacheSv1HasItemErrorArgsNil(t *testing.T) {
 	}
 	var reply *bool
 	result := dspSrv.CacheSv1HasItem(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -150,7 +150,7 @@ func TestDspCacheSv1GetItemExpiryTimeCacheSv1GetItemExpiryTimeErrorArgsNil(t *te
 	}
 	var reply *time.Time
 	result := dspSrv.CacheSv1GetItemExpiryTime(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -177,7 +177,7 @@ func TestDspCacheSv1RemoveItemArgsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1RemoveItem(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -204,7 +204,7 @@ func TestDspCacheSv1RemoveItemsArgsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1RemoveItems(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -231,7 +231,7 @@ func TestDspCacheSv1ClearArgsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1Clear(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -258,7 +258,7 @@ func TestDspCacheSv1GetCacheStatsArgsNil(t *testing.T) {
 	}
 	var reply *map[string]*ltcache.CacheStats
 	result := dspSrv.CacheSv1GetCacheStats(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -285,7 +285,7 @@ func TestDspCacheSv1PrecacheStatusArgsNil(t *testing.T) {
 	}
 	var reply *map[string]string
 	result := dspSrv.CacheSv1PrecacheStatus(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -312,7 +312,7 @@ func TestDspCacheSv1HasGroupArgsNil(t *testing.T) {
 	}
 	var reply *bool
 	result := dspSrv.CacheSv1HasGroup(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -339,7 +339,7 @@ func TestDspCacheSv1GetGroupItemIDsArgsNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.CacheSv1GetGroupItemIDs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -366,7 +366,7 @@ func TestDspCacheSv1RemoveGroupArgsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1RemoveGroup(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -393,7 +393,7 @@ func TestDspCacheSv1ReloadCacheNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1ReloadCache(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -420,7 +420,7 @@ func TestDspCacheSv1LoadCacheNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1LoadCache(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -447,7 +447,7 @@ func TestDspCacheSv1ReplicateRemoveNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1ReplicateRemove(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -474,7 +474,7 @@ func TestDspCacheSv1ReplicateSetNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CacheSv1ReplicateSet(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

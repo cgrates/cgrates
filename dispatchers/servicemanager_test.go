@@ -60,7 +60,7 @@ func TestDspServiceManagerV1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ServiceManagerV1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -89,7 +89,7 @@ func TestDspServiceManagerV1StartServiceNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ServiceManagerV1StartService(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -118,7 +118,7 @@ func TestDspServiceManagerV1StopServiceNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ServiceManagerV1StopService(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -147,7 +147,7 @@ func TestDspServiceManagerV1ServiceStatusErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ServiceManagerV1ServiceStatus(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

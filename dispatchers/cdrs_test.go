@@ -47,7 +47,7 @@ func TestDspCDRsV1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -86,7 +86,7 @@ func TestDspCDRsV1GetCDRsNil(t *testing.T) {
 	}
 	var reply *[]*engine.CDR
 	result := dspSrv.CDRsV1GetCDRs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -113,7 +113,7 @@ func TestDspCDRsV1GetCDRsCountNil(t *testing.T) {
 	}
 	var reply *int64
 	result := dspSrv.CDRsV1GetCDRsCount(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -140,7 +140,7 @@ func TestDspCDRsV1RateCDRsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV1RateCDRs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -173,7 +173,7 @@ func TestDspCDRsV1ProcessExternalCDRNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV1ProcessExternalCDR(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -206,7 +206,7 @@ func TestDspCDRsV1ProcessEventNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV1ProcessEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -239,7 +239,7 @@ func TestDspCDRsV1ProcessCDRNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV1ProcessCDR(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -274,7 +274,7 @@ func TestDspCDRsV2ProcessEventNil(t *testing.T) {
 	}
 	var reply *[]*utils.EventWithFlags
 	result := dspSrv.CDRsV2ProcessEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -304,7 +304,7 @@ func TestDspCDRsV1StoreSessionCostNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV1StoreSessionCost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -331,7 +331,7 @@ func TestDspCDRsV2StoreSessionCostNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CDRsV2StoreSessionCost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

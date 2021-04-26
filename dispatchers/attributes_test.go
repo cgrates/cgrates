@@ -33,7 +33,7 @@ func TestDspAttributeSv1PingError(t *testing.T) {
 	cgrEvent := &utils.CGREvent{}
 	var reply *string
 	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -51,7 +51,7 @@ func TestDspAttributeSv1PingErrorTenant(t *testing.T) {
 	}
 	var reply *string
 	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -62,7 +62,7 @@ func TestDspAttributeSv1PingErrorNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	err := dspSrv.AttributeSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -153,7 +153,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 
 	var reply *engine.AttributeProfile
 	err := dspSrv.AttributeSv1GetAttributeForEvent(processEvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -177,7 +177,7 @@ func TestDspAttributeSv1ProcessEventError(t *testing.T) {
 
 	var reply *engine.AttrSProcessEventReply
 	err := dspSrv.AttributeSv1ProcessEvent(processEvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
