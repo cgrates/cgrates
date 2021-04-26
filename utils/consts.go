@@ -2339,6 +2339,8 @@ const (
 	AMQPDefaultConsumerTag = "cgrates"
 	AMQPConsumerTag        = "consumerTag"
 
+	LazyQuotes = "lazyQuotes"
+
 	KafkaDefaultTopic   = "cgrates"
 	KafkaDefaultGroupID = "cgrates"
 	KafkaDefaultMaxWait = time.Millisecond

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"bufio"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -138,13 +137,13 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		return
 	}
 	defer file.Close()
-	csvReader := csv.NewReader(bufio.NewReader(file))
-	csvReader.FieldsPerRecord = rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].RowLength
-	csvReader.Comma = ','
-	if len(rdr.Config().FieldSep) > 0 {
-		csvReader.Comma = rune(rdr.Config().FieldSep[0])
+	var csvReader *csv.Reader
+	if csvReader, err = newCSVReader(file, rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].RowLength, rdr.Config().FieldSep, rdr.Config().Opts); err != nil {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> failed creating CSV reader for <%s>, due to option parsing error: <%s>",
+				utils.ERs, rdr.Config().ID, err.Error()))
+		return
 	}
-	csvReader.Comment = '#'
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	evsPosted := 0
 	timeStart := time.Now()
