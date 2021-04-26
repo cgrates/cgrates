@@ -38,15 +38,15 @@ func NewCacheSv1(cacheS *engine.CacheS) *CacheSv1 {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (chSv1 *CacheSv1) GetItemIDs(_ *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
+func (chSv1 *CacheSv1) GetItemIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) error {
-	return chSv1.cacheS.V1GetItemIDs(args, reply)
+	return chSv1.cacheS.V1GetItemIDs(ctx, args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
-func (chSv1 *CacheSv1) HasItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chSv1 *CacheSv1) HasItem(ctx *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) error {
-	return chSv1.cacheS.V1HasItem(args, reply)
+	return chSv1.cacheS.V1HasItem(ctx, args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
