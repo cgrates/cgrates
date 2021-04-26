@@ -194,7 +194,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 			CompressFactor: 1,
 		}
 	} else { // take it from first increment, not copying since it will be done bellow
-		ratingID = ecCost.Accounting[ecCost.ChargingIntervals[0].Increments[0].AccountChargeID].RatingID
+		ratingID = ecCost.Accounting[ecCost.Charges[0].ChargingID].RatingID
 	}
 	// AccountingID
 	acntID := utils.UUIDSha1Prefix()
@@ -206,30 +206,22 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		RatingID:     ratingID,
 	}
 	if ecCost != nil {
-		for _, ival := range ecCost.ChargingIntervals {
-			for _, icrm := range ival.Increments {
-				ec.Accounting[acntID].JoinedChargeIDs = append(ec.Accounting[acntID].JoinedChargeIDs, icrm.AccountChargeID)
-				ec.Accounting[icrm.AccountChargeID] = ecCost.Accounting[icrm.AccountChargeID]
-				// Copy the unitFactor data
-				if ecCost.Accounting[icrm.AccountChargeID].UnitFactorID != utils.EmptyString {
-					ec.UnitFactors[ecCost.Accounting[icrm.AccountChargeID].UnitFactorID] = ecCost.UnitFactors[ecCost.Accounting[icrm.AccountChargeID].UnitFactorID]
-				}
-				// Copy the Rating data
-				if ecCost.Accounting[icrm.AccountChargeID].RatingID != utils.EmptyString {
-					ec.Rating[ecCost.Accounting[icrm.AccountChargeID].RatingID] = ecCost.Rating[ecCost.Accounting[icrm.AccountChargeID].RatingID]
-				}
+		for _, ival := range ecCost.Charges {
+			ec.Accounting[acntID].JoinedChargeIDs = append(ec.Accounting[acntID].JoinedChargeIDs, ival.ChargingID)
+			ec.Accounting[ival.ChargingID] = ecCost.Accounting[ival.ChargingID]
+			// Copy the unitFactor data
+			if ecCost.Accounting[ival.ChargingID].UnitFactorID != utils.EmptyString {
+				ec.UnitFactors[ecCost.Accounting[ival.ChargingID].UnitFactorID] = ecCost.UnitFactors[ecCost.Accounting[ival.ChargingID].UnitFactorID]
+			}
+			// Copy the Rating data
+			if ecCost.Accounting[ival.ChargingID].RatingID != utils.EmptyString {
+				ec.Rating[ecCost.Accounting[ival.ChargingID].RatingID] = ecCost.Rating[ecCost.Accounting[ival.ChargingID].RatingID]
 			}
 		}
 	}
-	ec.ChargingIntervals = []*utils.ChargingInterval{
+	ec.Charges = []*utils.ChargeEntry{
 		{
-			Increments: []*utils.ChargingIncrement{
-				{
-					Units:           &utils.Decimal{usage},
-					AccountChargeID: acntID,
-					CompressFactor:  1,
-				},
-			},
+			ChargingID:     acntID,
 			CompressFactor: 1,
 		},
 	}
