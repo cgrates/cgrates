@@ -381,6 +381,42 @@ func TestFileFWV(t *testing.T) {
 	}
 }
 
+func TestFileFWVServeDefault(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/fwvErs/out"
+	err := os.MkdirAll(filePath, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(filePath, fmt.Sprintf("file%d.fwv", i))); err != nil {
+			t.Error(err)
+		}
+	}
+	os.Create(path.Join(filePath, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		close(eR.rdrExit)
+	}()
+	eR.serveDefault()
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestFileFWVExit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltrs := &engine.FilterS{}

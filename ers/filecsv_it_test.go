@@ -667,8 +667,29 @@ func TestFileCSV(t *testing.T) {
 		conReqs:   make(chan struct{}, 1),
 	}
 	eR.conReqs <- struct{}{}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileCSVServeDefault(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &CSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	var err error
+	eR.conReqs <- struct{}{}
 	filePath := "/tmp/ers/out/"
-	err := os.MkdirAll(filePath, 0777)
+	err = os.MkdirAll(filePath, 0777)
 	if err != nil {
 		t.Error(err)
 	}
@@ -679,8 +700,12 @@ func TestFileCSV(t *testing.T) {
 	}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	os.Create(path.Join(filePath, "file1.txt"))
-	eR.Config().RunDelay = 1 * time.Millisecond
-	if err := eR.Serve(); err != nil {
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		close(eR.rdrExit)
+	}()
+	eR.serveDefault()
+	if err := os.RemoveAll(filePath); err != nil {
 		t.Error(err)
 	}
 }

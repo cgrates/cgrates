@@ -82,6 +82,36 @@ func (rdr *FlatstoreER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
+func (rdr *FlatstoreER) serveDefault() {
+	tm := time.NewTimer(0)
+	for {
+		// Not automated, process and sleep approach
+		select {
+		case <-rdr.rdrExit:
+			tm.Stop()
+			utils.Logger.Info(
+				fmt.Sprintf("<%s> stop monitoring path <%s>",
+					utils.ERs, rdr.rdrDir))
+			return
+		case <-tm.C:
+		}
+		filesInDir, _ := os.ReadDir(rdr.rdrDir)
+		for _, file := range filesInDir {
+			if !strings.HasSuffix(file.Name(), utils.CSVSuffix) { // hardcoded file extension for csv event reader
+				continue // used in order to filter the files from directory
+			}
+			go func(fileName string) {
+				if err := rdr.processFile(rdr.rdrDir, fileName); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> processing file %s, error: %s",
+							utils.ERs, fileName, err.Error()))
+				}
+			}(file.Name())
+		}
+		tm.Reset(rdr.Config().RunDelay)
+	}
+}
+
 func (rdr *FlatstoreER) Serve() (err error) {
 	switch rdr.Config().RunDelay {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
@@ -90,35 +120,7 @@ func (rdr *FlatstoreER) Serve() (err error) {
 		return utils.WatchDir(rdr.rdrDir, rdr.processFile,
 			utils.ERs, rdr.rdrExit)
 	default:
-		go func() {
-			tm := time.NewTimer(0)
-			for {
-				// Not automated, process and sleep approach
-				select {
-				case <-rdr.rdrExit:
-					tm.Stop()
-					utils.Logger.Info(
-						fmt.Sprintf("<%s> stop monitoring path <%s>",
-							utils.ERs, rdr.rdrDir))
-					return
-				case <-tm.C:
-				}
-				filesInDir, _ := os.ReadDir(rdr.rdrDir)
-				for _, file := range filesInDir {
-					if !strings.HasSuffix(file.Name(), utils.CSVSuffix) { // hardcoded file extension for csv event reader
-						continue // used in order to filter the files from directory
-					}
-					go func(fileName string) {
-						if err := rdr.processFile(rdr.rdrDir, fileName); err != nil {
-							utils.Logger.Warning(
-								fmt.Sprintf("<%s> processing file %s, error: %s",
-									utils.ERs, fileName, err.Error()))
-						}
-					}(file.Name())
-				}
-				tm.Reset(rdr.Config().RunDelay)
-			}
-		}()
+		go rdr.serveDefault()
 	}
 	return
 }
