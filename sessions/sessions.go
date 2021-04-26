@@ -1255,6 +1255,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 	for _, sr := range s.SRuns {
 		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
 		if reqType == utils.MetaNone {
+			maxUsage[sr.CD.RunID] = reqMaxUsage
 			continue
 		}
 		// var rplyMaxUsage time.Duration
