@@ -140,49 +140,6 @@ func TestECAsExtEventChargesSuccess(t *testing.T) {
 	}
 }
 
-func TestAsExtChargingInterval(t *testing.T) {
-	chrgInt := &ChargingInterval{
-		Increments: []*ChargingIncrement{
-			{
-				Units:           NewDecimal(123, 3),
-				AccountChargeID: "ID1",
-				CompressFactor:  40,
-			},
-			{
-				Units:           NewDecimal(15238, 3),
-				AccountChargeID: "ID2",
-			},
-		},
-		CompressFactor: 9,
-	}
-	expChInt := &ExtChargingInterval{
-		Increments: []*ExtChargingIncrement{
-			{
-				Units:           Float64Pointer(0.123),
-				AccountChargeID: "ID1",
-				CompressFactor:  40,
-			},
-			{
-				Units:           Float64Pointer(15.238),
-				AccountChargeID: "ID2",
-				CompressFactor:  0,
-			},
-		},
-		CompressFactor: 9,
-	}
-	if rcv, err := chrgInt.AsExtChargingInterval(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, expChInt) {
-		t.Errorf("Expected %+v \n, received %+v", ToJSON(expChInt), ToJSON(rcv))
-	}
-
-	chrgInt.Increments[0].Units = NewDecimal(int64(math.Inf(1))-1, 0)
-	expected := "Cannot convert decimal ChargingIncrement into float64 "
-	if _, err := chrgInt.AsExtChargingInterval(); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestAsExtAccountCharge(t *testing.T) {
 	ac := &AccountCharge{
 		AccountID:       "ACCID_1",

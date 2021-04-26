@@ -38,12 +38,17 @@ type EventCharges struct {
 	Abstracts *Decimal // total abstract units charged
 	Concretes *Decimal // total concrete units charged
 
-	ChargingIntervals []*ChargingInterval
+	Charges []*ChargeEntry
 
 	Accounting  map[string]*AccountCharge
 	UnitFactors map[string]*UnitFactor
 	Rating      map[string]*RateSInterval
 	Accounts    map[string]*Account
+}
+
+type ChargeEntry struct {
+	ChargingID     string
+	CompressFactor int
 }
 
 // Merge will merge the event charges into existing
@@ -56,7 +61,7 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 		if sumCrct := SumDecimalAsBig(ec.Concretes, nEc.Concretes); sumCrct != nil {
 			ec.Concretes = &Decimal{sumCrct}
 		}
-		ec.appendChargingIntervals(nEc.ChargingIntervals...)
+		ec.appendCharges(nEc.Charges...)
 		for acntID, acntChrg := range nEc.Accounting {
 			ec.Accounting[acntID] = acntChrg
 		}
@@ -72,67 +77,69 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 	}
 }
 
-// appendChargingIntervals will add new charging intervals to the  existing.
+// appendCharges will add new charge to the  existing.
 // if possible, the existing last one in ec will be compressed
-func (ec *EventCharges) appendChargingIntervals(cIls ...*ChargingInterval) {
+func (ec *EventCharges) appendCharges(cIls ...*ChargeEntry) {
 	for i, cIl := range cIls {
-		if i == 0 && len(ec.ChargingIntervals) == 0 {
-			ec.ChargingIntervals = []*ChargingInterval{cIl}
+		if i == 0 && len(ec.Charges) == 0 {
+			ec.Charges = []*ChargeEntry{cIl}
 			continue
 		}
-		if ec.ChargingIntervals[len(ec.ChargingIntervals)-1].CompressEquals(cIl) {
-			ec.ChargingIntervals[len(ec.ChargingIntervals)-1].CompressFactor += 1
+		if ec.Charges[len(ec.Charges)-1].CompressEquals(cIl) {
+			ec.Charges[len(ec.Charges)-1].CompressFactor += 1
 			continue
 		}
-		ec.ChargingIntervals = append(ec.ChargingIntervals, cIl)
+		ec.Charges = append(ec.Charges, cIl)
 	}
+}
+
+func (cE *ChargeEntry) CompressEquals(chEn *ChargeEntry) bool {
+	return cE.ChargingID == chEn.ChargingID
 }
 
 // SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
 func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
-		for _, cIl := range nEc.ChargingIntervals {
-			for _, cIcrm := range cIl.Increments {
-				nEcAcntChrg := nEc.Accounting[cIcrm.AccountChargeID]
+		for _, cIl := range nEc.Charges {
+			nEcAcntChrg := nEc.Accounting[cIl.ChargingID]
 
-				// UnitFactors
-				if nEcAcntChrg.UnitFactorID != EmptyString {
-					if uFctID := ec.unitFactorID(nEc.UnitFactors[nEcAcntChrg.UnitFactorID]); uFctID != EmptyString &&
-						uFctID != nEcAcntChrg.UnitFactorID {
-						nEc.UnitFactors[uFctID] = ec.UnitFactors[uFctID]
-						delete(nEc.UnitFactors, nEcAcntChrg.UnitFactorID)
-						nEcAcntChrg.UnitFactorID = uFctID
-					}
+			// UnitFactors
+			if nEcAcntChrg.UnitFactorID != EmptyString {
+				if uFctID := ec.unitFactorID(nEc.UnitFactors[nEcAcntChrg.UnitFactorID]); uFctID != EmptyString &&
+					uFctID != nEcAcntChrg.UnitFactorID {
+					nEc.UnitFactors[uFctID] = ec.UnitFactors[uFctID]
+					delete(nEc.UnitFactors, nEcAcntChrg.UnitFactorID)
+					nEcAcntChrg.UnitFactorID = uFctID
 				}
-
-				// Rating
-				if nEcAcntChrg.RatingID != EmptyString {
-					if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.RatingID]); rtID != EmptyString &&
-						rtID != nEcAcntChrg.RatingID {
-						nEc.Rating[rtID] = ec.Rating[rtID]
-						delete(nEc.Rating, nEcAcntChrg.RatingID)
-						nEcAcntChrg.RatingID = rtID
-					}
-				}
-
-				// AccountCharges
-				for i, chrgID := range nEc.Accounting[cIcrm.AccountChargeID].JoinedChargeIDs {
-					if acntChrgID := ec.accountChargeID(nEc.Accounting[chrgID]); acntChrgID != chrgID {
-						// matched the accountChargeID with an existing one in reference ec, replace in nEc
-						nEc.Accounting[acntChrgID] = ec.Accounting[acntChrgID]
-						delete(nEc.Accounting, chrgID)
-						nEc.Accounting[cIcrm.AccountChargeID].JoinedChargeIDs[i] = acntChrgID
-					}
-				}
-				if acntChrgID := ec.accountChargeID(nEcAcntChrg); acntChrgID != EmptyString &&
-					acntChrgID != cIcrm.AccountChargeID {
-					// matched the accountChargeID with an existing one in reference ec, replace in nEc
-					nEc.Accounting[acntChrgID] = ec.Accounting[cIcrm.AccountChargeID]
-					delete(nEc.Accounting, cIcrm.AccountChargeID)
-					cIcrm.AccountChargeID = acntChrgID
-				}
-
 			}
+
+			// Rating
+			if nEcAcntChrg.RatingID != EmptyString {
+				if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.RatingID]); rtID != EmptyString &&
+					rtID != nEcAcntChrg.RatingID {
+					nEc.Rating[rtID] = ec.Rating[rtID]
+					delete(nEc.Rating, nEcAcntChrg.RatingID)
+					nEcAcntChrg.RatingID = rtID
+				}
+			}
+
+			// AccountCharges
+			for i, chrgID := range nEc.Accounting[cIl.ChargingID].JoinedChargeIDs {
+				if acntChrgID := ec.accountChargeID(nEc.Accounting[chrgID]); acntChrgID != chrgID {
+					// matched the accountChargeID with an existing one in reference ec, replace in nEc
+					nEc.Accounting[acntChrgID] = ec.Accounting[acntChrgID]
+					delete(nEc.Accounting, chrgID)
+					nEc.Accounting[cIl.ChargingID].JoinedChargeIDs[i] = acntChrgID
+				}
+			}
+			if acntChrgID := ec.accountChargeID(nEcAcntChrg); acntChrgID != EmptyString &&
+				acntChrgID != cIl.ChargingID {
+				// matched the accountChargeID with an existing one in reference ec, replace in nEc
+				nEc.Accounting[acntChrgID] = ec.Accounting[cIl.ChargingID]
+				delete(nEc.Accounting, cIl.ChargingID)
+				cIl.ChargingID = acntChrgID
+			}
+
 		}
 	}
 }
@@ -154,14 +161,10 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 			eEc.Concretes = &flt
 		}
 	}
-	if ec.ChargingIntervals != nil {
-		eEc.ChargingIntervals = make([]*ExtChargingInterval, len(ec.ChargingIntervals))
-		for idx, val := range ec.ChargingIntervals {
-			if rcv, err := val.AsExtChargingInterval(); err != nil {
-				return nil, err
-			} else {
-				eEc.ChargingIntervals[idx] = rcv
-			}
+	if ec.Charges != nil {
+		eEc.Charges = make([]*ChargeEntry, len(ec.Charges))
+		for idx, val := range ec.Charges {
+			eEc.Charges[idx] = val
 		}
 	}
 	if ec.Accounting != nil {
@@ -242,7 +245,7 @@ type ExtEventCharges struct {
 	Abstracts *float64
 	Concretes *float64
 
-	ChargingIntervals []*ExtChargingInterval
+	Charges []*ChargeEntry
 
 	Accounting  map[string]*ExtAccountCharge
 	UnitFactors map[string]*ExtUnitFactor
@@ -250,81 +253,10 @@ type ExtEventCharges struct {
 	Accounts    map[string]*ExtAccount
 }
 
-type ChargingInterval struct {
-	Increments     []*ChargingIncrement // specific increments applied to this interval
-	CompressFactor int
-}
-
-// CompressEquals compares two ChargingIntervals for aproximate equality, ignoring compress field
-func (cIl *ChargingInterval) CompressEquals(nCil *ChargingInterval) (eq bool) {
-	if len(cIl.Increments) != len(nCil.Increments) {
-		return
-	}
-	for i, chIr := range cIl.Increments {
-		if !chIr.CompressEquals(nCil.Increments[i]) {
-			return
-		}
-	}
-	return true
-}
-
-type ExtChargingInterval struct {
-	Increments     []*ExtChargingIncrement
-	CompressFactor int
-}
-
-// ChargingIncrement represents one unit charged inside an interval
-type ChargingIncrement struct {
-	Units           *Decimal // Can differ from AccountCharge due to JoinedCharging
-	AccountChargeID string   // Account charging information
-	CompressFactor  int
-}
-
 type ExtChargingIncrement struct {
 	Units           *float64
 	AccountChargeID string
 	CompressFactor  int
-}
-
-func (cI *ChargingInterval) AsExtChargingInterval() (eCi *ExtChargingInterval, err error) {
-	eCi = &ExtChargingInterval{
-		CompressFactor: cI.CompressFactor,
-	}
-	if cI.Increments != nil {
-		eCi.Increments = make([]*ExtChargingIncrement, len(cI.Increments))
-		for i, val := range cI.Increments {
-			if incr, err := val.AsExtChargingIncrements(); err != nil {
-				return nil, err
-			} else {
-				eCi.Increments[i] = incr
-			}
-		}
-	}
-	return
-}
-
-func (cIn *ChargingIncrement) AsExtChargingIncrements() (eCin *ExtChargingIncrement, err error) {
-	eCin = &ExtChargingIncrement{
-		AccountChargeID: cIn.AccountChargeID,
-		CompressFactor:  cIn.CompressFactor,
-	}
-	if cIn.Units != nil {
-		if fltUnit, ok := cIn.Units.Big.Float64(); !ok {
-			return nil, errors.New("Cannot convert decimal ChargingIncrement into float64 ")
-		} else {
-			eCin.Units = &fltUnit
-		}
-	}
-	return
-}
-
-func (cI *ChargingIncrement) CompressEquals(chIh *ChargingIncrement) (eq bool) {
-	if cI.Units == nil && chIh.Units != nil ||
-		cI.Units != nil && chIh.Units == nil {
-		return
-	}
-	return cI.Units.Compare(chIh.Units) == 0 &&
-		cI.AccountChargeID == chIh.AccountChargeID
 }
 
 // AccountCharge represents one Account charge

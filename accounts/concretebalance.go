@@ -157,15 +157,19 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 	}
-	ec.ChargingIntervals = []*utils.ChargingInterval{
+	ec.Charges = []*utils.ChargeEntry{
 		{
-			Increments: []*utils.ChargingIncrement{
-				{
-					Units:           &utils.Decimal{dbted},
-					AccountChargeID: acntID,
-					CompressFactor:  1,
+			ChargingID: acntID,
+			/*
+				Increments: []*utils.ChargingIncrement{
+					{
+						Units:           &utils.Decimal{dbted},
+						AccountChargeID: acntID,
+						CompressFactor:  1,
+					},
 				},
-			},
+
+			*/
 			CompressFactor: 1,
 		},
 	}

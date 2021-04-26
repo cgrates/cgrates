@@ -62,10 +62,28 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 
 	// consume only from first balance
 	expectedEvCharg := &utils.EventCharges{
-		Concretes:   utils.NewDecimal(5, 0),
-		Accounting:  make(map[string]*utils.AccountCharge),
-		UnitFactors: make(map[string]*utils.UnitFactor),
-		Rating:      make(map[string]*utils.RateSInterval),
+		Concretes: utils.NewDecimal(5, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID", //will be changed
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID": {
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(5, 0),
+				BalanceLimit: utils.NewDecimal(-200, 0),
+				UnitFactorID: "GENUUID",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"GENUUID": {
+				Factor: utils.NewDecimal(100, 0),
+			},
+		},
+		Rating:   make(map[string]*utils.RateSInterval),
+		Accounts: make(map[string]*utils.Account),
 	}
 	if evCh, err := debitConcreteUnits(decimal.New(5, 0),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err != nil {
@@ -74,17 +92,50 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	} else if aB.cncrtBlncs[1].blnCfg.Units.Compare(utils.NewDecimal(125, 2)) != 0 {
 		t.Errorf("Unexpected units in second balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
-	} else if !reflect.DeepEqual(evCh, expectedEvCharg) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCharg), utils.ToJSON(evCh))
+	} else {
+		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
+		expectedEvCharg.Charges[0].ChargingID = evCh.Charges[0].ChargingID
+		expectedEvCharg.Accounting = evCh.Accounting
+		expectedEvCharg.UnitFactors = evCh.UnitFactors
+		if !reflect.DeepEqual(evCh, expectedEvCharg) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCharg), utils.ToJSON(evCh))
+		}
 	}
 
 	//back with the main units
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	expectedEvCharg = &utils.EventCharges{
-		Concretes:   utils.NewDecimal(9, 0),
-		Accounting:  make(map[string]*utils.AccountCharge),
-		UnitFactors: make(map[string]*utils.UnitFactor),
-		Rating:      make(map[string]*utils.RateSInterval),
+		Concretes: utils.NewDecimal(9, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID", //will be changed
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2", //will be changed
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID2": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(2, 0),
+				BalanceLimit: utils.NewDecimal(-1, 0),
+			},
+			"GENUUID": {
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(7, 0),
+				BalanceLimit: utils.NewDecimal(-200, 0),
+				UnitFactorID: "GENNUUID_FACTOR",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"GENNUUID_FACTOR": {
+				Factor: utils.NewDecimal(100, 0),
+			},
+		},
+		Rating:   make(map[string]*utils.RateSInterval),
+		Accounts: make(map[string]*utils.Account),
 	}
 
 	if evCh, err := debitConcreteUnits(decimal.New(9, 0),
@@ -94,8 +145,14 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	} else if aB.cncrtBlncs[1].blnCfg.Units.Compare(utils.NewDecimal(-75, 2)) != 0 {
 		t.Errorf("Unexpected units in second balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
-	} else if !reflect.DeepEqual(evCh, expectedEvCharg) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCharg), utils.ToJSON(evCh))
+	} else {
+		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
+		expectedEvCharg.Charges = evCh.Charges
+		expectedEvCharg.Accounting = evCh.Accounting
+		expectedEvCharg.UnitFactors = evCh.UnitFactors
+		if !reflect.DeepEqual(evCh, expectedEvCharg) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCharg), utils.ToJSON(evCh))
+		}
 	}
 
 	//back with the main units
@@ -112,10 +169,37 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 	}
 
 	expectedEvCharg = &utils.EventCharges{
-		Concretes:   utils.NewDecimal(925, 2),
-		Accounting:  make(map[string]*utils.AccountCharge),
-		UnitFactors: make(map[string]*utils.UnitFactor),
-		Rating:      make(map[string]*utils.RateSInterval),
+		Concretes: utils.NewDecimal(925, 2),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID", //will be changed
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2", //will be changed
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID": {
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(7, 0),
+				BalanceLimit: utils.NewDecimal(-200, 0),
+				UnitFactorID: "GENNUUID_FACTOR",
+			},
+			"GENUUID2": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(225, 2),
+				BalanceLimit: utils.NewDecimal(-1, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"GENNUUID_FACTOR": {
+				Factor: utils.NewDecimal(100, 0),
+			},
+		},
+		Rating:   make(map[string]*utils.RateSInterval),
+		Accounts: make(map[string]*utils.Account),
 	}
 	if evCh, err := debitConcreteUnits(decimal.New(925, 2),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err != nil {
@@ -124,8 +208,14 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 		t.Errorf("Unexpected units in first balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	} else if aB.cncrtBlncs[1].blnCfg.Units.Compare(utils.NewDecimal(-1, 0)) != 0 {
 		t.Errorf("Unexpected units in second balance: %s", aB.cncrtBlncs[1].blnCfg.Units)
-	} else if !reflect.DeepEqual(evCh, expectedEvCharg) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCharg), utils.ToJSON(evCh))
+	} else {
+		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
+		expectedEvCharg.Charges = evCh.Charges
+		expectedEvCharg.Accounting = evCh.Accounting
+		expectedEvCharg.UnitFactors = evCh.UnitFactors
+		if !reflect.DeepEqual(evCh, expectedEvCharg) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCharg), utils.ToJSON(evCh))
+		}
 	}
 
 }
@@ -280,7 +370,7 @@ func TestABCost0WithoutConcrete(t *testing.T) {
 	}
 }
 
-func TestABCost0Exceed(t *testing.T) {
+func TestABCost0Exceed11(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
 		blnCfg: &utils.Balance{
@@ -311,7 +401,7 @@ func TestABCost0Exceed(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(60*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(-10*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(10, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
