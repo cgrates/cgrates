@@ -32,7 +32,7 @@ func TestDspConfigSv1GetConfigNil(t *testing.T) {
 	}
 	var reply *map[string]interface{}
 	result := dspSrv.ConfigSv1GetConfig(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -59,7 +59,7 @@ func TestDspConfigSv1ReloadConfigNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ConfigSv1ReloadConfig(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -86,7 +86,7 @@ func TestDspConfigSv1SetConfigNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ConfigSv1SetConfig(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -113,7 +113,7 @@ func TestDspConfigSv1SetConfigFromJSONNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ConfigSv1SetConfigFromJSON(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -140,7 +140,7 @@ func TestDspConfigSv1GetConfigAsJSONNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ConfigSv1GetConfigAsJSON(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

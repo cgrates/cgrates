@@ -646,10 +646,10 @@ func TestChargersprocessEvent(t *testing.T) {
 		},
 	}
 
-	experr := utils.ErrNotFound
+	experr := "NO_DATABASE_CONNECTION"
 	rcv, err := cS.processEvent(cgrEv.Tenant, cgrEv)
 
-	if err == nil || err != experr {
+	if err == nil || err.Error() != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 

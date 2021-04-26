@@ -50,7 +50,7 @@ func TestGuardianGuardianSv1PingErr2(t *testing.T) {
 	}
 	var reply *string
 
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
@@ -64,7 +64,7 @@ func TestGuardianGuardianSv1PingErrNil(t *testing.T) {
 	var CGREvent *utils.CGREvent
 	var reply *string
 
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
@@ -97,7 +97,7 @@ func TestGuardianGuardianSv1RemoteLockErr2(t *testing.T) {
 	}
 	var reply *string
 
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
 
 	if result == nil || result.Error() != expected {
@@ -130,7 +130,7 @@ func TestGuardianGuardianSv1RemoteUnlockErr2(t *testing.T) {
 	}
 	var reply *[]string
 
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
 
 	if result == nil || result.Error() != expected {

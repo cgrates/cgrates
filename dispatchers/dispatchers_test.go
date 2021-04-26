@@ -93,7 +93,7 @@ func TestDispatcherV1GetProfileForEventErr(t *testing.T) {
 	ev := &utils.CGREvent{}
 	dPfl := &engine.DispatcherProfile{}
 	err := dsp.V1GetProfileForEvent(ev, dPfl)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -106,7 +106,7 @@ func TestDispatcherV1GetProfileForEvent(t *testing.T) {
 	ev := &utils.CGREvent{}
 	dPfl := &engine.DispatcherProfile{}
 	err := dsp.V1GetProfileForEvent(ev, dPfl)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -118,7 +118,7 @@ func TestDispatcherDispatch(t *testing.T) {
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
 	ev := &utils.CGREvent{}
 	err := dsp.Dispatch(ev, "", "", "", "")
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -542,7 +542,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	}
 	dPfl := &engine.DispatcherProfile{}
 	err = dss.V1GetProfileForEvent(ev, dPfl)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
@@ -1006,12 +1006,16 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
+
+*/
+
 func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.DispatcherSCfg().IndexedSelects = false
 	rpcCl := map[string]chan rpcclient.ClientConnector{}
 	connMng := engine.NewConnManager(cfg, rpcCl)
-	dm := engine.NewDataManager(&engine.DataDBMock{}, nil, connMng)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "123",
@@ -1061,5 +1065,3 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND:filter", err)
 	}
 }
-
-*/

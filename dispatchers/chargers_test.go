@@ -31,7 +31,7 @@ func TestDspChargerSv1PingNilStruct(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ChargerSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -45,7 +45,7 @@ func TestDspChargerSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ChargerSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -72,7 +72,7 @@ func TestDspChargerSv1GetChargersForEventNil(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	result := dspSrv.ChargerSv1GetChargersForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -99,7 +99,7 @@ func TestDspChargerSv1ProcessEventNil(t *testing.T) {
 	}
 	var reply *[]*engine.ChrgSProcessEventReply
 	result := dspSrv.ChargerSv1ProcessEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
