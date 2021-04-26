@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"encoding/csv"
+	"io"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -30,6 +32,20 @@ func getProcessOptions(opts map[string]interface{}) (proc map[string]interface{}
 		if strings.HasSuffix(k, utils.ProcessedOpt) {
 			proc[k[:len(k)-9]] = v
 		}
+	}
+	return
+}
+
+func newCSVReader(file io.Reader, rowLenght int, fieldSep string, opts map[string]interface{}) (csvReader *csv.Reader, err error) {
+	csvReader = csv.NewReader(file)
+	csvReader.FieldsPerRecord = rowLenght
+	csvReader.Comment = utils.CommentChar
+	csvReader.Comma = utils.CSVSep
+	if len(fieldSep) > 0 {
+		csvReader.Comma = rune(fieldSep[0])
+	}
+	if val, has := opts[utils.LazyQuotes]; has {
+		csvReader.LazyQuotes, err = utils.IfaceAsBool(val)
 	}
 	return
 }

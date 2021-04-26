@@ -347,7 +347,53 @@
 // 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 // 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
 // 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
-// 			"opts": {},
+// 			"opts": {
+// 				// "queueID": "cgrates_cdrs", 					// the queue id for AMQP, AMQPv1, SQS and S3 readers from were the events are read
+// 				// "queueIDProcessed": "", 						// the queue id for AMQP, AMQPv1, SQS and S3 readers were the events are sent after they are processed
+
+// 				// FileCSV, FlatStore and PartialCSV
+// 				// "lazyQuotes": false,							//  if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+
+// 				// AMQP
+// 				// "consumerTag": "cgrates",					// the ID of the consumer
+// 				// "exchange": "",									
+// 				// "exchangeType": "",
+// 				// "routingKey": "",
+
+// 				// "exchangeProcessed": "",									
+// 				// "exchangeTypeProcessed": "",
+// 				// "routingKeyProcessed": "",
+
+// 				// Kafka
+// 				// "topic": "cgrates",							// the topic from were the events are read
+// 				// "groupID": "cgrates",						// the group that reads the events
+// 				// "maxWait": "1ms",							// the maximum amount of time to wait for new data to come
+
+// 				// "topicProcessed": "",						// the topic were the events are sent after they are processed
+
+
+// 				// SQL
+// 				// "dbName": "cgrates", 						// the name of the database from were the events are read
+// 				// "tableName": "cdrs",							// the name of the table from were the events are read
+// 				// "sslmode": "disable",						// the ssl mode for postgres db
+
+// 				// "dbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+// 				// "tableNameProcessed": "",					// the name of the table were the events are sent after they are processed
+// 				// "sslmodeProcessed": "",						// the ssl mode for postgres db
+
+// 				// SQS and S3
+// 				// "awsRegion": "",
+// 				// "awsKey": "",
+// 				// "awsSecret": "",
+// 				// "awsToken": "",
+
+// 				// "awsRegionProcessed": "",
+// 				// "awsKeyProcessed": "",
+// 				// "awsSecretProcessed": "",
+// 				// "awsTokenProcessed": "",
+// 				// "folderPathProcessed": "", 					// only for S3 event posting 
+				
+// 			},
 // 			"xml_root_path": "",								// path towards one event in case of XML CDRs
 // 			"tenant": "",										// tenant used by import
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
