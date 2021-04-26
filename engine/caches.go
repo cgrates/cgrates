@@ -253,8 +253,7 @@ func (chS *CacheS) Precache() (err error) {
 }
 
 // APIs start here
-
-func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
+func (chS *CacheS) V1GetItemIDs(_ *context.Context, args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	reply *[]string) (err error) {
 	itmIDs := chS.tCache.GetItemIDs(args.CacheID, args.ItemIDPrefix)
 	if len(itmIDs) == 0 {
@@ -264,7 +263,7 @@ func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithAPIOpts,
+func (chS *CacheS) V1HasItem(_ *context.Context, args *utils.ArgsGetCacheItemWithAPIOpts,
 	reply *bool) (err error) {
 	*reply = chS.tCache.HasItem(args.CacheID, args.ItemID)
 	return
