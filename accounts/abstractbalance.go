@@ -127,7 +127,9 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 					CompressFactor: 1,
 				},
 			}
+
 	*/
+
 	var ecCost *utils.EventCharges
 	if (costIcrm.FixedFee != nil &&
 		costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
