@@ -605,75 +605,80 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 	}
 }
 
-// func TestCMCallWithConnIDs2(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
+func TestCMCallWithConnIDs2(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 
-// 	connID := "connID"
-// 	defaultCfg := config.NewDefaultCGRConfig()
-// 	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
-// 	defaultCfg.RPCConns()[connID].Strategy = rpcclient.PoolParallel
-// 	defaultCfg.RPCConns()[connID].Conns = []*config.RemoteHost{
-// 		{
-// 			ID:        connID,
-// 			Address:   "127.0.0.1:2012",
-// 			Transport: rpcclient.JSONrpc,
-// 		},
-// 	}
+	poolID := "poolID"
+	connID := "connID"
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.RPCConns()[poolID] = config.NewDfltRPCConn()
+	defaultCfg.RPCConns()[poolID].Conns = []*config.RemoteHost{
+		{
+			ID:      connID,
+			Address: "addr",
+		},
+	}
 
-// 	cc := make(chan rpcclient.ClientConnector, 1)
+	ccM := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			"testMethod": func(args, reply interface{}) error {
+				return utils.ErrExists
+			},
+		},
+	}
 
-// 	cM := &ConnManager{
-// 		cfg: defaultCfg,
-// 		rpcInternal: map[string]chan rpcclient.ClientConnector{
-// 			connID: cc,
-// 		},
-// 		connCache: ltcache.NewCache(-1, 0, true, nil),
-// 	}
-// 	subsHostIDs := utils.StringSet{
-// 		connID: struct{}{},
-// 	}
+	cM := &ConnManager{
+		cfg:       defaultCfg,
+		connCache: ltcache.NewCache(-1, 0, true, nil),
+	}
 
-// 	_, err := net.Listen("tcp", ":2012")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	cM.connCache.Set(poolID+utils.ConcatenatedKeySep+connID, ccM, nil)
 
-// 	args := new(utils.CGREvent)
-// 	var reply string
+	subsHostIDs := utils.StringSet{
+		connID: struct{}{},
+	}
 
-// 	experr := rpcclient.ErrInternallyDisconnected
-// 	err = cM.CallWithConnIDs([]string{connID}, subsHostIDs, utils.CacheSv1Ping, args, &reply)
+	experr := utils.ErrExists
+	err := cM.CallWithConnIDs([]string{poolID}, subsHostIDs, "testMethod", "", "")
 
-// 	if err == nil || err != experr {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-// 	}
-// }
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
 
-// func TestCMReload(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
+func TestCMReload(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 
-// 	connID := "connID"
-// 	defaultCfg := config.NewDefaultCGRConfig()
-// 	defaultCfg.RPCConns()[connID] = config.NewDfltRPCConn()
+	defaultCfg := config.NewDefaultCGRConfig()
 
-// 	cM := &ConnManager{
-// 		cfg:       defaultCfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, nil),
-// 	}
-// 	cM.connCache.Set(connID, nil, nil)
+	cM := &ConnManager{
+		cfg:       defaultCfg,
+		connCache: ltcache.NewCache(-1, 0, true, nil),
+	}
+	cM.connCache.Set("itmID1", "value of first item", nil)
 
-// 	db := NewInternalDB(nil, nil, true)
-// 	dm := NewDataManager(db, defaultCfg.CacheCfg(), cM)
-// 	Cache = NewCacheS(defaultCfg, dm, nil)
-// 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
-// 	Cache.SetWithoutReplicate(utils.CacheReplicationHosts, connID, nil, nil, true, utils.NonTransactional)
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, defaultCfg.CacheCfg(), cM)
+	Cache = NewCacheS(defaultCfg, dm, nil)
+	Cache.SetWithoutReplicate(utils.CacheRPCConnections, "itmID2",
+		"value of 2nd item", nil, true, utils.NonTransactional)
 
-// 	cM.Reload()
+	var exp []string
+	cM.Reload()
+	rcv1 := cM.connCache.GetItemIDs("itmID1")
+	rcv2 := Cache.GetItemIDs(utils.CacheRPCConnections, utils.EmptyString)
 
-// }
+	if !reflect.DeepEqual(rcv1, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv1)
+	}
+
+	if !reflect.DeepEqual(rcv2, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv2)
+	}
+}
