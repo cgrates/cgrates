@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -667,7 +671,31 @@ func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
 	}
 }
 
-// func TestChargersShutdown(t *testing.T) {
-// 	cS := &ChargerService{}
-// 	cS.Shutdown()
-// }
+func TestChargersShutdown(t *testing.T) {
+	cS := &ChargerService{}
+
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	exp := []string{
+		"CGRateS <> [INFO] <ChargerS> shutdown initialized",
+		"CGRateS <> [INFO] <ChargerS> shutdown complete",
+	}
+	cS.Shutdown()
+	rcv := strings.Split(buf.String(), "\n")
+
+	for i := 0; i < 2; i++ {
+		rcv[i] = rcv[i][20:]
+		if rcv[i] != exp[i] {
+			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp[i], rcv[i])
+		}
+	}
+
+	utils.Logger.SetLogLevel(0)
+}
