@@ -61,7 +61,7 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 		if sumCrct := SumDecimalAsBig(ec.Concretes, nEc.Concretes); sumCrct != nil {
 			ec.Concretes = &Decimal{sumCrct}
 		}
-		ec.appendCharges(nEc.Charges...)
+		ec.appendChargeEntry(nEc.Charges...)
 		for acntID, acntChrg := range nEc.Accounting {
 			ec.Accounting[acntID] = acntChrg
 		}
@@ -77,9 +77,9 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 	}
 }
 
-// appendCharges will add new charge to the  existing.
+// appendChargeEntry will add new charge to the  existing.
 // if possible, the existing last one in ec will be compressed
-func (ec *EventCharges) appendCharges(cIls ...*ChargeEntry) {
+func (ec *EventCharges) appendChargeEntry(cIls ...*ChargeEntry) {
 	for i, cIl := range cIls {
 		if i == 0 && len(ec.Charges) == 0 {
 			ec.Charges = []*ChargeEntry{cIl}

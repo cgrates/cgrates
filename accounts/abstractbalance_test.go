@@ -370,7 +370,7 @@ func TestABCost0WithoutConcrete(t *testing.T) {
 	}
 }
 
-func TestABCost0Exceed11(t *testing.T) {
+func TestABCost0Exceed1(t *testing.T) {
 	// consume more units that has an abstract balance
 	aB := &abstractBalance{
 		blnCfg: &utils.Balance{
@@ -401,7 +401,7 @@ func TestABCost0Exceed11(t *testing.T) {
 		t.Error(err)
 	} else if ec.Abstracts.Cmp(decimal.New(int64(60*time.Second), 0)) != 0 {
 		t.Errorf("Unexpected debited units: %s", ec.Abstracts)
-	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(int64(-10*time.Second), 0)) != 0 {
+	} else if aB.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("Unexpected units in abstract balance: %s", aB.blnCfg.Units)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(10, 0)) != 0 {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)

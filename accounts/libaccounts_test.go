@@ -212,7 +212,6 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg := config.NewDefaultCGRConfig()
-
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
 		blnCfg: &utils.Balance{
@@ -231,10 +230,32 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		fltrS: filterS,
 	}
 	expectedEvCh := &utils.EventCharges{
-		Concretes:   utils.NewDecimal(700, 0),
-		Accounting:  make(map[string]*utils.AccountCharge),
+		Concretes: utils.NewDecimal(700, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID2": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(200, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+			"GENUUID1": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(500, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
 		UnitFactors: make(map[string]*utils.UnitFactor),
 		Rating:      make(map[string]*utils.RateSInterval),
+		Accounts:    make(map[string]*utils.Account),
 	}
 
 	if evCh, err := debitConcreteUnits(decimal.New(700, 0), utils.EmptyString,
@@ -244,8 +265,13 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
 	} else if cb2.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
-	} else if !reflect.DeepEqual(expectedEvCh, evCh) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
+	} else {
+		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
+		expectedEvCh.Charges = evCh.Charges
+		expectedEvCh.Accounting = evCh.Accounting
+		if !reflect.DeepEqual(evCh, expectedEvCh) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
+		}
 	}
 
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
@@ -310,10 +336,32 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	}
 
 	expectedEvCh := &utils.EventCharges{
-		Concretes:   utils.NewDecimal(700, 0),
-		Accounting:  make(map[string]*utils.AccountCharge),
+		Concretes: utils.NewDecimal(700, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1", // will be changed
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2", // will be changed
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"GENUUID2": {
+				BalanceID:    "CB2",
+				Units:        utils.NewDecimal(200, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+			"GENUUID1": {
+				BalanceID:    "CB1",
+				Units:        utils.NewDecimal(500, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
 		UnitFactors: make(map[string]*utils.UnitFactor),
 		Rating:      make(map[string]*utils.RateSInterval),
+		Accounts:    make(map[string]*utils.Account),
 	}
 
 	if evCh, err := debitConcreteUnits(decimal.New(700, 0), utils.EmptyString,
@@ -323,8 +371,13 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
 	} else if cb2.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
-	} else if !reflect.DeepEqual(expectedEvCh, evCh) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
+	} else {
+		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
+		expectedEvCh.Charges = evCh.Charges
+		expectedEvCh.Accounting = evCh.Accounting
+		if !reflect.DeepEqual(evCh, expectedEvCh) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedEvCh), utils.ToJSON(evCh))
+		}
 	}
 
 	// debit all the units from balances
