@@ -44,7 +44,7 @@ type FilterS struct {
 	connMgr *ConnManager
 }
 
-// Pass will check all filters wihin filterIDs and require them passing for dataProvider
+// Pass will check all filters within filterIDs and require them passing for dataProvider
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
