@@ -632,6 +632,25 @@ func TestFlatstore(t *testing.T) {
 		conReqs:   make(chan struct{}, 1),
 	}
 	eR.conReqs <- struct{}{}
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFlatstoreServeDefault(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &FlatstoreER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/flatstoreErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
 	filePath := "/tmp/flatstoreErs/out"
 	err := os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -643,12 +662,13 @@ func TestFlatstore(t *testing.T) {
 		}
 	}
 	eR.Config().RunDelay = 1 * time.Millisecond
-	if err := eR.Serve(); err != nil {
-		t.Error(err)
-	}
 	os.Create(path.Join(filePath, "file1.txt"))
-	eR.Config().RunDelay = 1 * time.Millisecond
-	if err := eR.Serve(); err != nil {
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		close(eR.rdrExit)
+	}()
+	eR.serveDefault()
+	if err := os.RemoveAll(filePath); err != nil {
 		t.Error(err)
 	}
 }

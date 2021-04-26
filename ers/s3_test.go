@@ -28,104 +28,45 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestNewSQSER(t *testing.T) {
+func TestS3ERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	expected := &SQSER{
-		cgrCfg:  cfg,
-		cfgIdx:  0,
-		cap:     nil,
-		queueID: "cgrates_cdrs",
-	}
-	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   1,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			Filters:          []string{},
-			Opts:             make(map[string]interface{}),
-		},
-	}
-	rdr, err := NewSQSER(cfg, 0, nil,
+	rdr, err := NewS3ER(cfg, 0, nil,
 		nil, nil, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
-	expected.cap = rdr.(*SQSER).cap
-	expected.session = rdr.(*SQSER).session
-
-	rdr.(*SQSER).poster = nil
-	if !reflect.DeepEqual(rdr, expected) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rdr)
+	rdr.Config().RunDelay = 1 * time.Millisecond
+	if err := rdr.Serve(); err != nil {
+		t.Error(err)
 	}
 }
 
-func TestSQSERServeRunDelay0(t *testing.T) {
+func TestS3ERServe2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   1,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			Filters:          []string{},
-			Opts:             make(map[string]interface{}),
-		},
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     nil,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
 	}
-	rdr, err := NewSQSER(cfg, 0, nil,
-		nil, nil, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rdr.Config().RunDelay = time.Duration(0)
-	result := rdr.Serve()
-	if result != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	if err := rdr.Serve(); err != nil {
+		t.Error(err)
 	}
 }
 
-func TestSQSERServe(t *testing.T) {
+func TestS3ERProcessMessage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   1,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			Filters:          []string{},
-			Opts:             make(map[string]interface{}),
-		},
-	}
-	rdr, err := NewSQSER(cfg, 0, nil,
-		nil, nil, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rdr.Config().RunDelay = time.Duration(1)
-	result := rdr.Serve()
-	if result != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
-	}
-}
-
-func TestSQSERProcessMessage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	rdr := &SQSER{
+	rdr := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     new(engine.FilterS),
@@ -173,9 +114,9 @@ func TestSQSERProcessMessage(t *testing.T) {
 	}
 }
 
-func TestSQSERProcessMessageError1(t *testing.T) {
+func TestS3ERProcessMessageError1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr := &SQSER{
+	rdr := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     new(engine.FilterS),
@@ -201,13 +142,13 @@ func TestSQSERProcessMessageError1(t *testing.T) {
 	}
 }
 
-func TestSQSERProcessMessageError2(t *testing.T) {
+func TestS3ERProcessMessageError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rdr := &SQSER{
+	rdr := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     fltrs,
@@ -237,9 +178,9 @@ func TestSQSERProcessMessageError2(t *testing.T) {
 	}
 }
 
-func TestSQSERProcessMessageError3(t *testing.T) {
+func TestS3ERProcessMessageError3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr := &SQSER{
+	rdr := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     new(engine.FilterS),
@@ -262,9 +203,9 @@ func TestSQSERProcessMessageError3(t *testing.T) {
 	}
 }
 
-func TestSQSERParseOpts(t *testing.T) {
+func TestS3ERParseOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr := &SQSER{
+	rdr := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     new(engine.FilterS),
@@ -297,9 +238,9 @@ func TestSQSERParseOpts(t *testing.T) {
 	rdr.createPoster()
 }
 
-func TestSQSERIsClosed(t *testing.T) {
+func TestS3ERIsClosed(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr := &SQSER{
+	rdr := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     new(engine.FilterS),

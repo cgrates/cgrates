@@ -294,3 +294,67 @@ func TestNewAMQPv1Reader(t *testing.T) {
 		t.Errorf("Expected \n%v but received \n%v", expected, rcv)
 	}
 }
+
+func TestNewS3Reader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaS3jsonMap
+	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
+	exp := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+		queueID:   "cgrates_cdrs",
+	}
+	exp.Config().ProcessedPath = ""
+	exp.Config().Opts = map[string]interface{}{}
+	exp.createPoster()
+	var expected EventReader = exp
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected \n%v but received \n%v", expected, rcv)
+	}
+}
+
+func TestNewSQSReader(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	cfg.ERsCfg().Readers[0].Type = utils.MetaSQSjsonMap
+	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
+	exp := &SQSER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltr,
+		rdrEvents: nil,
+		rdrExit:   nil,
+		rdrErr:    nil,
+		queueID:   "cgrates_cdrs",
+	}
+	exp.Config().SourcePath = "string"
+	// var err error
+	// awsCfg := aws.Config{Endpoint: aws.String(exp.Config().SourcePath)}
+	// exp.session, err = session.NewSessionWithOptions(
+	// 	session.Options{
+	// 		Config: awsCfg,
+	// 	},
+	// )
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	exp.Config().ProcessedPath = ""
+	exp.Config().Opts = map[string]interface{}{}
+	exp.createPoster()
+	var expected EventReader = exp
+	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	exp.session = rcv.(*SQSER).session
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected \n%v but received \n%v", expected, rcv)
+	}
+}
