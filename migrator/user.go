@@ -73,7 +73,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 			fieldName = utils.RequestType
 		}
 		if utils.IsSliceMember(usrFltr, fieldName) {
-			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:~%s:%s", fieldName, substitute))
+			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:~*req.%s:%s", fieldName, substitute))
 			continue
 		}
 		var path string

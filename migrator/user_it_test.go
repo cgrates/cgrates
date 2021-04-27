@@ -194,7 +194,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 	}
 
 	expUsrIdx := map[string]utils.StringSet{
-		"*string:Account:1002": {
+		"*string:*req.Account:1002": {
 			"1001": struct{}{},
 		},
 	}
