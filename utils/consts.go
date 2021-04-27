@@ -428,6 +428,7 @@ const (
 	MetaDateTime             = "*datetime"
 	MetaMaskedDestination    = "*masked_destination"
 	MetaUnixTimestamp        = "*unix_timestamp"
+	MetaPostCDR              = "*post_cdr"
 	MetaDumpToFile           = "*dump_to_file"
 	NonTransactional         = ""
 	DataDB                   = "data_db"
@@ -1767,7 +1768,7 @@ const (
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
 	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
 	QueryTimeoutCfg        = "query_timeout"
-	SSLModeCfg             = "sslmode"
+	SSLModeCfg             = "sslMode"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
@@ -2128,22 +2129,16 @@ const (
 
 // EventReaderCfg
 const (
-	IDCfg                       = "id"
-	CacheCfg                    = "cache"
-	RowLengthCfg                = "row_length"
-	FieldSepCfg                 = "field_separator"
-	HeaderDefCharCfg            = "header_define_character"
-	RunDelayCfg                 = "run_delay"
-	SourcePathCfg               = "source_path"
-	ProcessedPathCfg            = "processed_path"
-	XMLRootPathCfg              = "xml_root_path"
-	TenantCfg                   = "tenant"
-	FlagsCfg                    = "flags"
-	FailedCallsPrefixCfg        = "failed_calls_prefix"
-	PartialRecordCacheCfg       = "partial_record_cache"
-	PartialCacheExpiryActionCfg = "partial_cache_expiry_action"
-	FieldsCfg                   = "fields"
-	CacheDumpFieldsCfg          = "cache_dump_fields"
+	IDCfg              = "id"
+	CacheCfg           = "cache"
+	FieldSepCfg        = "field_separator"
+	RunDelayCfg        = "run_delay"
+	SourcePathCfg      = "source_path"
+	ProcessedPathCfg   = "processed_path"
+	TenantCfg          = "tenant"
+	FlagsCfg           = "flags"
+	FieldsCfg          = "fields"
+	CacheDumpFieldsCfg = "cache_dump_fields"
 )
 
 // RegistrarCCfg
@@ -2323,7 +2318,7 @@ const (
 	AWSKey        = "awsKey"
 	AWSSecret     = "awsSecret"
 	AWSToken      = "awsToken"
-	AWSFolderPath = "folderPath"
+	AWSFolderPath = "s3FolderPath"
 	KafkaTopic    = "topic"
 	KafkaGroupID  = "groupID"
 	KafkaMaxWait  = "maxWait"
@@ -2340,19 +2335,34 @@ const (
 	AMQPDefaultConsumerTag = "cgrates"
 	AMQPConsumerTag        = "consumerTag"
 
-	LazyQuotes = "lazyQuotes"
-
 	KafkaDefaultTopic   = "cgrates"
 	KafkaDefaultGroupID = "cgrates"
 	KafkaDefaultMaxWait = time.Millisecond
 
 	SQLDBName         = "dbName"
 	SQLTableName      = "tableName"
-	SQLSSLMode        = "sslmode"
 	SQLDefaultSSLMode = "disable"
 	SQLDefaultDBName  = "cgrates"
 
 	ProcessedOpt = "Processed"
+
+	// fileCSV
+	RowLengthOpt        = "RowLength"
+	FieldSepOpt         = "FieldSeparator"
+	HeaderDefineCharOpt = "csvHeaderDefineChar"
+	LazyQuotes          = "LazyQuotes"
+
+	// partialCSV
+	PartialCSVCacheExpiryActionOpt = "csvCacheExpiryAction"
+	PartialCSVRecordCacheOpt       = "csvRecordCacheTTL"
+
+	// flatStore
+	FlatstorePrfx            = "fst"
+	FstFailedCallsPrefixOpt  = "fstFailedCallsPrefix"
+	FstPartialRecordCacheOpt = "fstRecordCacheTTL"
+
+	// fileXML
+	XMLRootPathOpt = "xmlRootPath"
 )
 
 // Analyzers constants
