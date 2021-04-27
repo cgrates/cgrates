@@ -100,7 +100,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Tenant:             defaultTenant,
 			ID:                 "1001",
 			Contexts:           []string{utils.MetaAny},
-			FilterIDs:          []string{"*string:~Account:1002"},
+			FilterIDs:          []string{"*string:~*req.Account:1002"},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
@@ -122,7 +122,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ID:       "1001",
 			Contexts: []string{utils.MetaAny},
 			FilterIDs: []string{
-				"*string:~Account:1002",
+				"*string:~*req.Account:1002",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -144,7 +144,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Tenant:             defaultTenant,
 			ID:                 "1001",
 			Contexts:           []string{utils.MetaAny},
-			FilterIDs:          []string{"*string:~Account:1002"},
+			FilterIDs:          []string{"*string:~*req.Account:1002"},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
@@ -166,7 +166,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ID:       "acstmusername",
 			Contexts: []string{utils.MetaAny},
 			FilterIDs: []string{
-				"*string:~Account:acnt63",
+				"*string:~*req.Account:acnt63",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
