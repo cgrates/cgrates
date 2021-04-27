@@ -197,6 +197,11 @@ type TPTimingWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
+// ArgsGetTimingID is used by GetTiming API
+type ArgsGetTimingID struct {
+	ID string
+}
+
 func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
 	rt = &TPTiming{}
 	rt.ID = ID
