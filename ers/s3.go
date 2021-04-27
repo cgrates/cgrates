@@ -80,6 +80,12 @@ type S3ER struct {
 	poster engine.Poster
 }
 
+type s3Client interface {
+	ListObjectsV2Pages(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error
+	GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput, error)
+	DeleteObject(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error)
+}
+
 // Config returns the curent configuration
 func (rdr *S3ER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
@@ -104,8 +110,7 @@ func (rdr *S3ER) Serve() (err error) {
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return
 	}
-
-	go rdr.readLoop() // read until the connection is closed
+	go rdr.readLoop(s3.New(rdr.session)) // read until the connection is closed
 	return
 }
 
@@ -157,8 +162,7 @@ func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
 	}
 }
 
-func (rdr *S3ER) readLoop() (err error) {
-	scv := s3.New(rdr.session)
+func (rdr *S3ER) readLoop(scv s3Client) (err error) {
 	var keys []string
 	if err = scv.ListObjectsV2Pages(&s3.ListObjectsV2Input{Bucket: aws.String(rdr.queueID)},
 		func(lovo *s3.ListObjectsV2Output, b bool) bool {
@@ -200,7 +204,7 @@ func (rdr *S3ER) isClosed() bool {
 	}
 }
 
-func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
+func (rdr *S3ER) readMsg(scv s3Client, key string) (err error) {
 	if rdr.Config().ConcurrentReqs != -1 {
 		<-rdr.cap // do not try to read if the limit is reached
 		defer func() { rdr.cap <- struct{}{} }()
@@ -210,6 +214,7 @@ func (rdr *S3ER) readMsg(scv *s3.S3, key string) (err error) {
 	}
 
 	obj, err := scv.GetObject(&s3.GetObjectInput{Bucket: &rdr.queueID, Key: &key})
+	fmt.Println(obj)
 	if err != nil {
 		rdr.rdrErr <- err
 		return
