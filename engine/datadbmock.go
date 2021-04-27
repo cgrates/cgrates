@@ -23,7 +23,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type DataDBMock struct{}
+type DataDBMock struct {
+	GetKeysForPrefixF     func(*context.Context, string) ([]string, error)
+	GetChargerProfileDrvF func(string, string) (*ChargerProfile, error)
+	GetFilterDrvF         func(string, string) (*Filter, error)
+	GetIndexesDrvF        func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+}
 
 //Storage methods
 func (dbM *DataDBMock) Close() {}
@@ -32,7 +37,10 @@ func (dbM *DataDBMock) Flush(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetKeysForPrefix(_ *context.Context, _ string) ([]string, error) {
+func (dbM *DataDBMock) GetKeysForPrefix(ctx *context.Context, prf string) ([]string, error) {
+	if dbM.GetKeysForPrefixF != nil {
+		return dbM.GetKeysForPrefixF(ctx, prf)
+	}
 	return nil, utils.ErrNotImplemented
 }
 

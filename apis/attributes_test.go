@@ -116,6 +116,10 @@ func (dbM *dataDBKeys) SetAttributeProfileDrv(*context.Context, *engine.Attribut
 	return nil
 }
 
+func (dbM *dataDBKeys) GetKeysForPrefix(ctx *context.Context, prf string) ([]string, error) {
+	return nil, utils.ErrNotImplemented
+}
+
 func (dbM *dataDBKeys) RemoveAttributeProfileDrv(*context.Context, string, string) error {
 	return nil
 }
