@@ -62,7 +62,7 @@ func TestNewSQLeUrl(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "postgres"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLSSLMode] = "test"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SSLModeCfg] = "test"
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)

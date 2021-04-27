@@ -57,17 +57,21 @@ func NewPartialCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		rdrExit:   rdrExit,
 		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
 
-	var function func(itmID string, value interface{})
-	if cfg.ERsCfg().Readers[cfgIdx].PartialCacheExpiryAction == utils.MetaDumpToFile {
+	function := pCSVFileER.postCDR
+	if utils.IfaceAsString(pCSVFileER.Config().Opts[utils.PartialCSVCacheExpiryActionOpt]) == utils.MetaDumpToFile {
 		function = pCSVFileER.dumpToFile
-	} else {
-		function = pCSVFileER.postCDR
 	}
 	var processFile struct{}
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
 		pCSVFileER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
-	pCSVFileER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, function)
+	var ttl time.Duration
+	if ttlOpt, has := pCSVFileER.Config().Opts[utils.PartialCSVRecordCacheOpt]; has {
+		if ttl, err = utils.IfaceAsDuration(ttlOpt); err != nil {
+			return
+		}
+	}
+	pCSVFileER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, ttl, false, function)
 	return pCSVFileER, nil
 }
 
@@ -145,7 +149,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 	}
 	defer file.Close()
 	var csvReader *csv.Reader
-	if csvReader, err = newCSVReader(file, rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].RowLength, rdr.Config().FieldSep, rdr.Config().Opts); err != nil {
+	if csvReader, err = newCSVReader(file, rdr.Config().Opts, utils.CSV); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> failed creating CSV reader for <%s>, due to option parsing error: <%s>",
 				utils.ERs, rdr.Config().ID, err.Error()))
@@ -156,6 +160,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 	evsPosted := 0
 	timeStart := time.Now()
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
+	hdrDefChar := utils.IfaceAsString(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].Opts[utils.HeaderDefineCharOpt])
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -165,8 +170,8 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 		if rowNr == 0 && len(record) > 0 &&
-			strings.HasPrefix(record[0], rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].HeaderDefineChar) {
-			record[0] = strings.TrimPrefix(record[0], rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].HeaderDefineChar)
+			strings.HasPrefix(record[0], hdrDefChar) {
+			record[0] = strings.TrimPrefix(record[0], hdrDefChar)
 			// map the templates
 			indxAls = make(map[string]int)
 			for i, hdr := range record {
@@ -321,7 +326,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 		return
 	}
 	csvWriter := csv.NewWriter(fileOut)
-	csvWriter.Comma = rune(rdr.Config().FieldSep[0])
+	csvWriter.Comma = rune(utils.IfaceAsString(rdr.Config().Opts[utils.CSV+utils.FieldSepOpt])[0])
 	if err = csvWriter.Write(record); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
 			utils.ERs, record, dumpFilePath, err.Error()))

@@ -60,8 +60,14 @@ func NewFlatstoreER(cfg *config.CGRConfig, cfgIdx int,
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
 		flatER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
-	flatER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, flatER.dumpToFile)
-	return flatER, err
+	var ttl time.Duration
+	if ttlOpt, has := flatER.Config().Opts[utils.FstPartialRecordCacheOpt]; has {
+		if ttl, err = utils.IfaceAsDuration(ttlOpt); err != nil {
+			return
+		}
+	}
+	flatER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, ttl, false, flatER.dumpToFile)
+	return flatER, nil
 }
 
 // FlatstoreER implements EventReader interface for Flatstore CDR
@@ -138,9 +144,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	}
 	defer file.Close()
 	var csvReader *csv.Reader
-	if csvReader, err = newCSVReader(file, rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].RowLength, rdr.Config().FieldSep, rdr.Config().Opts); err != nil {
+	if csvReader, err = newCSVReader(file, rdr.Config().Opts, utils.FlatstorePrfx); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<%s> failed creating CSV reader for <%s>, due to option parsing error: <%s>",
+			fmt.Sprintf("<%s> failed creating flatStore reader for <%s>, due to option parsing error: <%s>",
 				utils.ERs, rdr.Config().ID, err.Error()))
 		return
 	}
@@ -148,6 +154,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	evsPosted := 0
 	timeStart := time.Now()
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
+	failCallPrfx := utils.IfaceAsString(rdr.Config().Opts[utils.FstFailedCallsPrefixOpt])
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -156,7 +163,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			}
 			return
 		}
-		if strings.HasPrefix(fName, rdr.Config().FailedCallsPrefix) { // Use the first index since they should be the same in all configs
+		if strings.HasPrefix(fName, failCallPrfx) { // Use the first index since they should be the same in all configs
 			record = append(record, "0") // Append duration 0 for failed calls flatstore CDR
 		} else {
 			pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -308,7 +315,7 @@ func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
 		return
 	}
 	csvWriter := csv.NewWriter(fileOut)
-	csvWriter.Comma = rune(rdr.Config().FieldSep[0])
+	csvWriter.Comma = rune(utils.IfaceAsString(rdr.Config().Opts[utils.FlatstorePrfx+utils.FieldSepOpt])[0])
 	if err = csvWriter.Write(unpRcd.Values); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
 			utils.ERs, unpRcd.Values, dumpFilePath, err.Error()))

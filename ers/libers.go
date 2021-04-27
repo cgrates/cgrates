@@ -36,15 +36,19 @@ func getProcessOptions(opts map[string]interface{}) (proc map[string]interface{}
 	return
 }
 
-func newCSVReader(file io.Reader, rowLenght int, fieldSep string, opts map[string]interface{}) (csvReader *csv.Reader, err error) {
+func newCSVReader(file io.Reader, opts map[string]interface{}, prfx string) (csvReader *csv.Reader, err error) {
 	csvReader = csv.NewReader(file)
-	csvReader.FieldsPerRecord = rowLenght
+	var rowLength int64
+	if rowLength, err = utils.IfaceAsTInt64(opts[prfx+utils.RowLengthOpt]); err != nil {
+		return
+	}
+	csvReader.FieldsPerRecord = int(rowLength)
 	csvReader.Comment = utils.CommentChar
 	csvReader.Comma = utils.CSVSep
-	if len(fieldSep) > 0 {
-		csvReader.Comma = rune(fieldSep[0])
+	if fieldSep, has := opts[prfx+utils.FieldSepOpt]; has {
+		csvReader.Comma = rune(utils.IfaceAsString(fieldSep)[0])
 	}
-	if val, has := opts[utils.LazyQuotes]; has {
+	if val, has := opts[prfx+utils.LazyQuotes]; has {
 		csvReader.LazyQuotes, err = utils.IfaceAsBool(val)
 	}
 	return

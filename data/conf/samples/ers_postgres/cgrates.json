@@ -85,7 +85,9 @@
 		{
 			"id": "file_reader2",
 			"run_delay":  "-1",
-			"field_separator": ";",
+			"opts": {
+				"csvFieldSeparator":";"
+			},
 			"type": "*file_csv",
 			"source_path": "/tmp/ers2/in",
 			"flags": ["*dryrun"],
@@ -110,7 +112,6 @@
 		{
 			"id": "init_session",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
@@ -132,7 +133,6 @@
 		{
 			"id": "terminate_session",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
@@ -147,7 +147,6 @@
 		{
 			"id": "create_cdr",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
@@ -172,7 +171,9 @@
 			"id": "file_reader_with_filters",
 			"run_delay":  "-1",
 			"type": "*file_csv",
-			"field_separator": ";",
+			"opts": {
+				"csvFieldSeparator":";"
+			},
 			"source_path": "/tmp/ers_with_filters/in",
 			"processed_path": "/tmp/ers_with_filters/out",
 			"flags": ["*cdrs","*log"],
@@ -202,7 +203,9 @@
 			"source_path": "/tmp/xmlErs/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/xmlErs/out",
-			"xml_root_path": "broadWorksCDR.cdrData",
+			"opts": {
+				"xmlRootPath": "broadWorksCDR.cdrData",
+			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
@@ -256,8 +259,10 @@
 			"source_path": "/tmp/partErs1/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/partErs1/out",
-			"partial_record_cache": "500ms",
-			"partial_cache_expiry_action": "*dump_to_file",
+			"opts": {
+				"csvRecordCacheTTL": "500ms",
+				"csvCacheExpiryAction": "*dump_to_file",
+			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "AccId1", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.0"},
@@ -297,8 +302,10 @@
 			"source_path": "/tmp/partErs2/in",
 			"processed_path": "/tmp/partErs2/out",
 			"flags": ["*cdrs"],
-			"partial_record_cache": "500ms",
-			"partial_cache_expiry_action": "*post_cdr",
+			"opts": {
+				"csvRecordCacheTTL": "500ms",
+				"csvCacheExpiryAction": "*post_cdr",
+			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "AccId1", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.0"},
@@ -324,12 +331,14 @@
 			"enabled": true,
 			"run_delay":  "-1",
 			"type": "*flatstore",
-			"field_separator": "|",
+			"opts": {
+				"fstFieldSeparator":"|",
+				"fstFailedCallsPrefix": "missed_calls",
+				"fstRecordCacheTTL": "500ms",
+			},
 			"source_path": "/tmp/flatstoreErs/in",
 			"processed_path": "/tmp/flatstoreErs/out",
-			"failed_calls_prefix": "missed_calls",
 			"flags": ["*cdrs"],
-			"partial_record_cache": "500ms",
 			"fields":[
 				{"tag": "Tor", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
@@ -370,7 +379,6 @@
 		{
 			"id": "readerWithTemplate",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/readerWithTemplate/in",
 			"flags": ["*cdrs","*log"],

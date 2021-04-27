@@ -198,7 +198,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 				"max_idle_conns": 10,					
 				"conn_max_lifetime": 0, 			
 				"query_timeout":"10s",
-				"sslmode":"disable",		
+				"sslMode":"disable",		
 				"mysql_location": "UTC",			
 			},
 			"items":{
