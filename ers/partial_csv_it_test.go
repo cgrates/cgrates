@@ -279,7 +279,7 @@ func TestNewPartialCSVFileERCase2(t *testing.T) {
 
 func TestNewPartialCSVFileERCase3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers[0].PartialCacheExpiryAction = utils.MetaDumpToFile
+	cfg.ERsCfg().Readers[0].Opts[utils.PartialCSVCacheExpiryActionOpt] = utils.MetaDumpToFile
 	fltr := &engine.FilterS{}
 	result, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
 	if err != nil {
@@ -306,23 +306,19 @@ func TestPartialCSVConfig(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   1024,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
-			Tenant:           nil,
-			Timezone:         utils.EmptyString,
-			Filters:          []string{},
-			Flags:            utils.FlagsWithParams{},
-			Fields:           nil,
-			CacheDumpFields:  nil,
-			Opts:             make(map[string]interface{}),
+			ID:              utils.MetaDefault,
+			Type:            utils.MetaNone,
+			RunDelay:        0,
+			ConcurrentReqs:  1024,
+			SourcePath:      "/var/spool/cgrates/ers/in",
+			ProcessedPath:   "/var/spool/cgrates/ers/out",
+			Tenant:          nil,
+			Timezone:        utils.EmptyString,
+			Filters:         []string{},
+			Flags:           utils.FlagsWithParams{},
+			Fields:          nil,
+			CacheDumpFields: nil,
+			Opts:            make(map[string]interface{}),
 		},
 	}
 	fltr := &engine.FilterS{}
@@ -338,23 +334,19 @@ func TestPartialCSVConfig(t *testing.T) {
 		conReqs:   nil,
 	}
 	expected := &config.EventReaderCfg{
-		ID:               utils.MetaDefault,
-		Type:             utils.MetaNone,
-		RowLength:        0,
-		FieldSep:         ",",
-		HeaderDefineChar: ":",
-		RunDelay:         0,
-		ConcurrentReqs:   1024,
-		SourcePath:       "/var/spool/cgrates/ers/in",
-		ProcessedPath:    "/var/spool/cgrates/ers/out",
-		XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
-		Tenant:           nil,
-		Timezone:         utils.EmptyString,
-		Filters:          []string{},
-		Flags:            utils.FlagsWithParams{},
-		Fields:           nil,
-		CacheDumpFields:  nil,
-		Opts:             make(map[string]interface{}),
+		ID:              utils.MetaDefault,
+		Type:            utils.MetaNone,
+		RunDelay:        0,
+		ConcurrentReqs:  1024,
+		SourcePath:      "/var/spool/cgrates/ers/in",
+		ProcessedPath:   "/var/spool/cgrates/ers/out",
+		Tenant:          nil,
+		Timezone:        utils.EmptyString,
+		Filters:         []string{},
+		Flags:           utils.FlagsWithParams{},
+		Fields:          nil,
+		CacheDumpFields: nil,
+		Opts:            make(map[string]interface{}),
 	}
 	result := testStruct.Config()
 	if !reflect.DeepEqual(result, expected) {
@@ -366,23 +358,19 @@ func TestPartialCSVServe1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   1024,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
-			Tenant:           nil,
-			Timezone:         utils.EmptyString,
-			Filters:          []string{},
-			Flags:            utils.FlagsWithParams{},
-			Fields:           nil,
-			CacheDumpFields:  nil,
-			Opts:             make(map[string]interface{}),
+			ID:              utils.MetaDefault,
+			Type:            utils.MetaNone,
+			RunDelay:        0,
+			ConcurrentReqs:  1024,
+			SourcePath:      "/var/spool/cgrates/ers/in",
+			ProcessedPath:   "/var/spool/cgrates/ers/out",
+			Tenant:          nil,
+			Timezone:        utils.EmptyString,
+			Filters:         []string{},
+			Flags:           utils.FlagsWithParams{},
+			Fields:          nil,
+			CacheDumpFields: nil,
+			Opts:            make(map[string]interface{}),
 		},
 	}
 	fltr := &engine.FilterS{}
@@ -407,23 +395,19 @@ func TestPartialCSVServe3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         1,
-			ConcurrentReqs:   1024,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
-			Tenant:           nil,
-			Timezone:         utils.EmptyString,
-			Filters:          []string{},
-			Flags:            utils.FlagsWithParams{},
-			Fields:           nil,
-			CacheDumpFields:  nil,
-			Opts:             make(map[string]interface{}),
+			ID:              utils.MetaDefault,
+			Type:            utils.MetaNone,
+			RunDelay:        1,
+			ConcurrentReqs:  1024,
+			SourcePath:      "/var/spool/cgrates/ers/in",
+			ProcessedPath:   "/var/spool/cgrates/ers/out",
+			Tenant:          nil,
+			Timezone:        utils.EmptyString,
+			Filters:         []string{},
+			Flags:           utils.FlagsWithParams{},
+			Fields:          nil,
+			CacheDumpFields: nil,
+			Opts:            make(map[string]interface{}),
 		},
 	}
 	fltr := &engine.FilterS{}
@@ -449,23 +433,19 @@ func TestPartialCSVServe4(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         1,
-			ConcurrentReqs:   1024,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
-			Tenant:           nil,
-			Timezone:         utils.EmptyString,
-			Filters:          []string{},
-			Flags:            utils.FlagsWithParams{},
-			Fields:           nil,
-			CacheDumpFields:  nil,
-			Opts:             make(map[string]interface{}),
+			ID:              utils.MetaDefault,
+			Type:            utils.MetaNone,
+			RunDelay:        1,
+			ConcurrentReqs:  1024,
+			SourcePath:      "/var/spool/cgrates/ers/in",
+			ProcessedPath:   "/var/spool/cgrates/ers/out",
+			Tenant:          nil,
+			Timezone:        utils.EmptyString,
+			Filters:         []string{},
+			Flags:           utils.FlagsWithParams{},
+			Fields:          nil,
+			CacheDumpFields: nil,
+			Opts:            make(map[string]interface{}),
 		},
 	}
 	fltr := &engine.FilterS{}
@@ -532,23 +512,19 @@ func TestPartialCSVServe2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         -1,
-			ConcurrentReqs:   1024,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			XMLRootPath:      utils.HierarchyPath{utils.EmptyString},
-			Tenant:           nil,
-			Timezone:         utils.EmptyString,
-			Filters:          []string{},
-			Flags:            utils.FlagsWithParams{},
-			Fields:           nil,
-			CacheDumpFields:  nil,
-			Opts:             make(map[string]interface{}),
+			ID:              utils.MetaDefault,
+			Type:            utils.MetaNone,
+			RunDelay:        -1,
+			ConcurrentReqs:  1024,
+			SourcePath:      "/var/spool/cgrates/ers/in",
+			ProcessedPath:   "/var/spool/cgrates/ers/out",
+			Tenant:          nil,
+			Timezone:        utils.EmptyString,
+			Filters:         []string{},
+			Flags:           utils.FlagsWithParams{},
+			Fields:          nil,
+			CacheDumpFields: nil,
+			Opts:            make(map[string]interface{}),
 		},
 	}
 	fltr := &engine.FilterS{}
@@ -658,7 +634,7 @@ func TestPartialCSVProcessEvent(t *testing.T) {
 func TestPartialCSVProcessEventPrefix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
-	cfg.ERsCfg().Readers[0].HeaderDefineChar = ":"
+	cfg.ERsCfg().Readers[0].Opts[utils.HeaderDefineCharOpt] = ":"
 	fltrs := &engine.FilterS{}
 	filePath := "/tmp/TestPartialCSVProcessEvent/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {

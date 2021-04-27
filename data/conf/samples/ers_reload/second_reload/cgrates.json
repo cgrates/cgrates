@@ -79,11 +79,13 @@
 		{
 			"id": "file_reader2",
 			"run_delay":  "-1",
-			"field_separator": ";",
 			"type": "*file_csv",
 			"source_path": "/tmp/ers2/in",
 			"flags": ["*dryrun"],
 			"processed_path": "/tmp/ers2/out",
+			"opts": {
+				"csvFieldSeparator":";"
+			},
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -104,7 +106,6 @@
 		{
 			"id": "init_session",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
@@ -126,7 +127,6 @@
 		{
 			"id": "terminate_session",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
@@ -141,7 +141,6 @@
 		{
 			"id": "create_cdr",
 			"run_delay":  "-1",
-			"field_separator": ",",
 			"type": "*file_csv",
 			"source_path": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
@@ -166,12 +165,13 @@
 			"id": "file_reader_with_filters",
 			"run_delay":  "-1",
 			"type": "*file_csv",
-			"flags": ["*dryrun"],
-			"field_separator": ";",
 			"source_path": "/tmp/ers_with_filters/in",
 			"processed_path": "/tmp/ers_with_filters/out",
 			"flags": ["*cdrs","*log"],
 			"filters":["*string:~*req.3:1002"],
+			"opts": {
+				"csvFieldSeparator":";"
+			},
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},

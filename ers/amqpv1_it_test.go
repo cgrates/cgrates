@@ -140,17 +140,14 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   -1,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			Filters:          []string{},
-			Opts:             make(map[string]interface{}),
+			ID:             utils.MetaDefault,
+			Type:           utils.MetaNone,
+			RunDelay:       0,
+			ConcurrentReqs: -1,
+			SourcePath:     "/var/spool/cgrates/ers/in",
+			ProcessedPath:  "/var/spool/cgrates/ers/out",
+			Filters:        []string{},
+			Opts:           make(map[string]interface{}),
 		},
 	}
 
@@ -174,17 +171,14 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 	}
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:               utils.MetaDefault,
-			Type:             utils.MetaNone,
-			RowLength:        0,
-			FieldSep:         ",",
-			HeaderDefineChar: ":",
-			RunDelay:         0,
-			ConcurrentReqs:   1,
-			SourcePath:       "/var/spool/cgrates/ers/in",
-			ProcessedPath:    "/var/spool/cgrates/ers/out",
-			Filters:          []string{},
-			Opts:             make(map[string]interface{}),
+			ID:             utils.MetaDefault,
+			Type:           utils.MetaNone,
+			RunDelay:       0,
+			ConcurrentReqs: 1,
+			SourcePath:     "/var/spool/cgrates/ers/in",
+			ProcessedPath:  "/var/spool/cgrates/ers/out",
+			Filters:        []string{},
+			Opts:           make(map[string]interface{}),
 		},
 	}
 
