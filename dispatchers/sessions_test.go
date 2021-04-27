@@ -34,7 +34,7 @@ func TestDspSessionSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -65,7 +65,7 @@ func TestDspSessionSv1AuthorizeEventNil(t *testing.T) {
 	}
 	var reply *sessions.V1AuthorizeReply
 	result := dspSrv.SessionSv1AuthorizeEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -98,7 +98,7 @@ func TestDspSessionSv1AuthorizeEventWithDigestNil(t *testing.T) {
 	}
 	var reply *sessions.V1AuthorizeReplyWithDigest
 	result := dspSrv.SessionSv1AuthorizeEventWithDigest(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -131,7 +131,7 @@ func TestDspSessionSv1InitiateSessionNil(t *testing.T) {
 	}
 	var reply *sessions.V1InitSessionReply
 	result := dspSrv.SessionSv1InitiateSession(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -164,7 +164,7 @@ func TestDspSessionSv1InitiateSessionWithDigestNil(t *testing.T) {
 	}
 	var reply *sessions.V1InitReplyWithDigest
 	result := dspSrv.SessionSv1InitiateSessionWithDigest(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -197,7 +197,7 @@ func TestDspSessionSv1UpdateSessionNil(t *testing.T) {
 	}
 	var reply *sessions.V1UpdateSessionReply
 	result := dspSrv.SessionSv1UpdateSession(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -228,7 +228,7 @@ func TestDspSessionSv1SyncSessionsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1SyncSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -259,7 +259,7 @@ func TestDspSessionSv1TerminateSessionNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1TerminateSession(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -290,7 +290,7 @@ func TestDspSessionSv1ProcessCDRNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1ProcessCDR(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -321,7 +321,7 @@ func TestDspSessionSv1ProcessMessageNil(t *testing.T) {
 	}
 	var reply *sessions.V1ProcessMessageReply
 	result := dspSrv.SessionSv1ProcessMessage(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -354,7 +354,7 @@ func TestDspSessionSv1ProcessEventNil(t *testing.T) {
 	}
 	var reply *sessions.V1ProcessEventReply
 	result := dspSrv.SessionSv1ProcessEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -385,7 +385,7 @@ func TestDspSessionSv1GetActiveSessionsNil(t *testing.T) {
 	}
 	var reply *[]*sessions.ExternalSession
 	result := dspSrv.SessionSv1GetActiveSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -414,7 +414,7 @@ func TestDspSessionSv1GetActiveSessionsCountNil(t *testing.T) {
 	}
 	var reply *int
 	result := dspSrv.SessionSv1GetActiveSessionsCount(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -443,7 +443,7 @@ func TestDspSessionSv1ForceDisconnectNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1ForceDisconnect(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -472,7 +472,7 @@ func TestDspSessionSv1GetPassiveSessionsNil(t *testing.T) {
 	}
 	var reply *[]*sessions.ExternalSession
 	result := dspSrv.SessionSv1GetPassiveSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -501,7 +501,7 @@ func TestDspSessionSv1ReplicateSessionsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1ReplicateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -530,7 +530,7 @@ func TestDspSessionSv1GetPassiveSessionsCountNil(t *testing.T) {
 	}
 	var reply *int
 	result := dspSrv.SessionSv1GetPassiveSessionsCount(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -559,7 +559,7 @@ func TestDspSessionSv1SetPassiveSessionNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1SetPassiveSession(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -586,7 +586,7 @@ func TestDspSessionSv1STIRAuthenticateNil(t *testing.T) {
 	CGREvent := &sessions.V1STIRAuthenticateArgs{}
 	var reply *string
 	result := dspSrv.SessionSv1STIRAuthenticate(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -611,7 +611,7 @@ func TestDspSessionSv1STIRIdentityNil(t *testing.T) {
 	CGREvent := &sessions.V1STIRIdentityArgs{}
 	var reply *string
 	result := dspSrv.SessionSv1STIRIdentity(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -636,7 +636,7 @@ func TestDspSessionSv1ActivateSessionsNil(t *testing.T) {
 	CGREvent := &utils.SessionIDsWithAPIOpts{}
 	var reply *string
 	result := dspSrv.SessionSv1ActivateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -650,7 +650,7 @@ func TestDspSessionSv1ActivateSessionsErrorTenant(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1ActivateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -675,7 +675,7 @@ func TestDspSessionSv1DeactivateSessionsNil(t *testing.T) {
 	CGREvent := &utils.SessionIDsWithAPIOpts{}
 	var reply *string
 	result := dspSrv.SessionSv1DeactivateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -689,7 +689,7 @@ func TestDspSessionSv1DeactivateSessionsErrorTenant(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.SessionSv1DeactivateSessions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

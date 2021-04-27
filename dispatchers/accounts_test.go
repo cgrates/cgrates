@@ -33,7 +33,7 @@ func TestDspAccountSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.AccountSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -44,7 +44,7 @@ func TestDspAccountSv1PingNilArgs(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.AccountSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -75,7 +75,7 @@ func TestDspAAccountsForEventNil(t *testing.T) {
 	}
 	var reply *[]*utils.Account
 	result := dspSrv.AccountsForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -108,7 +108,7 @@ func TestDspMaxAbstractsNil(t *testing.T) {
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.MaxAbstracts(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -141,7 +141,7 @@ func TestDspDebitAbstractsNil(t *testing.T) {
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.DebitAbstracts(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -174,7 +174,7 @@ func TestDspMaxConcretesNil(t *testing.T) {
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.MaxConcretes(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -207,7 +207,7 @@ func TestDspDebitConcretesNil(t *testing.T) {
 	}
 	var reply *utils.ExtEventCharges
 	result := dspSrv.DebitConcretes(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -238,7 +238,7 @@ func TestDspAccountSv1ActionSetBalanceNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.AccountSv1ActionSetBalance(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -267,7 +267,7 @@ func TestDspAAccountSv1ActionRemoveBalanceNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.AccountSv1ActionRemoveBalance(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

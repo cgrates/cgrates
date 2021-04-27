@@ -61,7 +61,7 @@ func TestDspResourceSv1PingErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ResourceSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -94,7 +94,7 @@ func TestDspResourceSv1GetResourcesForEventErrorNil(t *testing.T) {
 	}
 	var reply *engine.Resources
 	result := dspSrv.ResourceSv1GetResourcesForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -127,7 +127,7 @@ func TestDspResourceSv1AuthorizeResourcesErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ResourceSv1AuthorizeResources(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -160,7 +160,7 @@ func TestDspResourceSv1ReleaseResourcesErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ResourceSv1ReleaseResources(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -193,7 +193,7 @@ func TestDspResourceSv1GetResourceErrorNil(t *testing.T) {
 	}
 	var reply *engine.Resource
 	result := dspSrv.ResourceSv1GetResource(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -226,7 +226,7 @@ func TestDspResourceSv1AllocateResourcesErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ResourceSv1AllocateResources(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -259,7 +259,7 @@ func TestDspResourceSv1GetResourceWithConfigErrorNil(t *testing.T) {
 	}
 	var reply *engine.ResourceWithConfig
 	result := dspSrv.ResourceSv1GetResourceWithConfig(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

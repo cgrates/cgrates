@@ -33,7 +33,7 @@ func TestDspRateSv1PingErrorCase2(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.RateSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -59,7 +59,7 @@ func TestDspRateSv1CostForEventCaseNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.RateSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -75,7 +75,7 @@ func TestDspRateSv1CostForEventCase2(t *testing.T) {
 	}
 	var reply *utils.RateProfileCost
 	result := dspSrv.RateSv1CostForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -86,7 +86,7 @@ func TestDspRateSv1PingNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *utils.RateProfileCost
 	result := dspSrv.RateSv1CostForEvent(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

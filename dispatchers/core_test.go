@@ -33,7 +33,7 @@ func TestDspCoreSv1StatusNil(t *testing.T) {
 	}
 	var reply *map[string]interface{}
 	result := dspSrv.CoreSv1Status(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -60,7 +60,7 @@ func TestDspCoreSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CoreSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -87,7 +87,7 @@ func TestDspCoreSv1SleepNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.CoreSv1Sleep(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
