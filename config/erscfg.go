@@ -126,26 +126,19 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 
 // EventReaderCfg the event for the Event Reader
 type EventReaderCfg struct {
-	ID                       string
-	Type                     string
-	RowLength                int
-	FieldSep                 string
-	HeaderDefineChar         string
-	RunDelay                 time.Duration
-	ConcurrentReqs           int
-	SourcePath               string
-	ProcessedPath            string
-	Opts                     map[string]interface{}
-	XMLRootPath              utils.HierarchyPath
-	Tenant                   RSRParsers
-	Timezone                 string
-	Filters                  []string
-	Flags                    utils.FlagsWithParams
-	FailedCallsPrefix        string        // Used in case of flatstore CDRs to avoid searching for BYE records
-	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
-	PartialCacheExpiryAction string
-	Fields                   []*FCTemplate
-	CacheDumpFields          []*FCTemplate
+	ID              string
+	Type            string
+	RunDelay        time.Duration
+	ConcurrentReqs  int
+	SourcePath      string
+	ProcessedPath   string
+	Opts            map[string]interface{}
+	Tenant          RSRParsers
+	Timezone        string
+	Filters         []string
+	Flags           utils.FlagsWithParams
+	Fields          []*FCTemplate
+	CacheDumpFields []*FCTemplate
 }
 
 func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
@@ -157,15 +150,6 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Type != nil {
 		er.Type = *jsnCfg.Type
-	}
-	if jsnCfg.Row_length != nil {
-		er.RowLength = *jsnCfg.Row_length
-	}
-	if jsnCfg.Field_separator != nil {
-		er.FieldSep = *jsnCfg.Field_separator
-	}
-	if jsnCfg.Header_define_character != nil {
-		er.HeaderDefineChar = *jsnCfg.Header_define_character
 	}
 	if jsnCfg.Run_delay != nil {
 		if er.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Run_delay); err != nil {
@@ -180,9 +164,6 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Processed_path != nil {
 		er.ProcessedPath = *jsnCfg.Processed_path
-	}
-	if jsnCfg.Xml_root_path != nil {
-		er.XMLRootPath = utils.ParseHierarchyPath(*jsnCfg.Xml_root_path, utils.EmptyString)
 	}
 	if jsnCfg.Tenant != nil {
 		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
@@ -200,17 +181,6 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Flags != nil {
 		er.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
-	}
-	if jsnCfg.Failed_calls_prefix != nil {
-		er.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
-	}
-	if jsnCfg.Partial_record_cache != nil {
-		if er.PartialRecordCache, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_record_cache); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Partial_cache_expiry_action != nil {
-		er.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Fields != nil {
 		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
@@ -243,22 +213,16 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 // Clone returns a deep copy of EventReaderCfg
 func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = &EventReaderCfg{
-		ID:                       er.ID,
-		Type:                     er.Type,
-		FieldSep:                 er.FieldSep,
-		HeaderDefineChar:         er.HeaderDefineChar,
-		RunDelay:                 er.RunDelay,
-		ConcurrentReqs:           er.ConcurrentReqs,
-		SourcePath:               er.SourcePath,
-		ProcessedPath:            er.ProcessedPath,
-		XMLRootPath:              er.XMLRootPath.Clone(),
-		Tenant:                   er.Tenant.Clone(),
-		Timezone:                 er.Timezone,
-		Flags:                    er.Flags.Clone(),
-		FailedCallsPrefix:        er.FailedCallsPrefix,
-		PartialCacheExpiryAction: er.PartialCacheExpiryAction,
-		PartialRecordCache:       er.PartialRecordCache,
-		Opts:                     make(map[string]interface{}),
+		ID:             er.ID,
+		Type:           er.Type,
+		RunDelay:       er.RunDelay,
+		ConcurrentReqs: er.ConcurrentReqs,
+		SourcePath:     er.SourcePath,
+		ProcessedPath:  er.ProcessedPath,
+		Tenant:         er.Tenant.Clone(),
+		Timezone:       er.Timezone,
+		Flags:          er.Flags.Clone(),
+		Opts:           make(map[string]interface{}),
 	}
 	if er.Filters != nil {
 		cln.Filters = make([]string, len(er.Filters))
@@ -287,23 +251,16 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.IDCfg:                       er.ID,
-		utils.TypeCfg:                     er.Type,
-		utils.RowLengthCfg:                er.RowLength,
-		utils.FieldSepCfg:                 er.FieldSep,
-		utils.HeaderDefCharCfg:            er.HeaderDefineChar,
-		utils.ConcurrentRequestsCfg:       er.ConcurrentReqs,
-		utils.SourcePathCfg:               er.SourcePath,
-		utils.ProcessedPathCfg:            er.ProcessedPath,
-		utils.TenantCfg:                   er.Tenant.GetRule(separator),
-		utils.XMLRootPathCfg:              []string(er.XMLRootPath),
-		utils.TimezoneCfg:                 er.Timezone,
-		utils.FiltersCfg:                  er.Filters,
-		utils.FlagsCfg:                    []string{},
-		utils.FailedCallsPrefixCfg:        er.FailedCallsPrefix,
-		utils.PartialCacheExpiryActionCfg: er.PartialCacheExpiryAction,
-		utils.PartialRecordCacheCfg:       "0",
-		utils.RunDelayCfg:                 "0",
+		utils.IDCfg:                 er.ID,
+		utils.TypeCfg:               er.Type,
+		utils.ConcurrentRequestsCfg: er.ConcurrentReqs,
+		utils.SourcePathCfg:         er.SourcePath,
+		utils.ProcessedPathCfg:      er.ProcessedPath,
+		utils.TenantCfg:             er.Tenant.GetRule(separator),
+		utils.TimezoneCfg:           er.Timezone,
+		utils.FiltersCfg:            er.Filters,
+		utils.FlagsCfg:              []string{},
+		utils.RunDelayCfg:           "0",
 	}
 
 	opts := make(map[string]interface{})
@@ -335,10 +292,6 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		initialMP[utils.RunDelayCfg] = er.RunDelay.String()
 	} else if er.RunDelay < 0 {
 		initialMP[utils.RunDelayCfg] = "-1"
-	}
-
-	if er.PartialRecordCache != 0 {
-		initialMP[utils.PartialRecordCacheCfg] = er.PartialRecordCache.String()
 	}
 	return
 }

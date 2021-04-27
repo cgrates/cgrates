@@ -309,7 +309,7 @@ func TestFlatstoreProcessEvent2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 	eR.cache.Set("baToR", pr, nil)
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -329,7 +329,7 @@ func TestFlatstoreProcessEvent2(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 	}
 	eR.conReqs <- struct{}{}
-	eR.Config().FailedCallsPrefix = "x"
+	eR.Config().Opts[utils.FstFailedCallsPrefixOpt] = "x"
 	if err := eR.processFile(filePath, fname); err != nil {
 		t.Error(err)
 	}
@@ -374,10 +374,10 @@ func TestFlatstoreProcessEvent2CacheNotSet(t *testing.T) {
 		conReqs:   make(chan struct{}, 1),
 	}
 
-	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 
 	eR.conReqs <- struct{}{}
-	eR.Config().FailedCallsPrefix = "x"
+	eR.Config().Opts[utils.FstFailedCallsPrefixOpt] = "x"
 	if err := eR.processFile(filePath, fname); err != nil {
 		t.Error(err)
 	}
@@ -428,11 +428,11 @@ func TestFlatstoreProcessEvent2Error1(t *testing.T) {
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
-	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 	eR.cache.Set("baToR", pr, nil)
 
 	eR.conReqs <- struct{}{}
-	eR.Config().FailedCallsPrefix = "x"
+	eR.Config().Opts[utils.FstFailedCallsPrefixOpt] = "x"
 	if err := eR.processFile(filePath, fname); err != nil {
 		t.Error(err)
 	}
@@ -487,10 +487,10 @@ func TestFlatstoreProcessEvent2Error2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[0].PartialRecordCache, false, eR.dumpToFile)
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 	eR.cache.Set("baToR", pr, nil)
 	eR.conReqs <- struct{}{}
-	eR.Config().FailedCallsPrefix = "x"
+	eR.Config().Opts[utils.FstFailedCallsPrefixOpt] = "x"
 	if err := eR.processFile(filePath, fname); err != nil {
 		t.Error(err)
 	}

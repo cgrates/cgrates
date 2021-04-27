@@ -376,7 +376,6 @@ func testCsvITKillEngine(t *testing.T) {
 func TestFileCSVProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
-	cfg.ERsCfg().Readers[0].HeaderDefineChar = ":"
 	fltrs := &engine.FilterS{}
 	filePath := "/tmp/TestFileCSVProcessEvent/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {

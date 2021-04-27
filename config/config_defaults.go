@@ -138,7 +138,7 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
-		"sslmode":"disable",				// postgresSSLMode in case of *postgres
+		"sslMode":"disable",				// postgresSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 	},
 	"items":{
@@ -361,19 +361,34 @@ const CGRATES_CFG_JSON = `
 		{
 			"id": "*default",									// identifier of the EventReader profile
 			"type": "*none",									// reader type <*file_csv>
-			"row_length" : 0, 									// Number of fields from csv file
-			"field_separator": ",",								// separator used in case of csv files
-			"header_define_character": ":",						// the starting character for header definition used in case of CSV files
 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
 			"opts": {
+				// FileCSV and PartialCSV
+				"csvRowLength": 0,								// Number of fields from csv file
+				"csvFieldSeparator": ",",						// separator used when reading the fields
+				"csvHeaderDefineChar": ":", 					// the starting character for header definition used in case of CSV files
+				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+
+				// PartialCSV
+				"csvCacheExpiryAction": "*post_cdr",			// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
+				// "csvRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
+
+				// FlatStore
+				"fstRowLength": 0,								// Number of fields from csv file
+				"fstFieldSeparator": ",",						// separator used when reading the fields
+				// "fstFailedCallsPrefix": ""					// Used in case of flatstore CDRs to avoid searching for BYE records
+				// "fstRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
+				// "fstLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+
+				// FileXML
+				"xmlRootPath": "",								// path towards one event in case of XML CDRs
+
+
 				// "queueID": "cgrates_cdrs", 					// the queue id for AMQP, AMQPv1, SQS and S3 readers from were the events are read
 				// "queueIDProcessed": "", 						// the queue id for AMQP, AMQPv1, SQS and S3 readers were the events are sent after they are processed
-
-				// FileCSV, FlatStore and PartialCSV
-				// "lazyQuotes": false,							//  if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
 
 				// AMQP
 				// "consumerTag": "cgrates",					// the ID of the consumer
@@ -394,13 +409,13 @@ const CGRATES_CFG_JSON = `
 
 
 				// SQL
-				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
-				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
-				// "sslmode": "disable",						// the postgresSSLMode for postgres db
+				// "sqldbName": "cgrates", 						// the name of the database from were the events are read
+				// "sqltableName": "cdrs",							// the name of the table from were the events are read
+				// "sslMode": "disable",						// the postgresSSLMode for postgres db
 
-				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed: "", 						// the name of the database were the events are sent after they are processed
-				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "sslmodeProcessed": "",						// the postgresSSLMode for postgres db
+				// "sqldbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+				// "sqltableNameProcessed": "",					// the name of the table were the events are sent after they are processed
+				// "sslModeProcessed": "",						// the postgresSSLMode for postgres db
 
 				// SQS and S3
 				// "awsRegion": "",
@@ -412,10 +427,9 @@ const CGRATES_CFG_JSON = `
 				// "awsKeyProcessed": "",
 				// "awsSecretProcessed": "",
 				// "awsTokenProcessed": "",
-				// "folderPathProcessed": "", 					// only for S3 event posting 
+				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
 			},
-			"xml_root_path": "",								// path towards one event in case of XML CDRs
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters

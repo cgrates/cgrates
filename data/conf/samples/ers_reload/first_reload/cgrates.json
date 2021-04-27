@@ -79,11 +79,13 @@
 		{
 			"id": "file_reader2",
 			"run_delay":  "-1",
-			"field_separator": ";",
 			"type": "*file_csv",
 			"source_path": "/tmp/ers2/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/ers2/out",
+			"opts": {
+				"csvFieldSeparator":";"
+			},
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "ToR", "path": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},

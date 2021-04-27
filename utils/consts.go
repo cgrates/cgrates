@@ -1963,7 +1963,7 @@ const (
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
 	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
 	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
-	SSLModeCfg             = "sslmode"
+	SSLModeCfg             = "sslMode"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
@@ -2340,22 +2340,16 @@ const (
 
 // EventReaderCfg
 const (
-	IDCfg                       = "id"
-	CacheCfg                    = "cache"
-	RowLengthCfg                = "row_length"
-	FieldSepCfg                 = "field_separator"
-	HeaderDefCharCfg            = "header_define_character"
-	RunDelayCfg                 = "run_delay"
-	SourcePathCfg               = "source_path"
-	ProcessedPathCfg            = "processed_path"
-	XMLRootPathCfg              = "xml_root_path"
-	TenantCfg                   = "tenant"
-	FlagsCfg                    = "flags"
-	FailedCallsPrefixCfg        = "failed_calls_prefix"
-	PartialRecordCacheCfg       = "partial_record_cache"
-	PartialCacheExpiryActionCfg = "partial_cache_expiry_action"
-	FieldsCfg                   = "fields"
-	CacheDumpFieldsCfg          = "cache_dump_fields"
+	IDCfg              = "id"
+	CacheCfg           = "cache"
+	FieldSepCfg        = "field_separator"
+	RunDelayCfg        = "run_delay"
+	SourcePathCfg      = "source_path"
+	ProcessedPathCfg   = "processed_path"
+	TenantCfg          = "tenant"
+	FlagsCfg           = "flags"
+	FieldsCfg          = "fields"
+	CacheDumpFieldsCfg = "cache_dump_fields"
 )
 
 // RegistrarCCfg
@@ -2552,8 +2546,6 @@ const (
 	AMQPDefaultConsumerTag = "cgrates"
 	AMQPConsumerTag        = "consumerTag"
 
-	LazyQuotes = "lazyQuotes"
-
 	KafkaDefaultTopic   = "cgrates"
 	KafkaDefaultGroupID = "cgrates"
 	KafkaDefaultMaxWait = time.Millisecond
@@ -2567,9 +2559,23 @@ const (
 
 	S3Bucket   = "s3BucketID"
 	SQSQueueID = "SQSQueueID"
+	// fileCSV
+	RowLengthOpt        = "RowLength"
+	FieldSepOpt         = "FieldSeparator"
+	HeaderDefineCharOpt = "csvHeaderDefineChar"
+	LazyQuotes          = "LazyQuotes"
 
-	//CSV
-	FieldSepOpt = "FieldSeparator"
+	// partialCSV
+	PartialCSVCacheExpiryActionOpt = "csvCacheExpiryAction"
+	PartialCSVRecordCacheOpt       = "csvRecordCacheTTL"
+
+	// flatStore
+	FlatstorePrfx            = "fst"
+	FstFailedCallsPrefixOpt  = "fstFailedCallsPrefix"
+	FstPartialRecordCacheOpt = "fstRecordCacheTTL"
+
+	// fileXML
+	XMLRootPathOpt = "xmlRootPath"
 )
 
 // Analyzers constants

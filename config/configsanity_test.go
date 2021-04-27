@@ -1243,9 +1243,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 		Type:          utils.MetaFileCSV,
 		ProcessedPath: "/",
 		SourcePath:    "/",
-		FieldSep:      "",
+		Opts:          map[string]interface{}{"csvFieldSeparator": ""},
 	}}
-	expected = "<ERs> empty FieldSep for reader with ID: test3"
+	expected = "<ERs> empty csvFieldSeparator for reader with ID: test3"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -1253,7 +1253,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ID:       "test4",
 		Type:     utils.MetaKafkajsonMap,
 		RunDelay: 1,
-		FieldSep: utils.InInFieldSep,
+		Opts:     map[string]interface{}{"csvFieldSeparator": ","},
 	}
 	expected = "<ERs> the RunDelay field can not be bigger than zero for reader with ID: test4"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1263,7 +1263,6 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ID:            "test5",
 		Type:          utils.MetaFileXML,
 		RunDelay:      0,
-		FieldSep:      utils.InInFieldSep,
 		ProcessedPath: "not/a/path",
 		SourcePath:    "not/a/path",
 	}
@@ -1276,7 +1275,6 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ID:            "test5",
 		Type:          utils.MetaFileFWV,
 		RunDelay:      0,
-		FieldSep:      utils.InInFieldSep,
 		ProcessedPath: "not/a/path",
 		SourcePath:    "not/a/path",
 	}

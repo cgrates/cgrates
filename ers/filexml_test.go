@@ -51,17 +51,14 @@ func TestERSNewXMLFileER(t *testing.T) {
 func TestERSXMLFileERConfig(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
-		ID:               utils.MetaDefault,
-		Type:             utils.MetaNone,
-		RowLength:        0,
-		FieldSep:         ",",
-		HeaderDefineChar: ":",
-		RunDelay:         0,
-		ConcurrentReqs:   0,
-		SourcePath:       "/var/spool/cgrates/ers/in",
-		ProcessedPath:    "/var/spool/cgrates/ers/out",
-		Filters:          []string{},
-		Opts:             make(map[string]interface{}),
+		ID:             utils.MetaDefault,
+		Type:           utils.MetaNone,
+		RunDelay:       0,
+		ConcurrentReqs: 0,
+		SourcePath:     "/var/spool/cgrates/ers/in",
+		ProcessedPath:  "/var/spool/cgrates/ers/out",
+		Filters:        []string{},
+		Opts:           make(map[string]interface{}),
 	}
 	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
 	if err != nil {
@@ -76,17 +73,14 @@ func TestERSXMLFileERConfig(t *testing.T) {
 func TestERSXMLFileERServeNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
-		ID:               utils.MetaDefault,
-		Type:             utils.MetaNone,
-		RowLength:        0,
-		FieldSep:         ",",
-		HeaderDefineChar: ":",
-		RunDelay:         0,
-		ConcurrentReqs:   0,
-		SourcePath:       "/var/spool/cgrates/ers/in",
-		ProcessedPath:    "/var/spool/cgrates/ers/out",
-		Filters:          []string{},
-		Opts:             make(map[string]interface{}),
+		ID:             utils.MetaDefault,
+		Type:           utils.MetaNone,
+		RunDelay:       0,
+		ConcurrentReqs: 0,
+		SourcePath:     "/var/spool/cgrates/ers/in",
+		ProcessedPath:  "/var/spool/cgrates/ers/out",
+		Filters:        []string{},
+		Opts:           make(map[string]interface{}),
 	}
 	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
 	if err != nil {
