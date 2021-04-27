@@ -62,3 +62,61 @@ func TestCacheHasItemAndGetItem(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedRPly, reply)
 	}
 }
+
+func TestCacheSetAndRemoveItems(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	ch := engine.NewCacheS(cfg, dm, nil)
+	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestCacheSetAndRemoveItems", nil, nil, true, utils.NonTransactional)
+	cache := NewCacheSv1(ch)
+
+	var replyBool bool
+	argsHasItem := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TestCacheSetAndRemoveItems",
+		},
+	}
+	if err := cache.HasItem(nil, argsHasItem, &replyBool); err != nil {
+		t.Error(err)
+	} else if !replyBool {
+		t.Errorf("Unexpected replyBool returned")
+	}
+
+	argsRemItm := &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TestCacheSetAndRemoveItems",
+		},
+	}
+	var reply string
+	if err := cache.RemoveItem(nil, argsRemItm, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected replyBool returned")
+	}
+
+	argsHasItem = &utils.ArgsGetCacheItemWithAPIOpts{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
+			CacheID: utils.CacheAttributeProfiles,
+			ItemID:  "cgrates.org:TestCacheSetAndRemoveItems",
+		},
+	}
+	if err := cache.HasItem(nil, argsHasItem, &replyBool); err != nil {
+		t.Error(err)
+	} else if replyBool {
+		t.Errorf("Unexpected replyBool returned")
+	}
+
+	argsGetItem := &utils.ArgsGetCacheItemIDsWithAPIOpts{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
+			CacheID: utils.CacheAttributeProfiles,
+		},
+	}
+	var replyStr []string
+	if err := cache.GetItemIDs(nil, argsGetItem, &replyStr); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
+}
