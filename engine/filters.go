@@ -475,7 +475,42 @@ func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 
 // ToDo when Timings will be available in DataDb
 func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
-	return false, utils.ErrNotImplemented
+	tmVal, err := fltr.rsrElement.ParseDataProviderWithInterfaces(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	tmTime, err := utils.IfaceAsTime(tmVal, utils.EmptyString)
+	if err != nil {
+		return false, err
+	}
+
+	for _, valTmIDVal := range fltr.rsrValues {
+		valTmID, err := valTmIDVal.ParseDataProvider(dDP)
+		if err != nil {
+			return false, err
+		}
+		var tm utils.TPTiming
+		if err = connMgr.Call(config.CgrConfig().FilterSCfg().ApierSConns, nil, utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: valTmID}, &tm); err != nil {
+			continue
+		}
+		ritm := &RITiming{
+			ID:        tm.ID,
+			Years:     tm.Years,
+			Months:    tm.Months,
+			MonthDays: tm.MonthDays,
+			WeekDays:  tm.WeekDays,
+			StartTime: tm.StartTime,
+			EndTime:   tm.EndTime,
+		}
+		if ritm.IsActiveAt(tmTime) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
