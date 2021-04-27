@@ -1431,6 +1431,9 @@ const (
 	APIerSv1GetAccount                  = "APIerSv1.GetAccount"
 	APIerSv1GetAttributeProfileIDsCount = "APIerSv1.GetAttributeProfileIDsCount"
 	APIerSv1GetMaxUsage                 = "APIerSv1.GetMaxUsage"
+	APIerSv1GetTiming                   = "APIerSv1.GetTiming"
+	APIerSv1SetTiming                   = "APIerSv1.SetTiming"
+	APIerSv1RemoveTiming                = "APIerSv1.RemoveTiming"
 )
 
 // APIerSv1 TP APIs
