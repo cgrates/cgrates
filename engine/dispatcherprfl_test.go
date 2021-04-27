@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -291,5 +292,49 @@ func TestDispatcherHostIDsProfilesClone(t *testing.T) {
 	d2Conns[0] = "DSP_4"
 	if !reflect.DeepEqual(eConns, dConns) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eConns), utils.ToJSON(dConns))
+	}
+}
+
+func TestDispatcherHostProfileCloneWithParams(t *testing.T) {
+	dC := &DispatcherHostProfile{
+		ID:      "testID",
+		Weight:  10,
+		Blocker: false,
+		Params: map[string]interface{}{
+			"param1": "value of param1",
+			"param2": "value of param2",
+		},
+	}
+
+	exp := &DispatcherHostProfile{
+		ID:      "testID",
+		Weight:  10,
+		Blocker: false,
+		Params: map[string]interface{}{
+			"param1": "value of param1",
+			"param2": "value of param2",
+		},
+	}
+	rcv := dC.Clone()
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v", exp, rcv)
+	}
+}
+
+func TestDispatcherHostCallNilRPCConn(t *testing.T) {
+	dH := &DispatcherHost{
+		Tenant:     "cgrates.org",
+		RemoteHost: config.NewDfltRemoteHost(),
+	}
+
+	var args int
+	var reply *int
+
+	experr := "dial tcp 127.0.0.1:2012: connect: connection refused"
+	err := dH.Call("method", args, reply)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
