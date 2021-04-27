@@ -1,5 +1,3 @@
-// +build integration
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -62,7 +60,7 @@ func TestDspServiceManagerV1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ServiceManagerV1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
