@@ -33,7 +33,7 @@ func TestDspActionSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ActionSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -44,7 +44,7 @@ func TestDspActionSv1PingNilArgs(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ActionSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -75,7 +75,7 @@ func TestDspActionSv1ScheduleActionsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ActionSv1ScheduleActions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -120,7 +120,7 @@ func TestDspActionSv1ExecuteActionsNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ActionSv1ExecuteActions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

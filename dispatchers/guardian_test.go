@@ -33,7 +33,7 @@ func TestDspRateSv1CostForEventCase(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.GuardianSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -44,7 +44,7 @@ func TestDspGuardianSv1PingNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.GuardianSv1Ping(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -73,7 +73,7 @@ func TestDspGuardianSv1RemoteLockCase(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.GuardianSv1RemoteLock(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -102,7 +102,7 @@ func TestDspGuardianSv1RemoteUnlockCase(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.GuardianSv1RemoteUnlock(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

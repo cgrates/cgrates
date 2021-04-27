@@ -34,7 +34,7 @@ func TestDspStatSv1PingNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.StatSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -77,7 +77,7 @@ func TestDspStatSv1GetStatQueuesForEventNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1GetStatQueuesForEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -110,7 +110,7 @@ func TestDspStatSv1GetQueueStringMetricsNil(t *testing.T) {
 	}
 	var reply *map[string]string
 	result := dspSrv.StatSv1GetQueueStringMetrics(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -143,7 +143,7 @@ func TestDspStatSv1ProcessEventNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1ProcessEvent(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -176,7 +176,7 @@ func TestDspStatSv1GetQueueFloatMetricsNil(t *testing.T) {
 	}
 	var reply *map[string]float64
 	result := dspSrv.StatSv1GetQueueFloatMetrics(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -207,7 +207,7 @@ func TestDspStatSv1GetQueueIDsNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.StatSv1GetQueueIDs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

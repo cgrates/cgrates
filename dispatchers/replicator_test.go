@@ -61,7 +61,7 @@ func TestDspReplicatorSv1PingErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1Ping(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -103,7 +103,7 @@ func TestDspReplicatorSv1GetDestinationErrorNil(t *testing.T) {
 	}
 	var reply *engine.Destination
 	result := dspSrv.ReplicatorSv1GetDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -144,7 +144,7 @@ func TestDspReplicatorSv1GetReverseDestinationErrorNil(t *testing.T) {
 	}
 	var reply *[]string
 	result := dspSrv.ReplicatorSv1GetReverseDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -177,7 +177,7 @@ func TestDspReplicatorSv1GetStatQueueErrorNil(t *testing.T) {
 	}
 	var reply *engine.StatQueue
 	result := dspSrv.ReplicatorSv1GetStatQueue(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -210,7 +210,7 @@ func TestDspReplicatorSv1GetFilterErrorNil(t *testing.T) {
 	}
 	var reply *engine.Filter
 	result := dspSrv.ReplicatorSv1GetFilter(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -243,7 +243,7 @@ func TestDspReplicatorSv1GetThresholdErrorNil(t *testing.T) {
 	}
 	var reply *engine.Threshold
 	result := dspSrv.ReplicatorSv1GetThreshold(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -276,7 +276,7 @@ func TestDspReplicatorSv1GetThresholdProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.ThresholdProfile
 	result := dspSrv.ReplicatorSv1GetThresholdProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -309,7 +309,7 @@ func TestDspReplicatorSv1GetStatQueueProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.StatQueueProfile
 	result := dspSrv.ReplicatorSv1GetStatQueueProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -350,7 +350,7 @@ func TestDspReplicatorSv1GetTimingErrorNil(t *testing.T) {
 	}
 	var reply *utils.TPTiming
 	result := dspSrv.ReplicatorSv1GetTiming(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -383,7 +383,7 @@ func TestDspReplicatorSv1GetResourceErrorNil(t *testing.T) {
 	}
 	var reply *engine.Resource
 	result := dspSrv.ReplicatorSv1GetResource(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -416,7 +416,7 @@ func TestDspReplicatorSv1GetResourceProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.ResourceProfile
 	result := dspSrv.ReplicatorSv1GetResourceProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -449,7 +449,7 @@ func TestDspReplicatorSv1GetRouteProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.RouteProfile
 	result := dspSrv.ReplicatorSv1GetRouteProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -482,7 +482,7 @@ func TestDspReplicatorSv1GetAttributeProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	result := dspSrv.ReplicatorSv1GetAttributeProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -515,7 +515,7 @@ func TestDspReplicatorSv1GetChargerProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.ChargerProfile
 	result := dspSrv.ReplicatorSv1GetChargerProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -548,7 +548,7 @@ func TestDspReplicatorSv1GetDispatcherProfileErrorNil(t *testing.T) {
 	}
 	var reply *engine.DispatcherProfile
 	result := dspSrv.ReplicatorSv1GetDispatcherProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -581,7 +581,7 @@ func TestDspReplicatorSv1GetDispatcherHostErrorNil(t *testing.T) {
 	}
 	var reply *engine.DispatcherHost
 	result := dspSrv.ReplicatorSv1GetDispatcherHost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -622,7 +622,7 @@ func TestDspReplicatorSv1GetItemLoadIDsErrorNil(t *testing.T) {
 	}
 	var reply *map[string]int64
 	result := dspSrv.ReplicatorSv1GetItemLoadIDs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -655,7 +655,7 @@ func TestDspReplicatorSv1SetThresholdProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetThresholdProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -688,7 +688,7 @@ func TestDspReplicatorSv1RemoveFilterErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveFilter(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -699,7 +699,7 @@ func TestDspReplicatorSv1RemoveFilterNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveFilter(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -732,7 +732,7 @@ func TestDspReplicatorSv1RemoveThresholdProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveThresholdProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -743,7 +743,7 @@ func TestDspReplicatorSv1RemoveThresholdProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveThresholdProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -776,7 +776,7 @@ func TestDspReplicatorSv1RemoveStatQueueProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveStatQueueProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -787,7 +787,7 @@ func TestDspReplicatorSv1RemoveStatQueueProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveStatQueueProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -820,7 +820,7 @@ func TestDspReplicatorSv1RemoveResourceErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveResource(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -831,7 +831,7 @@ func TestDspReplicatorSv1RemoveResourceNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveResource(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -864,7 +864,7 @@ func TestDspReplicatorSv1RemoveResourceProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveResourceProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -875,7 +875,7 @@ func TestDspReplicatorSv1RemoveResourceProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveResourceProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -904,7 +904,7 @@ func TestDspReplicatorSv1RemoveTimingErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveTiming(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -915,7 +915,7 @@ func TestDspReplicatorSv1RemoveTimingNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveTiming(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -944,7 +944,7 @@ func TestDspReplicatorSv1RemoveActionsErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveActions(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -955,7 +955,7 @@ func TestDspReplicatorSv1RemoveActionsEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveActions(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -988,7 +988,7 @@ func TestDspReplicatorSv1RemoveRouteProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveRouteProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -999,7 +999,7 @@ func TestDspReplicatorSv1RemoveRouteProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveRouteProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1032,7 +1032,7 @@ func TestDspReplicatorSv1RemoveAttributeProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveAttributeProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1043,7 +1043,7 @@ func TestDspReplicatorSv1RemoveAttributeProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveAttributeProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1076,7 +1076,7 @@ func TestDspReplicatorSv1RemoveChargerProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveChargerProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1087,7 +1087,7 @@ func TestDspReplicatorSv1RemoveChargerProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveChargerProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1120,7 +1120,7 @@ func TestDspReplicatorSv1RemoveDispatcherHostErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveDispatcherHost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1131,7 +1131,7 @@ func TestDspReplicatorSv1RemoveDispatcherHostNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveDispatcherHost(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1164,7 +1164,7 @@ func TestDspReplicatorSv1RemoveDispatcherProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveDispatcherProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1175,7 +1175,7 @@ func TestDspReplicatorSv1RemoveDispatcherProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveDispatcherProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1204,7 +1204,7 @@ func TestDspReplicatorSv1GetIndexesErrorNil(t *testing.T) {
 	}
 	var reply *map[string]utils.StringSet
 	result := dspSrv.ReplicatorSv1GetIndexes(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1215,7 +1215,7 @@ func TestDspReplicatorSv1GetIndexesNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *map[string]utils.StringSet
 	result := dspSrv.ReplicatorSv1GetIndexes(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1244,7 +1244,7 @@ func TestDspReplicatorSv1SetIndexesErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetIndexes(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1255,7 +1255,7 @@ func TestDspReplicatorSv1SetIndexesNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetIndexes(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1281,7 +1281,7 @@ func TestDspReplicatorSv1RemoveDestinationNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveDestination(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1310,7 +1310,7 @@ func TestReplicatorSv1RemoveDestinationErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1339,7 +1339,7 @@ func TestDspReplicatorSv1SetLoadIDsErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetLoadIDs(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1350,7 +1350,7 @@ func TestDspReplicatorSv1SetLoadIDsNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetLoadIDs(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1383,7 +1383,7 @@ func TestDspReplicatorSv1RemoveAccountErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveAccount(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1394,7 +1394,7 @@ func TestDspReplicatorSv1RemoveAccountNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveAccount(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1427,7 +1427,7 @@ func TestDspReplicatorSv1RemoveStatQueueErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveStatQueue(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1438,7 +1438,7 @@ func TestDspReplicatorSv1RemoveStatQueueNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveStatQueue(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1452,7 +1452,7 @@ func TestDspReplicatorSv1RemoveIndexesErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveIndexes(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1463,7 +1463,7 @@ func TestDspReplicatorSv1RemoveIndexesNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveIndexes(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1474,7 +1474,7 @@ func TestDspReplicatorSv1SetThresholdProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetThresholdProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1507,7 +1507,7 @@ func TestDspReplicatorSv1SetThresholdErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetThreshold(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1518,7 +1518,7 @@ func TestDspReplicatorSv1SetThresholdNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetThreshold(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1547,7 +1547,7 @@ func TestDspReplicatorSv1SetDestinationErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1558,7 +1558,7 @@ func TestDspReplicatorSv1SetDestinationNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetDestination(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1589,7 +1589,7 @@ func TestDspReplicatorSv1SetAccountErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetAccount(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1600,7 +1600,7 @@ func TestDspReplicatorSv1SetAccountNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetAccount(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1633,7 +1633,7 @@ func TestDspReplicatorSv1SetReverseDestinationErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetReverseDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1644,7 +1644,7 @@ func TestDspReplicatorSv1SetReverseDestinationNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetReverseDestination(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1677,7 +1677,7 @@ func TestDspReplicatorSv1SetStatQueueErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetStatQueue(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1688,7 +1688,7 @@ func TestDspReplicatorSv1SetStatQueueNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetStatQueue(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1721,7 +1721,7 @@ func TestDspReplicatorSv1SetFilterErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetFilter(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1732,7 +1732,7 @@ func TestDspReplicatorSv1SetFilterNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetFilter(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1765,7 +1765,7 @@ func TestDspReplicatorSv1SetStatQueueProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetStatQueueProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1776,7 +1776,7 @@ func TestDspReplicatorSv1SetStatQueueProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetStatQueueProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1805,7 +1805,7 @@ func TestDspReplicatorSv1SetTimingErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetTiming(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1816,7 +1816,7 @@ func TestDspReplicatorSv1SetTimingNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetTiming(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1849,7 +1849,7 @@ func TestDspReplicatorSv1SetResourceErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetResource(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1860,7 +1860,7 @@ func TestDspReplicatorSv1SetResourceNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetResource(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1893,7 +1893,7 @@ func TestReplicatorSv1SetResourceProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetResourceProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1904,7 +1904,7 @@ func TestDspReplicatorSv1SetResourceProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetResourceProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1937,7 +1937,7 @@ func TestDspReplicatorSv1SetRouteProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetRouteProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1948,7 +1948,7 @@ func TestDspReplicatorSv1SetRouteProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetRouteProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1981,7 +1981,7 @@ func TestDspReplicatorSv1SetAttributeProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetAttributeProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -1992,7 +1992,7 @@ func TestDspReplicatorSv1SetAttributeProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetAttributeProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2025,7 +2025,7 @@ func TestDspReplicatorSv1SetChargerProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetChargerProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2036,7 +2036,7 @@ func TestDspReplicatorSv1SetChargerProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetChargerProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2069,7 +2069,7 @@ func TestDspReplicatorSv1SetDispatcherProfileErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetDispatcherProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2080,7 +2080,7 @@ func TestDspReplicatorSv1SetDispatcherProfileNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetDispatcherProfile(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2113,7 +2113,7 @@ func TestReplicatorSv1SetDispatcherHostErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetDispatcherHost(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2124,7 +2124,7 @@ func TestDspReplicatorSv1SetDispatcherHostNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetDispatcherHost(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2157,7 +2157,7 @@ func TestReplicatorSv1RemoveThresholdErrorNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveThreshold(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2168,7 +2168,7 @@ func TestDspReplicatorSv1RemoveThresholdNilEvent(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveThreshold(nil, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2184,7 +2184,7 @@ func TestDspReplicatorSv1GetRateProfileNil(t *testing.T) {
 	}
 	var reply *utils.RateProfile
 	result := dspSrv.ReplicatorSv1GetRateProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2200,7 +2200,7 @@ func TestDspReplicatorSv1GetRateProfileErrorTenant(t *testing.T) {
 	}
 	var reply *utils.RateProfile
 	result := dspSrv.ReplicatorSv1GetRateProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2229,7 +2229,7 @@ func TestDspReplicatorSv1GetActionProfileNil(t *testing.T) {
 	}
 	var reply *engine.ActionProfile
 	result := dspSrv.ReplicatorSv1GetActionProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2245,7 +2245,7 @@ func TestDspReplicatorSv1GetActionProfileErrorTenant(t *testing.T) {
 	}
 	var reply *engine.ActionProfile
 	result := dspSrv.ReplicatorSv1GetActionProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2278,7 +2278,7 @@ func TestDspReplicatorSv1SetActionProfileNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetActionProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2323,7 +2323,7 @@ func TestDspReplicatorSv1SetRateProfileNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1SetRateProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2368,7 +2368,7 @@ func TestDspReplicatorSv1RemoveRateProfileNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveRateProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2413,7 +2413,7 @@ func TestDspReplicatorSv1RemoveActionProfileNil(t *testing.T) {
 	}
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveActionProfile(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
@@ -2475,7 +2475,7 @@ func TestDspReplicatorSv1GetAccountErrorCase2(t *testing.T) {
 	}
 	var reply *utils.Account
 	result := dspSrv.ReplicatorSv1GetAccount(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NOT_FOUND"
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
