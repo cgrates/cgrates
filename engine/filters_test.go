@@ -1681,7 +1681,34 @@ func TestFiltersPassTimingsTimeConvertFail(t *testing.T) {
 	}
 }
 
+func TestFiltersPassTimingsParseDPErr(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaTimings, "~*req.AnswerTime", []string{"~2018-01-07T17:00:10Z"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dtP := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			"AnswerTime": "2018-01-07T17:00:10Z",
+		},
+	}
+
+	experr := utils.ErrNotFound
+	rcv, err := fltr.passTimings(dtP)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+	}
+}
+
 func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 	tmp1, tmp2 := connMgr, config.CgrConfig()
 	defer func() {
 		connMgr = tmp1
@@ -1758,3 +1785,167 @@ func TestFiltersPassTimingsCallFail(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
 	}
 }
+
+func TestFiltersPassDestinationsParseFailNotFound(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dtP := utils.MapStorage{}
+	rcv, err := fltr.passDestinations(dtP)
+
+	if err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+	}
+}
+
+func TestFiltersPassDestinationsParseFailWrongPath(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dtP := utils.MapStorage{
+		utils.MetaReq: 13,
+	}
+
+	experr := utils.ErrWrongPath
+	rcv, err := fltr.passDestinations(dtP)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+	}
+}
+
+func TestFiltersPassDestinationsCallFail(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dtP := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+
+	rcv, err := fltr.passDestinations(dtP)
+
+	if err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	if rcv != false {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+	}
+}
+
+// func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	tmp1, tmp2 := connMgr, config.CgrConfig()
+// 	defer func() {
+// 		connMgr = tmp1
+// 		config.SetCgrConfig(tmp2)
+// 	}()
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
+// 	config.SetCgrConfig(cfg)
+
+// 	client := make(chan rpcclient.ClientConnector, 1)
+// 	ccM := &ccMock{
+// 		calls: map[string]func(args interface{}, reply interface{}) error{
+// 			utils.APIerSv1GetReverseDestination: func(args, reply interface{}) error {
+// 				rply := []string{"1002"}
+// 				*reply.(*[]string) = rply
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	client <- ccM
+
+// 	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+// 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
+// 	})
+
+// 	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1002"})
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	dtP := utils.MapStorage{
+// 		utils.MetaReq: map[string]interface{}{
+// 			utils.AccountField: "1002",
+// 		},
+// 	}
+
+// 	rcv, err := fltr.passDestinations(dtP)
+
+// 	if err != nil {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+// 	}
+
+// 	if rcv != true {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", true, rcv)
+// 	}
+// }
+
+// func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+// 	tmp1, tmp2 := connMgr, config.CgrConfig()
+// 	defer func() {
+// 		connMgr = tmp1
+// 		config.SetCgrConfig(tmp2)
+// 	}()
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}
+// 	config.SetCgrConfig(cfg)
+
+// 	client := make(chan rpcclient.ClientConnector, 1)
+// 	ccM := &ccMock{
+// 		calls: map[string]func(args interface{}, reply interface{}) error{
+// 			utils.APIerSv1GetReverseDestination: func(args, reply interface{}) error {
+// 				rply := []string{"1002"}
+// 				*reply.(*[]string) = rply
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	client <- ccM
+
+// 	NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+// 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
+// 	})
+
+// 	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"~1002"})
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	dtP := utils.MapStorage{
+// 		utils.MetaReq: map[string]interface{}{
+// 			utils.AccountField: "1002",
+// 		},
+// 	}
+
+// 	rcv, err := fltr.passDestinations(dtP)
+
+// 	if err != nil {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+// 	}
+
+// 	if rcv != false {
+// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
+// 	}
+// }
