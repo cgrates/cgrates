@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -170,5 +171,105 @@ func TestAttributesV1GetAttributeForEvent2(t *testing.T) {
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestAttributesV1ProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := &ConnManager{}
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ATTR_CHANGE_TENANT_FROM_USER",
+		Contexts:           []string{utils.MetaAny},
+		FilterIDs:          []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*req.Account",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*composed",
+				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	err := dm.SetAttributeProfile(attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	attr2 := &AttributeProfile{
+		Tenant:             "adrian.itsyscom.com.co.uk",
+		ID:                 "ATTR_MATCH_TENANT",
+		Contexts:           []string{utils.MetaAny},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*req.Password",
+				Type:      utils.MetaConstant,
+				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+
+	err = dm.SetAttributeProfile(attr2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	args := &AttrArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "123",
+			Event: map[string]interface{}{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+		},
+		ProcessRuns: utils.IntPointer(2),
+	}
+	rply := &AttrSProcessEventReply{}
+	expected := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_CHANGE_TENANT_FROM_USER", "ATTR_MATCH_TENANT"},
+		AlteredFields:   []string{"*req.Account", "*req.Password", "*tenant"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "adrian.itsyscom.com.co.uk",
+			ID:     "123",
+			Time:   nil,
+			Event: map[string]interface{}{
+				utils.AccountField: "andrei.itsyscom.com",
+				"Password":         "CGRATES.ORG",
+			},
+			APIOpts: map[string]interface{}{},
+		},
+		blocker: false,
+	}
+	err = alS.V1ProcessEvent(args, rply)
+	sort.Strings(rply.AlteredFields)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 }
