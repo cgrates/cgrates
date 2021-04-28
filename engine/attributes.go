@@ -477,6 +477,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID)
+
 		if err != nil {
 			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)
@@ -486,6 +487,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			break
 		}
 		args.CGREvent.Tenant = evRply.CGREvent.Tenant
+		tnt = evRply.CGREvent.Tenant
 		lastID = evRply.MatchedProfiles[0]
 		matchedIDs = append(matchedIDs, lastID)
 		for _, fldName := range evRply.AlteredFields {
