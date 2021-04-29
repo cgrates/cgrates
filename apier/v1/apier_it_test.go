@@ -826,7 +826,8 @@ func testApierLoadRatingProfileWithoutTenant(t *testing.T) {
 func testApierLoadAccountActions(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats() // Make sure nothing in cache so far
-	expectedStats[utils.CacheLoadIDs].Items = 4         // we loaded the ratingprofiles
+	expectedStats[utils.CacheLoadIDs].Items = 1         // we loaded the ratingprofiles
+	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -843,7 +844,7 @@ func testApierLoadAccountActions(t *testing.T) {
 	expectedStats[utils.CacheAccountActionPlans].Items = 1
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 8
+	expectedStats[utils.CacheLoadIDs].Items = 5
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -881,7 +882,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 1
-	expectedStats[utils.CacheLoadIDs].Items = 8
+	expectedStats[utils.CacheLoadIDs].Items = 5
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -1080,7 +1081,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 3
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
-	expectedStats[utils.CacheLoadIDs].Items = 8
+	expectedStats[utils.CacheLoadIDs].Items = 5
 	expectedStats[utils.CacheRPCConnections].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
@@ -1629,7 +1630,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
-	expStats[utils.CacheLoadIDs].Items = 17
+	expStats[utils.CacheLoadIDs].Items = 14
 	expStats[utils.CacheRPCConnections].Items = 2
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())

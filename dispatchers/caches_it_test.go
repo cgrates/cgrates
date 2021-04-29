@@ -100,7 +100,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
-	expStats[utils.CacheLoadIDs].Items = 17
+	expStats[utils.CacheLoadIDs].Items = 14
 	expStats[utils.CacheRPCConnections].Items = 2
 	args := utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]interface{}{

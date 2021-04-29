@@ -2398,56 +2398,28 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	aps, _ := tpr.GetLoadedIds(utils.ActionPlanPrefix)
 
 	//compose Reload Cache argument
-	cacheArgs := utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: opts,
-		ArgsCache: map[string][]string{
-			utils.DestinationIDs:        dstIds,
-			utils.ReverseDestinationIDs: revDstIDs,
-			utils.RatingPlanIDs:         rplIds,
-			utils.RatingProfileIDs:      rpfIds,
-			utils.ActionIDs:             actIds,
-			utils.ActionPlanIDs:         aps,
-			utils.AccountActionPlanIDs:  aapIDs,
-			utils.SharedGroupIDs:        shgIds,
-			utils.ResourceProfileIDs:    rspIDs,
-			utils.ResourceIDs:           resIDs,
-			utils.ActionTriggerIDs:      aatIDs,
-			utils.StatsQueueIDs:         stqIDs,
-			utils.StatsQueueProfileIDs:  stqpIDs,
-			utils.ThresholdIDs:          trsIDs,
-			utils.ThresholdProfileIDs:   trspfIDs,
-			utils.FilterIDs:             flrIDs,
-			utils.RouteProfileIDs:       routeIDs,
-			utils.AttributeProfileIDs:   apfIDs,
-			utils.ChargerProfileIDs:     chargerIDs,
-			utils.DispatcherProfileIDs:  dppIDs,
-			utils.DispatcherHostIDs:     dphIDs,
-		},
-	}
-
-	if verbose {
-		log.Print("Reloading cache")
-	}
-	var reply string
-	switch caching {
-	case utils.MetaNone:
-		return
-	case utils.MetaReload:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
-			return
-		}
-	case utils.MetaLoad:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
-			return
-		}
-	case utils.MetaRemove:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1RemoveItems, cacheArgs, &reply); err != nil {
-			return
-		}
-	case utils.MetaClear:
-		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, new(utils.AttrCacheIDsWithAPIOpts), &reply); err != nil {
-			return
-		}
+	cacheArgs := map[string][]string{
+		utils.DestinationIDs:        dstIds,
+		utils.ReverseDestinationIDs: revDstIDs,
+		utils.RatingPlanIDs:         rplIds,
+		utils.RatingProfileIDs:      rpfIds,
+		utils.ActionIDs:             actIds,
+		utils.ActionPlanIDs:         aps,
+		utils.AccountActionPlanIDs:  aapIDs,
+		utils.SharedGroupIDs:        shgIds,
+		utils.ResourceProfileIDs:    rspIDs,
+		utils.ResourceIDs:           resIDs,
+		utils.ActionTriggerIDs:      aatIDs,
+		utils.StatsQueueIDs:         stqIDs,
+		utils.StatsQueueProfileIDs:  stqpIDs,
+		utils.ThresholdIDs:          trsIDs,
+		utils.ThresholdProfileIDs:   trspfIDs,
+		utils.FilterIDs:             flrIDs,
+		utils.RouteProfileIDs:       routeIDs,
+		utils.AttributeProfileIDs:   apfIDs,
+		utils.ChargerProfileIDs:     chargerIDs,
+		utils.DispatcherProfileIDs:  dppIDs,
+		utils.DispatcherHostIDs:     dphIDs,
 	}
 
 	// verify if we need to clear indexes
@@ -2476,27 +2448,69 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	if len(flrIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheReverseFilterIndexes)
 	}
-	if verbose {
-		log.Print("Clearing indexes")
-	}
-	clearArgs := &utils.AttrCacheIDsWithAPIOpts{
-		APIOpts:  opts,
-		CacheIDs: cacheIDs,
-	}
-	if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
-		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
-	}
 
+	if err = CallCache(connMgr, tpr.cacheConns, caching, cacheArgs, cacheIDs, opts, verbose); err != nil {
+		return
+	}
 	//get loadIDs for all types
 	var loadIDs map[string]int64
 	if loadIDs, err = tpr.dm.GetItemLoadIDs(utils.EmptyString, false); err != nil {
 		return
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.ArgsCache)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs)
 	for key, val := range cacheLoadIDs {
 		if err = Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional); err != nil {
 			return
+		}
+	}
+	return
+}
+
+// CallCache call the cache reload after data load
+func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args map[string][]string, cacheIDs []string, opts map[string]interface{}, verbose bool) (err error) {
+	for k, v := range args {
+		if len(v) == 0 {
+			delete(args, k)
+		}
+	}
+	var method, reply string
+	var cacheArgs interface{} = utils.AttrReloadCacheWithAPIOpts{
+		APIOpts:   opts,
+		ArgsCache: args,
+	}
+	switch caching {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		cacheArgs = &utils.AttrCacheIDsWithAPIOpts{APIOpts: opts}
+	}
+	if verbose {
+		log.Print("Reloading cache")
+	}
+
+	if err = connMgr.Call(cacheConns, nil, method, cacheArgs, &reply); err != nil {
+		return
+	}
+
+	if len(cacheIDs) != 0 {
+		if verbose {
+			log.Print("Clearing indexes")
+		}
+		if err = connMgr.Call(cacheConns, nil, utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+			APIOpts:  opts,
+			CacheIDs: cacheIDs,
+		}, &reply); err != nil {
+			if verbose {
+				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
+			}
 		}
 	}
 	return
