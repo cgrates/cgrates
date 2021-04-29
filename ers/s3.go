@@ -214,7 +214,6 @@ func (rdr *S3ER) readMsg(scv s3Client, key string) (err error) {
 	}
 
 	obj, err := scv.GetObject(&s3.GetObjectInput{Bucket: &rdr.queueID, Key: &key})
-	fmt.Println(obj)
 	if err != nil {
 		rdr.rdrErr <- err
 		return

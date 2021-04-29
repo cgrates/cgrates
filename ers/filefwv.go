@@ -299,7 +299,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		rdr.fltrS, nil, rdr.trailerDP) // create an AgentRequest
 	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
-		return nil
+		return err
 	}
 	if err := agReq.SetFields(trailerFields); err != nil {
 		utils.Logger.Warning(
@@ -339,7 +339,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		rdr.fltrS, rdr.headerDP, nil) // create an AgentRequest
 	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
-		return nil
+		return err
 	}
 	if err := agReq.SetFields(hdrFields); err != nil {
 		utils.Logger.Warning(
