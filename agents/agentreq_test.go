@@ -2220,3 +2220,32 @@ func TestFieldAsInterface(t *testing.T) {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
+
+func TestAgentRequestParseFieldDateTime(t *testing.T) {
+	tntTpl := config.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil, nil)
+	fctTemp := &config.FCTemplate{
+		Type:     utils.MetaDateTime,
+		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Layout:   "“Mon Jan _2 15:04:05 2006”",
+		Timezone: "",
+	}
+
+	result, err := AgentReq.ParseField(fctTemp)
+	if err != nil {
+		t.Errorf("Expected %v but received %v", nil, err)
+	}
+
+	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	if err != nil {
+		t.Errorf("Expected %v but received %v", nil, err)
+	}
+	strRes := fmt.Sprintf("%v", result)
+	finRes, err := time.Parse("“Mon Jan _2 15:04:05 2006”", strRes)
+	if err != nil {
+		t.Errorf("Expected %v but received %v", nil, err)
+	}
+	if !reflect.DeepEqual(finRes.Day(), expected.Day()) {
+		t.Errorf("Expected %v but received %v", finRes.Day(), expected.Day())
+	}
+}
