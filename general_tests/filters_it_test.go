@@ -24,6 +24,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -58,6 +59,7 @@ var (
 		testV1FltrAttributesPrefix,
 		testV1FltrInitDataDb,
 		testV1FltrChargerSuffix,
+		testV1FltrPopulateTimings,
 		testV1FltrStopEngine,
 	}
 )
@@ -1061,6 +1063,113 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		t.Errorf("Expecting : %s, \n received: %s", utils.ToJSON(processedEv), utils.ToJSON(result2))
 	}
 
+}
+
+func testV1FltrPopulateTimings(t *testing.T) {
+	timing := &utils.TPTimingWithAPIOpts{
+		TPTiming: &utils.TPTiming{
+			ID:        "TM_MORNING",
+			WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
+			StartTime: "08:00:00",
+			EndTime:   "09:00:00",
+		},
+	}
+
+	var reply string
+
+	if err := fltrRpc.Call(utils.APIerSv1SetTiming, timing, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	filter := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TM_1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaTimings,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"TM_MORNING"},
+				},
+			},
+		},
+	}
+
+	var result string
+	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "FltrTest",
+			Contexts:  []string{utils.MetaAny},
+			FilterIDs: []string{"FLTR_TM_1"},
+			Attributes: []*engine.Attribute{
+				{
+					Path:  utils.MetaReq + utils.NestingSep + utils.AnswerTime,
+					Value: config.NewRSRParsersMustCompile("2021-04-29T10:45:00Z", utils.InfieldSep),
+				},
+			},
+			Weight: 10,
+		},
+	}
+	attrPrf.Compile()
+	if err := fltrRpc.Call(utils.APIerSv1SetAttributeProfile, attrPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	ev := &engine.AttrArgsProcessEvent{
+		AttributeIDs: []string{"FltrTest"},
+		Context:      utils.StringPointer(utils.MetaAny),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1FltrPopulateTimings",
+			Event: map[string]interface{}{
+				utils.AnswerTime: "2021-04-29T08:35:00Z",
+			},
+		},
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"FltrTest"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.AnswerTime},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1FltrPopulateTimings",
+			Event: map[string]interface{}{
+				utils.AnswerTime: "2021-04-29T10:45:00Z",
+			},
+			APIOpts: make(map[string]interface{}),
+		},
+	}
+
+	var rplyEv1 engine.AttrSProcessEventReply
+	if err := fltrRpc.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv1); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(eRply.AlteredFields)
+		sort.Strings(rplyEv1.AlteredFields)
+		if !reflect.DeepEqual(eRply, &rplyEv1) {
+			t.Errorf("\nexpected: %s, \nreceived: %s",
+				utils.ToJSON(eRply), utils.ToJSON(rplyEv1))
+		}
+	}
+
+	ev.CGREvent.Event[utils.AnswerTime] = "2021-04-29T13:35:00Z"
+
+	var rplyEv2 engine.AttrSProcessEventReply
+	if err := fltrRpc.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv2); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %+v,%+v", err, utils.ErrNotFound)
+	}
 }
 
 func testV1FltrStopEngine(t *testing.T) {
