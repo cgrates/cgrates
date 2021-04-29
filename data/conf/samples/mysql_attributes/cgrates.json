@@ -1,0 +1,49 @@
+{
+  // CGRateS Configuration file
+  // used in general_tests/attributes_filter_it_test.go
+
+  "apiers": {
+    "enabled": true,
+  },
+
+  "attributes": {								// AttributeS config
+    "enabled": true,
+    "string_indexed_fields": [],
+    "prefix_indexed_fields": ["*req.Subject"],
+  },
+
+  "cdrs": {
+    "enabled": true,
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"],
+    "attributes_conns": ["*localhost"],
+
+  },
+
+  "chargers": {								// ChargerS config
+    "enabled": true,
+  },
+
+  "general": {
+    "node_id": "CGRAero",
+    "rounding_decimals": 10,
+
+  },
+
+  "rals": {
+    "enabled": true,
+  },
+
+  "sessions": {
+    "enabled": true,
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"],
+    "cdrs_conns": ["*localhost"],
+    "attributes_conns": ["*localhost"],
+  },
+
+  "stor_db": {
+    "db_password": "CGRateS.org"
+  },
+
+}
