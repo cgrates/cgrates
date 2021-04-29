@@ -2190,3 +2190,62 @@ func TestAgReqSetFieldsFromCfg(t *testing.T) {
 	}
 
 }
+
+func TestFieldAsInterface(t *testing.T) {
+	fldPath := []string{utils.MetaOpts, utils.AccountField}
+	ar := &AgentRequest{
+		Request:    nil,
+		Vars:       &utils.DataNode{},
+		CGRRequest: &utils.OrderedNavigableMap{},
+		diamreq:    nil,
+		tmp:        &utils.DataNode{},
+		Opts: utils.MapStorage{
+			utils.AccountField: "Field1",
+		},
+	}
+
+	rcv, err := ar.FieldAsInterface(fldPath)
+	rcvExpect := ar.Opts[utils.AccountField]
+	if err != nil {
+		t.Error(err)
+	} else if rcv != rcvExpect {
+		t.Errorf("Expected %v but received %v", rcvExpect, rcv)
+	}
+
+	//default case
+	fldPath = []string{utils.MetaNone}
+	_, err = ar.FieldAsInterface(fldPath)
+	errExpect := "unsupported field prefix: <*none>"
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestAgentRequestParseFieldDateTime(t *testing.T) {
+	tntTpl := config.NewRSRParsersMustCompile("*daily", utils.InfieldSep)
+	AgentReq := NewAgentRequest(utils.MapStorage{}, nil, nil, nil, nil, tntTpl, "", "", nil, nil, nil)
+	fctTemp := &config.FCTemplate{
+		Type:     utils.MetaDateTime,
+		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Layout:   "“Mon Jan _2 15:04:05 2006”",
+		Timezone: "",
+	}
+
+	result, err := AgentReq.ParseField(fctTemp)
+	if err != nil {
+		t.Errorf("Expected %v but received %v", nil, err)
+	}
+
+	expected, err := utils.ParseTimeDetectLayout("*daily", utils.FirstNonEmpty(fctTemp.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+	if err != nil {
+		t.Errorf("Expected %v but received %v", nil, err)
+	}
+	strRes := fmt.Sprintf("%v", result)
+	finRes, err := time.Parse("“Mon Jan _2 15:04:05 2006”", strRes)
+	if err != nil {
+		t.Errorf("Expected %v but received %v", nil, err)
+	}
+	if !reflect.DeepEqual(finRes.Day(), expected.Day()) {
+		t.Errorf("Expected %v but received %v", finRes.Day(), expected.Day())
+	}
+}

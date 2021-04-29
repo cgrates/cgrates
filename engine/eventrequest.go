@@ -332,6 +332,17 @@ func (eeR *EventRequest) ParseField(
 			return
 		}
 		out = strconv.Itoa(int(t1.Unix()))
+	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
+		var val string
+		if val, err = cfgFld.Value.ParseDataProvider(eeR); err != nil {
+			return
+		}
+		var dtFld time.Time
+		dtFld, err = utils.ParseTimeDetectLayout(val, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
+		if err != nil {
+			return
+		}
+		out = dtFld.Format(cfgFld.Layout)
 	case utils.MetaMaskedDestination:
 		//check if we have destination in the event
 		var dst string
