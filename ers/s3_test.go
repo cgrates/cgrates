@@ -19,10 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"bytes"
+	"io"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -262,5 +265,284 @@ func TestS3ERIsClosed(t *testing.T) {
 	rdr.rdrExit <- struct{}{}
 	if rcv := rdr.isClosed(); rcv != true {
 		t.Errorf("Expected %v but received %v", true, false)
+	}
+}
+
+type s3ClientMock struct {
+	ListObjectsV2PagesF func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error
+	GetObjectF          func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error)
+	DeleteObjectF       func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error)
+}
+
+func (s *s3ClientMock) ListObjectsV2Pages(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+	if s.ListObjectsV2PagesF != nil {
+		return s.ListObjectsV2PagesF(input, fn)
+	}
+	return utils.ErrNotFound
+}
+
+func (s *s3ClientMock) GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+	if s.GetObjectF != nil {
+		return s.GetObjectF(input)
+	}
+	return nil, utils.ErrNotImplemented
+}
+
+func (s *s3ClientMock) DeleteObject(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+	// return nil, nil
+	if s.DeleteObjectF != nil {
+		return s.DeleteObjectF(input)
+	}
+	return nil, utils.ErrInvalidPath
+}
+
+func TestS3ERReadLoop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		return nil
+	}
+	scv := &s3ClientMock{
+		ListObjectsV2PagesF: listObjects,
+	}
+	if err := rdr.readLoop(scv); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestS3ERReadLoopIsClosed(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		return nil
+	}
+	scv := &s3ClientMock{
+		ListObjectsV2PagesF: listObjects,
+	}
+	rdr.rdrExit <- struct{}{}
+	if err := rdr.readLoop(scv); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestS3ERReadMsg(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	// rdr.poster = engine.NewS3Poster(rdr.Config().SourcePath, 1, make(map[string]interface{}))
+	rdr.Config().SourcePath = rdr.awsRegion
+	rdr.Config().ConcurrentReqs = -1
+	rdr.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:   "Tor",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Path:  "*cgreq.ToR",
+		},
+	}
+	rdr.Config().Fields[0].ComputePath()
+
+	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		return nil
+	}
+	getObject := func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+		return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewBuffer([]byte(`{"key":"value"}`)))}, nil
+	}
+	deleteObject := func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+		return nil, nil
+	}
+	scv := &s3ClientMock{
+		ListObjectsV2PagesF: listObjects,
+		GetObjectF:          getObject,
+		DeleteObjectF:       deleteObject,
+	}
+	if err := rdr.readMsg(scv, "AWSKey"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestS3ERReadMsgError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       make(chan struct{}, 1),
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	rdr.Config().ConcurrentReqs = 1
+	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		return nil
+	}
+	getObject := func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+		return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewBuffer([]byte(`{"key":"value"}`)))}, nil
+	}
+	deleteObject := func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+		return nil, nil
+	}
+	scv := &s3ClientMock{
+		ListObjectsV2PagesF: listObjects,
+		GetObjectF:          getObject,
+		DeleteObjectF:       deleteObject,
+	}
+	rdr.cap <- struct{}{}
+	errExp := "NOT_FOUND:ToR"
+	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v but received %v", errExp, err)
+	}
+}
+
+func TestS3ERReadMsgError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       make(chan struct{}, 1),
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	rdr.Config().ConcurrentReqs = 1
+	scv := &s3ClientMock{}
+	rdr.cap <- struct{}{}
+	rdr.rdrExit <- struct{}{}
+	if err := rdr.readMsg(scv, "AWSKey"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestS3ERReadMsgError3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       make(chan struct{}, 1),
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	rdr.Config().ConcurrentReqs = -1
+	scv := &s3ClientMock{}
+	errExp := "NOT_IMPLEMENTED"
+	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v but received %v", errExp, err)
+	}
+}
+
+func TestS3ERReadMsgError4(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       make(chan struct{}, 1),
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	rdr.Config().SourcePath = rdr.awsRegion
+	rdr.Config().ConcurrentReqs = -1
+	rdr.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:   "Tor",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Path:  "*cgreq.ToR",
+		},
+	}
+	rdr.Config().Fields[0].ComputePath()
+	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		return nil
+	}
+	getObject := func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+		return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewBuffer([]byte(`{"key":"value"}`)))}, nil
+	}
+	deleteObject := func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+		return nil, utils.ErrInvalidPath
+	}
+	scv := &s3ClientMock{
+		ListObjectsV2PagesF: listObjects,
+		GetObjectF:          getObject,
+		DeleteObjectF:       deleteObject,
+	}
+	errExp := "INVALID_PATH"
+	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v but received %v", errExp, err)
 	}
 }

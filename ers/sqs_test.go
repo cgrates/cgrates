@@ -23,6 +23,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -321,5 +324,62 @@ func TestSQSERIsClosed(t *testing.T) {
 	rdr.rdrExit <- struct{}{}
 	if rcv := rdr.isClosed(); rcv != true {
 		t.Errorf("Expected %v but received %v", true, false)
+	}
+}
+
+func TestSQSERReadMsgError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &SQSER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		// queueURL:  utils.StringPointer("url"),
+		session: nil,
+		poster:  nil,
+	}
+	awsCfg := aws.Config{Endpoint: aws.String(rdr.Config().SourcePath)}
+	rdr.session, _ = session.NewSessionWithOptions(
+		session.Options{
+			Config: awsCfg,
+		},
+	)
+	// rdrEvents := make(chan *erEvent, 1)
+	// rdrErr := make(chan error, 1)
+	// rdrExit := make(chan struct{}, 1)
+
+	// sqsRdr, err := NewSQSER(cfg, 1, rdrEvents,
+	// 	rdrErr, new(engine.FilterS), rdrExit)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// rdr := sqsRdr.(*SQSER)
+	rdr.Config().ConcurrentReqs = -1
+	rdr.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:   "Tor",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Path:  "*cgreq.ToR",
+		},
+	}
+	rdr.Config().Fields[0].ComputePath()
+	scv := &sqs.SQS{}
+	msg := &sqs.Message{
+		Body:          utils.StringPointer(`{"msgBody":"BODY"`),
+		MessageId:     utils.StringPointer(`{"msgId":"MESSAGE"}`),
+		ReceiptHandle: utils.StringPointer(`{"msgReceiptHandle":"RECEIPT_HANDLE"}`),
+	}
+	errExp := "unexpected end of JSON input"
+	if err := rdr.readMsg(scv, msg); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v but received %v", errExp, err)
 	}
 }
