@@ -473,7 +473,6 @@ func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
 
-// ToDo when Timings will be available in DataDb
 func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 	tmVal, err := fltr.rsrElement.ParseDataProviderWithInterfaces(dDP)
 	if err != nil {
