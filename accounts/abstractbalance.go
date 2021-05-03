@@ -44,6 +44,11 @@ type abstractBalance struct {
 	rateSConns []string
 }
 
+// id implements the balanceOperator interface
+func (aB *abstractBalance) id() string {
+	return aB.blnCfg.ID
+}
+
 // debitAbstracts implements the balanceOperator interface
 func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
@@ -60,8 +65,6 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
-
-	dbtUnits := new(decimal.Big).Copy(usage)
 
 	// balanceLimit
 	var hasLmt bool
@@ -87,55 +90,26 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 	}
 	var hasUF bool
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
-		dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
+		//dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
 		hasUF = true
 	}
-	// balance smaller than usage, correct usage if the balance has limit
-	if aB.blnCfg.Units.Big.Cmp(dbtUnits) == -1 && blncLmt != nil {
-		// decrease the usage to match the maximum increments
-		// will use special rounding to 0 since otherwise we go negative (ie: 0.05 as increment)
-		maxDbt := new(decimal.Big).Copy(aB.blnCfg.Units.Big)
+
+	if blncLmt != nil {
+		maxBlcDbt := new(decimal.Big).Copy(aB.blnCfg.Units.Big)
 		if hasUF {
-			maxDbt = utils.DivideBig(maxDbt, uF.Factor.Big)
+			maxBlcDbt = utils.DivideBig(maxBlcDbt, uF.Factor.Big) // common units with debit and increments
 		}
-		usage = roundUnitsWithIncrements(maxDbt, costIcrm.Increment.Big)
+		maxBlcDbt = roundUnitsWithIncrements(maxBlcDbt, costIcrm.Increment.Big)
+		if maxBlcDbt.Cmp(usage) == -1 { // balance smaller than usage, correct usage
+			usage = maxBlcDbt
+		}
 	}
-
-	/*
-		if costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) == 0 &&
-			(costIcrm.FixedFee == nil ||
-				costIcrm.FixedFee.Cmp(decimal.New(0, 0)) == 0) {
-
-			acntID := utils.UUIDSha1Prefix()
-			ec.Accounting[acntID] = &utils.AccountCharge{
-				AccountID:    aB.acntID,
-				BalanceID:    aB.blnCfg.ID,
-				Units:        &utils.Decimal{usage},
-				BalanceLimit: blncLmt,
-				UnitFactorID: ufID,
-				RatingID:     ratingID,
-			}
-			ec.ChargingIntervals = []*utils.ChargingInterval{
-				{
-					Increments: []*utils.ChargingIncrement{
-						{
-							Units:           &utils.Decimal{usage},
-							AccountChargeID: acntID,
-							CompressFactor:  1,
-						},
-					},
-					CompressFactor: 1,
-				},
-			}
-
-	*/
 
 	var ecCost *utils.EventCharges
 	if (costIcrm.FixedFee != nil &&
 		costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
 		(costIcrm.RecurrentFee != nil &&
 			costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0) {
-
 		// attempt to debit usage with cost
 		if ecCost, err = maxDebitAbstractsFromConcretes(usage,
 			aB.acntID, aB.cncrtBlncs,
@@ -145,16 +119,19 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 			costIcrm); err != nil {
 			return
 		}
-
 	}
 
+	var dbtUnits *decimal.Big
 	if ecCost != nil {
 		usage = ecCost.Abstracts.Big
 		dbtUnits = ecCost.Abstracts.Big
-		if hasUF {
-			dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
-		}
+	} else {
+		dbtUnits = new(decimal.Big).Copy(usage)
 	}
+	if hasUF {
+		dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
+	}
+
 	if dbtUnits.Cmp(decimal.New(0, 0)) != 0 {
 		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, dbtUnits)
 	}
@@ -203,6 +180,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 	ec.Accounting[acntID] = &utils.AccountCharge{
 		AccountID:    aB.acntID,
 		BalanceID:    aB.blnCfg.ID,
+		Units:        &utils.Decimal{usage},
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 		RatingID:     ratingID,

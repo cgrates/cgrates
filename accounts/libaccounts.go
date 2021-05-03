@@ -77,6 +77,7 @@ func newBalanceOperator(acntID string, blncCfg *utils.Balance, cncrtBlncs []*con
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
+	id() string // balance id
 	debitAbstracts(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
 	debitConcretes(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
 }
@@ -219,7 +220,7 @@ func debitConcreteUnits(cUnits *decimal.Big,
 
 // maxDebitAbstractsFromConcretes will debit the maximum possible abstract units out of concretes
 func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
-	acndID string, cncrtBlncs []*concreteBalance,
+	acntID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
@@ -280,7 +281,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		}
 		aQried := aUnits // so we can detect loops
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debitConcreteUnits(cUnits, acndID, cncrtBlncs, cgrEv); err != nil {
+		if ecDbt, err = debitConcreteUnits(cUnits, acntID, cncrtBlncs, cgrEv); err != nil {
 			if err != utils.ErrInsufficientCredit {
 				return
 			}

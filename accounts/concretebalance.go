@@ -61,6 +61,11 @@ type concreteBalance struct {
 	rateSConns []string
 }
 
+// id implements the balanceOperator interface
+func (cB *concreteBalance) id() string {
+	return cB.blnCfg.ID
+}
+
 // debitAbstracts implements the balanceOperator interface
 func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
@@ -79,13 +84,64 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 		cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-	if ec, err = maxDebitAbstractsFromConcretes(aUnits,
+	var ecCncrt *utils.EventCharges
+	if ecCncrt, err = maxDebitAbstractsFromConcretes(aUnits,
 		cB.acntID, []*concreteBalance{cB},
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,
 		costIcrm); err != nil {
 		return
+	}
+	ec = utils.NewEventCharges()
+	ec.Abstracts = ecCncrt.Abstracts
+	ec.Concretes = ecCncrt.Concretes
+	// RatingID
+	var ratingID string
+	if costIcrm != nil {
+		ratingID = utils.UUIDSha1Prefix()
+		ec.Rating[ratingID] = &utils.RateSInterval{
+			Increments: []*utils.RateSIncrement{
+				{
+					Rate: &utils.Rate{
+						ID: utils.MetaCostIncrement,
+						IntervalRates: []*utils.IntervalRate{
+							{
+								FixedFee:     costIcrm.FixedFee,
+								RecurrentFee: costIcrm.RecurrentFee,
+							},
+						},
+					},
+					CompressFactor: 1,
+				},
+			},
+			CompressFactor: 1,
+		}
+	} else { // take it from first increment
+		ratingID = ecCncrt.Accounting[ecCncrt.Charges[0].ChargingID].RatingID
+		ec.Rating[ratingID] = ecCncrt.Rating[ratingID]
+	}
+	// AccountingID
+	acntID := utils.UUIDSha1Prefix()
+	ec.Accounting[acntID] = &utils.AccountCharge{
+		AccountID: cB.acntID,
+		BalanceID: utils.MetaTransAbstract,
+		Units:     ec.Abstracts,
+		RatingID:  ratingID,
+	}
+	for _, cE := range ecCncrt.Charges {
+		if ecCncrt.Accounting[cE.ChargingID].UnitFactorID != utils.EmptyString {
+			ec.UnitFactors[ecCncrt.Accounting[cE.ChargingID].UnitFactorID] = ecCncrt.UnitFactors[ecCncrt.Accounting[cE.ChargingID].UnitFactorID]
+		}
+		ec.Accounting[cE.ChargingID] = ecCncrt.Accounting[cE.ChargingID]
+		ec.Accounting[cE.ChargingID].RatingID = utils.EmptyString // should not be needed since we have used it above
+		ec.Accounting[acntID].JoinedChargeIDs = append(ec.Accounting[acntID].JoinedChargeIDs, cE.ChargingID)
+	}
+	ec.Charges = []*utils.ChargeEntry{
+		{
+			ChargingID:     acntID,
+			CompressFactor: 1,
+		},
 	}
 	return
 }
@@ -159,17 +215,7 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 	}
 	ec.Charges = []*utils.ChargeEntry{
 		{
-			ChargingID: acntID,
-			/*
-				Increments: []*utils.ChargingIncrement{
-					{
-						Units:           &utils.Decimal{dbted},
-						AccountChargeID: acntID,
-						CompressFactor:  1,
-					},
-				},
-
-			*/
+			ChargingID:     acntID,
 			CompressFactor: 1,
 		},
 	}

@@ -1471,7 +1471,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		Tenant: utils.CGRateSorg,
 		ID:     "TestV1DebitAbstractsEventCharges2",
 		Balances: map[string]*utils.Balance{
-			ab1ID: &utils.Balance{ // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10s
+			ab1ID: &utils.Balance{ // cost: 0.4 connectFee plus 0.2 per minute, available 2 minutes, should remain  10 units
 				ID:   ab1ID,
 				Type: utils.MetaAbstract,
 				Weights: utils.DynamicWeights{
@@ -1485,11 +1485,27 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						FixedFee:     utils.NewDecimal(4, 1),  // 0.4
 						RecurrentFee: utils.NewDecimal(2, 1)}, // 0.2 per minute
 				},
-				Units: utils.NewDecimal(int64(130*time.Second), 0),
+				UnitFactors: []*utils.UnitFactor{
+					{
+						Factor: utils.NewDecimal(1, 9), // Nanoseconds
+					},
+				},
+				Units: utils.NewDecimal(130, 0),
 			},
-			//7m25s ABSTR, 4.85 CONCR
+			//7m25s ABSTR, 4.05 CONCR
 			cb1ID: &utils.Balance{ // absorb all costs, standard rating used when primary debiting
 				ID:   cb1ID,
+				Type: utils.MetaConcrete,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				Units: utils.NewDecimal(5, 1), //0.5 covering partially the AB1
+			},
+			// 7m25s ABSTR, 4.55 CONCR
+			cb2ID: &utils.Balance{ // absorb all costs, standard rating used when primary debiting
+				ID:   cb2ID,
 				Type: utils.MetaConcrete,
 				Opts: map[string]interface{}{
 					utils.MetaBalanceUnlimited: true,
@@ -1499,10 +1515,15 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 						Increment: utils.NewDecimal(int64(time.Second), 0),
 					},
 				},
-				Units: utils.NewDecimal(1, 0), //0.8 covering the first balance 20s on it's own with RateS
+				Units: utils.NewDecimal(35, 2), //0.3 + 0.05 covering 5s  it's own with RateS
+				// ToDo: change rating with a lower preference here, should have multiple groups also // RateProfileIDs: ["TWOCENTS"]
 			},
-			//7m45s ABSTR, 5.05 CONCR on 0 for CB1
-			//7m55s ABSTR, 5.15 CONCR on -0.1 for CB1
+			// 7m25s ABSTR, 4.85 CONCR to cover the AB1
+
+			// 7m30 ABSTR, 4.9 CONCR with 5s covered by CB2 with RateS
+
+			// 7m35s ABSTR, 4,95 CONCR with negative 0.5 on CB2
+
 		},
 	}
 	if err := dm.SetAccount(acnt2, true); err != nil {
@@ -1660,8 +1681,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			ID:     "TestV1DebitAbstractsEventCharges",
 			Tenant: utils.CGRateSorg,
 			APIOpts: map[string]interface{}{
-				utils.MetaUsage: "7m55s", // 7m55s to debit both accounts
-				//utils.MetaUsage: "1m",
+				utils.MetaUsage: "7m35s",
 			},
 		},
 	}

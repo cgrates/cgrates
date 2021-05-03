@@ -46,6 +46,7 @@ type EventCharges struct {
 	Accounts    map[string]*Account
 }
 
+// ChargeEntry is a reference towards Accounting or Rating ID (depending on request type)
 type ChargeEntry struct {
 	ChargingID     string
 	CompressFactor int

@@ -198,7 +198,6 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	// in case we have error it is returned in the function from above
 	// this came to light in coverage tests
 	rpCost.Cost, _ = utils.CostForIntervals(rpCost.RateSIntervals).Float64()
-
 	return
 }
 
