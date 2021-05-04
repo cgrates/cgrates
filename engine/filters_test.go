@@ -2042,26 +2042,3 @@ func TestFiltersPassGreaterThanFailParseValues(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
 	}
 }
-
-// func TestFiltersPassGreaterThan2(t *testing.T) {
-// 	fltr, err := NewFilterRule(utils.MetaGreaterThan, "~*req.Usage", []string{"10"})
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	dtP := utils.MapStorage{
-// 		utils.MetaReq: map[string]interface{}{
-// 			utils.Usage: "10",
-// 		},
-// 	}
-
-// 	experr := utils.ErrExists
-// 	rcv, err := fltr.passGreaterThan(dtP)
-
-// 	if err == nil || err != experr {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
-// 	}
-
-// 	if rcv != false {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", false, rcv)
-// 	}
-// }
