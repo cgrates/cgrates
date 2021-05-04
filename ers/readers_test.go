@@ -307,7 +307,7 @@ func TestNewS3Reader(t *testing.T) {
 		rdrEvents: nil,
 		rdrExit:   nil,
 		rdrErr:    nil,
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 	}
 	exp.Config().ProcessedPath = ""
 	exp.Config().Opts = map[string]interface{}{}

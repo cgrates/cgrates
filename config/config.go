@@ -88,20 +88,6 @@ func (dbDflt dbDefaults) dbName(dbType string, flagInput string) string {
 	return dbDflt[dbType]["DbName"]
 }
 
-func (dbDefaults) dbUser(dbType string, flagInput string) string {
-	if flagInput != utils.MetaDynamic {
-		return flagInput
-	}
-	return utils.CGRateSLwr
-}
-
-func (dbDefaults) dbHost(dbType string, flagInput string) string {
-	if flagInput != utils.MetaDynamic {
-		return flagInput
-	}
-	return utils.Localhost
-}
-
 func (dbDflt dbDefaults) dbPort(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput

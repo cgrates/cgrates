@@ -58,7 +58,7 @@ func TestS3ERServe2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -81,7 +81,7 @@ func TestS3ERProcessMessage(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -131,7 +131,7 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -163,7 +163,7 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -195,7 +195,7 @@ func TestS3ERProcessMessageError3(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -220,20 +220,24 @@ func TestS3ERParseOpts(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
 
 	opts := map[string]interface{}{
-		utils.S3Bucket:  "s3BucketID",
+		utils.S3Bucket:  "QueueID",
 		utils.AWSRegion: "AWSRegion",
 		utils.AWSKey:    "AWSKey",
 		utils.AWSSecret: "AWSSecret",
 		utils.AWSToken:  "AWSToken",
 	}
 	rdr.parseOpts(opts)
-	if rdr.queueID != opts[utils.S3Bucket] || rdr.awsRegion != opts[utils.AWSRegion] || rdr.awsID != opts[utils.AWSKey] || rdr.awsKey != opts[utils.AWSSecret] || rdr.awsToken != opts[utils.AWSToken] {
+	if rdr.bucket != opts[utils.S3Bucket] ||
+		rdr.awsRegion != opts[utils.AWSRegion] ||
+		rdr.awsID != opts[utils.AWSKey] ||
+		rdr.awsKey != opts[utils.AWSSecret] ||
+		rdr.awsToken != opts[utils.AWSToken] {
 		t.Error("Fields do not corespond")
 	}
 	rdr.Config().Opts = map[string]interface{}{}
@@ -255,7 +259,7 @@ func TestS3ERIsClosed(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -310,7 +314,7 @@ func TestS3ERReadLoop(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -347,7 +351,7 @@ func TestS3ERReadLoopIsClosed(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -377,7 +381,7 @@ func TestS3ERReadMsg(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -427,7 +431,7 @@ func TestS3ERReadMsgError1(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -467,7 +471,7 @@ func TestS3ERReadMsgError2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -494,7 +498,7 @@ func TestS3ERReadMsgError3(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -520,7 +524,7 @@ func TestS3ERReadMsgError4(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -569,7 +573,7 @@ func TestS3ERReadMsgError5(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    engine.NewSQSPoster("url", 1, make(map[string]interface{})),
 	}

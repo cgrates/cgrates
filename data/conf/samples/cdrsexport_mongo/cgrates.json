@@ -103,7 +103,7 @@
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",
 				"awsSecret": "testsecret",
-				"SQSQueueID": "cgrates-cdrs",
+				"sqsQueueID": "cgrates-cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,

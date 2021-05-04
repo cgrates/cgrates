@@ -74,7 +74,7 @@ type S3ER struct {
 	awsID     string
 	awsKey    string
 	awsToken  string
-	queueID   string
+	bucket    string
 	session   *session.Session
 
 	poster engine.Poster
@@ -144,9 +144,9 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 }
 
 func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
-	rdr.queueID = utils.DefaultQueueID
+	rdr.bucket = utils.DefaultQueueID
 	if val, has := opts[utils.S3Bucket]; has {
-		rdr.queueID = utils.IfaceAsString(val)
+		rdr.bucket = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {
 		rdr.awsRegion = utils.IfaceAsString(val)
@@ -164,7 +164,7 @@ func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
 
 func (rdr *S3ER) readLoop(scv s3Client) (err error) {
 	var keys []string
-	if err = scv.ListObjectsV2Pages(&s3.ListObjectsV2Input{Bucket: aws.String(rdr.queueID)},
+	if err = scv.ListObjectsV2Pages(&s3.ListObjectsV2Input{Bucket: aws.String(rdr.bucket)},
 		func(lovo *s3.ListObjectsV2Output, _ bool) bool {
 			for _, objMeta := range lovo.Contents {
 				if objMeta.Key != nil {
@@ -213,7 +213,7 @@ func (rdr *S3ER) readMsg(scv s3Client, key string) (err error) {
 		return
 	}
 
-	obj, err := scv.GetObject(&s3.GetObjectInput{Bucket: &rdr.queueID, Key: &key})
+	obj, err := scv.GetObject(&s3.GetObjectInput{Bucket: &rdr.bucket, Key: &key})
 	if err != nil {
 		rdr.rdrErr <- err
 		return
@@ -232,7 +232,7 @@ func (rdr *S3ER) readMsg(scv s3Client, key string) (err error) {
 				utils.ERs, key, err.Error()))
 		return
 	}
-	if _, err = scv.DeleteObject(&s3.DeleteObjectInput{Bucket: &rdr.queueID, Key: &key}); err != nil {
+	if _, err = scv.DeleteObject(&s3.DeleteObjectInput{Bucket: &rdr.bucket, Key: &key}); err != nil {
 		rdr.rdrErr <- err
 		return
 	}

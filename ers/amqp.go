@@ -217,14 +217,14 @@ func (rdr *AMQPER) setOpts(opts map[string]interface{}) {
 	if vals, has := opts[utils.AMQPConsumerTag]; has {
 		rdr.tag = utils.IfaceAsString(vals)
 	}
-	if vals, has := opts[utils.RoutingKey]; has {
+	if vals, has := opts[utils.AMQPRoutingKey]; has {
 		rdr.routingKey = utils.IfaceAsString(vals)
 	}
-	if vals, has := opts[utils.Exchange]; has {
+	if vals, has := opts[utils.AMQPExchange]; has {
 		rdr.exchange = utils.IfaceAsString(vals)
 		rdr.exchangeType = utils.DefaultExchangeType
 	}
-	if vals, has := opts[utils.ExchangeType]; has {
+	if vals, has := opts[utils.AMQPExchangeType]; has {
 		rdr.exchangeType = utils.IfaceAsString(vals)
 	}
 }
