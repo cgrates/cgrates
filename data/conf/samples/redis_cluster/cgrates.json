@@ -20,8 +20,8 @@
 	"db_host":"127.0.0.1:7001",
 	"db_name": "10", 						// data_db database name to connect to
 	"opts": {
-		"redis_cluster": true,
-		"redis_cluster_sync": "100ms",				// the sync interval for the redis cluster
+		"redisCluster": true,
+		"redisClusterSync": "100ms",				// the sync interval for the redis cluster
 	},
 },
 

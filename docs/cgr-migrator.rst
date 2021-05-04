@@ -59,9 +59,9 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	output StorDB type for move mode <*mysql|*postgres|*mongo> (default "*stordb")
   -out_stordb_user string
     	output StorDB user (default "*stordb")
-  -redis_sentinel string
+  -redisSentinel string
     	the name of redis sentinel
-  -redis_cluster bool
+  -redisCluster bool
     	Is the redis datadb a cluster
   -cluster_sync string
     	The sync interval for the redis cluster
