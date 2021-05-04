@@ -60,8 +60,8 @@ func TestSqlGetMetrics(t *testing.T) {
 
 func TestNewSQLeUrl(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "postgres"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "postgres"
 	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SSLModeCfg] = "test"
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
@@ -84,8 +84,8 @@ func TestNewSQLeUrl(t *testing.T) {
 
 func TestNewSQLeUrlSQL(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "mysql"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "mysql"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
@@ -110,8 +110,8 @@ func TestNewSQLeUrlSQL(t *testing.T) {
 
 func TestNewSQLeUrlPostgres(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "postgres"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "postgres"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `postgres://cgrates:CGRateS.org@127.0.0.1:3306`
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
@@ -136,8 +136,8 @@ func TestNewSQLeUrlPostgres(t *testing.T) {
 
 func TestNewSQLeExportPathError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "postgres"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "postgres"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ":foo"
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
