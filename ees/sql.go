@@ -71,7 +71,7 @@ func (sqlEe *SQLEe) NewSQLEeURL(cgrCfg *config.CGRConfig) (dialect gorm.Dialecto
 	password, _ := u.User.Password()
 
 	dbname := utils.SQLDefaultDBName
-	if vals, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLDBName]; has {
+	if vals, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLDBNameOpt]; has {
 		dbname = utils.IfaceAsString(vals)
 	}
 	ssl := utils.SQLDefaultSSLMode
@@ -79,8 +79,8 @@ func (sqlEe *SQLEe) NewSQLEeURL(cgrCfg *config.CGRConfig) (dialect gorm.Dialecto
 		ssl = utils.IfaceAsString(vals)
 	}
 	// tableName is mandatory in opts
-	if iface, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLTableName]; !has {
-		return nil, utils.NewErrMandatoryIeMissing(utils.SQLTableName)
+	if iface, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLTableNameOpt]; !has {
+		return nil, utils.NewErrMandatoryIeMissing(utils.SQLTableNameOpt)
 	} else {
 		sqlEe.tableName = utils.IfaceAsString(iface)
 	}

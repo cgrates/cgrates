@@ -268,7 +268,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 	rdr.connType = u.Scheme
 
 	dbname := utils.SQLDefaultDBName
-	if vals, has := opts[utils.SQLDBName]; has {
+	if vals, has := opts[utils.SQLDBNameOpt]; has {
 		dbname = utils.IfaceAsString(vals)
 	}
 	ssl := utils.SQLDefaultSSLMode
@@ -277,7 +277,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 	}
 
 	rdr.tableName = utils.CDRsTBL
-	if vals, has := opts[utils.SQLTableName]; has {
+	if vals, has := opts[utils.SQLTableNameOpt]; has {
 		rdr.tableName = utils.IfaceAsString(vals)
 	}
 	switch rdr.connType {
@@ -317,7 +317,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 	}
 
 	outDBname = utils.SQLDefaultDBName
-	if vals, has := processedOpt[utils.SQLDBName]; has {
+	if vals, has := processedOpt[utils.SQLDBNameOpt]; has {
 		outDBname = utils.IfaceAsString(vals)
 	}
 	outSSL = utils.SQLDefaultSSLMode
@@ -325,7 +325,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 		outSSL = utils.IfaceAsString(vals)
 	}
 	rdr.expTableName = utils.CDRsTBL
-	if vals, has := processedOpt[utils.SQLTableName]; has {
+	if vals, has := processedOpt[utils.SQLTableNameOpt]; has {
 		rdr.expTableName = utils.IfaceAsString(vals)
 	}
 
