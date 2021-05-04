@@ -43,11 +43,11 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
 		utils.SQLDBName:    "cgrates2",
 		utils.SQLTableName: "cdrs2",
-		"sslMode":          "enabled",
+		utils.SSLModeCfg:   "enabled",
 
 		utils.SQLDBName + utils.ProcessedOpt:    "cgrates3",
 		utils.SQLTableName + utils.ProcessedOpt: "cdrs3",
-		"sslModeProcessed":                      "enabled",
+		utils.SSLModeCfg + utils.ProcessedOpt:   "enabled",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -78,11 +78,11 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
 		utils.SQLDBName:    "cgrates2",
 		utils.SQLTableName: "cdrs2",
-		"sslMode":          "enabled",
+		utils.SSLModeCfg:   "enabled",
 
 		utils.SQLDBName + utils.ProcessedOpt:    "cgrates3",
 		utils.SQLTableName + utils.ProcessedOpt: "cdrs3",
-		"sslModeProcessed":                      "enabled",
+		utils.SSLModeCfg + utils.ProcessedOpt:   "enabled",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -113,11 +113,11 @@ func TestSQLSetURL(t *testing.T) {
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
 		utils.SQLDBName:    "cgrates2",
 		utils.SQLTableName: "cdrs2",
-		"sslMode":          "enabled",
+		utils.SSLModeCfg:   "enabled",
 
 		utils.SQLDBName + utils.ProcessedOpt:    "cgrates2",
 		utils.SQLTableName + utils.ProcessedOpt: "cdrs2",
-		"sslModeProcessed":                      "enabled",
+		utils.SSLModeCfg + utils.ProcessedOpt:   "enabled",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {

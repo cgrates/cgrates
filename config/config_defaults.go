@@ -138,7 +138,7 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
-		"sslMode":"disable",				// postgresSSLMode in case of *postgres
+		"postgresSSLMode":"disable",		// postgresSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 	},
 	"items":{
@@ -406,16 +406,16 @@ const CGRATES_CFG_JSON = `
 				// "kafkaGroupID": "cgrates",					// the group that reads the events
 				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
 
-				// "kafkaTopicProcessed": "",					 the topic were the events are sent after they are processed
+				// "kafkaTopicProcessed": "",					// the topic were the events are sent after they are processed
 
 				// SQL
 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
-				// "sslMode": "disable",						// the ssl mode for postgres db
+				// "postgresSSLMode": "disable",				// the ssl mode for postgres db
 
 				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "sslModeProcessed": "",						// the ssl mode for postgres db
+				// "postgresSSLModeProcessed": "",				// the ssl mode for postgres db
 
 				// SQS and S3
 				// "awsRegion": "",
@@ -434,7 +434,7 @@ const CGRATES_CFG_JSON = `
 				// "sqsQueueIDProcessed": "", 					// the queue id for SQS readers were the events are sent after they are processed
 
 				// S3
-				// "s3BucketID": "cgrates_cdrs", 					// the bucket id for S3 readers from were the events are read
+				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from were the events are read
 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
 				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
