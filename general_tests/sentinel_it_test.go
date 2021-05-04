@@ -36,18 +36,18 @@ import (
 )
 
 var (
-	node1ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node1.conf")
-	node2ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node2.conf")
-	sentinel1ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel1.conf")
-	sentinel2ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel2.conf")
-	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "redis_sentinel")
+	node1ConfigPath     = path.Join(*dataDir, "redisSentinel", "node1.conf")
+	node2ConfigPath     = path.Join(*dataDir, "redisSentinel", "node2.conf")
+	sentinel1ConfigPath = path.Join(*dataDir, "redisSentinel", "sentinel1.conf")
+	sentinel2ConfigPath = path.Join(*dataDir, "redisSentinel", "sentinel2.conf")
+	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "redisSentinel")
 	sentinelConfig      *config.CGRConfig
 	sentinelRPC         *rpc.Client
 	node1Exec           *exec.Cmd
 	node2Exec           *exec.Cmd
 	stlExec1            *exec.Cmd
 	stlExec2            *exec.Cmd
-	redisSentinel       = flag.Bool("redis_sentinel", false, "Run tests with redis sentinel")
+	redisSentinel       = flag.Bool("redisSentinel", false, "Run tests with redis sentinel")
 
 	sTestsRds = []func(t *testing.T){
 		testRedisSentinelStartNodes,

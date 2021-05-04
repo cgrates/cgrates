@@ -93,12 +93,12 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 		"out_stordb_port": "1234",
         "users_filters":["users","filters","Account"],
         "out_datadb_opts":{	
-		   "redis_cluster": true,					
-		   "redis_cluster_sync": "2s",					
-		   "redis_cluster_ondown_delay": "1",	
+		   "redisCluster": true,					
+		   "redisClusterSync": "2s",					
+		   "redisClusterOndownDelay": "1",	
 		},
 		"out_stordb_opts":{	
-			"redis_cluster": true,					
+			"redisCluster": true,					
 		 },
 	},
 }`
@@ -143,7 +143,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 			"out_stordb_password": "out_stordb_password",
 			"users_filters":["users","filters","Account"],
 			"out_datadb_opts": {
-				"redis_sentinel": "out_datadb_redis_sentinel",
+				"redisSentinel": "out_datadb_redis_sentinel",
 			},
 		},
 	}`
