@@ -157,7 +157,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [SessionS] RequestType *none returns back the requested usage
   * [DataDB] Updated config options
   * [StorDB] Updated config options
-  
+  * [ERs] Refactored the reader options
+
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
 cgrates (0.10.0) UNRELEASED; urgency=medium
