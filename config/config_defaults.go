@@ -360,12 +360,12 @@ const CGRATES_CFG_JSON = `
 				// "kafkaTopicProcessed": "",					 the topic were the events are sent after they are processed
 
 				// SQL
-				// "dbName": "cgrates", 						// the name of the database from were the events are read
-				// "tableName": "cdrs",							// the name of the table from were the events are read
+				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
+				// "sqlTableName": "cdrs",							// the name of the table from were the events are read
 				// "sslMode": "disable",						// the ssl mode for postgres db
 
-				// "dbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
-				// "tableNameProcessed": "",					// the name of the table were the events are sent after they are processed
+				// "sqlDBNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
 				// "sslModeProcessed": "",						// the ssl mode for postgres db
 
 				// SQS and S3

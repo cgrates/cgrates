@@ -878,14 +878,6 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 	flagInput := utils.MetaDynamic
 	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.Internal}
 	for _, dbtype := range dbs {
-		host := dbdf.dbHost(flagInput)
-		if host != utils.Localhost {
-			t.Errorf("received: %+v, expecting: %+v", host, utils.Localhost)
-		}
-		user := dbdf.dbUser(flagInput)
-		if user != utils.CGRateSLwr {
-			t.Errorf("received: %+v, expecting: %+v", user, utils.CGRateSLwr)
-		}
 		port := dbdf.dbPort(dbtype, flagInput)
 		if port != dbdf[dbtype]["DbPort"] {
 			t.Errorf("received: %+v, expecting: %+v", port, dbdf[dbtype]["DbPort"])
@@ -894,26 +886,13 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 		if name != dbdf[dbtype]["DbName"] {
 			t.Errorf("received: %+v, expecting: %+v", name, dbdf[dbtype]["DbName"])
 		}
-		pass := dbdf.dbPass(dbtype, flagInput)
-		if pass != dbdf[dbtype]["DbPass"] {
-			t.Errorf("received: %+v, expecting: %+v", pass, dbdf[dbtype]["DbPass"])
-		}
 	}
 }
 
 func TestDbDefaults(t *testing.T) {
 	dbdf := newDbDefaults()
-	flagInput := "NonMetaDynamic"
 	dbs := []string{utils.Mongo, utils.Redis, utils.MySQL, utils.Internal, utils.Postgres}
 	for _, dbtype := range dbs {
-		host := dbdf.dbHost(flagInput)
-		if host != flagInput {
-			t.Errorf("Expected %+v, received %+v", flagInput, host)
-		}
-		user := dbdf.dbUser(flagInput)
-		if user != flagInput {
-			t.Errorf("Expected %+v, received %+v", flagInput, user)
-		}
 		port := dbdf.dbPort(dbtype, "1234")
 		if port != "1234" {
 			t.Errorf("Expected %+v, received %+v", "1234", port)
@@ -921,10 +900,6 @@ func TestDbDefaults(t *testing.T) {
 		name := dbdf.dbName(dbtype, utils.CGRateSLwr)
 		if name != utils.CGRateSLwr {
 			t.Errorf("Expected %+v, received %+v", utils.CGRateSLwr, name)
-		}
-		pass := dbdf.dbPass(dbtype, utils.EmptyString)
-		if pass != utils.EmptyString {
-			t.Errorf("Expected %+v, received %+v", utils.EmptyString, pass)
 		}
 	}
 }
