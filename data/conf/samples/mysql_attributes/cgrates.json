@@ -25,9 +25,9 @@
   },
 
   "general": {
-    "node_id": "CGRAero",
+    "node_id": "index",
     "rounding_decimals": 10,
-
+    "log_level": 7,
   },
 
   "rals": {
