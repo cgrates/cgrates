@@ -53,27 +53,22 @@ func newDbDefaults() dbDefaults {
 		utils.MySQL: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "3306",
-			"DbPass": "CGRateS.org",
 		},
 		utils.Postgres: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "5432",
-			"DbPass": "CGRateS.org",
 		},
 		utils.Mongo: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "27017",
-			"DbPass": "",
 		},
 		utils.Redis: map[string]string{
 			"DbName": "10",
 			"DbPort": "6379",
-			"DbPass": "",
 		},
 		utils.INTERNAL: map[string]string{
 			"DbName": "internal",
 			"DbPort": "internal",
-			"DbPass": "internal",
 		},
 	}
 	return deflt
@@ -93,13 +88,6 @@ func (dbDflt dbDefaults) dbPort(dbType string, flagInput string) string {
 		return flagInput
 	}
 	return dbDflt[dbType]["DbPort"]
-}
-
-func (dbDflt dbDefaults) dbPass(dbType string, flagInput string) string {
-	if flagInput != utils.MetaDynamic {
-		return flagInput
-	}
-	return dbDflt[dbType]["DbPass"]
 }
 
 func init() {

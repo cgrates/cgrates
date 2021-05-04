@@ -969,10 +969,6 @@ func TestDbDefaultsMetaDynamic(t *testing.T) {
 		if name != dbdf[dbtype]["DbName"] {
 			t.Errorf("received: %+v, expecting: %+v", name, dbdf[dbtype]["DbName"])
 		}
-		pass := dbdf.dbPass(dbtype, flagInput)
-		if pass != dbdf[dbtype]["DbPass"] {
-			t.Errorf("received: %+v, expecting: %+v", pass, dbdf[dbtype]["DbPass"])
-		}
 	}
 }
 
@@ -987,10 +983,6 @@ func TestDbDefaults(t *testing.T) {
 		name := dbdf.dbName(dbtype, utils.CGRateSLwr)
 		if name != utils.CGRateSLwr {
 			t.Errorf("Expected %+v, received %+v", utils.CGRateSLwr, name)
-		}
-		pass := dbdf.dbPass(dbtype, utils.EmptyString)
-		if pass != utils.EmptyString {
-			t.Errorf("Expected %+v, received %+v", utils.EmptyString, pass)
 		}
 	}
 }
