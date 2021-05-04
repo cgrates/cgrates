@@ -35,7 +35,7 @@ var (
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
 // is used to update the mentioned index
-func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string) (indexes map[string]utils.StringSet, err error) {
+func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string, newFlt *Filter) (indexes map[string]utils.StringSet, err error) {
 	tntCtx := tnt
 	if ctx != utils.EmptyString {
 		tntCtx = utils.ConcatenatedKey(tnt, ctx)
@@ -63,7 +63,9 @@ func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 	// we try to get them from Cache/DataDB or if not found in this location we create them here
 	for _, fltrID := range filterIDs {
 		var fltr *Filter
-		if fltr, err = dm.GetFilter(apiCtx, tnt, fltrID,
+		if newFlt != nil && newFlt.Tenant == tnt && newFlt.ID == fltrID {
+			fltr = newFlt
+		} else if fltr, err = dm.GetFilter(apiCtx, tnt, fltrID,
 			true, false, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
@@ -123,7 +125,7 @@ func addItemToFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, 
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	var indexes map[string]utils.StringSet
-	if indexes, err = newFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, filterIDs); err != nil {
+	if indexes, err = newFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, filterIDs, nil); err != nil {
 		return
 	}
 	// in case we have a profile with only non indexable filters(e.g. only *gt)
@@ -154,7 +156,7 @@ func removeItemFromFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmT
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	var indexes map[string]utils.StringSet
-	if indexes, err = newFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, filterIDs); err != nil {
+	if indexes, err = newFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, filterIDs, nil); err != nil {
 		return
 	}
 	if len(indexes) == 0 { // in case we have a profile with only non indexable filters(e.g. only *gt)
@@ -385,7 +387,7 @@ func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
 // getFilters returns a list of filters IDs for the given profile id
 func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
-	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error)) (processed bool, err error) {
+	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error), newFltr *Filter) (processed bool, err error) {
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		var ids []string
@@ -417,7 +419,7 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 		}
 		var index map[string]utils.StringSet
 		if index, err = newFilterIndex(context.TODO(), dm, idxItmType,
-			tnt, ctx, id, *filterIDs); err != nil {
+			tnt, ctx, id, *filterIDs, newFltr); err != nil {
 			return
 		}
 		// ensure that the item is in the index set
@@ -611,7 +613,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheStatFilterIndexes:
@@ -631,7 +633,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheResourceFilterIndexes:
@@ -651,7 +653,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheRouteFilterIndexes:
@@ -671,7 +673,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheChargerFilterIndexes:
@@ -691,7 +693,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheAccountsFilterIndexes:
@@ -711,7 +713,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheActionProfilesFilterIndexes:
@@ -731,7 +733,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheRateProfilesFilterIndexes:
@@ -751,7 +753,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						fltrIDs[i] = fltrID
 					}
 					return &fltrIDs, nil
-				}); err != nil && err != utils.ErrNotFound {
+				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
 
@@ -786,7 +788,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
 					var updIdx map[string]utils.StringSet
 					if updIdx, err = newFilterIndex(context.TODO(), dm, idxItmType,
-						newFlt.Tenant, rpID, itemID, rate.FilterIDs); err != nil {
+						newFlt.Tenant, rpID, itemID, rate.FilterIDs, newFlt); err != nil {
 						guardian.Guardian.UnguardIDs(refID)
 						return
 					}
@@ -819,7 +821,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
 					var updIdx map[string]utils.StringSet
 					if updIdx, err = newFilterIndex(context.TODO(), dm, idxItmType,
-						newFlt.Tenant, ctx, itemID, ap.FilterIDs); err != nil {
+						newFlt.Tenant, ctx, itemID, ap.FilterIDs, newFlt); err != nil {
 						guardian.Guardian.UnguardIDs(refID)
 						return
 					}
@@ -852,7 +854,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
 					var updIdx map[string]utils.StringSet
 					if updIdx, err = newFilterIndex(context.TODO(), dm, idxItmType,
-						newFlt.Tenant, ctx, itemID, dp.FilterIDs); err != nil {
+						newFlt.Tenant, ctx, itemID, dp.FilterIDs, newFlt); err != nil {
 						guardian.Guardian.UnguardIDs(refID)
 						return
 					}
