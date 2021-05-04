@@ -641,7 +641,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "type": "*file_csv",									
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
-					"groupID": "test",
+					"kafkaGroupID": "test",
 				  },											
 			      "tenant": "~*req.Destination1",										
 			      "timezone": "UTC",										

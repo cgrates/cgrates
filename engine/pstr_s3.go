@@ -50,7 +50,7 @@ type S3Poster struct {
 	awsKey     string
 	awsToken   string
 	attempts   int
-	queueID    string
+	bucket     string
 	folderPath string
 	session    *session.Session
 }
@@ -59,11 +59,11 @@ type S3Poster struct {
 func (pstr *S3Poster) Close() {}
 
 func (pstr *S3Poster) parseOpts(opts map[string]interface{}) {
-	pstr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.QueueID]; has {
-		pstr.queueID = utils.IfaceAsString(val)
+	pstr.bucket = utils.DefaultQueueID
+	if val, has := opts[utils.S3Bucket]; has {
+		pstr.bucket = utils.IfaceAsString(val)
 	}
-	if val, has := opts[utils.AWSFolderPath]; has {
+	if val, has := opts[utils.S3FolderPath]; has {
 		pstr.folderPath = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {
@@ -100,7 +100,7 @@ func (pstr *S3Poster) Post(message []byte, key string) (err error) {
 
 	for i := 0; i < pstr.attempts; i++ {
 		if _, err = svc.Upload(&s3manager.UploadInput{
-			Bucket: aws.String(pstr.queueID),
+			Bucket: aws.String(pstr.bucket),
 
 			// Can also use the `filepath` standard library package to modify the
 			// filename as need for an S3 object key. Such as turning absolute path

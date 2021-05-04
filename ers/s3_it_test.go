@@ -60,7 +60,7 @@ func TestS3ER(t *testing.T) {
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"opts": {
-				"queueID": "cgrates-cdrs",
+				"s3BucketID": "cgrates-cdrs",
 				"awsRegion": "us-east-2",
 				"awsKey": "AWSAccessKeyId",
 				"awsSecret": "AWSSecretKey",
@@ -98,7 +98,7 @@ func TestS3ER(t *testing.T) {
 
 	randomCGRID := utils.UUIDSha1Prefix()
 	scv.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(s3Rdr.queueID),
+		Bucket: aws.String(s3Rdr.bucket),
 		Key:    aws.String("home/test.json"),
 		Body:   bytes.NewReader([]byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID))),
 	})
@@ -145,7 +145,7 @@ func TestNewS3ER(t *testing.T) {
 		awsID:     "",
 		awsKey:    "",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}
@@ -196,7 +196,7 @@ func TestNewS3ERCase2(t *testing.T) {
 		awsID:     "",
 		awsKey:    "",
 		awsToken:  "",
-		queueID:   "cgrates_cdrs",
+		bucket:    "cgrates_cdrs",
 		session:   nil,
 		poster:    nil,
 	}

@@ -61,7 +61,7 @@ func TestAddFldPost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))
 	}
 	AddFailedPost("path1", "format1", "module1", "2", make(map[string]interface{}))
-	AddFailedPost("path2", "format2", "module2", "3", map[string]interface{}{utils.QueueID: "qID"})
+	AddFailedPost("path2", "format2", "module2", "3", map[string]interface{}{utils.SQSQueueID: "qID"})
 	x, ok = failedPostCache.Get(utils.ConcatenatedKey("path1", "format1", "module1"))
 	if !ok {
 		t.Error("Error reading from cache")
@@ -99,7 +99,7 @@ func TestAddFldPost(t *testing.T) {
 		Format: "format2",
 		module: "module2",
 		Events: []interface{}{"3"},
-		Opts:   map[string]interface{}{utils.QueueID: "qID"},
+		Opts:   map[string]interface{}{utils.SQSQueueID: "qID"},
 	}
 	if !reflect.DeepEqual(eOut, failedPost) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(failedPost))

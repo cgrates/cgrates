@@ -2312,45 +2312,34 @@ const (
 
 // Poster and Event reader constants
 const (
-	SQSPoster     = "SQSPoster"
-	S3Poster      = "S3Poster"
-	AWSRegion     = "awsRegion"
-	AWSKey        = "awsKey"
-	AWSSecret     = "awsSecret"
-	AWSToken      = "awsToken"
-	AWSFolderPath = "s3FolderPath"
-	KafkaTopic    = "topic"
-	KafkaGroupID  = "groupID"
-	KafkaMaxWait  = "maxWait"
+	SQSPoster = "SQSPoster"
+	S3Poster  = "S3Poster"
 
-	// General constants for posters
-	DefaultQueueID      = "cgrates_cdrs"
-	QueueID             = "queueID"
-	DefaultExchangeType = "direct"
-	Exchange            = "exchange"
-	ExchangeType        = "exchangeType"
-	RoutingKey          = "routingKey"
+	// General constants for posters and readers
+	DefaultQueueID = "cgrates_cdrs"
+	ProcessedOpt   = "Processed"
 
-	// for ers:
-	AMQPDefaultConsumerTag = "cgrates"
-	AMQPConsumerTag        = "consumerTag"
+	// sqs and s3
+	AWSRegion = "awsRegion"
+	AWSKey    = "awsKey"
+	AWSSecret = "awsSecret"
+	AWSToken  = "awsToken"
 
-	KafkaDefaultTopic   = "cgrates"
-	KafkaDefaultGroupID = "cgrates"
-	KafkaDefaultMaxWait = time.Millisecond
+	// sqs
+	SQSQueueID = "sqsQueueID"
 
-	SQLDBName         = "dbName"
+	// s3
+	S3Bucket     = "s3BucketID"
+	S3FolderPath = "s3FolderPath"
 	SQLTableName      = "tableName"
 	SQLDefaultSSLMode = "disable"
 	SQLDefaultDBName  = "cgrates"
 
-	ProcessedOpt = "Processed"
-
 	// fileCSV
 	RowLengthOpt        = "RowLength"
 	FieldSepOpt         = "FieldSeparator"
-	HeaderDefineCharOpt = "csvHeaderDefineChar"
 	LazyQuotes          = "LazyQuotes"
+	HeaderDefineCharOpt = "csvHeaderDefineChar"
 
 	// partialCSV
 	PartialCSVCacheExpiryActionOpt = "csvCacheExpiryAction"
@@ -2363,6 +2352,25 @@ const (
 
 	// fileXML
 	XMLRootPathOpt = "xmlRootPath"
+
+	// amqp
+	AMQPDefaultConsumerTag = "cgrates"
+	DefaultExchangeType    = "direct"
+
+	AMQPQueueID      = "amqpQueueID"
+	AMQPConsumerTag  = "amqpConsumerTag"
+	AMQPExchange     = "amqpExchange"
+	AMQPExchangeType = "amqpExchangeType"
+	AMQPRoutingKey   = "amqpRoutingKey"
+
+	// kafka
+	KafkaDefaultTopic   = "cgrates"
+	KafkaDefaultGroupID = "cgrates"
+	KafkaDefaultMaxWait = time.Millisecond
+
+	KafkaTopic   = "kafkaTopic"
+	KafkaGroupID = "kafkaGroupID"
+	KafkaMaxWait = "kafkaMaxWait"
 )
 
 // Analyzers constants
