@@ -337,27 +337,27 @@ const CGRATES_CFG_JSON = `
 				// FileXML
 				"xmlRootPath": "",								// path towards one event in case of XML CDRs
 
-
-				// "queueID": "cgrates_cdrs", 					// the queue id for AMQP, AMQPv1, SQS and S3 readers from were the events are read
-				// "queueIDProcessed": "", 						// the queue id for AMQP, AMQPv1, SQS and S3 readers were the events are sent after they are processed
+				// AMQP and AMQPv1
+				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP and AMQPv1 readers from were the events are read
+				// "amqpQueueIDProcessed": "", 					// the queue id for AMQP and AMQPv1 readers were the events are sent after they are processed
 
 				// AMQP
-				// "consumerTag": "cgrates",					// the ID of the consumer
-				// "exchange": "",									
-				// "exchangeType": "",
-				// "routingKey": "",
+				// "amqpConsumerTag": "cgrates",				// the ID of the consumer
+				// "amqpExchange": "",									
+				// "amqpExchangeType": "",
+				// "amqpRoutingKey": "",
 
-				// "exchangeProcessed": "",									
-				// "exchangeTypeProcessed": "",
-				// "routingKeyProcessed": "",
+				// "amqpExchangeProcessed": "",									
+				// "amqpExchangeTypeProcessed": "",
+				// "amqpRoutingKeyProcessed": "",
+
 
 				// Kafka
-				// "topic": "cgrates",							// the topic from were the events are read
-				// "groupID": "cgrates",						// the group that reads the events
-				// "maxWait": "1ms",							// the maximum amount of time to wait for new data to come
+				// "kafkaTopic": "cgrates",						// the topic from were the events are read
+				// "kafkaGroupID": "cgrates",					// the group that reads the events
+				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
 
-				// "topicProcessed": "",						// the topic were the events are sent after they are processed
-
+				// "kafkaTopicProcessed": "",					 the topic were the events are sent after they are processed
 
 				// SQL
 				// "dbName": "cgrates", 						// the name of the database from were the events are read
@@ -378,8 +378,17 @@ const CGRATES_CFG_JSON = `
 				// "awsKeyProcessed": "",
 				// "awsSecretProcessed": "",
 				// "awsTokenProcessed": "",
+
+				// SQS
+				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS readers from were the events are read
+
+				// "sqsQueueIDProcessed": "", 					// the queue id for SQS readers were the events are sent after they are processed
+
+				// S3
+				// "s3BucketID": "cgrates_cdrs", 					// the bucket id for S3 readers from were the events are read
 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
+				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
 			},
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>

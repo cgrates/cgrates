@@ -35,7 +35,7 @@ func NewAMQPv1Poster(dialURL string, attempts int, opts map[string]interface{}) 
 		queueID:  "/" + utils.DefaultQueueID,
 		attempts: attempts,
 	}
-	if vals, has := opts[utils.QueueID]; has {
+	if vals, has := opts[utils.AMQPQueueID]; has {
 		pstr.queueID = "/" + utils.IfaceAsString(vals)
 	}
 	return pstr

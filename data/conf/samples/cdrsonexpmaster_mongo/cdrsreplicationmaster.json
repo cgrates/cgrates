@@ -78,10 +78,10 @@
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"queueID": "cgrates_cdrs",
-				"exchange": "exchangename",
-				"exchangeType": "fanout",
-				"routingKey": "cgr_cdrs",
+				"amqpQueueID": "cgrates_cdrs",
+				"amqpExchange": "exchangename",
+				"amqpExchangeType": "fanout",
+				"amqpRoutingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 3,
@@ -118,7 +118,7 @@
 			"type": "*kafka_json_map",
 			"export_path": "localhost:9092",
 			"opts": {
-				"topic": "cgrates_cdrs",
+				"kafkaTopic": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"synchronous": true,
@@ -132,7 +132,7 @@
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@wrongurl:25672/",
 			"opts": {
-				"queueID": "cgrates_cdrs",
+				"amqpQueueID": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"filters":["*string:~*ec.Cost:100"],

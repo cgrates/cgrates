@@ -164,7 +164,6 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 				break
 			}
 			if hasTrailer {
-
 				// process trailer here
 				if err = rdr.processTrailer(file, rowNr, evsPosted, absPath, trailerFields); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Read trailer error: %s ", utils.ERs, err.Error()))

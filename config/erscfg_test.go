@@ -927,7 +927,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
                            {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}                
 				],
 				"opts":{
-					"groupID": "test",
+					"kafkaGroupID": "test",
 				},
 			},
 		],

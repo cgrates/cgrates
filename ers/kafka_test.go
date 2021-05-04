@@ -21,6 +21,8 @@ package ers
 import (
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestKafkasetOpts(t *testing.T) {
@@ -33,9 +35,9 @@ func TestKafkasetOpts(t *testing.T) {
 		maxWait: time.Second,
 	}
 	if err := k.setOpts(map[string]interface{}{
-		"topic":   "cdrs",
-		"groupID": "new",
-		"maxWait": "1s",
+		utils.KafkaTopic:   "cdrs",
+		utils.KafkaGroupID: "new",
+		utils.KafkaMaxWait: "1s",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
@@ -76,9 +78,9 @@ func TestKafkasetOpts(t *testing.T) {
 		maxWait: time.Second,
 	}
 	if err := k.setOpts(map[string]interface{}{
-		"topic":   "cdrs",
-		"groupID": "new",
-		"maxWait": "1s",
+		utils.KafkaTopic:   "cdrs",
+		utils.KafkaGroupID: "new",
+		utils.KafkaMaxWait: "1s",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {

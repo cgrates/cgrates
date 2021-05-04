@@ -140,10 +140,10 @@ func TestSQSPoster(t *testing.T) {
 	qname := "cgrates-cdrs"
 
 	opts := map[string]interface{}{
-		"awsRegion": region,
-		"awsKey":    awsKey,
-		"awsSecret": awsSecret,
-		"queueID":   qname,
+		utils.AWSRegion:  region,
+		utils.AWSKey:     awsKey,
+		utils.AWSSecret:  awsSecret,
+		utils.SQSQueueID: qname,
 	}
 	//#####################################
 
@@ -219,10 +219,10 @@ func TestS3Poster(t *testing.T) {
 	qname := "cgrates-cdrs"
 
 	opts := map[string]interface{}{
-		"awsRegion": region,
-		"awsKey":    awsKey,
-		"awsSecret": awsSecret,
-		"queueID":   qname,
+		utils.AWSRegion: region,
+		utils.AWSKey:    awsKey,
+		utils.AWSSecret: awsSecret,
+		utils.S3Bucket:  qname,
 	}
 	//#####################################
 
@@ -276,7 +276,7 @@ func TestAMQPv1Poster(t *testing.T) {
 	endpoint := "amqps://RootManageSharedAccessKey:UlfIJ%2But11L0ZzA%2Fgpje8biFJeQihpWibJsUhaOi1DU%3D@cdrscgrates.servicebus.windows.net"
 	qname := "cgrates-cdrs"
 	opts := map[string]interface{}{
-		"queueID": qname,
+		utils.AMQPQueueID: qname,
 	}
 	//#####################################
 
