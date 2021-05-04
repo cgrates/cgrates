@@ -44,7 +44,7 @@ var (
 		"db_name": "10",/*/*asd*/ 				// data_db database name to connect to
 		"db_user": "*env:TESTVAR", 				// username to use when connecting to data_db
 		"db_password": ",/**/", 				// password to use when connecting to data_db
-		"redis_sentinel":"",					// redis_sentinel is the name of sentinel
+		"redisSentinel":"",					// redisSentinel is the name of sentinel
 	},/*Multiline coment 
 	Line1
 	Line2
@@ -55,8 +55,8 @@ var (
 
 func TestEnvRawJsonReadByte(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(envStr))
-	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redis_sentinel":""}}`)
-	var reply []byte
+	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redisSentinel":""}}`)
+	rply := []byte{}
 	bit, err := raw.ReadByte()
 	for ; err == nil; bit, err = raw.ReadByte() {
 		reply = append(reply, bit)
@@ -211,8 +211,8 @@ func TestEnvReaderRead(t *testing.T) {
 		t.Error(err)
 	}
 	envR := NewRjReaderFromBytes([]byte(envStr))
-	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/","redis_sentinel":""}}`)
-	var reply []byte
+	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/","redisSentinel":""}}`)
+	rply := []byte{}
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
 	for ; err == nil && n > 0; n, err = envR.Read(buf) {
@@ -445,7 +445,7 @@ func TestGetErrorLine(t *testing.T) {
 		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
 		"db_user": "user", 					// username to use when connecting to data_db
 		"db_password": ",/**/", 						// password to use when connecting to data_db
-		"redis_sentinel":"",					// redis_sentinel is the name of sentinel
+		"redisSentinel":"",					// redisSentinel is the name of sentinel
 	},/*Multiline coment 
 	Line1
 	Line2
@@ -478,7 +478,7 @@ func TestGetErrorLine2(t *testing.T) {
 		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
 		"db_user": "user", 					// username to use when connecting to data_db
 		"db_password": ",/**/", 						// password to use when connecting to data_db
-		"redis_sentinel":"",					// redis_sentinel is the name of sentinel
+		"redisSentinel":"",					// redisSentinel is the name of sentinel
 	},/*Multiline coment 
 	Line1
 	Line2

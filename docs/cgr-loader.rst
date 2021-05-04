@@ -55,9 +55,9 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	The path to folder containing the data files (default "./")
   -recursive
     	Loads data from folder recursive.
-  -redis_sentinel string
+  -redisSentinel string
     	The name of redis sentinel
-  -redis_cluster bool
+  -redisCluster bool
     	Is the redis datadb a cluster
   -cluster_sync string
     	The sync interval for the redis cluster
