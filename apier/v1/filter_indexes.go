@@ -226,7 +226,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -243,7 +243,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -260,7 +260,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -277,7 +277,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -298,7 +298,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 				}
 
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -315,7 +315,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -335,7 +335,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexes(args *utils.ArgsComputeFilterInde
 					fltrIDs[i] = fltrID
 				}
 				return &fltrIDs, nil
-			}); err != nil && err != utils.ErrNotFound {
+			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -410,7 +410,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//StatQueueProfile Indexes
@@ -425,7 +425,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//ResourceProfile Indexes
@@ -440,7 +440,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//RouteProfile Indexes
@@ -455,7 +455,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
@@ -473,7 +473,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//ChargerProfile  Indexes
@@ -488,7 +488,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//DispatcherProfile Indexes
@@ -506,7 +506,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 				fltrIDs[i] = fltrID
 			}
 			return &fltrIDs, nil
-		}); err != nil && err != utils.ErrNotFound {
+		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
