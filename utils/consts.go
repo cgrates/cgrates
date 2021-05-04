@@ -2331,9 +2331,13 @@ const (
 	// s3
 	S3Bucket     = "s3BucketID"
 	S3FolderPath = "s3FolderPath"
-	SQLTableName      = "tableName"
-	SQLDefaultSSLMode = "disable"
+
+	// sql
 	SQLDefaultDBName  = "cgrates"
+	SQLDefaultSSLMode = "disable"
+
+	SQLDBName    = "sqlDBName"
+	SQLTableName = "sqlTableName"
 
 	// fileCSV
 	RowLengthOpt        = "RowLength"

@@ -41,13 +41,13 @@ func TestSQLSetURL(t *testing.T) {
 	inURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		"dbName":    "cgrates2",
-		"tableName": "cdrs2",
-		"sslMode":   "enabled",
+		utils.SQLDBName:    "cgrates2",
+		utils.SQLTableName: "cdrs2",
+		"sslMode":          "enabled",
 
-		"dbNameProcessed":    "cgrates3",
-		"tableNameProcessed": "cdrs3",
-		"sslModeProcessed":   "enabled",
+		utils.SQLDBName + utils.ProcessedOpt:    "cgrates3",
+		utils.SQLTableName + utils.ProcessedOpt: "cdrs3",
+		"sslModeProcessed":                      "enabled",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -76,13 +76,13 @@ func TestSQLSetURL(t *testing.T) {
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		"dbName":    "cgrates2",
-		"tableName": "cdrs2",
-		"sslMode":   "enabled",
+		utils.SQLDBName:    "cgrates2",
+		utils.SQLTableName: "cdrs2",
+		"sslMode":          "enabled",
 
-		"dbNameProcessed":    "cgrates3",
-		"tableNameProcessed": "cdrs3",
-		"sslModeProcessed":   "enabled",
+		utils.SQLDBName + utils.ProcessedOpt:    "cgrates3",
+		utils.SQLTableName + utils.ProcessedOpt: "cdrs3",
+		"sslModeProcessed":                      "enabled",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
@@ -111,13 +111,13 @@ func TestSQLSetURL(t *testing.T) {
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = ""
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		"dbName":    "cgrates2",
-		"tableName": "cdrs2",
-		"sslMode":   "enabled",
+		utils.SQLDBName:    "cgrates2",
+		utils.SQLTableName: "cdrs2",
+		"sslMode":          "enabled",
 
-		"dbNameProcessed":    "cgrates2",
-		"tableNameProcessed": "cdrs2",
-		"sslModeProcessed":   "enabled",
+		utils.SQLDBName + utils.ProcessedOpt:    "cgrates2",
+		utils.SQLTableName + utils.ProcessedOpt: "cdrs2",
+		"sslModeProcessed":                      "enabled",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expsql.connString != sql.connString {
