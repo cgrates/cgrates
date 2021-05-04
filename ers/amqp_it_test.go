@@ -45,7 +45,7 @@ func TestAMQPER(t *testing.T) {
 			"source_path": "amqp://guest:guest@localhost:5672/",// read data from this path
 			"opts": {
 				"amqpQueueID": "cdrs3",
-				"consumerTag": "test-key",
+				"amqpConsumerTag": "test-key",
 				"amqpExchange": "test-exchange",
 				"amqpExchangeType": "direct",
 				"amqpRoutingKey": "test-key",

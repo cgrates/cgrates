@@ -276,14 +276,18 @@ func TestSQSERParseOpts(t *testing.T) {
 	}
 
 	opts := map[string]interface{}{
-		utils.SQSQueueID: "SQSQueueID",
+		utils.SQSQueueID: "QueueID",
 		utils.AWSRegion:  "AWSRegion",
 		utils.AWSKey:     "AWSKey",
 		utils.AWSSecret:  "AWSSecret",
 		utils.AWSToken:   "AWSToken",
 	}
 	rdr.parseOpts(opts)
-	if rdr.queueID != opts[utils.SQSQueueID] || rdr.awsRegion != opts[utils.AWSRegion] || rdr.awsID != opts[utils.AWSKey] || rdr.awsKey != opts[utils.AWSSecret] || rdr.awsToken != opts[utils.AWSToken] {
+	if rdr.queueID != opts[utils.SQSQueueID] ||
+		rdr.awsRegion != opts[utils.AWSRegion] ||
+		rdr.awsID != opts[utils.AWSKey] ||
+		rdr.awsKey != opts[utils.AWSSecret] ||
+		rdr.awsToken != opts[utils.AWSToken] {
 		t.Error("Fields do not corespond")
 	}
 	rdr.Config().Opts = map[string]interface{}{}

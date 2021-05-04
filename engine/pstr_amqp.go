@@ -56,14 +56,14 @@ func (pstr *AMQPPoster) parseOpts(dialURL map[string]interface{}) {
 	if vals, has := dialURL[utils.AMQPQueueID]; has {
 		pstr.queueID = utils.IfaceAsString(vals)
 	}
-	if vals, has := dialURL[utils.RoutingKey]; has {
+	if vals, has := dialURL[utils.AMQPRoutingKey]; has {
 		pstr.routingKey = utils.IfaceAsString(vals)
 	}
-	if vals, has := dialURL[utils.Exchange]; has {
+	if vals, has := dialURL[utils.AMQPExchange]; has {
 		pstr.exchange = utils.IfaceAsString(vals)
 		pstr.exchangeType = utils.DefaultExchangeType
 	}
-	if vals, has := dialURL[utils.ExchangeType]; has {
+	if vals, has := dialURL[utils.AMQPExchangeType]; has {
 		pstr.exchangeType = utils.IfaceAsString(vals)
 	}
 }

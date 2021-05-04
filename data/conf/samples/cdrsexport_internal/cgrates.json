@@ -67,7 +67,7 @@
 				"amqpQueueID": "cgrates_cdrs",
 				"amqpExchange": "exchangename",
 				"amqpExchangeType": "fanout",
-				"amqpRoutingKey": "cgr_cdrs"
+				"amqpRoutingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 20,
@@ -80,7 +80,7 @@
 			"type": "*amqpv1_json_map",
 			"export_path": "amqps://guest:guest@localhost:95672/",
 			"opts": {
-				"amqpQueueID": "cgrates_cdrs"
+				"amqpQueueID": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -98,7 +98,7 @@
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",
 				"awsSecret": "testsecret",
-				"SQSQueueID": "cgrates-cdrs"
+				"sqsQueueID": "cgrates-cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -111,7 +111,7 @@
 			"type": "*kafka_json_map",
 			"export_path": "127.0.0.1:9092",
 			"opts":{
-				"kafkaTopic": "cgrates_cdrs"
+				"kafkaTopic": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 10,
@@ -129,7 +129,7 @@
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",
 				"awsSecret": "testsecret",
-				"s3BucketID": "cgrates-cdrs"
+				"s3BucketID": "cgrates-cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
