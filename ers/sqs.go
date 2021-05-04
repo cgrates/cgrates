@@ -81,6 +81,11 @@ type SQSER struct {
 	poster engine.Poster
 }
 
+type sqsClient interface {
+	ReceiveMessage(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error)
+	DeleteMessage(input *sqs.DeleteMessageInput) (*sqs.DeleteMessageOutput, error)
+}
+
 // Config returns the curent configuration
 func (rdr *SQSER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
@@ -91,7 +96,7 @@ func (rdr *SQSER) Serve() (err error) {
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
 		return
 	}
-	go rdr.readLoop() // read until the connection is closed
+	go rdr.readLoop(sqs.New(rdr.session)) // read until the connection is closed
 	return
 }
 
@@ -174,8 +179,7 @@ func (rdr *SQSER) getQueueURL() (err error) {
 	return
 }
 
-func (rdr *SQSER) readLoop() (err error) {
-	scv := sqs.New(rdr.session)
+func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
 	for !rdr.isClosed() {
 		if rdr.Config().ConcurrentReqs != -1 {
 			<-rdr.cap // do not try to read if the limit is reached
@@ -218,7 +222,7 @@ func (rdr *SQSER) isClosed() bool {
 	}
 }
 
-func (rdr *SQSER) readMsg(scv *sqs.SQS, msg *sqs.Message) (err error) {
+func (rdr *SQSER) readMsg(scv sqsClient, msg *sqs.Message) (err error) {
 	if rdr.Config().ConcurrentReqs != -1 {
 		defer func() { rdr.cap <- struct{}{} }()
 	}
