@@ -258,7 +258,28 @@ func (rI *RateSInterval) AsExtRateSInterval() (eRi *ExtRateSInterval, err error)
 		}
 	}
 	return
+}
 
+// Equals compares two ExtRateSInterval
+func (rIl *ExtRateSInterval) Equals(nRil *ExtRateSInterval) (eq bool) {
+	if rIl.IntervalStart == nil && nRil.IntervalStart != nil ||
+		rIl.IntervalStart != nil && nRil.IntervalStart == nil ||
+		rIl.cost == nil && nRil.cost != nil ||
+		rIl.cost != nil && nRil.cost == nil ||
+		len(rIl.Increments) != len(nRil.Increments) {
+		return
+	}
+	if rIl.IntervalStart != nRil.IntervalStart ||
+		rIl.CompressFactor != nRil.CompressFactor ||
+		rIl.cost != nRil.cost {
+		return
+	}
+	for i, rtIn := range rIl.Increments {
+		if !rtIn.Equals(nRil.Increments[i]) {
+			return
+		}
+	}
+	return true
 }
 
 type RateSIncrement struct {
@@ -316,6 +337,21 @@ func (rI *RateSIncrement) AsExtRateSIncrement() (eRi *ExtRateSIncrement, err err
 		}
 	}
 	return
+}
+
+// Equals returns the equality between twoExt RateSIncrement
+func (eRI *ExtRateSIncrement) Equals(extRI *ExtRateSIncrement) (eq bool) {
+	if eRI.Usage == nil && extRI.Usage != nil ||
+		eRI.Usage != nil && extRI.Usage == nil ||
+		eRI.IncrementStart == nil && extRI.IncrementStart != nil ||
+		eRI.IncrementStart != nil && extRI.IncrementStart == nil {
+		return
+	}
+	return eRI.Usage == extRI.Usage &&
+		eRI.IncrementStart == extRI.IncrementStart &&
+		eRI.CompressFactor == extRI.CompressFactor &&
+		eRI.IntervalRateIndex == extRI.IntervalRateIndex &&
+		eRI.Rate.uID == extRI.Rate.uID
 }
 
 // Equals compares two RateSIntervals

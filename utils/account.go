@@ -439,6 +439,21 @@ func (uF *UnitFactor) AsExtUnitFactor() (eUf *ExtUnitFactor, err error) {
 	return
 }
 
+// Equals compares two ExtUnitFactor
+func (eUf *ExtUnitFactor) Equals(extUf *ExtUnitFactor) (eq bool) {
+	if eUf.FilterIDs == nil && extUf.FilterIDs != nil ||
+		eUf.FilterIDs != nil && extUf.FilterIDs == nil ||
+		len(eUf.FilterIDs) != len(extUf.FilterIDs) {
+		return
+	}
+	for idx, val := range eUf.FilterIDs {
+		if val != extUf.FilterIDs[idx] {
+			return
+		}
+	}
+	return eUf.Factor == extUf.Factor
+}
+
 // Clone return a copy of the UnitFactor
 func (uF *UnitFactor) Clone() (untFct *UnitFactor) {
 	untFct = new(UnitFactor)
