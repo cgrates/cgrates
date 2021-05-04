@@ -208,7 +208,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "password",				// password to use when connecting to data_db
 	"opts":{
-		"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
+		"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 	},
 	"remote_conns":["Conn1"],
 	}
@@ -317,7 +317,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		"*destinations": {"replicate":false},
 	  }	,
 	"opts": {
-		"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
+		"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 	  }
 	},
 }`
@@ -366,7 +366,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"db_user": "cgrates", 					// username to use when connecting to data_db
 			"db_password": "password",				// password to use when connecting to data_db
 			"opts": {
-				"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
+				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 			},
 			"remote_conns":["Conn1"],
 			"items":{
@@ -424,7 +424,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			"db_user": "cgrates", 					// username to use when connecting to data_db
 			"db_password": "password",				// password to use when connecting to data_db
 			"opts": {
-				"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
+				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 			},
 			"remote_conns":["Conn1"],
 			"items":{
@@ -476,7 +476,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"db_user": "cgrates", 					
 		"db_password": "", 						
 		"opts": {
-			"redis_sentinel":"",					
+			"redisSentinel":"",					
 			"query_timeout":"10s",
 		},
 		"remote_conns":[],

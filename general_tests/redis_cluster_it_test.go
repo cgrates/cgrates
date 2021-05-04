@@ -49,8 +49,8 @@ import (
  *     	- configure the cluster with the following command:
  *         	`./redis-trib.rb create --replicas 1 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006`
  *
- * To run the tests you need to specify the `redis_cluster` flag and have the redis stoped:
- *    	`go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql -run=TestRedisCluster -redis_cluster  -v`
+ * To run the tests you need to specify the `redisCluster` flag and have the redis stoped:
+ *    	`go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql -run=TestRedisCluster -redisCluster  -v`
  *
  * The configuration of the cluster is the following:
  *		- node1 127.0.0.1:7001 master
@@ -66,12 +66,12 @@ var (
 	clsrConfig *config.CGRConfig
 	clsrRPC    *rpc.Client
 
-	clsrNodeCfgPath   = path.Join(*dataDir, "redis_cluster", "node%v.conf")
-	clsrEngineCfgPath = path.Join(*dataDir, "conf", "samples", "redis_cluster")
+	clsrNodeCfgPath   = path.Join(*dataDir, "redisCluster", "node%v.conf")
+	clsrEngineCfgPath = path.Join(*dataDir, "conf", "samples", "redisCluster")
 	clsrNodes         = make(map[string]*exec.Cmd)
 	clsrOutput        = make(map[string]*bytes.Buffer) // in order to debug if something is not working
 	clsrNoNodes       = 6                              // this is the minimum number of nodes for a cluster with 1 replica for each master
-	clsrRedisFlag     = flag.Bool("redis_cluster", false, "Run tests for redis cluster")
+	clsrRedisFlag     = flag.Bool("redisCluster", false, "Run tests for redis cluster")
 	clsrTests         = []func(t *testing.T){
 		testClsrPrepare,
 		testClsrStartNodes,

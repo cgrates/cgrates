@@ -54,12 +54,12 @@ var (
 	datadbUser     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().User, "The DataDb user to sign in as.")
 	datadbPass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().Password, "The DataDb user's password.")
 	dbdataEncoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
-	redisSentinel  = cgrTesterFlags.String("redis_sentinel", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]), "The name of redis sentinel")
-	dbRedisCluster = cgrTesterFlags.Bool("redis_cluster", false,
+	redisSentinel  = cgrTesterFlags.String("redisSentinel", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisSentinelNameCfg]), "The name of redis sentinel")
+	dbRedisCluster = cgrTesterFlags.Bool("redisCluster", false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrTesterFlags.String("redis_cluster_sync", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
+	dbRedisClusterSync = cgrTesterFlags.String("redisClusterSync", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterSyncCfg]),
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrTesterFlags.String("redis_cluster_ondown_delay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
+	dbRedisClusterDownDelay = cgrTesterFlags.String("redisClusterOndownDelay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
 	dbQueryTimeout = cgrTesterFlags.String("query_timeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
 		"The timeout for queries")
