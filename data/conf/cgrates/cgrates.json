@@ -93,9 +93,9 @@
 // 		"redisSentinel": "",					// the name of sentinel when used
 // 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 // 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
-// 		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-// 		"mongoQueryTimeout":"10s",
-// 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate certificate, redisClientKey and redisCACertificate for tls connection
+// 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+// 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
+// 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 // 		"redisClientCertificate":"",			// path to client certificate
 // 		"redisClientKey":"",					// path to client key
 // 		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
@@ -116,8 +116,8 @@
 // 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
 // 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 // 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-// 		"mongoQueryTimeout":"10s",
-// 		"sslMode":"disable",				// sslmode in case of *postgres
+// 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
+// 		"postgresSSLMode":"disable",		// postgresSSLMode in case of *postgres
 // 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 // 	},
 // 	"items":{
@@ -365,36 +365,36 @@
 // 				// FileXML
 // 				"xmlRootPath": "",								// path towards one event in case of XML CDRs
 
-
-// 				// "queueID": "cgrates_cdrs", 					// the queue id for AMQP, AMQPv1, SQS and S3 readers from were the events are read
-// 				// "queueIDProcessed": "", 						// the queue id for AMQP, AMQPv1, SQS and S3 readers were the events are sent after they are processed
+// 				// AMQP and AMQPv1
+// 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP and AMQPv1 readers from were the events are read
+// 				// "amqpQueueIDProcessed": "", 					// the queue id for AMQP and AMQPv1 readers were the events are sent after they are processed
 
 // 				// AMQP
-// 				// "consumerTag": "cgrates",					// the ID of the consumer
-// 				// "amqpExchange": "",
+// 				// "amqpConsumerTag": "cgrates",				// the ID of the consumer
+// 				// "amqpExchange": "",									
 // 				// "amqpExchangeType": "",
 // 				// "amqpRoutingKey": "",
 
-// 				// "exchangeProcessed": "",									
-// 				// "exchangeTypeProcessed": "",
-// 				// "routingKeyProcessed": "",
+// 				// "amqpExchangeProcessed": "",									
+// 				// "amqpExchangeTypeProcessed": "",
+// 				// "amqpRoutingKeyProcessed": "",
+
 
 // 				// Kafka
-// 				// "kafkaTopic": "cgrates",							// the topic from were the events are read
-// 				// "groupID": "cgrates",						// the group that reads the events
-// 				// "maxWait": "1ms",							// the maximum amount of time to wait for new data to come
+// 				// "kafkaTopic": "cgrates",						// the topic from were the events are read
+// 				// "kafkaGroupID": "cgrates",					// the group that reads the events
+// 				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
 
-// 				// "topicProcessed": "",						// the topic were the events are sent after they are processed
-
+// 				// "kafkaTopicProcessed": "",					// the topic were the events are sent after they are processed
 
 // 				// SQL
 // 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
-// 				// "sqlTableName": "cdrs",							// the name of the table from were the events are read
-// 				// "sslmode": "disable",						// the ssl mode for postgres db
+// 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
+// 				// "postgresSSLMode": "disable",				// the ssl mode for postgres db
 
-// 				// "sqlDBNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+// 				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
 // 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-// 				// "sslmodeProcessed": "",						// the ssl mode for postgres db
+// 				// "postgresSSLModeProcessed": "",				// the ssl mode for postgres db
 
 // 				// SQS and S3
 // 				// "awsRegion": "",
@@ -406,8 +406,17 @@
 // 				// "awsKeyProcessed": "",
 // 				// "awsSecretProcessed": "",
 // 				// "awsTokenProcessed": "",
+
+// 				// SQS
+// 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS readers from were the events are read
+
+// 				// "sqsQueueIDProcessed": "", 					// the queue id for SQS readers were the events are sent after they are processed
+
+// 				// S3
+// 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from were the events are read
 // 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
+// 				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
 // 			},
 // 			"tenant": "",										// tenant used by import
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -443,7 +452,57 @@
 // 			"id": "*default",									// identifier of the EventReader profile
 // 			"type": "*none",									// exporter type 
 // 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
-// 			"opts": {},											// extra options for exporter
+// 			"opts": {
+
+// 				// CSV
+// 				// "csvFieldSeparator": ",",					// separator used when reading the fields
+
+				
+// 				// Elasticsearch options
+// 				// "elsIndex": "",								// ElsIndex               	
+// 				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
+//  				// "elsIfSeqNo": 0,								// ElsIfSeqNo
+// 				// "elsOpType": "",								// ElsOpType
+// 				// "elsPipeline": "",							// ElsPipeline
+// 				// "elsRouting": "",							// ElsRouting
+// 				// "elsTimeout": "",							// ElsTimeout
+// 				// "elsVersion": 0,								// ElsVersionLow
+// 				// "elsVersionType": "",						// ElsVersionType
+// 				// "elsWaitForActiveShards": "",				// ElsWaitForActiveShards
+				
+				
+// 				// SQL
+// 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
+// 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
+// 				// "sqlMaxConnLifetime": 0,						// SQLMaxConnLifetime 
+
+
+// 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
+// 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
+// 				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
+				
+				
+// 				// Kafka
+// 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
+				
+				
+// 				// AMQP
+// 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
+// 				// "amqpRoutingKey": "",						// RoutingKey
+// 				// "sqlExchange": "",							// Exchange
+// 				// "sqlExchangeType": "",						// ExchangeType
+				
+
+// 				// SQS and S3
+// 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
+// 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
+// 				// "awsRegion": "",								// AWSRegion  
+// 				// "awsKey": "",								// AWSKey        
+// 				// "awsSecret": "",								// AWSSecret
+// 				// "awsToken": "",								// AWSToken      
+// 				// "s3FolderPath": "",							// AWSFolderPath 
+
+// 			},													// extra options for exporter
 // 			"tenant": "",										// tenant used in filterS.Pass
 // 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 			"filters": [],										// limit parsing based on the filters
@@ -898,9 +957,9 @@
 // 	"out_stordb_password": "",
 // 	"users_filters":[],
 // 	"out_datadb_opts":{
-// 		"redisSentinel": "",
-// 		"redisCluster": false,
-// 		"redisClusterSync": "5s",
+// 		"redisSentinel": "",					
+// 		"redisCluster": false,					
+// 		"redisClusterSync": "5s",					
 // 		"redisClusterOndownDelay": "0",
 // 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
 // 		"redisClientCertificate":"",		// path to client certificate
