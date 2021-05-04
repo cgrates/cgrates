@@ -514,7 +514,7 @@ func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-	match := fltr.rsrFilters.Pass(fld, true)
+	match := fltr.rsrFilters.Pass(fld, false)
 	return match, nil
 }
 

@@ -1086,3 +1086,24 @@ func TestAPIBan(t *testing.T) {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
 }
+
+func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"23": "sip:11561561561561568@dan",
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	flts := NewFilterS(cfg, nil, dm)
+	if passes, err := flts.Pass(context.Background(), "cgrate.org", []string{"*rsr:~*req.23:dan|1001"}, ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+	if passes, err := flts.Pass(context.Background(), "cgrate.org", []string{"*rsr:~*req.23:dan"}, ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+}
