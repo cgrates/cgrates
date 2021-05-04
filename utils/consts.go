@@ -2549,8 +2549,8 @@ const (
 	SQLDefaultDBName  = "cgrates"
 	SQLDefaultSSLMode = "disable"
 
-	SQLDBName    = "sqlDBName"
-	SQLTableName = "sqlTableName"
+	SQLDBNameOpt    = "sqlDBName"
+	SQLTableNameOpt = "sqlTableName"
 
 	// fileCSV
 	RowLengthOpt        = "RowLength"
@@ -2566,6 +2566,8 @@ const (
 	FlatstorePrfx            = "fst"
 	FstFailedCallsPrefixOpt  = "fstFailedCallsPrefix"
 	FstPartialRecordCacheOpt = "fstRecordCacheTTL"
+	FstMethodOpt             = "fstMethod" //
+	FstMadatoryACKOpt        = "fstMadatoryACK"
 
 	// fileXML
 	XMLRootPathOpt = "xmlRootPath"

@@ -38,6 +38,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type fstRecord struct {
+	inv      []string
+	bye      []string
+	ack      []string
+	fileName string
+}
+
 func NewFlatstoreER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {

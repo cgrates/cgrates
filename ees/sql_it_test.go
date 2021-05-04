@@ -300,8 +300,8 @@ func TestOpenDB3Err(t *testing.T) {
 
 func TestSQLExportEvent1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "cgrates"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	cgrEv := new(utils.CGREvent)
 	newIDb := engine.NewInternalDB(nil, nil, true)
@@ -343,8 +343,8 @@ func TestSQLExportEvent1(t *testing.T) {
 
 func TestSQLExportEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "cgrates"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	cgrEv := new(utils.CGREvent)
 	newIDb := engine.NewInternalDB(nil, nil, true)
@@ -386,8 +386,8 @@ func TestSQLExportEvent2(t *testing.T) {
 
 func TestSQLExportEvent3(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "cgrates"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	cgrEv := new(utils.CGREvent)
 	newIDb := engine.NewInternalDB(nil, nil, true)
@@ -429,8 +429,8 @@ func TestSQLExportEvent3(t *testing.T) {
 
 func TestSQLExportEvent4(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableName] = "expTable"
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBName] = "cgrates"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLTableNameOpt] = "expTable"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLDBNameOpt] = "cgrates"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	cgrEv := new(utils.CGREvent)
 	newIDb := engine.NewInternalDB(nil, nil, true)
