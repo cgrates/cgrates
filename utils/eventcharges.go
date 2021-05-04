@@ -94,8 +94,15 @@ func (ec *EventCharges) appendChargeEntry(cIls ...*ChargeEntry) {
 	}
 }
 
+// Equals return the equality between two ChargeEntry ignoring CompressFactor
 func (cE *ChargeEntry) CompressEquals(chEn *ChargeEntry) bool {
 	return cE.ChargingID == chEn.ChargingID
+}
+
+// Equals return the equality between two ChargeEntry
+func (cE *ChargeEntry) Equals(chEn *ChargeEntry) (eq bool) {
+	return cE.ChargingID == chEn.ChargingID &&
+		cE.CompressFactor == chEn.CompressFactor
 }
 
 // SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
@@ -209,6 +216,69 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 		}
 	}
 	return
+}
+
+// Equals returns the equality between two EventChargers
+func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
+	if eC.Abstracts == nil && evCh.Abstracts != nil ||
+		eC.Abstracts != nil && evCh.Abstracts == nil ||
+		eC.Concretes == nil && evCh.Concretes != nil ||
+		eC.Concretes != nil && evCh.Concretes == nil ||
+		eC.Abstracts.Compare(evCh.Abstracts) != 0 ||
+		eC.Concretes.Compare(evCh.Concretes) != 0 {
+		return
+	}
+	if eC.Charges == nil && evCh.Charges != nil ||
+		eC.Charges != nil && evCh.Charges == nil ||
+		len(eC.Charges) != len(evCh.Charges) {
+		return
+	}
+	for idx, val := range eC.Charges {
+		if ok := val.Equals(evCh.Charges[idx]); !ok {
+			return
+		}
+	}
+	if eC.Accounting == nil && evCh.Accounting != nil ||
+		eC.Accounting != nil && evCh.Accounting == nil ||
+		len(eC.Accounting) != len(evCh.Accounting) {
+		return
+	}
+	for key, val := range eC.Accounting {
+		if ok := val.Equals(evCh.Accounting[key]); !ok {
+			return
+		}
+	}
+	if eC.UnitFactors == nil && evCh.UnitFactors != nil ||
+		eC.UnitFactors != nil && evCh.UnitFactors == nil ||
+		len(eC.UnitFactors) != len(evCh.UnitFactors) {
+		return
+	}
+	for key, val := range eC.UnitFactors {
+		if ok := val.Equals(evCh.UnitFactors[key]); !ok {
+			return
+		}
+	}
+	if eC.Rating == nil && evCh.Rating != nil ||
+		eC.Rating != nil && evCh.Rating == nil ||
+		len(eC.Rating) != len(evCh.Rating) {
+		return
+	}
+	for key, val := range eC.Rating {
+		if ok := val.Equals(evCh.Rating[key]); !ok {
+			return
+		}
+	}
+	if eC.Accounts == nil && evCh.Accounts != nil ||
+		eC.Accounts != nil && evCh.Accounts == nil ||
+		len(eC.Accounts) != len(evCh.Accounts) {
+		return
+	}
+	for key, val := range eC.Accounts {
+		if ok := val.Equals(evCh.Accounts[key]); !ok {
+			return
+		}
+	}
+	return true
 }
 
 // unitFactorID returns the ID of the matching UnitFactor within ec.UnitFactors

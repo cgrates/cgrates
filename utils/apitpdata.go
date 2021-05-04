@@ -599,6 +599,17 @@ func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
 		(ai.ExpiryTime.IsZero() || ai.ExpiryTime.After(atTime))
 }
 
+func (aI *ActivationInterval) Equals(actInt *ActivationInterval) (eq bool) {
+	if aI.ActivationTime.IsZero() && !actInt.ActivationTime.IsZero() ||
+		!aI.ActivationTime.IsZero() && actInt.ActivationTime.IsZero() ||
+		aI.ExpiryTime.IsZero() && !actInt.ExpiryTime.IsZero() ||
+		!aI.ExpiryTime.IsZero() && actInt.ExpiryTime.IsZero() {
+		return
+	}
+	return aI.ActivationTime.Equal(actInt.ActivationTime) &&
+		aI.ExpiryTime.Equal(actInt.ExpiryTime)
+}
+
 // Attributes to send on SessionDisconnect by SMG
 type AttrDisconnectSession struct {
 	EventStart map[string]interface{}

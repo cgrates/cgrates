@@ -337,6 +337,7 @@ func (rIl *RateSInterval) Equals(nRil *RateSInterval) (eq bool) {
 	return true
 }
 
+// Equals returns the equality between two RateSIncrement
 func (rI *RateSIncrement) Equals(rtIn *RateSIncrement) (eq bool) {
 	if rI.Usage == nil && rtIn.Usage != nil ||
 		rI.Usage != nil && rtIn.Usage == nil ||

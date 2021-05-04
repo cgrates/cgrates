@@ -66,6 +66,20 @@ func (dW DynamicWeight) String(dWSep, fltrsep string) (out string) {
 	return strings.Join(dW.FilterIDs, fltrsep) + dWSep + strconv.FormatFloat(dW.Weight, 'f', -1, 64)
 }
 
+func (dW *DynamicWeight) Equals(dnWg *DynamicWeight) (eq bool) {
+	if dW.FilterIDs == nil && dnWg.FilterIDs != nil ||
+		dW.FilterIDs != nil && dnWg.FilterIDs == nil ||
+		len(dW.FilterIDs) != len(dnWg.FilterIDs) {
+		return
+	}
+	for i := range dW.FilterIDs {
+		if dW.FilterIDs[i] != dnWg.FilterIDs[i] {
+			return
+		}
+	}
+	return dW.Weight == dnWg.Weight
+}
+
 // DynamicWeight returns Weight based on Filters
 type DynamicWeight struct {
 	FilterIDs []string
