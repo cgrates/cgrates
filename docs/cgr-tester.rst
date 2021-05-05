@@ -49,7 +49,7 @@ Command line stress testing tool configurable via command line arguments.
     	The sync interval for the redis cluster
   -cluster_ondown_delay string
     	The delay before executing the commands if thredis cluster is in the CLUSTERDOWN state
-  -query_timeout string
+  -mongoQueryTimeout string
     	The timeout for queries
   -req_separator string
     	separator for requests in file (default "\n\n")

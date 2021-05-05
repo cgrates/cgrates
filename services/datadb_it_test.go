@@ -88,7 +88,7 @@ func TestDataDBReload(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,
@@ -255,7 +255,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,
@@ -378,7 +378,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,
@@ -596,7 +596,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,
@@ -756,7 +756,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,
@@ -846,7 +846,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 				Remote:    false},
 		},
 	}
-	cfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = true
+	cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = true
 	db.dm = nil
 	err = db.Reload()
 	if err == nil || err.Error() != "cannot convert field: true to time.Duration" {
@@ -898,7 +898,7 @@ func TestDataDBReloadError(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,

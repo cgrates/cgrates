@@ -67,7 +67,7 @@ Customisable through the use of :ref:`JSON configuration <configuration>` or com
     	The sync interval for the redis cluster
   -cluster_ondown_delay string
     	The delay before executing the commands if thredis cluster is in the CLUSTERDOWN state
-  -query_timeout string
+  -mongoQueryTimeout string
     	The timeout for queries
   -stordb_host string
     	the StorDB host (default "127.0.0.1")

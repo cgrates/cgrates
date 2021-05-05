@@ -59,7 +59,7 @@ func TestLoadConfig(t *testing.T) {
 		Password: "toor",
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "sentinel1",
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterCfg:            false,
@@ -88,12 +88,12 @@ func TestLoadConfig(t *testing.T) {
 		StringIndexedFields: []string{},
 		PrefixIndexedFields: []string{},
 		Opts: map[string]interface{}{
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.QueryTimeoutCfg:    "10s",
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.SSLModeCfg:         "disable",
-			utils.MysqlLocation:      "Local",
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SSLModeCfg:            "disable",
+			utils.MysqlLocation:         "Local",
 		},
 	}
 	// Loader

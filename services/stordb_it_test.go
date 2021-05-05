@@ -421,7 +421,7 @@ func TestStorDBReloadCanCastError(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.Mongo
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.cfg.StorDbCfg().Opts = map[string]interface{}{
-		utils.QueryTimeoutCfg: false,
+		utils.MongoQueryTimeoutCfg: false,
 	}
 	stordb.db = &engine.MongoStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
@@ -445,7 +445,7 @@ func TestStorDBReloadIfaceAsTIntMaxOpenConnsCfgError(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.MySQL
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.cfg.StorDbCfg().Opts = map[string]interface{}{
-		utils.MaxOpenConnsCfg: false,
+		utils.SQLMaxOpenConnsCfg: false,
 	}
 	stordb.db = &engine.SQLStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
@@ -470,9 +470,9 @@ func TestStorDBReloadIfaceAsTIntConnMaxLifetimeCfgError(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.MySQL
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.cfg.StorDbCfg().Opts = map[string]interface{}{
-		utils.MaxOpenConnsCfg:    1,
-		utils.MaxIdleConnsCfg:    1,
-		utils.ConnMaxLifetimeCfg: false,
+		utils.SQLMaxOpenConnsCfg:    1,
+		utils.SQLMaxIdleConnsCfg:    1,
+		utils.SQLConnMaxLifetimeCfg: false,
 	}
 	stordb.db = &engine.SQLStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()
@@ -497,9 +497,9 @@ func TestStorDBReloadIfaceAsTIntMaxIdleConnsCfgError(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.MySQL
 	stordb := NewStorDBService(cfg, srvDep)
 	stordb.cfg.StorDbCfg().Opts = map[string]interface{}{
-		utils.MaxOpenConnsCfg:    1,
-		utils.MaxIdleConnsCfg:    false,
-		utils.ConnMaxLifetimeCfg: 1,
+		utils.SQLMaxOpenConnsCfg:    1,
+		utils.SQLMaxIdleConnsCfg:    false,
+		utils.SQLConnMaxLifetimeCfg: 1,
 	}
 	stordb.db = &engine.SQLStorage{}
 	stordb.oldDBCfg = cfg.StorDbCfg().Clone()

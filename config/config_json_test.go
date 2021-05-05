@@ -348,7 +348,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_cache:    utils.StringPointer(""),
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg:       "",
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterCfg:            false,
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
@@ -482,12 +482,12 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{},
 		Prefix_indexed_fields: &[]string{},
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:    "10s",
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.SSLModeCfg:         utils.PostgressSSLModeDisable,
-			utils.MysqlLocation:      "Local",
+			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.SSLModeCfg:            utils.PostgressSSLModeDisable,
+			utils.MysqlLocation:         "Local",
 		},
 		Items: &map[string]*ItemOptJson{
 			utils.CacheTBLTPTimings: {
