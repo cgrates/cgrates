@@ -1220,7 +1220,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 	}
 	t, err = dm.dataDB.GetTimingDrv(id)
 	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; err == utils.ErrNotFound && itm.Remote {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.CacheTimings]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetTiming,
 				&utils.StringWithAPIOpts{
 					Arg:    id,
@@ -1261,7 +1261,7 @@ func (dm *DataManager) SetTiming(ctx *context.Context, t *utils.TPTiming) (err e
 	if err = dm.CacheDataFromDB(ctx, utils.TimingsPrefix, []string{t.ID}, true); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.CacheTimings]; itm.Replicate {
 		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.TimingsPrefix, t.ID, // this are used to get the host IDs from cache
@@ -1285,7 +1285,7 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 		cacheCommit(transactionID), transactionID); errCh != nil {
 		return errCh
 	}
-	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
+	if config.CgrConfig().DataDbCfg().Items[utils.CacheTimings].Replicate {
 		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.TimingsPrefix, id, // this are used to get the host IDs from cache

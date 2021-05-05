@@ -124,7 +124,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateDestinations()
 		case utils.MetaReverseDestinations:
 			err = m.migrateReverseDestinations()
-		case utils.MetaTimings:
+		case utils.CacheTimings:
 			err = m.migrateTimings()
 		case utils.MetaResources:
 			err = m.migrateResources()
@@ -182,7 +182,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("ERROR: ", utils.MetaReverseDestinations, " ", err)
 			}
 			if err := m.migrateTimings(); err != nil {
-				log.Print("ERROR: ", utils.MetaTimings, " ", err)
+				log.Print("ERROR: ", utils.CacheTimings, " ", err)
 			}
 			if err := m.migrateFilters(); err != nil {
 				log.Print("ERROR: ", utils.MetaFilters, " ", err)

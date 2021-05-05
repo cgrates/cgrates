@@ -222,19 +222,19 @@ func (fltr *Filter) Compile() (err error) {
 
 var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
+	utils.MetaCronExp, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
+	utils.MetaCronExp, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
 	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
-	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
+	utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
 	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval})
@@ -341,8 +341,8 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 		result, err = fltr.passStringPrefix(dDP)
 	case utils.MetaSuffix, utils.MetaNotSuffix:
 		result, err = fltr.passStringSuffix(dDP)
-	case utils.MetaTimings, utils.MetaNotTimings:
-		result, err = fltr.passTimings(dDP)
+	case utils.MetaCronExp, utils.MetaNotCronExp:
+		result, err = fltr.passCronExp(ctx, dDP)
 	case utils.MetaDestinations, utils.MetaNotDestinations:
 		result, err = fltr.passDestinations(ctx, dDP)
 	case utils.MetaRSR, utils.MetaNotRSR:
@@ -472,8 +472,31 @@ func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
 
-// ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
+func (fltr *FilterRule) passCronExp(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
+	// 	tm, err := fltr.rsrElement.ParseDataProvider(dDP)
+	// 	if err != nil {
+	// 		if err == utils.ErrNotFound {
+	// 			return false, nil
+	// 		}
+	// 		return false, err
+	// 	}
+	// 	tmTime, err := utils.IfaceAsTime(tm, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	// 	if err != nil {
+	// 		return false, err
+	// 	}
+
+	// 	for _, valCronIDVal := range fltr.rsrValues {
+	// 		valTmID, err := valCronIDVal.ParseDataProvider(dDP)
+	// 		if err != nil {
+	// 			return false, err
+	// 		}
+
+	// 		if err = connMgr.Call(ctx, config.CgrConfig().FilterSCfg().AdminSConns, utils.APIerSv1GetTPTiming, ,); err != nil {
+	// 			continue
+	// 		}
+
+	// 	}
+	// 	return false, nil
 	return false, utils.ErrNotImplemented
 }
 

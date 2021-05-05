@@ -353,7 +353,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},

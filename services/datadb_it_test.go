@@ -113,7 +113,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {
@@ -265,7 +265,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {
@@ -376,7 +376,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {
@@ -576,7 +576,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {
@@ -721,7 +721,7 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {
@@ -851,7 +851,7 @@ func TestDataDBReloadError(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {

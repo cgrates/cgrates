@@ -247,17 +247,6 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	// rf, err = NewFilterRule(utils.MetaTimings, "~MetaTimings", []string{""})
-	// if err != nil {
-	// 	t.Errorf("Error: %+v", err)
-	// }
-	// erf = &FilterRule{Type: utils.MetaTimings, Element: "~MetaTimings", Values: []string{""}, negative: utils.BoolPointer(false)}
-	// if err = erf.CompileValues(); err != nil {
-	// 	t.Fatal(err)
-	// }
-	// if !reflect.DeepEqual(erf, rf) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", erf, rf)
-	// }
 	rf, err = NewFilterRule(utils.MetaDestinations, "~MetaDestinations", []string{"1001"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1107,3 +1096,21 @@ func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
 		t.Error("Not passing")
 	}
 }
+
+// func TestFilterPassCronExp(t *testing.T) {
+// 	ev := utils.MapStorage{
+// 		utils.MetaReq: utils.MapStorage{
+// 			utils.AnswerTime: "2018-01-07T17:00:10Z",
+// 		},
+// 	}
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+// 	fltr := NewFilterS(cfg, nil, dm)
+
+// 	if passes, err := fltr.Pass(context.Background(), "cgrates.org", []string{"*cronexp:~*req.AnswerTime:* 10-12 * * *"}, ev); err != nil {
+// 		t.Error(err)
+// 	} else if !passes {
+// 		t.Error("Not passing")
+// 	}
+// }
