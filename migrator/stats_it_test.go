@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -392,7 +393,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 
 	//from V1 to V2
 	var filter *engine.Filter
-	if filter, err = stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
+	if filter, err = stsMigrator.dmOut.DataManager().GetFilter(context.Background(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(config.CgrConfig().GeneralCfg().DefaultTenant, filter.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", config.CgrConfig().GeneralCfg().DefaultTenant, filter.Tenant)
