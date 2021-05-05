@@ -550,107 +550,126 @@ func Sum(items ...interface{}) (sum interface{}, err error) {
 
 	switch dt := items[0].(type) {
 	case time.Duration:
-		sum = dt
+		s := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsDuration(item); err != nil {
 				return nil, err
 			} else {
-				sum = sum.(time.Duration) + itmVal
+				s += itmVal
 			}
 		}
+		sum = s
 	case time.Time:
-		sum = dt
+		s := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsDuration(item); err != nil {
 				return nil, err
 			} else {
-				sum = sum.(time.Time).Add(itmVal)
+				s = s.Add(itmVal)
 			}
 		}
+		sum = s
 	case float64:
-		sum = dt
+		s := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsFloat64(item); err != nil {
 				return nil, err
 			} else {
-				sum = sum.(float64) + itmVal
+				s += itmVal
 			}
 		}
+		sum = s
 	case int64:
-		sum = dt
+		s := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				sum = sum.(int64) + itmVal
+				s += itmVal
 			}
 		}
+		sum = s
 	case int:
-		sum = int64(dt)
+		s := int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				sum = sum.(int64) + itmVal
+				s += itmVal
 			}
 		}
+		sum = s
 	}
 	return
 }
 
 // Difference attempts to sum multiple items
 // returns the result or error if not comparable
-func Difference(items ...interface{}) (diff interface{}, err error) {
+func Difference(tm string, items ...interface{}) (diff interface{}, err error) {
 	//we need at least 2 items to diff them
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
 	}
 	switch dt := items[0].(type) {
 	case time.Duration:
-		diff = dt
+		d := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsDuration(item); err != nil {
 				return nil, err
 			} else {
-				diff = diff.(time.Duration) - itmVal
+				d -= itmVal
 			}
 		}
+		diff = d
 	case time.Time:
-		diff = dt
-		for _, item := range items[1:] {
+		d := dt
+		for i, item := range items[1:] {
+			if itmVal, err := IfaceAsTime(item, tm); err == nil {
+				diff = d.Sub(itmVal)
+				if len(items) == i+1 {
+					return diff, nil
+				}
+				items[i] = diff
+				return Difference(tm, items[i:]...)
+			}
+
 			if itmVal, err := IfaceAsDuration(item); err != nil {
 				return nil, err
 			} else {
-				diff = diff.(time.Time).Add(-itmVal)
+				d = d.Add(-itmVal)
 			}
 		}
+		diff = d
 	case float64:
-		diff = dt
+		d := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsFloat64(item); err != nil {
 				return nil, err
 			} else {
-				diff = diff.(float64) - itmVal
+				d -= itmVal
 			}
 		}
+		diff = d
 	case int64:
-		diff = dt
+		d := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				diff = diff.(int64) - itmVal
+				d -= itmVal
 			}
 		}
+		diff = d
 	case int:
-		diff = int64(dt)
+		d := int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				diff = diff.(int64) - itmVal
+				d -= itmVal
 			}
 		}
+		diff = d
 	default: // unsupported comparison
 		return nil, fmt.Errorf("unsupported type")
 	}
@@ -666,32 +685,35 @@ func Multiply(items ...interface{}) (mlt interface{}, err error) {
 	}
 	switch dt := items[0].(type) {
 	case float64:
-		mlt = dt
+		m := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsFloat64(item); err != nil {
 				return nil, err
 			} else {
-				mlt = mlt.(float64) * itmVal
+				m *= itmVal
 			}
 		}
+		mlt = m
 	case int64:
-		mlt = dt
+		m := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				mlt = mlt.(int64) * itmVal
+				m *= itmVal
 			}
 		}
+		mlt = m
 	case int:
-		mlt = int64(dt)
+		m := int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				mlt = mlt.(int64) * itmVal
+				m *= itmVal
 			}
 		}
+		mlt = m
 	default: // unsupported comparison
 		return nil, fmt.Errorf("unsupported type")
 	}
@@ -700,39 +722,42 @@ func Multiply(items ...interface{}) (mlt interface{}, err error) {
 
 // Divide attempts to divide multiple items
 // returns the result or error if not comparable
-func Divide(items ...interface{}) (mlt interface{}, err error) {
+func Divide(items ...interface{}) (div interface{}, err error) {
 	//we need at least 2 items to diff them
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
 	}
 	switch dt := items[0].(type) {
 	case float64:
-		mlt = dt
+		d := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsFloat64(item); err != nil {
 				return nil, err
 			} else {
-				mlt = mlt.(float64) / itmVal
+				d /= itmVal
 			}
 		}
+		div = d
 	case int64:
-		mlt = dt
+		d := dt
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				mlt = mlt.(int64) / itmVal
+				d /= itmVal
 			}
 		}
+		div = d
 	case int:
-		mlt = int64(dt)
+		d := int64(dt)
 		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsInt64(item); err != nil {
 				return nil, err
 			} else {
-				mlt = mlt.(int64) / itmVal
+				d /= itmVal
 			}
 		}
+		div = d
 	default: // unsupported comparison
 		return nil, fmt.Errorf("unsupported type")
 	}

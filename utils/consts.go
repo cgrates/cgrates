@@ -2657,6 +2657,17 @@ var (
 	}
 )
 
+// StringTmplType a string set used, by agentRequest and eventRequest to determine if the returned template type is string
+var StringTmplType = StringSet{
+	MetaConstant:        struct{}{},
+	MetaRemoteHost:      struct{}{},
+	MetaVariable:        struct{}{},
+	MetaComposed:        struct{}{},
+	MetaUsageDifference: struct{}{},
+	MetaPrefix:          struct{}{},
+	MetaSuffix:          struct{}{},
+}
+
 // Time duration suffix
 const (
 	NsSuffix = "ns"
