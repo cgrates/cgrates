@@ -573,49 +573,49 @@ func TestGetUniformType(t *testing.T) {
 }
 
 func TestDifference(t *testing.T) {
-	if _, err := Difference(10); err == nil || err != ErrNotEnoughParameters {
+	if _, err := Difference("", 10); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
 	}
-	if _, err := Difference(10, 1.2, false); err == nil || err.Error() != "cannot convert field: 1.2 to int" {
+	if _, err := Difference("", 10, 1.2, false); err == nil || err.Error() != "cannot convert field: 1.2 to int" {
 		t.Error(err)
 	}
-	if diff, err := Difference(12, 1, 2, 3); err != nil {
+	if diff, err := Difference("", 12, 1, 2, 3); err != nil {
 		t.Error(err)
 	} else if diff != int64(6) {
 		t.Errorf("Expecting: 6, received: %+v", diff)
 	}
-	if diff, err := Difference(8.0, 4.0, 2.0, -1.0); err != nil {
+	if diff, err := Difference("", 8.0, 4.0, 2.0, -1.0); err != nil {
 		t.Error(err)
 	} else if diff != 3.0 {
 		t.Errorf("Expecting: 3.0, received: %+v", diff)
 	}
 
-	if diff, err := Difference(8.0, 4, 2.0, -1.0); err != nil {
+	if diff, err := Difference("", 8.0, 4, 2.0, -1.0); err != nil {
 		t.Error(err)
 	} else if diff != 3.0 {
 		t.Errorf("Expecting: 3.0, received: %+v", diff)
 	}
-	if diff, err := Difference(10*time.Second, time.Second, 2*time.Second,
+	if diff, err := Difference("", 10*time.Second, time.Second, 2*time.Second,
 		4*time.Millisecond); err != nil {
 		t.Error(err)
 	} else if diff != 6*time.Second+996*time.Millisecond {
 		t.Errorf("Expecting: 6.996ms, received: %+v", diff)
 	}
-	if diff, err := Difference(2*time.Second,
+	if diff, err := Difference("", 2*time.Second,
 		10*time.Millisecond); err != nil {
 		t.Error(err)
 	} else if diff != time.Second+990*time.Millisecond {
 		t.Errorf("Expecting: 1.99s, received: %+v", diff)
 	}
 
-	if diff, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
+	if diff, err := Difference("", time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
 		10*time.Second); err != nil {
 		t.Error(err)
 	} else if diff != time.Date(2009, 11, 10, 22, 59, 50, 0, time.UTC) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Date(2009, 11, 10, 22, 59, 50, 0, time.UTC), diff)
 	}
 
-	if diff, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
+	if diff, err := Difference("", time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
 		10*time.Second, 10000000000); err != nil {
 		t.Error(err)
 	} else if diff != time.Date(2009, 11, 10, 22, 59, 40, 0, time.UTC) {
@@ -1405,7 +1405,7 @@ func TestReflectDifferenceTimeDurationError(t *testing.T) {
 	var test2Var bool
 	testVar = 25354
 	test2Var = true
-	_, err := Difference(testVar, test2Var)
+	_, err := Difference("", testVar, test2Var)
 	if err == nil || err.Error() != "cannot convert field: true to time.Duration" {
 		t.Errorf("Expected <cannot convert field: true to time.Duration> ,received: <%+v>", err)
 	}
@@ -1416,7 +1416,7 @@ func TestReflectDifferenceFloat64Error(t *testing.T) {
 	var test2Var bool
 	testVar = 2.5
 	test2Var = true
-	_, err := Difference(testVar, test2Var)
+	_, err := Difference("", testVar, test2Var)
 	if err == nil || err.Error() != "cannot convert field: true to float64" {
 		t.Errorf("Expected <cannot convert field: true to float64> ,received: <%+v>", err)
 	}
@@ -1429,7 +1429,7 @@ func TestReflectDifferenceInt64Error(t *testing.T) {
 	testVar = 6
 	test2Var = 5
 	expected = 1
-	dif, _ := Difference(testVar, test2Var)
+	dif, _ := Difference("", testVar, test2Var)
 	if !reflect.DeepEqual(dif, expected) {
 		t.Errorf("Expected <%+v> ,received: <%+v>", expected, dif)
 	}
@@ -1440,7 +1440,7 @@ func TestReflectDifferenceDefault(t *testing.T) {
 	var test2Var bool
 	testVar = true
 	test2Var = true
-	_, err := Difference(testVar, test2Var)
+	_, err := Difference("", testVar, test2Var)
 	if err == nil || err.Error() != "unsupported type" {
 		t.Errorf("Expected <unsupported type> ,received: <%+v>", err)
 	}
@@ -1615,14 +1615,14 @@ func TestSumTimeTime(t *testing.T) {
 }
 
 func TestDifferenceTimeTimeError(t *testing.T) {
-	_, err := Difference(time.Now(), "cat")
+	_, err := Difference("", time.Now(), "cat")
 	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
 		t.Errorf("Expected <time: invalid duration \"cat\"> ,received: <%+v>", err)
 	}
 }
 
 func TestDifferenceInt64Error(t *testing.T) {
-	_, err := Difference(int64(2), "cat")
+	_, err := Difference("", int64(2), "cat")
 	if err == nil || err.Error() != "strconv.ParseInt: parsing \"cat\": invalid syntax" {
 		t.Errorf("Expected <strconv.ParseInt: parsing \"cat\": invalid syntax> ,received: <%+v>", err)
 	}
