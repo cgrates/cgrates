@@ -175,7 +175,11 @@ func testFlatstoreITHandleCdr1File(t *testing.T) {
 	// check the files to be processed
 	filesInDir, _ := os.ReadDir("/tmp/flatstoreErs/in")
 	if len(filesInDir) != 0 {
-		t.Errorf("Files in ersInDir: %+v", filesInDir)
+		fls := make([]string, len(filesInDir))
+		for i, fs := range filesInDir {
+			fls[i] = fs.Name()
+		}
+		t.Errorf("Files in ersInDir: %+v", fls)
 	}
 	filesOutDir, _ := os.ReadDir("/tmp/flatstoreErs/out")
 	if len(filesOutDir) != 5 {
@@ -216,6 +220,7 @@ func testFlatstoreITKillEngine(t *testing.T) {
 func TestFlatstoreProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	cfg.ERsCfg().Readers[0].Opts[utils.FstFailedCallsPrefixOpt] = "file"
 	fltrs := &engine.FilterS{}
 	filePath := "/tmp/TestFlatstoreProcessEvent/"
 	fname := "file1.csv"
@@ -226,7 +231,7 @@ func TestFlatstoreProcessEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	file.Write([]byte(",a,ToR,b,c,d,e,f,g,h,i,j,k,l"))
+	file.Write([]byte("INVITE,a,ToR,b,c,d,e,f,g,h,i,j,k,l"))
 	file.Close()
 	eR := &FlatstoreER{
 		cgrCfg:    cfg,
@@ -238,6 +243,7 @@ func TestFlatstoreProcessEvent(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
+	eR.cache = ltcache.NewCache(-1, 0, false, eR.dumpToFile)
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
@@ -251,7 +257,7 @@ func TestFlatstoreProcessEvent(t *testing.T) {
 			utils.Subject:      "h",
 			utils.Tenant:       "e",
 			utils.ToR:          "ToR",
-			utils.Usage:        "0",
+			utils.Usage:        "l",
 		},
 		APIOpts: map[string]interface{}{},
 	}
@@ -278,6 +284,15 @@ func TestFlatstoreProcessEvent(t *testing.T) {
 func TestFlatstoreProcessEvent2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	cfg.ERsCfg().Readers[0].Fields = append(cfg.ERsCfg().Readers[0].Fields, &config.FCTemplate{
+		Tag:   "Usage",
+		Path:  "*cgreq.Usage",
+		Type:  utils.MetaUsageDifference,
+		Value: config.NewRSRParsersMustCompile("~*bye.6;~*invite.6", utils.InfieldSep),
+	})
+	for _, v := range cfg.ERsCfg().Readers[0].Fields {
+		v.ComputePath()
+	}
 	fltrs := &engine.FilterS{}
 	filePath := "/tmp/TestFlatstoreProcessEvent/"
 	fname := "file1.csv"
@@ -301,10 +316,10 @@ func TestFlatstoreProcessEvent2(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	record := []string{utils.ByeCgr, "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
+	record := []string{utils.FstBye, "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
 	pr := &fstRecord{method: utils.FstBye, values: record, fileName: fname}
-	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
-	eR.cache.Set("baToR", pr, nil)
+	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
+	eR.cache.Set(utils.ConcatenatedKey("baToR", utils.FstBye), pr, []string{"baToR"})
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
@@ -318,7 +333,7 @@ func TestFlatstoreProcessEvent2(t *testing.T) {
 			utils.Subject:      "h",
 			utils.Tenant:       "2013-12-30T15:00:01Z",
 			utils.ToR:          "ToR",
-			utils.Usage:        "3600",
+			utils.Usage:        "1h0m0s",
 		},
 		APIOpts: map[string]interface{}{},
 	}
@@ -381,60 +396,6 @@ func TestFlatstoreProcessEvent2CacheNotSet(t *testing.T) {
 	}
 }
 
-//Test unsupported time format err while making the unpaired record.
-func TestFlatstoreProcessEvent2Error1(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ERsCfg().Readers[0].ProcessedPath = ""
-	fltrs := &engine.FilterS{}
-	filePath := "/tmp/TestFlatstoreProcessEvent/"
-	fname := "file1.csv"
-	if err := os.MkdirAll(filePath, 0777); err != nil {
-		t.Error(err)
-	}
-	file, err := os.Create(path.Join(filePath, fname))
-	if err != nil {
-		t.Error(err)
-	}
-	//Create new logger
-	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
-	if err != nil {
-		t.Error(err)
-	}
-	utils.Logger.SetLogLevel(7)
-	buf := new(bytes.Buffer)
-	log.SetOutput(buf)
-	file.Write([]byte("INVITE,a,ToR,b,c,d,invalid_time,f,g,h,i,j,k,l"))
-	file.Close()
-	eR := &FlatstoreER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     fltrs,
-		rdrDir:    "/tmp/flatstoreErs/out",
-		rdrEvents: make(chan *erEvent, 1),
-		rdrError:  make(chan error, 1),
-		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
-	}
-	record := []string{utils.ByeCgr, "a", "ToR", "b", "c", "d", "invalid_time", "f", "g", "h", "i", "j", "k", "l"}
-	pr := &fstRecord{method: utils.FstBye, values: record, fileName: fname}
-	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
-	eR.cache.Set("baToR", pr, nil)
-
-	eR.conReqs <- struct{}{}
-	eR.Config().Opts[utils.FstFailedCallsPrefixOpt] = "x"
-	if err := eR.processFile(filePath, fname); err != nil {
-		t.Error(err)
-	}
-	errExpect := "[WARNING] <ERs> Converting row : <[INVITE a ToR b c d invalid_time f g h i j k l]> to unpairedRecord , ignoring due to error: <Unsupported time format>"
-	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
-		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
-	}
-	if err := os.RemoveAll(filePath); err != nil {
-		t.Error(err)
-	}
-	buf.Reset()
-}
-
 //Test pairToRecord() error, where both methods of unpaired record object are INVITE
 func TestFlatstoreProcessEvent2Error2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -473,13 +434,13 @@ func TestFlatstoreProcessEvent2Error2(t *testing.T) {
 	record := []string{"INVITE", "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
 	pr := &fstRecord{method: utils.FstInvite, values: record, fileName: fname}
 	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
-	eR.cache.Set("baToR", pr, nil)
+	eR.cache.Set("baToR:INVITE", pr, []string{"baToR"})
 	eR.conReqs <- struct{}{}
 	eR.Config().Opts[utils.FstFailedCallsPrefixOpt] = "x"
 	if err := eR.processFile(filePath, fname); err != nil {
 		t.Error(err)
 	}
-	errExpect := "[WARNING] <ERs> Merging unpairedRecords"
+	errExpect := "[WARNING] <ERs> Overwriting the INVITE method for record <baToR>"
 	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
 		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
 	}
@@ -504,7 +465,7 @@ func TestFlatstoreProcessEventError2(t *testing.T) {
 		t.Error(err)
 	}
 	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
-	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
 	file.Close()
 	eR := &FlatstoreER{
 		cgrCfg:    cfg,
@@ -522,7 +483,7 @@ func TestFlatstoreProcessEventError2(t *testing.T) {
 		{},
 	}
 
-	errExpect := "unsupported type: <>"
+	errExpect := `unsupported method: <"">`
 	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
@@ -549,7 +510,7 @@ func TestFlatstoreProcessEventError3(t *testing.T) {
 		t.Error(err)
 	}
 	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
-	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+BYE,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
 	file.Close()
 	eR := &FlatstoreER{
 		cgrCfg:    cfg,
@@ -560,9 +521,10 @@ func TestFlatstoreProcessEventError3(t *testing.T) {
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
+		cache:     ltcache.NewCache(-1, 0, false, nil),
 	}
 	eR.conReqs <- struct{}{}
-
+	eR.cache.Set("OriginCDR1*voice:INVITE", &fstRecord{method: utils.FstInvite, values: []string{}}, []string{"OriginCDR1*voice"})
 	//
 	eR.Config().Filters = []string{"Filter1"}
 	errExpect := "NOT_FOUND:Filter1"
@@ -571,6 +533,8 @@ func TestFlatstoreProcessEventError3(t *testing.T) {
 	}
 
 	//
+	eR.cache.Set("OriginCDR1*voice:INVITE", &fstRecord{method: utils.FstInvite, values: []string{}}, []string{"OriginCDR1*voice"})
+
 	eR.Config().Filters = []string{"*exists:~*req..Account:"}
 	errExpect = "Invalid fieldPath [ Account]"
 	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
