@@ -1050,7 +1050,7 @@ func TestV1DebitConcretes(t *testing.T) {
 
 }
 
-func TestMultipleAccountsFail(t *testing.T) {
+func TestMultipleAccountsErr(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
