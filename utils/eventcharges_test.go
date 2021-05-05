@@ -22,6 +22,7 @@ import (
 	"math"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/ericlagergren/decimal"
 )
@@ -585,3 +586,871 @@ func TestAsExtEventChargersCheckErrors(t *testing.T) {
 	evCh.Rating["first_rates_interval"].IntervalStart = NewDecimal(0, 0)
 }
 */
+
+func TestEventChargesEquals(t *testing.T) {
+	eEvChgs := &EventCharges{
+		Abstracts: NewDecimal(47500, 3),
+		Concretes: NewDecimal(515, 2),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"GENUUID_GHOST1": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(8, 1),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID3": {
+				AccountID:       "TestEventChargesEquals",
+				BalanceID:       "ABSTRACT2",
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+			"GENUUID2": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR1": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+			"GENUUID_FACTOR2": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Rate: &Rate{
+							ID:              "*costIncrement",
+							FilterIDs:       []string{"*string:~*req.Account:1003"},
+							ActivationTimes: "* * * * *",
+							Blocker:         true,
+							IntervalRates: []*IntervalRate{
+								{
+									IntervalStart: NewDecimal(0, 0),
+									Increment:     NewDecimal(int64(time.Second), 0),
+									FixedFee:      NewDecimal(0, 0),
+									RecurrentFee:  NewDecimal(11, 1),
+								},
+								{
+									IntervalStart: NewDecimal(int64(time.Minute), 0),
+									Increment:     NewDecimal(int64(2*time.Second), 0),
+									FixedFee:      NewDecimal(1, 0),
+									RecurrentFee:  NewDecimal(5, 1),
+									Unit:          NewDecimal(8, 1),
+								},
+							},
+						},
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+			"GENUUID_RATING2": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart: NewDecimal(4, 2),
+						Rate: &Rate{
+							ID:        "*costIncrement",
+							FilterIDs: []string{},
+							Weights: []*DynamicWeight{
+								{
+									FilterIDs: []string{"*string:~*req.Account:1002"},
+									Weight:    20,
+								},
+								{
+									Weight: 15,
+								},
+							},
+							IntervalRates: []*IntervalRate{
+								{
+									FixedFee:     NewDecimal(5, 1),
+									RecurrentFee: NewDecimal(2, 1),
+								},
+							},
+						},
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC1": {
+				Tenant:    CGRateSorg,
+				ID:        "account_1",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+					},
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:        "BAL1",
+						FilterIDs: []string{"*string:~*req.Account:1003"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(int64(30*time.Second), 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor:    NewDecimal(100, 0),
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+							},
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								Increment:    NewDecimal(int64(time.Second), 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1003"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs: []string{"ATTRIBUTE1"},
+					},
+					"bal2": {
+						ID:        "BAL2",
+						FilterIDs: []string{"*string:~*req.Account:1004"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaConcrete,
+						Units: NewDecimal(2000, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						Opts: map[string]interface{}{
+							Destinations: "1234",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1004"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs:   []string{"ATTRIBUTE1"},
+						RateProfileIDs: []string{"RATE1", "RATE2"},
+					},
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC2": {
+				Tenant: CGRateSorg,
+				ID:     "account_2",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+
+	expectedEqual := &EventCharges{
+		Abstracts: NewDecimal(47500, 3),
+		Concretes: NewDecimal(515, 2),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"GENUUID_GHOST1": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(8, 1),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID3": {
+				AccountID:       "TestEventChargesEquals",
+				BalanceID:       "ABSTRACT2",
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+			"GENUUID2": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR1": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+			"GENUUID_FACTOR2": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Rate: &Rate{
+							ID:              "*costIncrement",
+							FilterIDs:       []string{"*string:~*req.Account:1003"},
+							ActivationTimes: "* * * * *",
+							Blocker:         true,
+							IntervalRates: []*IntervalRate{
+								{
+									IntervalStart: NewDecimal(0, 0),
+									Increment:     NewDecimal(int64(time.Second), 0),
+									FixedFee:      NewDecimal(0, 0),
+									RecurrentFee:  NewDecimal(11, 1),
+								},
+								{
+									IntervalStart: NewDecimal(int64(time.Minute), 0),
+									Increment:     NewDecimal(int64(2*time.Second), 0),
+									FixedFee:      NewDecimal(1, 0),
+									RecurrentFee:  NewDecimal(5, 1),
+									Unit:          NewDecimal(8, 1),
+								},
+							},
+						},
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+			"GENUUID_RATING2": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart: NewDecimal(4, 2),
+						Rate: &Rate{
+							ID:        "*costIncrement",
+							FilterIDs: []string{},
+							Weights: []*DynamicWeight{
+								{
+									FilterIDs: []string{"*string:~*req.Account:1002"},
+									Weight:    20,
+								},
+								{
+									Weight: 15,
+								},
+							},
+							IntervalRates: []*IntervalRate{
+								{
+									FixedFee:     NewDecimal(5, 1),
+									RecurrentFee: NewDecimal(2, 1),
+								},
+							},
+						},
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC1": {
+				Tenant:    CGRateSorg,
+				ID:        "account_1",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+					},
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:        "BAL1",
+						FilterIDs: []string{"*string:~*req.Account:1003"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(int64(30*time.Second), 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor:    NewDecimal(100, 0),
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+							},
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								Increment:    NewDecimal(int64(time.Second), 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1003"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs: []string{"ATTRIBUTE1"},
+					},
+					"bal2": {
+						ID:        "BAL2",
+						FilterIDs: []string{"*string:~*req.Account:1004"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaConcrete,
+						Units: NewDecimal(2000, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						Opts: map[string]interface{}{
+							Destinations: "1234",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1004"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs:   []string{"ATTRIBUTE1"},
+						RateProfileIDs: []string{"RATE1", "RATE2"},
+					},
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC2": {
+				Tenant: CGRateSorg,
+				ID:     "account_2",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+	if ok := eEvChgs.Equals(expectedEqual); !ok {
+		t.Errorf("Expected %+v, received %+v", eEvChgs, expectedEqual)
+	}
+
+}
+
+func TestEqualsExtEventCharges(t *testing.T) {
+	eEvChgs := &EventCharges{
+		Abstracts: NewDecimal(47500, 3),
+		Concretes: NewDecimal(515, 2),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"GENUUID_GHOST1": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(8, 1),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID3": {
+				AccountID:       "TestEventChargesEquals",
+				BalanceID:       "ABSTRACT2",
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+			"GENUUID2": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        NewDecimal(2, 0),
+				BalanceLimit: NewDecimal(200, 0),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"GENUUID_FACTOR1": {
+				Factor:    NewDecimal(100, 0),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+			"GENUUID_FACTOR2": {
+				Factor: NewDecimal(200, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*RateSIncrement{
+					{
+						Rate: &Rate{
+							ID:              "*costIncrement",
+							FilterIDs:       []string{"*string:~*req.Account:1003"},
+							ActivationTimes: "* * * * *",
+							Blocker:         true,
+							IntervalRates: []*IntervalRate{
+								{
+									IntervalStart: NewDecimal(0, 0),
+									Increment:     NewDecimal(int64(time.Second), 0),
+									FixedFee:      NewDecimal(0, 0),
+									RecurrentFee:  NewDecimal(11, 1),
+								},
+								{
+									IntervalStart: NewDecimal(int64(time.Minute), 0),
+									Increment:     NewDecimal(int64(2*time.Second), 0),
+									FixedFee:      NewDecimal(1, 0),
+									RecurrentFee:  NewDecimal(5, 1),
+									Unit:          NewDecimal(8, 1),
+								},
+							},
+						},
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(int64(time.Second), 0),
+				CompressFactor: 1,
+			},
+			"GENUUID_RATING2": {
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart: NewDecimal(4, 2),
+						Rate: &Rate{
+							ID:        "*costIncrement",
+							FilterIDs: []string{},
+							Weights: []*DynamicWeight{
+								{
+									FilterIDs: []string{"*string:~*req.Account:1002"},
+									Weight:    20,
+								},
+								{
+									Weight: 15,
+								},
+							},
+							IntervalRates: []*IntervalRate{
+								{
+									FixedFee:     NewDecimal(5, 1),
+									RecurrentFee: NewDecimal(2, 1),
+								},
+							},
+						},
+						Usage:             NewDecimal(int64(30*time.Second), 0),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  NewDecimal(0, 0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*Account{
+			"ACC1": {
+				Tenant:    CGRateSorg,
+				ID:        "account_1",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+					},
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:        "BAL1",
+						FilterIDs: []string{"*string:~*req.Account:1003"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(int64(30*time.Second), 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor:    NewDecimal(100, 0),
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+							},
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								Increment:    NewDecimal(int64(time.Second), 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1003"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs: []string{"ATTRIBUTE1"},
+					},
+					"bal2": {
+						ID:        "BAL2",
+						FilterIDs: []string{"*string:~*req.Account:1004"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaConcrete,
+						Units: NewDecimal(2000, 0),
+						UnitFactors: []*UnitFactor{
+							{
+								Factor: NewDecimal(200, 0),
+							},
+						},
+						Opts: map[string]interface{}{
+							Destinations: "1234",
+						},
+						CostIncrements: []*CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1004"},
+								Increment:    NewDecimal(int64(2*time.Second), 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(5, 0),
+							},
+						},
+						AttributeIDs:   []string{"ATTRIBUTE1"},
+						RateProfileIDs: []string{"RATE1", "RATE2"},
+					},
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC2": {
+				Tenant: CGRateSorg,
+				ID:     "account_2",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+
+	// ext equals
+	extEvCh := &ExtEventCharges{
+		Abstracts: Float64Pointer(47.5),
+		Concretes: Float64Pointer(5.15),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*ExtAccountCharge{
+			"GENUUID_GHOST1": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        Float64Pointer(0.8),
+				BalanceLimit: Float64Pointer(200),
+				UnitFactorID: "GENUUID_FACTOR1",
+			},
+			"GENUUID3": {
+				AccountID:       "TestEventChargesEquals",
+				BalanceID:       "ABSTRACT2",
+				BalanceLimit:    Float64Pointer(0),
+				RatingID:        "GENUUID_RATING1",
+				JoinedChargeIDs: []string{"THIS_GENUUID1"},
+			},
+			"GENUUID2": {
+				AccountID:    "TestEventChargesEquals",
+				BalanceID:    "CONCRETE1",
+				Units:        Float64Pointer(2),
+				BalanceLimit: Float64Pointer(200),
+				UnitFactorID: "GENUUID_FACTOR2",
+				RatingID:     "ID_FOR_RATING",
+				AttributeIDs: []string{"ATTR1", "ATTR2"},
+			},
+		},
+		UnitFactors: map[string]*ExtUnitFactor{
+			"GENUUID_FACTOR1": {
+				Factor:    Float64Pointer(100),
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+			},
+			"GENUUID_FACTOR2": {
+				Factor: Float64Pointer(200),
+			},
+		},
+		Rating: map[string]*ExtRateSInterval{
+			"GENUUID_RATING1": {
+				Increments: []*ExtRateSIncrement{
+					{
+						Rate: &ExtRate{
+							ID:              "*costIncrement",
+							FilterIDs:       []string{"*string:~*req.Account:1003"},
+							ActivationTimes: "* * * * *",
+							Blocker:         true,
+							IntervalRates: []*ExtIntervalRate{
+								{
+									IntervalStart: Float64Pointer(0),
+									Increment:     Float64Pointer(float64(time.Second)),
+									FixedFee:      Float64Pointer(0),
+									RecurrentFee:  Float64Pointer(1.1),
+								},
+								{
+									IntervalStart: Float64Pointer(float64(time.Minute)),
+									Increment:     Float64Pointer(float64(2 * time.Second)),
+									FixedFee:      Float64Pointer(1),
+									RecurrentFee:  Float64Pointer(0.5),
+									Unit:          Float64Pointer(0.8),
+								},
+							},
+						},
+						Usage:             Float64Pointer(float64(time.Minute)),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  Float64Pointer(float64(time.Second)),
+				CompressFactor: 1,
+			},
+			"GENUUID_RATING2": {
+				Increments: []*ExtRateSIncrement{
+					{
+						IncrementStart: Float64Pointer(0.04),
+						Rate: &ExtRate{
+							ID:        "*costIncrement",
+							FilterIDs: []string{},
+							Weights: []*DynamicWeight{
+								{
+									FilterIDs: []string{"*string:~*req.Account:1002"},
+									Weight:    20,
+								},
+								{
+									Weight: 15,
+								},
+							},
+							IntervalRates: []*ExtIntervalRate{
+								{
+									FixedFee:     Float64Pointer(0.5),
+									RecurrentFee: Float64Pointer(0.2),
+								},
+							},
+						},
+						Usage:             Float64Pointer(float64(30 * time.Second)),
+						IntervalRateIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				IntervalStart:  Float64Pointer(0),
+				CompressFactor: 2,
+			},
+		},
+		Accounts: map[string]*ExtAccount{
+			"ACC1": {
+				Tenant:    CGRateSorg,
+				ID:        "account_1",
+				FilterIDs: []string{"*string:~*req.Account:1003"},
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+					},
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				Balances: map[string]*ExtBalance{
+					"bal1": {
+						ID:        "BAL1",
+						FilterIDs: []string{"*string:~*req.Account:1003"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: Float64Pointer(float64(30 * time.Second)),
+						UnitFactors: []*ExtUnitFactor{
+							{
+								Factor:    Float64Pointer(100),
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+							},
+							{
+								Factor: Float64Pointer(200),
+							},
+						},
+						CostIncrements: []*ExtCostIncrement{
+							{
+								Increment:    Float64Pointer(float64(time.Second)),
+								RecurrentFee: Float64Pointer(5),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1003"},
+								Increment:    Float64Pointer(float64(2 * time.Second)),
+								FixedFee:     Float64Pointer(1),
+								RecurrentFee: Float64Pointer(5),
+							},
+						},
+						AttributeIDs: []string{"ATTRIBUTE1"},
+					},
+					"bal2": {
+						ID:        "BAL2",
+						FilterIDs: []string{"*string:~*req.Account:1004"},
+						Weights: []*DynamicWeight{
+							{
+								Weight: 25,
+							},
+						},
+						Type:  MetaConcrete,
+						Units: Float64Pointer(2000),
+						UnitFactors: []*ExtUnitFactor{
+							{
+								Factor: Float64Pointer(200),
+							},
+						},
+						Opts: map[string]interface{}{
+							Destinations: "1234",
+						},
+						CostIncrements: []*ExtCostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Account:1004"},
+								Increment:    Float64Pointer(float64(2 * time.Second)),
+								FixedFee:     Float64Pointer(1),
+								RecurrentFee: Float64Pointer(5),
+							},
+						},
+						AttributeIDs:   []string{"ATTRIBUTE1"},
+						RateProfileIDs: []string{"RATE1", "RATE2"},
+					},
+				},
+				ThresholdIDs: []string{},
+			},
+			"ACC2": {
+				Tenant: CGRateSorg,
+				ID:     "account_2",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 25,
+					},
+				},
+				ActivationInterval: &ActivationInterval{
+					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
+				},
+				Opts: map[string]interface{}{
+					Subsys: MetaSessionS,
+				},
+				ThresholdIDs: []string{},
+			},
+		},
+	}
+	rcv, err := eEvChgs.AsExtEventCharges()
+	if err != nil {
+		t.Error(err)
+	}
+	if ok := rcv.Equals(extEvCh); ok {
+		t.Errorf("Expected %+v \n, received %+v", ToJSON(extEvCh), ToJSON(rcv))
+	}
+}
