@@ -482,7 +482,7 @@ func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 		return false, err
 	}
 
-	tmTime, err := utils.IfaceAsTime(tmVal, utils.EmptyString)
+	tmTime, err := utils.IfaceAsTime(tmVal, config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return false, err
 	}

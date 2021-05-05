@@ -182,7 +182,7 @@ func (mW *mockWriter) Write(p []byte) (n int, err error) {
 	return 0, nil
 }
 
-func TestResourcesRecordUsage2(t *testing.T) {
+func TestResourcesRecordUsageClearErr(t *testing.T) {
 	utils.Logger.SetLogLevel(4)
 	utils.Logger.SetSyslog(nil)
 
