@@ -441,7 +441,7 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
 	internalSessionSChan := make(chan birpc.ClientConnector, 1)
 	internalSessionSChan <- sS
@@ -471,7 +471,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
 	pr, err = da.processRequest(reqProcessor, agReq)
 	if err != nil {
@@ -488,7 +488,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
 	pr, err = da.processRequest(reqProcessor, agReq)
 	if err != nil {
@@ -511,7 +511,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
 	pr, err = da.processRequest(reqProcessor, agReq)
 	if err != nil {
@@ -528,7 +528,7 @@ func TestProcessRequest(t *testing.T) {
 
 	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
-		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil, nil)
+		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
 	pr, err = da.processRequest(reqProcessor, agReq)
 	if err != nil {

@@ -30,7 +30,7 @@ import (
 func NewSliceDP(record []string, indxAls map[string]int) (dP utils.DataProvider) {
 	return &SliceDP{
 		req:    record,
-		cache:  utils.MapStorage{},
+		cache:  utils.MapStorage{utils.Length: len(record)},
 		idxAls: indxAls,
 	}
 }

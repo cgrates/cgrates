@@ -50,7 +50,7 @@ func sipErr(m utils.DataProvider, sipMessage sipingo.Message,
 	aReq := NewAgentRequest(
 		m, reqVars,
 		nil, nil, nil, nil,
-		tnt, tmz, filterS, nil, nil)
+		tnt, tmz, filterS, nil)
 	if err = aReq.SetFields(tpl); err != nil {
 		return
 	}

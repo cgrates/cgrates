@@ -466,7 +466,7 @@ func diamErr(m *diam.Message, resCode uint32,
 	aReq := NewAgentRequest(
 		newDADataProvider(nil, m), reqVars,
 		nil, nil, nil, nil,
-		tnt, tmz, filterS, nil, nil)
+		tnt, tmz, filterS, nil)
 	if err = aReq.SetFields(tpl); err != nil {
 		return
 	}
