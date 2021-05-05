@@ -154,7 +154,7 @@ func TestSuretaxNewSureTaxRequestInvalidUnits(t *testing.T) {
 	}
 }
 
-func TestSuretaxSureTaxProcessCdrPostFail(t *testing.T) {
+func TestSuretaxSureTaxProcessCdrPostErr(t *testing.T) {
 	CGRID := utils.Sha1("testOriginID", time.Date(2021, 1, 1, 8, 42, 20, 0, time.UTC).String())
 	cdr := &CDR{
 		CGRID:       CGRID,
