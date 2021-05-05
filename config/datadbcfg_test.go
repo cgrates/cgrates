@@ -477,7 +477,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		"db_password": "", 						
 		"opts": {
 			"redisSentinel":"",					
-			"query_timeout":"10s",
+			"mongoQueryTimeout":"10s",
 		},
 		"remote_conns":[],
 		"replication_conns":[],
@@ -496,7 +496,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.DataDbPassCfg: "",
 		utils.OptsCfg: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "",
-			utils.QueryTimeoutCfg:      "10s",
+			utils.MongoQueryTimeoutCfg: "10s",
 		},
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},

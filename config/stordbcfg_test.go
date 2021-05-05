@@ -43,10 +43,10 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 		Opts: map[string]interface{}{
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.MysqlLocation:      "UTC",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MysqlLocation:         "UTC",
 		},
 	}
 	expected := &StorDbCfg{
@@ -67,12 +67,12 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 		Opts: map[string]interface{}{
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.QueryTimeoutCfg:    "10s",
-			utils.SSLModeCfg:         "disable",
-			utils.MysqlLocation:      "UTC",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.SSLModeCfg:            "disable",
+			utils.MysqlLocation:         "UTC",
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -194,12 +194,12 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
             "remote_conns": ["*conn1"],
             "replication_conns": ["*conn1"],
 			"opts": {	
-				"max_open_conns": 100,					
-				"max_idle_conns": 10,					
-				"conn_max_lifetime": 0, 			
-				"query_timeout":"10s",
+				"sqlMaxOpenConns": 100,					
+				"sqlMaxIdleConns": 10,					
+				"sqlConnMaxLifetime": 0, 			
+				"mongoQueryTimeout":"10s",
 				"sslMode":"disable",		
-				"mysql_location": "UTC",			
+				"mysqlLocation": "UTC",			
 			},
 			"items":{
 				"session_costs": {}, 
@@ -220,12 +220,12 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:         []string{"*conn1"},
 		utils.ReplicationConnsCfg:    []string{"*conn1"},
 		utils.OptsCfg: map[string]interface{}{
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.QueryTimeoutCfg:    "10s",
-			utils.SSLModeCfg:         "disable",
-			utils.MysqlLocation:      "UTC",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.SSLModeCfg:            "disable",
+			utils.MysqlLocation:         "UTC",
 		},
 		utils.ItemsCfg: map[string]interface{}{
 			utils.SessionCostsTBL: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false},
@@ -271,11 +271,11 @@ func TestStorDbCfgClone(t *testing.T) {
 			},
 		},
 		Opts: map[string]interface{}{
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.QueryTimeoutCfg:    "10s",
-			utils.SSLModeCfg:         "disable",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.SSLModeCfg:            "disable",
 		},
 	}
 	rcv := ban.Clone()

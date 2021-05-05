@@ -53,7 +53,7 @@ func TestDataDBCoverage(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: map[string]interface{}{
-			utils.QueryTimeoutCfg:            "10s",
+			utils.MongoQueryTimeoutCfg:       "10s",
 			utils.RedisClusterOnDownDelayCfg: "0",
 			utils.RedisClusterSyncCfg:        "5s",
 			utils.RedisClusterCfg:            false,

@@ -377,11 +377,11 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDbCfg().Password != "" {
 		t.Errorf("Expecting: , received: %+v", cgrCfg.StorDbCfg().Password)
 	}
-	if cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg] != 100. {
-		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg])
+	if cgrCfg.StorDbCfg().Opts[utils.SQLMaxOpenConnsCfg] != 100. {
+		t.Errorf("Expecting: 100 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.SQLMaxOpenConnsCfg])
 	}
-	if cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg] != 10. {
-		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg])
+	if cgrCfg.StorDbCfg().Opts[utils.SQLMaxIdleConnsCfg] != 10. {
+		t.Errorf("Expecting: 10 , received: %+v", cgrCfg.StorDbCfg().Opts[utils.SQLMaxIdleConnsCfg])
 	}
 	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
 		t.Errorf("Expecting: %+v , received: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
@@ -3794,12 +3794,12 @@ func TestV1GetConfigStorDB(t *testing.T) {
 		utils.RemoteConnsCfg:         empty,
 		utils.ReplicationConnsCfg:    empty,
 		utils.OptsCfg: map[string]interface{}{
-			utils.MaxOpenConnsCfg:    100.,
-			utils.MaxIdleConnsCfg:    10.,
-			utils.ConnMaxLifetimeCfg: 0.,
-			utils.QueryTimeoutCfg:    "10s",
-			utils.SSLModeCfg:         "disable",
-			utils.MysqlLocation:      "Local",
+			utils.SQLMaxOpenConnsCfg:    100.,
+			utils.SQLMaxIdleConnsCfg:    10.,
+			utils.SQLConnMaxLifetimeCfg: 0.,
+			utils.MongoQueryTimeoutCfg:  "10s",
+			utils.SSLModeCfg:            "disable",
+			utils.MysqlLocation:         "Local",
 		},
 		utils.ItemsCfg: map[string]interface{}{},
 	}
@@ -4840,7 +4840,7 @@ func TestV1GetConfigAsJSONGeneral(t *testing.T) {
 
 func TestV1GetConfigAsJSONDataDB(t *testing.T) {
 	var reply string
-	expected := `{"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_action_plans":{"remote":false,"replicate":false},"*accounts":{"remote":false,"replicate":false},"*action_plans":{"remote":false,"replicate":false},"*action_triggers":{"remote":false,"replicate":false},"*actions":{"remote":false,"replicate":false},"*attribute_profiles":{"remote":false,"replicate":false},"*charger_profiles":{"remote":false,"replicate":false},"*destinations":{"remote":false,"replicate":false},"*dispatcher_hosts":{"remote":false,"replicate":false},"*dispatcher_profiles":{"remote":false,"replicate":false},"*filters":{"remote":false,"replicate":false},"*indexes":{"remote":false,"replicate":false},"*load_ids":{"remote":false,"replicate":false},"*rating_plans":{"remote":false,"replicate":false},"*rating_profiles":{"remote":false,"replicate":false},"*resource_profiles":{"remote":false,"replicate":false},"*resources":{"remote":false,"replicate":false},"*reverse_destinations":{"remote":false,"replicate":false},"*route_profiles":{"remote":false,"replicate":false},"*shared_groups":{"remote":false,"replicate":false},"*statqueue_profiles":{"remote":false,"replicate":false},"*statqueues":{"remote":false,"replicate":false},"*threshold_profiles":{"remote":false,"replicate":false},"*thresholds":{"remote":false,"replicate":false},"*timings":{"remote":false,"replicate":false}},"opts":{"query_timeout":"10s","redisCluster":false,"redisClusterOndownDelay":"0","redisClusterSync":"5s","redisSentinel":"","redis_ca_certificate":"","redis_client_certificate":"","redis_client_key":"","redis_tls":false},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false}}`
+	expected := `{"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_action_plans":{"remote":false,"replicate":false},"*accounts":{"remote":false,"replicate":false},"*action_plans":{"remote":false,"replicate":false},"*action_triggers":{"remote":false,"replicate":false},"*actions":{"remote":false,"replicate":false},"*attribute_profiles":{"remote":false,"replicate":false},"*charger_profiles":{"remote":false,"replicate":false},"*destinations":{"remote":false,"replicate":false},"*dispatcher_hosts":{"remote":false,"replicate":false},"*dispatcher_profiles":{"remote":false,"replicate":false},"*filters":{"remote":false,"replicate":false},"*indexes":{"remote":false,"replicate":false},"*load_ids":{"remote":false,"replicate":false},"*rating_plans":{"remote":false,"replicate":false},"*rating_profiles":{"remote":false,"replicate":false},"*resource_profiles":{"remote":false,"replicate":false},"*resources":{"remote":false,"replicate":false},"*reverse_destinations":{"remote":false,"replicate":false},"*route_profiles":{"remote":false,"replicate":false},"*shared_groups":{"remote":false,"replicate":false},"*statqueue_profiles":{"remote":false,"replicate":false},"*statqueues":{"remote":false,"replicate":false},"*threshold_profiles":{"remote":false,"replicate":false},"*thresholds":{"remote":false,"replicate":false},"*timings":{"remote":false,"replicate":false}},"opts":{"mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0","redisClusterSync":"5s","redisSentinel":"","redisTLS":false},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{DataDBJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5139,7 +5139,7 @@ func TestV1GetConfigAsJSONCgrLoader(t *testing.T) {
 
 func TestV1GetConfigAsJSONCgrMigrator(t *testing.T) {
 	var reply string
-	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"redisCluster":false,"redisClusterOndownDelay":"0","redisClusterSync":"5s","redisSentinel":"","redis_ca_certificate":"","redis_client_certificate":"","redis_client_key":"","redis_tls":false},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","out_stordb_host":"127.0.0.1","out_stordb_name":"cgrates","out_stordb_opts":{},"out_stordb_password":"","out_stordb_port":"3306","out_stordb_type":"mysql","out_stordb_user":"cgrates","users_filters":[]}}`
+	expected := `{"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0","redisClusterSync":"5s","redisSentinel":"","redisTLS":false},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"redis","out_datadb_user":"cgrates","out_stordb_host":"127.0.0.1","out_stordb_name":"cgrates","out_stordb_opts":{},"out_stordb_password":"","out_stordb_port":"3306","out_stordb_type":"mysql","out_stordb_user":"cgrates","users_filters":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{MigratorJSON}}, &reply); err != nil {
 		t.Error(err)

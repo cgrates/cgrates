@@ -21,10 +21,10 @@
 	"db_host":"127.0.0.1:6400",
 	"db_name": "10",
 	"opts": {
-		"redis_tls": true,
-		"redis_client_certificate":"/usr/share/cgrates/tls/client.crt",
-		"redis_client_key":"/usr/share/cgrates/tls/client.key",
-		"redis_ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+		"redisTLS": true,
+		"redisClientCertificate":"/usr/share/cgrates/tls/client.crt",
+		"redisClientKey":"/usr/share/cgrates/tls/client.key",
+		"redisCACertificate":"/usr/share/cgrates/tls/ca.crt",
 	},
 },
 
