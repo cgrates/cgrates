@@ -417,7 +417,7 @@
 			"opts": {
 				"dbName": "exportedDatabase",
 				"tableName": "expTable",
-				"sslmode": "disable",
+				"postgresSSLModee": "disable",
 				"maxIdleConns": "10",
 				"maxOpenConns": "100",
 				"maxConnLifetime": "0",

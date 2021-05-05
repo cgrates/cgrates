@@ -95,7 +95,7 @@ func (db *DataDBService) Reload() (err error) {
 	}
 	if db.cfg.DataDbCfg().Type == utils.Mongo {
 		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]); err != nil {
+		if ttl, err = utils.IfaceAsDuration(db.cfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]); err != nil {
 			return
 		}
 		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)

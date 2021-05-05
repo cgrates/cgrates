@@ -273,7 +273,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 		dbname = utils.IfaceAsString(vals)
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if vals, has := opts[utils.SQLSSLMode]; has {
+	if vals, has := opts[utils.SSLModeCfg]; has {
 		ssl = utils.IfaceAsString(vals)
 	}
 
@@ -322,7 +322,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 		outDBname = utils.IfaceAsString(vals)
 	}
 	outSSL = utils.SQLDefaultSSLMode
-	if vals, has := processedOpt[utils.SQLSSLMode]; has {
+	if vals, has := processedOpt[utils.SSLModeCfg]; has {
 		outSSL = utils.IfaceAsString(vals)
 	}
 	rdr.expTableName = utils.CDRsTBL

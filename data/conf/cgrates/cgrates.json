@@ -94,11 +94,11 @@
 // 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 // 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 // 		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-// 		"query_timeout":"10s",
-// 		"redis_tls": false,						// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
-// 		"redis_client_certificate":"",			// path to client certificate
-// 		"redis_client_key":"",					// path to client key
-// 		"redis_ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"mongoQueryTimeout":"10s",
+// 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate certificate, redisClientKey and redisCACertificate for tls connection
+// 		"redisClientCertificate":"",			// path to client certificate
+// 		"redisClientKey":"",					// path to client key
+// 		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 // 	}
 // },
 
@@ -113,12 +113,12 @@
 // 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 // 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 // 	"opts": {
-// 		"max_open_conns": 100,				// maximum database connections opened, not applying for mongo
-// 		"max_idle_conns": 10,				// maximum database connections idle, not applying for mongo
-// 		"conn_max_lifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-// 		"query_timeout":"10s",
+// 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
+// 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
+// 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+// 		"mongoQueryTimeout":"10s",
 // 		"sslmode":"disable",				// sslmode in case of *postgres
-// 		"mysql_location": "Local",			// the location the time from mysql is retrived
+// 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 // 	},
 // 	"items":{
 // 		"*session_costs": {"remote":false, "replicate":false}, 
@@ -888,10 +888,10 @@
 // 		"redisCluster": false,
 // 		"redisClusterSync": "5s",
 // 		"redisClusterOndownDelay": "0",
-// 		"redis_tls": false,					// enable TLS when connecting to Redis and use the redis_client_certificate, redis_client_key and redis_ca_certificate for TLS connection
-// 		"redis_client_certificate":"",		// path to client certificate
-// 		"redis_client_key":"",				// path to client key
-// 		"redis_ca_certificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
+// 		"redisClientCertificate":"",		// path to client certificate
+// 		"redisClientKey":"",				// path to client key
+// 		"redisCACertificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 // 	},
 // 	"out_stordb_opts":{},
 // },

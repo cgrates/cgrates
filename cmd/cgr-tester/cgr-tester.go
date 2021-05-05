@@ -61,7 +61,7 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrTesterFlags.String("redisClusterOndownDelay", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbQueryTimeout = cgrTesterFlags.String("query_timeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
+	dbQueryTimeout = cgrTesterFlags.String("mongoQueryTimeout", utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]),
 		"The timeout for queries")
 	raterAddress = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor          = cgrTesterFlags.String("tor", utils.MetaVoice, "The type of record to use in queries.")
@@ -214,8 +214,8 @@ func main() {
 	if *dbRedisClusterDownDelay != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
 		tstCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
 	}
-	if *dbQueryTimeout != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
-		tstCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout
+	if *dbQueryTimeout != utils.IfaceAsString(cgrConfig.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]) {
+		tstCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = *dbQueryTimeout
 	}
 
 	if *cpuprofile != "" {

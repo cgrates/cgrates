@@ -102,7 +102,7 @@ func (db *StorDBService) Reload() (err error) {
 				db.cfg.StorDbCfg().Type)
 		}
 		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(db.cfg.StorDbCfg().Opts[utils.QueryTimeoutCfg]); err != nil {
+		if ttl, err = utils.IfaceAsDuration(db.cfg.StorDbCfg().Opts[utils.MongoQueryTimeoutCfg]); err != nil {
 			return
 		}
 		mgo.SetTTL(ttl)
@@ -114,13 +114,13 @@ func (db *StorDBService) Reload() (err error) {
 				db.cfg.StorDbCfg().Type)
 		}
 		var maxConn, maxIdleConn, connMaxLifetime int64
-		if maxConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.MaxOpenConnsCfg]); err != nil {
+		if maxConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.SQLMaxOpenConnsCfg]); err != nil {
 			return
 		}
-		if maxIdleConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.MaxIdleConnsCfg]); err != nil {
+		if maxIdleConn, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.SQLMaxIdleConnsCfg]); err != nil {
 			return
 		}
-		if connMaxLifetime, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.ConnMaxLifetimeCfg]); err != nil {
+		if connMaxLifetime, err = utils.IfaceAsTInt64(db.cfg.StorDbCfg().Opts[utils.SQLConnMaxLifetimeCfg]); err != nil {
 			return
 		}
 		msql.Db.SetMaxOpenConns(int(maxConn))

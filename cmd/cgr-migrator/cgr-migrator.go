@@ -71,7 +71,7 @@ var (
 		"The sync interval for the redis cluster")
 	dbRedisClusterDownDelay = cgrMigratorFlags.String(utils.RedisClusterOnDownDelayCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]),
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbQueryTimeout = cgrMigratorFlags.String(utils.QueryTimeoutCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]),
+	dbQueryTimeout = cgrMigratorFlags.String(utils.MongoQueryTimeoutCfg, utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]),
 		"The timeout for queries")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLS, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificate, utils.EmptyString, "Path to the client certificate")
@@ -182,8 +182,8 @@ func main() {
 	if *dbRedisClusterDownDelay != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg]) {
 		mgrCfg.DataDbCfg().Opts[utils.RedisClusterOnDownDelayCfg] = *dbRedisClusterDownDelay
 	}
-	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg]) {
-		mgrCfg.DataDbCfg().Opts[utils.QueryTimeoutCfg] = *dbQueryTimeout
+	if *dbQueryTimeout != utils.IfaceAsString(dfltCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg]) {
+		mgrCfg.DataDbCfg().Opts[utils.MongoQueryTimeoutCfg] = *dbQueryTimeout
 	}
 
 	rdsTLS, _ := utils.IfaceAsBool(dfltCfg.DataDbCfg().Opts[utils.RedisTLS])

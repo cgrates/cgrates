@@ -75,7 +75,7 @@ func (sqlEe *SQLEe) NewSQLEeUrl(cgrCfg *config.CGRConfig) (dialect gorm.Dialecto
 		dbname = utils.IfaceAsString(vals)
 	}
 	ssl := utils.SQLDefaultSSLMode
-	if vals, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SQLSSLMode]; has {
+	if vals, has := cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Opts[utils.SSLModeCfg]; has {
 		ssl = utils.IfaceAsString(vals)
 	}
 	// tableName is mandatory in opts
