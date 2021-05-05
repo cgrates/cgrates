@@ -165,7 +165,7 @@ func TestDecimalNewDecimalFromString(t *testing.T) {
 	}
 }
 
-func TestDecimalNewDecimalFromStringFail(t *testing.T) {
+func TestDecimalNewDecimalFromStringErr(t *testing.T) {
 	str := "testString"
 	_, err := NewDecimalFromString(str)
 	expected := "can't convert <" + str + "> to decimal"

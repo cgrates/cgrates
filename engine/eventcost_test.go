@@ -4489,7 +4489,7 @@ func TestECTrimNoActiveIncrement(t *testing.T) {
 	}
 }
 
-func TestECTrimFailDetectLastActiveChargingInterval(t *testing.T) {
+func TestECTrimUnableToDetectLastActiveChargingInterval(t *testing.T) {
 	ec := &EventCost{
 		Usage:          utils.DurationPointer(30 * time.Second),
 		AccountSummary: &AccountSummary{},
