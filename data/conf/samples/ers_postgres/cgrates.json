@@ -342,15 +342,16 @@
 			"fields":[
 				{"tag": "Tor", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
-				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.7", "mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*invite.7", "mandatory": true},
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*constant", "value": "cgrates.org", "mandatory": true},
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call", "mandatory": true},
-				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.8", "mandatory": true},
-				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.8", "mandatory": true},
-				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.9", "mandatory": true},
-				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.6", "mandatory": true},
-				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.6", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "mandatory": true}, // Value for Usage is composed based on record
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*invite.8", "mandatory": true},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*invite.8", "mandatory": true},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*invite.9", "mandatory": true},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*invite.6", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*invite.6", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.FileName:missed_calls"]},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference","value": "~*bye.6;~*invite.6", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls"]}, 
 				{"tag": "DisconnectCause", "path": "*cgreq.DisconnectCause", "type": "*variable", "value": "~*req.4; ;~*req.5", "mandatory": true},
 				{"tag": "DialogId", "path": "*cgreq.DialogId", "type": "*variable", "value": "~*req.11"}
 			],
