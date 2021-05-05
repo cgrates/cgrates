@@ -355,6 +355,7 @@
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.9", "mandatory": true},
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.6", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.6", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.FileName:missed_calls"]},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "mandatory": true}, // Value for Usage is composed based on record
 				{"tag": "DisconnectCause", "path": "*cgreq.DisconnectCause", "type": "*variable", "value": "~*req.4; ;~*req.5", "mandatory": true},
 				{"tag": "DialogId", "path": "*cgreq.DialogId", "type": "*variable", "value": "~*req.11"}

@@ -20,12 +20,10 @@ package ers
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -39,9 +37,8 @@ import (
 )
 
 type fstRecord struct {
-	inv      []string
-	bye      []string
-	ack      []string
+	method   string
+	values   []string
 	fileName string
 }
 
@@ -162,7 +159,20 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	evsPosted := 0
 	timeStart := time.Now()
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.FileName: utils.NewLeafNode(fName)}}
-	failCallPrfx := utils.IfaceAsString(rdr.Config().Opts[utils.FstFailedCallsPrefixOpt])
+	faildCallPrfx := utils.IfaceAsString(rdr.Config().Opts[utils.FstFailedCallsPrefixOpt])
+	failedCallsFile := len(faildCallPrfx) != 0 && strings.HasPrefix(fName, faildCallPrfx)
+	var methodTmp config.RSRParsers
+	if methodTmp, err = config.NewRSRParsers(utils.IfaceAsString(rdr.Config().Opts[utils.FstMethodOpt]), rdr.cgrCfg.GeneralCfg().RSRSep); err != nil {
+		return
+	}
+	var originTmp config.RSRParsers
+	if originTmp, err = config.NewRSRParsers(utils.IfaceAsString(rdr.Config().Opts[utils.FstOriginIDOpt]), rdr.cgrCfg.GeneralCfg().RSRSep); err != nil {
+		return
+	}
+	var mandatoryAcK bool
+	if mandatoryAcK, err = utils.IfaceAsBool(rdr.Config().Opts[utils.FstMadatoryACKOpt]); err != nil {
+		return
+	}
 	for {
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
@@ -172,48 +182,46 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			}
 			return
 		}
-		if strings.HasPrefix(fName, failCallPrfx) { // Use the first index since they should be the same in all configs
-			record = append(record, "0") // Append duration 0 for failed calls flatstore CDR
-		} else {
-			pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(rdr.Config().Timezone,
-				rdr.cgrCfg.GeneralCfg().DefaultTimezone), fName)
-			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
-						utils.ERs, record, err.Error()))
-				continue
-			}
-			if val, has := rdr.cache.Get(pr.OriginID); !has {
-				rdr.cache.Set(pr.OriginID, pr, nil)
-				continue
-			} else {
-				pair := val.(*UnpairedRecord)
-				record, err = pairToRecord(pair, pr)
-				if err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
-							utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error()))
-					continue
-				}
-				rdr.cache.Set(pr.OriginID, nil, nil)
-				rdr.cache.Remove(pr.OriginID)
-			}
+		req := config.NewSliceDP(record, nil)
+		tmpReq := utils.MapStorage{utils.MetaReq: req}
+		var method string
+		if method, err = methodTmp.ParseDataProvider(tmpReq); err != nil {
+			return
+		} else if method != utils.FstInvite &&
+			method != utils.FstBye &&
+			method != utils.FstAck {
+			return fmt.Errorf("Unsuported method<%s>", method)
 		}
 
-		// build Usage from Fields based on record lenght
-		for i, cntFld := range rdr.Config().Fields {
-			if cntFld.Path == utils.MetaCgreq+utils.NestingSep+utils.Usage {
-				rdr.Config().Fields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), utils.InfieldSep) // in case of flatstore, last element will be the duration computed by us
-			}
+		var originID string
+		if originID, err = originTmp.ParseDataProvider(tmpReq); err != nil {
+			return
 		}
+
+		records := rdr.cache.GetGroupItems(originID)
+
+		if lrecords := len(records); !failedCallsFile && // do not set in cache if we know that the calls are failed
+			(lrecords == 0 ||
+				(mandatoryAcK && lrecords != 2) ||
+				(!mandatoryAcK && lrecords != 1)) {
+			rdr.cache.Set(utils.ConcatenatedKey(originID, method), &fstRecord{method: method, values: record, fileName: fName}, []string{originID})
+			continue
+		}
+		rdr.cache.RemoveGroup(originID)
+		extraDP := map[string]utils.DataProvider{method: req}
+		for _, record := range records {
+			req := record.(*fstRecord)
+			extraDP[req.method] = config.NewSliceDP(req.values, nil)
+		}
+
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			config.NewSliceDP(record, nil), reqVars,
+			req, reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-			rdr.fltrS, nil, nil) // create an AgentRequest
+			rdr.fltrS, extraDP) // create an AgentRequest
 		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(
@@ -251,6 +259,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	return
 }
 
+/*
 func NewUnpairedRecord(record []string, timezone string, fileName string) (*UnpairedRecord, error) {
 	if len(record) < 7 {
 		return nil, errors.New("MISSING_IE")
@@ -309,14 +318,14 @@ func pairToRecord(part1, part2 *UnpairedRecord) ([]string, error) {
 	record = append(record, strconv.FormatFloat(callDur.Seconds(), 'f', -1, 64))
 	return record, nil
 }
-
+*/
 func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
 	if value == nil {
 		return
 	}
-	unpRcd := value.(*UnpairedRecord)
+	unpRcd := value.(*fstRecord)
 
-	dumpFilePath := path.Join(rdr.Config().ProcessedPath, unpRcd.FileName+utils.TmpSuffix)
+	dumpFilePath := path.Join(rdr.Config().ProcessedPath, unpRcd.fileName+utils.TmpSuffix)
 	fileOut, err := os.Create(dumpFilePath)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s",
@@ -325,11 +334,11 @@ func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
 	}
 	csvWriter := csv.NewWriter(fileOut)
 	csvWriter.Comma = rune(utils.IfaceAsString(rdr.Config().Opts[utils.FlatstorePrfx+utils.FieldSepOpt])[0])
-	if err = csvWriter.Write(unpRcd.Values); err != nil {
+	if err = csvWriter.Write(unpRcd.values); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
-			utils.ERs, unpRcd.Values, dumpFilePath, err.Error()))
-		return
+			utils.ERs, unpRcd.values, dumpFilePath, err.Error()))
+		// return // let it close the opened file
 	}
-
 	csvWriter.Flush()
+	fileOut.Close()
 }

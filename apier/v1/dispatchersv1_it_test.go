@@ -204,8 +204,8 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		ID:     "testDspv2",
 		Event:  map[string]interface{}{},
 		APIOpts: map[string]interface{}{
-			utils.Subsys:               utils.MetaAny,
-			utils.OptsDispatcherMethod: utils.DispatcherSv1GetProfileForEvent,
+			utils.Subsys:     utils.MetaAny,
+			utils.OptsMethod: utils.DispatcherSv1GetProfileForEvent,
 		},
 	}
 	var reply engine.DispatcherProfile
