@@ -382,6 +382,9 @@ const CGRATES_CFG_JSON = `
 				// "fstFailedCallsPrefix": ""					// Used in case of flatstore CDRs to avoid searching for BYE records
 				// "fstRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
 				// "fstLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+				"fstMethod": "~*req.1",							// the rsr parser that will determine the method of the current record
+				"fstOriginID": "~*req.3;~*req.1;~*req.2",		// the rsr parser that will determine the originID of the current record
+				"fstMadatoryACK": false,						// if we should receive the ACK before processing the record
 
 				// FileXML
 				"xmlRootPath": "",								// path towards one event in case of XML CDRs

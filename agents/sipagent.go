@@ -332,7 +332,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 			opts, reqProcessor.Tenant, sa.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			sa.filterS, nil, nil)
+			sa.filterS, nil)
 		var lclProcessed bool
 		if lclProcessed, err = sa.processRequest(reqProcessor, agReq); err != nil {
 			utils.Logger.Warning(

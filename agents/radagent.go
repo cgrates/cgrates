@@ -89,7 +89,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.filterS, nil, nil)
+			ra.filterS, nil)
 		agReq.Vars.Map[MetaRadReqType] = utils.NewLeafNode(MetaRadAuth)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
@@ -134,7 +134,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.filterS, nil, nil)
+			ra.filterS, nil)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed

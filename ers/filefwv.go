@@ -200,7 +200,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-			rdr.fltrS, rdr.headerDP, rdr.trailerDP) // create an AgentRequest
+			rdr.fltrS, map[string]utils.DataProvider{utils.MetaHdr: rdr.headerDP, utils.MetaTrl: rdr.trailerDP}) // create an AgentRequest
 		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil {
 			utils.Logger.Warning(
@@ -295,7 +295,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.fltrS, nil, rdr.trailerDP) // create an AgentRequest
+		rdr.fltrS, map[string]utils.DataProvider{utils.MetaTrl: rdr.trailerDP}) // create an AgentRequest
 	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
 		return err
@@ -335,7 +335,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
-		rdr.fltrS, rdr.headerDP, nil) // create an AgentRequest
+		rdr.fltrS, map[string]utils.DataProvider{utils.MetaHdr: rdr.headerDP}) // create an AgentRequest
 	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 		agReq); err != nil || !pass {
 		return err

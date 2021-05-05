@@ -303,12 +303,8 @@ func TestFlatstoreProcessEvent2(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	record := []string{"BYE", "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
-	pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(eR.Config().Timezone,
-		eR.cgrCfg.GeneralCfg().DefaultTimezone), fname)
-	if err != nil {
-		t.Error(err)
-	}
+	record := []string{utils.ByeCgr, "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
+	pr := &fstRecord{method: utils.FstBye, values: record, fileName: fname}
 	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 	eR.cache.Set("baToR", pr, nil)
 	expEvent := &utils.CGREvent{
@@ -421,13 +417,8 @@ func TestFlatstoreProcessEvent2Error1(t *testing.T) {
 		rdrExit:   make(chan struct{}),
 		conReqs:   make(chan struct{}, 1),
 	}
-	record := []string{"BYE", "a", "ToR", "b", "c", "d", "invalid_time", "f", "g", "h", "i", "j", "k", "l"}
-	pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(eR.Config().Timezone,
-		eR.cgrCfg.GeneralCfg().DefaultTimezone), fname)
-	errExpect := "Unsupported time format"
-	if err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
-	}
+	record := []string{utils.ByeCgr, "a", "ToR", "b", "c", "d", "invalid_time", "f", "g", "h", "i", "j", "k", "l"}
+	pr := &fstRecord{method: utils.FstBye, values: record, fileName: fname}
 	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 	eR.cache.Set("baToR", pr, nil)
 
@@ -436,7 +427,7 @@ func TestFlatstoreProcessEvent2Error1(t *testing.T) {
 	if err := eR.processFile(filePath, fname); err != nil {
 		t.Error(err)
 	}
-	errExpect = "[WARNING] <ERs> Converting row : <[INVITE a ToR b c d invalid_time f g h i j k l]> to unpairedRecord , ignoring due to error: <Unsupported time format>"
+	errExpect := "[WARNING] <ERs> Converting row : <[INVITE a ToR b c d invalid_time f g h i j k l]> to unpairedRecord , ignoring due to error: <Unsupported time format>"
 	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
 		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
 	}
@@ -482,11 +473,7 @@ func TestFlatstoreProcessEvent2Error2(t *testing.T) {
 		conReqs:   make(chan struct{}, 1),
 	}
 	record := []string{"INVITE", "a", "ToR", "b", "c", "d", "2013-12-30T16:00:01Z", "f", "g", "h", "i", "j", "k", "l"}
-	pr, err := NewUnpairedRecord(record, utils.FirstNonEmpty(eR.Config().Timezone,
-		eR.cgrCfg.GeneralCfg().DefaultTimezone), fname)
-	if err != nil {
-		t.Error(err)
-	}
+	pr := &fstRecord{method: utils.FstInvite, values: record, fileName: fname}
 	eR.cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, eR.dumpToFile)
 	eR.cache.Set("baToR", pr, nil)
 	eR.conReqs <- struct{}{}
@@ -706,30 +693,5 @@ func TestFlatstoreServeErrTimeDurationNeg1(t *testing.T) {
 	err = rdr.Serve()
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-}
-func TestDumpToFileErr(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	fltrs := &engine.FilterS{}
-	eR := &FlatstoreER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     fltrs,
-		rdrDir:    "/tmp/flatstoreErs/out",
-		rdrEvents: make(chan *erEvent, 1),
-		rdrError:  make(chan error, 1),
-		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
-	}
-	part1 := &UnpairedRecord{
-		Method: "BYE",
-		Values: []string{"value1", "value2", "value3", "value4", "value5"},
-	}
-	eR.conReqs <- struct{}{}
-	eR.dumpToFile("ID1", part1)
-	errExpect := "open /var/spool/cgrates/ers/out/.tmp: no such file or directory"
-	_, err := os.Open(path.Join(eR.Config().ProcessedPath, part1.FileName+utils.TmpSuffix))
-	if err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
