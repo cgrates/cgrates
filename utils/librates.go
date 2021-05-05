@@ -459,7 +459,7 @@ func (rIl *RateSInterval) Equals(nRil *RateSInterval) (eq bool) {
 			}
 		}
 	}
-	return true
+	return rIl.CompressFactor == nRil.CompressFactor
 }
 
 // Equals returns the equality between two RateSIncrement
