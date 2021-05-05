@@ -315,6 +315,14 @@ func TestS3ERReadLoop(t *testing.T) {
 		poster:    nil,
 	}
 	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		obj := &s3.ListObjectsV2Output{
+			Contents: []*s3.Object{
+				{
+					Key: utils.StringPointer("Key"),
+				},
+			},
+		}
+		fn(obj, false)
 		return nil
 	}
 	scv := &s3ClientMock{
@@ -542,6 +550,55 @@ func TestS3ERReadMsgError4(t *testing.T) {
 		DeleteObjectF:       deleteObject,
 	}
 	errExp := "INVALID_PATH"
+	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v but received %v", errExp, err)
+	}
+}
+
+func TestS3ERReadMsgError5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &S3ER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       make(chan struct{}, 1),
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    engine.NewSQSPoster("url", 1, make(map[string]interface{})),
+	}
+	rdr.Config().SourcePath = rdr.awsRegion
+	rdr.Config().ConcurrentReqs = -1
+	rdr.Config().Fields = []*config.FCTemplate{
+		{
+			Tag:   "Tor",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Path:  "*cgreq.ToR",
+		},
+	}
+	rdr.Config().Fields[0].ComputePath()
+	listObjects := func(input *s3.ListObjectsV2Input, fn func(*s3.ListObjectsV2Output, bool) bool) error {
+		return nil
+	}
+	getObject := func(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+		return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewBuffer([]byte(`{"key":"value"}`)))}, nil
+	}
+	deleteObject := func(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
+		return nil, nil
+	}
+	scv := &s3ClientMock{
+		ListObjectsV2PagesF: listObjects,
+		GetObjectF:          getObject,
+		DeleteObjectF:       deleteObject,
+	}
+	errExp := "MissingRegion: could not find region configuration"
 	if err := rdr.readMsg(scv, "AWSKey"); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v but received %v", errExp, err)
 	}
