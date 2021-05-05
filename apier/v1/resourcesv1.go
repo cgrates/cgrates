@@ -51,12 +51,12 @@ func (rsv1 *ResourceSv1) AuthorizeResources(args *utils.ArgRSv1ResourceUsage, re
 
 // V1InitiateResourceUsage records usage for an event
 func (rsv1 *ResourceSv1) AllocateResources(args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1AllocateResource(*args, reply)
+	return rsv1.rls.V1AllocateResources(*args, reply)
 }
 
 // V1TerminateResourceUsage releases usage for an event
 func (rsv1 *ResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage, reply *string) error {
-	return rsv1.rls.V1ReleaseResource(*args, reply)
+	return rsv1.rls.V1ReleaseResources(*args, reply)
 }
 
 // GetResource returns a resource configuration
