@@ -1696,19 +1696,6 @@ func TestRatesIncrementEquals(t *testing.T) {
 	}
 	incr2.IntervalRateIndex = 1
 
-	//not equals by RateUID
-	incr1.Rate.uID = "changed_uID"
-	if incr1.Equals(incr2) {
-		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
-	}
-	incr1.Rate.uID = "newID"
-
-	incr2.Rate.uID = "changed_uID"
-	if incr1.Equals(incr2) {
-		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
-	}
-	incr2.Rate.uID = "newID"
-
 	// not equals by CompressFactor
 	incr1.CompressFactor = 0
 	if incr1.Equals(incr2) {
