@@ -80,6 +80,49 @@ type ExtRate struct {
 	uID   string
 }
 
+func (rT *Rate) Equals(rte *Rate) (eq bool) {
+	if rT.ID != rte.ID ||
+		rT.ActivationTimes != rte.ActivationTimes ||
+		rT.Blocker != rte.Blocker {
+		return
+	}
+	if rT.FilterIDs == nil && rte.FilterIDs != nil ||
+		rT.FilterIDs != nil && rte.FilterIDs == nil {
+		return
+	}
+	for idx, val := range rT.FilterIDs {
+		if val != rte.FilterIDs[idx] {
+			return
+		}
+	}
+	if rT.Weights == nil && rte.Weights != nil ||
+		rT.Weights != nil && rte.Weights == nil ||
+		len(rT.Weights) != len(rte.Weights) {
+		return
+	}
+	if rT.Weights != nil && rte.Weights != nil {
+		for idx, val := range rT.Weights {
+			if ok := val.Equals(rte.Weights[idx]); !ok {
+				return
+			}
+		}
+	}
+	if rT.IntervalRates == nil && rte.IntervalRates != nil ||
+		rT.IntervalRates != nil && rte.IntervalRates == nil ||
+		len(rT.IntervalRates) != len(rte.IntervalRates) {
+		return
+	}
+	if rT.IntervalRates != nil && rte.IntervalRates != nil {
+		for idx, val := range rT.IntervalRates {
+			if ok := val.Equals(rte.IntervalRates[idx]); !ok {
+				return
+			}
+		}
+	}
+	return true
+}
+
+// AsExtRate converts Rate to ExtRate
 func (rT *Rate) AsExtRate() (eRt *ExtRate, err error) {
 	eRt = &ExtRate{
 		ID:              rT.ID,
@@ -131,6 +174,7 @@ type ExtIntervalRate struct {
 	Increment     *float64 // RateIncrement
 }
 
+// AsExtIntervalRate converts IntervalRate to ExtIntervalRate
 func (iR *IntervalRate) AsExtIntervalRate() (eIr *ExtIntervalRate, err error) {
 	eIr = new(ExtIntervalRate)
 	if iR.IntervalStart != nil {
@@ -169,6 +213,42 @@ func (iR *IntervalRate) AsExtIntervalRate() (eIr *ExtIntervalRate, err error) {
 		}
 	}
 	return
+}
+
+func (iR *IntervalRate) Equals(inRt *IntervalRate) (eq bool) {
+	if iR.RecurrentFee == nil && inRt.RecurrentFee != nil ||
+		iR.RecurrentFee != nil && inRt.RecurrentFee == nil ||
+		iR.FixedFee == nil && inRt.FixedFee != nil ||
+		iR.FixedFee != nil && inRt.FixedFee == nil ||
+		iR.Increment == nil && inRt.Increment != nil ||
+		iR.Increment != nil && inRt.Increment == nil ||
+		iR.Unit == nil && inRt.Unit != nil ||
+		iR.Unit != nil && inRt.Unit == nil ||
+		iR.IntervalStart == nil && inRt.IntervalStart != nil ||
+		iR.IntervalStart != nil && inRt.IntervalStart == nil {
+		return
+	}
+	if iR.RecurrentFee != nil && inRt.RecurrentFee != nil &&
+		iR.RecurrentFee.Compare(inRt.RecurrentFee) != 0 {
+		return
+	}
+	if iR.FixedFee != nil && inRt.FixedFee != nil &&
+		iR.FixedFee.Compare(inRt.FixedFee) != 0 {
+		return
+	}
+	if iR.Increment != nil && inRt.Increment != nil &&
+		iR.Increment.Compare(inRt.Increment) != 0 {
+		return
+	}
+	if iR.Unit != nil && inRt.Unit != nil &&
+		iR.Unit.Compare(inRt.Unit) != 0 {
+		return
+	}
+	if iR.IntervalStart != nil && inRt.IntervalStart != nil &&
+		iR.IntervalStart.Compare(inRt.IntervalStart) != 0 {
+		return
+	}
+	return true
 }
 
 func (rt *Rate) Compile() (err error) {
@@ -229,6 +309,7 @@ type ExtRateSInterval struct {
 	cost *float64 // unexported total interval cost
 }
 
+// AsExtRateSInterval converts RateSInterval to ExtRateSInterval
 func (rI *RateSInterval) AsExtRateSInterval() (eRi *ExtRateSInterval, err error) {
 	eRi = &ExtRateSInterval{
 		CompressFactor: rI.CompressFactor,
@@ -263,15 +344,16 @@ func (rI *RateSInterval) AsExtRateSInterval() (eRi *ExtRateSInterval, err error)
 // Equals compares two ExtRateSInterval
 func (rIl *ExtRateSInterval) Equals(nRil *ExtRateSInterval) (eq bool) {
 	if rIl.IntervalStart == nil && nRil.IntervalStart != nil ||
-		rIl.IntervalStart != nil && nRil.IntervalStart == nil ||
-		rIl.cost == nil && nRil.cost != nil ||
-		rIl.cost != nil && nRil.cost == nil ||
-		len(rIl.Increments) != len(nRil.Increments) {
+		rIl.IntervalStart != nil && nRil.IntervalStart == nil {
 		return
 	}
 	if rIl.IntervalStart != nRil.IntervalStart ||
-		rIl.CompressFactor != nRil.CompressFactor ||
-		rIl.cost != nRil.cost {
+		rIl.CompressFactor != nRil.CompressFactor {
+		return
+	}
+	if rIl.Increments == nil && nRil.Increments != nil ||
+		rIl.Increments != nil && nRil.Increments == nil ||
+		len(rIl.Increments) != len(nRil.Increments) {
 		return
 	}
 	for i, rtIn := range rIl.Increments {
@@ -302,6 +384,7 @@ type ExtRateSIncrement struct {
 	cost *float64 // unexported total increment cost
 }
 
+// AsExtRateSIncrement converts RateSIncrement to ExtRateSIncrement
 func (rI *RateSIncrement) AsExtRateSIncrement() (eRi *ExtRateSIncrement, err error) {
 	eRi = &ExtRateSIncrement{
 		IntervalRateIndex: rI.IntervalRateIndex,
@@ -357,17 +440,23 @@ func (eRI *ExtRateSIncrement) Equals(extRI *ExtRateSIncrement) (eq bool) {
 // Equals compares two RateSIntervals
 func (rIl *RateSInterval) Equals(nRil *RateSInterval) (eq bool) {
 	if rIl.IntervalStart == nil && nRil.IntervalStart != nil ||
-		rIl.IntervalStart != nil && nRil.IntervalStart == nil ||
+		rIl.IntervalStart != nil && nRil.IntervalStart == nil {
+		return
+	}
+	if rIl.IntervalStart != nil && nRil.IntervalStart != nil &&
+		rIl.IntervalStart.Compare(nRil.IntervalStart) != 0 {
+		return
+	}
+	if rIl.Increments != nil && rIl.Increments == nil ||
+		rIl.Increments == nil && nRil.Increments != nil ||
 		len(rIl.Increments) != len(nRil.Increments) {
 		return
 	}
-	if rIl.IntervalStart.Compare(nRil.IntervalStart) != 0 ||
-		rIl.CompressFactor != nRil.CompressFactor {
-		return
-	}
-	for i, rtIn := range rIl.Increments {
-		if !rtIn.Equals(nRil.Increments[i]) {
-			return
+	if rIl.Increments != nil && nRil.Increments != nil {
+		for i, rtIn := range rIl.Increments {
+			if !rtIn.Equals(nRil.Increments[i]) {
+				return
+			}
 		}
 	}
 	return true
@@ -376,16 +465,32 @@ func (rIl *RateSInterval) Equals(nRil *RateSInterval) (eq bool) {
 // Equals returns the equality between two RateSIncrement
 func (rI *RateSIncrement) Equals(rtIn *RateSIncrement) (eq bool) {
 	if rI.Usage == nil && rtIn.Usage != nil ||
-		rI.Usage != nil && rtIn.Usage == nil ||
-		rI.IncrementStart == nil && rtIn.IncrementStart != nil ||
+		rI.Usage != nil && rtIn.Usage == nil {
+		return
+	}
+	if rI.Usage != nil && rtIn.Usage != nil &&
+		rI.Usage.Compare(rtIn.Usage) != 0 {
+		return
+	}
+	if rI.IncrementStart == nil && rtIn.IncrementStart != nil ||
 		rI.IncrementStart != nil && rtIn.IncrementStart == nil {
 		return
 	}
-	return rI.Usage.Compare(rtIn.Usage) == 0 &&
-		rI.IncrementStart.Compare(rtIn.IncrementStart) == 0 &&
-		rI.CompressFactor == rtIn.CompressFactor &&
-		rI.IntervalRateIndex == rtIn.IntervalRateIndex &&
-		rI.Rate.UID() == rtIn.Rate.UID()
+	if rI.IncrementStart != nil && rtIn.IncrementStart != nil &&
+		rI.IncrementStart.Compare(rtIn.IncrementStart) != 0 {
+		return
+	}
+	if rI.Rate == nil && rtIn.Rate != nil ||
+		rI.Rate != nil && rtIn.Rate == nil {
+		return
+	}
+	if rI.Rate != nil && rtIn.Rate != nil {
+		if ok := rI.Rate.Equals(rtIn.Rate); !ok {
+			return
+		}
+	}
+	return rI.CompressFactor == rtIn.CompressFactor &&
+		rI.IntervalRateIndex == rtIn.IntervalRateIndex
 }
 
 // RateProfileCost is the cost returned by RateS at cost queries
@@ -491,6 +596,7 @@ func CostForIntervals(rtIvls []*RateSInterval) (cost *decimal.Big) {
 func CompressIntervals(rtIvls []*RateSInterval) {
 }
 
+// AsRateProfile converts APIRateProfile to RateProfile
 func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 	rp = &RateProfile{
 		Tenant:             ext.Tenant,
@@ -537,6 +643,7 @@ type APIRateProfile struct {
 	APIOpts            map[string]interface{}
 }
 
+// AsRate converts APIRate to Rate
 func (ext *APIRate) AsRate() (rate *Rate, err error) {
 	rate = &Rate{
 		ID:              ext.ID,
@@ -569,6 +676,7 @@ type APIRate struct {
 	IntervalRates   []*APIIntervalRate
 }
 
+// AsIntervalRate converts APIIntervalRate to IntervalRate
 func (ext *APIIntervalRate) AsIntervalRate() (iRate *IntervalRate, err error) {
 	iRate = new(IntervalRate)
 	if iRate.IntervalStart, err = NewDecimalFromUsage(ext.IntervalStart); err != nil {

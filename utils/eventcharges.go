@@ -218,6 +218,7 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 	return
 }
 
+// Equals returns the equality between two ExtEventCharges
 func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 	if eEc.Abstracts != exCh.Abstracts ||
 		eEc.Concretes != exCh.Concretes {
@@ -263,16 +264,32 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 			return
 		}
 	}
+	if eEc.Accounts == nil && exCh.Accounts != nil ||
+		eEc.Accounts != nil && exCh.Accounts == nil ||
+		len(eEc.Rating) != len(exCh.Rating) {
+		return
+	}
+	for key, val := range eEc.Accounts {
+		if ok := val.Equals(exCh.Accounts[key]); !ok {
+			return
+		}
+	}
 	return true
 }
 
-// Equals returns the equality between two EventChargers
+// Equals returns the equality between two EventCharges
 func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 	if eC.Abstracts == nil && evCh.Abstracts != nil ||
 		eC.Abstracts != nil && evCh.Abstracts == nil ||
 		eC.Concretes == nil && evCh.Concretes != nil ||
-		eC.Concretes != nil && evCh.Concretes == nil ||
-		eC.Abstracts.Compare(evCh.Abstracts) != 0 ||
+		eC.Concretes != nil && evCh.Concretes == nil {
+		return
+	}
+	if eC.Abstracts != nil && evCh.Abstracts != nil &&
+		eC.Abstracts.Compare(evCh.Abstracts) != 0 {
+		return
+	}
+	if eC.Concretes != nil && evCh.Concretes != nil &&
 		eC.Concretes.Compare(evCh.Concretes) != 0 {
 		return
 	}
@@ -401,6 +418,7 @@ type ExtAccountCharge struct {
 	JoinedChargeIDs []string // identificator of extra account charges
 }
 
+// AsExtAccountCharge converts AccountCharge to ExtAccountCharge
 func (aC *AccountCharge) AsExtAccountCharge() (eAc *ExtAccountCharge, err error) {
 	eAc = &ExtAccountCharge{
 		AccountID:    aC.AccountID,
@@ -487,8 +505,8 @@ func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
 		len(ac.AttributeIDs) != len(nAc.AttributeIDs) {
 		return
 	}
-	for i := range ac.AttributeIDs {
-		if ac.AttributeIDs[i] != nAc.AttributeIDs[i] {
+	for idx, val := range ac.AttributeIDs {
+		if val != nAc.AttributeIDs[idx] {
 			return
 		}
 	}
