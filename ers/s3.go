@@ -165,7 +165,7 @@ func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
 func (rdr *S3ER) readLoop(scv s3Client) (err error) {
 	var keys []string
 	if err = scv.ListObjectsV2Pages(&s3.ListObjectsV2Input{Bucket: aws.String(rdr.queueID)},
-		func(lovo *s3.ListObjectsV2Output, b bool) bool {
+		func(lovo *s3.ListObjectsV2Output, _ bool) bool {
 			for _, objMeta := range lovo.Contents {
 				if objMeta.Key != nil {
 					keys = append(keys, *objMeta.Key)
