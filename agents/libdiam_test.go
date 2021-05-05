@@ -1150,7 +1150,7 @@ func TestFilterWithDiameterDP(t *testing.T) {
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
 		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 
 	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
 		[]string{"*exists:~*req.Multiple-Services-Credit-Control.Rating-Group[~Rating-Group(99)]:"}, agReq); err != nil {

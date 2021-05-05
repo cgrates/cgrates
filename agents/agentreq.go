@@ -40,7 +40,7 @@ func NewAgentRequest(req utils.DataProvider,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
-	header, trailer utils.DataProvider) (ar *AgentRequest) {
+	extraDP map[string]utils.DataProvider) (ar *AgentRequest) {
 	if cgrRply == nil {
 		cgrRply = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	}
@@ -53,6 +53,9 @@ func NewAgentRequest(req utils.DataProvider,
 	if opts == nil {
 		opts = make(utils.MapStorage)
 	}
+	if extraDP == nil {
+		extraDP = make(map[string]utils.DataProvider)
+	}
 	ar = &AgentRequest{
 		Request:    req,
 		Tenant:     dfltTenant,
@@ -63,10 +66,9 @@ func NewAgentRequest(req utils.DataProvider,
 		Reply:      rply,
 		Timezone:   timezone,
 		filterS:    filterS,
-		Header:     header,
-		Trailer:    trailer,
 		Opts:       opts,
 		Cfg:        config.CgrConfig().GetDataProvider(),
+		ExtraDP:    extraDP,
 	}
 	if tnt, err := tntTpl.ParseDataProvider(ar); err == nil && tnt != utils.EmptyString {
 		ar.Tenant = tnt
@@ -86,12 +88,11 @@ type AgentRequest struct {
 	Tenant     string
 	Timezone   string
 	filterS    *engine.FilterS
-	Header     utils.DataProvider
-	Trailer    utils.DataProvider
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
 	tmp        *utils.DataNode            // used in case you want to store temporary items and access them later
 	Opts       utils.MapStorage
 	Cfg        utils.DataProvider
+	ExtraDP    map[string]utils.DataProvider
 }
 
 // String implements utils.DataProvider
@@ -108,7 +109,11 @@ func (ar *AgentRequest) RemoteHost() net.Addr {
 func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
-		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+		dp, has := ar.ExtraDP[fldPath[0]]
+		if !has {
+			return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+		}
+		val, err = dp.FieldAsInterface(fldPath[1:])
 	case utils.MetaReq:
 		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
@@ -121,10 +126,6 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
 		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
-	case utils.MetaHdr:
-		val, err = ar.Header.FieldAsInterface(fldPath[1:])
-	case utils.MetaTrl:
-		val, err = ar.Trailer.FieldAsInterface(fldPath[1:])
 	case utils.MetaTmp:
 		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
 	case utils.MetaUCH:

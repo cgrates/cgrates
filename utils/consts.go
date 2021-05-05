@@ -2257,7 +2257,6 @@ const (
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
 	OptsAttributesProcessRuns = "*processRuns"
-	OptsDispatcherMethod      = "*method"
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
 	SchedulerInit             = "SchedulerInit"
@@ -2350,10 +2349,16 @@ const (
 	PartialCSVRecordCacheOpt       = "csvRecordCacheTTL"
 
 	// flatStore
-	FlatstorePrfx            = "fst"
+	FlatstorePrfx = "fst"
+	OptsMethod    = "*method"
+	FstInvite     = "INVITE"
+	FstBye        = "BYE"
+	FstAck        = "ACK"
+
 	FstFailedCallsPrefixOpt  = "fstFailedCallsPrefix"
 	FstPartialRecordCacheOpt = "fstRecordCacheTTL"
-	FstMethodOpt             = "fstMethod" //
+	FstMethodOpt             = "fstMethod"
+	FstOriginIDOpt           = "fstOriginID"
 	FstMadatoryACKOpt        = "fstMadatoryACK"
 
 	// fileXML

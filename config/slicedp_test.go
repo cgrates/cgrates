@@ -43,7 +43,7 @@ func TestNewSliceDp(t *testing.T) {
 	}
 	expected := &SliceDP{
 		req:    record,
-		cache:  utils.MapStorage{},
+		cache:  utils.MapStorage{utils.Length: len(record)},
 		idxAls: index,
 	}
 	if newSliceDP := NewSliceDP(record, index); !reflect.DeepEqual(expected, newSliceDP) {
