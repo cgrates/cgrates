@@ -78,7 +78,7 @@ func TestDataDBCoverage(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaTimings: {
+			utils.MetaCronExp: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {
