@@ -66,7 +66,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 			utils.IfaceAsString(opts[utils.RedisCACertificate]))
 	case utils.Mongo:
 		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
+		if ttl, err = utils.IfaceAsDuration(opts[utils.MongoQueryTimeoutCfg]); err != nil {
 			return
 		}
 		d, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.DataDB, nil, ttl)
@@ -85,32 +85,32 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	switch dbType {
 	case utils.Mongo:
 		var ttl time.Duration
-		if ttl, err = utils.IfaceAsDuration(opts[utils.QueryTimeoutCfg]); err != nil {
+		if ttl, err = utils.IfaceAsDuration(opts[utils.MongoQueryTimeoutCfg]); err != nil {
 			return nil, err
 		}
 		db, err = NewMongoStorage(host, port, name, user, pass, marshaler, utils.StorDB, stringIndexedFields, ttl)
 	case utils.Postgres:
 		var maxConn, maxIdleConn, connMaxLifetime int64
-		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {
+		if maxConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxOpenConnsCfg]); err != nil {
 			return
 		}
-		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.MaxIdleConnsCfg]); err != nil {
+		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxIdleConnsCfg]); err != nil {
 			return
 		}
-		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.ConnMaxLifetimeCfg]); err != nil {
+		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.SQLConnMaxLifetimeCfg]); err != nil {
 			return
 		}
 		db, err = NewPostgresStorage(host, port, name, user, pass, utils.IfaceAsString(opts[utils.SSLModeCfg]),
 			int(maxConn), int(maxIdleConn), int(connMaxLifetime))
 	case utils.MySQL:
 		var maxConn, maxIdleConn, connMaxLifetime int64
-		if maxConn, err = utils.IfaceAsTInt64(opts[utils.MaxOpenConnsCfg]); err != nil {
+		if maxConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxOpenConnsCfg]); err != nil {
 			return
 		}
-		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.MaxIdleConnsCfg]); err != nil {
+		if maxIdleConn, err = utils.IfaceAsTInt64(opts[utils.SQLMaxIdleConnsCfg]); err != nil {
 			return
 		}
-		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.ConnMaxLifetimeCfg]); err != nil {
+		if connMaxLifetime, err = utils.IfaceAsTInt64(opts[utils.SQLConnMaxLifetimeCfg]); err != nil {
 			return
 		}
 		db, err = NewMySQLStorage(host, port, name, user, pass, int(maxConn), int(maxIdleConn),

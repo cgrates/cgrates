@@ -161,7 +161,9 @@ cgrates (0.11.0) UNRELEASED; urgency=medium
   * [AgentS] Added ~*req prefix for freeswitch extra_fields
   * [AgentS] Changed NavigableMap with DataNode for speed improvements
   * [SessionS] RequestType *none returns back the requested usage
-
+  * [DataDB] Updated config options
+  * [StorDB] Updated config options
+  
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
 cgrates (0.10.0) UNRELEASED; urgency=medium

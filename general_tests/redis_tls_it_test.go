@@ -34,9 +34,9 @@ import (
 )
 
 var (
-	redisTLS          = flag.Bool("redis_tls", false, "Run tests with redis tls")
+	redisTLS          = flag.Bool("redisTLS", false, "Run tests with redis tls")
 	redisTLSServer    *exec.Cmd
-	redisTLSEngineCfg = path.Join(*dataDir, "conf", "samples", "redis_tls")
+	redisTLSEngineCfg = path.Join(*dataDir, "conf", "samples", "redisTLS")
 	redisTLSCfg       *config.CGRConfig
 	redisTLSRPC       *rpc.Client
 
