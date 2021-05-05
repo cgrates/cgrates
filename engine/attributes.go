@@ -221,167 +221,12 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 				continue
 			}
 		}
-		var substitute string
-		switch attribute.Type {
-		case utils.MetaConstant:
-			substitute, err = attribute.Value.ParseValue(utils.EmptyString)
-		case utils.MetaVariable, utils.MetaComposed:
-			substitute, err = attribute.Value.ParseDataProvider(dynDP)
-		case utils.MetaUsageDifference:
-			if len(attribute.Value) != 2 {
-				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Value))
-			}
-			var strVal1 string
-			if strVal1, err = attribute.Value[0].ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var strVal2 string
-			if strVal2, err = attribute.Value[1].ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var tEnd time.Time
-			if tEnd, err = utils.ParseTimeDetectLayout(strVal1, utils.EmptyString); err != nil {
-				rply = nil
-				return
-			}
-			var tStart time.Time
-			if tStart, err = utils.ParseTimeDetectLayout(strVal2, utils.EmptyString); err != nil {
-				rply = nil
-				return
-			}
-			substitute = tEnd.Sub(tStart).String()
-		case utils.MetaSum:
-			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var ifaceSum interface{}
-			if ifaceSum, err = utils.Sum(ifaceVals...); err != nil {
-				rply = nil
-				return
-			}
-			substitute = utils.IfaceAsString(ifaceSum)
-		case utils.MetaDifference:
-			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var ifaceSum interface{}
-			if ifaceSum, err = utils.Difference(ifaceVals...); err != nil {
-				rply = nil
-				return
-			}
-			substitute = utils.IfaceAsString(ifaceSum)
-		case utils.MetaMultiply:
-			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var ifaceSum interface{}
-			if ifaceSum, err = utils.Multiply(ifaceVals...); err != nil {
-				rply = nil
-				return
-			}
-			substitute = utils.IfaceAsString(ifaceSum)
-		case utils.MetaDivide:
-			var ifaceVals []interface{}
-			if ifaceVals, err = attribute.Value.GetIfaceFromValues(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var ifaceSum interface{}
-			if ifaceSum, err = utils.Divide(ifaceVals...); err != nil {
-				rply = nil
-				return
-			}
-			substitute = utils.IfaceAsString(ifaceSum)
-		case utils.MetaValueExponent:
-			if len(attribute.Value) != 2 {
-				return nil, fmt.Errorf("invalid arguments <%s> to %s",
-					utils.ToJSON(attribute.Value), utils.MetaValueExponent)
-			}
-			var strVal1 string
-			if strVal1, err = attribute.Value[0].ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var val float64
-			if val, err = strconv.ParseFloat(strVal1, 64); err != nil {
-				return nil, fmt.Errorf("invalid value <%s> to %s",
-					strVal1, utils.MetaValueExponent)
-			}
-			var strVal2 string
-			if strVal2, err = attribute.Value[1].ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var exp int
-			if exp, err = strconv.Atoi(strVal2); err != nil {
-				rply = nil
-				return
-			}
-			substitute = strconv.FormatFloat(val*math.Pow10(exp), 'f', -1, 64)
-		case utils.MetaUnixTimestamp:
-			var val string
-			if val, err = attribute.Value.ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var t time.Time
-			if t, err = utils.ParseTimeDetectLayout(val, alS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
-				rply = nil
-				return
-			}
-			substitute = strconv.Itoa(int(t.Unix()))
-		case utils.MetaPrefix:
-			var pathRsr config.RSRParsers
-			pathRsr, err = config.NewRSRParsers(utils.DynamicDataPrefix+attribute.Path, alS.cgrcfg.GeneralCfg().RSRSep)
-			if err != nil {
-				rply = nil
-				return
-			}
-			var pathVal string
-			if pathVal, err = pathRsr.ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var val string
-			if val, err = attribute.Value.ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			substitute = val + pathVal
-		case utils.MetaSuffix:
-			var pathRsr config.RSRParsers
-			pathRsr, err = config.NewRSRParsers(utils.DynamicDataPrefix+attribute.Path, alS.cgrcfg.GeneralCfg().RSRSep)
-			if err != nil {
-				rply = nil
-				return
-			}
-			var pathVal string
-			if pathVal, err = pathRsr.ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			var val string
-			if val, err = attribute.Value.ParseDataProvider(dynDP); err != nil {
-				rply = nil
-				return
-			}
-			substitute = pathVal + val
-		default: // backwards compatible in case that Type is empty
-			substitute, err = attribute.Value.ParseDataProvider(dynDP)
-		}
-
-		if err != nil {
+		var out interface{}
+		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cgrcfg.GeneralCfg().RoundingDecimals, alS.cgrcfg.GeneralCfg().DefaultTimezone, time.RFC3339, alS.cgrcfg.GeneralCfg().RSRSep); err != nil {
 			rply = nil
 			return
 		}
+		substitute := utils.IfaceAsString(out)
 		//add only once the Path in AlteredFields
 		if !utils.IsSliceMember(rply.AlteredFields, attribute.Path) {
 			rply.AlteredFields = append(rply.AlteredFields, attribute.Path)
@@ -516,6 +361,183 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		MatchedProfiles: matchedIDs,
 		AlteredFields:   alteredFields.AsSlice(),
 		CGREvent:        args.CGREvent,
+	}
+	return
+}
+
+func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.RSRParsers, roundingDec int, timeZone, layout, rsrSep string) (
+	out interface{}, err error) {
+	switch attrType {
+	case utils.MetaNone:
+		return
+	case utils.MetaConstant:
+		out, err = value.ParseValue(utils.EmptyString)
+	case utils.MetaVariable, utils.MetaComposed:
+		out, err = value.ParseDataProvider(dp)
+	case utils.MetaUsageDifference:
+		if len(value) != 2 {
+			return "", fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(value), utils.MetaUsageDifference)
+		}
+		var strVal1 string
+		if strVal1, err = value[0].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var strVal2 string
+		if strVal2, err = value[1].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var tEnd time.Time
+		if tEnd, err = utils.ParseTimeDetectLayout(strVal1, utils.EmptyString); err != nil {
+			return
+		}
+		var tStart time.Time
+		if tStart, err = utils.ParseTimeDetectLayout(strVal2, utils.EmptyString); err != nil {
+			return
+		}
+		out = tEnd.Sub(tStart).String()
+	case utils.MetaSum:
+		var ifaceVals []interface{}
+		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
+			return
+		}
+		out, err = utils.Sum(ifaceVals...)
+	case utils.MetaDifference:
+		var ifaceVals []interface{}
+		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
+			return
+		}
+		out, err = utils.Difference(timeZone, ifaceVals...)
+	case utils.MetaMultiply:
+		var ifaceVals []interface{}
+		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
+			return
+		}
+		out, err = utils.Multiply(ifaceVals...)
+	case utils.MetaDivide:
+		var ifaceVals []interface{}
+		if ifaceVals, err = value.GetIfaceFromValues(dp); err != nil {
+			return
+		}
+		out, err = utils.Divide(ifaceVals...)
+	case utils.MetaValueExponent:
+		if len(value) != 2 {
+			return "", fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(value), utils.MetaValueExponent)
+		}
+		var strVal1 string
+		if strVal1, err = value[0].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var val float64
+		if val, err = strconv.ParseFloat(strVal1, 64); err != nil {
+			return "", fmt.Errorf("invalid value <%s> to %s",
+				strVal1, utils.MetaValueExponent)
+		}
+		var strVal2 string
+		if strVal2, err = value[1].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var exp int
+		if exp, err = strconv.Atoi(strVal2); err != nil {
+			return
+		}
+		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
+			roundingDec, utils.MetaRoundingMiddle), 'f', -1, 64)
+	case utils.MetaUnixTimestamp:
+		var val string
+		if val, err = value.ParseDataProvider(dp); err != nil {
+			return
+		}
+		var t time.Time
+		if t, err = utils.ParseTimeDetectLayout(val, timeZone); err != nil {
+			return
+		}
+		out = strconv.Itoa(int(t.Unix()))
+	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
+		var val string
+		if val, err = value.ParseDataProvider(dp); err != nil {
+			return
+		}
+		var dtFld time.Time
+		dtFld, err = utils.ParseTimeDetectLayout(val, timeZone)
+		if err != nil {
+			return
+		}
+		out = dtFld.Format(layout)
+	case utils.MetaPrefix:
+		var pathRsr config.RSRParsers
+		pathRsr, err = config.NewRSRParsers(path, rsrSep)
+		if err != nil {
+			return
+		}
+		var pathVal string
+		if pathVal, err = pathRsr.ParseDataProvider(dp); err != nil {
+			return
+		}
+		var val string
+		if val, err = value.ParseDataProvider(dp); err != nil {
+			return
+		}
+		out = val + pathVal
+	case utils.MetaSuffix:
+		var pathRsr config.RSRParsers
+		pathRsr, err = config.NewRSRParsers(path, rsrSep)
+		if err != nil {
+			return
+		}
+		var pathVal string
+		if pathVal, err = pathRsr.ParseDataProvider(dp); err != nil {
+			return
+		}
+		var val string
+		if val, err = value.ParseDataProvider(dp); err != nil {
+			return
+		}
+		out = pathVal + val
+	case utils.MetaRemoteHost:
+		out = dp.RemoteHost().String()
+	case utils.MetaCCUsage:
+		if len(value) != 3 {
+			return nil, fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(value), utils.MetaCCUsage)
+		}
+		var strVal1 string
+		if strVal1, err = value[0].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var reqNr int64
+		if reqNr, err = strconv.ParseInt(strVal1, 10, 64); err != nil {
+			err = fmt.Errorf("invalid requestNumber <%s> to %s",
+				strVal1, utils.MetaCCUsage)
+			return
+		}
+		var strVal2 string
+		if strVal2, err = value[1].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var usedCCTime time.Duration
+		if usedCCTime, err = utils.ParseDurationWithNanosecs(strVal2); err != nil {
+			err = fmt.Errorf("invalid usedCCTime <%s> to %s",
+				strVal2, utils.MetaCCUsage)
+			return
+		}
+		var strVal3 string
+		if strVal3, err = value[2].ParseDataProvider(dp); err != nil {
+			return
+		}
+		var debitItvl time.Duration
+		if debitItvl, err = utils.ParseDurationWithNanosecs(strVal3); err != nil {
+			err = fmt.Errorf("invalid debitInterval <%s> to %s",
+				strVal3, utils.MetaCCUsage)
+			return
+		}
+		if reqNr--; reqNr < 0 { // terminate will be ignored (init request should always be 0)
+			reqNr = 0
+		}
+		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
+	default:
+		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", attrType)
 	}
 	return
 }

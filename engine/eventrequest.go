@@ -20,11 +20,8 @@ package engine
 
 import (
 	"fmt"
-	"math"
 	"net"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -192,157 +189,8 @@ func (eeR *EventRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLea
 // ParseField outputs the value based on the template item
 func (eeR *EventRequest) ParseField(
 	cfgFld *config.FCTemplate) (out interface{}, err error) {
-	var isString bool
-	switch cfgFld.Type {
-	default:
-		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
-	case utils.MetaNone:
-		return
-	case utils.MetaFiller:
-		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		cfgFld.Padding = utils.MetaRight
-		isString = true
-	case utils.MetaConstant:
-		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
-		isString = true
-	case utils.MetaRemoteHost:
-		out = eeR.RemoteHost().String()
-		isString = true
-	case utils.MetaVariable, utils.MetaComposed, utils.MetaGroup:
-		out, err = cfgFld.Value.ParseDataProvider(eeR)
-		isString = true
-	case utils.MetaUsageDifference:
-		if len(cfgFld.Value) != 2 {
-			return nil, fmt.Errorf("invalid arguments <%s> to %s",
-				utils.ToJSON(cfgFld.Value), utils.MetaUsageDifference)
-		}
-		var strVal1 string
-		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var strVal2 string
-		if strVal2, err = cfgFld.Value[1].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var tEnd time.Time
-		if tEnd, err = utils.ParseTimeDetectLayout(strVal1, eeR.Timezone); err != nil {
-			return
-		}
-		var tStart time.Time
-		if tStart, err = utils.ParseTimeDetectLayout(strVal2, eeR.Timezone); err != nil {
-			return
-		}
-		out = tEnd.Sub(tStart).String()
-		isString = true
-	case utils.MetaCCUsage:
-		if len(cfgFld.Value) != 3 {
-			return nil, fmt.Errorf("invalid arguments <%s> to %s",
-				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
-		}
-		var strVal1 string
-		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var reqNr int64
-		if reqNr, err = strconv.ParseInt(strVal1, 10, 64); err != nil {
-			err = fmt.Errorf("invalid requestNumber <%s> to %s",
-				strVal1, utils.MetaCCUsage)
-			return
-		}
-		var strVal2 string
-		if strVal2, err = cfgFld.Value[1].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var usedCCTime time.Duration
-		if usedCCTime, err = utils.ParseDurationWithNanosecs(strVal2); err != nil {
-			err = fmt.Errorf("invalid usedCCTime <%s> to %s",
-				strVal2, utils.MetaCCUsage)
-			return
-		}
-		var strVal3 string
-		if strVal3, err = cfgFld.Value[2].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var debitItvl time.Duration
-		if debitItvl, err = utils.ParseDurationWithNanosecs(strVal3); err != nil {
-			err = fmt.Errorf("invalid debitInterval <%s> to %s",
-				strVal3, utils.MetaCCUsage)
-			return
-		}
-
-		if reqNr--; reqNr < 0 { // terminate will be ignored (init request should always be 0)
-			reqNr = 0
-		}
-		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
-	case utils.MetaSum:
-		var iFaceVals []interface{}
-		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
-			return
-		}
-		out, err = utils.Sum(iFaceVals...)
-	case utils.MetaDifference:
-		var iFaceVals []interface{}
-		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
-			return
-		}
-		out, err = utils.Difference(iFaceVals...)
-	case utils.MetaMultiply:
-		var iFaceVals []interface{}
-		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
-			return
-		}
-		out, err = utils.Multiply(iFaceVals...)
-	case utils.MetaDivide:
-		var iFaceVals []interface{}
-		if iFaceVals, err = cfgFld.Value.GetIfaceFromValues(eeR); err != nil {
-			return
-		}
-		out, err = utils.Divide(iFaceVals...)
-	case utils.MetaValueExponent:
-		if len(cfgFld.Value) != 2 {
-			return nil, fmt.Errorf("invalid arguments <%s> to %s",
-				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
-		}
-		var strVal1 string
-		if strVal1, err = cfgFld.Value[0].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var val float64
-		if val, err = strconv.ParseFloat(strVal1, 64); err != nil {
-			err = fmt.Errorf("invalid value <%s> to %s",
-				strVal1, utils.MetaValueExponent)
-			return
-		}
-		var strVal2 string
-		if strVal2, err = cfgFld.Value[1].ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var exp int
-		if exp, err = strconv.Atoi(strVal2); err != nil {
-			return
-		}
-		out = strconv.FormatFloat(val*math.Pow10(exp), 'f', -1, 64)
-	case utils.MetaUnixTimestamp:
-		var val string
-		if val, err = cfgFld.Value.ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var t1 time.Time
-		if t1, err = utils.ParseTimeDetectLayout(val, cfgFld.Timezone); err != nil {
-			return
-		}
-		out = strconv.Itoa(int(t1.Unix()))
-	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
-		var val string
-		if val, err = cfgFld.Value.ParseDataProvider(eeR); err != nil {
-			return
-		}
-		var dtFld time.Time
-		dtFld, err = utils.ParseTimeDetectLayout(val, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone))
-		if err != nil {
-			return
-		}
-		out = dtFld.Format(cfgFld.Layout)
+	tmpType := cfgFld.Type
+	switch tmpType {
 	case utils.MetaMaskedDestination:
 		//check if we have destination in the event
 		var dst string
@@ -355,14 +203,20 @@ func (eeR *EventRequest) ParseField(
 			CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
 			out = utils.MaskSuffix(dst, cfgFld.MaskLen)
 		}
-
+		return
+	case utils.MetaFiller:
+		cfgFld.Padding = utils.MetaRight
+		tmpType = utils.MetaConstant
+	case utils.MetaGroup:
+		tmpType = utils.MetaVariable
 	}
+	out, err = ParseAttribute(eeR, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout, config.CgrConfig().GeneralCfg().RSRSep)
 
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {
 		return
 	}
-	if isString { // format the string additionally with fmtFieldWidth
+	if utils.StringTmplType.Has(tmpType) { // format the string additionally with fmtFieldWidth
 		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
 			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 	}
