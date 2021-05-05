@@ -190,7 +190,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		} else if method != utils.FstInvite &&
 			method != utils.FstBye &&
 			method != utils.FstAck {
-			return fmt.Errorf("Unsuported method<%s>", method)
+			return fmt.Errorf("unsupported method: <%q>", method)
 		}
 
 		var originID string
@@ -198,21 +198,28 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			return
 		}
 
+		cacheKey := utils.ConcatenatedKey(originID, method)
+		if rdr.cache.HasItem(cacheKey) {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Overwriting the %s method for record <%s>", utils.ERs, method, originID))
+			rdr.cache.Set(cacheKey, &fstRecord{method: method, values: record, fileName: fName}, []string{originID})
+			continue
+		}
 		records := rdr.cache.GetGroupItems(originID)
 
 		if lrecords := len(records); !failedCallsFile && // do not set in cache if we know that the calls are failed
 			(lrecords == 0 ||
 				(mandatoryAcK && lrecords != 2) ||
 				(!mandatoryAcK && lrecords != 1)) {
-			rdr.cache.Set(utils.ConcatenatedKey(originID, method), &fstRecord{method: method, values: record, fileName: fName}, []string{originID})
+			rdr.cache.Set(cacheKey, &fstRecord{method: method, values: record, fileName: fName}, []string{originID})
 			continue
 		}
-		rdr.cache.RemoveGroup(originID)
-		extraDP := map[string]utils.DataProvider{method: req}
+		extraDP := map[string]utils.DataProvider{utils.FstMethodToPrfx[method]: req}
 		for _, record := range records {
 			req := record.(*fstRecord)
-			extraDP[req.method] = config.NewSliceDP(req.values, nil)
+			rdr.cache.Set(utils.ConcatenatedKey(originID, req.method), nil, []string{originID})
+			extraDP[utils.FstMethodToPrfx[req.method]] = config.NewSliceDP(req.values, nil)
 		}
+		rdr.cache.RemoveGroup(originID)
 
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
@@ -259,72 +266,11 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	return
 }
 
-/*
-func NewUnpairedRecord(record []string, timezone string, fileName string) (*UnpairedRecord, error) {
-	if len(record) < 7 {
-		return nil, errors.New("MISSING_IE")
-	}
-	pr := &UnpairedRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record, FileName: fileName}
-	var err error
-	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
-		return nil, err
-	}
-	return pr, nil
-}
-
-// UnpairedRecord is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
-type UnpairedRecord struct {
-	Method    string    // INVITE or BYE
-	OriginID  string    // Copute here the OriginID
-	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
-	Values    []string  // Can contain original values or updated via UpdateValues
-	FileName  string
-}
-
-// Pairs INVITE and BYE into final record containing as last element the duration
-func pairToRecord(part1, part2 *UnpairedRecord) ([]string, error) {
-	var invite, bye *UnpairedRecord
-	if part1.Method == "INVITE" {
-		invite = part1
-	} else if part2.Method == "INVITE" {
-		invite = part2
-	} else {
-		return nil, errors.New("MISSING_INVITE")
-	}
-	if part1.Method == "BYE" {
-		bye = part1
-	} else if part2.Method == "BYE" {
-		bye = part2
-	} else {
-		return nil, errors.New("MISSING_BYE")
-	}
-	if len(invite.Values) != len(bye.Values) {
-		return nil, errors.New("INCONSISTENT_VALUES_LENGTH")
-	}
-	record := invite.Values
-	for idx := range record {
-		switch idx {
-		case 0, 1, 2, 3, 6: // Leave these values as they are
-		case 4, 5:
-			record[idx] = bye.Values[idx] // Update record with status from bye
-		default:
-			if bye.Values[idx] != "" { // Any value higher than 6 is dynamically inserted, overwrite if non empty
-				record[idx] = bye.Values[idx]
-			}
-
-		}
-	}
-	callDur := bye.Timestamp.Sub(invite.Timestamp)
-	record = append(record, strconv.FormatFloat(callDur.Seconds(), 'f', -1, 64))
-	return record, nil
-}
-*/
 func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
 	if value == nil {
 		return
 	}
 	unpRcd := value.(*fstRecord)
-
 	dumpFilePath := path.Join(rdr.Config().ProcessedPath, unpRcd.fileName+utils.TmpSuffix)
 	fileOut, err := os.Create(dumpFilePath)
 	if err != nil {
