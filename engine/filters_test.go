@@ -1622,7 +1622,7 @@ func TestAPIBan(t *testing.T) {
 	}
 }
 
-func TestFiltersPassTimingsParseFailNotFound(t *testing.T) {
+func TestFiltersPassTimingsErrParseNotFound(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaTimings, "~*req.AnswerTime", []string{"2018-01-07T17:00:10Z"})
 	if err != nil {
 		t.Fatal(err)
@@ -1639,7 +1639,7 @@ func TestFiltersPassTimingsParseFailNotFound(t *testing.T) {
 	}
 }
 
-func TestFiltersPassTimingsParseFailWrongPath(t *testing.T) {
+func TestFiltersPassTimingsErrParseWrongPath(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaTimings, "~*req.AnswerTime", []string{"2018-01-07T17:00:10Z"})
 	if err != nil {
 		t.Fatal(err)
@@ -1660,7 +1660,7 @@ func TestFiltersPassTimingsParseFailWrongPath(t *testing.T) {
 	}
 }
 
-func TestFiltersPassTimingsTimeConvertFail(t *testing.T) {
+func TestFiltersPassTimingsTimeConvertErr(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaTimings, "~*req.AnswerTime", []string{"2018-01-07T17:00:10Z"})
 	if err != nil {
 		t.Fatal(err)
@@ -1766,7 +1766,7 @@ func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
 	}
 }
 
-func TestFiltersPassTimingsCallFail(t *testing.T) {
+func TestFiltersPassTimingsCallErr(t *testing.T) {
 
 	fltr, err := NewFilterRule(utils.MetaTimings, "~*req.AnswerTime", []string{"2018-01-07T17:00:10Z"})
 	if err != nil {
@@ -1788,7 +1788,7 @@ func TestFiltersPassTimingsCallFail(t *testing.T) {
 	}
 }
 
-func TestFiltersPassDestinationsParseFailNotFound(t *testing.T) {
+func TestFiltersPassDestinationsErrParseNotFound(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1805,7 +1805,7 @@ func TestFiltersPassDestinationsParseFailNotFound(t *testing.T) {
 	}
 }
 
-func TestFiltersPassDestinationsParseFailWrongPath(t *testing.T) {
+func TestFiltersPassDestinationsErrParseWrongPath(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1826,7 +1826,7 @@ func TestFiltersPassDestinationsParseFailWrongPath(t *testing.T) {
 	}
 }
 
-func TestFiltersPassDestinationsCallFail(t *testing.T) {
+func TestFiltersPassDestinationsCallErr(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1955,7 +1955,7 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 	}
 }
 
-func TestFiltersPassRSRFailParseWrongPath(t *testing.T) {
+func TestFiltersPassRSRErrParseWrongPath(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
 	if err != nil {
 		t.Fatal(err)
@@ -1976,7 +1976,7 @@ func TestFiltersPassRSRFailParseWrongPath(t *testing.T) {
 	}
 }
 
-func TestFiltersPassGreaterThanFailParseWrongPath(t *testing.T) {
+func TestFiltersPassGreaterThanErrParseWrongPath(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaGreaterThan, "~*req.Usage", []string{"10"})
 	if err != nil {
 		t.Fatal(err)
@@ -2021,7 +2021,7 @@ func TestFiltersPassGreaterThanErrIncomparable(t *testing.T) {
 	}
 }
 
-func TestFiltersPassGreaterThanFailParseValues(t *testing.T) {
+func TestFiltersPassGreaterThanErrParseValues(t *testing.T) {
 	fltr, err := NewFilterRule(utils.MetaGreaterThan, "~*req.Usage", []string{"~10"})
 	if err != nil {
 		t.Fatal(err)

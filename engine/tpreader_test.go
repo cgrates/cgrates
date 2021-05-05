@@ -66,7 +66,7 @@ func TestCallCacheNoCaching(t *testing.T) {
 	}
 }
 
-func TestCallCacheReloadCacheFirstCallFail(t *testing.T) {
+func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	tmp1, tmp2 := connMgr, Cache
 	defer func() {
 		connMgr = tmp1
@@ -133,7 +133,7 @@ func TestCallCacheReloadCacheFirstCallFail(t *testing.T) {
 	}
 }
 
-func TestCallCacheReloadCacheSecondCallFailed(t *testing.T) {
+func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	tmp1, tmp2 := connMgr, Cache
 	defer func() {
 		connMgr = tmp1
