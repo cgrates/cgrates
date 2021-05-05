@@ -2355,6 +2355,10 @@ const (
 	FstBye        = "BYE"
 	FstAck        = "ACK"
 
+	MetaInvite = "*invite"
+	MetaBye    = "*bye"
+	MetaAck    = "*ack"
+
 	FstFailedCallsPrefixOpt  = "fstFailedCallsPrefix"
 	FstPartialRecordCacheOpt = "fstRecordCacheTTL"
 	FstMethodOpt             = "fstMethod"
@@ -2382,6 +2386,15 @@ const (
 	KafkaTopic   = "kafkaTopic"
 	KafkaGroupID = "kafkaGroupID"
 	KafkaMaxWait = "kafkaMaxWait"
+)
+
+var (
+	// FstMethodToPrfx used for flatstore to convert the method in DP prefix
+	FstMethodToPrfx = map[string]string{
+		FstInvite: MetaInvite,
+		FstBye:    MetaBye,
+		FstAck:    MetaAck,
+	}
 )
 
 // Analyzers constants

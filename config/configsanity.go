@@ -496,7 +496,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					}
 				}
 				if rdr.Type == utils.MetaPartialCSV {
-					if act, has := rdr.Opts[utils.PartialCSVCacheExpiryActionOpt]; has && (utils.IfaceAsString(act) != utils.MetaDumpToFile ||
+					if act, has := rdr.Opts[utils.PartialCSVCacheExpiryActionOpt]; has && (utils.IfaceAsString(act) != utils.MetaDumpToFile &&
 						utils.IfaceAsString(act) != utils.MetaPostCDR) {
 						return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
 					}
