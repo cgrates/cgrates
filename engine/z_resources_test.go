@@ -2820,3 +2820,56 @@ func TestResourceCaching(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resources[0].ttl, mres[0].ttl)
 	}
 }
+
+func TestResourceAllocateResourceOtherDB(t *testing.T) {
+	rProf := &ResourceProfile{
+		Tenant:       "cgrates.org",
+		ID:           "RL_DB",
+		FilterIDs:    []string{"*string:~*opts.Resource:RL_DB"},
+		Weight:       100,
+		Limit:        2,
+		ThresholdIDs: []string{utils.MetaNone},
+		UsageTTL:     -time.Nanosecond,
+	}
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fltS := NewFilterS(cfg, nil, dm)
+	rs := NewResourceService(dm, cfg, fltS, nil)
+	if err := dm.SetResourceProfile(rProf, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetResource(&Resource{
+		Tenant: "cgrates.org",
+		ID:     "RL_DB",
+		Usages: map[string]*ResourceUsage{
+			"RU1": { // the resource in DB is expired (should be cleaned when the next allocate is called)
+				Tenant:     "cgrates.org",
+				ID:         "RU1",
+				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+				Units:      1,
+			},
+		},
+		TTLIdx: []string{"RU1"},
+	}, nil, 2, true); err != nil { // simulate how the resource is stored in redis or mongo(non-exported fields are not populated)
+		t.Fatal(err)
+	}
+	var reply string
+	exp := rProf.ID
+	if err := rs.V1AllocateResources(utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "ef0f554",
+			Event:   map[string]interface{}{"": ""},
+			APIOpts: map[string]interface{}{"Resource": "RL_DB"},
+		},
+		UsageID: "56156434-2e44-4f16-a766-086f10b413cd",
+		Units:   1,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != exp {
+		t.Errorf("Expected: %q, received: %q", exp, reply)
+	}
+
+}
