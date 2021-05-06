@@ -3848,7 +3848,7 @@ cgrates.org,FILTERS_REM_1
 		Tenant: "cgrates.org",
 		ID:     "FILTERS_REM_1",
 	}
-	if err := ldr.dm.SetFilter(eFltr1, true); err != nil {
+	if err := ldr.dm.SetFilter(context.TODO(), eFltr1, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != nil {

@@ -437,36 +437,3 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheTBLTPAccounts:        {},
 	}
 }
-
-func GetDefaultEmptyArgCachePrefix() map[string][]string {
-	return map[string][]string{
-		utils.DestinationPrefix:             nil,
-		utils.ReverseDestinationPrefix:      nil,
-		utils.ResourceProfilesPrefix:        nil,
-		utils.ResourcesPrefix:               nil,
-		utils.StatQueuePrefix:               nil,
-		utils.StatQueueProfilePrefix:        nil,
-		utils.ThresholdPrefix:               nil,
-		utils.ThresholdProfilePrefix:        nil,
-		utils.FilterPrefix:                  nil,
-		utils.RouteProfilePrefix:            nil,
-		utils.AttributeProfilePrefix:        nil,
-		utils.ChargerProfilePrefix:          nil,
-		utils.DispatcherProfilePrefix:       nil,
-		utils.DispatcherHostPrefix:          nil,
-		utils.RateProfilePrefix:             nil,
-		utils.ActionProfilePrefix:           nil,
-		utils.TimingsPrefix:                 nil,
-		utils.AttributeFilterIndexes:        nil,
-		utils.ResourceFilterIndexes:         nil,
-		utils.StatFilterIndexes:             nil,
-		utils.ThresholdFilterIndexes:        nil,
-		utils.RouteFilterIndexes:            nil,
-		utils.ChargerFilterIndexes:          nil,
-		utils.DispatcherFilterIndexes:       nil,
-		utils.RateProfilesFilterIndexPrfx:   nil,
-		utils.RateFilterIndexPrfx:           nil,
-		utils.ActionProfilesFilterIndexPrfx: nil,
-		utils.FilterIndexPrfx:               nil,
-	}
-}

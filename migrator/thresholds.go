@@ -164,7 +164,7 @@ func (m *Migrator) migrateThresholds() (err error) {
 		if !m.dryRun {
 			//set threshond
 			if migratedFrom == 1 {
-				if err = m.dmOut.DataManager().SetFilter(filter, true); err != nil {
+				if err = m.dmOut.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
 					return
 				}
 				if err = m.dmOut.DataManager().SetThreshold(th, 0, true); err != nil {

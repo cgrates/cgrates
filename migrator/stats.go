@@ -219,7 +219,7 @@ func (m *Migrator) migrateStats() (err error) {
 		}
 		if !m.dryRun {
 			if vrs[utils.StatS] == 1 {
-				if err = m.dmOut.DataManager().SetFilter(filter, true); err != nil {
+				if err = m.dmOut.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
 					return
 				}
 			}
