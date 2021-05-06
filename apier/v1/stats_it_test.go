@@ -70,7 +70,9 @@ var (
 		testV1STSInitDataDb,
 		testV1STSStartEngine,
 		testV1STSRpcConn,
+		testV1STSCacheQueueBeforeLoad,
 		testV1STSFromFolder,
+		testV1STSCacheQueueAfterLoad,
 		testV1STSGetStats,
 		testV1STSProcessEvent,
 		testV1STSGetStatsAfterRestart,
@@ -163,6 +165,29 @@ func testV1STSRpcConn(t *testing.T) {
 	stsV1Rpc, err = newRPCClient(stsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func testV1STSCacheQueueBeforeLoad(t *testing.T) { // cache it with not found
+	var replySq engine.StatQueue
+	if err := stsV1Rpc.Call(utils.StatSv1GetStatQueue, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+		},
+	}, &replySq); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal(err)
+	}
+}
+
+func testV1STSCacheQueueAfterLoad(t *testing.T) { // the APIerSv1LoadTariffPlanFromFolder should also reload the cache for resources
+	if err := stsV1Rpc.Call(utils.StatSv1GetStatQueue, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats1",
+		},
+	}, nil); err != nil { // do not care about value only that they were recached correctly
+		t.Fatal(err)
 	}
 }
 

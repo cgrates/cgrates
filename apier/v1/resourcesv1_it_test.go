@@ -45,7 +45,9 @@ var (
 		testV1RsResetStorDb,
 		testV1RsStartEngine,
 		testV1RsRpcConn,
+		testV1RsCacheResourceBeforeLoad,
 		testV1RsFromFolder,
+		testV1RsCacheResourceAfterLoad,
 		testV1RsGetResourcesForEvent,
 		testV1RsTTL0,
 		testV1RsAllocateResource,
@@ -139,6 +141,31 @@ func testV1RsRpcConn(t *testing.T) {
 	rlsV1Rpc, err = newRPCClient(rlsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func testV1RsCacheResourceBeforeLoad(t *testing.T) { // cache it with not found
+	var rplyRes *engine.Resource
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
+	}, &rplyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1RsCacheResourceAfterLoad(t *testing.T) { // the APIerSv1LoadTariffPlanFromFolder should also reload the cache for resources
+	var rplyRes *engine.Resource
+	expRes := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup1",
+		Usages: map[string]*engine.ResourceUsage{},
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResource, &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"},
+	}, &rplyRes); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expRes, rplyRes) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expRes), utils.ToJSON(rplyRes))
 	}
 }
 
@@ -873,7 +900,6 @@ func testV1RsAllocateUnlimited(t *testing.T) {
 	} else if reply != "CustomUnlimitedMessage" {
 		t.Errorf("Expecting: %+v, received: %+v", "CustomUnlimitedMessage", reply)
 	}
-
 	var rplyRes *engine.Resource
 	expRes := &engine.Resource{
 		Tenant: "cgrates.org",

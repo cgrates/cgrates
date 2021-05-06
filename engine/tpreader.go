@@ -1889,6 +1889,24 @@ func (tpr *TpReader) ShowStatistics() {
 // GetLoadedIds returns the identities loaded for a specific category, useful for cache reloads
 func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
+	case utils.ResourcesPrefix:
+		keys := make([]string, len(tpr.resources))
+		for i, k := range tpr.resources {
+			keys[i] = k.TenantID()
+		}
+		return keys, nil
+	case utils.StatQueuePrefix:
+		keys := make([]string, len(tpr.statQueues))
+		for i, k := range tpr.statQueues {
+			keys[i] = k.TenantID()
+		}
+		return keys, nil
+	case utils.ThresholdPrefix:
+		keys := make([]string, len(tpr.thresholds))
+		for i, k := range tpr.thresholds {
+			keys[i] = k.TenantID()
+		}
+		return keys, nil
 	case utils.DestinationPrefix:
 		keys := make([]string, len(tpr.destinations))
 		i := 0
