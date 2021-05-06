@@ -91,7 +91,7 @@ func durInternalRater(cd *engine.CallDescriptorWithAPIOpts) (time.Duration, erro
 	dm := engine.NewDataManager(dbConn, cgrConfig.CacheCfg(), nil) // for the momentn we use here "" for sentinelName
 	defer dm.DataDB().Close()
 	engine.SetDataStorage(dm)
-	if err := dm.LoadDataDBCache(engine.GetDefaultEmptyArgCachePrefix()); err != nil {
+	if err := engine.LoadAllDataDBToCache(dm); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)

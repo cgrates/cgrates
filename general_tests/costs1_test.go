@@ -83,7 +83,7 @@ cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	dataDB.LoadDataDBCache(engine.GetDefaultEmptyArgCachePrefix())
+	engine.LoadAllDataDBToCache(dataDB)
 
 	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, utils.EmptyString)); cachedRPlans != 3 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
