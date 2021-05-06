@@ -220,13 +220,27 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 
 // Equals returns the equality between two ExtEventCharges
 func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
-	if eEc.Abstracts != exCh.Abstracts ||
-		eEc.Concretes != exCh.Concretes {
-		return
-	}
-	if eEc.Charges == nil && exCh.Charges != nil ||
-		eEc.Charges != nil && exCh.Charges == nil ||
-		len(eEc.Charges) != len(exCh.Charges) {
+	if !((eEc.Abstracts == nil && exCh.Abstracts == nil) ||
+		(eEc.Abstracts != nil && exCh.Abstracts != nil &&
+			*eEc.Abstracts == *exCh.Abstracts)) ||
+		!((eEc.Concretes == nil && exCh.Concretes == nil) ||
+			(eEc.Concretes != nil && exCh.Concretes != nil &&
+				*eEc.Concretes == *exCh.Concretes)) ||
+		(eEc.Charges == nil && exCh.Charges != nil ||
+			eEc.Charges != nil && exCh.Charges == nil ||
+			len(eEc.Charges) != len(exCh.Charges)) ||
+		(eEc.Accounting == nil && exCh.Accounting != nil ||
+			eEc.Accounting != nil && exCh.Accounting == nil ||
+			len(eEc.Accounting) != len(exCh.Accounting)) ||
+		(eEc.UnitFactors == nil && exCh.UnitFactors != nil ||
+			eEc.UnitFactors != nil && exCh.UnitFactors == nil ||
+			len(eEc.UnitFactors) != len(exCh.UnitFactors)) ||
+		(eEc.Rating == nil && exCh.Rating != nil ||
+			eEc.Rating != nil && exCh.Rating == nil ||
+			len(eEc.Rating) != len(exCh.Rating)) ||
+		(eEc.Accounts == nil && exCh.Accounts != nil ||
+			eEc.Accounts != nil && exCh.Accounts == nil ||
+			len(eEc.Accounts) != len(exCh.Accounts)) {
 		return
 	}
 	for idx, val := range exCh.Charges {
@@ -234,40 +248,20 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 			return
 		}
 	}
-	if eEc.Accounting == nil && exCh.Accounting != nil ||
-		eEc.Accounting != nil && exCh.Accounting == nil ||
-		len(eEc.Accounting) != len(exCh.Accounting) {
-		return
-	}
 	for key, val := range eEc.Accounting {
 		if ok := val.Equals(exCh.Accounting[key]); !ok {
 			return
 		}
-	}
-	if eEc.UnitFactors == nil && exCh.UnitFactors != nil ||
-		eEc.UnitFactors != nil && exCh.UnitFactors == nil ||
-		len(eEc.UnitFactors) != len(exCh.UnitFactors) {
-		return
 	}
 	for key, val := range eEc.UnitFactors {
 		if ok := val.Equals(exCh.UnitFactors[key]); !ok {
 			return
 		}
 	}
-	if eEc.Rating == nil && exCh.Rating != nil ||
-		eEc.Rating != nil && exCh.Rating == nil ||
-		len(eEc.Rating) != len(exCh.Rating) {
-		return
-	}
 	for key, val := range eEc.Rating {
 		if ok := val.Equals(exCh.Rating[key]); !ok {
 			return
 		}
-	}
-	if eEc.Accounts == nil && exCh.Accounts != nil ||
-		eEc.Accounts != nil && exCh.Accounts == nil ||
-		len(eEc.Rating) != len(exCh.Rating) {
-		return
 	}
 	for key, val := range eEc.Accounts {
 		if ok := val.Equals(exCh.Accounts[key]); !ok {
@@ -279,23 +273,29 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 
 // Equals returns the equality between two EventCharges
 func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
-	if eC.Abstracts == nil && evCh.Abstracts != nil ||
+	if (eC.Abstracts == nil && evCh.Abstracts != nil ||
 		eC.Abstracts != nil && evCh.Abstracts == nil ||
-		eC.Concretes == nil && evCh.Concretes != nil ||
-		eC.Concretes != nil && evCh.Concretes == nil {
-		return
-	}
-	if eC.Abstracts != nil && evCh.Abstracts != nil &&
-		eC.Abstracts.Compare(evCh.Abstracts) != 0 {
-		return
-	}
-	if eC.Concretes != nil && evCh.Concretes != nil &&
-		eC.Concretes.Compare(evCh.Concretes) != 0 {
-		return
-	}
-	if eC.Charges == nil && evCh.Charges != nil ||
-		eC.Charges != nil && evCh.Charges == nil ||
-		len(eC.Charges) != len(evCh.Charges) {
+		(eC.Abstracts != nil && evCh.Abstracts != nil &&
+			eC.Abstracts.Compare(evCh.Abstracts) != 0)) ||
+		(eC.Concretes == nil && evCh.Concretes != nil ||
+			eC.Concretes != nil && evCh.Concretes == nil ||
+			(eC.Concretes != nil && evCh.Concretes != nil &&
+				eC.Concretes.Compare(evCh.Concretes) != 0)) ||
+		(eC.Charges == nil && evCh.Charges != nil ||
+			eC.Charges != nil && evCh.Charges == nil ||
+			len(eC.Charges) != len(evCh.Charges)) ||
+		(eC.Accounting == nil && evCh.Accounting != nil ||
+			eC.Accounting != nil && evCh.Accounting == nil ||
+			len(eC.Accounting) != len(evCh.Accounting)) ||
+		(eC.UnitFactors == nil && evCh.UnitFactors != nil ||
+			eC.UnitFactors != nil && evCh.UnitFactors == nil ||
+			len(eC.UnitFactors) != len(evCh.UnitFactors)) ||
+		(eC.Rating == nil && evCh.Rating != nil ||
+			eC.Rating != nil && evCh.Rating == nil ||
+			len(eC.Rating) != len(evCh.Rating)) ||
+		(eC.Accounts == nil && evCh.Accounts != nil ||
+			eC.Accounts != nil && evCh.Accounts == nil ||
+			len(eC.Accounts) != len(evCh.Accounts)) {
 		return
 	}
 	for idx, val := range eC.Charges {
@@ -303,40 +303,20 @@ func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 			return
 		}
 	}
-	if eC.Accounting == nil && evCh.Accounting != nil ||
-		eC.Accounting != nil && evCh.Accounting == nil ||
-		len(eC.Accounting) != len(evCh.Accounting) {
-		return
-	}
 	for key, val := range eC.Accounting {
 		if ok := val.Equals(evCh.Accounting[key]); !ok {
 			return
 		}
-	}
-	if eC.UnitFactors == nil && evCh.UnitFactors != nil ||
-		eC.UnitFactors != nil && evCh.UnitFactors == nil ||
-		len(eC.UnitFactors) != len(evCh.UnitFactors) {
-		return
 	}
 	for key, val := range eC.UnitFactors {
 		if ok := val.Equals(evCh.UnitFactors[key]); !ok {
 			return
 		}
 	}
-	if eC.Rating == nil && evCh.Rating != nil ||
-		eC.Rating != nil && evCh.Rating == nil ||
-		len(eC.Rating) != len(evCh.Rating) {
-		return
-	}
 	for key, val := range eC.Rating {
 		if ok := val.Equals(evCh.Rating[key]); !ok {
 			return
 		}
-	}
-	if eC.Accounts == nil && evCh.Accounts != nil ||
-		eC.Accounts != nil && evCh.Accounts == nil ||
-		len(eC.Accounts) != len(evCh.Accounts) {
-		return
 	}
 	for key, val := range eC.Accounts {
 		if ok := val.Equals(evCh.Accounts[key]); !ok {
@@ -457,52 +437,55 @@ func (aC *AccountCharge) AsExtAccountCharge() (eAc *ExtAccountCharge, err error)
 
 // Equals compares two ExtAccountCharge
 func (eAc *ExtAccountCharge) Equals(extAc *ExtAccountCharge) (eq bool) {
-	if eAc.AttributeIDs == nil && extAc.AttributeIDs != nil ||
+	if (eAc.AttributeIDs == nil && extAc.AttributeIDs != nil ||
 		eAc.AttributeIDs != nil && extAc.AttributeIDs == nil ||
-		len(eAc.AttributeIDs) != len(extAc.AttributeIDs) {
+		len(eAc.AttributeIDs) != len(extAc.AttributeIDs)) ||
+		(eAc.JoinedChargeIDs == nil && extAc.JoinedChargeIDs != nil ||
+			eAc.JoinedChargeIDs != nil && extAc.JoinedChargeIDs == nil ||
+			len(eAc.JoinedChargeIDs) != len(extAc.JoinedChargeIDs)) ||
+		(eAc.AccountID != extAc.AccountID ||
+			eAc.BalanceID != extAc.BalanceID ||
+			eAc.UnitFactorID != extAc.UnitFactorID ||
+			eAc.RatingID != extAc.RatingID) ||
+		!((eAc.Units == nil && extAc.Units == nil) ||
+			(eAc.Units != nil && extAc.Units != nil && *eAc.Units == *extAc.Units)) ||
+		!((eAc.BalanceLimit == nil && extAc.BalanceLimit == nil) ||
+			(eAc.BalanceLimit != nil && extAc.BalanceLimit != nil && *eAc.BalanceLimit == *extAc.BalanceLimit)) {
 		return
 	}
-	for i := range eAc.AttributeIDs {
-		if eAc.AttributeIDs[i] != extAc.AttributeIDs[i] {
+	for idx, val := range eAc.AttributeIDs {
+		if val != extAc.AttributeIDs[idx] {
 			return
 		}
 	}
-	if eAc.JoinedChargeIDs == nil && extAc.JoinedChargeIDs != nil ||
-		eAc.JoinedChargeIDs != nil && extAc.JoinedChargeIDs == nil ||
-		len(eAc.JoinedChargeIDs) != len(extAc.JoinedChargeIDs) {
-		return
-	}
-	for i := range eAc.JoinedChargeIDs {
-		if eAc.JoinedChargeIDs[i] != extAc.JoinedChargeIDs[i] {
+	for idx, val := range eAc.JoinedChargeIDs {
+		if val != extAc.JoinedChargeIDs[idx] {
 			return
 		}
 	}
-	if eAc.AccountID != extAc.AccountID ||
-		eAc.BalanceID != extAc.BalanceID ||
-		eAc.UnitFactorID != extAc.UnitFactorID ||
-		eAc.RatingID != extAc.RatingID {
-		return
-	}
-	if eAc.Units == nil && extAc.Units != nil ||
-		eAc.Units != nil && extAc.Units == nil {
-		return
-	}
-	if eAc.BalanceLimit == nil && extAc.BalanceLimit != nil ||
-		eAc.BalanceLimit != nil && extAc.BalanceLimit == nil {
-		return
-	}
-	if eAc.Units == nil && extAc.Units == nil ||
-		eAc.BalanceLimit == nil && extAc.BalanceLimit == nil {
-		return true
-	}
-	return eAc.Units == extAc.Units && eAc.BalanceLimit == extAc.BalanceLimit
+	return true
 }
 
 // Equals compares two AccountCharges
 func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
-	if ac.AttributeIDs == nil && nAc.AttributeIDs != nil ||
+	if (ac.AttributeIDs == nil && nAc.AttributeIDs != nil ||
 		ac.AttributeIDs != nil && nAc.AttributeIDs == nil ||
-		len(ac.AttributeIDs) != len(nAc.AttributeIDs) {
+		len(ac.AttributeIDs) != len(nAc.AttributeIDs)) ||
+		ac.JoinedChargeIDs == nil && nAc.JoinedChargeIDs != nil ||
+		ac.JoinedChargeIDs != nil && nAc.JoinedChargeIDs == nil ||
+		len(ac.JoinedChargeIDs) != len(nAc.JoinedChargeIDs) ||
+		(ac.AccountID != nAc.AccountID ||
+			ac.BalanceID != nAc.BalanceID ||
+			ac.UnitFactorID != nAc.UnitFactorID ||
+			ac.RatingID != nAc.RatingID) ||
+		(ac.Units == nil && nAc.Units != nil ||
+			ac.Units != nil && nAc.Units == nil ||
+			(ac.Units != nil && nAc.Units != nil &&
+				ac.Units.Compare(nAc.Units) != 0)) ||
+		(ac.BalanceLimit == nil && nAc.BalanceLimit != nil ||
+			ac.BalanceLimit != nil && nAc.BalanceLimit == nil ||
+			(ac.BalanceLimit != nil && nAc.BalanceLimit != nil &&
+				ac.BalanceLimit.Compare(nAc.BalanceLimit) != 0)) {
 		return
 	}
 	for idx, val := range ac.AttributeIDs {
@@ -510,33 +493,10 @@ func (ac *AccountCharge) Equals(nAc *AccountCharge) (eq bool) {
 			return
 		}
 	}
-	if ac.JoinedChargeIDs == nil && nAc.JoinedChargeIDs != nil ||
-		ac.JoinedChargeIDs != nil && nAc.JoinedChargeIDs == nil ||
-		len(ac.JoinedChargeIDs) != len(nAc.JoinedChargeIDs) {
-		return
-	}
 	for i := range ac.JoinedChargeIDs {
 		if ac.JoinedChargeIDs[i] != nAc.JoinedChargeIDs[i] {
 			return
 		}
 	}
-	if ac.AccountID != nAc.AccountID ||
-		ac.BalanceID != nAc.BalanceID ||
-		ac.UnitFactorID != nAc.UnitFactorID ||
-		ac.RatingID != nAc.RatingID {
-		return
-	}
-	if ac.Units == nil && nAc.Units != nil ||
-		ac.Units != nil && nAc.Units == nil {
-		return
-	}
-	if ac.BalanceLimit == nil && nAc.BalanceLimit != nil ||
-		ac.BalanceLimit != nil && nAc.BalanceLimit == nil {
-		return
-	}
-	if ac.Units == nil && nAc.Units == nil ||
-		ac.BalanceLimit == nil && nAc.BalanceLimit == nil {
-		return true
-	}
-	return ac.Units.Compare(nAc.Units) == 0 && ac.BalanceLimit.Compare(nAc.BalanceLimit) == 0
+	return true
 }

@@ -69,7 +69,8 @@ func (dW DynamicWeight) String(dWSep, fltrsep string) (out string) {
 func (dW *DynamicWeight) Equals(dnWg *DynamicWeight) (eq bool) {
 	if dW.FilterIDs == nil && dnWg.FilterIDs != nil ||
 		dW.FilterIDs != nil && dnWg.FilterIDs == nil ||
-		len(dW.FilterIDs) != len(dnWg.FilterIDs) {
+		len(dW.FilterIDs) != len(dnWg.FilterIDs) ||
+		dW.Weight != dnWg.Weight {
 		return
 	}
 	for i := range dW.FilterIDs {
@@ -77,7 +78,7 @@ func (dW *DynamicWeight) Equals(dnWg *DynamicWeight) (eq bool) {
 			return
 		}
 	}
-	return dW.Weight == dnWg.Weight
+	return true
 }
 
 // DynamicWeight returns Weight based on Filters
