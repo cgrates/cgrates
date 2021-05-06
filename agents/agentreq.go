@@ -68,7 +68,7 @@ func NewAgentRequest(req utils.DataProvider,
 		filterS:    filterS,
 		Opts:       opts,
 		Cfg:        config.CgrConfig().GetDataProvider(),
-		ExtraDP:    extraDP,
+		ExtraDP:    extraDP, // used for extra dataproviders like *hdr and *trl
 	}
 	if tnt, err := tntTpl.ParseDataProvider(ar); err == nil && tnt != utils.EmptyString {
 		ar.Tenant = tnt

@@ -659,8 +659,8 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	return
 }
 
-// V1AllocateResource is called when a resource requires allocation
-func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
+// V1AllocateResources is called when a resource requires allocation
+func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -730,8 +730,8 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	return
 }
 
-// V1ReleaseResource is called when we need to clear an allocation
-func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
+// V1ReleaseResources is called when we need to clear an allocation
+func (rS *ResourceService) V1ReleaseResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
