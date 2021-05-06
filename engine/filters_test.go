@@ -1097,20 +1097,131 @@ func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
 	}
 }
 
-// func TestFilterPassCronExp(t *testing.T) {
-// 	ev := utils.MapStorage{
-// 		utils.MetaReq: utils.MapStorage{
-// 			utils.AnswerTime: "2018-01-07T17:00:10Z",
-// 		},
-// 	}
+func TestFilterPassCronExpOK(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2021-05-05T12:00:01Z",
+		},
+	}
 
-// 	cfg := config.NewDefaultCGRConfig()
-// 	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
-// 	fltr := NewFilterS(cfg, nil, dm)
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
 
-// 	if passes, err := fltr.Pass(context.Background(), "cgrates.org", []string{"*cronexp:~*req.AnswerTime:* 10-12 * * *"}, ev); err != nil {
-// 		t.Error(err)
-// 	} else if !passes {
-// 		t.Error("Not passing")
-// 	}
-// }
+	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
+		[]string{"*cronexp:~*req.AnswerTime:0 12 5 5 *"}, ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passing")
+	}
+}
+
+func TestFilterPassCronExpNotActive(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2021-05-05T12:00:01Z",
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
+
+	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
+		[]string{"*cronexp:~*req.AnswerTime:1 12 5 5 *"}, ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("should not be passing")
+	}
+}
+
+func TestFilterPassCronExpParseErrWrongPath(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: 13,
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
+	experr := utils.ErrWrongPath
+
+	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
+		[]string{"*cronexp:~*req.AnswerTime:1 12 5 5 *"}, ev); err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	} else if passes {
+		t.Errorf("should not be passing")
+	}
+}
+
+func TestFilterPassCronExpErrNotFound(t *testing.T) {
+	ev := utils.MapStorage{}
+
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
+
+	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
+		[]string{"*cronexp:~*req.AnswerTime:1 12 5 5 *"}, ev); err != nil {
+		t.Errorf("Expected nil, got %+v", err)
+	} else if passes {
+		t.Error("should not be passing")
+	}
+}
+
+func TestFilterPassCronExpConvertTimeErr(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "invalid time format",
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	fltr := NewFilterS(cfg, nil, dm)
+	experr := "Unsupported time format"
+
+	if passes, err := fltr.Pass(context.Background(), "cgrates.org",
+		[]string{"*cronexp:~*req.AnswerTime:1 12 5 5 *"}, ev); err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	} else if passes {
+		t.Error("should not be passing")
+	}
+}
+
+func TestFilterPassCronExpParseExpErr(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaCronExp, "~*req.AnswerTime", []string{"* * * * * *"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2021-05-05T12:00:01Z",
+		},
+	}
+
+	if passes, err := fltr.passCronExp(context.Background(), ev); err != nil {
+		t.Errorf("Expected nil, got %+v", err)
+	} else if passes {
+		t.Error("should not be passing")
+	}
+}
+
+func TestFilterPassCronExpParseDPErr(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaCronExp, "~*req.AnswerTime", []string{"~* * * * *"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ev := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AnswerTime: "2021-05-05T12:00:01Z",
+		},
+	}
+
+	if passes, err := fltr.passCronExp(context.Background(), ev); err != nil {
+		t.Errorf("Expected nil, got %+v", err)
+	} else if passes {
+		t.Error("should not be passing")
+	}
+}
