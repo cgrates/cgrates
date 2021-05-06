@@ -84,6 +84,8 @@ type SQSER struct {
 type sqsClient interface {
 	ReceiveMessage(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error)
 	DeleteMessage(input *sqs.DeleteMessageInput) (*sqs.DeleteMessageOutput, error)
+	GetQueueUrl(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error)
+	CreateQueue(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error)
 }
 
 // Config returns the curent configuration
@@ -156,7 +158,10 @@ func (rdr *SQSER) getQueueURL() (err error) {
 	if err = rdr.newSession(); err != nil {
 		return
 	}
-	svc := sqs.New(rdr.session)
+	return rdr.getQueueURLWithClient(sqs.New(rdr.session))
+}
+
+func (rdr *SQSER) getQueueURLWithClient(svc sqsClient) (err error) {
 	var result *sqs.GetQueueUrlOutput
 	if result, err = svc.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: aws.String(rdr.queueID),

@@ -331,8 +331,8 @@ func TestSQSERIsClosed(t *testing.T) {
 type sqsClientMock struct {
 	ReceiveMessageF func(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error)
 	DeleteMessageF  func(input *sqs.DeleteMessageInput) (*sqs.DeleteMessageOutput, error)
-	// GetQueueUrlF    func(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error)
-	// CreateQueueF    func(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error)
+	GetQueueUrlF    func(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error)
+	CreateQueueF    func(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error)
 }
 
 func (s *sqsClientMock) ReceiveMessage(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error) {
@@ -349,19 +349,19 @@ func (s *sqsClientMock) DeleteMessage(input *sqs.DeleteMessageInput) (*sqs.Delet
 	return nil, utils.ErrNotImplemented
 }
 
-// func (s *sqsClientMock) GetQueueUrl(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error) {
-// 	if s.GetQueueUrlF != nil {
-// 		return s.GetQueueUrlF(input)
-// 	}
-// 	return nil, nil
-// }
+func (s *sqsClientMock) GetQueueUrl(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error) {
+	if s.GetQueueUrlF != nil {
+		return s.GetQueueUrlF(input)
+	}
+	return nil, nil
+}
 
-// func (s *sqsClientMock) CreateQueue(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error) {
-// 	if s.CreateQueueF != nil {
-// 		return s.CreateQueueF(input)
-// 	}
-// 	return nil, utils.ErrInvalidPath
-// }
+func (s *sqsClientMock) CreateQueue(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error) {
+	if s.CreateQueueF != nil {
+		return s.CreateQueueF(input)
+	}
+	return nil, utils.ErrInvalidPath
+}
 
 func TestSQSERReadMsg(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -685,5 +685,101 @@ func TestSQSERGetQueueURL(t *testing.T) {
 	rdr.queueURL = utils.StringPointer("queueURL")
 	if err := rdr.getQueueURL(); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestSQSERGetQueueURLWithClient(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &SQSER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	getQueueUrl := func(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error) {
+		output := &sqs.GetQueueUrlOutput{
+			QueueUrl: utils.StringPointer("queueURL"),
+		}
+		return output, nil
+	}
+	scv := &sqsClientMock{
+		GetQueueUrlF: getQueueUrl,
+	}
+	// rdr.queueURL = utils.StringPointer("queueURL")
+	if err := rdr.getQueueURLWithClient(scv); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rdr.queueURL, utils.StringPointer("queueURL")) {
+		t.Errorf("Expected %v but received %v", "queueURL", rdr.queueURL)
+	}
+}
+
+type awserrMock struct {
+	error
+}
+
+func (awserrMock) Code() string {
+	return sqs.ErrCodeQueueDoesNotExist
+}
+
+func (awserrMock) Message() string {
+	return ""
+}
+
+func (awserrMock) OrigErr() error {
+	return utils.ErrNotImplemented
+}
+
+func TestSQSERGetQueueURLWithClient2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rdr := &SQSER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     new(engine.FilterS),
+		rdrEvents: make(chan *erEvent, 1),
+		rdrExit:   make(chan struct{}, 1),
+		rdrErr:    make(chan error, 1),
+		cap:       nil,
+		awsRegion: "us-east-2",
+		awsID:     "AWSId",
+		awsKey:    "AWSAccessKeyId",
+		awsToken:  "",
+		queueID:   "cgrates_cdrs",
+		session:   nil,
+		poster:    nil,
+	}
+	getQueueUrl := func(input *sqs.GetQueueUrlInput) (output *sqs.GetQueueUrlOutput, err error) {
+		output = &sqs.GetQueueUrlOutput{
+			QueueUrl: utils.StringPointer("queueURL"),
+		}
+		aerr := &awserrMock{}
+		return output, aerr
+	}
+	createQueue := func(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error) {
+		output := &sqs.CreateQueueOutput{
+			QueueUrl: utils.StringPointer("queueURL"),
+		}
+		return output, nil
+	}
+	scv := &sqsClientMock{
+		GetQueueUrlF: getQueueUrl,
+		CreateQueueF: createQueue,
+	}
+	// rdr.queueURL = utils.StringPointer("queueURL")
+	if err := rdr.getQueueURLWithClient(scv); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rdr.queueURL, utils.StringPointer("queueURL")) {
+		t.Errorf("Expected %v but received %v", "queueURL", rdr.queueURL)
 	}
 }
