@@ -66,8 +66,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-
-	dbAcntActs.LoadDataDBCache(engine.GetDefaultEmptyArgCachePrefix())
+	engine.LoadAllDataDBToCache(dbAcntActs)
 
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
 	if acnt, err := dbAcntActs.GetAccount("cgrates.org:1"); err != nil {

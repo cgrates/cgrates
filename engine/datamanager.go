@@ -101,21 +101,6 @@ func (dm *DataManager) DataDB() DataDB {
 	return nil
 }
 
-func (dm *DataManager) LoadDataDBCache(attr map[string][]string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if dm.DataDB().GetStorageType() == utils.INTERNAL {
-		return // all the data is in cache already
-	}
-	for key, ids := range attr {
-		if err = dm.CacheDataFromDB(key, ids, false); err != nil {
-			return
-		}
-	}
-	return
-}
-
 func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
@@ -131,7 +116,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	}
 	if prfx == utils.MetaAPIBan { // no need for ids in this case
 		ids = []string{utils.EmptyString}
-	} else if ids == nil {
+	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
