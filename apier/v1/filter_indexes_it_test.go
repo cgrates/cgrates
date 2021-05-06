@@ -483,10 +483,6 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
 		},
 	}
 	var result string
@@ -502,13 +498,9 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	}
 	statConfig = &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:    tenant,
-			ID:        "TEST_PROFILE1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      tenant,
+			ID:          "TEST_PROFILE1",
+			FilterIDs:   []string{"FLTR_1"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{
@@ -537,13 +529,63 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", statConfig.StatQueueProfile, reply)
 	}
+
+	//update the filter(element and values) for getting the indexes well
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destinations,
+				Type:    utils.MetaString,
+				Values:  []string{"+122", "+5543"},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var indexes []string
+	expectedIdx := []string{"*string:*req.Destinations:+122:TEST_PROFILE1",
+		"*string:*req.Destinations:+5543:TEST_PROFILE1"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(indexes)
+		sort.Strings(expectedIdx)
+		if !reflect.DeepEqual(indexes, expectedIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIdx, indexes)
+		}
+	}
+
+	//back to our initial filter
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -732,10 +774,6 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
 		},
 	}
 	var result string
@@ -750,13 +788,9 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	}
 	rlsConfig = &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    tenant,
-			ID:        "RCFG1",
-			FilterIDs: []string{"FLTR_RES_RCFG1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            tenant,
+			ID:                "RCFG1",
+			FilterIDs:         []string{"FLTR_RES_RCFG1"},
 			UsageTTL:          10 * time.Microsecond,
 			Limit:             10,
 			AllocationMessage: "MessageAllocation",
@@ -776,13 +810,63 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+
+	//update the filter(element and values) for getting the indexes well
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_RES_RCFG1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+				Type:    utils.MetaString,
+				Values:  []string{"20m", "45m", "10s"},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var indexes []string
+	expectedIdx := []string{"*string:*req.Usage:20m:RCFG1",
+		"*string:*req.Usage:45m:RCFG1",
+		"*string:*req.Usage:10s:RCFG1"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(indexes)
+		sort.Strings(expectedIdx)
+		if !reflect.DeepEqual(indexes, expectedIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIdx, indexes)
+		}
+	}
+
+	//back to our initial filter
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_RES_RCFG1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -962,10 +1046,6 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 					Values:  []string{"1001"},
 				},
 			},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
 		},
 	}
 	var result string
@@ -1011,13 +1091,64 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(rPrf.RouteProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", rPrf.RouteProfile, reply)
 	}
+
+	//updating our filter(values and element) for getting the indexes well
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CGRID,
+				Type:    utils.MetaString,
+				Values:  []string{"qweasdzxc", "iopjklbnm"},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var indexes []string
+	expectedIdx := []string{"*string:*req.CGRID:qweasdzxc:TEST_PROFILE1",
+		"*string:*req.CGRID:iopjklbnm:TEST_PROFILE1"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaRoutes, Tenant: tenant},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(indexes)
+		sort.Strings(expectedIdx)
+		if !reflect.DeepEqual(indexes, expectedIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIdx, indexes)
+		}
+	}
+
+	//back to our initial filter
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaRoutes, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1203,10 +1334,6 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 				Type:    utils.MetaString,
 				Values:  []string{"1001"},
 			}},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
 		},
 	}
 	var result string
@@ -1226,10 +1353,6 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			ID:        "ApierTest",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.FL1:In1"},
@@ -1258,6 +1381,57 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
 
+	//we will update the filter(element and values) for getting the indexes well
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaOpts + utils.NestingSep + utils.Subsystems,
+				Type:    utils.MetaString,
+				Values:  []string{utils.MetaChargers, utils.MetaThresholds, utils.MetaStats},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var indexes []string
+	expectedIdx := []string{"*string:*opts.Subsystems:*chargers:ApierTest",
+		"*string:*opts.Subsystems:*thresholds:ApierTest",
+		"*string:*opts.Subsystems:*stats:ApierTest"}
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		ItemType: utils.MetaAttributes, Tenant: tenant, FilterType: utils.MetaString,
+		Context: utils.MetaSessionS},
+		&indexes); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(indexes)
+		sort.Strings(expectedIdx)
+		if !reflect.DeepEqual(indexes, expectedIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIdx, indexes)
+		}
+	}
+
+	//back to our initial filter
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
+			}},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaAttributes,
 		Tenant:   tenant,
@@ -1266,7 +1440,6 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var indexes []string
 	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes, Tenant: tenant, FilterType: utils.MetaString,
 		Context: utils.MetaSessionS}, &indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1665,12 +1838,40 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 
 func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	var reply string
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject,
+					Type:    utils.MetaString,
+					Values:  []string{"2012"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomField",
+					Type:    utils.MetaPrefix,
+					Values:  []string{"RandomValue"},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
 	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
 	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test1",
-			FilterIDs:  []string{"*string:~*req.Account:1001", "*string:~*req.Subject:2012", "*prefix:~*req.RandomField:RandomValue"},
+			FilterIDs:  []string{"FLTR_1"},
 			Strategy:   utils.MetaFirst,
 			Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
 			Weight:     20,
@@ -1739,6 +1940,100 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
 	}
+
+	//update the filter(element and values) for getting the indexes well
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"1001", "1234"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+					Type:    utils.MetaString,
+					Values:  []string{"15m", "1s"},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	//get new indexes for *attributes context
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Account:1234:DSP_Test1",
+		"*string:*req.Usage:15m:DSP_Test1",
+		"*string:*req.Usage:1s:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant: tenant, Context: utils.MetaAttributes, ItemType: utils.MetaDispatchers,
+	}, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
+	}
+	//get new indexes for *sessions context
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{"*string:*req.Account:1001:DSP_Test1",
+		"*string:*req.Account:1234:DSP_Test1",
+		"*string:*req.Usage:15m:DSP_Test1",
+		"*string:*req.Usage:1s:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
+		Tenant: tenant, Context: utils.MetaSessionS, ItemType: utils.MetaDispatchers,
+	}, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
+	}
+
+	//back to our initial filter
+	filter = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject,
+					Type:    utils.MetaString,
+					Values:  []string{"2012"},
+				},
+				{
+					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + "RandomField",
+					Type:    utils.MetaPrefix,
+					Values:  []string{"RandomValue"},
+				},
+			},
+		},
+	}
+	if err := tFIdxRpc.Call(utils.APIerSv1SetFilter, filter, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
 	//remove the indexes for *sessions subsystem
 	if err := tFIdxRpc.Call(utils.APIerSv1RemoveFilterIndexes, &AttrRemFilterIndexes{
 		ItemType: utils.MetaDispatchers,
@@ -1751,8 +2046,9 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 
 	//verify if was removed
 	var indexes []string
-	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, arg,
-		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tFIdxRpc.Call(utils.APIerSv1GetFilterIndexes, AttrGetFilterIndexes{
+		Tenant: tenant, Context: utils.MetaSessionS, ItemType: utils.MetaDispatchers,
+	}, &indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
