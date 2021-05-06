@@ -155,12 +155,26 @@ func (aC *Account) AsExtAccount() (eAc *ExtAccount, err error) {
 
 // Equals returns the equality between two ExtAccount
 func (eAc *ExtAccount) Equals(extAc *ExtAccount) (eq bool) {
-	if eAc.ID != extAc.ID || eAc.Tenant != extAc.Tenant {
-		return
-	}
-	if eAc.FilterIDs == nil && extAc.FilterIDs != nil ||
-		eAc.FilterIDs != nil && extAc.FilterIDs == nil ||
-		len(eAc.FilterIDs) != len(extAc.FilterIDs) {
+	if (eAc.ID != extAc.ID || eAc.Tenant != extAc.Tenant) ||
+		(eAc.FilterIDs == nil && extAc.FilterIDs != nil ||
+			eAc.FilterIDs != nil && extAc.FilterIDs == nil ||
+			len(eAc.FilterIDs) != len(extAc.FilterIDs)) ||
+		(eAc.ActivationInterval == nil && extAc.ActivationInterval != nil ||
+			eAc.ActivationInterval != nil && extAc.ActivationInterval == nil ||
+			(eAc.ActivationInterval != nil && extAc.ActivationInterval != nil &&
+				!eAc.ActivationInterval.Equals(extAc.ActivationInterval))) ||
+		(eAc.Weights == nil && extAc.Weights != nil ||
+			eAc.Weights != nil && extAc.Weights == nil ||
+			len(eAc.Weights) != len(extAc.Weights)) ||
+		(eAc.Opts == nil && extAc.Opts != nil ||
+			eAc.Opts != nil && extAc.Opts == nil ||
+			len(eAc.Opts) != len(extAc.Opts)) ||
+		(eAc.Balances == nil && extAc.Balances != nil ||
+			eAc.Balances != nil && extAc.Balances == nil ||
+			len(eAc.Balances) != len(extAc.Balances)) ||
+		(eAc.ThresholdIDs == nil && extAc.ThresholdIDs != nil ||
+			eAc.ThresholdIDs != nil && extAc.ThresholdIDs == nil ||
+			len(eAc.ThresholdIDs) != len(extAc.ThresholdIDs)) {
 		return
 	}
 	for idx, val := range eAc.FilterIDs {
@@ -168,48 +182,20 @@ func (eAc *ExtAccount) Equals(extAc *ExtAccount) (eq bool) {
 			return
 		}
 	}
-	if eAc.ActivationInterval == nil && extAc.ActivationInterval != nil ||
-		eAc.ActivationInterval != nil && extAc.ActivationInterval == nil {
-		return
-	}
-	if eAc.ActivationInterval != nil && extAc.ActivationInterval != nil &&
-		!eAc.ActivationInterval.Equals(extAc.ActivationInterval) {
-		return
-	}
-	if eAc.Weights == nil && extAc.Weights != nil ||
-		eAc.Weights != nil && extAc.Weights == nil ||
-		len(eAc.Weights) != len(extAc.Weights) {
-		return
-	}
 	for idx, val := range eAc.Weights {
 		if ok := val.Equals(extAc.Weights[idx]); !ok {
 			return
 		}
-	}
-	if eAc.Opts == nil && extAc.Opts != nil ||
-		eAc.Opts != nil && extAc.Opts == nil ||
-		len(eAc.Opts) != len(extAc.Opts) {
-		return
 	}
 	for key, val := range eAc.Opts {
 		if val != extAc.Opts[key] {
 			return
 		}
 	}
-	if eAc.Balances == nil && extAc.Balances != nil ||
-		eAc.Balances != nil && extAc.Balances == nil ||
-		len(eAc.Balances) != len(extAc.Balances) {
-		return
-	}
 	for key, val := range eAc.Balances {
 		if ok := val.Equals(extAc.Balances[key]); !ok {
 			return
 		}
-	}
-	if eAc.ThresholdIDs == nil && extAc.ThresholdIDs != nil ||
-		eAc.ThresholdIDs != nil && extAc.ThresholdIDs == nil ||
-		len(eAc.ThresholdIDs) != len(extAc.ThresholdIDs) {
-		return
 	}
 	for idx, val := range eAc.ThresholdIDs {
 		if val != extAc.ThresholdIDs[idx] {
@@ -311,12 +297,30 @@ func (bL *Balance) AsExtBalance() (eBl *ExtBalance, err error) {
 
 // Equals returns the equality between two ExtBalance
 func (eBL *ExtBalance) Equals(extBl *ExtBalance) (eq bool) {
-	if eBL.ID != extBl.ID || eBL.Type != extBl.Type {
-		return
-	}
-	if eBL.FilterIDs == nil && extBl.FilterIDs != nil ||
-		eBL.FilterIDs != nil && extBl.FilterIDs == nil ||
-		len(eBL.FilterIDs) != len(extBl.FilterIDs) {
+	if (eBL.ID != extBl.ID || eBL.Type != extBl.Type) ||
+		(eBL.FilterIDs == nil && extBl.FilterIDs != nil ||
+			eBL.FilterIDs != nil && extBl.FilterIDs == nil ||
+			len(eBL.FilterIDs) != len(extBl.FilterIDs)) ||
+		(eBL.Weights == nil && extBl.Weights != nil ||
+			eBL.Weights != nil && extBl.Weights == nil ||
+			len(eBL.Weights) != len(extBl.Weights)) ||
+		!((eBL.Units == nil && extBl.Units == nil) ||
+			(eBL.Units != nil && extBl.Units != nil && *eBL.Units == *extBl.Units)) ||
+		(eBL.UnitFactors == nil && extBl.UnitFactors != nil ||
+			eBL.UnitFactors != nil && extBl.UnitFactors == nil ||
+			len(eBL.UnitFactors) != len(extBl.UnitFactors)) ||
+		(eBL.Opts == nil && extBl.Opts != nil ||
+			eBL.Opts != nil && extBl.Opts == nil ||
+			len(eBL.Opts) != len(extBl.Opts)) ||
+		(eBL.CostIncrements == nil && extBl.CostIncrements != nil ||
+			eBL.CostIncrements != nil && extBl.CostIncrements == nil ||
+			len(eBL.CostIncrements) != len(extBl.CostIncrements)) ||
+		(eBL.AttributeIDs == nil && extBl.AttributeIDs != nil ||
+			eBL.AttributeIDs != nil && extBl.AttributeIDs == nil ||
+			len(eBL.AttributeIDs) != len(extBl.AttributeIDs)) ||
+		(eBL.RateProfileIDs == nil && extBl.RateProfileIDs != nil ||
+			eBL.RateProfileIDs != nil && extBl.RateProfileIDs == nil ||
+			len(eBL.RateProfileIDs) != len(extBl.RateProfileIDs)) {
 		return
 	}
 	for i, val := range eBL.FilterIDs {
@@ -324,65 +328,30 @@ func (eBL *ExtBalance) Equals(extBl *ExtBalance) (eq bool) {
 			return
 		}
 	}
-	if eBL.Weights == nil && extBl.Weights != nil ||
-		eBL.Weights != nil && extBl.Weights == nil ||
-		len(eBL.Weights) != len(extBl.Weights) {
-		return
-	}
 	for idx, val := range eBL.Weights {
 		if ok := val.Equals(extBl.Weights[idx]); !ok {
 			return
 		}
-	}
-	if eBL.Units == nil && extBl.Units != nil ||
-		eBL.Units != nil && extBl.Units == nil ||
-		eBL.Units != extBl.Units {
-		return
-	}
-	if eBL.UnitFactors == nil && extBl.UnitFactors != nil ||
-		eBL.UnitFactors != nil && extBl.UnitFactors == nil ||
-		len(eBL.UnitFactors) != len(extBl.UnitFactors) {
-		return
 	}
 	for idx, val := range eBL.UnitFactors {
 		if ok := val.Equals(extBl.UnitFactors[idx]); !ok {
 			return
 		}
 	}
-	if eBL.Opts == nil && extBl.Opts != nil ||
-		eBL.Opts != nil && extBl.Opts == nil ||
-		len(eBL.Opts) != len(extBl.Opts) {
-		return
-	}
 	for key, val := range eBL.Opts {
 		if val != extBl.Opts[key] {
 			return
 		}
-	}
-	if eBL.CostIncrements == nil && extBl.CostIncrements != nil ||
-		eBL.CostIncrements != nil && extBl.CostIncrements == nil ||
-		len(eBL.CostIncrements) != len(extBl.CostIncrements) {
-		return
 	}
 	for idx, val := range eBL.CostIncrements {
 		if ok := val.Equals(extBl.CostIncrements[idx]); !ok {
 			return
 		}
 	}
-	if eBL.AttributeIDs == nil && extBl.AttributeIDs != nil ||
-		eBL.AttributeIDs != nil && extBl.AttributeIDs == nil ||
-		len(eBL.AttributeIDs) != len(extBl.AttributeIDs) {
-		return
-	}
 	for i, val := range eBL.AttributeIDs {
 		if val != extBl.AttributeIDs[i] {
 			return
 		}
-	}
-	if eBL.RateProfileIDs == nil && extBl.RateProfileIDs != nil ||
-		eBL.RateProfileIDs != nil && extBl.RateProfileIDs == nil ||
-		len(eBL.RateProfileIDs) != len(extBl.RateProfileIDs) {
-		return
 	}
 	for i, val := range eBL.RateProfileIDs {
 		if val != extBl.RateProfileIDs[i] {
@@ -394,12 +363,31 @@ func (eBL *ExtBalance) Equals(extBl *ExtBalance) (eq bool) {
 
 // Equals returns the equality between two Balance
 func (bL *Balance) Equals(bal *Balance) (eq bool) {
-	if bL.ID != bal.ID || bL.Type != bal.Type {
-		return
-	}
-	if bL.FilterIDs == nil && bal.FilterIDs != nil ||
-		bL.FilterIDs != nil && bal.FilterIDs == nil ||
-		len(bL.FilterIDs) != len(bal.FilterIDs) {
+	if (bL.ID != bal.ID || bL.Type != bal.Type) ||
+		(bL.FilterIDs == nil && bal.FilterIDs != nil ||
+			bL.FilterIDs != nil && bal.FilterIDs == nil ||
+			len(bL.FilterIDs) != len(bal.FilterIDs)) ||
+		(bL.Weights == nil && bal.Weights != nil ||
+			bL.Weights != nil && bal.Weights == nil ||
+			len(bL.Weights) != len(bal.Weights)) ||
+		(bL.Units == nil && bal.Units != nil ||
+			bL.Units != nil && bal.Units == nil ||
+			bL.Units.Compare(bal.Units) != 0) ||
+		(bL.UnitFactors == nil && bal.UnitFactors != nil ||
+			bL.UnitFactors != nil && bal.UnitFactors == nil ||
+			len(bL.UnitFactors) != len(bal.UnitFactors)) ||
+		(bL.Opts == nil && bal.Opts != nil ||
+			bL.Opts != nil && bal.Opts == nil ||
+			len(bL.Opts) != len(bal.Opts)) ||
+		(bL.CostIncrements == nil && bal.CostIncrements != nil ||
+			bL.CostIncrements != nil && bal.CostIncrements == nil ||
+			len(bL.CostIncrements) != len(bal.CostIncrements)) ||
+		(bL.AttributeIDs == nil && bal.AttributeIDs != nil ||
+			bL.AttributeIDs != nil && bal.AttributeIDs == nil ||
+			len(bL.AttributeIDs) != len(bal.AttributeIDs)) ||
+		(bL.RateProfileIDs == nil && bal.RateProfileIDs != nil ||
+			bL.RateProfileIDs != nil && bal.RateProfileIDs == nil ||
+			len(bL.RateProfileIDs) != len(bal.RateProfileIDs)) {
 		return
 	}
 	for i, val := range bL.FilterIDs {
@@ -407,65 +395,30 @@ func (bL *Balance) Equals(bal *Balance) (eq bool) {
 			return
 		}
 	}
-	if bL.Weights == nil && bal.Weights != nil ||
-		bL.Weights != nil && bal.Weights == nil ||
-		len(bL.Weights) != len(bal.Weights) {
-		return
-	}
 	for idx, val := range bL.Weights {
 		if ok := val.Equals(bal.Weights[idx]); !ok {
 			return
 		}
-	}
-	if bL.Units == nil && bal.Units != nil ||
-		bL.Units != nil && bal.Units == nil ||
-		bL.Units.Compare(bal.Units) != 0 {
-		return
-	}
-	if bL.UnitFactors == nil && bal.UnitFactors != nil ||
-		bL.UnitFactors != nil && bal.UnitFactors == nil ||
-		len(bL.UnitFactors) != len(bal.UnitFactors) {
-		return
 	}
 	for idx, val := range bL.UnitFactors {
 		if ok := val.Equals(bal.UnitFactors[idx]); !ok {
 			return
 		}
 	}
-	if bL.Opts == nil && bal.Opts != nil ||
-		bL.Opts != nil && bal.Opts == nil ||
-		len(bL.Opts) != len(bal.Opts) {
-		return
-	}
 	for key, val := range bL.Opts {
 		if val != bal.Opts[key] {
 			return
 		}
-	}
-	if bL.CostIncrements == nil && bal.CostIncrements != nil ||
-		bL.CostIncrements != nil && bal.CostIncrements == nil ||
-		len(bL.CostIncrements) != len(bal.CostIncrements) {
-		return
 	}
 	for idx, val := range bL.CostIncrements {
 		if ok := val.Equals(bal.CostIncrements[idx]); !ok {
 			return
 		}
 	}
-	if bL.AttributeIDs == nil && bal.AttributeIDs != nil ||
-		bL.AttributeIDs != nil && bal.AttributeIDs == nil ||
-		len(bL.AttributeIDs) != len(bal.AttributeIDs) {
-		return
-	}
 	for i, val := range bL.AttributeIDs {
 		if val != bal.AttributeIDs[i] {
 			return
 		}
-	}
-	if bL.RateProfileIDs == nil && bal.RateProfileIDs != nil ||
-		bL.RateProfileIDs != nil && bal.RateProfileIDs == nil ||
-		len(bL.RateProfileIDs) != len(bal.RateProfileIDs) {
-		return
 	}
 	for i, val := range bL.RateProfileIDs {
 		if val != bal.RateProfileIDs[i] {
@@ -492,23 +445,21 @@ type ExtCostIncrement struct {
 
 // Equals returns the equality between two ExtCostIncrement
 func (eCi *ExtCostIncrement) Equals(extCi *ExtCostIncrement) (eq bool) {
-	if eCi.FilterIDs == nil && extCi.FilterIDs != nil ||
+	if (eCi.FilterIDs == nil && extCi.FilterIDs != nil ||
 		eCi.FilterIDs != nil && extCi.FilterIDs == nil ||
-		len(eCi.FilterIDs) != len(extCi.FilterIDs) {
+		len(eCi.FilterIDs) != len(extCi.FilterIDs)) ||
+		!((eCi.Increment == nil && extCi.Increment == nil) ||
+			(eCi.Increment != nil && extCi.Increment != nil && *eCi.Increment == *extCi.Increment)) ||
+		!((eCi.FixedFee == nil && extCi.FixedFee == nil) ||
+			(eCi.FixedFee != nil && extCi.FixedFee != nil && *eCi.FixedFee == *extCi.FixedFee)) ||
+		!((eCi.RecurrentFee == nil && extCi.RecurrentFee == nil) ||
+			(eCi.RecurrentFee != nil && extCi.RecurrentFee != nil && *eCi.RecurrentFee == *extCi.RecurrentFee)) {
 		return
 	}
 	for idx, val := range eCi.FilterIDs {
 		if val != extCi.FilterIDs[idx] {
 			return
 		}
-	}
-	if eCi.Increment == nil && extCi.Increment != nil ||
-		eCi.Increment != nil && extCi.Increment == nil ||
-		eCi.FixedFee == nil && extCi.FixedFee != nil ||
-		eCi.FixedFee != nil && extCi.FixedFee == nil ||
-		eCi.RecurrentFee == nil && extCi.RecurrentFee != nil ||
-		eCi.RecurrentFee != nil && extCi.RecurrentFee == nil {
-		return
 	}
 	return true
 }
@@ -548,35 +499,27 @@ func (cI *CostIncrement) AsExtCostIncrement() (eCi *ExtCostIncrement, err error)
 
 // Equals returns the equality between two CostIncrement
 func (cI *CostIncrement) Equals(ctIn *CostIncrement) (eq bool) {
-	if cI.FilterIDs == nil && ctIn.FilterIDs != nil ||
+	if (cI.FilterIDs == nil && ctIn.FilterIDs != nil ||
 		cI.FilterIDs != nil && ctIn.FilterIDs == nil ||
-		len(cI.FilterIDs) != len(ctIn.FilterIDs) {
+		len(cI.FilterIDs) != len(ctIn.FilterIDs)) ||
+		(cI.Increment == nil && ctIn.Increment != nil ||
+			cI.Increment != nil && ctIn.Increment == nil ||
+			(cI.Increment != nil && ctIn.Increment != nil &&
+				cI.Increment.Compare(ctIn.Increment) != 0)) ||
+		(cI.RecurrentFee == nil && ctIn.RecurrentFee != nil ||
+			cI.RecurrentFee != nil && ctIn.RecurrentFee == nil ||
+			(cI.RecurrentFee != nil && ctIn.RecurrentFee != nil &&
+				cI.RecurrentFee.Compare(ctIn.RecurrentFee) != 0)) ||
+		(cI.FixedFee == nil && ctIn.FixedFee != nil ||
+			cI.FixedFee != nil && ctIn.FixedFee == nil ||
+			(cI.FixedFee != nil && ctIn.FixedFee != nil &&
+				cI.FixedFee.Compare(ctIn.FixedFee) != 0)) {
 		return
 	}
 	for i, val := range cI.FilterIDs {
 		if val != ctIn.FilterIDs[i] {
 			return
 		}
-	}
-	if cI.Increment == nil && ctIn.Increment != nil ||
-		cI.Increment != nil && ctIn.Increment == nil ||
-		cI.RecurrentFee == nil && ctIn.RecurrentFee != nil ||
-		cI.RecurrentFee != nil && ctIn.RecurrentFee == nil ||
-		cI.FixedFee == nil && ctIn.FixedFee != nil ||
-		cI.FixedFee != nil && ctIn.FixedFee == nil {
-		return
-	}
-	if cI.Increment != nil && ctIn.Increment != nil &&
-		cI.Increment.Compare(ctIn.Increment) != 0 {
-		return
-	}
-	if cI.FixedFee != nil && ctIn.FixedFee != nil &&
-		cI.FixedFee.Compare(ctIn.FixedFee) != 0 {
-		return
-	}
-	if cI.RecurrentFee != nil && ctIn.RecurrentFee != nil &&
-		cI.RecurrentFee.Compare(ctIn.RecurrentFee) != 0 {
-		return
 	}
 	return true
 }
@@ -628,9 +571,11 @@ func (uF *UnitFactor) AsExtUnitFactor() (eUf *ExtUnitFactor, err error) {
 
 // Equals compares two ExtUnitFactor
 func (eUf *ExtUnitFactor) Equals(extUf *ExtUnitFactor) (eq bool) {
-	if eUf.FilterIDs == nil && extUf.FilterIDs != nil ||
+	if (eUf.FilterIDs == nil && extUf.FilterIDs != nil ||
 		eUf.FilterIDs != nil && extUf.FilterIDs == nil ||
-		len(eUf.FilterIDs) != len(extUf.FilterIDs) {
+		len(eUf.FilterIDs) != len(extUf.FilterIDs)) ||
+		!((eUf.Factor == nil && extUf.Factor == nil) ||
+			(eUf.Factor != nil && extUf.Factor != nil && *eUf.Factor == *extUf.Factor)) {
 		return
 	}
 	for idx, val := range eUf.FilterIDs {
@@ -638,7 +583,7 @@ func (eUf *ExtUnitFactor) Equals(extUf *ExtUnitFactor) (eq bool) {
 			return
 		}
 	}
-	return eUf.Factor == extUf.Factor
+	return true
 }
 
 // Clone return a copy of the UnitFactor
@@ -664,9 +609,13 @@ type UnitFactor struct {
 
 // Equals compares two UnitFactors
 func (uF *UnitFactor) Equals(nUf *UnitFactor) (eq bool) {
-	if uF.FilterIDs == nil && nUf.FilterIDs != nil ||
+	if (uF.FilterIDs == nil && nUf.FilterIDs != nil ||
 		uF.FilterIDs != nil && nUf.FilterIDs == nil ||
-		len(uF.FilterIDs) != len(nUf.FilterIDs) {
+		len(uF.FilterIDs) != len(nUf.FilterIDs)) ||
+		(uF.Factor == nil && nUf.Factor != nil ||
+			uF.Factor != nil && nUf.Factor == nil ||
+			(uF.Factor != nil && nUf.Factor != nil &&
+				uF.Factor.Compare(nUf.Factor) != 0)) {
 		return
 	}
 	for idx, val := range uF.FilterIDs {
@@ -674,14 +623,7 @@ func (uF *UnitFactor) Equals(nUf *UnitFactor) (eq bool) {
 			return
 		}
 	}
-	if uF.Factor == nil && nUf.Factor != nil ||
-		uF.Factor != nil && nUf.Factor == nil {
-		return
-	}
-	if uF.Factor == nil && nUf.Factor == nil {
-		return true
-	}
-	return uF.Factor.Compare(nUf.Factor) == 0
+	return true
 }
 
 // TenantID returns the combined Tenant:ID
@@ -691,13 +633,27 @@ func (aP *Account) TenantID() string {
 
 // Equals return the equality between two Accounts
 func (aC *Account) Equals(acnt *Account) (eq bool) {
-	if aC.Tenant != acnt.Tenant ||
-		aC.ID != acnt.ID {
-		return
-	}
-	if aC.FilterIDs == nil && acnt.FilterIDs != nil ||
-		aC.FilterIDs != nil && acnt.FilterIDs == nil ||
-		len(aC.FilterIDs) != len(acnt.FilterIDs) {
+	if (aC.Tenant != acnt.Tenant ||
+		aC.ID != acnt.ID) ||
+		(aC.FilterIDs == nil && acnt.FilterIDs != nil ||
+			aC.FilterIDs != nil && acnt.FilterIDs == nil ||
+			len(aC.FilterIDs) != len(acnt.FilterIDs)) ||
+		(aC.ActivationInterval == nil && acnt.ActivationInterval != nil ||
+			aC.ActivationInterval != nil && acnt.ActivationInterval == nil ||
+			(aC.ActivationInterval != nil && acnt.ActivationInterval != nil &&
+				!aC.ActivationInterval.Equals(acnt.ActivationInterval))) ||
+		(aC.Weights == nil && acnt.Weights != nil ||
+			aC.Weights != nil && acnt.Weights == nil ||
+			len(aC.Weights) != len(acnt.Weights)) ||
+		(aC.Opts == nil && acnt.Opts != nil ||
+			aC.Opts != nil && acnt.Opts == nil ||
+			len(aC.Opts) != len(acnt.Opts)) ||
+		(aC.Balances == nil && acnt.Balances != nil ||
+			aC.Balances != nil && acnt.Balances == nil ||
+			len(aC.Balances) != len(acnt.Balances)) ||
+		(aC.ThresholdIDs == nil && acnt.ThresholdIDs != nil ||
+			aC.ThresholdIDs != nil && acnt.ThresholdIDs == nil ||
+			len(aC.ThresholdIDs) != len(acnt.ThresholdIDs)) {
 		return
 	}
 	for idx, val := range aC.FilterIDs {
@@ -705,48 +661,20 @@ func (aC *Account) Equals(acnt *Account) (eq bool) {
 			return
 		}
 	}
-	if aC.ActivationInterval == nil && acnt.ActivationInterval != nil ||
-		aC.ActivationInterval != nil && acnt.ActivationInterval == nil {
-		return
-	}
-	if aC.ActivationInterval != nil && acnt.ActivationInterval != nil &&
-		!aC.ActivationInterval.Equals(acnt.ActivationInterval) {
-		return
-	}
-	if aC.Weights == nil && acnt.Weights != nil ||
-		aC.Weights != nil && acnt.Weights == nil ||
-		len(aC.Weights) != len(acnt.Weights) {
-		return
-	}
 	for idx, val := range aC.Weights {
 		if ok := val.Equals(acnt.Weights[idx]); !ok {
 			return
 		}
-	}
-	if aC.Opts == nil && acnt.Opts != nil ||
-		aC.Opts != nil && acnt.Opts == nil ||
-		len(aC.Opts) != len(acnt.Opts) {
-		return
 	}
 	for key := range aC.Opts {
 		if aC.Opts[key] != acnt.Opts[key] {
 			return
 		}
 	}
-	if aC.Balances == nil && acnt.Balances != nil ||
-		aC.Balances != nil && acnt.Balances == nil ||
-		len(aC.Balances) != len(acnt.Balances) {
-		return
-	}
 	for key, val := range aC.Balances {
 		if ok := val.Equals(acnt.Balances[key]); !ok {
 			return
 		}
-	}
-	if aC.ThresholdIDs == nil && acnt.ThresholdIDs != nil ||
-		aC.ThresholdIDs != nil && acnt.ThresholdIDs == nil ||
-		len(aC.ThresholdIDs) != len(acnt.ThresholdIDs) {
-		return
 	}
 	for idx, val := range aC.ThresholdIDs {
 		if val != acnt.ThresholdIDs[idx] {
