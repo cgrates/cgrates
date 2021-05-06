@@ -448,7 +448,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		},
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.MetaCronExp:           {},
+			utils.CacheTimings:          {},
 			utils.MetaResourceProfile:   {},
 			utils.MetaResources:         {},
 			utils.MetaStatQueueProfiles: {},

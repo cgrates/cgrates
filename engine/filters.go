@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cron"
 )
 
 // NewFilterS initializtes the filter service
@@ -473,31 +474,37 @@ func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passCronExp(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
-	// 	tm, err := fltr.rsrElement.ParseDataProvider(dDP)
-	// 	if err != nil {
-	// 		if err == utils.ErrNotFound {
-	// 			return false, nil
-	// 		}
-	// 		return false, err
-	// 	}
-	// 	tmTime, err := utils.IfaceAsTime(tm, config.CgrConfig().GeneralCfg().DefaultTimezone)
-	// 	if err != nil {
-	// 		return false, err
-	// 	}
+	tm, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	tmTime, err := utils.IfaceAsTime(tm, config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if err != nil {
+		return false, err
+	}
 
-	// 	for _, valCronIDVal := range fltr.rsrValues {
-	// 		valTmID, err := valCronIDVal.ParseDataProvider(dDP)
-	// 		if err != nil {
-	// 			return false, err
-	// 		}
+	// tmTime = tmTime.Truncate(time.Second)
+	tmTime = tmTime.Truncate(time.Minute)
+	tmBefore := tmTime.Add(-time.Second)
 
-	// 		if err = connMgr.Call(ctx, config.CgrConfig().FilterSCfg().AdminSConns, utils.APIerSv1GetTPTiming, ,); err != nil {
-	// 			continue
-	// 		}
+	for _, valCronIDVal := range fltr.rsrValues {
+		valTmID, err := valCronIDVal.ParseDataProvider(dDP)
+		if err != nil {
+			continue
+		}
+		exp, err := cron.ParseStandard(valTmID)
+		if err != nil {
+			continue
+		}
+		if exp.Next(tmBefore) == tmTime {
+			return true, nil
+		}
+	}
 
-	// 	}
-	// 	return false, nil
-	return false, utils.ErrNotImplemented
+	return false, nil
 }
 
 func (fltr *FilterRule) passDestinations(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
