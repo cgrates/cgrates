@@ -209,7 +209,9 @@ var (
 		testV1TSResetStorDb,
 		testV1TSStartEngine,
 		testV1TSRpcConn,
+		testV1TSCacheThresholdBeforeLoad,
 		testV1TSFromFolder,
+		testV1TSCacheThresholdAfterLoad,
 		testV1TSGetThresholds,
 		testV1TSProcessEvent,
 		testV1TSGetThresholdsAfterProcess,
@@ -301,6 +303,25 @@ func testV1TSRpcConn(t *testing.T) {
 	}
 }
 
+func testV1TSCacheThresholdBeforeLoad(t *testing.T) { // cache it with not found
+	var td engine.Threshold
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}},
+		&td); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1TSCacheThresholdAfterLoad(t *testing.T) { // the APIerSv1LoadTariffPlanFromFolder should also reload the cache for resources
+	var td engine.Threshold
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd, td) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	}
+}
 func testV1TSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
