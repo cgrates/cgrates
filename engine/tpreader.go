@@ -469,7 +469,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoFilter(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetFilter(th, true); err != nil {
+		if err = tpr.dm.SetFilter(context.TODO(), th, true); err != nil {
 			return
 		}
 		if verbose {
@@ -1175,7 +1175,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("Filters:")
 	}
 	for _, tpFltr := range tpr.filters {
-		if err = tpr.dm.RemoveFilter(tpFltr.Tenant, tpFltr.ID,
+		if err = tpr.dm.RemoveFilter(context.TODO(), tpFltr.Tenant, tpFltr.ID,
 			utils.NonTransactional, true); err != nil {
 			return
 		}

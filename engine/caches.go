@@ -231,7 +231,8 @@ func (chS *CacheS) Precache() (err error) {
 		wg.Add(1)
 		go func(cacheID string) {
 			errCache := chS.dm.CacheDataFromDB(context.TODO(),
-				utils.CacheInstanceToPrefix[cacheID], nil,
+				utils.CacheInstanceToPrefix[cacheID],
+				[]string{utils.MetaAny},
 				false)
 			if errCache != nil {
 				errChan <- fmt.Errorf("precaching cacheID <%s>, got error: %s", cacheID, errCache)
@@ -356,6 +357,14 @@ func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 }
 
 func (chS *CacheS) V1ReloadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+	return chS.cacheDataFromDB(ctx, attrs, reply, true)
+}
+
+func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+	return chS.cacheDataFromDB(ctx, attrs, reply, false)
+}
+
+func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string, mustBeCached bool) (err error) {
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {
 			if err = chS.dm.CacheDataFromDB(ctx, prfx, ids, true); err != nil {
@@ -375,35 +384,8 @@ func (chS *CacheS) V1ReloadCache(ctx *context.Context, attrs utils.AttrReloadCac
 		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
-
 	*reply = utils.OK
-	return nil
-}
-
-func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	args := make(map[string][]string)
-	for key, ids := range attrs.ArgsCache {
-		if prfx, has := utils.ArgCacheToPrefix[key]; has {
-			args[prfx] = ids
-		}
-	}
-	if err = chS.dm.LoadDataDBCache(ctx, args); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	//get loadIDs for all types
-	var loadIDs map[string]int64
-	if loadIDs, err = chS.dm.GetItemLoadIDs(ctx, utils.EmptyString, false); err != nil {
-		if err != utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
-			return
-		}
-		loadIDs = make(map[string]int64)
-	}
-	for key, val := range populateCacheLoadIDs(loadIDs, attrs.ArgsCache) {
-		chS.tCache.Set(utils.CacheLoadIDs, key, val, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	*reply = utils.OK
-	return nil
+	return
 }
 
 //populateCacheLoadIDs populate cacheLoadIDs based on attrs

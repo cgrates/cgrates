@@ -103,21 +103,6 @@ func (dm *DataManager) DataDB() DataDB {
 	return nil
 }
 
-func (dm *DataManager) LoadDataDBCache(ctx *context.Context, attr map[string][]string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if dm.DataDB().GetStorageType() == utils.Internal {
-		return // all the data is in cache already
-	}
-	for key, ids := range attr {
-		if err = dm.CacheDataFromDB(ctx, key, ids, false); err != nil {
-			return
-		}
-	}
-	return
-}
-
 func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []string, mustBeCached bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
@@ -133,7 +118,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 	}
 	if prfx == utils.MetaAPIBan { // no need for ids in this case
 		ids = []string{utils.EmptyString}
-	} else if ids == nil {
+	} else if len(ids) != 0 && ids[0] == utils.MetaAny {
 		if mustBeCached {
 			ids = Cache.GetItemIDs(utils.CachePrefixToInstance[prfx], utils.EmptyString)
 		} else {
@@ -782,7 +767,7 @@ func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex b
 		return
 	}
 	if withIndex {
-		if err = UpdateFilterIndex(dm, oldFlt, fltr); err != nil {
+		if err = UpdateFilterIndex(ctx, dm, oldFlt, fltr); err != nil {
 			return
 		}
 	}

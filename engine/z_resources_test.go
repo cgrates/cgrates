@@ -980,7 +980,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -1007,7 +1007,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -1019,7 +1019,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1140,7 +1140,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -1167,7 +1167,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -1179,7 +1179,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1468,7 +1468,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -1495,7 +1495,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -1507,7 +1507,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
@@ -1673,7 +1673,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -1700,7 +1700,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -1712,7 +1712,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &resprf[0].UsageTTL
@@ -1878,7 +1878,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -1905,7 +1905,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -1917,7 +1917,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = nil
@@ -2083,7 +2083,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -2110,7 +2110,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -2123,7 +2123,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 		},
 	}
 	timeDurationExample := 10 * time.Second
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf[0].UsageTTL = 5
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
@@ -2412,7 +2412,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -2439,7 +2439,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -2451,7 +2451,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2637,7 +2637,7 @@ func TestResourceCaching(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes1, true)
+	dmRES.SetFilter(context.TODO(), fltrRes1, true)
 	fltrRes2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
@@ -2664,7 +2664,7 @@ func TestResourceCaching(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes2, true)
+	dmRES.SetFilter(context.TODO(), fltrRes2, true)
 	fltrRes3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
@@ -2676,7 +2676,7 @@ func TestResourceCaching(t *testing.T) {
 			},
 		},
 	}
-	dmRES.SetFilter(fltrRes3, true)
+	dmRES.SetFilter(context.TODO(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,

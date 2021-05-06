@@ -376,7 +376,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, fltrPrf.TenantID())
-				if err := ldr.dm.SetFilter(fltrPrf, true); err != nil {
+				if err := ldr.dm.SetFilter(context.TODO(), fltrPrf, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.FilterIDs] = ids
@@ -806,7 +806,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveFilter(tntIDStruct.Tenant, tntIDStruct.ID,
+				if err := ldr.dm.RemoveFilter(context.TODO(), tntIDStruct.Tenant, tntIDStruct.ID,
 					utils.NonTransactional, true); err != nil {
 					return err
 				}

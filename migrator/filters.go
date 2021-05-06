@@ -48,10 +48,10 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err = m.dmOut.DataManager().SetFilter(fl, true); err != nil {
+		if err = m.dmOut.DataManager().SetFilter(context.TODO(), fl, true); err != nil {
 			return
 		}
-		if err = m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
+		if err = m.dmIN.DataManager().RemoveFilter(context.TODO(), tntID[0], tntID[1],
 			utils.NonTransactional, true); err != nil {
 			return
 		}
@@ -921,5 +921,5 @@ func (m *Migrator) setFilterv5WithoutCompile(fltr *engine.Filter) (err error) {
 	if err = m.dmOut.DataManager().DataDB().SetFilterDrv(context.TODO(), fltr); err != nil {
 		return
 	}
-	return engine.UpdateFilterIndex(m.dmOut.DataManager(), oldFlt, fltr)
+	return engine.UpdateFilterIndex(context.TODO(), m.dmOut.DataManager(), oldFlt, fltr)
 }
