@@ -1450,7 +1450,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if ok := rcv.Equals(extEvCh); ok {
+	if ok := rcv.Equals(extEvCh); !ok {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(extEvCh), ToJSON(rcv))
 	}
 }
