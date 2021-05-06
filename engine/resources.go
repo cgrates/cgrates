@@ -129,11 +129,13 @@ func (r *Resource) removeExpiredUnits() {
 			continue
 		}
 		delete(r.Usages, rID)
-		*r.tUsage -= ru.Units
-		if *r.tUsage < 0 { // something went wrong
-			utils.Logger.Warning(
-				fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.ID, *r.tUsage))
-			r.tUsage = nil
+		if r.tUsage != nil { //  total usage was not yet calculated so we do not need to update it
+			*r.tUsage -= ru.Units
+			if *r.tUsage < 0 { // something went wrong
+				utils.Logger.Warning(
+					fmt.Sprintf("resetting total usage for resourceID: %s, usage smaller than 0: %f", r.ID, *r.tUsage))
+				r.tUsage = nil
+			}
 		}
 	}
 	r.TTLIdx = r.TTLIdx[firstActive:]
@@ -547,11 +549,9 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 		return nil, utils.ErrNotFound
 	}
 	// All good, convert from Map to Slice so we can sort
-	rs = make(Resources, len(matchingResources))
-	i := 0
+	rs = make(Resources, 0, len(matchingResources))
 	for _, r := range matchingResources {
-		rs[i] = r
-		i++
+		rs = append(rs, r)
 	}
 	rs.Sort()
 	for i, r := range rs {
