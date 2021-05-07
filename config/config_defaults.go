@@ -138,7 +138,7 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
-		"sslmode":"disable",		// sslmode in case of *postgres
+		"sslmode":"disable",				// postgresSSLMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 	},
 	"items":{
@@ -396,11 +396,11 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "dbName": "cgrates", 						// the name of the database from were the events are read
 				// "tableName": "cdrs",							// the name of the table from were the events are read
-				// "sslmode": "disable",				// the ssl mode for postgres db
+				// "sslmode": "disable",						// the postgresSSLMode for postgres db
 
 				// "dbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
 				// "tableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-				// "sslmodeProcessed": "",						// the ssl mode for postgres db
+				// "sslmodeProcessed": "",						// the postgresSSLMode for postgres db
 
 				// SQS and S3
 				// "awsRegion": "",
@@ -450,7 +450,58 @@ const CGRATES_CFG_JSON = `
 			"id": "*default",									// identifier of the EventReader profile
 			"type": "*none",									// exporter type 
 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
-			"opts": {},											// extra options for exporter
+			"opts": {
+
+				// General
+				// "queueID": "cgrates_cdrs", 					// the queue id where events are exported
+
+
+				// CSV
+				// "csvFieldSeparator": ",",					// separator used when reading the fields
+
+
+				// Elasticsearch options
+				// "index": "",									// ElsIndex               	
+				// "if_primary_term": 0,						// ElsIfPrimaryTerm
+ 				// "if_seq_no": 0,								// ElsIfSeqNo
+				// "op_type": "",								// ElsOpType
+				// "pipeline": "",								// ElsPipeline
+				// "routing": "",								// ElsRouting
+				// "timeout": "",								// ElsTimeout
+				// "version": 0,								// ElsVersionLow
+				// "version_type": "",							// ElsVersionType
+				// "wait_for_active_shards": "",				// ElsWaitForActiveShards
+				
+				
+				// SQL
+				// "maxIdleConns": 0,							// SQLMaxIdleConns    
+				// "maxOpenConns": 0,							// SQLMaxOpenConns
+				// "maxConnLifetime": 0,						// SQLMaxConnLifetime 
+
+
+				// "tableName":"cdrs", 							// the name of the table from where the events are exported
+				// "dbName": "cgrates",							// the name of the database from where the events are exported
+				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
+				
+
+				// Kafka
+				// "topic": "cgrates",							// the topic from where the events are exported
+				
+
+				// AMQP
+				// "routingKey": "",							// RoutingKey
+				// "exchange": "",								// Exchange
+				// "exchangeType": "",							// ExchangeType
+
+
+				// S3 and SQS
+				// "awsRegion": "",								// AWSRegion  
+				// "awsKey": "",								// AWSKey        
+				// "awsSecret": "",								// AWSSecret
+				// "awsToken": "",								// AWSToken      
+				// "folderPath": "",							// AWSFolderPath 
+
+			},													// extra options for exporter
 			"tenant": "",										// tenant used in filterS.Pass
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
