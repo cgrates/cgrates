@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -3134,5 +3135,143 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	} else if reply != exp {
 		t.Errorf("Expected: %q, received: %q", exp, reply)
 	}
+}
 
+func TestResourceClearUsageErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	rs := Resources{
+		{
+			Usages: map[string]*ResourceUsage{
+				"RU_1": {
+					Tenant: "cgrates.org",
+					ID:     "RU_1",
+				},
+				"RU_2": {
+					Tenant: "cgrates.org",
+					ID:     "RU_2",
+				},
+			},
+			TTLIdx: []string{"RU_1", "RU_2"},
+			ttl:    utils.DurationPointer(1 * time.Second),
+		},
+	}
+
+	ruTntID := "cgrates.org:RU_3"
+
+	experr := fmt.Sprintf("cannot find usage record with id: %s", ruTntID)
+	explog := fmt.Sprintf("CGRateS <> [WARNING] <ResourceS>, clear ruID: %s, err: %s\n", ruTntID, experr)
+	err := rs.clearUsage(ruTntID)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	rcvlog := buf.String()[20:]
+	if rcvlog != explog {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
+	rs := Resources{}
+	ru := &ResourceUsage{}
+
+	experr := utils.ErrResourceUnavailable
+	rcv, err := rs.allocateResource(ru, false)
+
+	if err == nil || !errors.Is(err, experr) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != "" {
+		t.Errorf("\nexpected empty string, got %s", rcv)
+	}
+}
+
+func TestResourcesAllocateResourceEmptyConfiguration(t *testing.T) {
+	rs := Resources{
+		{
+			Usages: map[string]*ResourceUsage{
+				"RU_1": {
+					Tenant: "cgrates.org",
+					ID:     "RU_1",
+				},
+				"RU_2": {
+					Tenant: "cgrates.org",
+					ID:     "RU_2",
+				},
+			},
+			TTLIdx: []string{"RU_1", "RU_2"},
+			ttl:    utils.DurationPointer(1 * time.Second),
+			Tenant: "cgrates.org",
+			ID:     "Res_1",
+		},
+	}
+
+	ru := &ResourceUsage{
+		Tenant: "cgrates.org",
+		ID:     "RU_2",
+	}
+
+	experr := fmt.Sprintf("empty configuration for resourceID: %s", rs[0].TenantID())
+	rcv, err := rs.allocateResource(ru, false)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != "" {
+		t.Errorf("\nexpected empty string, got %s", rcv)
+	}
+}
+
+func TestResourcesAllocateResourceDryRun(t *testing.T) {
+	rs := Resources{
+		{
+			Usages: map[string]*ResourceUsage{
+				"RU_1": {
+					Tenant: "cgrates.org",
+					ID:     "RU_1",
+				},
+				"RU_2": {
+					Tenant: "cgrates.org",
+					ID:     "RU_2",
+				},
+			},
+			TTLIdx: []string{"RU_1", "RU_2"},
+			ttl:    utils.DurationPointer(1 * time.Second),
+			Tenant: "cgrates.org",
+			ID:     "Res_1",
+			rPrf: &ResourceProfile{
+				Tenant: "cgrates.org",
+				ID:     "ResGroup1",
+			},
+		},
+	}
+
+	ru := &ResourceUsage{
+		Tenant: "cgrates.org",
+		ID:     "RU_2",
+	}
+
+	exp := "ResGroup1"
+	rcv, err := rs.allocateResource(ru, true)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, got %+v", err)
+	}
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
 }
