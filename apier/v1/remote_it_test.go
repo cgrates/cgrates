@@ -713,7 +713,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		},
 	}
 	if err := internalRPC.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
