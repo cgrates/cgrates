@@ -758,50 +758,16 @@ func (bc Balances) HasBalance(balance *Balance) bool {
 }
 
 func (bc Balances) SaveDirtyBalances(acc *Account) {
-	savedAccounts := make(map[string]*Account)
+	savedAccounts := utils.StringSet{}
 	for _, b := range bc {
-		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == nil {
+		if b.account == nil || !b.dirty || savedAccounts.Has(b.account.ID) {
+			continue
+		}
+		savedAccounts.Add(b.account.ID)
+		if b.account != acc {
 			dm.SetAccount(b.account)
-			savedAccounts[b.account.ID] = b.account
 		}
-	}
-	if len(savedAccounts) != 0 {
-		for _, acnt := range savedAccounts {
-			acntSummary := acnt.AsAccountSummary()
-			cgrEv := &utils.CGREvent{
-				Tenant: acntSummary.Tenant,
-				ID:     utils.GenUUID(),
-				Time:   utils.TimePointer(time.Now()),
-				Event:  acntSummary.AsMapInterface(),
-				APIOpts: map[string]interface{}{
-					utils.MetaEventType: utils.AccountUpdate,
-				},
-			}
-			if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
-				var tIDs []string
-				if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
-					utils.ThresholdSv1ProcessEvent, &ThresholdsArgsProcessEvent{
-						CGREvent: cgrEv,
-					}, &tIDs); err != nil &&
-					err.Error() != utils.ErrNotFound.Error() {
-					utils.Logger.Warning(
-						fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
-				}
-			}
-			if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
-				var stsIDs []string
-				if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
-					utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{
-						CGREvent: cgrEv,
-					}, &stsIDs); err != nil &&
-					err.Error() != utils.ErrNotFound.Error() {
-					utils.Logger.Warning(
-						fmt.Sprintf("<AccountS> error: %s processing account event %+v with StatS.", err.Error(), cgrEv))
-				}
-			}
-
-		}
-
+		b.account.Publish()
 	}
 }
 
