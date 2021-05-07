@@ -56,7 +56,7 @@ var (
 func TestEnvRawJsonReadByte(t *testing.T) {
 	raw := NewRjReaderFromBytes([]byte(envStr))
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redisSentinel":""}}`)
-	rply := []byte{}
+	reply := []byte{}
 	bit, err := raw.ReadByte()
 	for ; err == nil; bit, err = raw.ReadByte() {
 		reply = append(reply, bit)
@@ -212,7 +212,7 @@ func TestEnvReaderRead(t *testing.T) {
 	}
 	envR := NewRjReaderFromBytes([]byte(envStr))
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/","redisSentinel":""}}`)
-	rply := []byte{}
+	reply := []byte{}
 	buf := make([]byte, 20)
 	n, err := envR.Read(buf)
 	for ; err == nil && n > 0; n, err = envR.Read(buf) {
