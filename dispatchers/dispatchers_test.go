@@ -65,7 +65,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
 		},
 	}
-	err = dm.SetFilter(context.TODO(), fltr, false)
+	err = dm.SetFilter(context.Background(), fltr, false)
 	if err == nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -895,7 +895,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
 		},
 	}
-	err = dm.SetFilter(context.TODO(), fltr, false)
+	err = dm.SetFilter(context.Background(), fltr, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -993,7 +993,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
 		},
 	}
-	err = dm.SetFilter(context.TODO(), fltr, false)
+	err = dm.SetFilter(context.Background(), fltr, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

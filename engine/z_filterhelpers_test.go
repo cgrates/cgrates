@@ -49,7 +49,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
-	dmMatch.SetFilter(context.TODO(), attribStringF, true)
+	dmMatch.SetFilter(context.Background(), attribStringF, true)
 	x, err = NewFilterRule(utils.MetaPrefix, "~*req.Field", []string{"profilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -59,7 +59,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
-	dmMatch.SetFilter(context.TODO(), attribPrefF, true)
+	dmMatch.SetFilter(context.Background(), attribPrefF, true)
 	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~*req.Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -69,7 +69,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
 		Rules:  defaultFilter}
-	dmMatch.SetFilter(context.TODO(), attribDefaultF, true)
+	dmMatch.SetFilter(context.Background(), attribDefaultF, true)
 
 	x, err = NewFilterRule(utils.MetaSuffix, "~*req.Field", []string{"Prefix"})
 	if err != nil {
@@ -80,7 +80,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "sufFilter",
 		Rules:  suffixFilter}
-	dmMatch.SetFilter(context.TODO(), attribSufF, true)
+	dmMatch.SetFilter(context.Background(), attribSufF, true)
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
@@ -154,7 +154,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
-	dmMatch.SetFilter(context.TODO(), attribStringF, true)
+
 	x, err = NewFilterRule(utils.MetaPrefix, "~*req.CallCost.Field", []string{"profile"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -164,7 +164,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
-	dmMatch.SetFilter(context.TODO(), attribPrefF, true)
+
 	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~*req.Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -174,7 +174,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
 		Rules:  defaultFilter}
-	dmMatch.SetFilter(context.TODO(), attribDefaultF, true)
+
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,

@@ -200,7 +200,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts1, true)
+	dmSTS.SetFilter(context.Background(), fltrSts1, true)
 	fltrSts2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_2",
@@ -227,7 +227,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts2, true)
+	dmSTS.SetFilter(context.Background(), fltrSts2, true)
 	fltrSts3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_3",
@@ -239,7 +239,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts3, true)
+	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
@@ -440,7 +440,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts1, true)
+	dmSTS.SetFilter(context.Background(), fltrSts1, true)
 	fltrSts2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_2",
@@ -467,7 +467,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts2, true)
+	dmSTS.SetFilter(context.Background(), fltrSts2, true)
 	fltrSts3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_3",
@@ -479,7 +479,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts3, true)
+	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
@@ -681,7 +681,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts1, true)
+	dmSTS.SetFilter(context.Background(), fltrSts1, true)
 	fltrSts2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_2",
@@ -708,7 +708,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts2, true)
+	dmSTS.SetFilter(context.Background(), fltrSts2, true)
 	fltrSts3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_3",
@@ -720,7 +720,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts3, true)
+	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
@@ -922,7 +922,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts1, true)
+	dmSTS.SetFilter(context.Background(), fltrSts1, true)
 	fltrSts2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_2",
@@ -949,7 +949,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts2, true)
+	dmSTS.SetFilter(context.Background(), fltrSts2, true)
 	fltrSts3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_3",
@@ -961,7 +961,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSTS.SetFilter(context.TODO(), fltrSts3, true)
+	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
