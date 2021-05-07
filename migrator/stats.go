@@ -63,7 +63,7 @@ type v1Stats []*v1Stat
 func (m *Migrator) moveStatQueueProfile() (err error) {
 	//StatQueueProfile
 	var ids []string
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix); err != nil {
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.Background(), utils.StatQueueProfilePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {

@@ -1,0 +1,27 @@
+{
+  // CGRateS Configuration file
+  // will be used in apis/filter_indexes_it_test.go
+
+
+  "data_db": {
+    "db_type": "*internal",
+  },
+
+  "stor_db": {
+    "db_type": "*internal",
+  },
+
+  "attributes": {
+    "enabled": true,
+    //"string_indexes_fields": ["*req.Subject"],
+    //"prefix_indexes_fields": ["*req.Destinations"]
+  },
+
+  "admins": {
+    "enabled": true,
+  },
+
+  "filters": {
+    "admins_conns": ["*internal"]
+  }
+},

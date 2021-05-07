@@ -65,7 +65,7 @@ type LoaderService struct {
 	srvDep   map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (ldrs *LoaderService) Start() (err error) {
 	if ldrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning

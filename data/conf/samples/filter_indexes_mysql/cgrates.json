@@ -1,0 +1,29 @@
+{
+  // CGRateS Configuration file
+  // will be used in apis/filter_indexes_it_test.go
+
+
+  "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+    "db_type": "redis",						// data_db type: <redis|mongo>
+    "db_port": 6379, 						// data_db port to reach the database
+    "db_name": "10", 						// data_db database name to connect to
+  },
+
+  "stor_db": {
+    "db_password": "CGRateS.org",
+  },
+
+  "attributes": {
+    "enabled": true,
+    //"string_indexes_fields": ["*req.Subject"],
+    //"prefix_indexes_fields": ["*req.Destinations"]
+  },
+
+  "admins": {
+    "enabled": true,
+  },
+
+  "filters": {
+    "admins_conns": ["*internal"]
+  }
+},

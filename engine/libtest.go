@@ -20,7 +20,6 @@ package engine
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/rpc/jsonrpc"
@@ -28,6 +27,8 @@ import (
 	"os/exec"
 	"path"
 	"time"
+
+	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
