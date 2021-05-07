@@ -373,7 +373,7 @@ const CGRATES_CFG_JSON = `
 				// "queueIDProcessed": "", 						// the queue id for AMQP, AMQPv1, SQS and S3 readers were the events are sent after they are processed
 
 				// FileCSV, FlatStore and PartialCSV
-				// "lazyQuotes": false,							// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+				// "lazyQuotes": false,							//  if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
 
 				// AMQP
 				// "consumerTag": "cgrates",					// the ID of the consumer
