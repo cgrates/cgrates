@@ -1768,7 +1768,7 @@ const (
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
 	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
 	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
-	SSLModeCfg             = "sslmode"
+	SSLModeCfg             = "sslMode"
 	ItemsCfg               = "items"
 	OptsCfg                = "opts"
 	Tenants                = "tenants"
