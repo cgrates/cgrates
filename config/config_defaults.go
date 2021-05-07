@@ -111,7 +111,7 @@ const CGRATES_CFG_JSON = `
 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"mongoQueryTimeout":"10s",
+		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 		"redisClientCertificate":"",			// path to client certificate
 		"redisClientKey":"",					// path to client key
@@ -133,7 +133,7 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": 0, 			// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-		"mongoQueryTimeout":"10s",
+		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 		"sslMode":"disable",				// sslMode in case of *postgres
 		"mysqlLocation": "Local",			// the location the time from mysql is retrived
 	},
