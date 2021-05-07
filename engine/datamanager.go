@@ -769,16 +769,16 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 	return
 }
 
-func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
+func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	var oldFlt *Filter
-	if oldFlt, err = dm.GetFilter(context.TODO(), fltr.Tenant, fltr.ID, true, false,
+	if oldFlt, err = dm.GetFilter(ctx, fltr.Tenant, fltr.ID, true, false,
 		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetFilterDrv(context.TODO(), fltr); err != nil {
+	if err = dm.DataDB().SetFilterDrv(ctx, fltr); err != nil {
 		return
 	}
 	if withIndex {
@@ -787,7 +787,7 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.FilterPrefix, fltr.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetFilter,
@@ -799,12 +799,12 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 	return
 }
 
-func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	var oldFlt *Filter
-	if oldFlt, err = dm.GetFilter(context.TODO(), tenant, id, true, false,
+	if oldFlt, err = dm.GetFilter(ctx, tenant, id, true, false,
 		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -812,7 +812,7 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 	if withIndex {
 		tntCtx = utils.ConcatenatedKey(tenant, id)
 		var rcvIndx map[string]utils.StringSet
-		if rcvIndx, err = dm.GetIndexes(context.TODO(), utils.CacheReverseFilterIndexes, tntCtx,
+		if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntCtx,
 			utils.EmptyString, true, true); err != nil {
 			if err != utils.ErrNotFound {
 				return
@@ -830,7 +830,7 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex 
 		return utils.ErrNotFound
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.FilterPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveFilter,
@@ -2728,7 +2728,7 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 	return
 }
 
-func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err error) {
+func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2736,7 +2736,7 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveIndexes,
