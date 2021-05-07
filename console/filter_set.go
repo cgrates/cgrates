@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdSetFilter{
 		name:      "filter_set",
-		rpcMethod: utils.APIerSv1SetFilter,
+		rpcMethod: utils.AdminSv1SetFilter,
 		rpcParams: &engine.FilterWithAPIOpts{},
 	}
 	commands[c.Name()] = c

@@ -34,10 +34,6 @@ func TestConvertExternalToProfile(t *testing.T) {
 		ID:        "ATTR_ID",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
 		Attributes: []*ExternalAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
@@ -52,10 +48,6 @@ func TestConvertExternalToProfile(t *testing.T) {
 		ID:        "ATTR_ID",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
