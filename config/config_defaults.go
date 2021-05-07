@@ -460,7 +460,7 @@ const CGRATES_CFG_JSON = `
 				// "dbName": "cgrates",							// the name of the database from where the events are exported
 				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
 				
-
+				
 				// Kafka
 				// "topic": "cgrates",							// the topic from where the events are exported
 				
@@ -476,7 +476,7 @@ const CGRATES_CFG_JSON = `
 				// "awsKey": "",								// AWSKey        
 				// "awsSecret": "",								// AWSSecret
 				// "awsToken": "",								// AWSToken      
-				// "folderPath": "",							// AWSFolderPath 
+				// "awsFolderPath": "",							// AWSFolderPath 
 
 			},													// extra options for exporter
 			"tenant": "",										// tenant used in filterS.Pass
