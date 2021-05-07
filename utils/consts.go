@@ -2536,7 +2536,7 @@ const (
 	AWSKey        = "awsKey"
 	AWSSecret     = "awsSecret"
 	AWSToken      = "awsToken"
-	AWSFolderPath = "folderPath"
+	AWSFolderPath = "awsFolderPath"
 	KafkaTopic    = "topic"
 	KafkaGroupID  = "groupID"
 	KafkaMaxWait  = "maxWait"
