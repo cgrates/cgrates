@@ -1752,7 +1752,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 		t.Error(err)
 		//} else if eEvChgs.Equals(&rcvEC) {
 	} else if !reflect.DeepEqual(eEvChgs, rcvEC) {
-		t.Errorf("expecting: %s, \nreceived: %s\n", utils.ToIJSON(eEvChgs), utils.ToIJSON(rcvEC))
+		t.Errorf("expecting: %s, \nreceived: %s\n", utils.ToJSON(eEvChgs), utils.ToJSON(rcvEC))
 	}
 
 	/*

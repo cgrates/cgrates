@@ -266,7 +266,7 @@ func TestRoutesCache(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -288,7 +288,7 @@ func TestRoutesCache(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -300,7 +300,7 @@ func TestRoutesCache(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
@@ -496,7 +496,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -518,7 +518,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -530,7 +530,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -748,7 +748,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -770,7 +770,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -782,7 +782,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -1054,7 +1054,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -1076,7 +1076,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -1088,7 +1088,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
@@ -1314,7 +1314,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -1336,7 +1336,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -1348,7 +1348,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
@@ -1567,7 +1567,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -1589,7 +1589,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -1601,7 +1601,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
@@ -1855,7 +1855,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -1877,7 +1877,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -1889,7 +1889,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
@@ -2109,7 +2109,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp1, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp1, true)
 	fltrSupp2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
@@ -2131,7 +2131,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp2, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp2, true)
 	fltrSupp3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
@@ -2143,7 +2143,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 			},
 		},
 	}
-	dmSPP.SetFilter(context.TODO(), fltrSupp3, true)
+	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
 		if err = dmSPP.SetRouteProfile(spp, true); err != nil {

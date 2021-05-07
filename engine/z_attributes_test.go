@@ -181,7 +181,7 @@ func TestAttributeAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmAtr.SetFilter(context.TODO(), fltrAttr1, true)
+	dmAtr.SetFilter(context.Background(), fltrAttr1, true)
 	fltrAttr2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_2",
@@ -193,7 +193,7 @@ func TestAttributeAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmAtr.SetFilter(context.TODO(), fltrAttr2, true)
+	dmAtr.SetFilter(context.Background(), fltrAttr2, true)
 	fltrAttrPrefix := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_3",
@@ -205,7 +205,7 @@ func TestAttributeAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmAtr.SetFilter(context.TODO(), fltrAttrPrefix, true)
+	dmAtr.SetFilter(context.Background(), fltrAttrPrefix, true)
 	fltrAttr4 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_4",
@@ -217,7 +217,7 @@ func TestAttributeAddFilters(t *testing.T) {
 			},
 		},
 	}
-	dmAtr.SetFilter(context.TODO(), fltrAttr4, true)
+	dmAtr.SetFilter(context.Background(), fltrAttr4, true)
 }
 
 func TestAttributeCache(t *testing.T) {

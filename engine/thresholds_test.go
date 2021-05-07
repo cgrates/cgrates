@@ -132,7 +132,7 @@ func TestThresholdsCache(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(), fltrTh1, true)
+	dmTH.SetFilter(context.Background(), fltrTh1, true)
 	fltrTh2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
@@ -149,7 +149,7 @@ func TestThresholdsCache(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(), fltrTh2, true)
+	dmTH.SetFilter(context.Background(), fltrTh2, true)
 	fltrTh3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
@@ -161,7 +161,7 @@ func TestThresholdsCache(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(), fltrTh3, true)
+	dmTH.SetFilter(context.Background(), fltrTh3, true)
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -314,7 +314,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(), fltrTh1, true)
+	dmTH.SetFilter(context.Background(), fltrTh1, true)
 	fltrTh2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
@@ -331,7 +331,6 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(), fltrTh2, true)
 	fltrTh3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
@@ -343,7 +342,6 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
 			t.Errorf("Error: %+v", err)

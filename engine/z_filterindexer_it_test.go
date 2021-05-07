@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/utils"
@@ -173,7 +174,7 @@ func testITSetFilterIndexes(t *testing.T) {
 			"RL5": struct{}{},
 		},
 	}
-	if err := dataManager.SetIndexes(utils.CacheResourceFilterIndexes,
+	if err := dataManager.SetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", idxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -207,7 +208,7 @@ func testITGetFilterIndexes(t *testing.T) {
 		},
 	}
 
-	if exsbjDan, err := dataManager.GetIndexes(
+	if exsbjDan, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "Subject", "dan"),
 		false, false); err != nil {
@@ -215,7 +216,7 @@ func testITGetFilterIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
 	}
-	if rcv, err := dataManager.GetIndexes(
+	if rcv, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes,
 		"cgrates.org", utils.EmptyString,
 		false, false); err != nil {
@@ -224,7 +225,7 @@ func testITGetFilterIndexes(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
 	//invalid tnt:context or index key
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		"unknown_key", "unkonwn_tenant",
 		utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -238,7 +239,7 @@ func testITMatchFilterIndex(t *testing.T) {
 			"RL2": struct{}{},
 		},
 	}
-	if rcvMp, err := dataManager.GetIndexes(
+	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "Account", "1002"),
 		false, true); err != nil {
@@ -248,7 +249,7 @@ func testITMatchFilterIndex(t *testing.T) {
 	}
 
 	//invalid tnt:context or index key
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.ConcatenatedKey(utils.MetaString, "NonexistentField", "1002"),
 		true, true); err == nil ||
@@ -273,7 +274,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{
@@ -314,7 +315,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			"THD_Test2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -338,7 +339,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp2, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp2, true); err != nil {
 		t.Error(err)
 	}
 	cloneTh1 := new(ThresholdProfile)
@@ -361,7 +362,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			"THD_Test2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -384,7 +385,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp3, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp3, true); err != nil {
 		t.Error(err)
 	}
 
@@ -410,7 +411,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			"THD_Test2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -434,7 +435,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp3, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp3, true); err != nil {
 		t.Error(err)
 	}
 
@@ -443,7 +444,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			"THD_Test": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3",
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -467,7 +468,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			"THD_Test2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -484,12 +485,12 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		th2.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes, "cgrates.org:Filter3",
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
 		t.Error(err)
@@ -512,7 +513,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
 	attrProfile := &AttributeProfile{
@@ -532,7 +533,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Weight: 20,
 	}
 	//Set AttributeProfile with 2 contexts (con1 , con2)
-	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
+	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -544,7 +545,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
-		if rcvIdx, err := dataManager.GetIndexes(
+		if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
 			utils.EmptyString, false, false); err != nil {
@@ -570,11 +571,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
+	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	//check indexes with the new context (con3)
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
 		utils.EmptyString, false, false); err != nil {
@@ -584,7 +585,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		if _, err = dataManager.GetIndexes(
+		if _, err = dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
 			utils.EmptyString, false, false); err == nil ||
@@ -608,7 +609,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -617,7 +618,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
-		if rcvIdx, err := dataManager.GetIndexes(
+		if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
 			utils.EmptyString, false, false); err != nil {
@@ -632,7 +633,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			"AttrPrf": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
 		fp.TenantID(),
 		utils.EmptyString, false, false); err != nil {
@@ -641,19 +642,19 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 
-	if err := dataManager.RemoveAttributeProfile(attrProfile.Tenant,
+	if err := dataManager.RemoveAttributeProfile(context.Background(), attrProfile.Tenant,
 		attrProfile.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", "con3"),
 		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
 		fp.TenantID(),
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
@@ -677,7 +678,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
 	attrProfile := &AttributeProfile{
@@ -697,7 +698,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		Weight: 20,
 	}
 	//Set AttributeProfile with 2 contexts ( con1 , con2)
-	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
+	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -709,7 +710,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
-		if rcvIdx, err := dataManager.GetIndexes(
+		if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
 			utils.EmptyString, false, false); err != nil {
@@ -735,11 +736,11 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
+	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	//check indexes with the new context (con3)
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
 		utils.EmptyString, false, false); err != nil {
@@ -749,7 +750,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	}
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		if _, err = dataManager.GetIndexes(
+		if _, err = dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
 			utils.EmptyString, false, false); err == nil ||
@@ -773,7 +774,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -782,7 +783,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
-		if rcvIdx, err := dataManager.GetIndexes(
+		if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx),
 			utils.EmptyString, false, false); err != nil {
@@ -797,7 +798,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 			"AttrPrf": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
 		fp.TenantID(),
 		utils.EmptyString, false, false); err != nil {
@@ -806,19 +807,19 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 
-	if err := dataManager.RemoveAttributeProfile(attrProfile.Tenant,
+	if err := dataManager.RemoveAttributeProfile(context.Background(), attrProfile.Tenant,
 		attrProfile.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", "con3"),
 		utils.MetaString, false, false); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes,
 		fp.TenantID(),
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
@@ -842,7 +843,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if err := dataManager.SetFilter(fp, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{
@@ -868,7 +869,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 			"THD_Test": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -901,7 +902,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 			"THD_Test": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -913,7 +914,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		th.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
 		t.Error(err)
@@ -942,13 +943,13 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL5": struct{}{},
 		},
 	}
-	if err := dataManager.SetIndexes(utils.CacheResourceFilterIndexes,
+	if err := dataManager.SetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", idxes, false, "transaction1"); err != nil {
 		t.Error(err)
 	}
 
 	//commit transaction
-	if err := dataManager.SetIndexes(utils.CacheResourceFilterIndexes,
+	if err := dataManager.SetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", idxes, true, "transaction1"); err != nil {
 		t.Error(err)
 	}
@@ -975,7 +976,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 	}
 
 	//verify new key and check if data was moved
-	if rcv, err := dataManager.GetIndexes(
+	if rcv, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes, "cgrates.org",
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -996,7 +997,7 @@ func testITAccountIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1044,7 +1045,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1063,7 +1064,7 @@ func testITAccountIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetFilter(fltr2, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1103,7 +1104,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1116,7 +1117,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
 		"cgrates.org", "*string:*req.Destination:DEST1", false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1134,9 +1135,9 @@ func testITAccountIndexes(t *testing.T) {
 		ID:     "SECOND",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "DEST4", Values: []string{"~*req.CGRID"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetFilter(fltr2, true); err != nil {
+	} else if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1153,7 +1154,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID3": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1167,7 +1168,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:FIRST", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1179,7 +1180,7 @@ func testITAccountIndexes(t *testing.T) {
 			"test_ID3": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:SECOND", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1188,7 +1189,7 @@ func testITAccountIndexes(t *testing.T) {
 
 	//invalid tnt:context or index key
 	eIdxes = nil
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheAccountsFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheAccountsFilterIndexes,
 		"cgrates.org", "*string:*req.Destination:DEST6", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1208,7 +1209,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1253,7 +1254,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 			"RES_PRF2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1272,7 +1273,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 	resPref1.ID = "RES_PRF_CHANGED1"
@@ -1296,7 +1297,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 			"RES_PRF_CHANGED2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1312,7 +1313,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 			"RES_PRF_CHANGED2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:RES_FLTR1", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1320,7 +1321,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 	}
 
 	//as we updated our filter, the old one is deleted
-	if _, err := dataManager.GetIndexes(utils.CacheResourceFilterIndexes,
+	if _, err := dataManager.GetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", "*string:*req.Destinations:DEST_RES1", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, receive %+v", utils.ErrNotFound, err)
 	}
@@ -1337,10 +1338,10 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		ID:     "SQUEUE2",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"~*req.Owner", "Dan1", "Dan2"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetFilter(fltr2, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1389,7 +1390,7 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 			"SQUEUE_PRF1": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheStatFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheStatFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1403,7 +1404,7 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 			"SQUEUE_PRF3": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:SQUEUE1", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1416,7 +1417,7 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 			"SQUEUE_PRF3": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:SQUEUE2", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1425,7 +1426,7 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 
 	//invalid tnt:context or index key
 	eIdxes = nil
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheStatFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheStatFilterIndexes,
 		"cgrates.org", "*string:~*opts.ToR:~*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, receive %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, eIdxes) {
@@ -1439,7 +1440,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 		ID:     "CHARGER_FLTR",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Usage", Values: []string{"10m", "20m", "~*req.Usage"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1471,7 +1472,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 			"CHARGER_PRF2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1484,7 +1485,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 		ID:     "CHARGER_FLTR",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.CGRID", Values: []string{"~*req.Usage", "DAN1"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 	chrgr1.ID = "CHANGED_CHARGER_PRF1"
@@ -1503,7 +1504,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 			"CHANGED_CHARGER_PRF2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1519,7 +1520,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 			"CHANGED_CHARGER_PRF2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:CHARGER_FLTR", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1528,7 +1529,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 
 	//the old filter is deleted
 	expIdx = nil
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheChargerFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheChargerFilterIndexes,
 		"cgrates.org", "*string:*req.Usage", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.Error, err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1547,9 +1548,9 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		ID:     "DISPATCHER_FLTR2",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "10m", Values: []string{"USAGE", "~*opts.Debited", "~*req.Usage", "~*opts.Usage"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetFilter(fltr2, true); err != nil {
+	} else if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1592,7 +1593,7 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 			"DISPATCHER_PRF2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheDispatcherFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
 		"cgrates.org:thresholds", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1605,7 +1606,7 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 			"DISPATCHER_PRF1": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:DISPATCHER_FLTR1", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1617,7 +1618,7 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 			"DISPATCHER_PRF2": struct{}{},
 		},
 	}
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:DISPATCHER_FLTR2", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1626,7 +1627,7 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 
 	//invalid tnt:context or index key
 	expIdx = nil
-	if rcvIDx, err := dataManager.GetIndexes(utils.CacheDispatcherFilterIndexes,
+	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
 		"cgrates.org:attributes", utils.EmptyString, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expectedd %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
@@ -1645,9 +1646,9 @@ func testITActionProfileIndexes(t *testing.T) {
 		ID:     "ACTPRF_FLTR2",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "20m", Values: []string{"USAGE", "~*opts.Debited", "~*req.Usage"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetFilter(fltr2, true); err != nil {
+	} else if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1684,7 +1685,7 @@ func testITActionProfileIndexes(t *testing.T) {
 			"ACTPRF2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
 		"itsyscom", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
@@ -1696,7 +1697,7 @@ func testITActionProfileIndexes(t *testing.T) {
 			"ACTPRF1": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
 		"itsyscom", "*string:*req.Destination:ACC1", false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
@@ -1715,9 +1716,9 @@ func testITActionProfileIndexes(t *testing.T) {
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.CGRID", Values: []string{"CHANGED_ID_1", "~*req.Account"}}},
 	}
 
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetFilter(fltr2, true); err != nil {
+	} else if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1751,7 +1752,7 @@ func testITActionProfileIndexes(t *testing.T) {
 			"CHANGED_ACTPRF1": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
 		"itsyscom", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
@@ -1765,7 +1766,7 @@ func testITActionProfileIndexes(t *testing.T) {
 			"CHANGED_ACTPRF1": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"itsyscom:ACTPRF_FLTR1", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
@@ -1778,7 +1779,7 @@ func testITActionProfileIndexes(t *testing.T) {
 			"CHANGED_ACTPRF2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"itsyscom:ACTPRF_FLTR2", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
@@ -1787,7 +1788,7 @@ func testITActionProfileIndexes(t *testing.T) {
 
 	//invalid tnt:context or index key
 	expIdx = nil
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheActionProfilesFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheActionProfilesFilterIndexes,
 		"itsyscom", "*string:*req.Destination:ACC7", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIdx, expIdx) {
@@ -1807,24 +1808,24 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		},
 	}
 	transID := "transaction1"
-	if err := dataManager.SetIndexes(utils.CacheResourceFilterIndexes,
+	if err := dataManager.SetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", idxes, false, transID); err != nil {
 		t.Error(err)
 	}
 	//commit transaction
-	if err := dataManager.SetIndexes(utils.CacheResourceFilterIndexes,
+	if err := dataManager.SetIndexes(context.Background(), utils.CacheResourceFilterIndexes,
 		"cgrates.org", nil, true, transID); err != nil {
 		t.Error(err)
 	}
 	//verify if old key was deleted
-	if _, err := dataManager.GetIndexes(
+	if _, err := dataManager.GetIndexes(context.Background(),
 		"tmp_"+utils.CacheResourceFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", transID),
 		utils.EmptyString, false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//verify new key and check if data was moved
-	if rcv, err := dataManager.GetIndexes(
+	if rcv, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheResourceFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -1869,7 +1870,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 			"THD_Test2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -1884,7 +1885,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 			"THD_Test2": struct{}{},
 		},
 	}
-	if rcvMp, err := dataManager.GetIndexes(
+	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny),
 		true, true); err != nil {
@@ -1954,7 +1955,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_Weight2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -1969,7 +1970,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_Weight2": struct{}{},
 		},
 	}
-	if rcvMp, err := dataManager.GetIndexes(
+	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRouteFilterIndexes, splProfile.Tenant,
 		utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny),
 		true, true); err != nil {
@@ -1990,7 +1991,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2021,7 +2022,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_WITH_FILTER1": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
@@ -2034,7 +2035,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_WITH_FILTER2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
 		"cgrates.org", "*string:*opts.CGRID:ORG_ID", false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
@@ -2048,7 +2049,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 			"SPL_WITH_FILTER2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:FIRST", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIdx, rcvIdx) {
@@ -2056,7 +2057,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 
 	//invalid tnt:context or index key
-	if _, err := dataManager.GetIndexes(utils.CacheRouteFilterIndexes,
+	if _, err := dataManager.GetIndexes(context.Background(), utils.CacheRouteFilterIndexes,
 		"cgrates.org", "*string:DAN:ORG_ID", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -2099,7 +2100,7 @@ func testITTestIndexingThresholds(t *testing.T) {
 			"TH3": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -2114,7 +2115,7 @@ func testITTestIndexingThresholds(t *testing.T) {
 			"TH2": struct{}{},
 		},
 	}
-	if rcvMp, err := dataManager.GetIndexes(
+	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, "1001"),
 		true, true); err != nil {
@@ -2160,7 +2161,7 @@ func testITTestIndexingMetaNot(t *testing.T) {
 			"TH2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
@@ -2174,7 +2175,7 @@ func testITTestIndexingMetaNot(t *testing.T) {
 			"TH1": struct{}{},
 		},
 	}
-	if rcvMp, err := dataManager.GetIndexes(
+	if rcvMp, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.ConcatenatedKey(utils.MetaString, utils.MetaReq+utils.NestingSep+utils.AccountField, "1001"),
 		true, true); err != nil {
@@ -2218,7 +2219,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -2229,7 +2230,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			"SECOND_GI": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP1",
 		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
@@ -2283,7 +2284,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(rPrf, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -2297,7 +2298,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			"THIRD_GI": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP1",
 		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
@@ -2313,7 +2314,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 		ID:     "FLTR",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "Dan", Values: []string{"~*req.Account", "~*req.Destination", "DAN2"}}},
 	}
-	if err := dataManager.SetFilter(fltr, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr, true); err != nil {
 		t.Error(err)
 	}
 	rPrf2 := &utils.RateProfile{
@@ -2348,7 +2349,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(rPrf2, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -2366,7 +2367,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			"CUSTOM_RATE1": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
 		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
@@ -2380,7 +2381,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			"CUSTOM_RATE1:RP2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheReverseFilterIndexes, "cgrates.org:FLTR",
 		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
@@ -2394,7 +2395,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 		ID:     "FLTR",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "10m", Values: []string{"~*req.Usage", "~*req.Debited", "DAN2"}}},
 	}
-	if err := dataManager.SetFilter(fltr, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2413,7 +2414,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 			"CUSTOM_RATE1": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP2",
 		utils.EmptyString, true, true); err != nil {
 		t.Error(err)
@@ -2423,7 +2424,7 @@ func testITIndexRateProfileRateIndexes(t *testing.T) {
 
 	//invalid or inexisting tenant:context or index key
 	eIdxes = nil
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheRateFilterIndexes, "cgrates.org:RP4",
 		utils.EmptyString, true, true); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -2439,7 +2440,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 		ID:     "FLTR",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Usage", Values: []string{"10m"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 	rPrf1 := &utils.RateProfile{
@@ -2473,9 +2474,9 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetRateProfile(rPrf1, true); err != nil {
+	if err := dataManager.SetRateProfile(context.Background(), rPrf1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetRateProfile(rPrf2, true); err != nil {
+	} else if err := dataManager.SetRateProfile(context.Background(), rPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -2497,7 +2498,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 			"RP1": struct{}{},
 		},
 	}
-	if rcv, err := dataManager.GetIndexes(utils.CacheRateProfilesFilterIndexes,
+	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
@@ -2510,7 +2511,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 		ID:     "FLTR",
 		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.CustomField", Values: []string{"234", "567"}}},
 	}
-	if err := dataManager.SetFilter(fltr1, true); err != nil {
+	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
 		t.Error(err)
 	}
 	expIdx = map[string]utils.StringSet{
@@ -2534,7 +2535,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 			"RP1": struct{}{},
 		},
 	}
-	if rcv, err := dataManager.GetIndexes(utils.CacheRateProfilesFilterIndexes,
+	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes,
 		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
@@ -2547,7 +2548,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 			"RP1": struct{}{},
 		},
 	}
-	if rcv, err := dataManager.GetIndexes(utils.CacheReverseFilterIndexes,
+	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
 		"cgrates.org:FLTR", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
@@ -2556,7 +2557,7 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 
 	//nothing to get with with an invalid indexKey
 	expIdx = nil
-	if rcv, err := dataManager.GetIndexes(utils.CacheRateProfilesFilterIndexes,
+	if rcv, err := dataManager.GetIndexes(context.Background(), utils.CacheRateProfilesFilterIndexes,
 		"cgrates.org", "*string:*req.CustomField:2346", false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcv, expIdx) {
@@ -2613,7 +2614,7 @@ func testITTestIndexingMetaSuffix(t *testing.T) {
 			"TH2": struct{}{},
 		},
 	}
-	if rcvIdx, err := dataManager.GetIndexes(
+	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)

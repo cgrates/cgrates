@@ -89,7 +89,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	if err := fltrCP1.Compile(); err != nil {
 		t.Error(err)
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP1, true)
+	dmCharger.SetFilter(context.Background(), fltrCP1, true)
 	fltrCP2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
@@ -101,7 +101,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP2, true)
+	dmCharger.SetFilter(context.Background(), fltrCP2, true)
 	fltrCPPrefix := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
@@ -113,7 +113,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCPPrefix, true)
+	dmCharger.SetFilter(context.Background(), fltrCPPrefix, true)
 	fltrCP4 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
@@ -125,7 +125,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP4, true)
+	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 	for _, cp := range cPPs {
 		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -237,7 +237,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	if err := fltrCP1.Compile(); err != nil {
 		t.Error(err)
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP1, true)
+	dmCharger.SetFilter(context.Background(), fltrCP1, true)
 	fltrCP2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
@@ -249,7 +249,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP2, true)
+	dmCharger.SetFilter(context.Background(), fltrCP2, true)
 	fltrCPPrefix := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
@@ -261,7 +261,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCPPrefix, true)
+	dmCharger.SetFilter(context.Background(), fltrCPPrefix, true)
 	fltrCP4 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
@@ -273,7 +273,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP4, true)
+	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 
 	for _, cp := range cPPs {
 		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
@@ -404,7 +404,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	if err := fltrCP1.Compile(); err != nil {
 		t.Error(err)
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP1, true)
+	dmCharger.SetFilter(context.Background(), fltrCP1, true)
 	fltrCP2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
@@ -416,7 +416,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP2, true)
+	dmCharger.SetFilter(context.Background(), fltrCP2, true)
 	fltrCPPrefix := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
@@ -428,7 +428,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCPPrefix, true)
+	dmCharger.SetFilter(context.Background(), fltrCPPrefix, true)
 	fltrCP4 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
@@ -440,7 +440,7 @@ func TestChargerProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmCharger.SetFilter(context.TODO(), fltrCP4, true)
+	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 
 	for _, cp := range cPPs {
 		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
