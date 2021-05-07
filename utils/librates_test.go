@@ -1966,3 +1966,41 @@ func TestAsExtRateSIntervalErrorsCheck(t *testing.T) {
 	}
 	rI.Increments[0].Rate.IntervalRates[0].Increment = NewDecimal(0, 0)
 }
+
+func TestCostForIntervalsWithPartialIntervals(t *testing.T) {
+	rtIvls := []*RateSInterval{
+		{
+			IntervalStart:  NewDecimal(int64(2*time.Minute), 0),
+			CompressFactor: 1,
+			Increments: []*RateSIncrement{
+				{
+					IncrementStart: NewDecimal(int64(2*time.Minute), 0),
+					Rate: &Rate{
+						ID: "RT_2",
+						IntervalRates: []*IntervalRate{
+							{
+								IntervalStart: NewDecimal(0, 0),
+								RecurrentFee:  NewDecimal(2, 2),
+								Unit:          NewDecimal(int64(time.Second), 0),
+								Increment:     NewDecimal(int64(time.Second), 0),
+							},
+							{
+								IntervalStart: NewDecimal(int64(time.Minute), 0),
+								FixedFee:      NewDecimal(2, 2),
+								Unit:          NewDecimal(int64(time.Second), 0),
+								Increment:     NewDecimal(int64(time.Second), 0),
+							},
+						},
+					},
+					IntervalRateIndex: 1,
+					CompressFactor:    1,
+					Usage:             NewDecimal(-1, 0),
+				},
+			},
+		},
+	}
+
+	if cost := CostForIntervals(rtIvls); cost.Cmp(decimal.New(2, 2)) != 0 {
+		t.Errorf("received cost: %s", cost)
+	}
+}

@@ -156,6 +156,7 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 	} else {
 		usage = decimal.New(int64(usgEv), 0)
 	}
+	dbted := decimal.New(0, 0)
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
 	for i, acnt := range acnts {
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
@@ -164,7 +165,7 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 		acntBkps[i] = acnt.Account.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
 		if ecDbt, err = aS.accountDebit(acnt.Account,
-			new(decimal.Big).Copy(usage), cgrEv, concretes); err != nil {
+			new(decimal.Big).Copy(usage), cgrEv, concretes, dbted); err != nil {
 			if store {
 				restoreAccounts(aS.dm, acnts, acntBkps)
 			}
@@ -189,6 +190,7 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 			used = ecDbt.Abstracts.Big
 		}
 		usage = utils.SubstractBig(usage, used)
+		dbted = utils.SumBig(dbted, used)
 		ec.Merge(ecDbt)
 	}
 	return
@@ -196,7 +198,7 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 
 // accountDebit will debit the usage out of an Account
 func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
-	cgrEv *utils.CGREvent, concretes bool) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent, concretes bool, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
@@ -223,7 +225,7 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv); err != nil {
+		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv, dbted); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps ||
 				err == utils.ErrNotImplemented {
 				err = nil
@@ -244,6 +246,7 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 			used = ecDbt.Abstracts.Big
 		}
 		usage = utils.SubstractBig(usage, used)
+		dbted = utils.SumBig(dbted, used)
 		ec.Merge(ecDbt)
 		ec.Accounts[acnt.ID] = acnt
 	}

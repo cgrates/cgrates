@@ -78,8 +78,8 @@ func newBalanceOperator(acntID string, blncCfg *utils.Balance, cncrtBlncs []*con
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	id() string // balance id
-	debitAbstracts(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
-	debitConcretes(usage *decimal.Big, cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error)
+	debitAbstracts(usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
+	debitConcretes(usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments
@@ -197,7 +197,7 @@ func debitConcreteUnits(cUnits *decimal.Big,
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for _, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
-		if ecCncrt, err = cB.debitConcretes(new(decimal.Big).Copy(cUnits), cgrEv); err != nil {
+		if ecCncrt, err = cB.debitConcretes(new(decimal.Big).Copy(cUnits), cgrEv, nil); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return nil, err
 		}
@@ -223,12 +223,13 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 	acntID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
-	costIcrm *utils.CostIncrement) (ec *utils.EventCharges, err error) {
+	costIcrm *utils.CostIncrement, dbtedAUnts *decimal.Big) (ec *utils.EventCharges, err error) {
 	// Init EventCharges
 	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	//var attrIDs []string // will be populated if attributes are processed successfully
 	// process AttributeS if needed
-	if calculateCost && len(attributeIDs) != 0 { // cost unknown, apply AttributeS to query from RateS
+	if calculateCost &&
+		len(attributeIDs) != 0 && attributeIDs[0] != utils.MetaNone { // cost unknown, apply AttributeS to query from RateS
 		var rplyAttrS *engine.AttrSProcessEventReply
 		if rplyAttrS, err = processAttributeS(connMgr, cgrEv, attrSConns,
 			attributeIDs); err != nil {
@@ -256,11 +257,15 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		}
 		if calculateCost {
 			var rplyCost *utils.RateProfileCost
+			cgrEv.APIOpts[utils.OptsRatesIntervalStart] = dbtedAUnts
 			cgrEv.APIOpts[utils.OptsRatesUsage] = aUnits
 			if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
 				err = utils.NewErrRateS(err)
 				return
 			}
+			// cleanup the opts
+			delete(cgrEv.APIOpts, utils.OptsRatesIntervalStart)
+			delete(cgrEv.APIOpts, utils.OptsRatesUsage)
 			costIcrm = costIcrm.Clone() // so we don't modify the original
 			costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
 		}

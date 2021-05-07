@@ -222,13 +222,6 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart.Cmp(iRtUsageSIdx) <= 0 {
 				continue // the next interval changes the rating
 			}
-			if isLastIRt {
-				iRtUsageEIdx = rtUsageEIdx
-			} else if rt.IntervalRates[j+1].IntervalStart.Cmp(rtUsageEIdx) > 0 {
-				iRtUsageEIdx = rtUsageEIdx
-			} else {
-				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart.Big
-			}
 			if iRt.Increment.Cmp(decimal.New(0, 0)) == 0 {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
@@ -241,6 +234,17 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 					Usage:             utils.NewDecimal(utils.InvalidUsage, 0),
 				})
 			}
+			if rt.IntervalRates[j].RecurrentFee == nil { // RecurrentFee not defined, go to the next increment
+				continue
+			}
+			if isLastIRt {
+				iRtUsageEIdx = rtUsageEIdx
+			} else if rt.IntervalRates[j+1].IntervalStart.Cmp(rtUsageEIdx) > 0 {
+				iRtUsageEIdx = rtUsageEIdx
+			} else {
+				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart.Big
+			}
+
 			iRtUsage := utils.SubstractBig(iRtUsageEIdx, iRtUsageSIdx)
 			intUsage := iRtUsage
 			intIncrm := iRt.Increment.Big

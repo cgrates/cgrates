@@ -191,8 +191,11 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 			return nil, fmt.Errorf("<%s> cannot convert <%+v> max cost to Float64", utils.RateS, rtPfl.MaxCost)
 		}
 	}
-
-	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, decimal.New(0, 0), usage); err != nil {
+	var ivalStart *decimal.Big
+	if ivalStart, err = args.IntervalStart(); err != nil {
+		return
+	}
+	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage); err != nil {
 		return nil, err
 	}
 	// in case we have error it is returned in the function from above

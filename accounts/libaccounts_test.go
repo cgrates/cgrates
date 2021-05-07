@@ -475,7 +475,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}); err != nil {
+		}, decimal.New(0, 0)); err != nil {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
@@ -493,7 +493,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}); err == nil || err != utils.ErrMaxIncrementsExceeded {
+		}, decimal.New(0, 0)); err == nil || err != utils.ErrMaxIncrementsExceeded {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
@@ -793,7 +793,7 @@ func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(2, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}); err == nil || err.Error() != expectedErr {
+		}, decimal.New(0, 0)); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 

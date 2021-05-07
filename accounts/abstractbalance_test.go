@@ -23,8 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
@@ -220,6 +218,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 
 }
 
+/*
 func TestABDebitAbstracts(t *testing.T) {
 	aB := &abstractBalance{
 		blnCfg: &utils.Balance{
@@ -1271,3 +1270,4 @@ func TestAMCostWithUnitFactor(t *testing.T) {
 		t.Errorf("Unexpected units in concrete balance: %s", aB.cncrtBlncs[0].blnCfg.Units)
 	}
 }
+*/

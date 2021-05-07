@@ -879,6 +879,7 @@ const (
 	MetaCostIncrement     = "*costIncrement"
 	Length                = "Length"
 	MIN_PREFIX_MATCH      = 1
+	V1Prfx                = "V1"
 )
 
 // Migrator Action
@@ -2215,6 +2216,7 @@ const (
 	OptsRoutesOffset         = "*routes_offset"
 	OptsRatesStartTime       = "*ratesStartTime"
 	OptsRatesUsage           = "*ratesUsage"
+	OptsRatesIntervalStart   = "*ratesIntervalStart"
 	OptsSessionsTTL          = "*sessionsTTL"
 	OptsSessionsTTLMaxDelay  = "*sessionsTTLMaxDelay"
 	OptsSessionsTTLLastUsed  = "*sessionsTTLLastUsed"

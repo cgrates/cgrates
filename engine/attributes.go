@@ -448,9 +448,6 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if args.Event == nil {
-		return utils.NewErrMandatoryIeMissing(utils.Event)
-	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
@@ -462,13 +459,18 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	}
 	args.CGREvent = args.CGREvent.Clone()
 	eNV := utils.MapStorage{
-		utils.MetaReq:  args.CGREvent.Event,
-		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
 			utils.ProcessRuns: 0,
 		},
 		utils.MetaTenant: tnt,
 	}
+	if args.APIOpts != nil {
+		eNV[utils.MetaOpts] = args.APIOpts
+	}
+	if args.CGREvent.Event != nil {
+		eNV[utils.MetaReq] = args.CGREvent.Event
+	}
+
 	var lastID string
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)

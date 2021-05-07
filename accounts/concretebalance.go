@@ -68,7 +68,7 @@ func (cB *concreteBalance) id() string {
 
 // debitAbstracts implements the balanceOperator interface
 func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
@@ -90,7 +90,7 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,
-		costIcrm); err != nil {
+		costIcrm, dbted); err != nil {
 		return
 	}
 	ec = utils.NewEventCharges()
@@ -148,7 +148,7 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 
 // debitConcretes implements the balanceOperator interface
 func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent, debited *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool

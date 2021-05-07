@@ -974,6 +974,14 @@ func (args *ArgsCostForEvent) Usage() (usage *decimal.Big, err error) {
 	return decimal.New(int64(time.Minute), 0), nil
 }
 
+// IntervalStart returns the inerval start out of APIOpts received for the event
+func (args *ArgsCostForEvent) IntervalStart() (ivlStart *decimal.Big, err error) {
+	if iface, has := args.APIOpts[OptsRatesIntervalStart]; has {
+		return IfaceAsBig(iface)
+	}
+	return decimal.New(0, 0), nil
+}
+
 type TPActionProfile struct {
 	TPid               string
 	Tenant             string

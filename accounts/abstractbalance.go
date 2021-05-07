@@ -51,7 +51,7 @@ func (aB *abstractBalance) id() string {
 
 // debitAbstracts implements the balanceOperator interface
 func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
-	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.APIOpts,
@@ -116,7 +116,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 			aB.connMgr, cgrEv,
 			aB.attrSConns, aB.blnCfg.AttributeIDs,
 			aB.rateSConns, aB.blnCfg.RateProfileIDs,
-			costIcrm); err != nil {
+			costIcrm, dbted); err != nil {
 			return
 		}
 	}
@@ -210,6 +210,6 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 
 // debitConcretes implements the balanceOperator interface
 func (aB *abstractBalance) debitConcretes(_ *decimal.Big,
-	_ *utils.CGREvent) (ec *utils.EventCharges, err error) {
+	_ *utils.CGREvent, _ *decimal.Big) (ec *utils.EventCharges, err error) {
 	return nil, utils.ErrNotImplemented
 }
