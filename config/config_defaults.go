@@ -471,7 +471,7 @@ const CGRATES_CFG_JSON = `
 				// "exchangeType": "",							// ExchangeType
 
 
-				// S3 and SQS
+				// SQS and S3
 				// "awsRegion": "",								// AWSRegion  
 				// "awsKey": "",								// AWSKey        
 				// "awsSecret": "",								// AWSSecret
