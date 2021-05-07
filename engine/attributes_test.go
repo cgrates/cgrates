@@ -273,3 +273,255 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 }
+
+func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := &ConnManager{}
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ATTR_CHANGE_TENANT_FROM_USER",
+		Contexts:           []string{utils.MetaAny},
+		FilterIDs:          []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*req.Account",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*composed",
+				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	err := dm.SetAttributeProfile(attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	attr2 := &AttributeProfile{
+		Tenant:             "adrian.itsyscom.com.co.uk",
+		ID:                 "ATTR_MATCH_TENANT",
+		Contexts:           []string{utils.MetaAny},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*req.Password",
+				Type:      utils.MetaSum,
+				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+
+	err = dm.SetAttributeProfile(attr2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	args := &AttrArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "123",
+			Event: map[string]interface{}{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+		},
+		ProcessRuns: utils.IntPointer(2),
+	}
+	rply := &AttrSProcessEventReply{}
+	err = alS.V1ProcessEvent(args, rply)
+	sort.Strings(rply.AlteredFields)
+	expErr := "SERVER_ERROR: NotEnoughParameters"
+	if err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+}
+
+func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := &ConnManager{}
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ATTR_CHANGE_TENANT_FROM_USER",
+		Contexts:           []string{utils.MetaAny},
+		FilterIDs:          []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*req.Account",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*composed",
+				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	err := dm.SetAttributeProfile(attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	attr2 := &AttributeProfile{
+		Tenant:             "adrian.itsyscom.com.co.uk",
+		ID:                 "ATTR_MATCH_TENANT",
+		Contexts:           []string{utils.MetaAny},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*req.Password",
+				Type:      utils.MetaDifference,
+				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+
+	err = dm.SetAttributeProfile(attr2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	args := &AttrArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "123",
+			Event: map[string]interface{}{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+		},
+		ProcessRuns: utils.IntPointer(2),
+	}
+	rply := &AttrSProcessEventReply{}
+	err = alS.V1ProcessEvent(args, rply)
+	sort.Strings(rply.AlteredFields)
+	expErr := "SERVER_ERROR: NotEnoughParameters"
+	if err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+}
+
+func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{}
+	conMng := &ConnManager{}
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, nil, conMng)
+	filterS := NewFilterS(cfg, conMng, dm)
+	attr := &AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ATTR_CHANGE_TENANT_FROM_USER",
+		Contexts:           []string{utils.MetaAny},
+		FilterIDs:          []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(.*)@(.*)/${1}.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*req.Account",
+				Type:      "*variable",
+				Value:     config.NewRSRParsersMustCompile("~*req.Account:s/(dan)@(.*)/${1}.${2}/:s/(adrian)@(.*)/andrei.${2}/", utils.InfieldSep),
+			},
+			{
+				FilterIDs: nil,
+				Path:      "*tenant",
+				Type:      "*composed",
+				Value:     config.NewRSRParsersMustCompile(".co.uk", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+	err := dm.SetAttributeProfile(attr, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	attr2 := &AttributeProfile{
+		Tenant:             "adrian.itsyscom.com.co.uk",
+		ID:                 "ATTR_MATCH_TENANT",
+		Contexts:           []string{utils.MetaAny},
+		ActivationInterval: nil,
+		Attributes: []*Attribute{
+			{
+				FilterIDs: nil,
+				Path:      "*req.Password",
+				Type:      utils.MetaValueExponent,
+				Value:     config.NewRSRParsersMustCompile("CGRATES.ORG", utils.InfieldSep),
+			},
+		},
+		Blocker: false,
+		Weight:  20,
+	}
+
+	err = dm.SetAttributeProfile(attr2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	alS := NewAttributeService(dm, filterS, cfg)
+	args := &AttrArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "123",
+			Event: map[string]interface{}{
+				utils.AccountField: "adrian@itsyscom.com",
+			},
+		},
+		ProcessRuns: utils.IntPointer(2),
+	}
+	rply := &AttrSProcessEventReply{}
+	err = alS.V1ProcessEvent(args, rply)
+	sort.Strings(rply.AlteredFields)
+	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *value_exponent"
+	if err == nil || err.Error() != expErr {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+}

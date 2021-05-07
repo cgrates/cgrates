@@ -1271,28 +1271,3 @@ func TestDispatcherServiceCall4(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
-
-func TestDispatcherServiceCallWithoutAuthentification(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	rpcCl := map[string]chan rpcclient.ClientConnector{}
-	connMng := engine.NewConnManager(cfg, rpcCl)
-	dm := engine.NewDataManager(nil, nil, nil)
-	dsp := NewDispatcherService(dm, cfg, nil, connMng)
-	reply := "reply"
-	args := &utils.CGREvent{
-		Tenant: "",
-		ID:     "123",
-		Time:   nil,
-		Event: map[string]interface{}{
-			utils.AccountField: "1001",
-			"Password":         "CGRateS.org",
-			"RunID":            utils.MetaDefault,
-		},
-		APIOpts: map[string]interface{}{},
-	}
-	err := dsp.Call("DispatcherService.Test3", args, &reply)
-	expected := "SERVER_ERROR"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-}
