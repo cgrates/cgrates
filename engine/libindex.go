@@ -386,12 +386,12 @@ func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
 // getFilters returns a list of filters IDs for the given profile id
-func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
+func ComputeIndexes(cntxt *context.Context, dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error), newFltr *Filter) (processed bool, err error) {
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		var ids []string
-		if ids, err = dm.DataDB().GetKeysForPrefix(context.TODO(), utils.CacheIndexesToPrefix[idxItmType]); err != nil {
+		if ids, err = dm.DataDB().GetKeysForPrefix(cntxt, utils.CacheIndexesToPrefix[idxItmType]); err != nil {
 			return
 		}
 		for _, id := range ids {
@@ -418,7 +418,7 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 			continue
 		}
 		var index map[string]utils.StringSet
-		if index, err = newFilterIndex(context.TODO(), dm, idxItmType,
+		if index, err = newFilterIndex(cntxt, dm, idxItmType,
 			tnt, ctx, id, *filterIDs, newFltr); err != nil {
 			return
 		}
@@ -426,7 +426,7 @@ func ComputeIndexes(dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
 		for _, idx := range index {
 			idx.Add(id)
 		}
-		if err = dm.SetIndexes(context.TODO(), idxItmType, tntCtx, index, cacheCommit(transactionID), transactionID); err != nil {
+		if err = dm.SetIndexes(cntxt, idxItmType, tntCtx, index, cacheCommit(transactionID), transactionID); err != nil {
 			return
 		}
 		processed = true
@@ -510,7 +510,7 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 // UpdateFilterIndex  will update the indexes for the new Filter
 // we do not care what is added
 // exported for the migrator
-func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
+func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	if oldFlt == nil { // no filter before so no index to update
 		return // nothing to update
 	}
@@ -583,7 +583,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	defer guardian.Guardian.UnguardIDs(refID)
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
-	if rcvIndx, err = dm.GetIndexes(context.TODO(), utils.CacheReverseFilterIndexes, tntID,
+	if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntID,
 		utils.EmptyString, true, false); err != nil {
 		if err != utils.ErrNotFound {
 			return
@@ -602,7 +602,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					th, e := dm.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
@@ -622,7 +622,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					sq, e := dm.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
@@ -642,7 +642,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					rs, e := dm.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
@@ -662,7 +662,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					rt, e := dm.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
@@ -682,7 +682,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					ch, e := dm.GetChargerProfile(tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
@@ -702,7 +702,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					ap, e := dm.GetAccount(tnt, id)
 					if e != nil {
@@ -722,7 +722,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					acp, e := dm.GetActionProfile(tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
@@ -742,7 +742,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
 					rp, e := dm.GetRateProfile(context.TODO(), tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
