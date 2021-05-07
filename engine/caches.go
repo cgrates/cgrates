@@ -367,7 +367,7 @@ func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs utils.AttrReloadCache
 func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string, mustBeCached bool) (err error) {
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {
-			if err = chS.dm.CacheDataFromDB(ctx, prfx, ids, true); err != nil {
+			if err = chS.dm.CacheDataFromDB(ctx, prfx, ids, mustBeCached); err != nil {
 				return
 			}
 		}
@@ -378,6 +378,7 @@ func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs utils.AttrReloadC
 		if err != utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
 			return
 		}
+		err = nil
 		loadIDs = make(map[string]int64)
 	}
 	for key, val := range populateCacheLoadIDs(loadIDs, attrs.ArgsCache) {
@@ -393,8 +394,7 @@ func populateCacheLoadIDs(loadIDs map[string]int64, attrs map[string][]string) (
 	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache
 	for key, ids := range attrs {
-		if inst, has := utils.ArgCacheToInstance[key]; has &&
-			(ids == nil || len(ids) != 0) {
+		if inst, has := utils.ArgCacheToInstance[key]; has && len(ids) != 0 {
 			cacheLoadIDs[inst] = loadIDs[inst]
 		}
 	}
