@@ -36,7 +36,6 @@ var (
 	accWThdCfg     *config.CGRConfig
 	accWThdRpc     *rpc.Client
 	accWThdConfDIR string //run tests for specific configuration
-	accountWT      *engine.Account
 	accWThdDelay   int
 
 	sTestsAccWThd = []func(t *testing.T){
@@ -46,9 +45,14 @@ var (
 		testAccWThdStartEngine,
 		testAccWThdRpcConn,
 		testAccWThdSetThresholdProfile,
-		testAccWThdGetThresholdProfile,
-		testAccWThdExecuteAction,
-		// testAccWThdLoadTarrifPlans,
+		testAccWThdGetThresholdBeforeDebit,
+		testAccWThdSetBalance,
+		testAccWThdGetAccountBeforeDebit,
+		testAccWThdDebit1,
+		testAccWThdGetThresholdBeforeDebit,
+		testAccWThdDebit2,
+		testAccWThdGetAccountAfterDebit,
+		testAccWThdGetThresholdAfterDebit,
 		testAccWThdStopEngine,
 	}
 )
@@ -108,22 +112,11 @@ func testAccWThdRpcConn(t *testing.T) {
 	}
 }
 
-// func testAccWThdLoadTarrifPlans(t *testing.T) {
-// 	var reply string
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-// 	if err := accWThdRpc.Call(utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply returned", reply)
-// 	}
-// 	time.Sleep(200 * time.Millisecond)
-// }
-
 func testAccWThdSetThresholdProfile(t *testing.T) {
 	ThdPrf := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
-			FilterIDs: []string{"*string:~*req.Account:1002"},
+			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate", "*string:~*asm.ID:1002", "*lt:~*asm.BalanceSummaries.testBalanceID.Value:56m"},
 			ID:        "THD_ACNT_1002",
 			MaxHits:   1,
 		},
@@ -134,16 +127,6 @@ func testAccWThdSetThresholdProfile(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-}
-
-func testAccWThdGetThresholdProfile(t *testing.T) {
-	expThdPrf := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Account:1002"},
-		ID:        "THD_ACNT_1002",
-		MaxHits:   1,
-	}
-
 	args := &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "THD_ACNT_1002",
@@ -152,8 +135,15 @@ func testAccWThdGetThresholdProfile(t *testing.T) {
 	var result1 *engine.ThresholdProfile
 	if err := accWThdRpc.Call(utils.APIerSv1GetThresholdProfile, args, &result1); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(result1, expThdPrf) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expThdPrf), utils.ToJSON(result1))
+	} else if !reflect.DeepEqual(result1, ThdPrf.ThresholdProfile) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(ThdPrf.ThresholdProfile), utils.ToJSON(result1))
+	}
+}
+
+func testAccWThdGetThresholdBeforeDebit(t *testing.T) {
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1002",
 	}
 
 	expThd := &engine.Threshold{
@@ -169,27 +159,108 @@ func testAccWThdGetThresholdProfile(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expThd), utils.ToJSON(result2))
 	}
 }
+func testAccWThdSetBalance(t *testing.T) {
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1002",
+		BalanceType: utils.MetaVoice,
+		Value:       float64(time.Hour),
+		Balance: map[string]interface{}{
+			utils.ID:            "testBalanceID",
+			utils.RatingSubject: "*zero1s",
+		},
+	}
+	var reply string
+	if err := accWThdRpc.Call(utils.APIerSv2SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+}
 
-func testAccWThdExecuteAction(t *testing.T) {
+func testAccWThdGetAccountBeforeDebit(t *testing.T) {
+	exp := float64(time.Hour)
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1002",
+	}
+	if err := accWThdRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != exp {
+		t.Errorf("Expecting: %v, received: %v",
+			exp, rply)
+	}
+}
+
+func testAccWThdDebit1(t *testing.T) {
 	tStart := time.Date(2021, 5, 5, 12, 0, 0, 0, time.UTC)
+	cd := &engine.CallDescriptor{
+		Category:      utils.Call,
+		Tenant:        "cgrates.org",
+		Subject:       "1002",
+		Account:       "1002",
+		Destination:   "1003",
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(5 * time.Second),
+		LoopIndex:     0,
+		DurationIndex: 5 * time.Second,
+		ToR:           utils.MetaVoice,
+		CgrID:         "12345678911",
+		RunID:         utils.MetaDefault,
+	}
 	cc := new(engine.CallCost)
 	err = accWThdRpc.Call(utils.ResponderMaxDebit, &engine.CallDescriptorWithAPIOpts{
-		CallDescriptor: &engine.CallDescriptor{
-			Category:      utils.Call,
-			Tenant:        "cgrates.org",
-			Subject:       "*01ms",
-			Account:       "1002",
-			Destination:   "1003",
-			TimeStart:     tStart,
-			TimeEnd:       tStart.Add(5 * time.Second),
-			LoopIndex:     0,
-			DurationIndex: 5 * time.Second,
-			ToR:           utils.MetaVoice,
-			CgrID:         "12345678910",
-			RunID:         utils.MetaDefault,
-		},
+		CallDescriptor: cd,
 	}, cc)
 	if err != nil {
+		t.Error(err)
+	}
+}
+
+func testAccWThdDebit2(t *testing.T) {
+	tStart := time.Date(2021, 5, 5, 12, 0, 0, 0, time.UTC)
+	cd := &engine.CallDescriptor{
+		Category:      utils.Call,
+		Tenant:        "cgrates.org",
+		Subject:       "1002",
+		Account:       "1002",
+		Destination:   "1003",
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(5 * time.Minute),
+		LoopIndex:     0,
+		DurationIndex: 5 * time.Minute,
+		ToR:           utils.MetaVoice,
+		CgrID:         "12345678910",
+		RunID:         utils.MetaDefault,
+	}
+	cc := new(engine.CallCost)
+	err = accWThdRpc.Call(utils.ResponderMaxDebit, &engine.CallDescriptorWithAPIOpts{
+		CallDescriptor: cd,
+	}, cc)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func testAccWThdGetAccountAfterDebit(t *testing.T) {
+	exp := float64(time.Hour - 5*time.Minute - 5*time.Second)
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1002",
+	}
+	if err := accWThdRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MetaVoice].GetTotalValue(); rply != exp {
+		t.Errorf("Expecting: %v, received: %v",
+			exp, rply)
+	}
+}
+
+func testAccWThdGetThresholdAfterDebit(t *testing.T) {
+	var result2 *engine.Threshold
+	if err := accWThdRpc.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
