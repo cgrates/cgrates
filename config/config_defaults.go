@@ -428,15 +428,11 @@ const CGRATES_CFG_JSON = `
 			"type": "*none",									// exporter type 
 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
 			"opts": {
-				
-				// General
-				// "queueID": "cgrates_cdrs", 					// the queue id where events are exported
-
 
 				// CSV
 				// "csvFieldSeparator": ",",					// separator used when reading the fields
 
-
+				
 				// Elasticsearch options
 				// "elsIndex": "",								// ElsIndex               	
 				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
@@ -464,14 +460,17 @@ const CGRATES_CFG_JSON = `
 				// Kafka
 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
 				
-
+				
 				// AMQP
-				// "amqpRoutingKey": "",							// RoutingKey
-				// "sqlExchange": "",								// Exchange
-				// "sqlExchangeType": "",							// ExchangeType
-
+				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
+				// "amqpRoutingKey": "",						// RoutingKey
+				// "sqlExchange": "",							// Exchange
+				// "sqlExchangeType": "",						// ExchangeType
+				
 
 				// SQS and S3
+				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
+				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 				// "awsRegion": "",								// AWSRegion  
 				// "awsKey": "",								// AWSKey        
 				// "awsSecret": "",								// AWSSecret

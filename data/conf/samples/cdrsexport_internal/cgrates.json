@@ -11,12 +11,12 @@
 },
 
 "data_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
 "stor_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
@@ -26,13 +26,13 @@
 
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 
@@ -56,8 +56,8 @@
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "amqp_localhost",
@@ -72,8 +72,8 @@
 			"tenant": "cgrates.org",
 			"attempts": 20,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "aws_test_file",
@@ -85,8 +85,8 @@
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "sqs_test_file",
@@ -103,21 +103,21 @@
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "kafka_localhost",
 			"type": "*kafka_json_map",
 			"export_path": "127.0.0.1:9092",
 			"opts":{
-				"kafkaTopic": "cgrates_cdrs",
+				"kafkaTopic": "cgrates_cdrs"
 			},
 			"tenant": "cgrates.org",
 			"attempts": 10,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "s3_test_file",
@@ -134,10 +134,10 @@
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
-		},
-	],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
+		}
+	]
 },
 
 
