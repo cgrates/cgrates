@@ -333,7 +333,6 @@
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"opts": {
-				"opts": {
 					"elsIndex": "cdrs",
 					//"elsIfPrimaryTerm": 0,
 					//"elsIfSeqNo": 0,
@@ -345,7 +344,6 @@
 					//"elsVersion": 0,
 					"elsVersionType": "",
 					"elsWaitForActiveShards": "",
-				}
 			},
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
