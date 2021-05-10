@@ -356,16 +356,16 @@
 
 // 				// AMQP
 // 				// "consumerTag": "cgrates",					// the ID of the consumer
-// 				// "exchange": "",									
-// 				// "exchangeType": "",
-// 				// "routingKey": "",
+// 				// "sqlExchange": "",
+// 				// "sqlExchangeType": "",
+// 				// "amqpRoutingKey": "",
 
 // 				// "exchangeProcessed": "",									
 // 				// "exchangeTypeProcessed": "",
 // 				// "routingKeyProcessed": "",
 
 // 				// Kafka
-// 				// "topic": "cgrates",							// the topic from were the events are read
+// 				// "kafkaTopic": "cgrates",							// the topic from were the events are read
 // 				// "groupID": "cgrates",						// the group that reads the events
 // 				// "maxWait": "1ms",							// the maximum amount of time to wait for new data to come
 
@@ -373,11 +373,11 @@
 
 
 // 				// SQL
-// 				// "dbName": "cgrates", 						// the name of the database from were the events are read
+// 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
 // 				// "sqlTableName": "cdrs",							// the name of the table from were the events are read
 // 				// "sslMode": "disable",						// the ssl mode for postgres db
 
-// 				// "dbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+// 				// "sqlDBNameProcessed": "", 						// the name of the database were the events are sent after they are processed
 // 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
 // 				// "sslModeProcessed": "",						// the ssl mode for postgres db
 
