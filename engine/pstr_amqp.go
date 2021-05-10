@@ -53,7 +53,7 @@ type AMQPPoster struct {
 func (pstr *AMQPPoster) parseOpts(dialURL map[string]interface{}) {
 	pstr.queueID = utils.DefaultQueueID
 	pstr.routingKey = utils.DefaultQueueID
-	if vals, has := dialURL[utils.QueueID]; has {
+	if vals, has := dialURL[utils.AMQPQueueID]; has {
 		pstr.queueID = utils.IfaceAsString(vals)
 	}
 	if vals, has := dialURL[utils.RoutingKey]; has {

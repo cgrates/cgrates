@@ -226,14 +226,14 @@ func TestS3ERParseOpts(t *testing.T) {
 	}
 
 	opts := map[string]interface{}{
-		utils.QueueID:   "QueueID",
+		utils.S3Bucket:  "s3BucketID",
 		utils.AWSRegion: "AWSRegion",
 		utils.AWSKey:    "AWSKey",
 		utils.AWSSecret: "AWSSecret",
 		utils.AWSToken:  "AWSToken",
 	}
 	rdr.parseOpts(opts)
-	if rdr.queueID != opts[utils.QueueID] || rdr.awsRegion != opts[utils.AWSRegion] || rdr.awsID != opts[utils.AWSKey] || rdr.awsKey != opts[utils.AWSSecret] || rdr.awsToken != opts[utils.AWSToken] {
+	if rdr.queueID != opts[utils.S3Bucket] || rdr.awsRegion != opts[utils.AWSRegion] || rdr.awsID != opts[utils.AWSKey] || rdr.awsKey != opts[utils.AWSSecret] || rdr.awsToken != opts[utils.AWSToken] {
 		t.Error("Fields do not corespond")
 	}
 	rdr.Config().Opts = map[string]interface{}{}

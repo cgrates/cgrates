@@ -60,7 +60,7 @@ func TestS3ER(t *testing.T) {
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"opts": {
-				"queueID": "cgrates-cdrs",
+				"s3BucketID": "cgrates-cdrs",
 				"awsRegion": "us-east-2",
 				"awsKey": "AWSAccessKeyId",
 				"awsSecret": "AWSSecretKey",

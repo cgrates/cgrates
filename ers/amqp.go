@@ -210,7 +210,7 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 
 func (rdr *AMQPER) setOpts(opts map[string]interface{}) {
 	rdr.queueID = utils.DefaultQueueID
-	if vals, has := opts[utils.QueueID]; has {
+	if vals, has := opts[utils.AMQPQueueID]; has {
 		rdr.queueID = utils.IfaceAsString(vals)
 	}
 	rdr.tag = utils.AMQPDefaultConsumerTag

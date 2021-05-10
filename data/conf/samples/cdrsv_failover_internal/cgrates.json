@@ -76,7 +76,7 @@
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",
 				"awsSecret": "testsecret",
-				"queueID": "cgrates-cdrs",
+				"s3BucketID": "cgrates-cdrs",
 				// "awsToken": "sessionToken",
 			},
 			"tenant": "cgrates.org",

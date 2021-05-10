@@ -59,7 +59,10 @@ func writeFailedPosts(itmID string, value interface{}) {
 func AddFailedPost(expPath, format, module string, ev interface{}, opts map[string]interface{}) {
 	key := utils.ConcatenatedKey(expPath, format, module)
 	// also in case of amqp,amqpv1,s3,sqs and kafka also separe them after queue id
-	if qID := utils.FirstNonEmpty(utils.IfaceAsString(opts[utils.QueueID]),
+	if qID := utils.FirstNonEmpty(
+		utils.IfaceAsString(opts[utils.AMQPQueueID]),
+		utils.IfaceAsString(opts[utils.S3Bucket]),
+		utils.IfaceAsString(opts[utils.SQSQueueID]),
 		utils.IfaceAsString(opts[utils.KafkaTopic])); len(qID) != 0 {
 		key = utils.ConcatenatedKey(key, qID)
 	}

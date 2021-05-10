@@ -60,7 +60,7 @@ func (pstr *SQSPoster) Close() {}
 
 func (pstr *SQSPoster) parseOpts(opts map[string]interface{}) {
 	pstr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.QueueID]; has {
+	if val, has := opts[utils.SQSQueueID]; has {
 		pstr.queueID = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {
