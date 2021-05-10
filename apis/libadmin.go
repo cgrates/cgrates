@@ -138,18 +138,68 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 }
 
 // callCacheForIndexes will only call CacheClear because don't have access at ItemID
-func (admS *AdminSv1) callCacheForIndexes(ctx *context.Context, cacheopt string, tnt, cacheID string,
-	opts map[string]interface{}) (err error) {
-	if utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) == utils.MetaClear {
-		var reply string
-		return admS.connMgr.Call(ctx, admS.cfg.AdminSCfg().CachesConns,
-			utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
-				Tenant:   tnt,
-				CacheIDs: []string{cacheID},
-				APIOpts:  opts,
-			}, &reply)
+func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt string, tnt, cacheID string,
+	itemIDs []string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
+		Tenant: tnt,
+		ArgsCache: map[string][]string{
+			utils.CacheInstanceToArg[cacheID]: itemIDs,
+		},
+		APIOpts: opts,
 	}
-	return
+	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		args = &utils.AttrCacheIDsWithAPIOpts{
+			Tenant:   tnt,
+			CacheIDs: []string{cacheID},
+			APIOpts:  opts,
+		}
+	}
+	return admS.connMgr.Call(ctx, admS.cfg.AdminSCfg().CachesConns,
+		method, args, &reply)
+}
+
+func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt, tnt string,
+	cacheItems map[string][]string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:    tnt,
+		ArgsCache: cacheItems,
+		APIOpts:   opts,
+	}
+	switch utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		cacheIDs := make([]string, 0, len(cacheItems))
+		for idx := range cacheItems {
+			cacheIDs = append(cacheIDs, utils.ArgCacheToInstance[idx])
+		}
+		args = &utils.AttrCacheIDsWithAPIOpts{
+			Tenant:   tnt,
+			CacheIDs: cacheIDs,
+			APIOpts:  opts,
+		}
+	}
+	return admS.connMgr.Call(ctx, admS.cfg.AdminSCfg().CachesConns,
+		method, args, &reply)
 }
 
 /*
