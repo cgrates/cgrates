@@ -456,19 +456,19 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxConnLifetime": 0,						// SQLMaxConnLifetime 
 
 
-				// "sqlTableName":"cdrs", 							// the name of the table from where the events are exported
-				// "dbName": "cgrates",							// the name of the database from where the events are exported
+				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
+				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
 				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
 				
 				
 				// Kafka
-				// "topic": "cgrates",							// the topic from where the events are exported
+				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
 				
 
 				// AMQP
-				// "routingKey": "",							// RoutingKey
-				// "exchange": "",								// Exchange
-				// "exchangeType": "",							// ExchangeType
+				// "amqpRoutingKey": "",							// RoutingKey
+				// "sqlExchange": "",								// Exchange
+				// "sqlExchangeType": "",							// ExchangeType
 
 
 				// SQS and S3
