@@ -374,11 +374,11 @@
 
 // 				// SQL
 // 				// "dbName": "cgrates", 						// the name of the database from were the events are read
-// 				// "tableName": "cdrs",							// the name of the table from were the events are read
+// 				// "sqlTableName": "cdrs",							// the name of the table from were the events are read
 // 				// "sslmode": "disable",						// the ssl mode for postgres db
 
 // 				// "dbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
-// 				// "tableNameProcessed": "",					// the name of the table were the events are sent after they are processed
+// 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
 // 				// "sslmodeProcessed": "",						// the ssl mode for postgres db
 
 // 				// SQS and S3

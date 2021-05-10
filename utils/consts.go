@@ -2559,7 +2559,7 @@ const (
 	KafkaDefaultMaxWait = time.Millisecond
 
 	SQLDBName         = "dbName"
-	SQLTableName      = "tableName"
+	SQLTableName      = "sqlTableName"
 	SQLDefaultSSLMode = "disable"
 	SQLDefaultDBName  = "cgrates"
 

@@ -100,7 +100,7 @@ func testSQLInitConfig(t *testing.T) {
 					"opts": {
 						"dbName":"cgrates2",
 						"dbNameProcessed":"cgrates2",
-						"tableNameProcessed":"cdrs2",
+						"sqlTableNameProcessed":"cdrs2",
 					},
 					"processed_path": "",	// move processed data here
 					"tenant": "cgrates.org",							// tenant used by import
@@ -377,7 +377,7 @@ func testSQLInitConfig2(t *testing.T) {
 					"opts": {
 						"dbName":"cgrates2",
 						"dbNameProcessed":"cgrates2",
-						"tableNameProcessed":"cdrs2",
+						"sqlTableNameProcessed":"cdrs2",
 					},
 					"processed_path": "",	// move processed data here
 					"tenant": "cgrates.org",							// tenant used by import

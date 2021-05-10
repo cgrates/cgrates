@@ -235,7 +235,7 @@ func TestNewEventExporterCase8(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQL
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	_, err := NewEventExporter(cgrCfg, 0, filterS)
-	errExpect := "MANDATORY_IE_MISSING: [tableName]"
+	errExpect := "MANDATORY_IE_MISSING: [sqlTableName]"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}
