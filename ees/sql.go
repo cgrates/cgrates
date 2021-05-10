@@ -107,7 +107,7 @@ func openDB(cgrCfg *config.CGRConfig, cfgIdx int, dialect gorm.Dialector) (db *g
 		return
 	}
 
-	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxIdleConns]; has {
+	if iface, has := cgrCfg.EEsCfg().Exporters[cfgIdx].Opts[utils.SQLMaxIdleConnsCfg]; has {
 		val, err := utils.IfaceAsTInt64(iface)
 		if err != nil {
 			return nil, nil, err

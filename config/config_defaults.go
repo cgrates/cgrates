@@ -474,7 +474,7 @@ const CGRATES_CFG_JSON = `
 				
 				
 				// SQL
-				// "maxIdleConns": 0,							// SQLMaxIdleConns    
+				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
 				// "maxOpenConns": 0,							// SQLMaxOpenConns
 				// "maxConnLifetime": 0,						// SQLMaxConnLifetime 
 
