@@ -398,8 +398,8 @@
 				"sqlTableName": "expTable", // tableName is mandatory in opts for sql exporter
 				"sslMode": "disable",
 				"sqlMaxIdleConns": "10",
-				"maxOpenConns": "100",
-				"maxConnLifetime": "0",
+				"sqlMaxOpenConns": "100",
+				"sqlMaxConnLifetime": "0",
 			},
 			"fields":[ // in case that the path is *exp.*row user must complete all the fields one to one with his sql schema in the correct order
 				{"tag": "CGRID", "path": "*exp.*row", "type": "*group", "value": "~*req.CGRID"},
@@ -419,8 +419,8 @@
 				"sqlTableName": "expTable",
 				"sslMode": "disable",
 				"sqlMaxIdleConns": "10",
-				"maxOpenConns": "100",
-				"maxConnLifetime": "0",
+				"sqlMaxOpenConns": "100",
+				"sqlMaxConnLifetime": "0",
 			},
 			"fields":[ // the path constains *exp.columnName
 				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},
