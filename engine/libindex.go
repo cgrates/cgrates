@@ -387,7 +387,8 @@ func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
 // getFilters returns a list of filters IDs for the given profile id
 func ComputeIndexes(cntxt *context.Context, dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
-	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error), newFltr *Filter) (processed bool, err error) {
+	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error), newFltr *Filter) (indexes utils.StringSet, err error) {
+	indexes = make(utils.StringSet)
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		var ids []string
@@ -423,13 +424,13 @@ func ComputeIndexes(cntxt *context.Context, dm *DataManager, tnt, ctx, idxItmTyp
 			return
 		}
 		// ensure that the item is in the index set
-		for _, idx := range index {
+		for key, idx := range index {
 			idx.Add(id)
+			indexes.Add(utils.ConcatenatedKey(tntCtx, key))
 		}
 		if err = dm.SetIndexes(cntxt, idxItmType, tntCtx, index, cacheCommit(transactionID), transactionID); err != nil {
 			return
 		}
-		processed = true
 	}
 	return
 }

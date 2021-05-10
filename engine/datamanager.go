@@ -766,7 +766,6 @@ func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex b
 	if err = dm.DataDB().SetFilterDrv(ctx, fltr); err != nil {
 		return
 	}
-	fmt.Println("set fltr da", withIndex, utils.ToJSON(oldFlt), utils.ToJSON(fltr))
 	if withIndex {
 		if err = UpdateFilterIndex(ctx, dm, oldFlt, fltr); err != nil {
 			return
@@ -1744,7 +1743,6 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 			oldContexes = &oldAP.Contexts
 			oldFiltersIDs = &oldAP.FilterIDs
 		}
-		fmt.Println(oldContexes, oldFiltersIDs)
 		if err = updatedIndexesWithContexts(ctx, dm, utils.CacheAttributeFilterIndexes, ap.Tenant, ap.ID,
 			oldContexes, oldFiltersIDs, ap.Contexts, ap.FilterIDs); err != nil {
 			return

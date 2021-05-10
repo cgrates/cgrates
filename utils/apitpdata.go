@@ -544,6 +544,7 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
 	Context          string
+	APIOpts          map[string]interface{}
 	AttributeIDs     []string
 	ResourceIDs      []string
 	StatIDs          []string
@@ -559,6 +560,7 @@ type ArgsComputeFilterIndexIDs struct {
 type ArgsComputeFilterIndexes struct {
 	Tenant      string
 	Context     string
+	APIOpts     map[string]interface{}
 	AttributeS  bool
 	ResourceS   bool
 	StatS       bool
