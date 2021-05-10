@@ -428,7 +428,7 @@ const CGRATES_CFG_JSON = `
 			"type": "*none",									// exporter type 
 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
 			"opts": {
-
+				
 				// General
 				// "queueID": "cgrates_cdrs", 					// the queue id where events are exported
 
@@ -456,7 +456,7 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxConnLifetime": 0,						// SQLMaxConnLifetime 
 
 
-				// "tableName":"cdrs", 							// the name of the table from where the events are exported
+				// "sqlTableName":"cdrs", 							// the name of the table from where the events are exported
 				// "dbName": "cgrates",							// the name of the database from where the events are exported
 				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
 				
