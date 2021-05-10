@@ -231,7 +231,7 @@ func testSqlEeVerifyExportedEvent2(t *testing.T) {
 
 func TestOpenDB1(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxIdleConns] = 2
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxIdleConnsCfg] = 2
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
 	_, _, err := openDB(cgrCfg, 0, dialect)
@@ -242,7 +242,7 @@ func TestOpenDB1(t *testing.T) {
 
 func TestOpenDB1Err(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxIdleConns] = "test"
+	cgrCfg.EEsCfg().Exporters[0].Opts[utils.SQLMaxIdleConnsCfg] = "test"
 	dialect := mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		"cgrates", "CGRateS.org", "127.0.0.1", "3306", "cgrates"))
 	_, _, err := openDB(cgrCfg, 0, dialect)
