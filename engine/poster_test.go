@@ -37,10 +37,10 @@ func TestAMQPPosterParseURL(t *testing.T) {
 		routingKey:   "CGRCDR",
 	}
 	opts := map[string]interface{}{
-		"queueID":      "q1",
-		"exchange":     "E1",
-		"routingKey":   "CGRCDR",
-		"exchangeType": "fanout",
+		"queueID":         "q1",
+		"sqlExchange":     "E1",
+		"amqpRoutingKey":  "CGRCDR",
+		"sqlExchangeType": "fanout",
 	}
 	amqp.parseOpts(opts)
 	if !reflect.DeepEqual(expected, amqp) {
@@ -55,7 +55,7 @@ func TestKafkaParseURL(t *testing.T) {
 		topic:    "cdr_billing",
 		attempts: 10,
 	}
-	if kfk := NewKafkaPoster(u, 10, map[string]interface{}{"topic": "cdr_billing"}); !reflect.DeepEqual(exp, kfk) {
+	if kfk := NewKafkaPoster(u, 10, map[string]interface{}{"kafkaTopic": "cdr_billing"}); !reflect.DeepEqual(exp, kfk) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
 	}
 	u = "localhost:9092"
@@ -64,7 +64,7 @@ func TestKafkaParseURL(t *testing.T) {
 		topic:    "cdr_billing",
 		attempts: 10,
 	}
-	if kfk := NewKafkaPoster(u, 10, map[string]interface{}{"topic": "cdr_billing"}); !reflect.DeepEqual(exp, kfk) {
+	if kfk := NewKafkaPoster(u, 10, map[string]interface{}{"kafkaTopic": "cdr_billing"}); !reflect.DeepEqual(exp, kfk) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
 	}
 }

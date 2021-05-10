@@ -2536,7 +2536,7 @@ const (
 	AWSSecret     = "awsSecret"
 	AWSToken      = "awsToken"
 	AWSFolderPath = "s3FolderPath"
-	KafkaTopic    = "topic"
+	KafkaTopic    = "kafkaTopic"
 	KafkaGroupID  = "groupID"
 	KafkaMaxWait  = "maxWait"
 
@@ -2544,9 +2544,9 @@ const (
 	DefaultQueueID      = "cgrates_cdrs"
 	QueueID             = "queueID"
 	DefaultExchangeType = "direct"
-	Exchange            = "exchange"
-	ExchangeType        = "exchangeType"
-	RoutingKey          = "routingKey"
+	Exchange            = "sqlExchange"
+	ExchangeType        = "sqlExchangeType"
+	RoutingKey          = "amqpRoutingKey"
 
 	// for ers:
 	AMQPDefaultConsumerTag = "cgrates"
@@ -2558,7 +2558,7 @@ const (
 	KafkaDefaultGroupID = "cgrates"
 	KafkaDefaultMaxWait = time.Millisecond
 
-	SQLDBName         = "dbName"
+	SQLDBName         = "sqlDBName"
 	SQLTableName      = "sqlTableName"
 	SQLDefaultSSLMode = "disable"
 	SQLDefaultDBName  = "cgrates"

@@ -38,9 +38,9 @@ func TestKafkasetOpts(t *testing.T) {
 		maxWait: time.Second,
 	}
 	if err := k.setOpts(map[string]interface{}{
-		"topic":   "cdrs",
-		"groupID": "new",
-		"maxWait": "1s",
+		"kafkaTopic": "cdrs",
+		"groupID":    "new",
+		"maxWait":    "1s",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {
@@ -81,9 +81,9 @@ func TestKafkasetOpts(t *testing.T) {
 		maxWait: time.Second,
 	}
 	if err := k.setOpts(map[string]interface{}{
-		"topic":   "cdrs",
-		"groupID": "new",
-		"maxWait": "1s",
+		"kafkaTopic": "cdrs",
+		"groupID":    "new",
+		"maxWait":    "1s",
 	}); err != nil {
 		t.Fatal(err)
 	} else if expKafka.dialURL != k.dialURL {

@@ -41,11 +41,11 @@ func TestSQLSetURL(t *testing.T) {
 	inURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		"dbName":           "cgrates2",
-		utils.SQLTableName: "cdrs2",
-		"sslmode":          "enabled",
+		"sqlDBName":    "cgrates2",
+		"sqlTableName": "cdrs2",
+		"sslmode":      "enabled",
 
-		"dbNameProcessed":       "cgrates3",
+		"sqlDBNameProcessed":    "cgrates3",
 		"sqlTableNameProcessed": "cdrs3",
 		"sslmodeProcessed":      "enabled",
 	}); err != nil {
@@ -76,11 +76,11 @@ func TestSQLSetURL(t *testing.T) {
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		"dbName":       "cgrates2",
+		"sqlDBName":    "cgrates2",
 		"sqlTableName": "cdrs2",
 		"sslmode":      "enabled",
 
-		"dbNameProcessed":       "cgrates3",
+		"sqlDBNameProcessed":    "cgrates3",
 		"sqlTableNameProcessed": "cdrs3",
 		"sslmodeProcessed":      "enabled",
 	}); err != nil {
@@ -111,11 +111,11 @@ func TestSQLSetURL(t *testing.T) {
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	outURL = ""
 	if err := sql.setURL(inURL, outURL, map[string]interface{}{
-		"dbName":       "cgrates2",
+		"sqlDBName":    "cgrates2",
 		"sqlTableName": "cdrs2",
 		"sslmode":      "enabled",
 
-		"dbNameProcessed":       "cgrates2",
+		"sqlDBNameProcessed":    "cgrates2",
 		"sqlTableNameProcessed": "cdrs2",
 		"sslmodeProcessed":      "enabled",
 	}); err != nil {

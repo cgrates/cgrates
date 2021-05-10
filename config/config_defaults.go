@@ -377,16 +377,16 @@ const CGRATES_CFG_JSON = `
 
 				// AMQP
 				// "consumerTag": "cgrates",					// the ID of the consumer
-				// "exchange": "",									
-				// "exchangeType": "",
-				// "routingKey": "",
+				// "sqlExchange": "",									
+				// "sqlExchangeType": "",
+				// "amqpRoutingKey": "",
 				
 				// "exchangeProcessed": "",									
 				// "exchangeTypeProcessed": "",
 				// "routingKeyProcessed": "",
 
 				// Kafka
-				// "topic": "cgrates",							// the topic from were the events are read
+				// "kafkaTopic": "cgrates",							// the topic from were the events are read
 				// "groupID": "cgrates",						// the group that reads the events
 				// "maxWait": "1ms",							// the maximum amount of time to wait for new data to come
 
@@ -394,11 +394,11 @@ const CGRATES_CFG_JSON = `
 
 
 				// SQL
-				// "dbName": "cgrates", 						// the name of the database from were the events are read
+				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
 				// "sslmode": "disable",						// the postgresSSLMode for postgres db
 
-				// "dbNameProcessed": "", 						// the name of the database were the events are sent after they are processed
+				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed: "", 						// the name of the database were the events are sent after they are processed
 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
 				// "sslmodeProcessed": "",						// the postgresSSLMode for postgres db
 
@@ -479,19 +479,19 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxConnLifetime": 0,						// SQLMaxConnLifetime 
 
 
-				// "sqlTableName":"cdrs", 							// the name of the table from where the events are exported
-				// "dbName": "cgrates",							// the name of the database from where the events are exported
+				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
+				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
 				// "sslmode": "disable",						// the postgresSSLMode for postgres            				
 				
 				
 				// Kafka
-				// "topic": "cgrates",							// the topic from where the events are exported
+				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
 				
 
 				// AMQP
-				// "routingKey": "",							// RoutingKey
-				// "exchange": "",								// Exchange
-				// "exchangeType": "",							// ExchangeType
+				// "amqpRoutingKey": "",							// RoutingKey
+				// "sqlExchange": "",								// Exchange
+				// "sqlExchangeType": "",							// ExchangeType
 
 
 				// SQS and S3
