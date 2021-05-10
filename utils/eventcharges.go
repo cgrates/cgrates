@@ -40,10 +40,11 @@ type EventCharges struct {
 
 	Charges []*ChargeEntry
 
-	Accounting  map[string]*AccountCharge
-	UnitFactors map[string]*UnitFactor
-	Rating      map[string]*RateSInterval
-	Accounts    map[string]*Account
+	Accounting    map[string]*AccountCharge
+	UnitFactors   map[string]*UnitFactor
+	Rating        map[string]*RateSInterval
+	IntervalRates map[string]*IntervalRate
+	Accounts      map[string]*Account
 }
 
 // ChargeEntry is a reference towards Accounting or Rating ID (depending on request type)

@@ -1428,9 +1428,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	cb2ID := "CB2"
 	// populate the Account
 	acnt1 := &utils.Account{
-		Tenant:    utils.CGRateSorg,
-		ID:        "TestV1DebitAbstractsEventCharges1",
-		FilterIDs: []string{"*string:*~req.Account:AnotherAccount"},
+		Tenant: utils.CGRateSorg,
+		ID:     "TestV1DebitAbstractsEventCharges1",
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
@@ -1592,8 +1591,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	}
 
 	eEvChgs := &utils.ExtEventCharges{
-		Abstracts: utils.Float64Pointer(475000000000),
-		Concretes: utils.Float64Pointer(5.15),
+		Abstracts: utils.Float64Pointer(446000000000),
+		Concretes: utils.Float64Pointer(4.95),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     "GENUUID1",
@@ -1743,7 +1742,6 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 			APIOpts: map[string]interface{}{
 				utils.MetaUsage: "7m26s",
-				//utils.MetaUsage: "2m1s",
 			},
 		},
 	}

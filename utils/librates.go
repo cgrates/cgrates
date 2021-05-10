@@ -413,6 +413,7 @@ type RateSIncrement struct {
 	IncrementStart    *Decimal
 	Rate              *Rate
 	IntervalRateIndex int
+	RateID            string
 	CompressFactor    int64
 	Usage             *Decimal
 
@@ -533,6 +534,7 @@ type RateProfileCost struct {
 	MaxCost         float64
 	MaxCostStrategy string
 	RateSIntervals  []*RateSInterval
+	Rates           map[string]*IntervalRate
 	Altered         []string
 }
 

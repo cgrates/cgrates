@@ -118,6 +118,8 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 			aB.rateSConns, aB.blnCfg.RateProfileIDs,
 			costIcrm, dbted); err != nil {
 			return
+		} else if ecCost.Abstracts.Compare(utils.NewDecimal(0, 0)) == 0 { // no debit performed
+			return
 		}
 	}
 

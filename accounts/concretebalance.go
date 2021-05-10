@@ -92,6 +92,8 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 		cB.rateSConns, cB.blnCfg.RateProfileIDs,
 		costIcrm, dbted); err != nil {
 		return
+	} else if ecCncrt.Abstracts.Compare(utils.NewDecimal(0, 0)) == 0 { // no debit performed
+		return
 	}
 	ec = utils.NewEventCharges()
 	ec.Abstracts = ecCncrt.Abstracts
