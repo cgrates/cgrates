@@ -53,7 +53,7 @@ func TestAMQPERv1(t *testing.T) {
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net",// read data from this path
 			"opts": {
-				"queueID": "cdrs3",
+				"amqpQueueID": "cdrs3",
 			},
 			"processed_path": "",								// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import

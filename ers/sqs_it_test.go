@@ -59,7 +59,7 @@ func TestSQSER(t *testing.T) {
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
 			"opts": {
-				"queueID": "cgrates-cdrs",
+				"sqsQueueID": "cgrates-cdrs",
 				"awsRegion": "us-east-2",
 				"awsKey": "AWSAccessKeyId",
 				"awsSecret": "AWSSecretKey",

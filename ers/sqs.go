@@ -133,7 +133,7 @@ func (rdr *SQSER) processMessage(body []byte) (err error) {
 
 func (rdr *SQSER) parseOpts(opts map[string]interface{}) {
 	rdr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.QueueID]; has {
+	if val, has := opts[utils.SQSQueueID]; has {
 		rdr.queueID = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {

@@ -30,7 +30,7 @@ func TestAMQPSetOpts(t *testing.T) {
 		queueID: "cdrs",
 		tag:     "new",
 	}
-	if k.setOpts(map[string]interface{}{"queueID": "cdrs", "consumerTag": "new"}); expKafka.dialURL != k.dialURL {
+	if k.setOpts(map[string]interface{}{"amqpQueueID": "cdrs", "consumerTag": "new"}); expKafka.dialURL != k.dialURL {
 		t.Errorf("Expected: %s ,received: %s", expKafka.dialURL, k.dialURL)
 	} else if expKafka.queueID != k.queueID {
 		t.Errorf("Expected: %s ,received: %s", expKafka.queueID, k.queueID)

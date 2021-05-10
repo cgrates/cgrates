@@ -145,7 +145,7 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 
 func (rdr *S3ER) parseOpts(opts map[string]interface{}) {
 	rdr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.QueueID]; has {
+	if val, has := opts[utils.S3Bucket]; has {
 		rdr.queueID = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSRegion]; has {

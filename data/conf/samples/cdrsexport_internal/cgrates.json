@@ -11,12 +11,12 @@
 },
 
 "data_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
 "stor_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
@@ -26,13 +26,13 @@
 
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
+	"attributes_conns": ["*internal"]
 },
 
 
@@ -56,37 +56,37 @@
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "amqp_localhost",
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"queueID": "cgrates_cdrs",
+				"amqpQueueID": "cgrates_cdrs",
 				"sqlExchange": "exchangename",
 				"sqlExchangeType": "fanout",
-				"amqpRoutingKey": "cgr_cdrs",
+				"amqpRoutingKey": "cgr_cdrs"
 			},
 			"tenant": "cgrates.org",
 			"attempts": 20,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "aws_test_file",
 			"type": "*amqpv1_json_map",
 			"export_path": "amqps://guest:guest@localhost:95672/",
 			"opts": {
-				"queueID": "cgrates_cdrs",
+				"amqpQueueID": "cgrates_cdrs"
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "sqs_test_file",
@@ -98,26 +98,26 @@
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",
 				"awsSecret": "testsecret",
-				"queueID": "cgrates-cdrs",
+				"SQSQueueID": "cgrates-cdrs"
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "kafka_localhost",
 			"type": "*kafka_json_map",
 			"export_path": "127.0.0.1:9092",
 			"opts":{
-				"kafkaTopic": "cgrates_cdrs",
+				"kafkaTopic": "cgrates_cdrs"
 			},
 			"tenant": "cgrates.org",
 			"attempts": 10,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
 		},
 		{
 			"id": "s3_test_file",
@@ -129,15 +129,15 @@
 				"awsRegion": "eu-west-2",
 				"awsKey": "testkey",
 				"awsSecret": "testsecret",
-				"queueID": "cgrates-cdrs",
+				"s3BucketID": "cgrates-cdrs"
 			},
 			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
-				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"},
-			],
-		},
-	],
+				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
+			]
+		}
+	]
 },
 
 
@@ -159,8 +159,8 @@
 
 
 "apiers": {
-	"enabled": true,
-},
+	"enabled": true
+}
 
 
 }

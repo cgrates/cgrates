@@ -49,7 +49,7 @@ func NewAMQPv1ER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	if vals, has := rdr.Config().Opts[utils.QueueID]; has {
+	if vals, has := rdr.Config().Opts[utils.AMQPQueueID]; has {
 		rdr.queueID = "/" + utils.IfaceAsString(vals)
 	}
 	rdr.createPoster()

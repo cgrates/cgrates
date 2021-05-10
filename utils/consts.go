@@ -2542,13 +2542,13 @@ const (
 
 	// General constants for posters
 	DefaultQueueID      = "cgrates_cdrs"
-	QueueID             = "queueID"
 	DefaultExchangeType = "direct"
 	Exchange            = "sqlExchange"
 	ExchangeType        = "sqlExchangeType"
 	RoutingKey          = "amqpRoutingKey"
 
 	// for ers:
+	AMQPQueueID            = "amqpQueueID"
 	AMQPDefaultConsumerTag = "cgrates"
 	AMQPConsumerTag        = "consumerTag"
 
@@ -2564,6 +2564,9 @@ const (
 	SQLDefaultDBName  = "cgrates"
 
 	ProcessedOpt = "Processed"
+
+	S3Bucket   = "s3BucketID"
+	SQSQueueID = "SQSQueueID"
 )
 
 // Analyzers constants

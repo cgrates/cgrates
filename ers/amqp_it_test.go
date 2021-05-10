@@ -44,7 +44,7 @@ func TestAMQPER(t *testing.T) {
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "amqp://guest:guest@localhost:5672/",// read data from this path
 			"opts": {
-				"queueID": "cdrs3",
+				"amqpQueueID": "cdrs3",
 				"consumerTag": "test-key",
 				"sqlExchange": "test-exchange",
 				"sqlExchangeType": "direct",

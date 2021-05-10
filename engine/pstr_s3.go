@@ -60,7 +60,7 @@ func (pstr *S3Poster) Close() {}
 
 func (pstr *S3Poster) parseOpts(opts map[string]interface{}) {
 	pstr.queueID = utils.DefaultQueueID
-	if val, has := opts[utils.QueueID]; has {
+	if val, has := opts[utils.S3Bucket]; has {
 		pstr.queueID = utils.IfaceAsString(val)
 	}
 	if val, has := opts[utils.AWSFolderPath]; has {

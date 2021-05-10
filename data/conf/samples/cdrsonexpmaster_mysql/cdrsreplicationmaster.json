@@ -76,7 +76,7 @@
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"queueID": "cgrates_cdrs",
+				"amqpQueueID": "cgrates_cdrs",
 				"sqlExchange": "exchangename",
 				"sqlExchangeType": "fanout",
 				"amqpRoutingKey": "cgr_cdrs",
@@ -130,7 +130,7 @@
 			"type": "*amqp_json_map",
 			"export_path": "amqp://guest:guest@wrongurl:25672/",
 			"opts": {
-				"queueID": "cgrates_cdrs",
+				"amqpQueueID": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"filters":["*string:~*ec.Cost:100"],
