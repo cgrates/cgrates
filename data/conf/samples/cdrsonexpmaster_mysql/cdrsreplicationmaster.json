@@ -77,9 +77,9 @@
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
 				"queueID": "cgrates_cdrs",
-				"exchange": "exchangename",
-				"exchangeType": "fanout",
-				"routingKey": "cgr_cdrs",
+				"sqlExchange": "exchangename",
+				"sqlExchangeType": "fanout",
+				"amqpRoutingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"attempts": 3,
@@ -116,7 +116,7 @@
 			"type": "*kafka_json_map",
 			"export_path": "localhost:9092",
 			"opts": {
-				"topic": "cgrates_cdrs",
+				"kafkaTopic": "cgrates_cdrs",
 			},
 			"tenant": "cgrates.org",
 			"synchronous": true,

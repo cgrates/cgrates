@@ -46,9 +46,9 @@ func TestAMQPER(t *testing.T) {
 			"opts": {
 				"queueID": "cdrs3",
 				"consumerTag": "test-key",
-				"exchange": "test-exchange",
-				"exchangeType": "direct",
-				"routingKey": "test-key",
+				"sqlExchange": "test-exchange",
+				"sqlExchangeType": "direct",
+				"amqpRoutingKey": "test-key",
 			},
 			"processed_path": "",								// move processed data here
 			"tenant": "cgrates.org",							// tenant used by import

@@ -394,7 +394,7 @@
 			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
-				"dbName": "exportedDatabase", // if dbName is not present "cgrates" will be used as default
+				"sqlDBName": "exportedDatabase", // if dbName is not present "cgrates" will be used as default
 				"sqlTableName": "expTable", // tableName is mandatory in opts for sql exporter
 				"sslmode": "disable",
 				"sqlMaxIdleConns": "10",
@@ -415,7 +415,7 @@
 			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
-				"dbName": "exportedDatabase",
+				"sqlDBName": "exportedDatabase",
 				"sqlTableName": "expTable",
 				"sslmode": "disable",
 				"sqlMaxIdleConns": "10",
