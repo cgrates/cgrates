@@ -2251,8 +2251,8 @@ const (
 	ElsVersionType         = "elsVersionType"
 	ElsWaitForActiveShards = "elsWaitForActiveShards"
 	// SQLEe options
-	SQLMaxOpenConns    = "maxOpenConns"
-	SQLMaxConnLifetime = "maxConnLifetime"
+	SQLMaxOpenConns    = "sqlMaxOpenConns"
+	SQLMaxConnLifetime = "sqlMaxConnLifetime"
 
 	// Others
 	OptsContext               = "*context"

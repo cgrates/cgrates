@@ -452,8 +452,8 @@ const CGRATES_CFG_JSON = `
 				
 				// SQL
 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
-				// "maxOpenConns": 0,							// SQLMaxOpenConns
-				// "maxConnLifetime": 0,						// SQLMaxConnLifetime 
+				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
+				// "sqlMaxConnLifetime": 0,						// SQLMaxConnLifetime 
 
 
 				// "tableName":"cdrs", 							// the name of the table from where the events are exported
