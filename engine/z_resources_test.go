@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -3276,4 +3277,370 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 		t.Errorf("Expected: %q, received: %q", exp, reply)
 	}
 
+}
+
+func TestResourcesShutdown(t *testing.T) {
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	rS := &ResourceService{
+		storedResources: utils.StringSet{
+			"Res1": struct{}{},
+		},
+		stopBackup: make(chan struct{}),
+	}
+
+	expLogs := []string{
+		fmt.Sprintf("CGRateS <> [INFO] <%s> service shutdown initialized",
+			utils.ResourceS),
+		fmt.Sprintf("CGRateS <> [WARNING] <%s> failed retrieving from cache resource with ID: %s",
+			utils.ResourceS, "Res1"),
+		fmt.Sprintf("CGRateS <> [INFO] <%s> service shutdown complete",
+			utils.ResourceS),
+	}
+	exp := utils.StringSet{}
+	rS.Shutdown()
+
+	if !reflect.DeepEqual(rS.storedResources, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+			exp, rS.storedResources)
+	}
+
+	rcvLogs := strings.Split(buf.String(), "\n")
+	rcvLogs = rcvLogs[:len(rcvLogs)-1]
+
+	for idx, rcvLog := range rcvLogs {
+		rcvLog := rcvLog[20:]
+		if rcvLog != expLogs[idx] {
+			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+				expLogs[idx], rcvLog)
+		}
+	}
+
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestResourcesStoreResources(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+	}()
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	rS := &ResourceService{
+		storedResources: utils.StringSet{
+			"Res1": struct{}{},
+		},
+	}
+
+	value := &Resource{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "testResource",
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheResources, "Res1", value, nil, true,
+		utils.NonTransactional)
+
+	explog := fmt.Sprintf("CGRateS <> [WARNING] <%s> failed saving Resource with ID: %s, error: %s\n",
+		utils.ResourceS, value.ID, utils.ErrNoDatabaseConn.Error())
+	exp := &ResourceService{
+		storedResources: utils.StringSet{
+			"Res1": struct{}{},
+		},
+	}
+	rS.storeResources()
+
+	if !reflect.DeepEqual(rS, exp) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rS)
+	}
+
+	rcvlog := buf.String()[20:]
+
+	if rcvlog != explog {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
+	}
+}
+
+func TestResourcesStoreResourceNotDirty(t *testing.T) {
+	rS := &ResourceService{}
+	r := &Resource{
+		dirty: utils.BoolPointer(false),
+	}
+
+	err := rS.StoreResource(r)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, received %+v", err)
+	}
+}
+
+func TestResourcesStoreResourceOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rS := &ResourceService{
+		dm: NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil),
+	}
+	r := &Resource{
+		dirty: utils.BoolPointer(true),
+	}
+
+	err := rS.StoreResource(r)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, received %+v", err)
+	}
+
+	if *r.dirty != false {
+		t.Errorf("\nexpected false, received %+v", *r.dirty)
+	}
+}
+
+// func TestResourcesStoreResource2(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	rS := &ResourceService{
+// 		dm: NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil),
+// 	}
+// 	r := &Resource{
+// 		dirty: utils.BoolPointer(true),
+// 	}
+
+// 	err := rS.StoreResource(r)
+
+// 	if err != nil {
+// 		t.Errorf("\nexpected nil, received %+v", err)
+// 	}
+
+// 	if *r.dirty != false {
+// 		t.Errorf("\nexpected false, received %+v", *r.dirty)
+// 	}
+// }
+
+func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
+	rs := Resources{
+		{
+			Usages: map[string]*ResourceUsage{
+				"": {},
+			},
+			rPrf: &ResourceProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RP_1",
+				AllocationMessage: "allocation msg",
+			},
+		},
+	}
+
+	ru := &ResourceUsage{}
+	exp := "allocation msg"
+	rcv, err := rs.allocateResource(ru, false)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, received %+v", err)
+	}
+
+	if rcv != exp {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestResourcesProcessThresholdsNoConns(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	rS := &ResourceService{
+		cgrcfg: cfg,
+	}
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_1",
+	}
+	opts := map[string]interface{}{}
+
+	err := rS.processThresholds(r, opts)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, received %+v", err)
+	}
+}
+
+func TestResourcesProcessThresholdsOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	Cache = NewCacheS(cfg, nil, nil)
+
+	ccM := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				exp := &ThresholdsArgsProcessEvent{
+					ThresholdIDs: []string{"THD_1"},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
+						Event: map[string]interface{}{
+							utils.EventType:  utils.ResourceUpdate,
+							utils.ResourceID: "RES_1",
+							utils.Usage:      0.,
+						},
+						APIOpts: map[string]interface{}{
+							utils.MetaEventType: utils.ResourceUpdate,
+						},
+					},
+				}
+				if !reflect.DeepEqual(exp, args) {
+					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+						utils.ToJSON(exp), utils.ToJSON(args))
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal <- ccM
+	rS := &ResourceService{
+		cgrcfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+		}),
+	}
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_1",
+		rPrf: &ResourceProfile{
+			Tenant:       "cgrates.org",
+			ID:           "RP_1",
+			ThresholdIDs: []string{"THD_1"},
+		},
+	}
+
+	err := rS.processThresholds(r, nil)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, received %+v", err)
+	}
+
+}
+
+func TestResourcesProcessThresholdsCallErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+	}()
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	Cache = NewCacheS(cfg, nil, nil)
+
+	ccM := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				exp := &ThresholdsArgsProcessEvent{
+					ThresholdIDs: []string{"THD_1"},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     args.(*ThresholdsArgsProcessEvent).CGREvent.ID,
+						Event: map[string]interface{}{
+							utils.EventType:  utils.ResourceUpdate,
+							utils.ResourceID: "RES_1",
+							utils.Usage:      0.,
+						},
+						APIOpts: map[string]interface{}{
+							utils.MetaEventType: utils.ResourceUpdate,
+						},
+					},
+				}
+				if !reflect.DeepEqual(exp, args) {
+					return fmt.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+						utils.ToJSON(exp), utils.ToJSON(args))
+				}
+				return utils.ErrExists
+			},
+		},
+	}
+	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal <- ccM
+	rS := &ResourceService{
+		cgrcfg: cfg,
+		connMgr: NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+			utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+		}),
+	}
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_1",
+		rPrf: &ResourceProfile{
+			Tenant:       "cgrates.org",
+			ID:           "RP_1",
+			ThresholdIDs: []string{"THD_1"},
+		},
+	}
+
+	experr := utils.ErrExists
+	err := rS.processThresholds(r, nil)
+
+	if err == nil || err != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+	if !strings.Contains(buf.String(), "CGRateS <> [WARNING] <ResourceS> error: EXISTS") {
+		t.Errorf("expected log warning")
+	}
+
+}
+
+func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().ThresholdSConns = []string{"connID"}
+	rS := &ResourceService{
+		cgrcfg: cfg,
+	}
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES_1",
+		rPrf: &ResourceProfile{
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	opts := map[string]interface{}{}
+
+	err := rS.processThresholds(r, opts)
+
+	if err != nil {
+		t.Errorf("\nexpected nil, received: %+v", err)
+	}
 }
