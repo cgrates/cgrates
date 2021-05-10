@@ -965,6 +965,18 @@ func TestGetLoadedIdsDispatcherProfiles(t *testing.T) {
 	}
 }
 
+func TestGetLoadedIdsEmptyObject(t *testing.T) {
+	tpr := &TpReader{}
+	rcv, err := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
+	if err != nil {
+		t.Error(err)
+	}
+	expRcv := make([]string, 0)
+	if !reflect.DeepEqual(expRcv, rcv) {
+		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+	}
+}
+
 func TestGetLoadedIdsDispatcherHosts(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
@@ -990,5 +1002,134 @@ func TestGetLoadedIdsError(t *testing.T) {
 	errExpect := "Unsupported load category"
 	if _, err := tpr.GetLoadedIds(""); err == nil || err.Error() != errExpect {
 		t.Errorf("\nExpected error %v but received \n%v", errExpect, err)
+	}
+}
+
+func TestReloadCache(t *testing.T) {
+	data := NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: map[string]interface{}{},
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"ActionIDs":            {"ActionsID"},
+			"ActionPlanIDs":        {"ActionPlansID"},
+			"ActionTriggerIDs":     {"ActionTriggersID"},
+			"DestinationIDs":       {"DestinationsID"},
+			"TimingIDs":            {"TimingsID"},
+			"RatingPlanIDs":        {"RatingPlansID"},
+			"RatingProfileIDs":     {"RatingProfilesID"},
+			"SharedGroupIDs":       {"SharedGroupsID"},
+			"ResourceProfileIDs":   {"cgrates.org:resourceProfilesID"},
+			"StatsQueueProfileIDs": {"cgrates.org:statProfilesID"},
+			"ThresholdProfileIDs":  {"cgrates.org:thresholdProfilesID"},
+			"FilterIDs":            {"cgrates.org:filtersID"},
+			"RouteProfileIDs":      {"cgrates.org:routeProfilesID"},
+			"AttributeProfileIDs":  {"cgrates.org:attributeProfilesID"},
+			"ChargerProfileIDs":    {"cgrates.org:chargerProfilesID"},
+			"DispatcherProfileIDs": {"cgrates.org:dispatcherProfilesID"},
+			"DispatcherHostIDs":    {"cgrates.org:dispatcherHostsID"},
+			"ResourceIDs":          {"cgrates.org:resourcesID"},
+			"StatsQueueIDs":        {"cgrates.org:statQueuesID"},
+			"ThresholdIDs":         {"cgrates.org:thresholdsID"},
+			"AccountActionPlanIDs": {"AccountActionPlansID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal <- cM
+	cnMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	tpr := &TpReader{
+		actions: map[string][]*Action{
+			"ActionsID": {},
+		},
+		actionPlans: map[string]*ActionPlan{
+			"ActionPlansID": {},
+		},
+		actionsTriggers: map[string]ActionTriggers{
+			"ActionTriggersID": {},
+		},
+		destinations: map[string]*Destination{
+			"DestinationsID": {},
+		},
+		timings: map[string]*utils.TPTiming{
+			"TimingsID": {},
+		},
+		ratingPlans: map[string]*RatingPlan{
+			"RatingPlansID": {},
+		},
+		ratingProfiles: map[string]*RatingProfile{
+			"RatingProfilesID": {},
+		},
+		sharedGroups: map[string]*SharedGroup{
+			"SharedGroupsID": {},
+		},
+		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
+			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
+		},
+		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
+			{Tenant: "cgrates.org", ID: "statProfilesID"}: {},
+		},
+		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
+			{Tenant: "cgrates.org", ID: "thresholdProfilesID"}: {},
+		},
+		filters: map[utils.TenantID]*utils.TPFilterProfile{
+			{Tenant: "cgrates.org", ID: "filtersID"}: {},
+		},
+		routeProfiles: map[utils.TenantID]*utils.TPRouteProfile{
+			{Tenant: "cgrates.org", ID: "routeProfilesID"}: {},
+		},
+		attributeProfiles: map[utils.TenantID]*utils.TPAttributeProfile{
+			{Tenant: "cgrates.org", ID: "attributeProfilesID"}: {},
+		},
+		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
+			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
+		},
+		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
+			{Tenant: "cgrates.org", ID: "dispatcherProfilesID"}: {},
+		},
+		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
+			{Tenant: "cgrates.org", ID: "dispatcherHostsID"}: {},
+		},
+		resources: []*utils.TenantID{
+			{
+				Tenant: "cgrates.org",
+				ID:     "resourcesID",
+			},
+		},
+		statQueues: []*utils.TenantID{
+			{
+				Tenant: "cgrates.org",
+				ID:     "statQueuesID",
+			},
+		},
+		thresholds: []*utils.TenantID{
+			{
+				Tenant: "cgrates.org",
+				ID:     "thresholdsID",
+			},
+		},
+		acntActionPlans: map[string][]string{
+			"AccountActionPlansID": {},
+		},
+		dm: NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
+	}
+	tpr.cacheConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	if err := tpr.ReloadCache(utils.MetaReload, false, make(map[string]interface{})); err != nil {
+		t.Error(err)
 	}
 }
