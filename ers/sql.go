@@ -328,6 +328,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string, opts map[string]interfac
 	rdr.expTableName = utils.CDRsTBL
 	if vals, has := processedOpt[utils.SQLTableName]; has {
 		rdr.expTableName = utils.IfaceAsString(vals)
+
 	}
 
 	switch rdr.expConnType {
