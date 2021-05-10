@@ -26,13 +26,11 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func TestCallCacheNoCaching(t *testing.T) {
@@ -82,7 +80,7 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	Cache = NewCacheS(defaultCfg, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
-	mCC := &mockClientConnector{
+	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := utils.AttrReloadCacheWithAPIOpts{
@@ -150,7 +148,7 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	Cache = NewCacheS(defaultCfg, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
-	mCC := &mockClientConnector{
+	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply interface{}) error {
 				return nil
@@ -231,7 +229,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 	Cache = NewCacheS(defaultCfg, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
-	mCC := &mockClientConnector{
+	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1LoadCache: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := utils.AttrReloadCacheWithAPIOpts{
@@ -302,7 +300,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	Cache = NewCacheS(defaultCfg, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
-	mCC := &mockClientConnector{
+	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1RemoveItems: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := utils.AttrReloadCacheWithAPIOpts{
@@ -373,7 +371,7 @@ func TestCallCacheClear(t *testing.T) {
 	Cache = NewCacheS(defaultCfg, nil, nil)
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
-	mCC := &mockClientConnector{
+	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1Clear: func(_ *context.Context, args, reply interface{}) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
@@ -487,11 +485,11 @@ func TestGetLoadedIdsDestinations(t *testing.T) {
 	tpr := &TpReader{
 		destinations: map[string]*Destination{
 			"1001": {
-				Id:       "1001_ID",
+				ID:       "1001_ID",
 				Prefixes: []string{"39", "40"},
 			},
 			"1002": {
-				Id:       "1002_ID",
+				ID:       "1002_ID",
 				Prefixes: []string{"75", "82"},
 			},
 		},
@@ -512,11 +510,11 @@ func TestGetLoadedIdsReverseDestinations(t *testing.T) {
 	tpr := &TpReader{
 		destinations: map[string]*Destination{
 			"1001": {
-				Id:       "1001_ID",
+				ID:       "1001_ID",
 				Prefixes: []string{"39", "75"},
 			},
 			"1002": {
-				Id:       "1002_ID",
+				ID:       "1002_ID",
 				Prefixes: []string{"87", "21"},
 			},
 		},
@@ -532,207 +530,207 @@ func TestGetLoadedIdsReverseDestinations(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsRatingPlans(t *testing.T) {
-	tpr := &TpReader{
-		ratingPlans: map[string]*RatingPlan{
-			"RP_RETAIL1": {
-				Id: "RP_1001",
-				Timings: map[string]*RITiming{
-					"TIMING_1001": {
-						ID:         "PEAK",
-						Years:      []int{2021},
-						Months:     []time.Month{8},
-						MonthDays:  []int{31},
-						WeekDays:   []time.Weekday{5},
-						StartTime:  "15:00:00Z",
-						EndTime:    "17:00:00Z",
-						cronString: "21 2 5 25 8 5 2021", //sec, min, hour, monthday, month, weekday, year
-						tag:        utils.MetaAny,
-					},
-				},
-				Ratings: map[string]*RIRate{
-					"RATING_1001": {
-						ConnectFee:       0.4,
-						RoundingMethod:   utils.MetaUp,
-						RoundingDecimals: 4,
-						MaxCost:          0.60,
-						MaxCostStrategy:  utils.MetaMaxCostDisconnect,
-						Rates: []*RGRate{
-							{
-								GroupIntervalStart: 0,
-								Value:              0.2,
-								RateIncrement:      60 * time.Second,
-								RateUnit:           60 * time.Second,
-							},
-						},
-						tag: utils.MetaAny,
-					},
-				},
-				DestinationRates: map[string]RPRateList{
-					"DR_FS_40CNT": {
-						{
-							Timing: "TIMING_1001",
-							Rating: "RATING_1001",
-							Weight: 10,
-						},
-					},
-				},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.RatingPlanPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	expRcv := []string{"RP_RETAIL1"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
+// func TestGetLoadedIdsRatingPlans(t *testing.T) {
+// 	tpr := &TpReader{
+// 		ratingPlans: map[string]*RatingPlan{
+// 			"RP_RETAIL1": {
+// 				Id: "RP_1001",
+// 				Timings: map[string]*RITiming{
+// 					"TIMING_1001": {
+// 						ID:         "PEAK",
+// 						Years:      []int{2021},
+// 						Months:     []time.Month{8},
+// 						MonthDays:  []int{31},
+// 						WeekDays:   []time.Weekday{5},
+// 						StartTime:  "15:00:00Z",
+// 						EndTime:    "17:00:00Z",
+// 						cronString: "21 2 5 25 8 5 2021", //sec, min, hour, monthday, month, weekday, year
+// 						tag:        utils.MetaAny,
+// 					},
+// 				},
+// 				Ratings: map[string]*RIRate{
+// 					"RATING_1001": {
+// 						ConnectFee:       0.4,
+// 						RoundingMethod:   utils.MetaUp,
+// 						RoundingDecimals: 4,
+// 						MaxCost:          0.60,
+// 						MaxCostStrategy:  utils.MetaMaxCostDisconnect,
+// 						Rates: []*RGRate{
+// 							{
+// 								GroupIntervalStart: 0,
+// 								Value:              0.2,
+// 								RateIncrement:      60 * time.Second,
+// 								RateUnit:           60 * time.Second,
+// 							},
+// 						},
+// 						tag: utils.MetaAny,
+// 					},
+// 				},
+// 				DestinationRates: map[string]RPRateList{
+// 					"DR_FS_40CNT": {
+// 						{
+// 							Timing: "TIMING_1001",
+// 							Rating: "RATING_1001",
+// 							Weight: 10,
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	rcv, err := tpr.GetLoadedIds(utils.RatingPlanPrefix)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	expRcv := []string{"RP_RETAIL1"}
+// 	if !reflect.DeepEqual(expRcv, rcv) {
+// 		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+// 	}
+// }
 
-func TestGetLoadedIdsRatingProfiles(t *testing.T) {
-	tpr := &TpReader{
-		ratingProfiles: map[string]*RatingProfile{
-			"1001": {
-				Id: "RP_RETAIL1",
-				RatingPlanActivations: []*RatingPlanActivation{
-					{
-						ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						RatingPlanId:   "RETAIL1",
-					},
-				},
-			},
-			"1002": {
-				Id: "RP_RETAIL2",
-				RatingPlanActivations: []*RatingPlanActivation{
-					{
-						ActivationTime: time.Date(2014, 7, 21, 14, 15, 0, 0, time.UTC),
-						RatingPlanId:   "RETAIL2",
-					},
-				},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.RatingProfilePrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	sort.Strings(rcv)
-	expRcv := []string{"1001", "1002"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
+// func TestGetLoadedIdsRatingProfiles(t *testing.T) {
+// 	tpr := &TpReader{
+// 		ratingProfiles: map[string]*RatingProfile{
+// 			"1001": {
+// 				Id: "RP_RETAIL1",
+// 				RatingPlanActivations: []*RatingPlanActivation{
+// 					{
+// 						ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+// 						RatingPlanId:   "RETAIL1",
+// 					},
+// 				},
+// 			},
+// 			"1002": {
+// 				Id: "RP_RETAIL2",
+// 				RatingPlanActivations: []*RatingPlanActivation{
+// 					{
+// 						ActivationTime: time.Date(2014, 7, 21, 14, 15, 0, 0, time.UTC),
+// 						RatingPlanId:   "RETAIL2",
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	rcv, err := tpr.GetLoadedIds(utils.RatingProfilePrefix)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	sort.Strings(rcv)
+// 	expRcv := []string{"1001", "1002"}
+// 	if !reflect.DeepEqual(expRcv, rcv) {
+// 		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+// 	}
+// }
 
-func TestGetLoadedIdsActions(t *testing.T) {
-	tpr := &TpReader{
-		actions: map[string][]*Action{
-			"TOPUP_RST_10": {
-				{
-					Id:               "ACTION_1001",
-					ActionType:       utils.MetaSetBalance,
-					ExtraParameters:  "",
-					Filter:           "",
-					ExpirationString: "",
-					Weight:           10,
-					balanceValue:     9.45,
-				},
-			},
-			"TOPUP_RST_5": {
-				{
-					Id:               "ACTION_1002",
-					ActionType:       utils.MetaPublishAccount,
-					ExtraParameters:  "",
-					Filter:           "",
-					ExpirationString: "",
-					Weight:           5,
-					balanceValue:     12.32,
-				},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.ActionPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	sort.Strings(rcv)
-	expRcv := []string{"TOPUP_RST_10", "TOPUP_RST_5"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
+// func TestGetLoadedIdsActions(t *testing.T) {
+// 	tpr := &TpReader{
+// 		actions: map[string][]*Action{
+// 			"TOPUP_RST_10": {
+// 				{
+// 					Id:               "ACTION_1001",
+// 					ActionType:       utils.MetaSetBalance,
+// 					ExtraParameters:  "",
+// 					Filter:           "",
+// 					ExpirationString: "",
+// 					Weight:           10,
+// 					balanceValue:     9.45,
+// 				},
+// 			},
+// 			"TOPUP_RST_5": {
+// 				{
+// 					Id:               "ACTION_1002",
+// 					ActionType:       utils.MetaPublishAccount,
+// 					ExtraParameters:  "",
+// 					Filter:           "",
+// 					ExpirationString: "",
+// 					Weight:           5,
+// 					balanceValue:     12.32,
+// 				},
+// 			},
+// 		},
+// 	}
+// 	rcv, err := tpr.GetLoadedIds(utils.ActionPrefix)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	sort.Strings(rcv)
+// 	expRcv := []string{"TOPUP_RST_10", "TOPUP_RST_5"}
+// 	if !reflect.DeepEqual(expRcv, rcv) {
+// 		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+// 	}
+// }
 
-func TestGetLoadedIdsActionPlans(t *testing.T) {
-	tpr := &TpReader{
-		actionPlans: map[string]*ActionPlan{
-			"PACKAGE_1001": {
-				Id: "TOPUP_RST_10",
-				AccountIDs: map[string]bool{
-					"1001": true,
-					"1002": false,
-				},
-			},
-			"PACKAGE_1002": {
-				Id: "TOPUP_RST_5",
-				AccountIDs: map[string]bool{
-					"1001": false,
-					"1002": true,
-				},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.ActionPlanPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	sort.Strings(rcv)
-	expRcv := []string{"PACKAGE_1001", "PACKAGE_1002"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
+// func TestGetLoadedIdsActionPlans(t *testing.T) {
+// 	tpr := &TpReader{
+// 		actionPlans: map[string]*ActionPlan{
+// 			"PACKAGE_1001": {
+// 				Id: "TOPUP_RST_10",
+// 				AccountIDs: map[string]bool{
+// 					"1001": true,
+// 					"1002": false,
+// 				},
+// 			},
+// 			"PACKAGE_1002": {
+// 				Id: "TOPUP_RST_5",
+// 				AccountIDs: map[string]bool{
+// 					"1001": false,
+// 					"1002": true,
+// 				},
+// 			},
+// 		},
+// 	}
+// 	rcv, err := tpr.GetLoadedIds(utils.ActionPlanPrefix)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	sort.Strings(rcv)
+// 	expRcv := []string{"PACKAGE_1001", "PACKAGE_1002"}
+// 	if !reflect.DeepEqual(expRcv, rcv) {
+// 		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+// 	}
+// }
 
-func TestGetLoadedIdsSharedGroup(t *testing.T) {
-	tpr := &TpReader{
-		sharedGroups: map[string]*SharedGroup{
-			"SHARED_A": {
-				Id: "SHARED_ID1",
-				AccountParameters: map[string]*SharingParameters{
-					"PARAM_1": {
-						Strategy:      utils.MetaTopUp,
-						RatingSubject: "1001",
-					},
-				},
-				MemberIds: map[string]bool{
-					"1001": true,
-					"1002": false,
-				},
-			},
-			"SHARED_B": {
-				Id: "SHARED_ID2",
-				AccountParameters: map[string]*SharingParameters{
-					"PARAM_1": {
-						Strategy:      utils.MetaTopUp,
-						RatingSubject: "1002",
-					},
-				},
-				MemberIds: map[string]bool{
-					"1001": true,
-					"1002": false,
-				},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.SharedGroupPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	sort.Strings(rcv)
-	expRcv := []string{"SHARED_A", "SHARED_B"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
+// func TestGetLoadedIdsSharedGroup(t *testing.T) {
+// 	tpr := &TpReader{
+// 		sharedGroups: map[string]*SharedGroup{
+// 			"SHARED_A": {
+// 				Id: "SHARED_ID1",
+// 				AccountParameters: map[string]*SharingParameters{
+// 					"PARAM_1": {
+// 						Strategy:      utils.MetaTopUp,
+// 						RatingSubject: "1001",
+// 					},
+// 				},
+// 				MemberIds: map[string]bool{
+// 					"1001": true,
+// 					"1002": false,
+// 				},
+// 			},
+// 			"SHARED_B": {
+// 				Id: "SHARED_ID2",
+// 				AccountParameters: map[string]*SharingParameters{
+// 					"PARAM_1": {
+// 						Strategy:      utils.MetaTopUp,
+// 						RatingSubject: "1002",
+// 					},
+// 				},
+// 				MemberIds: map[string]bool{
+// 					"1001": true,
+// 					"1002": false,
+// 				},
+// 			},
+// 		},
+// 	}
+// 	rcv, err := tpr.GetLoadedIds(utils.SharedGroupPrefix)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	sort.Strings(rcv)
+// 	expRcv := []string{"SHARED_A", "SHARED_B"}
+// 	if !reflect.DeepEqual(expRcv, rcv) {
+// 		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+// 	}
+// }
 
 func TestGetLoadedIdsResourceProfiles(t *testing.T) {
 	tpr := &TpReader{
@@ -764,32 +762,32 @@ func TestGetLoadedIdsResourceProfiles(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsActionTriggers(t *testing.T) {
-	tpr := &TpReader{
-		actionsTriggers: map[string]ActionTriggers{
-			"STANDARD_TRIGGERS": {
-				{
-					ID:             "ID1",
-					UniqueID:       "",
-					ThresholdType:  "*max_balance",
-					ThresholdValue: 20,
-					Recurrent:      false,
-					MinSleep:       0,
-					Weight:         10,
-					ActionsID:      "LOG_WARNING",
-				},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	expRcv := []string{"STANDARD_TRIGGERS"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
+// func TestGetLoadedIdsActionTriggers(t *testing.T) {
+// 	tpr := &TpReader{
+// 		actionsTriggers: map[string]ActionTriggers{
+// 			"STANDARD_TRIGGERS": {
+// 				{
+// 					ID:             "ID1",
+// 					UniqueID:       "",
+// 					ThresholdType:  "*max_balance",
+// 					ThresholdValue: 20,
+// 					Recurrent:      false,
+// 					MinSleep:       0,
+// 					Weight:         10,
+// 					ActionsID:      "LOG_WARNING",
+// 				},
+// 			},
+// 		},
+// 	}
+// 	rcv, err := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	expRcv := []string{"STANDARD_TRIGGERS"}
+// 	if !reflect.DeepEqual(expRcv, rcv) {
+// 		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+// 	}
+// }
 
 func TestGetLoadedIdsStatQueueProfiles(t *testing.T) {
 	tpr := &TpReader{
@@ -973,6 +971,18 @@ func TestGetLoadedIdsDispatcherProfiles(t *testing.T) {
 	}
 }
 
+func TestGetLoadedIdsEmptyObject(t *testing.T) {
+	tpr := &TpReader{}
+	rcv, err := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
+	if err != nil {
+		t.Error(err)
+	}
+	expRcv := make([]string, 0)
+	if !reflect.DeepEqual(expRcv, rcv) {
+		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
+	}
+}
+
 func TestGetLoadedIdsDispatcherHosts(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
@@ -998,5 +1008,127 @@ func TestGetLoadedIdsError(t *testing.T) {
 	errExpect := "Unsupported load category"
 	if _, err := tpr.GetLoadedIds(""); err == nil || err.Error() != errExpect {
 		t.Errorf("\nExpected error %v but received \n%v", errExpect, err)
+	}
+}
+
+func TestReloadCache(t *testing.T) {
+	data := NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: map[string]interface{}{},
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"DestinationIDs":       {"DestinationsID"},
+			"TimingIDs":            {"TimingsID"},
+			"ResourceProfileIDs":   {"cgrates.org:resourceProfilesID"},
+			"StatsQueueProfileIDs": {"cgrates.org:statProfilesID"},
+			"ThresholdProfileIDs":  {"cgrates.org:thresholdProfilesID"},
+			"FilterIDs":            {"cgrates.org:filtersID"},
+			"RouteProfileIDs":      {"cgrates.org:routeProfilesID"},
+			"AttributeProfileIDs":  {"cgrates.org:attributeProfilesID"},
+			"ChargerProfileIDs":    {"cgrates.org:chargerProfilesID"},
+			"DispatcherProfileIDs": {"cgrates.org:dispatcherProfilesID"},
+			"DispatcherHostIDs":    {"cgrates.org:dispatcherHostsID"},
+			"ResourceIDs":          {"cgrates.org:resourcesID"},
+			"StatsQueueIDs":        {"cgrates.org:statQueuesID"},
+			"ThresholdIDs":         {"cgrates.org:thresholdsID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	cnMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	tpr := &TpReader{
+		// actions: map[string][]*Action{
+		// 	"ActionsID": {},
+		// },
+		// actionPlans: map[string]*ActionPlan{
+		// 	"ActionPlansID": {},
+		// },
+		// actionsTriggers: map[string]ActionTriggers{
+		// 	"ActionTriggersID": {},
+		// },
+		destinations: map[string]*Destination{
+			"DestinationsID": {},
+		},
+		timings: map[string]*utils.TPTiming{
+			"TimingsID": {},
+		},
+		// ratingPlans: map[string]*RatingPlan{
+		// 	"RatingPlansID": {},
+		// },
+		// ratingProfiles: map[string]*RatingProfile{
+		// 	"RatingProfilesID": {},
+		// },
+		// sharedGroups: map[string]*SharedGroup{
+		// 	"SharedGroupsID": {},
+		// },
+		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
+			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
+		},
+		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
+			{Tenant: "cgrates.org", ID: "statProfilesID"}: {},
+		},
+		thProfiles: map[utils.TenantID]*utils.TPThresholdProfile{
+			{Tenant: "cgrates.org", ID: "thresholdProfilesID"}: {},
+		},
+		filters: map[utils.TenantID]*utils.TPFilterProfile{
+			{Tenant: "cgrates.org", ID: "filtersID"}: {},
+		},
+		routeProfiles: map[utils.TenantID]*utils.TPRouteProfile{
+			{Tenant: "cgrates.org", ID: "routeProfilesID"}: {},
+		},
+		attributeProfiles: map[utils.TenantID]*utils.TPAttributeProfile{
+			{Tenant: "cgrates.org", ID: "attributeProfilesID"}: {},
+		},
+		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
+			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
+		},
+		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
+			{Tenant: "cgrates.org", ID: "dispatcherProfilesID"}: {},
+		},
+		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
+			{Tenant: "cgrates.org", ID: "dispatcherHostsID"}: {},
+		},
+		resources: []*utils.TenantID{
+			{
+				Tenant: "cgrates.org",
+				ID:     "resourcesID",
+			},
+		},
+		statQueues: []*utils.TenantID{
+			{
+				Tenant: "cgrates.org",
+				ID:     "statQueuesID",
+			},
+		},
+		thresholds: []*utils.TenantID{
+			{
+				Tenant: "cgrates.org",
+				ID:     "thresholdsID",
+			},
+		},
+		acntActionPlans: map[string][]string{
+			"AccountActionPlansID": {},
+		},
+		dm: NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
+	}
+	tpr.cacheConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	if err := tpr.ReloadCache(context.Background(), utils.MetaReload, false, make(map[string]interface{})); err != nil {
+		t.Error(err)
 	}
 }
