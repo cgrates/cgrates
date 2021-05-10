@@ -137,6 +137,21 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 	return
 }
 
+// callCacheForIndexes will only call CacheClear because don't have access at ItemID
+func (admS *AdminSv1) callCacheForIndexes(ctx *context.Context, cacheopt string, tnt, cacheID string,
+	opts map[string]interface{}) (err error) {
+	if utils.FirstNonEmpty(cacheopt, admS.cfg.GeneralCfg().DefaultCaching) == utils.MetaClear {
+		var reply string
+		return admS.connMgr.Call(ctx, admS.cfg.AdminSCfg().CachesConns,
+			utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+				Tenant:   tnt,
+				CacheIDs: []string{cacheID},
+				APIOpts:  opts,
+			}, &reply)
+	}
+	return
+}
+
 /*
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
 func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {

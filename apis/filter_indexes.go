@@ -17,6 +17,7 @@ package apis
 
 import (
 	"strings"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ type AttrRemFilterIndexes struct {
 	Tenant   string
 	Context  string
 	ItemType string
+	APIOpts  map[string]interface{}
 }
 
 func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilterIndexes, reply *string) (err error) {
@@ -74,6 +76,15 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 	}
 	if err = adms.dm.RemoveIndexes(ctx, arg.ItemType, tntCtx, utils.EmptyString); err != nil {
 		return
+	}
+	//generate a loadID for CacheFilterIndexes and store it in database
+	if err := adms.dm.SetLoadIDs(ctx,
+		map[string]int64{arg.ItemType: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if err := adms.callCacheForIndexes(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant,
+		arg.ItemType, arg.APIOpts); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return

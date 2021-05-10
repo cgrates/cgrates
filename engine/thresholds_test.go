@@ -342,6 +342,8 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 			},
 		},
 	}
+	dmTH.SetFilter(context.TODO(), fltrTh2, true)
+	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
 			t.Errorf("Error: %+v", err)

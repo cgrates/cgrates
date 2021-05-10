@@ -578,7 +578,9 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
 		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes},
+			ItemType: utils.MetaAttributes, APIOpts: map[string]interface{}{
+				utils.CacheOpt: utils.MetaClear,
+			}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

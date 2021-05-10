@@ -154,6 +154,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "stringFilter",
 		Rules:  stringFilter}
+	dmMatch.SetFilter(context.TODO(), attribStringF, true)
 
 	x, err = NewFilterRule(utils.MetaPrefix, "~*req.CallCost.Field", []string{"profile"})
 	if err != nil {
@@ -164,6 +165,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
+	dmMatch.SetFilter(context.TODO(), attribPrefF, true)
 
 	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~*req.Weight", []string{"200.00"})
 	if err != nil {
@@ -173,8 +175,9 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	attribDefaultF := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "defaultFilter",
-		Rules:  defaultFilter}
-
+		Rules:  defaultFilter,
+	}
+	dmMatch.SetFilter(context.TODO(), attribDefaultF, true)
 
 	tnt := config.CgrConfig().GeneralCfg().DefaultTenant
 	if err = addItemToFilterIndex(context.TODO(), dmMatch, utils.CacheAttributeFilterIndexes,
