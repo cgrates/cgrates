@@ -461,16 +461,16 @@ const CGRATES_CFG_JSON = `
 
 
 				// Elasticsearch options
-				// "index": "",									// ElsIndex               	
-				// "if_primary_term": 0,						// ElsIfPrimaryTerm
- 				// "if_seq_no": 0,								// ElsIfSeqNo
-				// "op_type": "",								// ElsOpType
-				// "pipeline": "",								// ElsPipeline
-				// "routing": "",								// ElsRouting
-				// "timeout": "",								// ElsTimeout
-				// "version": 0,								// ElsVersionLow
-				// "version_type": "",							// ElsVersionType
-				// "wait_for_active_shards": "",				// ElsWaitForActiveShards
+				// "elsIndex": "",								// ElsIndex               	
+				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
+ 				// "elsIfSeqNo": 0,								// ElsIfSeqNo
+				// "elsOpType": "",								// ElsOpType
+				// "elsPipeline": "",							// ElsPipeline
+				// "elsRouting": "",							// ElsRouting
+				// "elsTimeout": "",							// ElsTimeout
+				// "elsVersion": 0,								// ElsVersionLow
+				// "elsVersionType": "",						// ElsVersionType
+				// "elsWaitForActiveShards": "",				// ElsWaitForActiveShards
 				
 				
 				// SQL
@@ -499,7 +499,7 @@ const CGRATES_CFG_JSON = `
 				// "awsKey": "",								// AWSKey        
 				// "awsSecret": "",								// AWSSecret
 				// "awsToken": "",								// AWSToken      
-				// "awsFolderPath": "",							// AWSFolderPath 
+				// "s3FolderPath": "",							// AWSFolderPath 
 
 			},													// extra options for exporter
 			"tenant": "",										// tenant used in filterS.Pass
