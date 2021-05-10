@@ -397,7 +397,7 @@
 				"dbName": "exportedDatabase", // if dbName is not present "cgrates" will be used as default
 				"sqlTableName": "expTable", // tableName is mandatory in opts for sql exporter
 				"sslMode": "disable",
-				"maxIdleConns": "10",
+				"sqlMaxIdleConns": "10",
 				"maxOpenConns": "100",
 				"maxConnLifetime": "0",
 			},
@@ -418,7 +418,7 @@
 				"sqlDBName": "exportedDatabase",
 				"sqlTableName": "expTable",
 				"sslMode": "disable",
-				"maxIdleConns": "10",
+				"sqlMaxIdleConns": "10",
 				"maxOpenConns": "100",
 				"maxConnLifetime": "0",
 			},
