@@ -1971,6 +1971,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case utils.TimingsPrefix:
+		keys := make([]string, len(tpr.timings))
+		i := 0
+		for k := range tpr.timings {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	case utils.ResourceProfilesPrefix:
 		keys := make([]string, len(tpr.resProfiles))
 		i := 0
@@ -2395,6 +2403,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	// take IDs for each type
 	dstIds, _ := tpr.GetLoadedIds(utils.DestinationPrefix)
 	revDstIDs, _ := tpr.GetLoadedIds(utils.ReverseDestinationPrefix)
+	tmgIds, _ := tpr.GetLoadedIds(utils.TimingsPrefix)
 	rplIds, _ := tpr.GetLoadedIds(utils.RatingPlanPrefix)
 	rpfIds, _ := tpr.GetLoadedIds(utils.RatingProfilePrefix)
 	actIds, _ := tpr.GetLoadedIds(utils.ActionPrefix)
@@ -2419,6 +2428,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	cacheArgs := map[string][]string{
 		utils.DestinationIDs:        dstIds,
 		utils.ReverseDestinationIDs: revDstIDs,
+		utils.TimingIDs:             tmgIds,
 		utils.RatingPlanIDs:         rplIds,
 		utils.RatingProfileIDs:      rpfIds,
 		utils.ActionIDs:             actIds,
