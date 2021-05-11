@@ -19,6 +19,7 @@ package utils
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -97,5 +98,95 @@ func TestNewSTIRError(t *testing.T) {
 	expected := `*stir_authenticate: wrong header`
 	if rcv := NewSTIRError("wrong header"); rcv.Error() != expected {
 		t.Errorf("Expecting: %q, received: %q", expected, rcv.Error())
+	}
+}
+
+func TestNewCGRError(t *testing.T) {
+	context := "*sessions"
+	apiErr := "API Error"
+	shortErr := "Short Error"
+	longErr := "Long Error"
+	exp := &CGRError{
+		context:      context,
+		apiError:     apiErr,
+		shortError:   shortErr,
+		longError:    longErr,
+		errorMessage: "Short Error",
+	}
+	rcv := NewCGRError(context, apiErr, shortErr, longErr)
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestGetContext(t *testing.T) {
+	err := &CGRError{
+		context: "*sessions",
+	}
+	exp := "*sessions"
+	if rcv := err.Context(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestGetError(t *testing.T) {
+	err := &CGRError{
+		errorMessage: "ERROR MESSAGE IN errorMessage field",
+	}
+	exp := "ERROR MESSAGE IN errorMessage field"
+	if rcv := err.Error(); !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestActivateAPIError(t *testing.T) {
+	err := &CGRError{
+		apiError:     "API Error",
+		errorMessage: "ERROR MESSAGE IN errorMessage field",
+	}
+	exp := "API Error"
+	err.ActivateAPIError()
+	if !reflect.DeepEqual(err.errorMessage, exp) {
+		t.Errorf("Expected %v \n but received %v\n", exp, err.errorMessage)
+	}
+}
+
+func TestActivateShortError(t *testing.T) {
+	err := &CGRError{
+		shortError:   "Short Error",
+		errorMessage: "ERROR MESSAGE IN errorMessage field",
+	}
+	exp := "Short Error"
+	err.ActivateShortError()
+	if !reflect.DeepEqual(err.errorMessage, exp) {
+		t.Errorf("Expected %v \n but received %v\n", exp, err.errorMessage)
+	}
+}
+
+func TestActivateLongError(t *testing.T) {
+	err := &CGRError{
+		longError:    "Long Error",
+		errorMessage: "ERROR MESSAGE IN errorMessage field",
+	}
+	exp := "Long Error"
+	err.ActivateLongError()
+	if !reflect.DeepEqual(err.errorMessage, exp) {
+		t.Errorf("Expected %v \n but received %v\n", exp, err.errorMessage)
+	}
+}
+
+func TestNewErrServerError(t *testing.T) {
+	err := ErrNotFound
+	exp := "SERVER_ERROR: NOT_FOUND"
+	if rcv := NewErrServerError(err); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestNewErrNotConnected(t *testing.T) {
+	serv := "localhost:8080"
+	exp := "NOT_CONNECTED: localhost:8080"
+	if rcv := NewErrNotConnected(serv); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
 	}
 }

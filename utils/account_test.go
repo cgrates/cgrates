@@ -778,7 +778,7 @@ func TestAsExtAccount(t *testing.T) {
 				RateProfileIDs: []string{"RT1"},
 			},
 		},
-		ThresholdIDs: []string{},
+		ThresholdIDs: []string{"THRESHOLD1", "THRESHOLD2"},
 	}
 
 	expAcc := &ExtAccount{
@@ -831,7 +831,7 @@ func TestAsExtAccount(t *testing.T) {
 				RateProfileIDs: []string{"RT1"},
 			},
 		},
-		ThresholdIDs: []string{},
+		ThresholdIDs: []string{"THRESHOLD1", "THRESHOLD2"},
 	}
 
 	if rcv, err := acc.AsExtAccount(); err != nil {

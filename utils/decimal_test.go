@@ -35,6 +35,25 @@ func TestNewDecimalDivide(t *testing.T) {
 	}
 }
 
+func TestDivideBigNil(t *testing.T) {
+	var x, y, expected *decimal.Big
+	x = nil
+	y = nil
+	expected = nil
+	received := DivideBig(x, y)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+
+	x = new(decimal.Big).SetUint64(2)
+	y = nil
+	expected = nil
+	received = DivideBig(x, y)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+}
+
 func TestNewDecimalMultiply(t *testing.T) {
 	x := new(decimal.Big).SetUint64(10)
 	y := new(decimal.Big).SetUint64(5)
@@ -45,11 +64,60 @@ func TestNewDecimalMultiply(t *testing.T) {
 	}
 }
 
+func TestMultiplyBigNil(t *testing.T) {
+	var x, y, expected *decimal.Big
+	x = nil
+	y = nil
+	expected = nil
+	received := MultiplyBig(x, y)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+
+	x = new(decimal.Big).SetUint64(2)
+	y = nil
+	expected = nil
+	received = MultiplyBig(x, y)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+}
+
 func TestNewDecimalAdd(t *testing.T) {
 	x := new(decimal.Big).SetUint64(10)
 	y := new(decimal.Big).SetUint64(5)
 	expected, _ := new(decimal.Big).SetUint64(15).Float64()
 	received, _ := SumBig(x, y).Float64()
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+}
+
+func TestSumBigNil(t *testing.T) {
+	var x, y, expected *decimal.Big
+	x = nil
+	y = new(decimal.Big).SetUint64(2)
+	expected = new(decimal.Big).SetUint64(2)
+	received := SumBig(x, y)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+
+	x = new(decimal.Big).SetUint64(3)
+	y = nil
+	expected = new(decimal.Big).SetUint64(3)
+	received = SumBig(x, y)
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
+	}
+}
+
+func TestSubstractBigNil(t *testing.T) {
+	var x, y, expected *decimal.Big
+	x = new(decimal.Big).SetUint64(10)
+	y = nil
+	expected = new(decimal.Big).SetUint64(10)
+	received := SubstractBig(x, y)
 	if !reflect.DeepEqual(expected, received) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, received)
 	}
@@ -171,5 +239,39 @@ func TestDecimalNewDecimalFromStringErr(t *testing.T) {
 
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err)
+	}
+}
+
+func TestDivideBigWithReminder(t *testing.T) {
+	x := new(decimal.Big).SetUint64(10)
+	y := new(decimal.Big).SetUint64(5)
+	qExpected := new(decimal.Big).SetUint64(2)
+	rExpected := new(decimal.Big).SetUint64(0)
+	qReceived, rReceived := DivideBigWithReminder(x, y)
+	if !reflect.DeepEqual(qExpected, qReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", qExpected, qReceived)
+	} else if !reflect.DeepEqual(rExpected, rReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", rExpected, rReceived)
+	}
+
+	x = nil
+	qReceived, rReceived = DivideBigWithReminder(x, y)
+	qExpected = nil
+	rExpected = nil
+	if !reflect.DeepEqual(qExpected, qReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", qExpected, qReceived)
+	} else if !reflect.DeepEqual(rExpected, rReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", rExpected, rReceived)
+	}
+
+	x = new(decimal.Big).SetUint64(10)
+	y = nil
+	qReceived, rReceived = DivideBigWithReminder(x, y)
+	qExpected = nil
+	rExpected = nil
+	if !reflect.DeepEqual(qExpected, qReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", qExpected, qReceived)
+	} else if !reflect.DeepEqual(rExpected, rReceived) {
+		t.Errorf("Expected divident <+%v> but received <+%v>", rExpected, rReceived)
 	}
 }
