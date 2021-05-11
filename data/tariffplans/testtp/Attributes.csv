@@ -1,3 +1,3 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
-cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial1,*req.Field1,*constant,Sub1,false,20
-cgrates.org,ALS1,,,,*string:~*req.Field1:Initial2,*req.Field2,*constant,Sub2,,
+#Tenant,ID,Contexts,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ALS1,con1,FLTR_1,20,*string:~*req.Field1:Initial1,*req.Field1,*constant,Sub1,false
+cgrates.org,ALS1,,,,*string:~*req.Field1:Initial2,*req.Field2,*constant,Sub2,

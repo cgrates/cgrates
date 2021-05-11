@@ -1,4 +1,4 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
-cgrates.org,ATTR_1,*sessions;*cdrs,*string:~*req.Account:1007,2014-01-14T00:00:00Z,,*req.Account,*constant,1001,false,10
-cgrates.org,ATTR_1,,,,,*req.Subject,*constant,1001,,
-cgrates.org,ATTR_PASS,*sessions,*string:~*req.Account:1001,,,*req.PasswordFromAttributes,*constant,CGRateSPassword1,false,10
+#Tenant,ID,Contexts,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ATTR_1,*sessions;*cdrs,*string:~*req.Account:1007,10,,*req.Account,*constant,1001,false
+cgrates.org,ATTR_1,,,,,*req.Subject,*constant,1001,
+cgrates.org,ATTR_PASS,*sessions,*string:~*req.Account:1001,10,,*req.PasswordFromAttributes,*constant,CGRateSPassword1,false
