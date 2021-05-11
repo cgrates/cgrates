@@ -36,11 +36,10 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	dm := NewDataManager(db, nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "ATTR_CHANGE_TENANT_FROM_USER",
-		Contexts:           []string{utils.MetaAny},
-		FilterIDs:          []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
-		ActivationInterval: nil,
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
 		Attributes: []*Attribute{
 			{
 				FilterIDs: nil,
@@ -70,10 +69,9 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	}
 
 	attr2 := &AttributeProfile{
-		Tenant:             "adrian.itsyscom.com.co.uk",
-		ID:                 "ATTR_MATCH_TENANT",
-		Contexts:           []string{utils.MetaAny},
-		ActivationInterval: nil,
+		Tenant:   "adrian.itsyscom.com.co.uk",
+		ID:       "ATTR_MATCH_TENANT",
+		Contexts: []string{utils.MetaAny},
 		Attributes: []*Attribute{
 			{
 				FilterIDs: nil,

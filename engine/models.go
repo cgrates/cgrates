@@ -257,13 +257,12 @@ type AttributeMdl struct {
 	ID                 string  `index:"1" re:""`
 	Contexts           string  `index:"2" re:""`
 	FilterIDs          string  `index:"3" re:""`
-	ActivationInterval string  `index:"4" re:""`
+	Weight             float64 `index:"4" re:"\d+\.?\d*"`
 	AttributeFilterIDs string  `index:"5" re:""`
 	Path               string  `index:"6" re:""`
 	Type               string  `index:"7" re:""`
 	Value              string  `index:"8" re:""`
 	Blocker            bool    `index:"9" re:""`
-	Weight             float64 `index:"10" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }
 

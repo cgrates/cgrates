@@ -37,14 +37,13 @@ type Attribute struct {
 
 // AttributeProfile the profile definition for the attributes
 type AttributeProfile struct {
-	Tenant             string
-	ID                 string
-	Contexts           []string // bind this AttributeProfile to multiple contexts
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	Attributes         []*Attribute
-	Blocker            bool // blocker flag to stop processing on multiple runs
-	Weight             float64
+	Tenant     string
+	ID         string
+	Contexts   []string // bind this AttributeProfile to multiple contexts
+	FilterIDs  []string
+	Attributes []*Attribute
+	Blocker    bool // blocker flag to stop processing on multiple runs
+	Weight     float64
 }
 
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -107,14 +106,13 @@ type AttributeWithAPIOpts struct {
 
 func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 	ext = &APIAttributeProfile{
-		Tenant:             attr.Tenant,
-		ID:                 attr.ID,
-		Contexts:           attr.Contexts,
-		FilterIDs:          attr.FilterIDs,
-		ActivationInterval: attr.ActivationInterval,
-		Attributes:         make([]*ExternalAttribute, len(attr.Attributes)),
-		Blocker:            attr.Blocker,
-		Weight:             attr.Weight,
+		Tenant:     attr.Tenant,
+		ID:         attr.ID,
+		Contexts:   attr.Contexts,
+		FilterIDs:  attr.FilterIDs,
+		Attributes: make([]*ExternalAttribute, len(attr.Attributes)),
+		Blocker:    attr.Blocker,
+		Weight:     attr.Weight,
 	}
 	for i, at := range attr.Attributes {
 		ext.Attributes[i] = &ExternalAttribute{
@@ -153,7 +151,6 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	attr.ID = ext.ID
 	attr.Contexts = ext.Contexts
 	attr.FilterIDs = ext.FilterIDs
-	attr.ActivationInterval = ext.ActivationInterval
 	attr.Blocker = ext.Blocker
 	attr.Weight = ext.Weight
 	return

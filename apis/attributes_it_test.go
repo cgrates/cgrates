@@ -452,10 +452,8 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 	expAttrFromEv := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
-		FilterIDs: []string{"*string:~*req.Account:dan"},
+		FilterIDs: []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
 		Contexts:  []string{utils.MetaAny},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -493,10 +491,8 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 	expAttrFromEv := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
-		FilterIDs: []string{"*string:~*req.Account:dan"},
+		FilterIDs: []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
 		Contexts:  []string{utils.MetaAny},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -548,10 +544,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:~*req.Account:1007"},
+		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
 		Contexts:  []string{utils.MetaCDRs, utils.MetaSessionS},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,

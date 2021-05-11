@@ -1376,10 +1376,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1418,11 +1415,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-15T14:36:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1463,10 +1456,7 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1513,7 +1503,6 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			AttributeFilterIDs: "filter_id1;filter_id2",
 			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
 			Weight:             20,
 		},
 	}
@@ -1548,15 +1537,14 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 	}
 	expected := AttributeMdls{
 		&AttributeMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "ALS1",
-			Contexts:           "con1",
-			FilterIDs:          "FLTR_ACNT_dan",
-			Path:               utils.MetaReq + utils.NestingSep + "FL1",
-			Value:              "Al1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "ALS1",
+			Contexts:  "con1",
+			FilterIDs: "FLTR_ACNT_dan",
+			Path:      utils.MetaReq + utils.NestingSep + "FL1",
+			Value:     "Al1",
+			Weight:    20,
 		},
 		&AttributeMdl{
 			Tpid:   "TP1",
@@ -1585,15 +1573,14 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 func TestModelAsTPAttribute2(t *testing.T) {
 	models := AttributeMdls{
 		&AttributeMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "ALS1",
-			Contexts:           "con1",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			Path:               utils.MetaReq + utils.NestingSep + "FL1",
-			Value:              "Al1",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			Weight:             20,
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "ALS1",
+			Contexts:  "con1",
+			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE",
+			Path:      utils.MetaReq + utils.NestingSep + "FL1",
+			Value:     "Al1",
+			Weight:    20,
 		},
 	}
 	expected := &utils.TPAttributeProfile{
@@ -1644,15 +1631,14 @@ func TestModelAsTPAttribute2(t *testing.T) {
 func TestModelAsTPAttribute(t *testing.T) {
 	models := AttributeMdls{
 		&AttributeMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "ALS1",
-			Contexts:           "con1",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			Path:               utils.MetaReq + utils.NestingSep + "FL1",
-			Value:              "Al1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "ALS1",
+			Contexts:  "con1",
+			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE",
+			Path:      utils.MetaReq + utils.NestingSep + "FL1",
+			Value:     "Al1",
+			Weight:    20,
 		},
 	}
 	expected := &utils.TPAttributeProfile{
