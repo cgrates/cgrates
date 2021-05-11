@@ -136,6 +136,71 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 	return
 }
 
+// callCacheForIndexes will only call CacheClear because don't have access at ItemID
+func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheID string,
+	itemIDs []string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{} = utils.AttrReloadCacheWithAPIOpts{
+		Tenant: tnt,
+		ArgsCache: map[string][]string{
+			utils.CacheInstanceToArg[cacheID]: itemIDs,
+		},
+		APIOpts: opts,
+	}
+	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		args = utils.AttrCacheIDsWithAPIOpts{
+			Tenant:   tnt,
+			CacheIDs: []string{cacheID},
+			APIOpts:  opts,
+		}
+	}
+	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		method, args, &reply)
+}
+
+func (apierSv1 *APIerSv1) callCacheForComputeIndexes(cacheopt, tnt string,
+	cacheItems map[string][]string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{} = utils.AttrReloadCacheWithAPIOpts{
+		Tenant:    tnt,
+		ArgsCache: cacheItems,
+		APIOpts:   opts,
+	}
+	switch utils.FirstNonEmpty(cacheopt, apierSv1.Config.GeneralCfg().DefaultCaching) {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+	case utils.MetaClear:
+		method = utils.CacheSv1Clear
+		cacheIDs := make([]string, 0, len(cacheItems))
+		for idx := range cacheItems {
+			cacheIDs = append(cacheIDs, utils.ArgCacheToInstance[idx])
+		}
+		args = utils.AttrCacheIDsWithAPIOpts{
+			Tenant:   tnt,
+			CacheIDs: cacheIDs,
+			APIOpts:  opts,
+		}
+	}
+	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		method, args, &reply)
+}
+
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
 func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]interface{}) (err error) {
 	if len(itemIDs) == 0 {
