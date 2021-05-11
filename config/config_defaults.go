@@ -464,8 +464,8 @@ const CGRATES_CFG_JSON = `
 				// AMQP
 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
 				// "amqpRoutingKey": "",						// RoutingKey
-				// "sqlExchange": "",							// Exchange
-				// "sqlExchangeType": "",						// ExchangeType
+				// "amqpExchange": "",							// Exchange
+				// "amqpExchangeType": "",						// ExchangeType
 				
 
 				// SQS and S3
