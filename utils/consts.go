@@ -2543,8 +2543,8 @@ const (
 	// General constants for posters
 	DefaultQueueID      = "cgrates_cdrs"
 	DefaultExchangeType = "direct"
-	Exchange            = "sqlExchange"
-	ExchangeType        = "sqlExchangeType"
+	Exchange            = "amqpExchange"
+	ExchangeType        = "amqpExchangeType"
 	RoutingKey          = "amqpRoutingKey"
 
 	// for ers:
@@ -2567,6 +2567,9 @@ const (
 
 	S3Bucket   = "s3BucketID"
 	SQSQueueID = "SQSQueueID"
+
+	//CSV
+	FieldSepOpt = "FieldSeparator"
 )
 
 // Analyzers constants

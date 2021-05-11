@@ -77,8 +77,8 @@
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
-				"sqlExchange": "exchangename",
-				"sqlExchangeType": "fanout",
+				"amqpExchange": "exchangename",
+				"amqpExchangeType": "fanout",
 				"amqpRoutingKey": "cgr_cdrs",
 			},
 			"tenant": "cgrates.org",

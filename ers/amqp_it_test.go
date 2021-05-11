@@ -46,8 +46,8 @@ func TestAMQPER(t *testing.T) {
 			"opts": {
 				"amqpQueueID": "cdrs3",
 				"consumerTag": "test-key",
-				"sqlExchange": "test-exchange",
-				"sqlExchangeType": "direct",
+				"amqpExchange": "test-exchange",
+				"amqpExchangeType": "direct",
 				"amqpRoutingKey": "test-key",
 			},
 			"processed_path": "",								// move processed data here

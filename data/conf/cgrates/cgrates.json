@@ -356,8 +356,8 @@
 
 // 				// AMQP
 // 				// "consumerTag": "cgrates",					// the ID of the consumer
-// 				// "sqlExchange": "",
-// 				// "sqlExchangeType": "",
+// 				// "amqpExchange": "",
+// 				// "amqpExchangeType": "",
 // 				// "amqpRoutingKey": "",
 
 // 				// "exchangeProcessed": "",									
