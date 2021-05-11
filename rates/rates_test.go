@@ -175,8 +175,8 @@ func TestRateProfileCostForEvent(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						IncrementStart:    utils.NewDecimal(0, 0),
-						Rate:              rPrf.Rates["RATE1"],
 						IntervalRateIndex: 0,
+						RateID:            "RATE1",
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),
 					},
@@ -184,8 +184,29 @@ func TestRateProfileCostForEvent(t *testing.T) {
 				CompressFactor: 1,
 			},
 		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
+					},
+				},
+			},
+		},
 	}
-	expectedRPCost.RateSIntervals[0].Cost()
+	if _, err := expectedRPCost.RateSIntervals[0].Cost(rPrf.Rates); err != nil {
+		t.Error(err)
+	}
 
 	if rcv, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
@@ -194,8 +215,11 @@ func TestRateProfileCostForEvent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001"}}}, rateS.cfg.RateSCfg().Verbosity); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, expectedRPCost) {
-		t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedRPCost), utils.ToJSON(rcv))
+	} else {
+		rcv.RateSIntervals[0].Cost(rPrf.Rates)
+		if !reflect.DeepEqual(rcv.RateSIntervals[0].Increments, expectedRPCost.RateSIntervals[0].Increments) {
+			t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedRPCost), utils.ToJSON(rcv))
+		}
 	}
 
 	expRpCostAfterV1 := expectedRPCost
