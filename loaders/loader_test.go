@@ -27,8 +27,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -5146,5 +5148,493 @@ func TestLoaderServiceEnabled(t *testing.T) {
 	ldrs := &LoaderService{}
 	if rcv := ldrs.Enabled(); rcv {
 		t.Errorf("Expected false, received %+v", rcv)
+	}
+}
+
+type ccMock struct {
+	calls map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
+}
+
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+	if call, has := ccM.calls[serviceMethod]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(ctx, args, reply)
+	}
+}
+
+func TestStoreLoadedDataAttributes(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"AttributeProfileIDs": {"cgrates.org:attributesID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Attributes": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "attributesID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaAttributes, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataResources(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"ResourceIDs": {
+				"cgrates.org:resourcesID",
+			},
+			"ResourceProfileIDs": {
+				"cgrates.org:resourcesID",
+			},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Resources": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "resourcesID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaResources, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataFilters(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"FilterIDs": {"cgrates.org:filtersID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Filters": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "filtersID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaFilters, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataStats(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"StatsQueueIDs": {
+				"cgrates.org:statsID",
+			},
+			"StatsQueueProfileIDs": {
+				"cgrates.org:statsID",
+			},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"StatsQueue": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "statsID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaStats, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataThresholds(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"ThresholdIDs": {
+				"cgrates.org:thresholdsID",
+			},
+			"ThresholdProfileIDs": {
+				"cgrates.org:thresholdsID",
+			},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Thresholds": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "thresholdsID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaThresholds, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataRoutes(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"RouteProfileIDs": {"cgrates.org:routesID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Routes": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "routesID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaRoutes, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataChargers(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"ChargerProfileIDs": {"cgrates.org:chargersID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Chargers": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "chargersID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaChargers, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataDispatchers(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"DispatcherProfileIDs": {"cgrates.org:dispatchersID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"Dispatchers": {
+			{
+				"Tenant": "cgrates.org",
+				"ID":     "dispatchersID",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaDispatchers, lds, utils.MetaReload); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
+	engine.Cache.Clear(nil)
+	data := engine.NewInternalDB(nil, nil, false)
+	cfg := config.NewDefaultCGRConfig()
+	argExpect := utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: nil,
+		Tenant:  "",
+		ArgsCache: map[string][]string{
+			"DispatcherHostIDs": {"cgrates.org:dispatcherHostsID"},
+		},
+	}
+	cM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				if !reflect.DeepEqual(args, argExpect) {
+					t.Errorf("Expected %v \nbut received %v", utils.ToJSON(argExpect), utils.ToJSON(args))
+				}
+				return nil
+			},
+			utils.CacheSv1Clear: func(ctx *context.Context, args interface{}, reply interface{}) error {
+				return nil
+			},
+		},
+	}
+
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cM
+	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
+	// ldr := &Loader{
+
+	// }
+	cacheConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	loaderCfg := config.CgrConfig().LoaderCfg()
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	ldr := NewLoader(dm, loaderCfg[0], "", fltrS, connMgr, cacheConns)
+	lds := map[string][]LoaderData{
+		"DispatcherHosts": {
+			{
+				"Tenant":  "cgrates.org",
+				"ID":      "dispatcherHostsID",
+				"Address": "192.168.100.1",
+			},
+		},
+	}
+	if err := ldr.storeLoadedData(utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
+		t.Error(err)
 	}
 }
