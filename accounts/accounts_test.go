@@ -618,15 +618,6 @@ func TestV1MaxAbstracts(t *testing.T) {
 			"GENUUID_RATING": {
 				Increments: []*utils.ExtRateSIncrement{
 					{
-						Rate: &utils.ExtRate{
-							ID: "*costIncrement",
-							IntervalRates: []*utils.ExtIntervalRate{
-								{
-									FixedFee:     utils.Float64Pointer(0),
-									RecurrentFee: utils.Float64Pointer(0),
-								},
-							},
-						},
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
@@ -1683,14 +1674,6 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"GENUUID_RATING1": {
 				Increments: []*utils.ExtRateSIncrement{
 					{
-						Rate: &utils.ExtRate{
-							ID: "*costIncrement",
-							IntervalRates: []*utils.ExtIntervalRate{
-								{
-									RecurrentFee: utils.Float64Pointer(0),
-								},
-							},
-						},
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
@@ -1700,15 +1683,6 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"GENUUID_RATING2": {
 				Increments: []*utils.ExtRateSIncrement{
 					{
-						Rate: &utils.ExtRate{
-							ID: "*costIncrement",
-							IntervalRates: []*utils.ExtIntervalRate{
-								{
-									FixedFee:     utils.Float64Pointer(0.4),
-									RecurrentFee: utils.Float64Pointer(0.2),
-								},
-							},
-						},
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
@@ -1718,15 +1692,6 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			"GENUUID_RATING3": {
 				Increments: []*utils.ExtRateSIncrement{
 					{
-						Rate: &utils.ExtRate{
-							ID: "*costIncrement",
-							IntervalRates: []*utils.ExtIntervalRate{
-								{
-									FixedFee:     utils.Float64Pointer(0.4),
-									RecurrentFee: utils.Float64Pointer(0.2),
-								},
-							},
-						},
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 					},
