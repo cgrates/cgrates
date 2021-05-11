@@ -228,8 +228,8 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			if rt.IntervalRates[j].FixedFee != nil && rt.IntervalRates[j].FixedFee.Cmp(decimal.New(0, 0)) != 0 { // Add FixedFee
 				rIcmts = append(rIcmts, &utils.RateSIncrement{
 					IncrementStart:    &utils.Decimal{iRtUsageSIdx},
-					Rate:              rt.Rate,
 					IntervalRateIndex: j,
+					RateID:            rt.ID,
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(utils.InvalidUsage, 0),
 				})
@@ -258,8 +258,8 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			}
 			rIcmts = append(rIcmts, &utils.RateSIncrement{
 				IncrementStart:    &utils.Decimal{iRtUsageSIdx},
-				Rate:              rt.Rate,
 				IntervalRateIndex: j,
+				RateID:            rt.ID,
 				CompressFactor:    cmpFactorInt,
 				Usage:             &utils.Decimal{iRtUsage},
 			})
@@ -279,7 +279,6 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 		if iRtUsageSIdx.Cmp(totalUsage) >= 0 { // charged enough for the usage
 			break
 		}
-
 	}
 	return
 }
