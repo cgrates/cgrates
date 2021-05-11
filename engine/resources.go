@@ -289,7 +289,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		for _, r := range rs {
 			r.removeExpiredUnits()
 			if _, hasID := r.Usages[ru.ID]; hasID && !dryRun { // update
-				r.clearUsage(ru.ID)
+				r.clearUsage(ru.ID) // clearUsage returns error only when ru.ID does not exist in the Usages map
 			}
 			if r.rPrf == nil {
 				err = fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
