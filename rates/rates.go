@@ -195,12 +195,33 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	if ivalStart, err = args.IntervalStart(); err != nil {
 		return
 	}
+	rpCost.Rates = make(map[string]*utils.Rate)
+	for _, val := range ordRts {
+		//rpCost.Rates[utils.UUIDSha1Prefix()] = val.Rate
+		rpCost.Rates[val.Rate.ID] = val.Rate
+	}
 	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage); err != nil {
 		return nil, err
 	}
+	/*
+		for key, rt := range rpCost.Rates {
+			for _, intvl := range rpCost.RateSIntervals {
+				for _, incr := range intvl.Increments {
+					if incr.RateID == rt.ID {
+						incr.RateID = key
+					}
+				}
+			}
+		}
+
+	*/
 	// in case we have error it is returned in the function from above
 	// this came to light in coverage tests
-	rpCost.Cost, _ = utils.CostForIntervals(rpCost.RateSIntervals).Float64()
+	rpCst, err := utils.CostForIntervals(rpCost.RateSIntervals, rpCost.Rates)
+	if err != nil {
+		return nil, err
+	}
+	rpCost.Cost, _ = rpCst.Float64()
 	return
 }
 
