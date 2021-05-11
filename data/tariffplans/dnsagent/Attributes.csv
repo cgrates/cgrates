@@ -1,3 +1,3 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
-cgrates.org,ATTR_NAPTR_ADDR,*any,*string:~*req.E164Address:4986517174964,,,*req.NAPTRAddress,*constant,sip:\1@172.16.1.1.,false,20
+#Tenant,ID,Contexts,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ATTR_NAPTR_ADDR,*any,*string:~*req.E164Address:4986517174964,20,,*req.NAPTRAddress,*constant,sip:\1@172.16.1.1.,false
 
