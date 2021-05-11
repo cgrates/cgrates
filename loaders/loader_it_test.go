@@ -194,9 +194,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1", "con2", "con3"},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},

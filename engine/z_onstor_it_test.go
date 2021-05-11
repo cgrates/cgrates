@@ -1001,11 +1001,8 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Contexts: []string{"con1"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Contexts:  []string{"con1"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
@@ -1081,11 +1078,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Contexts: []string{"con1"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Contexts:  []string{"con1"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",

@@ -519,11 +519,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
-		FilterIDs: []string{"AttrFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Contexts: []string{"con1", "con2"},
+		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Contexts:  []string{"con1", "con2"},
 		Attributes: []*Attribute{
 			{
 				Path:  "FN1",
@@ -558,11 +555,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	attrProfile = &AttributeProfile{ // recreate the profile because if we test on internal
 		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
 		ID:        "AttrPrf",
-		FilterIDs: []string{"AttrFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Contexts: []string{"con3"},
+		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Contexts:  []string{"con3"},
 		Attributes: []*Attribute{
 			{
 				Path:  "FN1",
@@ -684,11 +678,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
-		FilterIDs: []string{"AttrFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Contexts: []string{"con1", "con2"},
+		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Contexts:  []string{"con1", "con2"},
 		Attributes: []*Attribute{
 			{
 				Path:  "FN1",
@@ -723,11 +714,8 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	attrProfile = &AttributeProfile{ // recreate the profile because if we test on internal
 		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
 		ID:        "AttrPrf",
-		FilterIDs: []string{"AttrFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Contexts: []string{"con3"},
+		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Contexts:  []string{"con3"},
 		Attributes: []*Attribute{
 			{
 				Path:  "FN1",

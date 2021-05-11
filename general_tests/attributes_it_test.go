@@ -173,11 +173,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddAccountInfo"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddAccountInfo", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "Balance",
@@ -255,11 +251,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT2",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "FullAccount",
@@ -385,11 +377,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddStatEvent"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddStatEvent", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "AcdMetric",
@@ -468,11 +456,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS2",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddFullStats"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddFullStats", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "AllMetrics",
@@ -614,11 +598,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddResourceUsages"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddResourceUsages", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "ResourceTotalUsages",
@@ -697,11 +677,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE2",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddFullResource"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddFullResource", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "FullResource",
@@ -788,11 +764,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER2",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
@@ -872,11 +844,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER_COMPOSED",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "DestinationCarrier",
@@ -974,11 +942,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER",
 			Contexts:  []string{utils.MetaAny},
-			FilterIDs: []string{"*string:~*req.EventName:AddDestinationDetails"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.EventName:AddDestinationDetails", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
 					Path: utils.MetaReq + utils.NestingSep + "DestinationDetails",

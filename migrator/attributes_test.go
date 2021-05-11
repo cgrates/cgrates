@@ -233,15 +233,12 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	expTimeStr := cloneExpTime.Format("2006-01-02T15:04:05Z")
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     cloneExpTime,
-		},
+		FilterIDs: []string{"filter1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;" + expTimeStr},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -428,11 +425,7 @@ func TestAsAttributeProfileV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"filter1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-04-18T14:26:00Z"},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},

@@ -1342,16 +1342,6 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
 		}
-		if len(tp.ActivationInterval) != 0 {
-			th.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-				th.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[key.TenantID()]; !has {
 				filterMap[key.TenantID()] = make(utils.StringSet)
@@ -1401,14 +1391,6 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls AttributeMdls) {
 		}
 		if i == 0 {
 			mdl.Blocker = th.Blocker
-			if th.ActivationInterval != nil {
-				if th.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-				}
-				if th.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.InfieldSep + th.ActivationInterval.ExpiryTime
-				}
-			}
 			for i, val := range th.Contexts {
 				if i != 0 {
 					mdl.Contexts += utils.InfieldSep
@@ -1466,11 +1448,6 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			Value:     sbstPrsr,
 		}
 	}
-	if tpAttr.ActivationInterval != nil {
-		if attrPrf.ActivationInterval, err = tpAttr.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	return attrPrf, nil
 }
 
@@ -1497,14 +1474,6 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 			Path:      attr.Path,
 			Type:      attr.Type,
 			Value:     attr.Value.GetRule(utils.InfieldSep),
-		}
-	}
-	if attrPrf.ActivationInterval != nil {
-		if !attrPrf.ActivationInterval.ActivationTime.IsZero() {
-			tpAttr.ActivationInterval.ActivationTime = attrPrf.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !attrPrf.ActivationInterval.ExpiryTime.IsZero() {
-			tpAttr.ActivationInterval.ExpiryTime = attrPrf.ActivationInterval.ExpiryTime.Format(time.RFC3339)
 		}
 	}
 	return

@@ -102,10 +102,6 @@ func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, t
 			!utils.IsSliceMember(aPrfl.Contexts, contextVal) {
 			continue
 		}
-		if aPrfl.ActivationInterval != nil && actTime != nil &&
-			!aPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
-			continue
-		}
 		if pass, err := alS.filterS.Pass(apiCtx, tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
