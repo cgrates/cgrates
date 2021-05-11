@@ -935,20 +935,25 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 }
 
 type ArgsComputeFilterIndexIDs struct {
-	Tenant        string
-	Context       string
-	AttributeIDs  []string
-	ResourceIDs   []string
-	StatIDs       []string
-	RouteIDs      []string
-	ThresholdIDs  []string
-	ChargerIDs    []string
-	DispatcherIDs []string
+	Tenant           string
+	Context          string
+	APIOpts          map[string]interface{}
+	AttributeIDs     []string
+	ResourceIDs      []string
+	StatIDs          []string
+	RouteIDs         []string
+	ThresholdIDs     []string
+	ChargerIDs       []string
+	DispatcherIDs    []string
+	RateProfileIDs   []string
+	AccountIDs       []string
+	ActionProfileIDs []string
 }
 
 type ArgsComputeFilterIndexes struct {
 	Tenant      string
 	Context     string
+	APIOpts     map[string]interface{}
 	AttributeS  bool
 	ResourceS   bool
 	StatS       bool

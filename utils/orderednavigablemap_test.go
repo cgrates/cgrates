@@ -901,8 +901,6 @@ func TestOrderedNavigableMapString(t *testing.T) {
 		},
 	}
 	onmExpect := `{"Map":{"test1":{"Value":{"Data":"data!"}}}}`
-	// fmt.Println(onm.nm)
-	// fmt.Println(onm.String())
 	if onm.String() != onmExpect {
 		t.Errorf("Expected %s but received %s", onmExpect, onm.String())
 	}
