@@ -639,27 +639,6 @@ func TestEventChargesEquals(t *testing.T) {
 			"GENUUID_RATING1": {
 				Increments: []*RateSIncrement{
 					{
-						Rate: &Rate{
-							ID:              "*costIncrement",
-							FilterIDs:       []string{"*string:~*req.Account:1003"},
-							ActivationTimes: "* * * * *",
-							Blocker:         true,
-							IntervalRates: []*IntervalRate{
-								{
-									IntervalStart: NewDecimal(0, 0),
-									Increment:     NewDecimal(int64(time.Second), 0),
-									FixedFee:      NewDecimal(0, 0),
-									RecurrentFee:  NewDecimal(11, 1),
-								},
-								{
-									IntervalStart: NewDecimal(int64(time.Minute), 0),
-									Increment:     NewDecimal(int64(2*time.Second), 0),
-									FixedFee:      NewDecimal(1, 0),
-									RecurrentFee:  NewDecimal(5, 1),
-									Unit:          NewDecimal(8, 1),
-								},
-							},
-						},
 						Usage:             NewDecimal(int64(time.Minute), 0),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -671,26 +650,7 @@ func TestEventChargesEquals(t *testing.T) {
 			"GENUUID_RATING2": {
 				Increments: []*RateSIncrement{
 					{
-						IncrementStart: NewDecimal(4, 2),
-						Rate: &Rate{
-							ID:        "*costIncrement",
-							FilterIDs: []string{},
-							Weights: []*DynamicWeight{
-								{
-									FilterIDs: []string{"*string:~*req.Account:1002"},
-									Weight:    20,
-								},
-								{
-									Weight: 15,
-								},
-							},
-							IntervalRates: []*IntervalRate{
-								{
-									FixedFee:     NewDecimal(5, 1),
-									RecurrentFee: NewDecimal(2, 1),
-								},
-							},
-						},
+						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -852,27 +812,6 @@ func TestEventChargesEquals(t *testing.T) {
 			"GENUUID_RATING1": {
 				Increments: []*RateSIncrement{
 					{
-						Rate: &Rate{
-							ID:              "*costIncrement",
-							FilterIDs:       []string{"*string:~*req.Account:1003"},
-							ActivationTimes: "* * * * *",
-							Blocker:         true,
-							IntervalRates: []*IntervalRate{
-								{
-									IntervalStart: NewDecimal(0, 0),
-									Increment:     NewDecimal(int64(time.Second), 0),
-									FixedFee:      NewDecimal(0, 0),
-									RecurrentFee:  NewDecimal(11, 1),
-								},
-								{
-									IntervalStart: NewDecimal(int64(time.Minute), 0),
-									Increment:     NewDecimal(int64(2*time.Second), 0),
-									FixedFee:      NewDecimal(1, 0),
-									RecurrentFee:  NewDecimal(5, 1),
-									Unit:          NewDecimal(8, 1),
-								},
-							},
-						},
 						Usage:             NewDecimal(int64(time.Minute), 0),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -884,26 +823,7 @@ func TestEventChargesEquals(t *testing.T) {
 			"GENUUID_RATING2": {
 				Increments: []*RateSIncrement{
 					{
-						IncrementStart: NewDecimal(4, 2),
-						Rate: &Rate{
-							ID:        "*costIncrement",
-							FilterIDs: []string{},
-							Weights: []*DynamicWeight{
-								{
-									FilterIDs: []string{"*string:~*req.Account:1002"},
-									Weight:    20,
-								},
-								{
-									Weight: 15,
-								},
-							},
-							IntervalRates: []*IntervalRate{
-								{
-									FixedFee:     NewDecimal(5, 1),
-									RecurrentFee: NewDecimal(2, 1),
-								},
-							},
-						},
+						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -1071,27 +991,6 @@ func TestEqualsExtEventCharges(t *testing.T) {
 			"GENUUID_RATING1": {
 				Increments: []*RateSIncrement{
 					{
-						Rate: &Rate{
-							ID:              "*costIncrement",
-							FilterIDs:       []string{"*string:~*req.Account:1003"},
-							ActivationTimes: "* * * * *",
-							Blocker:         true,
-							IntervalRates: []*IntervalRate{
-								{
-									IntervalStart: NewDecimal(0, 0),
-									Increment:     NewDecimal(int64(time.Second), 0),
-									FixedFee:      NewDecimal(0, 0),
-									RecurrentFee:  NewDecimal(11, 1),
-								},
-								{
-									IntervalStart: NewDecimal(int64(time.Minute), 0),
-									Increment:     NewDecimal(int64(2*time.Second), 0),
-									FixedFee:      NewDecimal(1, 0),
-									RecurrentFee:  NewDecimal(5, 1),
-									Unit:          NewDecimal(8, 1),
-								},
-							},
-						},
 						Usage:             NewDecimal(int64(time.Minute), 0),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -1103,26 +1002,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 			"GENUUID_RATING2": {
 				Increments: []*RateSIncrement{
 					{
-						IncrementStart: NewDecimal(4, 2),
-						Rate: &Rate{
-							ID:        "*costIncrement",
-							FilterIDs: []string{},
-							Weights: []*DynamicWeight{
-								{
-									FilterIDs: []string{"*string:~*req.Account:1002"},
-									Weight:    20,
-								},
-								{
-									Weight: 15,
-								},
-							},
-							IntervalRates: []*IntervalRate{
-								{
-									FixedFee:     NewDecimal(5, 1),
-									RecurrentFee: NewDecimal(2, 1),
-								},
-							},
-						},
+						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -1285,27 +1165,6 @@ func TestEqualsExtEventCharges(t *testing.T) {
 			"GENUUID_RATING1": {
 				Increments: []*ExtRateSIncrement{
 					{
-						Rate: &ExtRate{
-							ID:              "*costIncrement",
-							FilterIDs:       []string{"*string:~*req.Account:1003"},
-							ActivationTimes: "* * * * *",
-							Blocker:         true,
-							IntervalRates: []*ExtIntervalRate{
-								{
-									IntervalStart: Float64Pointer(0),
-									Increment:     Float64Pointer(float64(time.Second)),
-									FixedFee:      Float64Pointer(0),
-									RecurrentFee:  Float64Pointer(1.1),
-								},
-								{
-									IntervalStart: Float64Pointer(float64(time.Minute)),
-									Increment:     Float64Pointer(float64(2 * time.Second)),
-									FixedFee:      Float64Pointer(1),
-									RecurrentFee:  Float64Pointer(0.5),
-									Unit:          Float64Pointer(0.8),
-								},
-							},
-						},
 						Usage:             Float64Pointer(float64(time.Minute)),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
@@ -1317,26 +1176,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 			"GENUUID_RATING2": {
 				Increments: []*ExtRateSIncrement{
 					{
-						IncrementStart: Float64Pointer(0.04),
-						Rate: &ExtRate{
-							ID:        "*costIncrement",
-							FilterIDs: []string{},
-							Weights: []*DynamicWeight{
-								{
-									FilterIDs: []string{"*string:~*req.Account:1002"},
-									Weight:    20,
-								},
-								{
-									Weight: 15,
-								},
-							},
-							IntervalRates: []*ExtIntervalRate{
-								{
-									FixedFee:     Float64Pointer(0.5),
-									RecurrentFee: Float64Pointer(0.2),
-								},
-							},
-						},
+						IncrementStart:    Float64Pointer(0.04),
 						Usage:             Float64Pointer(float64(30 * time.Second)),
 						IntervalRateIndex: 0,
 						CompressFactor:    1,

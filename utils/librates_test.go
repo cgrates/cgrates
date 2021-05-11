@@ -823,6 +823,11 @@ func TestCostForIntervals(t *testing.T) {
 		},
 	}
 	rt1.Compile()
+	rtsMap := map[string]*Rate{
+		"RATE0": rt0,
+		"RATE1": rt1,
+	}
+
 	rtIvls := []*RateSInterval{
 		{
 			IntervalStart: NewDecimal(0, 0),
@@ -830,15 +835,15 @@ func TestCostForIntervals(t *testing.T) {
 				{
 					IncrementStart:    NewDecimal(0, 0),
 					Usage:             NewDecimal(int64(time.Minute), 0),
-					Rate:              rt0,
 					IntervalRateIndex: 0,
+					RateID:            "RATE0",
 					CompressFactor:    1,
 				},
 				{
 					IncrementStart:    NewDecimal(int64(time.Minute), 0),
 					Usage:             NewDecimal(int64(30*time.Second), 0),
-					Rate:              rt0,
 					IntervalRateIndex: 1,
+					RateID:            "RATE0",
 					CompressFactor:    30,
 				},
 			},
@@ -850,15 +855,15 @@ func TestCostForIntervals(t *testing.T) {
 				{
 					IncrementStart:    NewDecimal(int64(90*time.Second), 0),
 					Usage:             NewDecimal(int64(30*time.Second), 0),
-					Rate:              rt1,
 					IntervalRateIndex: 0,
+					RateID:            "RATE1",
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    NewDecimal(int64(2*time.Minute), 0),
 					Usage:             NewDecimal(int64(10*time.Minute), 0),
-					Rate:              rt1,
 					IntervalRateIndex: 1,
+					RateID:            "RATE1",
 					CompressFactor:    10,
 				},
 			},
@@ -866,11 +871,16 @@ func TestCostForIntervals(t *testing.T) {
 		},
 	}
 	eDcml, _ := new(decimal.Big).SetFloat64(4.3).Float64()
-	if cost, _ := CostForIntervals(rtIvls).Float64(); cost != eDcml {
+	cost, err := CostForIntervals(rtIvls, rtsMap)
+	if err != nil {
+		t.Error(err)
+	}
+	if costFlt, _ := cost.Float64(); costFlt != eDcml {
 		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
 	}
 }
 
+/*
 func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 	minDecimal, err := NewDecimalFromUsage("1m")
 	if err != nil {
@@ -902,8 +912,8 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 	rt1 := &Rate{
 		ID: "RATE1",
 		IntervalRates: []*IntervalRate{
+			{},
 			{
-
 				IntervalStart: NewDecimal(0, 0),
 				FixedFee:      NewDecimal(2, 1),
 				RecurrentFee:  NewDecimal(12, 1),
@@ -919,28 +929,33 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 	rt1.Compile()
+	rtsMap := map[string]*Rate{
+		"RATE0": rt0,
+		"RATE1": rt1,
+	}
+
 	rtIvls := []*RateSInterval{
 		{
 			IntervalStart: NewDecimal(0, 0),
 			Increments: []*RateSIncrement{
 				{ // cost 0,4
 					IncrementStart:    NewDecimal(0, 0),
-					Rate:              rt0,
 					IntervalRateIndex: 0,
+					RateID:            "RATE0",
 					CompressFactor:    1,
 					Usage:             NewDecimal(-1, 0),
 				},
 				{ // cost 2,4
 					IncrementStart:    NewDecimal(0, 0),
-					Rate:              rt0,
 					IntervalRateIndex: 0,
+					RateID:            "RATE0",
 					CompressFactor:    1,
 					Usage:             NewDecimal(int64(time.Minute), 0),
 				},
 				{ // cost 1,2
 					IncrementStart:    NewDecimal(int64(time.Minute), 0),
-					Rate:              rt0,
 					IntervalRateIndex: 1,
+					RateID:            "RATE0",
 					CompressFactor:    30,
 					Usage:             NewDecimal(int64(30*time.Second), 0),
 				},
@@ -952,22 +967,22 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 			Increments: []*RateSIncrement{
 				{ // cost 0,2
 					IncrementStart:    NewDecimal(int64(90*time.Second), 0),
-					Rate:              rt1,
 					IntervalRateIndex: 0,
+					RateID:            "RATE1",
 					CompressFactor:    1,
 					Usage:             NewDecimal(-1, 0),
 				},
 				{ // cost 0,6
 					IncrementStart:    NewDecimal(int64(90*time.Second), 0),
-					Rate:              rt1,
 					IntervalRateIndex: 0,
+					RateID:            "RATE1",
 					CompressFactor:    30,
 					Usage:             NewDecimal(int64(30*time.Second), 0),
 				},
 				{ // cost 0,1
 					IncrementStart:    NewDecimal(int64(2*time.Minute), 0),
-					Rate:              rt1,
 					IntervalRateIndex: 1,
+					RateID:            "RATE1",
 					CompressFactor:    10,
 					Usage:             NewDecimal(int64(10*time.Second), 0),
 				},
@@ -976,10 +991,16 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 	eDcml, _ := new(decimal.Big).SetFloat64(4.9).Float64()
-	if cost, _ := CostForIntervals(rtIvls).Float64(); cost != eDcml {
+	cost, err := CostForIntervals(rtIvls, rtsMap)
+	if err != nil {
+		t.Error(err)
+	}
+	if costFlt, _ := cost.Float64(); costFlt != eDcml {
 		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
 	}
 }
+
+*/
 
 func TestRateProfileCostCorrectCost(t *testing.T) {
 	rPrfCost := &RateProfileCost{
@@ -1019,49 +1040,15 @@ func TestRateProfileCostCorrectCostMaxCost(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEquals(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-			{
-				IntervalStart: NewDecimal(int64(time.Minute), 0),
-				RecurrentFee:  NewDecimal(6, 3),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
-			},
-		},
-		uID: "testUID",
-	}
 	inCr1 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate1,
 		IntervalRateIndex: 0,
 		CompressFactor:    1,
 	}
 	inCr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate1,
 		IntervalRateIndex: 0,
 		CompressFactor:    1,
 	}
@@ -1072,57 +1059,15 @@ func TestRateSIncrementCompressEquals(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-		},
-		uID: "ID",
-	}
-	rate2 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-		},
-		uID: "ID2",
-	}
 	inCr1 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate1,
-		IntervalRateIndex: 0,
+		IntervalRateIndex: 1,
 		CompressFactor:    1,
 	}
 	inCr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate2,
 		IntervalRateIndex: 0,
 		CompressFactor:    1,
 	}
@@ -1131,39 +1076,17 @@ func TestRateSIncrementCompressEqualsCase1(t *testing.T) {
 		t.Errorf("\nExpecting: <false>,\n Received: <%+v>", result)
 	}
 }
+
 func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-		},
-	}
 	inCr1 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate1,
 		IntervalRateIndex: 0,
 		CompressFactor:    1,
 	}
 	inCr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate1,
 		IntervalRateIndex: 1,
 		CompressFactor:    1,
 	}
@@ -1174,38 +1097,15 @@ func TestRateSIncrementCompressEqualsCase2(t *testing.T) {
 }
 
 func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-		},
-	}
 	inCr1 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Second), 0),
-		Rate:              rate1,
 		IntervalRateIndex: 1,
 		CompressFactor:    1,
 	}
 	inCr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(0, 0),
 		Usage:             NewDecimal(int64(time.Minute), 0),
-		Rate:              rate1,
 		IntervalRateIndex: 1,
 		CompressFactor:    1,
 	}
@@ -1216,51 +1116,18 @@ func TestRateSIncrementCompressEqualsCase3(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-			{
-				IntervalStart: NewDecimal(int64(time.Minute), 0),
-				RecurrentFee:  NewDecimal(6, 3),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
-			},
-		},
-	}
 	rateSintrv1 := &RateSInterval{
 		IntervalStart: NewDecimal(0, 0),
 		Increments: []*RateSIncrement{
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Minute), 0),
-				Rate:              rate1,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
 			{
 				IncrementStart:    NewDecimal(int64(time.Minute), 0),
 				Usage:             NewDecimal(int64(time.Minute+10*time.Second), 0),
-				Rate:              rate1,
 				IntervalRateIndex: 1,
 				CompressFactor:    70,
 			},
@@ -1274,7 +1141,6 @@ func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Minute), 0),
-				Rate:              rate1,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
@@ -1288,74 +1154,18 @@ func TestRateSIntervalCompressEqualsCase1(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-			{
-				IntervalStart: NewDecimal(int64(time.Minute), 0),
-				RecurrentFee:  NewDecimal(6, 3),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
-			},
-		},
-	}
-	rate2 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-			{
-				IntervalStart: NewDecimal(int64(time.Minute), 0),
-				RecurrentFee:  NewDecimal(6, 3),
-				Unit:          minDecimal,
-				Increment:     secDecimal,
-			},
-		},
-	}
 	rateSintrv1 := &RateSInterval{
 		IntervalStart: NewDecimal(0, 0),
 		Increments: []*RateSIncrement{
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Minute), 0),
-				Rate:              rate1,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Second), 0),
-				Rate:              rate1,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
@@ -1369,14 +1179,12 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Minute), 0),
-				Rate:              rate2,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Minute), 0),
-				Rate:              rate2,
 				IntervalRateIndex: 2,
 				CompressFactor:    1,
 			},
@@ -1390,35 +1198,12 @@ func TestRateSIntervalCompressEqualsCase2(t *testing.T) {
 }
 
 func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-
-	rate1 := &Rate{
-		ID: "RATE1",
-		Weights: DynamicWeights{
-			{
-				Weight: 0,
-			},
-		},
-		ActivationTimes: "* * * * *",
-		IntervalRates: []*IntervalRate{
-			{
-				IntervalStart: NewDecimal(0, 0),
-				RecurrentFee:  NewDecimal(12, 2),
-				Unit:          minDecimal,
-				Increment:     minDecimal,
-			},
-		},
-	}
 	rateSintrv1 := &RateSInterval{
 		IntervalStart: NewDecimal(0, 0),
 		Increments: []*RateSIncrement{
 			{
 				IncrementStart:    NewDecimal(0, 0),
 				Usage:             NewDecimal(int64(time.Minute), 0),
-				Rate:              rate1,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			},
@@ -1431,7 +1216,6 @@ func TestRateSIntervalCompressEqualsCase3(t *testing.T) {
 		Increments: []*RateSIncrement{
 			{
 				IncrementStart:    NewDecimal(0, 0),
-				Rate:              rate1,
 				Usage:             NewDecimal(int64(time.Minute), 0),
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
@@ -1552,11 +1336,8 @@ func TestRatesIntervalEquals(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(int64(time.Second), 0),
 				IntervalRateIndex: 1,
-				Rate: &Rate{
-					uID: "newID",
-				},
-				CompressFactor: 2,
-				Usage:          NewDecimal(int64(5*time.Second), 0),
+				CompressFactor:    2,
+				Usage:             NewDecimal(int64(5*time.Second), 0),
 			},
 		},
 		CompressFactor: 2,
@@ -1567,11 +1348,8 @@ func TestRatesIntervalEquals(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(int64(time.Second), 0),
 				IntervalRateIndex: 1,
-				Rate: &Rate{
-					uID: "newID",
-				},
-				CompressFactor: 2,
-				Usage:          NewDecimal(int64(5*time.Second), 0),
+				CompressFactor:    2,
+				Usage:             NewDecimal(int64(5*time.Second), 0),
 			},
 		},
 		CompressFactor: 2,
@@ -1627,11 +1405,8 @@ func TestRatesIntervalEquals(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(int64(time.Second), 0),
 				IntervalRateIndex: 1,
-				Rate: &Rate{
-					uID: "newID",
-				},
-				CompressFactor: 2,
-				Usage:          NewDecimal(int64(5*time.Second), 0),
+				CompressFactor:    2,
+				Usage:             NewDecimal(int64(5*time.Second), 0),
 			},
 			{
 				IncrementStart: NewDecimal(int64(time.Second), 0),
@@ -1649,20 +1424,14 @@ func TestRatesIncrementEquals(t *testing.T) {
 	incr1 := &RateSIncrement{
 		IncrementStart:    NewDecimal(int64(time.Second), 0),
 		IntervalRateIndex: 1,
-		Rate: &Rate{
-			uID: "newID",
-		},
-		CompressFactor: 2,
-		Usage:          NewDecimal(int64(5*time.Second), 0),
+		CompressFactor:    2,
+		Usage:             NewDecimal(int64(5*time.Second), 0),
 	}
 	incr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(int64(time.Second), 0),
 		IntervalRateIndex: 1,
-		Rate: &Rate{
-			uID: "newID",
-		},
-		CompressFactor: 2,
-		Usage:          NewDecimal(int64(5*time.Second), 0),
+		CompressFactor:    2,
+		Usage:             NewDecimal(int64(5*time.Second), 0),
 	}
 
 	// equals is not looking for compress factor
@@ -1711,74 +1480,19 @@ func TestRatesIncrementEquals(t *testing.T) {
 }
 
 func TestAsExtRateSInterval(t *testing.T) {
-	minDecimal, err := NewDecimalFromUsage("1m")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
 	rI := &RateSInterval{
 		IntervalStart: NewDecimal(int64(time.Second), 0),
 		Increments: []*RateSIncrement{
 			{
-				IncrementStart: NewDecimal(int64(time.Nanosecond), 0),
-				Usage:          NewDecimal(int64(time.Minute), 0),
-				Rate: &Rate{
-					ID:        "RATE1",
-					FilterIDs: []string{"fltr1"},
-					Weights: DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					ActivationTimes: "* * * * *",
-					IntervalRates: []*IntervalRate{
-						{
-							IntervalStart: NewDecimal(0, 0),
-							RecurrentFee:  NewDecimal(12, 2),
-							FixedFee:      NewDecimal(4, 1),
-							Unit:          minDecimal,
-							Increment:     minDecimal,
-						},
-						{
-							IntervalStart: NewDecimal(int64(time.Minute), 0),
-							Unit:          minDecimal,
-							Increment:     secDecimal,
-						},
-					},
-				},
+				IncrementStart:    NewDecimal(int64(time.Nanosecond), 0),
+				Usage:             NewDecimal(int64(time.Minute), 0),
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 				cost:              NewDecimal(1000, 0).Big,
 			},
 			{
-				IncrementStart: NewDecimal(int64(time.Minute), 0),
-				Usage:          NewDecimal(int64(2*time.Minute), 0),
-				Rate: &Rate{
-					ID:        "RATE2",
-					FilterIDs: []string{},
-					Weights: DynamicWeights{
-						{
-							Weight: 0,
-						},
-					},
-					ActivationTimes: "* * * * 5",
-					IntervalRates: []*IntervalRate{
-						{
-							RecurrentFee: NewDecimal(12, 2),
-							FixedFee:     NewDecimal(4, 1),
-							Unit:         minDecimal,
-							Increment:    minDecimal,
-						},
-						{
-							IntervalStart: NewDecimal(int64(30*time.Second), 0),
-							Unit:          minDecimal,
-							Increment:     secDecimal,
-						},
-					},
-				},
+				IncrementStart:    NewDecimal(int64(time.Minute), 0),
+				Usage:             NewDecimal(int64(2*time.Minute), 0),
 				IntervalRateIndex: 2,
 				CompressFactor:    5,
 			},
@@ -1791,62 +1505,15 @@ func TestAsExtRateSInterval(t *testing.T) {
 		IntervalStart: Float64Pointer(float64(time.Second)),
 		Increments: []*ExtRateSIncrement{
 			{
-				IncrementStart: Float64Pointer(float64(time.Nanosecond)),
-				Usage:          Float64Pointer(float64(time.Minute)),
-				Rate: &ExtRate{
-					ID:        "RATE1",
-					FilterIDs: []string{"fltr1"},
-					Weights: DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					ActivationTimes: "* * * * *",
-					IntervalRates: []*ExtIntervalRate{
-						{
-							IntervalStart: Float64Pointer(0),
-							RecurrentFee:  Float64Pointer(0.12),
-							FixedFee:      Float64Pointer(0.4),
-							Unit:          Float64Pointer(float64(time.Minute)),
-							Increment:     Float64Pointer(float64(time.Minute)),
-						},
-						{
-							IntervalStart: Float64Pointer(float64(time.Minute)),
-							Unit:          Float64Pointer(float64(time.Minute)),
-							Increment:     Float64Pointer(float64(time.Second)),
-						},
-					},
-				},
+				IncrementStart:    Float64Pointer(float64(time.Nanosecond)),
+				Usage:             Float64Pointer(float64(time.Minute)),
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 				cost:              Float64Pointer(1000),
 			},
 			{
-				IncrementStart: Float64Pointer(float64(time.Minute)),
-				Usage:          Float64Pointer(float64(2 * time.Minute)),
-				Rate: &ExtRate{
-					ID:        "RATE2",
-					FilterIDs: []string{},
-					Weights: DynamicWeights{
-						{
-							Weight: 0,
-						},
-					},
-					ActivationTimes: "* * * * 5",
-					IntervalRates: []*ExtIntervalRate{
-						{
-							RecurrentFee: Float64Pointer(0.12),
-							FixedFee:     Float64Pointer(0.4),
-							Unit:         Float64Pointer(float64(time.Minute)),
-							Increment:    Float64Pointer(float64(time.Minute)),
-						},
-						{
-							IntervalStart: Float64Pointer(float64(30 * time.Second)),
-							Unit:          Float64Pointer(float64(time.Minute)),
-							Increment:     Float64Pointer(float64(time.Second)),
-						},
-					},
-				},
+				IncrementStart:    Float64Pointer(float64(time.Minute)),
+				Usage:             Float64Pointer(float64(2 * time.Minute)),
 				IntervalRateIndex: 2,
 				CompressFactor:    5,
 			},
@@ -1867,27 +1534,8 @@ func TestAsExtRateSIntervalErrorsCheck(t *testing.T) {
 		IntervalStart: NewDecimal(int64(math.Inf(1))-1, 0),
 		Increments: []*RateSIncrement{
 			{
-				IncrementStart: NewDecimal(int64(time.Nanosecond), 0),
-				Usage:          NewDecimal(int64(time.Minute), 0),
-				Rate: &Rate{
-					ID:        "RATE1",
-					FilterIDs: []string{"fltr1"},
-					Weights: DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					ActivationTimes: "* * * * *",
-					IntervalRates: []*IntervalRate{
-						{
-							IntervalStart: NewDecimal(0, 0),
-							RecurrentFee:  NewDecimal(12, 2),
-							FixedFee:      NewDecimal(4, 1),
-							//Unit:          minDecimal,
-							//Increment:     minDecimal,
-						},
-					},
-				},
+				IncrementStart:    NewDecimal(int64(time.Nanosecond), 0),
+				Usage:             NewDecimal(int64(time.Minute), 0),
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 				cost:              NewDecimal(1000, 0).Big,
@@ -1930,69 +1578,38 @@ func TestAsExtRateSIntervalErrorsCheck(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expErr, err)
 	}
 	rI.Increments[0].cost = NewDecimal(0, 0).Big
-
-	rI.Increments[0].Rate.IntervalRates[0].IntervalStart = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "cannot convert decimal IntervalStart to float64"
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].Rate.IntervalRates[0].IntervalStart = NewDecimal(0, 0)
-
-	rI.Increments[0].Rate.IntervalRates[0].FixedFee = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "cannot convert decimal FixedFee to float64"
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].Rate.IntervalRates[0].FixedFee = NewDecimal(0, 0)
-
-	rI.Increments[0].Rate.IntervalRates[0].RecurrentFee = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "cannot convert decimal RecurrentFee to float64"
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].Rate.IntervalRates[0].RecurrentFee = NewDecimal(0, 0)
-
-	rI.Increments[0].Rate.IntervalRates[0].Unit = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "cannot convert decimal Unit to float64"
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].Rate.IntervalRates[0].Unit = NewDecimal(0, 0)
-
-	rI.Increments[0].Rate.IntervalRates[0].Increment = NewDecimal(int64(math.Inf(1))-1, 0)
-	expErr = "cannot convert decimal Increment to float64"
-	if _, err := rI.AsExtRateSInterval(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+q, received %+q", expErr, err)
-	}
-	rI.Increments[0].Rate.IntervalRates[0].Increment = NewDecimal(0, 0)
 }
 
 func TestCostForIntervalsWithPartialIntervals(t *testing.T) {
+	rt0 := &Rate{
+		ID: "RT_2",
+		IntervalRates: []*IntervalRate{
+			{
+				IntervalStart: NewDecimal(0, 0),
+				RecurrentFee:  NewDecimal(2, 2),
+				Unit:          NewDecimal(int64(time.Second), 0),
+				Increment:     NewDecimal(int64(time.Second), 0),
+			},
+			{
+				IntervalStart: NewDecimal(int64(time.Minute), 0),
+				FixedFee:      NewDecimal(2, 2),
+				Unit:          NewDecimal(int64(time.Second), 0),
+				Increment:     NewDecimal(int64(time.Second), 0),
+			},
+		},
+	}
+	rtsMap := map[string]*Rate{
+		"RT_2": rt0,
+	}
 	rtIvls := []*RateSInterval{
 		{
 			IntervalStart:  NewDecimal(int64(2*time.Minute), 0),
 			CompressFactor: 1,
 			Increments: []*RateSIncrement{
 				{
-					IncrementStart: NewDecimal(int64(2*time.Minute), 0),
-					Rate: &Rate{
-						ID: "RT_2",
-						IntervalRates: []*IntervalRate{
-							{
-								IntervalStart: NewDecimal(0, 0),
-								RecurrentFee:  NewDecimal(2, 2),
-								Unit:          NewDecimal(int64(time.Second), 0),
-								Increment:     NewDecimal(int64(time.Second), 0),
-							},
-							{
-								IntervalStart: NewDecimal(int64(time.Minute), 0),
-								FixedFee:      NewDecimal(2, 2),
-								Unit:          NewDecimal(int64(time.Second), 0),
-								Increment:     NewDecimal(int64(time.Second), 0),
-							},
-						},
-					},
+					IncrementStart:    NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 1,
+					RateID:            "RT_2",
 					CompressFactor:    1,
 					Usage:             NewDecimal(-1, 0),
 				},
@@ -2000,7 +1617,9 @@ func TestCostForIntervalsWithPartialIntervals(t *testing.T) {
 		},
 	}
 
-	if cost := CostForIntervals(rtIvls); cost.Cmp(decimal.New(2, 2)) != 0 {
+	if cost, err := CostForIntervals(rtIvls, rtsMap); err != nil {
+		t.Error(err)
+	} else if cost.Cmp(decimal.New(2, 2)) != 0 {
 		t.Errorf("received cost: %s", cost)
 	}
 }
