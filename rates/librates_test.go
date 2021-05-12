@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rates
 
 import (
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -5060,5 +5061,101 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
 		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	}
+}
+
+func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
+	rt1 := &utils.Rate{
+		ID:              "RT_1",
+		ActivationTimes: "* * 1 * *",
+		IntervalRates: []*utils.IntervalRate{
+			{
+				IntervalStart: utils.NewDecimal(int64(48*time.Hour), 0),
+			},
+		},
+	}
+	err := rt1.Compile()
+	if err != nil {
+		t.Error(err)
+	}
+
+	wghts := []float64{0}
+	aRts := []*utils.Rate{rt1}
+	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
+	usage := utils.NewDecimalFromFloat64(math.Inf(1))
+	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:0 form:2}> increment to Int64"
+	_, err = orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4)
+	if err == nil || err.Error() != expected {
+		t.Error(err)
+	}
+}
+
+func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
+	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
+	if err != nil {
+		t.Error(err)
+	}
+	secDecimal, err := utils.NewDecimalFromUsage("1s")
+	if err != nil {
+		t.Error(err)
+	}
+	rt1 := &utils.Rate{
+		ID: "RATE1",
+		IntervalRates: []*utils.IntervalRate{
+			{
+				IntervalStart: utils.NewDecimal(0, 0),
+				RecurrentFee:  nil,
+				Unit:          tsecDecimal,
+				Increment:     secDecimal,
+			},
+		},
+	}
+	rt1.Compile()
+
+	ordRts := []*orderedRate{
+		{
+			utils.NewDecimal(0, 0).Big,
+			rt1,
+		},
+	}
+	rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big)
+	if err != nil {
+		t.Error(err)
+	}
+	if rcvOrdRts != nil {
+		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(nil), utils.ToJSON(rcvOrdRts))
+	}
+}
+
+func TestComputeRateSIntervalsRecurrentFeeCmpFactorIntInvalidError(t *testing.T) {
+	fminDecimal, err := utils.NewDecimalFromUsage("5m")
+	if err != nil {
+		t.Error(err)
+	}
+	rt1 := &utils.Rate{
+		ID: "RATE1",
+		IntervalRates: []*utils.IntervalRate{
+			{
+				IntervalStart: utils.NewDecimal(0, 0),
+				RecurrentFee:  utils.NewDecimal(2, 1),
+				Unit:          fminDecimal,
+				Increment:     utils.NewDecimal(1, 0),
+			},
+		},
+	}
+
+	ordRts := []*orderedRate{
+		{
+			utils.NewDecimal(0, 0).Big,
+			rt1,
+		},
+	}
+
+	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:0 form:2}> increment to Int64"
+	_, err = computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimalFromFloat64(math.Inf(1)).Big)
+	if err == nil || err.Error() != expected {
+		t.Error(err)
 	}
 }
