@@ -1557,7 +1557,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			Contexts:  "con1",
-			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z",
+			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
 			Weight:    20,
@@ -1568,7 +1568,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Attributes: []*utils.TPAttribute{
 			{
 				FilterIDs: []string{},

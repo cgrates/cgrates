@@ -2871,40 +2871,6 @@ true
 	}
 }
 
-func TestLoaderAttributesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoaderAttributesAsStructErrConversion",
-		bufLoaderData: map[string][]LoaderData{},
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaAttributes: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	attributeCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(attributeCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaAttributes: {
-			utils.AttributesCsv: &openedCSVFile{fileName: utils.AttributesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expectedErr := "Unsupported time format"
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
 func TestLoadResourcesAsStructErrType(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, true)
 	ldr := &Loader{

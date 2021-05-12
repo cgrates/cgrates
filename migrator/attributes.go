@@ -316,7 +316,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *v3AttributePr
 	for _, attr := range v2AttrPrf.Attributes {
 		filterIDs := make([]string, 0)
 		//append false translate to  if FieldName exist do stuff
-		if attr.Append == false {
+		if !attr.Append {
 			filterIDs = append(filterIDs, utils.MetaExists+utils.InInFieldSep+attr.FieldName+utils.InInFieldSep)
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
@@ -396,11 +396,12 @@ func (v3AttrPrf v3AttributeProfile) AsAttributeProfile() (attrPrf *v4AttributePr
 
 func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributeProfile, err error) {
 	attrPrf = &v6AttributeProfile{
-		Tenant:    v4AttrPrf.Tenant,
-		ID:        v4AttrPrf.ID,
-		Contexts:  v4AttrPrf.Contexts,
-		FilterIDs: v4AttrPrf.FilterIDs,
-		Weight:    v4AttrPrf.Weight,
+		Tenant:             v4AttrPrf.Tenant,
+		ID:                 v4AttrPrf.ID,
+		Contexts:           v4AttrPrf.Contexts,
+		FilterIDs:          v4AttrPrf.FilterIDs,
+		Weight:             v4AttrPrf.Weight,
+		ActivationInterval: v4AttrPrf.ActivationInterval,
 	}
 	for _, attr := range v4AttrPrf.Attributes { // ToDo:redo this
 		val := attr.Value.GetRule(utils.InfieldSep)
@@ -536,16 +537,17 @@ func (m *Migrator) migrateV6ToV7AttributeProfile(v5Attr *v6AttributeProfile) (_ 
 	}
 
 	if v5Attr.ActivationInterval != nil &&
-		(v5Attr.ActivationInterval.ActivationTime.IsZero() ||
-			v5Attr.ActivationInterval.ExpiryTime.IsZero()) {
+		(!v5Attr.ActivationInterval.ActivationTime.IsZero() ||
+			!v5Attr.ActivationInterval.ExpiryTime.IsZero()) {
 		fltr := "*ai:~*req.AnswerTime:"
-		if v5Attr.ActivationInterval.ActivationTime.IsZero() {
+		if !v5Attr.ActivationInterval.ActivationTime.IsZero() {
 			fltr += v5Attr.ActivationInterval.ActivationTime.Format(time.RFC3339)
 		}
-		fltr += ";"
-		if v5Attr.ActivationInterval.ExpiryTime.IsZero() {
+		fltr += "|"
+		if !v5Attr.ActivationInterval.ExpiryTime.IsZero() {
 			fltr += v5Attr.ActivationInterval.ExpiryTime.Format(time.RFC3339)
 		}
+		v7Attr.FilterIDs = append(v7Attr.FilterIDs, fltr)
 	}
 
 	return v7Attr, nil
