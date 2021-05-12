@@ -709,15 +709,14 @@ type TPAttribute struct {
 
 // TPAttributeProfile is used in APIs to manage remotely offline AttributeProfile
 type TPAttributeProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	Contexts           []string              // bind this TPAttribute to multiple context
-	Attributes         []*TPAttribute
-	Blocker            bool
-	Weight             float64
+	TPid       string
+	Tenant     string
+	ID         string
+	FilterIDs  []string
+	Contexts   []string // bind this TPAttribute to multiple context
+	Attributes []*TPAttribute
+	Blocker    bool
+	Weight     float64
 }
 
 // TPChargerProfile is used in APIs to manage remotely offline ChargerProfile

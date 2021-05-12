@@ -398,7 +398,7 @@ func (v1rs *redisMigrator) getV4AttributeProfile() (v3attrPrf *v4AttributeProfil
 	return v4attr, nil
 }
 
-func (v1rs *redisMigrator) getV5AttributeProfile() (v5attr *engine.AttributeProfile, err error) {
+func (v1rs *redisMigrator) getV5AttributeProfile() (v6attr *v6AttributeProfile, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 		if err != nil {
@@ -413,7 +413,7 @@ func (v1rs *redisMigrator) getV5AttributeProfile() (v5attr *engine.AttributeProf
 		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
 			return nil, err
 		}
-		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v5attr); err != nil {
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v6attr); err != nil {
 			return nil, err
 		}
 		*v1rs.qryIdx = *v1rs.qryIdx + 1

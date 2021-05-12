@@ -676,11 +676,8 @@ func TestGetLoadedIdsAttributeProfiles(t *testing.T) {
 				TPid:      testTPID,
 				Tenant:    "cgrates.org",
 				ID:        "ResGroup1",
-				FilterIDs: []string{"*string:~*req.Account:1001"},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				Contexts: []string{"sessions"},
+				FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+				Contexts:  []string{"sessions"},
 			},
 		},
 	}
