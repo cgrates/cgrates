@@ -259,3 +259,30 @@ func TestFlagsWithParamsClone(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ToJSON(fWp), ToJSON(cln))
 	}
 }
+
+func TestMapStringStringEqual(t *testing.T) {
+	v1 := map[string]string{
+		"testMap": "value1",
+	}
+
+	v2 := map[string]string{
+		"testMap": "value1",
+	}
+
+	//Matching maps
+	if rcv := MapStringStringEqual(v1, v2); !rcv {
+		t.Error("The maps should match")
+	}
+
+	//Different map values
+	v2["testMap"] = "value2"
+	if rcv := MapStringStringEqual(v1, v2); rcv {
+		t.Error("The maps should match")
+	}
+
+	//Different map length
+	v1["testMap2"] = "value1"
+	if rcv := MapStringStringEqual(v1, v2); rcv {
+		t.Error("The maps should match")
+	}
+}

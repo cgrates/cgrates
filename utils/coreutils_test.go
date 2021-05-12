@@ -1371,3 +1371,11 @@ func TestCoreUtilsGenerateDBItemOpts(t *testing.T) {
 		}
 	}
 }
+
+func TestSliceStringPointer(t *testing.T) {
+	sliceTest := []string{"ELEMENT_1", "ELEMENT_2"}
+	rcv := SliceStringPointer(sliceTest)
+	if fmt.Sprintf("%T", rcv) != "*[]string" {
+		t.Error("Could not convert to pointer slice")
+	}
+}

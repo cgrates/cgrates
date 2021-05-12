@@ -23,6 +23,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ericlagergren/decimal"
 )
 
 func TestGreaterThan(t *testing.T) {
@@ -1195,5 +1197,191 @@ func TestMultiplyInt64Error(t *testing.T) {
 	_, err := Multiply(int64(2), "cat")
 	if err == nil || err.Error() != "strconv.ParseInt: parsing \"cat\": invalid syntax" {
 		t.Errorf("Expected <strconv.ParseInt: parsing \"cat\": invalid syntax> ,received: <%+v>", err)
+	}
+}
+
+func TestIfaceAsBig(t *testing.T) {
+	timeDur := time.Duration(1)
+	rcv, _ := IfaceAsBig(timeDur)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(1)) {
+		t.Errorf("Expected %v but received %v", 1, rcv)
+	}
+
+	testInt := 2
+	rcv, _ = IfaceAsBig(testInt)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(2)) {
+		t.Errorf("Expected %v but received %v", 2, rcv)
+	}
+
+	testInt8 := int8(3)
+	rcv, _ = IfaceAsBig(testInt8)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(3)) {
+		t.Errorf("Expected %v but received %v", 3, rcv)
+	}
+
+	testInt16 := int16(4)
+	rcv, _ = IfaceAsBig(testInt16)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(4)) {
+		t.Errorf("Expected %v but received %v", 4, rcv)
+	}
+
+	testInt32 := int32(5)
+	rcv, _ = IfaceAsBig(testInt32)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(5)) {
+		t.Errorf("Expected %v but received %v", 5, rcv)
+	}
+
+	testInt64 := int64(6)
+	rcv, _ = IfaceAsBig(testInt64)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(6)) {
+		t.Errorf("Expected %v but received %v", 6, rcv)
+	}
+
+	uTestInt := uint(2)
+	rcv, _ = IfaceAsBig(uTestInt)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(2)) {
+		t.Errorf("Expected %v but received %v", 2, rcv)
+	}
+
+	uTestInt8 := uint8(3)
+	rcv, _ = IfaceAsBig(uTestInt8)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(3)) {
+		t.Errorf("Expected %v but received %v", 3, rcv)
+	}
+
+	uTestInt16 := uint16(4)
+	rcv, _ = IfaceAsBig(uTestInt16)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(4)) {
+		t.Errorf("Expected %v but received %v", 4, rcv)
+	}
+
+	uTestInt32 := uint32(5)
+	rcv, _ = IfaceAsBig(uTestInt32)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(5)) {
+		t.Errorf("Expected %v but received %v", 5, rcv)
+	}
+
+	uTestInt64 := uint64(6)
+	rcv, _ = IfaceAsBig(uTestInt64)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(6)) {
+		t.Errorf("Expected %v but received %v", 6, rcv)
+	}
+
+	testFloat64 := float64(12.2)
+	rcv, _ = IfaceAsBig(testFloat64)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetFloat64(12.2)) {
+		t.Errorf("Expected %v but received %v", 12.2, rcv)
+	}
+
+	testFloat32 := float32(12)
+	rcv, _ = IfaceAsBig(testFloat32)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetFloat64(float64(12))) {
+		t.Errorf("Expected %v but received %v", new(decimal.Big).SetFloat64(float64(12)), rcv)
+	}
+
+	timeSuffix := "not_valid_timems"
+	_, err := IfaceAsBig(timeSuffix)
+	errExpect := `time: invalid duration "not_valid_timems"`
+	if err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	num := "123"
+	rcv, err = IfaceAsBig(num)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(123)) {
+		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(123), rcv)
+	}
+
+	decBig := new(decimal.Big).SetUint64(21)
+	rcv, _ = IfaceAsBig(decBig)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(21)) {
+		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(21), rcv)
+	}
+
+	dec := NewDecimal(10, 0)
+	rcv, _ = IfaceAsBig(dec)
+	if !reflect.DeepEqual(rcv, new(decimal.Big).SetUint64(10)) {
+		t.Errorf("Expected %v but received %v", new(decimal.Big).SetUint64(10), rcv)
+	}
+}
+
+func TestReflectFieldMethodInterfaceStruct(t *testing.T) {
+	//Make obj a struct
+	type Obj struct {
+		Field1 string
+		Field2 string
+	}
+
+	obj := Obj{
+		Field1: "field1_string",
+	}
+
+	rcv, err := ReflectFieldMethodInterface(obj, "Field1")
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv != "field1_string" {
+		t.Errorf("Expected %v but received %v", "field_string1", rcv)
+	}
+}
+
+func TestReflectFieldMethodInterfaceMap(t *testing.T) {
+	//Make obj a map[string]string
+	type Obj map[string]string
+
+	obj := &Obj{
+		"MapField1": "map_field_1",
+	}
+
+	rcv, err := ReflectFieldMethodInterface(obj, "MapField1")
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv != "map_field_1" {
+		t.Errorf("Expected %v but received %v", "map_field_1", rcv)
+	}
+}
+
+func TestReflectFieldMethodInterfaceSlice(t *testing.T) {
+	obj := []string{"sliceField1"}
+	rcv, err := ReflectFieldMethodInterface(obj, "0")
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv != "sliceField1" {
+		t.Errorf("Expected %v but received %v", "sliceField1", rcv)
+	}
+
+	_, err = ReflectFieldMethodInterface(obj, "invalid_index")
+	if err == nil || err.Error() != `strconv.Atoi: parsing "invalid_index": invalid syntax` {
+		t.Errorf("Expected %v but received %v", `strconv.Atoi: parsing "invalid_index": invalid syntax`, err)
+	}
+
+	_, err = ReflectFieldMethodInterface(obj, "2")
+	if err == nil || err.Error() != "index out of range" {
+		t.Errorf("Expected %v but received %v", "index out of range", err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceDefault(t *testing.T) {
+	invalidKind := 2
+	_, err := ReflectFieldMethodInterface(invalidKind, "2")
+	if err == nil || err.Error() != "unsupported field kind: int" {
+		t.Errorf("Expected %v but received %v", "unsupported field kind: int", err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceInvalidField(t *testing.T) {
+	type Obj map[string][]string
+
+	obj := &Obj{
+		"MapField1": []string{""},
+	}
+	_, err := ReflectFieldMethodInterface(obj, "NotExistingField")
+	if err == nil || err != ErrNotFound {
+		t.Errorf("Expected %v but received %v", ErrNotFound, err)
 	}
 }
