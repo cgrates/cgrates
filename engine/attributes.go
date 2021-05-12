@@ -71,11 +71,14 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			alS.cgrcfg.AttributeSCfg().IndexedSelects,
 			alS.cgrcfg.AttributeSCfg().NestedFields,
 		)
-		if err != nil {
-			if err != utils.ErrNotFound {
-				return nil, err
-			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(evNm,
+		if err != nil &&
+			err != utils.ErrNotFound {
+			return nil, err
+		}
+		if err == utils.ErrNotFound ||
+			alS.cgrcfg.AttributeSCfg().AnyContext {
+			var aPrflAnyIDs utils.StringSet
+			if aPrflAnyIDs, err = MatchingItemIDsForEvent(evNm,
 				alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
@@ -84,6 +87,11 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 				alS.cgrcfg.AttributeSCfg().IndexedSelects,
 				alS.cgrcfg.AttributeSCfg().NestedFields); err != nil {
 				return nil, err
+			}
+			if aPrflIDs.Size() == 0 {
+				aPrflIDs = aPrflAnyIDs
+			} else {
+				aPrflIDs = utils.JoinStringSet(aPrflIDs, aPrflAnyIDs)
 			}
 		}
 		attrIDs = aPrflIDs.AsSlice()
