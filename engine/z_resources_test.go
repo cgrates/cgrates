@@ -926,9 +926,6 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	var reply *string
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
@@ -1119,9 +1116,6 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -1447,9 +1441,6 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -1652,9 +1643,6 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -1857,9 +1845,6 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -2062,9 +2047,6 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -2391,9 +2373,6 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -2616,9 +2595,6 @@ func TestResourceCaching(t *testing.T) {
 	defaultCfg.ResourceSCfg().StoreInterval = 1
 	defaultCfg.ResourceSCfg().StringIndexedFields = nil
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	fltrRes1 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
@@ -2767,9 +2743,6 @@ func TestResourceCaching(t *testing.T) {
 	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
 	resService := NewResourceService(dmRES, defaultCfg,
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 
 	resProf := &ResourceProfile{
 		Tenant:    "cgrates.org",
