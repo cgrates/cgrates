@@ -124,7 +124,7 @@ func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//add the resource only if it's not present
@@ -142,7 +142,7 @@ func (APIerSv1 *APIerSv1) SetResourceProfile(arg *ResourceWithCache, reply *stri
 			CacheID: utils.CacheResources,
 			ItemID:  arg.TenantID(),
 		}
-		if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -164,7 +164,7 @@ func (APIerSv1 *APIerSv1) RemoveResourceProfile(arg utils.TenantIDWithCache, rep
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := APIerSv1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
@@ -181,7 +181,7 @@ func (APIerSv1 *APIerSv1) RemoveResourceProfile(arg utils.TenantIDWithCache, rep
 		CacheID: utils.CacheResources,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

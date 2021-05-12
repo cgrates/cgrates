@@ -152,10 +152,10 @@ func testConfigSReloadConfigFromJSONSessionS(t *testing.T) {
 		"StoreSCosts":         false,
 		"AlterableFields":     map[string]interface{}{},
 		"DefaultUsage": map[string]interface{}{
-			utils.META_ANY: "3h0m0s",
-			utils.VOICE:    "3h0m0s",
-			utils.DATA:     "1048576",
-			utils.SMS:      "1",
+			utils.META_ANY: 10800000000000.,
+			utils.VOICE:    10800000000000.,
+			utils.DATA:     1048576.,
+			utils.SMS:      1.,
 		},
 	}
 	if *encoding == utils.MetaGOB {

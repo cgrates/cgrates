@@ -53,6 +53,7 @@ func (APIerSv2 *APIerSv2) SetAttributeProfile(arg *AttributeWithCache, reply *st
 		ItemID:  alsPrf.TenantID(),
 	}
 	if err := APIerSv2.APIerSv1.CallCache(
+		arg.Tenant,
 		v1.GetCacheOpt(arg.Cache),
 		args); err != nil {
 		return utils.APIErrorHandler(err)

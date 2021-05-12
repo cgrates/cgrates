@@ -96,7 +96,7 @@ func (APIerSv1 *APIerSv1) SetAttributeProfile(alsWrp *AttributeWithCache, reply 
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsWrp.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(alsWrp.Cache), args); err != nil {
+	if err := APIerSv1.CallCache(alsWrp.Tenant, GetCacheOpt(alsWrp.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -120,7 +120,7 @@ func (APIerSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, r
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  utils.ConcatenatedKey(arg.Tenant, arg.ID),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), args); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

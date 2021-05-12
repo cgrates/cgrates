@@ -81,7 +81,7 @@ func (APIerSv1 *APIerSv1) SetChargerProfile(arg *ChargerWithCache, reply *string
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -106,7 +106,7 @@ func (APIerSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithCache, rep
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

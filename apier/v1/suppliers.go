@@ -81,7 +81,7 @@ func (APIerSv1 *APIerSv1) SetSupplierProfile(args *SupplierWithCache, reply *str
 		CacheID: utils.CacheSupplierProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(args.Tenant, GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -105,7 +105,7 @@ func (APIerSv1 *APIerSv1) RemoveSupplierProfile(args *utils.TenantIDWithCache, r
 		CacheID: utils.CacheSupplierProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(args.Tenant, GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
