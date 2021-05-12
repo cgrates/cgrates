@@ -641,6 +641,7 @@ func TestEventChargesEquals(t *testing.T) {
 					{
 						Usage:             NewDecimal(int64(time.Minute), 0),
 						IntervalRateIndex: 0,
+						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
 				},
@@ -653,11 +654,19 @@ func TestEventChargesEquals(t *testing.T) {
 						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
 						IntervalRateIndex: 0,
+						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
 				},
 				IntervalStart:  NewDecimal(0, 0),
 				CompressFactor: 2,
+			},
+		},
+		IntervalRates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
 			},
 		},
 		Accounts: map[string]*Account{
@@ -814,6 +823,7 @@ func TestEventChargesEquals(t *testing.T) {
 					{
 						Usage:             NewDecimal(int64(time.Minute), 0),
 						IntervalRateIndex: 0,
+						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
 				},
@@ -826,11 +836,19 @@ func TestEventChargesEquals(t *testing.T) {
 						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
 						IntervalRateIndex: 0,
+						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
 				},
 				IntervalStart:  NewDecimal(0, 0),
 				CompressFactor: 2,
+			},
+		},
+		IntervalRates: map[string]*IntervalRate{
+			"RATE1": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
 			},
 		},
 		Accounts: map[string]*Account{
@@ -934,7 +952,7 @@ func TestEventChargesEquals(t *testing.T) {
 		},
 	}
 	if ok := eEvChgs.Equals(expectedEqual); !ok {
-		t.Errorf("Expected %+v, received %+v", eEvChgs, expectedEqual)
+		t.Errorf("Expected %+v, received %+v", ToJSON(eEvChgs), ToJSON(expectedEqual))
 	}
 
 }
@@ -993,6 +1011,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 					{
 						Usage:             NewDecimal(int64(time.Minute), 0),
 						IntervalRateIndex: 0,
+						RateID:            "RATE_2",
 						CompressFactor:    1,
 					},
 				},
@@ -1005,11 +1024,24 @@ func TestEqualsExtEventCharges(t *testing.T) {
 						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
 						IntervalRateIndex: 0,
+						RateID:            "RATE_1",
 						CompressFactor:    1,
 					},
 				},
 				IntervalStart:  NewDecimal(0, 0),
 				CompressFactor: 2,
+			},
+		},
+		IntervalRates: map[string]*IntervalRate{
+			"RATE_1": {
+				IntervalStart: NewDecimal(0, 0),
+				FixedFee:      NewDecimal(4, 1),
+				RecurrentFee:  NewDecimal(24, 1),
+			},
+			"RATE_2": {
+				IntervalStart: NewDecimal(12, 1),
+				FixedFee:      NewDecimal(1, 0),
+				RecurrentFee:  NewDecimal(5, 2),
 			},
 		},
 		Accounts: map[string]*Account{
@@ -1167,6 +1199,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 					{
 						Usage:             Float64Pointer(float64(time.Minute)),
 						IntervalRateIndex: 0,
+						RateID:            "RATE_2",
 						CompressFactor:    1,
 					},
 				},
@@ -1179,11 +1212,24 @@ func TestEqualsExtEventCharges(t *testing.T) {
 						IncrementStart:    Float64Pointer(0.04),
 						Usage:             Float64Pointer(float64(30 * time.Second)),
 						IntervalRateIndex: 0,
+						RateID:            "RATE_1",
 						CompressFactor:    1,
 					},
 				},
 				IntervalStart:  Float64Pointer(0),
 				CompressFactor: 2,
+			},
+		},
+		IntervalRates: map[string]*ExtIntervalRate{
+			"RATE_1": {
+				IntervalStart: Float64Pointer(0),
+				FixedFee:      Float64Pointer(0.4),
+				RecurrentFee:  Float64Pointer(2.4),
+			},
+			"RATE_2": {
+				IntervalStart: Float64Pointer(1.2),
+				FixedFee:      Float64Pointer(1),
+				RecurrentFee:  Float64Pointer(0.05),
 			},
 		},
 		Accounts: map[string]*ExtAccount{

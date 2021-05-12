@@ -1939,11 +1939,62 @@ func TestComputeRateSIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rtIvls, err := computeRateSIntervals(rts,
-		utils.NewDecimal(0, 0).Big, utils.NewDecimal(int64(130*time.Second), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"RATE0": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(5, 3),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(10*time.Second), 0),
+		},
+		"RATE01": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(1, 0),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(time.Minute), 0),
+		},
+		"RATE1": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(10*time.Second), 0),
+		},
+		"RATE11": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(10*time.Second), 0),
+		},
+	}
+
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(130*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
-		t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+	} else {
+		//UUIDSHA1 change
+		eRtIvls[0].Increments[0].RateID = rtIvls[0].Increments[0].RateID
+		eRtIvls[0].Increments[1].RateID = rtIvls[0].Increments[1].RateID
+		eRtIvls[1].Increments[0].RateID = rtIvls[1].Increments[0].RateID
+		eRtIvls[1].Increments[1].RateID = rtIvls[1].Increments[1].RateID
+		if !reflect.DeepEqual(eRtIvls, rtIvls) {
+			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+		}
+		expCstRts = map[string]*utils.IntervalRate{}
+		for key, val := range cstRts {
+			expCstRts[key] = val
+		}
+		/*
+			expCstRts = cstRts
+			for idx, val := range rtIvls {
+				if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
+					t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+				}
+			}
+		*/
+		if !reflect.DeepEqual(cstRts, expCstRts) {
+			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+		}
+
 	}
 
 	rts = []*orderedRate{
@@ -1992,14 +2043,28 @@ func TestComputeRateSIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rtIvls, err := computeRateSIntervals(rts,
-		utils.NewDecimal(int64(time.Minute), 0).Big, utils.NewDecimal(int64(70*time.Second), 0).Big); err != nil {
+	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(int64(time.Minute), 0).Big,
+		utils.NewDecimal(int64(70*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRtIvls, rtIvls) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+	} else {
+		//UUIDSHA1 change
+		eRtIvls[0].Increments[0].RateID = rtIvls[0].Increments[0].RateID
+		eRtIvls[1].Increments[0].RateID = rtIvls[1].Increments[0].RateID
+		eRtIvls[1].Increments[1].RateID = rtIvls[1].Increments[1].RateID
+		if !reflect.DeepEqual(eRtIvls, rtIvls) {
+			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+		}
+		expCstRts = map[string]*utils.IntervalRate{}
+		for key, val := range cstRts {
+			expCstRts[key] = val
+		}
+		if !reflect.DeepEqual(cstRts, expCstRts) {
+			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+		}
 	}
 }
 
+/*
 func TestComputeRateSIntervals1(t *testing.T) {
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
@@ -5064,6 +5129,7 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 	}
 }
 
+*/
 func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	rt1 := &utils.Rate{
 		ID:              "RT_1",

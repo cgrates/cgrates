@@ -823,9 +823,11 @@ func TestCostForIntervals(t *testing.T) {
 		},
 	}
 	rt1.Compile()
-	rtsMap := map[string]*Rate{
-		"RATE0": rt0,
-		"RATE1": rt1,
+	rtsMap := map[string]*IntervalRate{
+		"RATE0_0": rt0.IntervalRates[0],
+		"RATE0_1": rt0.IntervalRates[1],
+		"RATE1_0": rt1.IntervalRates[0],
+		"RATE1_1": rt1.IntervalRates[1],
 	}
 
 	rtIvls := []*RateSInterval{
@@ -836,14 +838,14 @@ func TestCostForIntervals(t *testing.T) {
 					IncrementStart:    NewDecimal(0, 0),
 					Usage:             NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "RATE0_0",
 					CompressFactor:    1,
 				},
 				{
 					IncrementStart:    NewDecimal(int64(time.Minute), 0),
 					Usage:             NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "RATE0_1",
 					CompressFactor:    30,
 				},
 			},
@@ -856,14 +858,14 @@ func TestCostForIntervals(t *testing.T) {
 					IncrementStart:    NewDecimal(int64(90*time.Second), 0),
 					Usage:             NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "RATE1_0",
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    NewDecimal(int64(2*time.Minute), 0),
 					Usage:             NewDecimal(int64(10*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "RATE1_1",
 					CompressFactor:    10,
 				},
 			},
@@ -880,7 +882,6 @@ func TestCostForIntervals(t *testing.T) {
 	}
 }
 
-/*
 func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 	minDecimal, err := NewDecimalFromUsage("1m")
 	if err != nil {
@@ -912,7 +913,7 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 	rt1 := &Rate{
 		ID: "RATE1",
 		IntervalRates: []*IntervalRate{
-			{},
+			//{},
 			{
 				IntervalStart: NewDecimal(0, 0),
 				FixedFee:      NewDecimal(2, 1),
@@ -929,9 +930,11 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 	rt1.Compile()
-	rtsMap := map[string]*Rate{
-		"RATE0": rt0,
-		"RATE1": rt1,
+	rtsMap := map[string]*IntervalRate{
+		"RATE0_0": rt0.IntervalRates[0],
+		"RATE0_1": rt0.IntervalRates[1],
+		"RATE1_0": rt1.IntervalRates[0],
+		"RATE1_1": rt1.IntervalRates[1],
 	}
 
 	rtIvls := []*RateSInterval{
@@ -941,21 +944,21 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 				{ // cost 0,4
 					IncrementStart:    NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "RATE0_0",
 					CompressFactor:    1,
 					Usage:             NewDecimal(-1, 0),
 				},
 				{ // cost 2,4
 					IncrementStart:    NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "RATE0_0",
 					CompressFactor:    1,
 					Usage:             NewDecimal(int64(time.Minute), 0),
 				},
 				{ // cost 1,2
 					IncrementStart:    NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "RATE0_1",
 					CompressFactor:    30,
 					Usage:             NewDecimal(int64(30*time.Second), 0),
 				},
@@ -968,21 +971,21 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 				{ // cost 0,2
 					IncrementStart:    NewDecimal(int64(90*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "RATE1_0",
 					CompressFactor:    1,
 					Usage:             NewDecimal(-1, 0),
 				},
 				{ // cost 0,6
 					IncrementStart:    NewDecimal(int64(90*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "RATE1_0",
 					CompressFactor:    30,
 					Usage:             NewDecimal(int64(30*time.Second), 0),
 				},
 				{ // cost 0,1
 					IncrementStart:    NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "RATE1_1",
 					CompressFactor:    10,
 					Usage:             NewDecimal(int64(10*time.Second), 0),
 				},
@@ -996,11 +999,9 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 		t.Error(err)
 	}
 	if costFlt, _ := cost.Float64(); costFlt != eDcml {
-		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
+		t.Errorf("eDcml: %f, received: %+v", eDcml, costFlt)
 	}
 }
-
-*/
 
 func TestRateProfileCostCorrectCost(t *testing.T) {
 	rPrfCost := &RateProfileCost{
@@ -1336,6 +1337,7 @@ func TestRatesIntervalEquals(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(int64(time.Second), 0),
 				IntervalRateIndex: 1,
+				RateID:            "ID1",
 				CompressFactor:    2,
 				Usage:             NewDecimal(int64(5*time.Second), 0),
 			},
@@ -1348,53 +1350,66 @@ func TestRatesIntervalEquals(t *testing.T) {
 			{
 				IncrementStart:    NewDecimal(int64(time.Second), 0),
 				IntervalRateIndex: 1,
+				RateID:            "ID1",
 				CompressFactor:    2,
 				Usage:             NewDecimal(int64(5*time.Second), 0),
 			},
 		},
 		CompressFactor: 2,
 	}
+	riRef := map[string]*IntervalRate{
+		"ID1": {
+			IntervalStart: NewDecimal(0, 0),
+			RecurrentFee:  NewDecimal(12, 1),
+		},
+	}
+	nRiRef := map[string]*IntervalRate{
+		"ID1": {
+			IntervalStart: NewDecimal(0, 0),
+			RecurrentFee:  NewDecimal(12, 1),
+		},
+	}
 
 	// equals is looking for compressFactor
-	if !rtInt1.Equals(rtInt2) {
+	if !rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are not equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 
 	// not equals for IntervalStart
 	rtInt1.IntervalStart = NewDecimal(int64(20*time.Second), 0)
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 	rtInt1.IntervalStart = NewDecimal(int64(10*time.Second), 0)
 
 	rtInt2.IntervalStart = NewDecimal(int64(20*time.Second), 0)
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 	rtInt2.IntervalStart = NewDecimal(int64(10*time.Second), 0)
 
 	// not equals for CompressFactor
 	rtInt1.CompressFactor = 5
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 	rtInt1.CompressFactor = 2
 
 	rtInt2.CompressFactor = 8
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 	rtInt2.CompressFactor = 2
 
 	//not equals for Increments and their length
 	rtInt1.Increments[0].Usage = NewDecimal(int64(90*time.Second), 0)
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 	rtInt1.Increments[0].Usage = NewDecimal(int64(5*time.Second), 0)
 
 	rtInt2.Increments[0].Usage = NewDecimal(int64(80*time.Second), 0)
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 	rtInt2.Increments[0].Usage = NewDecimal(int64(5*time.Second), 0)
@@ -1415,7 +1430,7 @@ func TestRatesIntervalEquals(t *testing.T) {
 		},
 		CompressFactor: 2,
 	}
-	if rtInt1.Equals(rtInt2) {
+	if rtInt1.Equals(rtInt2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(rtInt1), ToJSON(rtInt2))
 	}
 }
@@ -1424,56 +1439,70 @@ func TestRatesIncrementEquals(t *testing.T) {
 	incr1 := &RateSIncrement{
 		IncrementStart:    NewDecimal(int64(time.Second), 0),
 		IntervalRateIndex: 1,
+		RateID:            "ID1",
 		CompressFactor:    2,
 		Usage:             NewDecimal(int64(5*time.Second), 0),
 	}
 	incr2 := &RateSIncrement{
 		IncrementStart:    NewDecimal(int64(time.Second), 0),
 		IntervalRateIndex: 1,
+		RateID:            "ID1",
 		CompressFactor:    2,
 		Usage:             NewDecimal(int64(5*time.Second), 0),
 	}
+	riRef := map[string]*IntervalRate{
+		"ID1": {
+			IntervalStart: NewDecimal(0, 0),
+			RecurrentFee:  NewDecimal(12, 1),
+		},
+	}
+	nRiRef := map[string]*IntervalRate{
+		"ID1": {
+			IntervalStart: NewDecimal(0, 0),
+			RecurrentFee:  NewDecimal(12, 1),
+		},
+	}
 
 	// equals is not looking for compress factor
-	if !incr1.Equals(incr2) {
+	if !incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are not equal", ToJSON(incr1), ToJSON(incr2))
 	}
 
 	// not equals by IncrementStart
 	incr1.IncrementStart = NewDecimal(int64(10*time.Second), 0)
-	if incr1.Equals(incr2) {
+	if incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr1.IncrementStart = NewDecimal(int64(time.Second), 0)
 
 	incr2.IncrementStart = NewDecimal(int64(10*time.Second), 0)
-	if incr1.Equals(incr2) {
+	if incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr2.IncrementStart = NewDecimal(int64(time.Second), 0)
 
 	// not equals by IntervalRateIndex
 	incr1.IntervalRateIndex = 5
-	if incr1.Equals(incr2) {
+	if incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr1.IntervalRateIndex = 1
 
 	incr2.IntervalRateIndex = 5
-	if incr1.Equals(incr2) {
+	if incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr2.IntervalRateIndex = 1
 
 	// not equals by CompressFactor
 	incr1.CompressFactor = 0
-	if incr1.Equals(incr2) {
+	if incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr1.CompressFactor = 2
 
 	incr2.CompressFactor = 9
-	if incr1.Equals(incr2) {
+	if incr1.Equals(incr2, riRef, nRiRef) {
 		t.Errorf("Intervals %+v and %+v are equal", ToJSON(incr1), ToJSON(incr2))
 	}
 	incr2.CompressFactor = 2
@@ -1598,9 +1627,12 @@ func TestCostForIntervalsWithPartialIntervals(t *testing.T) {
 			},
 		},
 	}
-	rtsMap := map[string]*Rate{
-		"RT_2": rt0,
+
+	rtsMap := map[string]*IntervalRate{
+		"RT_2_0": rt0.IntervalRates[0],
+		"RT_2_1": rt0.IntervalRates[1],
 	}
+
 	rtIvls := []*RateSInterval{
 		{
 			IntervalStart:  NewDecimal(int64(2*time.Minute), 0),
@@ -1609,7 +1641,7 @@ func TestCostForIntervalsWithPartialIntervals(t *testing.T) {
 				{
 					IncrementStart:    NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RT_2",
+					RateID:            "RT_2_1",
 					CompressFactor:    1,
 					Usage:             NewDecimal(-1, 0),
 				},
