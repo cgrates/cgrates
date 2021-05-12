@@ -38,17 +38,16 @@ func init() {
 
 // ResourceProfile represents the user configuration for the resource
 type ResourceProfile struct {
-	Tenant             string
-	ID                 string // identifier of this resource
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
-	UsageTTL           time.Duration             // auto-expire the usage after this duration
-	Limit              float64                   // limit value
-	AllocationMessage  string                    // message returned by the winning resource on allocation
-	Blocker            bool                      // blocker flag to stop processing on filters matched
-	Stored             bool
-	Weight             float64  // Weight to sort the resources
-	ThresholdIDs       []string // Thresholds to check after changing Limit
+	Tenant            string
+	ID                string // identifier of this resource
+	FilterIDs         []string
+	UsageTTL          time.Duration // auto-expire the usage after this duration
+	Limit             float64       // limit value
+	AllocationMessage string        // message returned by the winning resource on allocation
+	Blocker           bool          // blocker flag to stop processing on filters matched
+	Stored            bool
+	Weight            float64  // Weight to sort the resources
+	ThresholdIDs      []string // Thresholds to check after changing Limit
 }
 
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -504,10 +503,6 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 					continue
 				}
 				return
-			}
-			if rPrf.ActivationInterval != nil && ev.Time != nil &&
-				!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
-				continue
 			}
 			if pass, err := rS.filterS.Pass(context.TODO(), tnt, rPrf.FilterIDs,
 				evNm); err != nil {

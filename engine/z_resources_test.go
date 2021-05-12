@@ -276,13 +276,9 @@ func TestResourceRecordUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -334,13 +330,9 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -407,13 +399,9 @@ func TestResourceUsedUnits(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -474,13 +462,9 @@ func TestResourceSort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -512,13 +496,8 @@ func TestResourceSort(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-			},
-
+			ID:           "RL2",
+			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       50,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -562,13 +541,9 @@ func TestResourceClearUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -600,13 +575,8 @@ func TestResourceClearUsage(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-			},
-
+			ID:           "RL2",
+			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       50,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -667,13 +637,9 @@ func TestResourceRecordUsages(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -705,13 +671,8 @@ func TestResourceRecordUsages(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-			},
-
+			ID:           "RL2",
+			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       50,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -764,13 +725,9 @@ func TestResourceAllocateResource(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Millisecond),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "RL1",
+			FilterIDs:    []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       100,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -802,13 +759,8 @@ func TestResourceAllocateResource(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-			},
-
+			ID:           "RL2",
+			FilterIDs:    []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			Weight:       50,
 			Limit:        2,
 			ThresholdIDs: []string{"TEST_ACTIONS"},
@@ -881,13 +833,9 @@ func TestRSCacheSetGet(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL",
 		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL",
-			FilterIDs: []string{"FLTR_RES_RL"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RL",
+			FilterIDs:         []string{"FLTR_RES_RL", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
 			AllocationMessage: "ALLOC_RL",
 			Weight:            50,
 			Limit:             2,
@@ -1027,12 +975,9 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	dmRES.SetFilter(context.Background(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1040,12 +985,9 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1053,12 +995,9 @@ func TestResourceAddResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1184,12 +1123,9 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	dmRES.SetFilter(context.Background(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1197,12 +1133,9 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1210,12 +1143,9 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1332,12 +1262,9 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 func TestResourceUsageTTLCase1(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1345,12 +1272,9 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1358,12 +1282,9 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1536,12 +1457,9 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 func TestResourceUsageTTLCase2(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1549,12 +1467,9 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1562,12 +1477,9 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1738,12 +1650,9 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 func TestResourceUsageTTLCase3(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1751,12 +1660,9 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1764,12 +1670,9 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1940,12 +1843,9 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 func TestResourceUsageTTLCase4(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1953,12 +1853,9 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -1966,12 +1863,9 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2142,12 +2036,9 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 func TestResourceResIDsMp(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2155,12 +2046,9 @@ func TestResourceResIDsMp(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2168,12 +2056,9 @@ func TestResourceResIDsMp(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2216,12 +2101,9 @@ func TestResourceResIDsMp(t *testing.T) {
 func TestResourceTenatIDs(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2229,12 +2111,9 @@ func TestResourceTenatIDs(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2242,12 +2121,9 @@ func TestResourceTenatIDs(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2291,12 +2167,9 @@ func TestResourceTenatIDs(t *testing.T) {
 func TestResourceIDs(t *testing.T) {
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2304,12 +2177,9 @@ func TestResourceIDs(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2317,12 +2187,9 @@ func TestResourceIDs(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2441,12 +2308,9 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	dmRES.SetFilter(context.Background(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2454,12 +2318,9 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2467,12 +2328,9 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2663,12 +2521,9 @@ func TestResourceCaching(t *testing.T) {
 	dmRES.SetFilter(context.Background(), fltrRes3, true)
 	resprf := []*ResourceProfile{
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile1",
-			FilterIDs: []string{"FLTR_RES_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile1",
+			FilterIDs:         []string{"FLTR_RES_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2676,12 +2531,9 @@ func TestResourceCaching(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile2", // identifier of this resource
-			FilterIDs: []string{"FLTR_RES_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile2", // identifier of this resource
+			FilterIDs:         []string{"FLTR_RES_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2689,12 +2541,9 @@ func TestResourceCaching(t *testing.T) {
 			ThresholdIDs:      []string{""},
 		},
 		{
-			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:        "ResourceProfile3",
-			FilterIDs: []string{"FLTR_RES_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:                "ResourceProfile3",
+			FilterIDs:         []string{"FLTR_RES_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			UsageTTL:          10 * time.Second,
 			Limit:             10.00,
 			AllocationMessage: "AllocationMessage",
@@ -2745,12 +2594,9 @@ func TestResourceCaching(t *testing.T) {
 		&FilterS{dm: dmRES, cfg: defaultCfg}, nil)
 
 	resProf := &ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResourceProfileCached",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "ResourceProfileCached",
+		FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		UsageTTL:          -1,
 		Limit:             10.00,
 		AllocationMessage: "AllocationMessage",

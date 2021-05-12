@@ -990,15 +990,14 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 			Stored:       true,
 		},
 		{
-			TPid:               "testTPid",
-			ID:                 "testTag2",
-			ActivationInterval: &utils.TPActivationInterval{ActivationTime: "test"},
-			Weight:             0.0,
-			Limit:              "test",
-			ThresholdIDs:       []string{"1x", "2x"},
-			FilterIDs:          []string{"FLTR_RES_2"},
-			Blocker:            true,
-			Stored:             false,
+			TPid:         "testTPid",
+			ID:           "testTag2",
+			Weight:       0.0,
+			Limit:        "test",
+			ThresholdIDs: []string{"1x", "2x"},
+			FilterIDs:    []string{"FLTR_RES_2"},
+			Blocker:      true,
+			Stored:       false,
 		},
 	}
 	if err := storDB.SetTPResources(snd); err != nil {
@@ -1013,9 +1012,6 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		}
 		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
-		}
-		if !(reflect.DeepEqual(snd[0].ActivationInterval, rcv[0].ActivationInterval) || reflect.DeepEqual(snd[0].ActivationInterval, rcv[1].ActivationInterval)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
 		}
 		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weight, rcv[0].Weight, rcv[1].Weight)
@@ -1044,10 +1040,6 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		}
 		if !(reflect.DeepEqual(snd[0].ID, rcv[0].ID) || reflect.DeepEqual(snd[0].ID, rcv[1].ID)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ID, rcv[0].ID, rcv[1].ID)
-		}
-		if !(reflect.DeepEqual(snd[0].ActivationInterval, rcv[0].ActivationInterval) ||
-			reflect.DeepEqual(snd[0].ActivationInterval, rcv[1].ActivationInterval)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].TPid, rcv[0].TPid, rcv[1].TPid)
 		}
 		if !(reflect.DeepEqual(snd[0].Weight, rcv[0].Weight) || reflect.DeepEqual(snd[0].Weight, rcv[1].Weight)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Weight, rcv[0].Weight, rcv[1].Weight)

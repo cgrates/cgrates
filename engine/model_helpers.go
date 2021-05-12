@@ -246,16 +246,6 @@ func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
 		}
 		rl.Blocker = tp.Blocker
 		rl.Stored = tp.Stored
-		if len(tp.ActivationInterval) != 0 {
-			rl.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				rl.ActivationInterval.ActivationTime = aiSplt[0]
-				rl.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				rl.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.ThresholdIDs != utils.EmptyString {
 			if _, has := thresholdMap[tenID]; !has {
 				thresholdMap[tenID] = make(utils.StringSet)
@@ -298,14 +288,6 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls ResourceMdls) {
 			Limit:             rl.Limit,
 			AllocationMessage: rl.AllocationMessage,
 		}
-		if rl.ActivationInterval != nil {
-			if rl.ActivationInterval.ActivationTime != utils.EmptyString {
-				mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
-			}
-			if rl.ActivationInterval.ExpiryTime != utils.EmptyString {
-				mdl.ActivationInterval += utils.InfieldSep + rl.ActivationInterval.ExpiryTime
-			}
-		}
 		for i, val := range rl.ThresholdIDs {
 			if i != 0 {
 				mdl.ThresholdIDs += utils.InfieldSep
@@ -327,14 +309,6 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls ResourceMdls) {
 			mdl.Weight = rl.Weight
 			mdl.Limit = rl.Limit
 			mdl.AllocationMessage = rl.AllocationMessage
-			if rl.ActivationInterval != nil {
-				if rl.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
-				}
-				if rl.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.InfieldSep + rl.ActivationInterval.ExpiryTime
-				}
-			}
 			for i, val := range rl.ThresholdIDs {
 				if i != 0 {
 					mdl.ThresholdIDs += utils.InfieldSep
@@ -370,11 +344,6 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 	for i, th := range tpRL.ThresholdIDs {
 		rp.ThresholdIDs[i] = th
 	}
-	if tpRL.ActivationInterval != nil {
-		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	if tpRL.Limit != utils.EmptyString {
 		if rp.Limit, err = strconv.ParseFloat(tpRL.Limit, 64); err != nil {
 			return nil, err
@@ -385,16 +354,15 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 
 func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	tpRL = &utils.TPResourceProfile{
-		Tenant:             rp.Tenant,
-		ID:                 rp.ID,
-		FilterIDs:          make([]string, len(rp.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Limit:              strconv.FormatFloat(rp.Limit, 'f', -1, 64),
-		AllocationMessage:  rp.AllocationMessage,
-		Blocker:            rp.Blocker,
-		Stored:             rp.Stored,
-		Weight:             rp.Weight,
-		ThresholdIDs:       make([]string, len(rp.ThresholdIDs)),
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		FilterIDs:         make([]string, len(rp.FilterIDs)),
+		Limit:             strconv.FormatFloat(rp.Limit, 'f', -1, 64),
+		AllocationMessage: rp.AllocationMessage,
+		Blocker:           rp.Blocker,
+		Stored:            rp.Stored,
+		Weight:            rp.Weight,
+		ThresholdIDs:      make([]string, len(rp.ThresholdIDs)),
 	}
 	if rp.UsageTTL != time.Duration(0) {
 		tpRL.UsageTTL = rp.UsageTTL.String()
@@ -404,15 +372,6 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	}
 	for i, fli := range rp.ThresholdIDs {
 		tpRL.ThresholdIDs[i] = fli
-	}
-
-	if rp.ActivationInterval != nil {
-		if !rp.ActivationInterval.ActivationTime.IsZero() {
-			tpRL.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !rp.ActivationInterval.ExpiryTime.IsZero() {
-			tpRL.ActivationInterval.ExpiryTime = rp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	return
 }

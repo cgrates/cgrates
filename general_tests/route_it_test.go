@@ -246,13 +246,9 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	//add ResourceSupplier1
 	rPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "ResourceSupplier1",
-			FilterIDs: []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:ResourceSupplier1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "ResourceSupplier1",
+			FilterIDs:    []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:ResourceSupplier1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,
@@ -269,13 +265,9 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	//add Resource2Supplier1
 	rPrf2 := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Resource2Supplier1",
-			FilterIDs: []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:Resource2Supplier1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "Resource2Supplier1",
+			FilterIDs:    []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:Resource2Supplier1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,
@@ -292,13 +284,9 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	//add ResourceSupplier2
 	rPrf3 := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "ResourceSupplier2",
-			FilterIDs: []string{"*string:~*req.Supplier:route2", "*string:~*req.ResID:ResourceSupplier2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "ResourceSupplier2",
+			FilterIDs:    []string{"*string:~*req.Supplier:route2", "*string:~*req.ResID:ResourceSupplier2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,
@@ -315,13 +303,9 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	//add ResourceSupplier2
 	rPrf4 := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "ResourceSupplier3",
-			FilterIDs: []string{"*string:~*req.Supplier:route3", "*string:~*req.ResID:ResourceSupplier3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "ResourceSupplier3",
+			FilterIDs:    []string{"*string:~*req.Supplier:route3", "*string:~*req.ResID:ResourceSupplier3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,

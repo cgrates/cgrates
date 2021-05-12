@@ -485,18 +485,17 @@ func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, e
 
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
 type TPResourceProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string // Identifier of this limit
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active/expires
-	UsageTTL           string
-	Limit              string // Limit value
-	AllocationMessage  string
-	Blocker            bool // blocker flag to stop processing on filters matched
-	Stored             bool
-	Weight             float64  // Weight to sort the ResourceLimits
-	ThresholdIDs       []string // Thresholds to check after changing Limit
+	TPid              string
+	Tenant            string
+	ID                string // Identifier of this limit
+	FilterIDs         []string
+	UsageTTL          string
+	Limit             string // Limit value
+	AllocationMessage string
+	Blocker           bool // blocker flag to stop processing on filters matched
+	Stored            bool
+	Weight            float64  // Weight to sort the ResourceLimits
+	ThresholdIDs      []string // Thresholds to check after changing Limit
 }
 
 type ArgRSv1ResourceUsage struct {
