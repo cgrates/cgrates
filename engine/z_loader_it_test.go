@@ -23,9 +23,11 @@ import (
 	"flag"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -104,7 +106,11 @@ func testLoaderITInitDataDB(t *testing.T) {
 		}
 	}
 	cacheChan := make(chan birpc.ClientConnector, 1)
-	cacheChan <- NewCacheS(lCfg, dataDbCsv, nil)
+	srv, _ := birpc.NewService(NewCacheS(lCfg, dataDbCsv, nil), "", false)
+	srv.UpdateMethodName(func(key string) (newKey string) {
+		return strings.TrimPrefix(key, "V1")
+	})
+	cacheChan <- srv
 	connMgr = NewConnManager(lCfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): cacheChan,
 	})
@@ -262,7 +268,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenantid, fltr := range loader.filters {
-		rcv, err := loader.dm.GetFilter(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetFilter(context.TODO(), tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetFilter: ", err.Error())
 		}
@@ -331,7 +337,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, attrPrf := range loader.attributeProfiles {
-		rcv, err := loader.dm.GetAttributeProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetAttributeProfile(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetAttributeProfile, tenant: %s, id: %s,  error: %s ", attrPrf.Tenant, attrPrf.ID, err.Error())
 		}

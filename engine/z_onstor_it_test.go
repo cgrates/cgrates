@@ -138,7 +138,7 @@ func testOnStorITCacheDestinations(t *testing.T) {
 		t.SkipNow()
 	}
 
-	if err := onStor.CacheDataFromDB("INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
+	if err := onStor.CacheDataFromDB(context.TODO(), "INVALID", nil, false); err == nil || err.Error() != utils.UnsupportedCachePrefix {
 		t.Error(err)
 	}
 	dst := &Destination{ID: "TEST_CACHE", Prefixes: []string{"+491", "+492", "+493"}}
@@ -149,13 +149,13 @@ func testOnStorITCacheDestinations(t *testing.T) {
 	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.ID); hasIt {
 		t.Error("Already in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.ID}, true); err != nil { // Should not cache due to mustBeCached
+	if err := onStor.CacheDataFromDB(context.TODO(), utils.DestinationPrefix, []string{dst.ID}, true); err != nil { // Should not cache due to mustBeCached
 		t.Error(err)
 	}
 	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.ID); hasIt {
 		t.Error("Should not be in cache")
 	}
-	if err := onStor.CacheDataFromDB(utils.DestinationPrefix, []string{dst.ID}, false); err != nil {
+	if err := onStor.CacheDataFromDB(context.TODO(), utils.DestinationPrefix, []string{dst.ID}, false); err != nil {
 		t.Error(err)
 	}
 	if itm, hasIt := Cache.Get(utils.CacheDestinations, dst.ID); !hasIt {
@@ -176,7 +176,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 			t.Errorf("Prefix: %s already in cache", prfx)
 		}
 	}
-	if err := onStor.CacheDataFromDB(utils.ReverseDestinationPrefix, dst.Prefixes, false); err != nil {
+	if err := onStor.CacheDataFromDB(context.TODO(), utils.ReverseDestinationPrefix, dst.Prefixes, false); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.Internal {
@@ -403,7 +403,7 @@ func testOnStorITTiming(t *testing.T) {
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetTiming(tmg); err != nil {
+	if err := onStor.SetTiming(context.TODO(), tmg); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.Internal {
@@ -428,7 +428,7 @@ func testOnStorITTiming(t *testing.T) {
 	}
 	//update
 	tmg.MonthDays = utils.MonthDays{1, 2, 3, 4, 5, 6, 7}
-	if err := onStor.SetTiming(tmg); err != nil {
+	if err := onStor.SetTiming(context.TODO(), tmg); err != nil {
 		t.Error(err)
 	}
 
@@ -697,7 +697,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{"Action1"},
 	}
-	if err := onStor.SetFilter(fp, true); err != nil {
+	if err := onStor.SetFilter(context.TODO(), fp, true); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID,
@@ -813,22 +813,22 @@ func testOnStorITFilter(t *testing.T) {
 	if err := fp.Compile(); err != nil {
 		t.Fatal(err)
 	}
-	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
+	if _, rcvErr := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetFilter(fp, true); err != nil {
+	if err := onStor.SetFilter(context.TODO(), fp, true); err != nil {
 		t.Error(err)
 	}
 	//get from cache
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
@@ -856,34 +856,34 @@ func testOnStorITFilter(t *testing.T) {
 	if err := fp.Compile(); err != nil {
 		t.Fatal(err)
 	}
-	if err := onStor.SetFilter(fp, true); err != nil {
+	if err := onStor.SetFilter(context.TODO(), fp, true); err != nil {
 		t.Error(err)
 	}
 
 	//get from cache
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
-	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional, true); err != nil {
+	if err := onStor.RemoveFilter(context.TODO(), fp.Tenant, fp.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
-	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
+	if _, rcvErr := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
+	if _, rcvErr := onStor.GetFilter(context.TODO(), "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -1011,22 +1011,22 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if _, rcvErr := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
+	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	//get from cache
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
@@ -1040,35 +1040,35 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	}
 	//update
 	attrProfile.Contexts = []string{"con1", "con2", "con3"}
-	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
+	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from cache
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant,
+	if err := onStor.RemoveAttributeProfile(context.TODO(), attrProfile.Tenant,
 		attrProfile.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
-	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if _, rcvErr := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if _, rcvErr := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -1088,15 +1088,15 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if _, rcvErr := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
+	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	//check database
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
@@ -1108,11 +1108,11 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("123.123", utils.InfieldSep),
 		},
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
+	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	//check database
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
@@ -1124,11 +1124,11 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep),
 		},
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
+	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	//check database
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+	if rcv, err := onStor.GetAttributeProfile(context.TODO(), "cgrates.org", "AttrPrf1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
@@ -1282,18 +1282,18 @@ func testOnStorITRateProfile(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.GetRateProfile("cgrates.org", "RP1",
+	if _, rcvErr := onStor.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetRateProfile(rPrf, false); err != nil {
+	if err := onStor.SetRateProfile(context.TODO(), rPrf, false); err != nil {
 		t.Error(err)
 	}
 	if err = rPrf.Compile(); err != nil {
 		t.Fatal(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetRateProfile("cgrates.org", "RP1",
+	if rcv, err := onStor.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rPrf, rcv) {
@@ -1307,23 +1307,23 @@ func testOnStorITRateProfile(t *testing.T) {
 	}
 	//update
 	rPrf.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
-	if err := onStor.SetRateProfile(rPrf, false); err != nil {
+	if err := onStor.SetRateProfile(context.TODO(), rPrf, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetRateProfile("cgrates.org", "RP1",
+	if rcv, err := onStor.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(rPrf, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", rPrf, rcv)
 	}
-	if err := onStor.RemoveRateProfile(rPrf.Tenant, rPrf.ID,
+	if err := onStor.RemoveRateProfile(context.TODO(), rPrf.Tenant, rPrf.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetRateProfile("cgrates.org", "RP1",
+	if _, rcvErr := onStor.GetRateProfile(context.TODO(), "cgrates.org", "RP1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
