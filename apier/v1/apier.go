@@ -1220,7 +1220,7 @@ func (apiv1 *APIerSv1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *strin
 
 // CallCache caching the item based on cacheopt
 // visible in APIerSv2
-func (apiv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (err error) {
+func (apiv1 *APIerSv1) CallCache(tnt, cacheOpt string, args utils.ArgsGetCacheItem) (err error) {
 	var reply string
 	switch cacheOpt {
 	case utils.META_NONE:
@@ -1228,24 +1228,29 @@ func (apiv1 *APIerSv1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (
 	case utils.MetaReload:
 		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				TenantArg:       utils.TenantArg{Tenant: tnt},
 				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
 		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+				TenantArg:       utils.TenantArg{Tenant: tnt},
 				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
 		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1RemoveItem,
-			&utils.ArgsGetCacheItemWithArgDispatcher{ArgsGetCacheItem: args}, &reply); err != nil {
+			&utils.ArgsGetCacheItemWithArgDispatcher{
+				TenantArg:        utils.TenantArg{Tenant: tnt},
+				ArgsGetCacheItem: args}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
 		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+				TenantArg:       utils.TenantArg{Tenant: tnt},
 				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}

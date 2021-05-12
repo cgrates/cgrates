@@ -86,7 +86,7 @@ func (APIerSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithCache, reply 
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(args.Tenant, GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -111,7 +111,7 @@ func (APIerSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, 
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -175,7 +175,7 @@ func (APIerSv1 *APIerSv1) SetDispatcherHost(args *DispatcherHostWithCache, reply
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(args.Tenant, GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -200,7 +200,7 @@ func (APIerSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, rep
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

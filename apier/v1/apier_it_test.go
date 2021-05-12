@@ -1020,6 +1020,7 @@ func testApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheReverseDestinations].Items = 10
 	expectedStats[utils.CacheLoadIDs].Items = 20
 	expectedStats[utils.CacheRPCConnections].Items = 1
+	expectedStats[utils.CacheActionTriggers].Items = 1
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {

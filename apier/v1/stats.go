@@ -79,7 +79,7 @@ func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if has, err := APIerSv1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
@@ -102,7 +102,7 @@ func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 			CacheID: utils.CacheStatQueues,
 			ItemID:  arg.TenantID(),
 		}
-		if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 			return utils.APIErrorHandler(err)
 		}
 	}
@@ -124,7 +124,7 @@ func (APIerSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(args.Tenant, GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := APIerSv1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
@@ -141,7 +141,7 @@ func (APIerSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, 
 		CacheID: utils.CacheStatQueues,
 		ItemID:  args.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(args.Tenant, GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -47,7 +47,7 @@ func (APIerSv1 *APIerSv1) SetFilter(arg *FilterWithCache, reply *string) error {
 		CacheID: utils.CacheFilters,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -105,7 +105,7 @@ func (APIerSv1 *APIerSv1) RemoveFilter(arg utils.TenantIDWithCache, reply *strin
 		CacheID: utils.CacheFilters,
 		ItemID:  arg.TenantID(),
 	}
-	if err := APIerSv1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+	if err := APIerSv1.CallCache(arg.Tenant, GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
