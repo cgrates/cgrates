@@ -684,6 +684,7 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"process_runs": 1,						// number of run loops when processing event
+	"any_context": true,					// if we match the *any context
 },
 
 

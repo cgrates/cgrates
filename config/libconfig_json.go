@@ -401,6 +401,7 @@ type AttributeSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Process_runs          *int
+	Any_context           *bool
 }
 
 // ChargerSJsonCfg service config section

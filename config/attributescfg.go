@@ -32,6 +32,7 @@ type AttributeSCfg struct {
 	SuffixIndexedFields *[]string
 	ProcessRuns         int
 	NestedFields        bool
+	AnyContext          bool
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -100,6 +101,9 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
+	}
+	if jsnCfg.Any_context != nil {
+		alS.AnyContext = *jsnCfg.Any_context
 	}
 	return
 }
