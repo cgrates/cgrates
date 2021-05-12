@@ -485,7 +485,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -498,7 +498,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -511,7 +511,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -589,7 +589,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -602,7 +602,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -615,7 +615,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -689,7 +689,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -702,7 +702,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -715,7 +715,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -789,7 +789,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -802,7 +802,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -875,7 +875,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -888,7 +888,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -902,7 +902,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -977,7 +977,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -991,7 +991,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1004,7 +1004,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -1076,7 +1076,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1221,7 +1221,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1289,7 +1289,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1364,7 +1364,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1444,7 +1444,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1516,7 +1516,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1590,7 +1590,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1669,7 +1669,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -1725,7 +1725,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -2673,7 +2673,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1_EXISTS",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*exists:~*req.InitialField:", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*exists:~*req.InitialField:", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -2686,7 +2686,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2_EXISTS",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*exists:~*req.Field1:", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*exists:~*req.Field1:", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -2761,7 +2761,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1_NOTEMPTY",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*notempty:~*req.InitialField:", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*notempty:~*req.InitialField:", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -2774,7 +2774,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2_NOTEMPTY",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*notempty:~*req.Field1:", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		FilterIDs: []string{"*notempty:~*req.Field1:", "*ai:*now:2014-07-14T14:25:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
