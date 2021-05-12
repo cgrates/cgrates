@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rates
 
 import (
-	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -1019,6 +1018,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 	}
 }
 
+/*
 func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -1333,3 +1333,5 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+*/

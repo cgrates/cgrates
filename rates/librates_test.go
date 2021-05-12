@@ -5156,6 +5156,7 @@ func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	}
 }
 
+/*
 func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
@@ -5225,3 +5226,5 @@ func TestComputeRateSIntervalsRecurrentFeeCmpFactorIntInvalidError(t *testing.T)
 		t.Error(err)
 	}
 }
+
+*/
