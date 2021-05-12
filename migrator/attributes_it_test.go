@@ -306,7 +306,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+		FilterIDs: []string{"*string:Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -321,7 +325,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		Tenant:    "cgrates.com",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+		FilterIDs: []string{"*string:Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -463,7 +471,11 @@ func testAttrITMigrateV2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+		FilterIDs: []string{"*string:Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -541,7 +553,11 @@ func testAttrITMigrateV3(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+		FilterIDs: []string{"*string:Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -623,7 +639,11 @@ func testAttrITMigrateV4(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+		FilterIDs: []string{"*string:~*req.Accont:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
@@ -728,7 +748,11 @@ func testAttrITV1ToV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2020-04-18T14:26:00Z"},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -742,7 +766,11 @@ func testAttrITV1ToV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2020-04-18T14:26:00Z"},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -859,7 +887,11 @@ func testAttrITV2ToV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2020-04-18T14:26:00Z"},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -873,7 +905,11 @@ func testAttrITV2ToV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2020-04-18T14:26:00Z"},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -979,7 +1015,11 @@ func testAttrITV3ToV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2020-04-18T14:26:00Z"},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -993,7 +1033,11 @@ func testAttrITV3ToV5(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2020-04-18T14:26:00Z"},
+		FilterIDs: []string{"*string:test:test"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
+		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},

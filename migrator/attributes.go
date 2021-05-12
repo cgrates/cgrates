@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -145,7 +144,7 @@ func (m *Migrator) migrateV3ToV4AttributeProfile(v3Attr *v3AttributeProfile) (v4
 	return v4Attr, nil
 }
 
-func (m *Migrator) migrateV4ToV5AttributeProfile(v4Attr *v4AttributeProfile) (v5Attr *v6AttributeProfile, err error) {
+func (m *Migrator) migrateV4ToV5AttributeProfile(v4Attr *v4AttributeProfile) (v5Attr *engine.AttributeProfile, err error) {
 	if v4Attr == nil {
 		// read data from DataDB
 		v4Attr, err = m.dmIN.getV4AttributeProfile()
@@ -172,9 +171,8 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	var v2Attr *v2AttributeProfile
 	var v3Attr *v3AttributeProfile
 	var v4Attr *v4AttributeProfile
-	var v5Attr *v6AttributeProfile
-	var v6Attr *v6AttributeProfile
-	var v7Attr *engine.AttributeProfile
+	var v5Attr *engine.AttributeProfile
+	var v6Attr *engine.AttributeProfile
 	for {
 		// One attribute profile at a time
 		version := vrs[utils.Attributes]
@@ -230,13 +228,6 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 					break
 				}
 				version = 6
-			case 6:
-				if v7Attr, err = m.migrateV6ToV7AttributeProfile(v6Attr); err != nil && err != utils.ErrNoMoreData {
-					return
-				} else if err == utils.ErrNoMoreData {
-					break
-				}
-				version = 7
 			}
 			if version == current[utils.Attributes] || err == utils.ErrNoMoreData {
 				break
@@ -247,19 +238,19 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 		}
 
 		if !m.dryRun {
-			for _, attr := range v7Attr.Attributes {
+			for _, attr := range v6Attr.Attributes {
 				if attr.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
-					err = fmt.Errorf("the AttributeProfile <%s> was not migrated corectly", v7Attr.TenantID())
+					err = fmt.Errorf("the AttributeProfile <%s> was not migrated corectly", v6Attr.TenantID())
 					return
 				}
 			}
 			if vrs[utils.Attributes] == 1 {
-				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(context.TODO(), v7Attr); err != nil {
+				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(context.TODO(), v6Attr); err != nil {
 					return
 				}
 			}
 			// Set the fresh-migrated AttributeProfile into DB
-			if err = m.dmOut.DataManager().SetAttributeProfile(context.TODO(), v7Attr, true); err != nil {
+			if err = m.dmOut.DataManager().SetAttributeProfile(context.TODO(), v6Attr, true); err != nil {
 				return err
 			}
 		}
@@ -316,7 +307,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *v3AttributePr
 	for _, attr := range v2AttrPrf.Attributes {
 		filterIDs := make([]string, 0)
 		//append false translate to  if FieldName exist do stuff
-		if !attr.Append {
+		if attr.Append == false {
 			filterIDs = append(filterIDs, utils.MetaExists+utils.InInFieldSep+attr.FieldName+utils.InInFieldSep)
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
@@ -394,14 +385,13 @@ func (v3AttrPrf v3AttributeProfile) AsAttributeProfile() (attrPrf *v4AttributePr
 	return
 }
 
-func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributeProfile, err error) {
-	attrPrf = &v6AttributeProfile{
-		Tenant:             v4AttrPrf.Tenant,
-		ID:                 v4AttrPrf.ID,
-		Contexts:           v4AttrPrf.Contexts,
-		FilterIDs:          v4AttrPrf.FilterIDs,
-		Weight:             v4AttrPrf.Weight,
-		ActivationInterval: v4AttrPrf.ActivationInterval,
+func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {
+	attrPrf = &engine.AttributeProfile{
+		Tenant:    v4AttrPrf.Tenant,
+		ID:        v4AttrPrf.ID,
+		Contexts:  v4AttrPrf.Contexts,
+		FilterIDs: v4AttrPrf.FilterIDs,
+		Weight:    v4AttrPrf.Weight,
 	}
 	for _, attr := range v4AttrPrf.Attributes { // ToDo:redo this
 		val := attr.Value.GetRule(utils.InfieldSep)
@@ -418,7 +408,7 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributePr
 		if attr.FieldName != utils.EmptyString {
 			path = utils.MetaReq + utils.NestingSep + attr.FieldName
 		}
-		attrPrf.Attributes = append(attrPrf.Attributes, &v6Attribute{
+		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: attr.FilterIDs,
 			Path:      path,
 			Value:     rsrVal,
@@ -479,25 +469,7 @@ type v4AttributeProfile struct {
 	Weight             float64
 }
 
-type v6AttributeProfile struct {
-	Tenant             string
-	ID                 string
-	Contexts           []string // bind this AttributeProfile to multiple contexts
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	Attributes         []*v6Attribute
-	Blocker            bool // blocker flag to stop processing on multiple runs
-	Weight             float64
-}
-
-type v6Attribute struct {
-	FilterIDs []string
-	Path      string
-	Type      string
-	Value     config.RSRParsers
-}
-
-func (m *Migrator) migrateV5ToV6AttributeProfile(v5Attr *v6AttributeProfile) (_ *v6AttributeProfile, err error) {
+func (m *Migrator) migrateV5ToV6AttributeProfile(v5Attr *engine.AttributeProfile) (_ *engine.AttributeProfile, err error) {
 	if v5Attr == nil {
 		// read data from DataDB
 		if v5Attr, err = m.dmIN.getV5AttributeProfile(); err != nil {
@@ -508,47 +480,4 @@ func (m *Migrator) migrateV5ToV6AttributeProfile(v5Attr *v6AttributeProfile) (_ 
 		return
 	}
 	return v5Attr, nil
-}
-
-func (m *Migrator) migrateV6ToV7AttributeProfile(v5Attr *v6AttributeProfile) (_ *engine.AttributeProfile, err error) {
-	if v5Attr == nil {
-		// read data from DataDB
-		if v5Attr, err = m.dmIN.getV5AttributeProfile(); err != nil { // they have the same structure
-			return
-		}
-	}
-	v7Attr := &engine.AttributeProfile{
-		Tenant:     v5Attr.Tenant,
-		ID:         v5Attr.ID,
-		Contexts:   v5Attr.Contexts,
-		FilterIDs:  v5Attr.FilterIDs,
-		Attributes: make([]*engine.Attribute, len(v5Attr.Attributes)),
-		Blocker:    v5Attr.Blocker,
-		Weight:     v5Attr.Weight,
-	}
-
-	for idx, attr := range v5Attr.Attributes {
-		v7Attr.Attributes[idx] = &engine.Attribute{
-			FilterIDs: attr.FilterIDs,
-			Path:      attr.Path,
-			Type:      attr.Type,
-			Value:     attr.Value,
-		}
-	}
-
-	if v5Attr.ActivationInterval != nil &&
-		(!v5Attr.ActivationInterval.ActivationTime.IsZero() ||
-			!v5Attr.ActivationInterval.ExpiryTime.IsZero()) {
-		fltr := "*ai:~*req.AnswerTime:"
-		if !v5Attr.ActivationInterval.ActivationTime.IsZero() {
-			fltr += v5Attr.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		fltr += "|"
-		if !v5Attr.ActivationInterval.ExpiryTime.IsZero() {
-			fltr += v5Attr.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
-		v7Attr.FilterIDs = append(v7Attr.FilterIDs, fltr)
-	}
-
-	return v7Attr, nil
 }
