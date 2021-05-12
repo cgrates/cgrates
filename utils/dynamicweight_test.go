@@ -126,3 +126,24 @@ func TestCloneDynamicWeights(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", dynWeigh, rcv)
 	}
 }
+
+func TestDynamicWeightEquals(t *testing.T) {
+	//Test the case where one of the fields is nil
+	dW := &DynamicWeight{
+		FilterIDs: nil,
+		Weight:    10,
+	}
+	dnWg := &DynamicWeight{
+		FilterIDs: []string{"fltr1", "fltr2"},
+		Weight:    10,
+	}
+	if rcv := dW.Equals(dnWg); rcv {
+		t.Error("FilterIDs should not match")
+	}
+
+	//Test the case where filters don't match
+	dW.FilterIDs = []string{"fltr1", "fltr3"}
+	if rcv := dW.Equals(dnWg); rcv {
+		t.Error("FilterIDs should not match")
+	}
+}

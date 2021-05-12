@@ -190,3 +190,57 @@ func TestNewErrNotConnected(t *testing.T) {
 		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
 	}
 }
+
+func TestNewErrResourceS(t *testing.T) {
+	err := errors.New("TEST_RESOURCES_ERROR")
+	exp := "RESOURCES_ERROR:TEST_RESOURCES_ERROR"
+	if rcv := NewErrResourceS(err); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestNewErrRouteS(t *testing.T) {
+	err := errors.New("TEST_ROUTES_ERROR")
+	exp := "ROUTES_ERROR:TEST_ROUTES_ERROR"
+	if rcv := NewErrRouteS(err); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestNewAttributeS(t *testing.T) {
+	err := errors.New("TEST_ATTRIBUTES_ERROR")
+	exp := "ATTRIBUTES_ERROR:TEST_ATTRIBUTES_ERROR"
+	if rcv := NewErrAttributeS(err); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestNewDispatcherS(t *testing.T) {
+	err := errors.New("TEST_DISPATCHER_ERROR")
+	exp := "DISPATCHER_ERROR:TEST_DISPATCHER_ERROR"
+	if rcv := NewErrDispatcherS(err); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestAPIErrorHandler(t *testing.T) {
+	errIn := &CGRError{
+		context:      "*sessions",
+		apiError:     "API_ERROR",
+		shortError:   "SHORT_ERROR",
+		longError:    "LONG_ERROR",
+		errorMessage: "ERROR_MESSAGE",
+	}
+	exp := "API_ERROR"
+	if rcv := APIErrorHandler(errIn); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
+
+func TestAPIErrorHandlerCase2(t *testing.T) {
+	errIn := errors.New("NEW_ERROR")
+	exp := "SERVER_ERROR: NEW_ERROR"
+	if rcv := APIErrorHandler(errIn); rcv.Error() != exp {
+		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
+	}
+}
