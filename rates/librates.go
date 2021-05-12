@@ -190,8 +190,20 @@ func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time,
 	return
 }
 
+func getRateIntervalIDFromIncrement(cstRts map[string]*utils.IntervalRate, intRt *utils.IntervalRate) string {
+	for key, val := range cstRts {
+		if val.Equals(intRt) {
+			return key
+		}
+	}
+	key := utils.UUIDSha1Prefix()
+	cstRts[key] = intRt
+	return key
+}
+
 // computeRateSIntervals will give out the cost projection for the given orderedRates and usage
-func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big) (rtIvls []*utils.RateSInterval, err error) {
+func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big,
+	cstRts map[string]*utils.IntervalRate) (rtIvls []*utils.RateSInterval, err error) {
 	totalUsage := usage
 	if intervalStart.Cmp(decimal.New(0, 0)) != 0 {
 		totalUsage = utils.SumBig(usage, intervalStart)
@@ -229,7 +241,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 				rIcmts = append(rIcmts, &utils.RateSIncrement{
 					IncrementStart:    &utils.Decimal{iRtUsageSIdx},
 					IntervalRateIndex: j,
-					RateID:            rt.ID,
+					RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(utils.InvalidUsage, 0),
 				})
@@ -258,9 +270,9 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			}
 			rIcmts = append(rIcmts, &utils.RateSIncrement{
 				IncrementStart:    &utils.Decimal{iRtUsageSIdx},
-				IntervalRateIndex: j,
-				RateID:            rt.ID,
+				RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 				CompressFactor:    cmpFactorInt,
+				IntervalRateIndex: j,
 				Usage:             &utils.Decimal{iRtUsage},
 			})
 			iRtUsageSIdx = utils.SumBig(iRtUsageSIdx, iRtUsage)
