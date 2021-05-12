@@ -233,17 +233,13 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrPrf := &v6AttributeProfile{
+	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     cloneExpTime,
-		},
-		Attributes: []*v6Attribute{
-			&v6Attribute{
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
@@ -424,17 +420,13 @@ func TestAsAttributeProfileV5(t *testing.T) {
 		Weight: 20,
 	}
 
-	eOut := &v6AttributeProfile{
+	eOut := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
-		Attributes: []*v6Attribute{
-			&v6Attribute{
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
@@ -501,75 +493,4 @@ func TestAsAttributeProfileV1To4(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
-}
-
-func TestAttributesMigrateV6ToV7AttributeProfileNilPrf(t *testing.T) {
-	var v6AttrPrf *v6AttributeProfile
-	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	m := &Migrator{
-		dmIN: newInternalMigrator(dm),
-	}
-
-	experr := utils.ErrNotImplemented
-	v7AttrPrf, err := m.migrateV6ToV7AttributeProfile(v6AttrPrf)
-
-	if err == nil || err != experr {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
-	}
-
-	if v7AttrPrf != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, v7AttrPrf)
-	}
-}
-
-func TestAttributesMigrateV6ToV7AttributeProfile2(t *testing.T) {
-	v6Attr := &v6AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1001_SESSIONAUTH",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 36, 0, 0, time.UTC),
-		},
-		Attributes: []*v6Attribute{
-			{
-				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
-			},
-		},
-		Weight: 20,
-	}
-	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	m := &Migrator{
-		dmIN: newInternalMigrator(dm),
-	}
-
-	exp := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1001_SESSIONAUTH",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-		Attributes: []*engine.Attribute{
-			{
-				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
-			},
-		},
-		Weight: 20,
-	}
-
-	v7Attr, err := m.migrateV6ToV7AttributeProfile(v6Attr)
-	if err != nil {
-		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(v7Attr, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(v7Attr))
-	}
 }
