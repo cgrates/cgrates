@@ -141,13 +141,10 @@ func TestLoadTimimgs(t *testing.T) {
 func TestLoadResourceProfiles(t *testing.T) {
 	eResProfiles := map[utils.TenantID]*utils.TPResourceProfile{
 		{Tenant: "cgrates.org", ID: "ResGroup21"}: {
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "ResGroup21",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			TPid:              testTPID,
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup21",
+			FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			UsageTTL:          "1s",
 			AllocationMessage: "call",
 			Weight:            10,
@@ -156,13 +153,10 @@ func TestLoadResourceProfiles(t *testing.T) {
 			Stored:            true,
 		},
 		{Tenant: "cgrates.org", ID: "ResGroup22"}: {
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "ResGroup22",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			TPid:              testTPID,
+			Tenant:            "cgrates.org",
+			ID:                "ResGroup22",
+			FilterIDs:         []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			UsageTTL:          "3600s",
 			AllocationMessage: "premium_call",
 			Blocker:           true,

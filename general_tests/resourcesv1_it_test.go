@@ -23,7 +23,6 @@ import (
 	"net/rpc"
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -106,13 +105,9 @@ func testV1RsRpcConn(t *testing.T) {
 func testV1RsSetProfile(t *testing.T) {
 	rls := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RES_GR_TEST",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RES_GR_TEST",
+			FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
 			UsageTTL:          -1,
 			Limit:             2,
 			AllocationMessage: "Account1Channels",

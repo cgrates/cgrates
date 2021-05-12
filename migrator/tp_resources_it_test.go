@@ -108,14 +108,10 @@ func testTpResITFlush(t *testing.T) {
 func testTpResITPopulate(t *testing.T) {
 	tpResources = []*utils.TPResourceProfile{
 		{
-			Tenant:    "cgrates.org",
-			TPid:      "TPR1",
-			ID:        "ResGroup1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
+			Tenant:            "cgrates.org",
+			TPid:              "TPR1",
+			ID:                "ResGroup1",
+			FilterIDs:         []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			UsageTTL:          "1s",
 			Limit:             "7",
 			AllocationMessage: "",

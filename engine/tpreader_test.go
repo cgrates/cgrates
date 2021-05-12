@@ -484,13 +484,10 @@ func TestGetLoadedIdsResourceProfiles(t *testing.T) {
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "ResGroup1"}: {
-				TPid:      testTPID,
-				Tenant:    "cgrates.org",
-				ID:        "ResGroup1",
-				FilterIDs: []string{"*string:~*req.Account:1001"},
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
+				TPid:              testTPID,
+				Tenant:            "cgrates.org",
+				ID:                "ResGroup1",
+				FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 				UsageTTL:          "1s",
 				AllocationMessage: "call",
 				Weight:            10,

@@ -323,12 +323,9 @@ func TestLoaderProcessResource(t *testing.T) {
 		t.Error(err)
 	}
 	eResPrf1 := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResGroup21",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "ResGroup21",
+		FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		UsageTTL:          time.Second,
 		AllocationMessage: "call",
 		Weight:            10,
@@ -338,12 +335,9 @@ func TestLoaderProcessResource(t *testing.T) {
 		ThresholdIDs:      []string{},
 	}
 	eResPrf2 := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResGroup22",
-		FilterIDs: []string{"*string:~*req.Account:dan"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "ResGroup22",
+		FilterIDs:         []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		UsageTTL:          3600 * time.Second,
 		AllocationMessage: "premium_call",
 		Weight:            10,
