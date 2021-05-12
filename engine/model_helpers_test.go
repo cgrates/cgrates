@@ -1359,11 +1359,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1398,11 +1394,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-15T14:36:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1435,11 +1427,7 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1480,11 +1468,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1", "con2"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{FilterIDs: []string{"filter_id1", "filter_id2"},
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1499,7 +1483,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
 			Contexts:           "con1;con2",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z",
 			AttributeFilterIDs: "filter_id1;filter_id2",
 			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
@@ -1518,11 +1502,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1541,7 +1521,7 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			Contexts:  "con1",
-			FilterIDs: "FLTR_ACNT_dan",
+			FilterIDs: "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
 			Weight:    20,
@@ -1558,10 +1538,10 @@ func TestCsvDumpForAttributeModels(t *testing.T) {
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v,\n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
-	expRecord := []string{"cgrates.org", "ALS1", "con1", "FLTR_ACNT_dan", "2014-07-14T14:35:00Z", "", "*req.FL1", "", "Al1", "false", "20"}
+	expRecord := []string{"cgrates.org", "ALS1", "con1", "FLTR_ACNT_dan;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "20", "", "*req.FL1", "", "Al1", "false"}
 	for i, model := range rcv {
 		if i == 1 {
-			expRecord = []string{"cgrates.org", "ALS1", "", "", "", "", "*req.FL2", "", "Al2", "false", "0"}
+			expRecord = []string{"cgrates.org", "ALS1", "", "", "0", "", "*req.FL2", "", "Al2", "false"}
 		}
 		if csvRecordRcv, _ := CsvDump(model); !reflect.DeepEqual(expRecord, csvRecordRcv) {
 			t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRecord), utils.ToJSON(csvRecordRcv))
@@ -1577,7 +1557,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			Contexts:  "con1",
-			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE",
+			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
 			Weight:    20,
@@ -1588,11 +1568,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Attributes: []*utils.TPAttribute{
 			{
 				FilterIDs: []string{},
@@ -1607,11 +1583,7 @@ func TestModelAsTPAttribute2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_DST_DE", "FLTR_ACNT_dan"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Attributes: []*utils.TPAttribute{
 			{
 				FilterIDs: []string{},
@@ -1635,7 +1607,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			Contexts:  "con1",
-			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE",
+			FilterIDs: "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
 			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
 			Weight:    20,
@@ -1646,11 +1618,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Attributes: []*utils.TPAttribute{
 			{
 				FilterIDs: []string{},
@@ -1665,11 +1633,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_DST_DE", "FLTR_ACNT_dan"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_DST_DE", "FLTR_ACNT_dan"},
 		Attributes: []*utils.TPAttribute{
 			{
 				FilterIDs: []string{},
@@ -4547,11 +4511,7 @@ func TestAPItoAttributeProfileError1(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  "",
@@ -4574,11 +4534,7 @@ func TestAPItoAttributeProfileError2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -4594,32 +4550,6 @@ func TestAPItoAttributeProfileError2(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, err)
 	}
 
-}
-
-func TestAPItoAttributeProfileError3(t *testing.T) {
-	tpAlsPrf := &utils.TPAttributeProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "ALS1",
-		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-			ExpiryTime:     "",
-		},
-		Attributes: []*utils.TPAttribute{
-			{
-				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: "Al1",
-			},
-		},
-		Weight: 20,
-	}
-
-	_, err := APItoAttributeProfile(tpAlsPrf, "UTC")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
-	}
 }
 
 func TestAPItoModelTPAttributeNoAttributes(t *testing.T) {

@@ -1453,14 +1453,13 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 
 func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttributeProfile) {
 	tpAttr = &utils.TPAttributeProfile{
-		Tenant:             attrPrf.Tenant,
-		ID:                 attrPrf.ID,
-		FilterIDs:          make([]string, len(attrPrf.FilterIDs)),
-		Contexts:           make([]string, len(attrPrf.Contexts)),
-		Attributes:         make([]*utils.TPAttribute, len(attrPrf.Attributes)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Blocker:            attrPrf.Blocker,
-		Weight:             attrPrf.Weight,
+		Tenant:     attrPrf.Tenant,
+		ID:         attrPrf.ID,
+		FilterIDs:  make([]string, len(attrPrf.FilterIDs)),
+		Contexts:   make([]string, len(attrPrf.Contexts)),
+		Attributes: make([]*utils.TPAttribute, len(attrPrf.Attributes)),
+		Blocker:    attrPrf.Blocker,
+		Weight:     attrPrf.Weight,
 	}
 	for i, fli := range attrPrf.FilterIDs {
 		tpAttr.FilterIDs[i] = fli
