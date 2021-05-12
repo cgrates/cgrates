@@ -124,7 +124,7 @@ func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 
 			// Rating
 			if nEcAcntChrg.RatingID != EmptyString {
-				if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.RatingID]); rtID != EmptyString &&
+				if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.RatingID], nEc.IntervalRates); rtID != EmptyString &&
 					rtID != nEcAcntChrg.RatingID {
 					nEc.Rating[rtID] = ec.Rating[rtID]
 					delete(nEc.Rating, nEcAcntChrg.RatingID)
@@ -206,6 +206,16 @@ func (ec *EventCharges) AsExtEventCharges() (eEc *ExtEventCharges, err error) {
 			}
 		}
 	}
+	if ec.IntervalRates != nil {
+		eEc.IntervalRates = make(map[string]*ExtIntervalRate, len(ec.IntervalRates))
+		for key, val := range ec.IntervalRates {
+			if extIntRate, err := val.AsExtIntervalRate(); err != nil {
+				return nil, err
+			} else {
+				eEc.IntervalRates[key] = extIntRate
+			}
+		}
+	}
 	if ec.Accounts != nil {
 		eEc.Accounts = make(map[string]*ExtAccount, len(ec.Accounts))
 		for acntID, acnt := range ec.Accounts {
@@ -239,6 +249,9 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 		(eEc.Rating == nil && exCh.Rating != nil ||
 			eEc.Rating != nil && exCh.Rating == nil ||
 			len(eEc.Rating) != len(exCh.Rating)) ||
+		(eEc.IntervalRates == nil && exCh.IntervalRates != nil ||
+			eEc.IntervalRates != nil && exCh.IntervalRates == nil ||
+			len(eEc.IntervalRates) != len(exCh.IntervalRates)) ||
 		(eEc.Accounts == nil && exCh.Accounts != nil ||
 			eEc.Accounts != nil && exCh.Accounts == nil ||
 			len(eEc.Accounts) != len(exCh.Accounts)) {
@@ -260,7 +273,7 @@ func (eEc *ExtEventCharges) Equals(exCh *ExtEventCharges) (eq bool) {
 		}
 	}
 	for key, val := range eEc.Rating {
-		if ok := val.Equals(exCh.Rating[key]); !ok {
+		if ok := val.Equals(exCh.Rating[key], eEc.IntervalRates, exCh.IntervalRates); !ok {
 			return
 		}
 	}
@@ -294,6 +307,9 @@ func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 		(eC.Rating == nil && evCh.Rating != nil ||
 			eC.Rating != nil && evCh.Rating == nil ||
 			len(eC.Rating) != len(evCh.Rating)) ||
+		(eC.IntervalRates == nil && evCh.IntervalRates != nil ||
+			eC.IntervalRates != nil && evCh.IntervalRates == nil ||
+			len(eC.IntervalRates) != len(evCh.IntervalRates)) ||
 		(eC.Accounts == nil && evCh.Accounts != nil ||
 			eC.Accounts != nil && evCh.Accounts == nil ||
 			len(eC.Accounts) != len(evCh.Accounts)) {
@@ -315,7 +331,7 @@ func (eC *EventCharges) Equals(evCh *EventCharges) (eq bool) {
 		}
 	}
 	for key, val := range eC.Rating {
-		if ok := val.Equals(evCh.Rating[key]); !ok {
+		if ok := val.Equals(evCh.Rating[key], eC.IntervalRates, evCh.IntervalRates); !ok {
 			return
 		}
 	}
@@ -338,9 +354,9 @@ func (ec *EventCharges) unitFactorID(uF *UnitFactor) (ufID string) {
 }
 
 // ratingID returns the ID of the matching RateSInterval within ec.Rating
-func (ec *EventCharges) ratingID(rIl *RateSInterval) (rID string) {
+func (ec *EventCharges) ratingID(rIl *RateSInterval, nIrRef map[string]*IntervalRate) (rID string) {
 	for ecID, ecRtIl := range ec.Rating {
-		if ecRtIl.Equals(rIl) {
+		if ecRtIl.Equals(rIl, ec.IntervalRates, nIrRef) {
 			return ecID
 		}
 	}
@@ -364,10 +380,11 @@ type ExtEventCharges struct {
 
 	Charges []*ChargeEntry
 
-	Accounting  map[string]*ExtAccountCharge
-	UnitFactors map[string]*ExtUnitFactor
-	Rating      map[string]*ExtRateSInterval
-	Accounts    map[string]*ExtAccount
+	Accounting    map[string]*ExtAccountCharge
+	UnitFactors   map[string]*ExtUnitFactor
+	Rating        map[string]*ExtRateSInterval
+	IntervalRates map[string]*ExtIntervalRate
+	Accounts      map[string]*ExtAccount
 }
 
 type ExtChargingIncrement struct {
