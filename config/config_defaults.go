@@ -1002,6 +1002,7 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
+	"any_subsystem": true,					// if we match the *any subsystem
 },
 
 

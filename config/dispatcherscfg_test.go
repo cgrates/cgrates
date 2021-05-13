@@ -34,6 +34,7 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
 		Nested_fields:         utils.BoolPointer(true),
+		Any_subsystem:         utils.BoolPointer(true),
 	}
 	expected := &DispatcherSCfg{
 		Enabled:             true,
@@ -43,6 +44,7 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		NestedFields:        true,
+		AnySubsystem:        true,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -71,6 +73,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
+		utils.AnySubsystemCfg:        true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -100,6 +103,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix"},
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{"*internal", "*conn1"},
+		utils.AnySubsystemCfg:        true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -119,6 +123,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
+		utils.AnySubsystemCfg:        true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -135,6 +140,7 @@ func TestDispatcherSCfgClone(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		NestedFields:        true,
+		AnySubsystem:        true,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

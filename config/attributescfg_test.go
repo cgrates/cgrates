@@ -36,6 +36,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(true),
+		Any_context:           utils.BoolPointer(true),
 	}
 	expected := &AttributeSCfg{
 		Enabled:             true,
@@ -48,6 +49,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		ProcessRuns:         1,
 		NestedFields:        true,
+		AnyContext:          true,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -80,6 +82,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.AnyContextCfg:          true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -107,6 +110,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
 		utils.ProcessRunsCfg:         7,
+		utils.AnyContextCfg:          true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -131,6 +135,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.ProcessRunsCfg:         1,
+		utils.AnyContextCfg:          true,
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
@@ -151,6 +156,7 @@ func TestAttributeSCfgClone(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		ProcessRuns:         1,
 		NestedFields:        true,
+		AnyContext:          true,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
