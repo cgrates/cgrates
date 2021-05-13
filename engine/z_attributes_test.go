@@ -420,7 +420,7 @@ func TestAttributeIndexer(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
 		Contexts:  []string{utils.MetaAny},
-		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;" + expTimeStr},
+		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -2552,7 +2552,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
 		Contexts:  []string{utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;" + expTimeStr},
+		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|" + expTimeStr},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,

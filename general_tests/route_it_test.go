@@ -248,7 +248,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:       "cgrates.org",
 			ID:           "ResourceSupplier1",
-			FilterIDs:    []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:ResourceSupplier1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+			FilterIDs:    []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:ResourceSupplier1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,
@@ -267,7 +267,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Resource2Supplier1",
-			FilterIDs:    []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:Resource2Supplier1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+			FilterIDs:    []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:Resource2Supplier1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,
@@ -286,7 +286,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:       "cgrates.org",
 			ID:           "ResourceSupplier2",
-			FilterIDs:    []string{"*string:~*req.Supplier:route2", "*string:~*req.ResID:ResourceSupplier2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+			FilterIDs:    []string{"*string:~*req.Supplier:route2", "*string:~*req.ResID:ResourceSupplier2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,
@@ -305,7 +305,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:       "cgrates.org",
 			ID:           "ResourceSupplier3",
-			FilterIDs:    []string{"*string:~*req.Supplier:route3", "*string:~*req.ResID:ResourceSupplier3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+			FilterIDs:    []string{"*string:~*req.Supplier:route3", "*string:~*req.ResID:ResourceSupplier3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			UsageTTL:     time.Minute,
 			Limit:        10,
 			Stored:       true,

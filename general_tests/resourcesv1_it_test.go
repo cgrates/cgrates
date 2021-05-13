@@ -107,7 +107,7 @@ func testV1RsSetProfile(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RES_GR_TEST",
-			FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-14T14:26:00Z"},
+			FilterIDs:         []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			UsageTTL:          -1,
 			Limit:             2,
 			AllocationMessage: "Account1Channels",

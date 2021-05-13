@@ -286,7 +286,7 @@ func TestAPItoResource(t *testing.T) {
 		Stored:            tpRL.Stored,
 		Blocker:           tpRL.Blocker,
 		Weight:            tpRL.Weight,
-		FilterIDs:         []string{"FLTR_RES_GR_1"},
+		FilterIDs:         []string{"FLTR_RES_GR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: tpRL.AllocationMessage,
 		Limit:             2,
@@ -328,6 +328,7 @@ func TestAPItoModelResource(t *testing.T) {
 		Tenant:            "cgrates.org",
 		TPid:              testTPID,
 		ID:                "ResGroup1",
+		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Weight:            10,
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1"},
@@ -1250,7 +1251,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-15T14:36:00Z"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1263,7 +1264,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-15T14:36:00Z"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1324,7 +1325,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1", "con2"},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 		Attributes: []*utils.TPAttribute{
 			{FilterIDs: []string{"filter_id1", "filter_id2"},
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -1339,7 +1340,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			Tenant:             "cgrates.org",
 			ID:                 "ALS1",
 			Contexts:           "con1;con2",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;2014-07-14T14:36:00Z",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z",
 			AttributeFilterIDs: "filter_id1;filter_id2",
 			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
@@ -3393,7 +3394,7 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 		Tenant:            "cgrates.org",
 		TPid:              testTPID,
 		ID:                "ResGroup1",
-		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;2015-07-29T15:00:00Z"},
+		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z"},
 		UsageTTL:          "Test_TTL",
 		Weight:            10,
 		Limit:             "2",
@@ -3405,7 +3406,7 @@ func TestAPItoModelResourceCase2(t *testing.T) {
 			Tenant:            "cgrates.org",
 			Tpid:              "LoaderCSVTests",
 			ID:                "ResGroup1",
-			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-07-29T15:00:00Z",
+			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
 			UsageTTL:          "Test_TTL",
 			Weight:            10,
 			Limit:             "2",
@@ -3424,24 +3425,37 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 		Tenant:            "cgrates.org",
 		TPid:              testTPID,
 		ID:                "ResGroup1",
-		FilterIDs:         []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;2015-07-29T15:00:00Z"},
+		FilterIDs:         []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z"},
 		UsageTTL:          "Test_TTL",
 		Weight:            10,
 		Limit:             "2",
 		ThresholdIDs:      []string{"TRes1", "TRes2"},
 		AllocationMessage: "test",
 	}
-	expStruct := ResourceMdls{{
-		Tenant:            "cgrates.org",
-		Tpid:              testTPID,
-		ID:                "ResGroup1",
-		FilterIDs:         "FilterID1;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
-		UsageTTL:          "Test_TTL",
-		Weight:            10,
-		Limit:             "2",
-		ThresholdIDs:      "TRes1;TRes2",
-		AllocationMessage: "test",
-	}}
+	expStruct := ResourceMdls{
+		{
+			Tenant:            "cgrates.org",
+			Tpid:              testTPID,
+			ID:                "ResGroup1",
+			FilterIDs:         "FilterID1",
+			UsageTTL:          "Test_TTL",
+			Weight:            10,
+			Limit:             "2",
+			ThresholdIDs:      "TRes1;TRes2",
+			AllocationMessage: "test",
+		},
+		{
+			Tenant:            "cgrates.org",
+			Tpid:              testTPID,
+			ID:                "ResGroup1",
+			FilterIDs:         "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2015-07-29T15:00:00Z",
+			UsageTTL:          "",
+			Weight:            0,
+			Limit:             "",
+			ThresholdIDs:      "",
+			AllocationMessage: "",
+		},
+	}
 	result := APItoModelResource(testStruct)
 	if !reflect.DeepEqual(expStruct, result) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4888,7 +4902,7 @@ func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
 	testStruct := &ResourceProfile{
 		Tenant:            "",
 		ID:                "",
-		FilterIDs:         []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-15T14:25:00Z"},
+		FilterIDs:         []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		UsageTTL:          time.Second,
 		Limit:             0,
 		AllocationMessage: "",
@@ -4901,7 +4915,7 @@ func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
 		TPid:              "",
 		Tenant:            "",
 		ID:                "",
-		FilterIDs:         []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z;2014-07-15T14:25:00Z"},
+		FilterIDs:         []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		UsageTTL:          "1s",
 		Limit:             "0",
 		AllocationMessage: "",
@@ -4971,11 +4985,12 @@ func TestTpResourcesAsTpResources2(t *testing.T) {
 			TPid:         "TEST_TPID",
 			Tenant:       "cgrates.org",
 			ID:           "ResGroup1",
-			FilterIDs:    []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-27T15:00:00Z;2014-07-28T15:00:00Z"},
+			FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-27T15:00:00Z|2014-07-28T15:00:00Z", "FLTR_RES_GR1"},
 			ThresholdIDs: []string{"WARN_RES1"},
 		},
 	}
 	result := ResourceMdls(testStruct).AsTPResources()
+	sort.Strings(result[0].FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
