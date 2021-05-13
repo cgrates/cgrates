@@ -1,5 +1,5 @@
-#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
-cgrates.org,DEFAULT,,,*default,*none,0
-cgrates.org,route1,,,route1,*constant:*req.RequestType:*none;*constant:*req.Destination:1003,0
-cgrates.org,route2,,,route2,*constant:*req.RequestType:*none;*constant:*req.Destination:1004,0
-cgrates.org,route3,,,route3,*constant:*req.RequestType:*none;*constant:*req.Destination:1005,0
+#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
+cgrates.org,DEFAULT,,0,*default,*none
+cgrates.org,route1,,0,route1,*constant:*req.RequestType:*none;*constant:*req.Destination:1003
+cgrates.org,route2,,0,route2,*constant:*req.RequestType:*none;*constant:*req.Destination:1004
+cgrates.org,route3,,0,route3,*constant:*req.RequestType:*none;*constant:*req.Destination:1005

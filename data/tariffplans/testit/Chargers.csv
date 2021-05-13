@@ -1,4 +1,4 @@
-#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
-cgrates.org,Raw,,,raw,*constant:*req.RequestType:*none,20
-cgrates.org,CustomerCharges,,,CustomerCharges,*none,20
-cgrates.org,SupplierCharges,,,SupplierCharges,ATTR_SUPPLIER1,10
+#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
+cgrates.org,Raw,,20,raw,*constant:*req.RequestType:*none
+cgrates.org,CustomerCharges,,20,CustomerCharges,*none
+cgrates.org,SupplierCharges,,10,SupplierCharges,ATTR_SUPPLIER1

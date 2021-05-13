@@ -72,10 +72,6 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *uti
 			}
 			return nil, err
 		}
-		if cP.ActivationInterval != nil && cgrEv.Time != nil &&
-			!cP.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
-			continue
-		}
 		if pass, err := cS.filterS.Pass(context.TODO(), tnt, cP.FilterIDs,
 			evNm); err != nil {
 			return nil, err

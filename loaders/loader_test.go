@@ -1101,15 +1101,12 @@ func TestLoaderProcessChargers(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	eCharger1 := &engine.ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-		Weight:       20,
+		Weight:       0,
 	}
 
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charger1",
@@ -3229,44 +3226,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadChargersAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadChargersAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaChargers: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaChargers: {
-			utils.ChargersCsv: &openedCSVFile{
-				fileName: utils.ChargersCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

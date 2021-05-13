@@ -1376,16 +1376,6 @@ func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
 		if tp.Weight != 0 {
 			tpCPP.Weight = tp.Weight
 		}
-		if len(tp.ActivationInterval) != 0 {
-			tpCPP.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				tpCPP.ActivationInterval.ActivationTime = aiSplt[0]
-				tpCPP.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				tpCPP.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tntID]; !has {
 				filterMap[tntID] = make(utils.StringSet)
@@ -1450,14 +1440,6 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 				Weight: tpCPP.Weight,
 				RunID:  tpCPP.RunID,
 			}
-			if tpCPP.ActivationInterval != nil {
-				if tpCPP.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = tpCPP.ActivationInterval.ActivationTime
-				}
-				if tpCPP.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.InfieldSep + tpCPP.ActivationInterval.ExpiryTime
-				}
-			}
 			if isFilter && len(tpCPP.AttributeIDs) > 0 {
 				mdl.AttributeIDs = tpCPP.AttributeIDs[0]
 			} else if len(tpCPP.FilterIDs) > 0 {
@@ -1475,14 +1457,6 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 				if i == 0 {
 					mdl.Weight = tpCPP.Weight
 					mdl.RunID = tpCPP.RunID
-					if tpCPP.ActivationInterval != nil {
-						if tpCPP.ActivationInterval.ActivationTime != utils.EmptyString {
-							mdl.ActivationInterval = tpCPP.ActivationInterval.ActivationTime
-						}
-						if tpCPP.ActivationInterval.ExpiryTime != utils.EmptyString {
-							mdl.ActivationInterval += utils.InfieldSep + tpCPP.ActivationInterval.ExpiryTime
-						}
-					}
 				}
 				mdl.AttributeIDs = tpCPP.AttributeIDs[i]
 				mdl.FilterIDs = tpCPP.FilterIDs[i]
@@ -1531,37 +1505,23 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	for i, attribute := range tpCPP.AttributeIDs {
 		cpp.AttributeIDs[i] = attribute
 	}
-	if tpCPP.ActivationInterval != nil {
-		if cpp.ActivationInterval, err = tpCPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	return cpp, nil
 }
 
 func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPChargerProfile) {
 	tpCharger = &utils.TPChargerProfile{
-		Tenant:             chargerPrf.Tenant,
-		ID:                 chargerPrf.ID,
-		FilterIDs:          make([]string, len(chargerPrf.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		RunID:              chargerPrf.RunID,
-		AttributeIDs:       make([]string, len(chargerPrf.AttributeIDs)),
-		Weight:             chargerPrf.Weight,
+		Tenant:       chargerPrf.Tenant,
+		ID:           chargerPrf.ID,
+		FilterIDs:    make([]string, len(chargerPrf.FilterIDs)),
+		RunID:        chargerPrf.RunID,
+		AttributeIDs: make([]string, len(chargerPrf.AttributeIDs)),
+		Weight:       chargerPrf.Weight,
 	}
 	for i, fli := range chargerPrf.FilterIDs {
 		tpCharger.FilterIDs[i] = fli
 	}
 	for i, fli := range chargerPrf.AttributeIDs {
 		tpCharger.AttributeIDs[i] = fli
-	}
-	if chargerPrf.ActivationInterval != nil {
-		if !chargerPrf.ActivationInterval.ActivationTime.IsZero() {
-			tpCharger.ActivationInterval.ActivationTime = chargerPrf.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !chargerPrf.ActivationInterval.ExpiryTime.IsZero() {
-			tpCharger.ActivationInterval.ExpiryTime = chargerPrf.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	return
 }

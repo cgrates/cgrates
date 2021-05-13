@@ -1509,26 +1509,19 @@ func TestModelAsTPAttribute(t *testing.T) {
 
 func TestAPItoChargerProfile(t *testing.T) {
 	tpCPP := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
 
 	expected := &ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
@@ -1542,26 +1535,18 @@ func TestAPItoChargerProfile(t *testing.T) {
 
 func TestChargerProfileToAPI(t *testing.T) {
 	exp := &utils.TPChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
 
 	chargerPrf := &ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
@@ -1576,36 +1561,37 @@ func TestChargerProfileToAPI(t *testing.T) {
 //Number of FilterIDs and AttributeIDs are equal
 func TestAPItoModelTPCharger(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan",
-			RunID:              "*rated",
-			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "FLTR_ACNT_dan",
+			RunID:        "*rated",
+			AttributeIDs: "ATTR1",
+			Weight:       20,
 		},
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_DST_DE",
-			AttributeIDs:       "ATTR2",
-			ActivationInterval: "",
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "FLTR_DST_DE",
+			AttributeIDs: "ATTR2",
+		},
+		&ChargerMdl{
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			AttributeIDs: "",
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1617,35 +1603,30 @@ func TestAPItoModelTPCharger(t *testing.T) {
 //Number of FilterIDs is smaller than AttributeIDs
 func TestAPItoModelTPCharger2(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1", "ATTR2"},
 		Weight:       20,
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan",
-			RunID:              "*rated",
-			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "FLTR_ACNT_dan",
+			RunID:        "*rated",
+			AttributeIDs: "ATTR1",
+			Weight:       20,
 		},
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			AttributeIDs:       "ATTR2",
-			ActivationInterval: "",
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			AttributeIDs: "ATTR2",
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1657,34 +1638,35 @@ func TestAPItoModelTPCharger2(t *testing.T) {
 //Number of FilterIDs is greater than AttributeIDs
 func TestAPItoModelTPCharger3(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan",
-			RunID:              "*rated",
-			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "FLTR_ACNT_dan",
+			RunID:        "*rated",
+			AttributeIDs: "ATTR1",
+			Weight:       20,
 		},
 		&ChargerMdl{
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
 			FilterIDs: "FLTR_DST_DE",
+		},
+		&ChargerMdl{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1699,23 +1681,26 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
-		Weight: 20,
+		Weight:    20,
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan",
-			RunID:              "*rated",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			Weight:             20,
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: "FLTR_ACNT_dan",
+			RunID:     "*rated",
+			Weight:    20,
+		},
+		&ChargerMdl{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			RunID:     "",
+			Weight:    0,
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1727,26 +1712,23 @@ func TestAPItoModelTPCharger4(t *testing.T) {
 //len(FilterIDs) is 0
 func TestAPItoModelTPCharger5(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "Charger1",
-		RunID:  "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			RunID:              "*rated",
-			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			RunID:        "*rated",
+			AttributeIDs: "ATTR1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			Weight:       20,
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1758,24 +1740,21 @@ func TestAPItoModelTPCharger5(t *testing.T) {
 //both len(AttributeIDs) and len(FilterIDs) are 0
 func TestAPItoModelTPCharger6(t *testing.T) {
 	tpCharger := &utils.TPChargerProfile{
-		TPid:   "TP1",
-		Tenant: "cgrates.org",
-		ID:     "Charger1",
-		RunID:  "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
-		Weight: 20,
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		RunID:     "*rated",
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+		Weight:    20,
 	}
 	expected := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			RunID:              "*rated",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			RunID:     "*rated",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			Weight:    20,
 		},
 	}
 	rcv := APItoModelTPCharger(tpCharger)
@@ -1787,43 +1766,35 @@ func TestAPItoModelTPCharger6(t *testing.T) {
 func TestModelAsTPChargers(t *testing.T) {
 	models := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			RunID:              "*rated",
-			AttributeIDs:       "ATTR1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:        "*rated",
+			AttributeIDs: "ATTR1",
+			Weight:       20,
 		},
 	}
 	expected := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
 	expected2 := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_DST_DE", "FLTR_ACNT_dan"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_DST_DE", "FLTR_ACNT_dan"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
 	rcv := models.AsTPChargers()
+	sort.Strings(rcv[0].FilterIDs)
 	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
@@ -1832,26 +1803,21 @@ func TestModelAsTPChargers(t *testing.T) {
 func TestModelAsTPChargers2(t *testing.T) {
 	models := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			RunID:              "*rated",
-			AttributeIDs:       "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:        "*rated",
+			AttributeIDs: "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call",
+			Weight:       20,
 		},
 	}
 	expected := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call"},
 		Weight:       20,
 	}
@@ -1865,26 +1831,21 @@ func TestModelAsTPChargers2(t *testing.T) {
 func TestModelAsTPChargers3(t *testing.T) {
 	models := ChargerMdls{
 		&ChargerMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Charger1",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			RunID:              "*rated",
-			AttributeIDs:       "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call&<~*req.OriginID;_suf>",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			Weight:             20,
+			Tpid:         "TP1",
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:        "*rated",
+			AttributeIDs: "*constant:*req.RequestType:*rated;*constant:*req.Category:call;ATTR1;*constant:*req.Category:call&<~*req.OriginID;_suf>",
+			Weight:       20,
 		},
 	}
 	expected := &utils.TPChargerProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		RunID:     "*rated",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		TPid:         "TP1",
+		Tenant:       "cgrates.org",
+		ID:           "Charger1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:        "*rated",
 		AttributeIDs: []string{"*constant:*req.RequestType:*rated;*constant:*req.Category:call", "ATTR1", "*constant:*req.Category:call&<~*req.OriginID;_suf>"},
 		Weight:       20,
 	}
@@ -2347,7 +2308,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
 			SortingParameters: []string{"srtPrm1"},
-			FilterIDs:         []string{"FltrRoute", "*ai:~*req.AnswerTime:2017-11-27T00:00:00Z"},
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
 					ID:     "route1",
@@ -2365,6 +2326,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 	sort.Slice(rcv[0].Routes, func(i, j int) bool {
 		return strings.Compare(rcv[0].Routes[i].ID, rcv[0].Routes[j].ID) < 0
 	})
+	sort.Strings(rcv[0].FilterIDs)
 	if !reflect.DeepEqual(rcv, expPrf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
 	}
@@ -3723,40 +3685,20 @@ func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
 	}
 }
 
-func TestModelHelpersAPItoChargerProfilError(t *testing.T) {
-	structTest := &utils.TPChargerProfile{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat1",
-			ExpiryTime:     "cat2",
-		},
-	}
-	_, err := APItoChargerProfile(structTest, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpected <Unsupported time format>,\n Received <%+v>", err)
-	}
-}
-
 func TestChargerProfileToAPILastCase(t *testing.T) {
 	testStruct := &ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "CPP_1",
-		FilterIDs: []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		RunID:        "TestRunID",
 		AttributeIDs: []string{"*none"},
 		Weight:       20,
 	}
 
 	expStruct := &utils.TPChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "CPP_1",
-		FilterIDs: []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "",
-		},
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4"},
 		AttributeIDs: []string{"*none"},
 		RunID:        "TestRunID",
 		Weight:       20,

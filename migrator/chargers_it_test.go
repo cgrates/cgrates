@@ -25,7 +25,6 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -179,24 +178,16 @@ func testChrgITFlush(t *testing.T) {
 
 func testChrgITMigrateAndMove(t *testing.T) {
 	chrgPrf := &engine.ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "CHRG_1",
-		FilterIDs: []string{"*string:Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "CHRG_1",
+		FilterIDs:    []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:25:00Z"},
 		AttributeIDs: []string{"ATTR_1"},
 		Weight:       20,
 	}
 	chrgPrf2 := &engine.ChargerProfile{
-		Tenant:    "cgrates.com",
-		ID:        "CHRG_1",
-		FilterIDs: []string{"*string:Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.com",
+		ID:           "CHRG_1",
+		FilterIDs:    []string{"*string:Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:25:00Z"},
 		AttributeIDs: []string{"ATTR_1"},
 		Weight:       20,
 	}

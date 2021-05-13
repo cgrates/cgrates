@@ -34,34 +34,25 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_1",
-			FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_1",
+			FilterIDs:    []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "TestRunID",
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_2",
-			FilterIDs: []string{"FLTR_CP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_2",
+			FilterIDs:    []string{"FLTR_CP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
 			Weight:       20,
 		},
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_3",
-			FilterIDs: []string{"FLTR_CP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_3",
+			FilterIDs:    []string{"FLTR_CP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
 			Weight:       20,
@@ -147,34 +138,25 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_1",
-			FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_1",
+			FilterIDs:    []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "TestRunID",
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_2",
-			FilterIDs: []string{"FLTR_CP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_2",
+			FilterIDs:    []string{"FLTR_CP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
 			Weight:       20,
 		},
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_3",
-			FilterIDs: []string{"FLTR_CP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_3",
+			FilterIDs:    []string{"FLTR_CP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
 			Weight:       20,
@@ -314,34 +296,25 @@ func TestChargerProcessEvent(t *testing.T) {
 	var dmCharger *DataManager
 	cPPs := ChargerProfiles{
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_1",
-			FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_1",
+			FilterIDs:    []string{"FLTR_CP_1", "FLTR_CP_4", "*string:~*opts.*subsys:*chargers", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "TestRunID",
 			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_2",
-			FilterIDs: []string{"FLTR_CP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_2",
+			FilterIDs:    []string{"FLTR_CP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
 			Weight:       20,
 		},
 		&ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "CPP_3",
-			FilterIDs: []string{"FLTR_CP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "CPP_3",
+			FilterIDs:    []string{"FLTR_CP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1"},
 			Weight:       20,
