@@ -41,7 +41,6 @@ type TPCSVImporter struct {
 // Change it to func(string) error as soon as Travis updates.
 var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.TimingsCsv:            (*TPCSVImporter).importTimings,
-	utils.DestinationsCsv:       (*TPCSVImporter).importDestinations,
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
@@ -90,21 +89,6 @@ func (tpImp *TPCSVImporter) importTimings(fn string) error {
 	}
 
 	return tpImp.StorDB.SetTPTimings(tps)
-}
-
-func (tpImp *TPCSVImporter) importDestinations(fn string) error {
-	if tpImp.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
-	tps, err := tpImp.csvr.GetTPDestinations(tpImp.TPid, "")
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = tpImp.TPid
-	}
-
-	return tpImp.StorDB.SetTPDestinations(tps)
 }
 
 func (tpImp *TPCSVImporter) importResources(fn string) error {

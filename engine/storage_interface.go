@@ -36,7 +36,6 @@ type Storage interface {
 	Close()
 	Flush(string) error
 	GetKeysForPrefix(ctx *context.Context, prefix string) ([]string, error)
-	RemoveKeysForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
@@ -49,10 +48,6 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	HasDataDrv(*context.Context, string, string, string) (bool, error)
-	RemoveDestinationDrv(string, string) error
-	RemoveReverseDestinationDrv(string, string, string) error
-	SetReverseDestinationDrv(string, []string, string) error
-	GetReverseDestinationDrv(string, string) ([]string, error)
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error
@@ -142,7 +137,6 @@ type LoadReader interface {
 	GetTpTableIds(string, string, []string,
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
-	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
@@ -160,7 +154,6 @@ type LoadReader interface {
 type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
 	SetTPTimings([]*utils.ApierTPTiming) error
-	SetTPDestinations([]*utils.TPDestination) error
 	SetTPResources([]*utils.TPResourceProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error

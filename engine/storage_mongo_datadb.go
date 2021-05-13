@@ -318,7 +318,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 			return
 		}
 		//StorDB
-	case utils.TBLTPTimings, utils.TBLTPDestinations,
+	case utils.TBLTPTimings,
 		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
 		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
 		utils.TBLTPRoutes, utils.TBLTPThresholds:
@@ -373,7 +373,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 		}
 	}
 	if ms.storageType == utils.StorDB {
-		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
+		for _, col := range []string{utils.TBLTPTimings,
 			utils.TBLTPStats, utils.TBLTPResources,
 			utils.CDRsTBL, utils.SessionCostsTBL} {
 			if err = ms.ensureIndexesForCol(col); err != nil {
@@ -415,10 +415,6 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
 	var colName string
 	switch prefix {
-	case utils.DestinationPrefix:
-		colName = ColDst
-	case utils.ReverseDestinationPrefix:
-		colName = ColRds
 	case utils.LoadInstKey:
 		colName = ColLht
 	case utils.VersionPrefix:
@@ -546,7 +542,7 @@ func (ms *MongoStorage) getField3(sctx mongo.SessionContext, col, prefix, field 
 // GetKeysForPrefix implementation
 func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (result []string, err error) {
 	var category, subject string
-	keyLen := len(utils.DestinationPrefix)
+	keyLen := len(utils.AccountPrefix)
 	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
 	}
@@ -555,10 +551,6 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (r
 	subject = fmt.Sprintf("^%s", prefix[keyLen:]) // old way, no tenant support
 	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		switch category {
-		case utils.DestinationPrefix:
-			result, err = ms.getField(sctx, ColDst, utils.DestinationPrefix, subject, "key")
-		case utils.ReverseDestinationPrefix:
-			result, err = ms.getField(sctx, ColRds, utils.ReverseDestinationPrefix, subject, "key")
 		case utils.ResourceProfilesPrefix:
 			result, err = ms.getField2(sctx, ColRsP, utils.ResourceProfilesPrefix, subject, tntID)
 		case utils.ResourcesPrefix:
@@ -629,8 +621,6 @@ func (ms *MongoStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		var count int64
 		switch category {
-		case utils.DestinationPrefix:
-			count, err = ms.getCol(ColDst).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.ResourcesPrefix:
 			count, err = ms.getCol(ColRes).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ResourceProfilesPrefix:

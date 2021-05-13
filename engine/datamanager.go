@@ -43,8 +43,6 @@ var (
 		utils.AccountFilterIndexPrfx:        {},
 	}
 	cachePrefixMap = utils.StringSet{
-		utils.DestinationPrefix:             {},
-		utils.ReverseDestinationPrefix:      {},
 		utils.ResourceProfilesPrefix:        {},
 		utils.TimingsPrefix:                 {},
 		utils.ResourcesPrefix:               {},

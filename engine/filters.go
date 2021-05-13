@@ -223,19 +223,19 @@ func (fltr *Filter) Compile() (err error) {
 
 var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaCronExp, utils.MetaRSR, utils.MetaDestinations,
+	utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
 	utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaCronExp, utils.MetaRSR, utils.MetaDestinations, utils.MetaLessThan,
+	utils.MetaCronExp, utils.MetaRSR, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
 	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
-	utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR, utils.MetaDestinations,
+	utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
 	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
 	utils.MetaActivationInterval})
@@ -344,8 +344,6 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 		result, err = fltr.passStringSuffix(dDP)
 	case utils.MetaCronExp, utils.MetaNotCronExp:
 		result, err = fltr.passCronExp(ctx, dDP)
-	case utils.MetaDestinations, utils.MetaNotDestinations:
-		result, err = fltr.passDestinations(ctx, dDP)
 	case utils.MetaRSR, utils.MetaNotRSR:
 		result, err = fltr.passRSR(dDP)
 	case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
@@ -504,34 +502,6 @@ func (fltr *FilterRule) passCronExp(ctx *context.Context, dDP utils.DataProvider
 		}
 	}
 
-	return false, nil
-}
-
-func (fltr *FilterRule) passDestinations(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
-	dst, err := fltr.rsrElement.ParseDataProvider(dDP)
-	if err != nil {
-		if err == utils.ErrNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-	for _, p := range utils.SplitPrefix(dst, utils.MIN_PREFIX_MATCH) {
-		var destIDs []string
-		if err = connMgr.Call(ctx, config.CgrConfig().FilterSCfg().AdminSConns, utils.APIerSv1GetReverseDestination, &p, &destIDs); err != nil {
-			continue
-		}
-		for _, dID := range destIDs {
-			for _, valDstIDVal := range fltr.rsrValues {
-				valDstID, err := valDstIDVal.ParseDataProvider(dDP)
-				if err != nil {
-					continue
-				}
-				if valDstID == dID {
-					return true, nil
-				}
-			}
-		}
-	}
 	return false, nil
 }
 

@@ -242,9 +242,6 @@ func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (exists bool, err error) {
 	var i int
 	switch category {
-	case utils.DestinationPrefix:
-		err = rs.Cmd(&i, redisEXISTS, category+subject)
-		return i == 1, err
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
@@ -254,33 +251,6 @@ func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		return i == 1, err
 	}
 	return false, errors.New("unsupported HasData category")
-}
-
-func (rs *RedisStorage) GetReverseDestinationDrv(key, transactionID string) (ids []string, err error) {
-	if err = rs.Cmd(&ids, redisSMEMBERS, utils.ReverseDestinationPrefix+key); err != nil {
-		return
-	}
-	if len(ids) == 0 {
-		err = utils.ErrNotFound
-	}
-	return
-}
-
-func (rs *RedisStorage) SetReverseDestinationDrv(destID string, prefixes []string, transactionID string) (err error) {
-	for _, p := range prefixes {
-		if err = rs.Cmd(nil, redisSADD, utils.ReverseDestinationPrefix+p, destID); err != nil {
-			return
-		}
-	}
-	return
-}
-
-func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err error) {
-	return rs.Cmd(nil, redisDEL, utils.DestinationPrefix+destID)
-}
-
-func (rs *RedisStorage) RemoveReverseDestinationDrv(dstID, prfx, transactionID string) (err error) {
-	return rs.Cmd(nil, redisSREM, utils.ReverseDestinationPrefix+prfx, dstID)
 }
 
 // Limit will only retrieve the last n items out of history, newest first

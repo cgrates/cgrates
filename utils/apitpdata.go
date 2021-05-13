@@ -803,8 +803,6 @@ type ArgsGetCacheItemWithAPIOpts struct {
 func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 	return &AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
-			DestinationIDs:             {MetaAny},
-			ReverseDestinationIDs:      {MetaAny},
 			ResourceProfileIDs:         {MetaAny},
 			ResourceIDs:                {MetaAny},
 			StatsQueueIDs:              {MetaAny},

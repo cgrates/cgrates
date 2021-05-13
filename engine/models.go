@@ -51,10 +51,6 @@ type DestinationMdl struct {
 	CreatedAt time.Time
 }
 
-func (DestinationMdl) TableName() string {
-	return utils.TBLTPDestinations
-}
-
 type ResourceMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
