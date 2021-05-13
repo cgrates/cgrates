@@ -3241,7 +3241,6 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 			TPid:              "TP1",
 			Tenant:            "cgrates.org",
 			ID:                "RoutePrf",
-			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 			Sorting:           "*lc",
 			SortingParameters: []string{},
 			Routes: []*utils.TPRoute{
@@ -3265,7 +3264,6 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
 			Sorting:            "*lc",
 			SortingParameters:  "",
 			RouteID:            "route1",
