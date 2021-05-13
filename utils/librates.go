@@ -710,18 +710,14 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 	return true
 }
 
-func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big, err error) {
+func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIv.cost == nil {
 		rIv.cost = new(decimal.Big)
 		for _, incrm := range rIv.Increments {
-			cstIncr, err := incrm.Cost(rts)
-			if err != nil {
-				return nil, err
-			}
-			rIv.cost = SumBig(rIv.cost, cstIncr)
+			rIv.cost = SumBig(rIv.cost, incrm.Cost(rts))
 		}
 	}
-	return rIv.cost, nil
+	return rIv.cost
 }
 
 // CompressEquals compares two RateSIncrement for Compress function
@@ -732,11 +728,11 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 }
 
 // Cost computes the Cost on RateSIncrement
-func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Big, err error) {
+func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIcr.cost == nil {
 		icrRt, has := rts[rIcr.RateID]
 		if !has {
-			return nil, fmt.Errorf("Cannot get the IntervalRate with this RateID: %s", rIcr.RateID)
+			//return nil, fmt.Errorf("Cannot get the IntervalRate with this RateID: %s", rIcr.RateID)
 		}
 		if rIcr.Usage.Compare(NewDecimal(-1, 0)) == 0 { // FixedFee
 			rIcr.cost = icrRt.FixedFee.Big
@@ -754,18 +750,14 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 			}
 		}
 	}
-	return rIcr.cost, nil
+	return rIcr.cost
 }
 
 // CostForIntervals sums the costs for all intervals
-func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (cost *decimal.Big, err error) {
+func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (cost *decimal.Big) {
 	cost = new(decimal.Big)
 	for _, rtIvl := range rtIvls {
-		rtCst, err := rtIvl.Cost(rts)
-		if err != nil {
-			return nil, err
-		}
-		cost = SumBig(cost, rtCst)
+		cost = SumBig(cost, rtIvl.Cost(rts))
 	}
 	return
 }
