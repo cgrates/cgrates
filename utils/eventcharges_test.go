@@ -662,7 +662,7 @@ func TestEventChargesEquals(t *testing.T) {
 				CompressFactor: 2,
 			},
 		},
-		IntervalRates: map[string]*IntervalRate{
+		Rates: map[string]*IntervalRate{
 			"RATE1": {
 				IntervalStart: NewDecimal(0, 0),
 				FixedFee:      NewDecimal(4, 1),
@@ -841,7 +841,7 @@ func TestEventChargesEquals(t *testing.T) {
 				CompressFactor: 2,
 			},
 		},
-		IntervalRates: map[string]*IntervalRate{
+		Rates: map[string]*IntervalRate{
 			"RATE1": {
 				IntervalStart: NewDecimal(0, 0),
 				FixedFee:      NewDecimal(4, 1),
@@ -1026,7 +1026,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 				CompressFactor: 2,
 			},
 		},
-		IntervalRates: map[string]*IntervalRate{
+		Rates: map[string]*IntervalRate{
 			"RATE_1": {
 				IntervalStart: NewDecimal(0, 0),
 				FixedFee:      NewDecimal(4, 1),
@@ -1211,7 +1211,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 				CompressFactor: 2,
 			},
 		},
-		IntervalRates: map[string]*ExtIntervalRate{
+		Rates: map[string]*ExtIntervalRate{
 			"RATE_1": {
 				IntervalStart: Float64Pointer(0),
 				FixedFee:      Float64Pointer(0.4),

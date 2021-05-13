@@ -873,10 +873,7 @@ func TestCostForIntervals(t *testing.T) {
 		},
 	}
 	eDcml, _ := new(decimal.Big).SetFloat64(4.3).Float64()
-	cost, err := CostForIntervals(rtIvls, rtsMap)
-	if err != nil {
-		t.Error(err)
-	}
+	cost := CostForIntervals(rtIvls, rtsMap)
 	if costFlt, _ := cost.Float64(); costFlt != eDcml {
 		t.Errorf("eDcml: %f, received: %+v", eDcml, cost)
 	}
@@ -994,10 +991,7 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 	eDcml, _ := new(decimal.Big).SetFloat64(4.9).Float64()
-	cost, err := CostForIntervals(rtIvls, rtsMap)
-	if err != nil {
-		t.Error(err)
-	}
+	cost := CostForIntervals(rtIvls, rtsMap)
 	if costFlt, _ := cost.Float64(); costFlt != eDcml {
 		t.Errorf("eDcml: %f, received: %+v", eDcml, costFlt)
 	}
@@ -1649,9 +1643,7 @@ func TestCostForIntervalsWithPartialIntervals(t *testing.T) {
 		},
 	}
 
-	if cost, err := CostForIntervals(rtIvls, rtsMap); err != nil {
-		t.Error(err)
-	} else if cost.Cmp(decimal.New(2, 2)) != 0 {
+	if cost := CostForIntervals(rtIvls, rtsMap); cost.Cmp(decimal.New(2, 2)) != 0 {
 		t.Errorf("received cost: %s", cost)
 	}
 }

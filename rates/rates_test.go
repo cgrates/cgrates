@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rates
 
 import (
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -201,9 +202,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 				utils.AccountField: "1001"}}}, rateS.cfg.RateSCfg().Verbosity); err != nil {
 		t.Error(err)
 	} else {
-		if _, err := expectedRPCost.RateSIntervals[0].Cost(expectedRPCost.Rates); err != nil {
-			t.Error(err)
-		}
+		expectedRPCost.RateSIntervals[0].Cost(expectedRPCost.Rates)
 		if !rcv.Equals(expectedRPCost) {
 			t.Errorf("Expected %+v\n, received %+v", utils.ToJSON(expectedRPCost), utils.ToJSON(rcv))
 		}
@@ -1018,7 +1017,6 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 	}
 }
 
-/*
 func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -1083,7 +1081,7 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						IncrementStart:    utils.NewDecimal(0, 0),
-						Rate:              rPrf.Rates["RATE1"],
+						RateID:            "UUID",
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -1093,7 +1091,15 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 			},
 		},
 	}
-	expectedRPCost.RateSIntervals[0].Cost()
+	intrvlRts := map[string]*utils.IntervalRate{
+		"UUID": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+	}
+	expectedRPCost.RateSIntervals[0].Cost(intrvlRts)
 	expected := "NOT_FOUND:fi"
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
@@ -1158,7 +1164,7 @@ func TestRateSRateProfileCostForEventErrMinCost(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						IncrementStart:    utils.NewDecimal(0, 0),
-						Rate:              rPrf.Rates["RATE1"],
+						RateID:            "UUID",
 						IntervalRateIndex: 0,
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -1168,7 +1174,15 @@ func TestRateSRateProfileCostForEventErrMinCost(t *testing.T) {
 			},
 		},
 	}
-	expectedRPCost.RateSIntervals[0].Cost()
+	intrvlRts := map[string]*utils.IntervalRate{
+		"UUID": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+	}
+	expectedRPCost.RateSIntervals[0].Cost(intrvlRts)
 	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:9223372036854775807 exp:0 precision:19 form:0}> min cost to Float64"
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
@@ -1234,8 +1248,8 @@ func TestRateSRateProfileCostForEventErrMaxCost(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						IncrementStart:    utils.NewDecimal(0, 0),
-						Rate:              rPrf.Rates["RATE1"],
 						IntervalRateIndex: 0,
+						RateID:            "UUID",
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),
 					},
@@ -1244,7 +1258,15 @@ func TestRateSRateProfileCostForEventErrMaxCost(t *testing.T) {
 			},
 		},
 	}
-	expectedRPCost.RateSIntervals[0].Cost()
+	intrvlRts := map[string]*utils.IntervalRate{
+		"UUID": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+	}
+	expectedRPCost.RateSIntervals[0].Cost(intrvlRts)
 	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:9223372036854775807 exp:0 precision:19 form:0}> max cost to Float64"
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
@@ -1309,8 +1331,8 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 				Increments: []*utils.RateSIncrement{
 					{
 						IncrementStart:    utils.NewDecimal(0, 0),
-						Rate:              rPrf.Rates["RATE1"],
 						IntervalRateIndex: 0,
+						RateID:            "UUID",
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),
 					},
@@ -1319,7 +1341,15 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 			},
 		},
 	}
-	expectedRPCost.RateSIntervals[0].Cost()
+	intrvlRts := map[string]*utils.IntervalRate{
+		"UUID": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+	}
+	expectedRPCost.RateSIntervals[0].Cost(intrvlRts)
 	expected := "can't convert <wrongValue> to decimal"
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
@@ -1333,5 +1363,3 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-*/
