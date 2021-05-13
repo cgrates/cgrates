@@ -33,15 +33,16 @@ import (
 
 // NewAMQPER return a new amqp event reader
 func NewAMQPER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, rdrErr chan error,
+	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	rdr := &AMQPER{
-		cgrCfg:    cfg,
-		cfgIdx:    cfgIdx,
-		fltrS:     fltrS,
-		rdrEvents: rdrEvents,
-		rdrExit:   rdrExit,
-		rdrErr:    rdrErr,
+		cgrCfg:        cfg,
+		cfgIdx:        cfgIdx,
+		fltrS:         fltrS,
+		rdrEvents:     rdrEvents,
+		partialEvents: partialEvents,
+		rdrExit:       rdrExit,
+		rdrErr:        rdrErr,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
@@ -69,10 +70,11 @@ type AMQPER struct {
 	exchangeType string
 	routingKey   string
 
-	rdrEvents chan *erEvent // channel to dispatch the events created to
-	rdrExit   chan struct{}
-	rdrErr    chan error
-	cap       chan struct{}
+	rdrEvents     chan *erEvent // channel to dispatch the events created to
+	partialEvents chan *erEvent // channel to dispatch the partial events created to
+	rdrExit       chan struct{}
+	rdrErr        chan error
+	cap           chan struct{}
 
 	conn    *amqp.Connection
 	channel *amqp.Channel
@@ -202,7 +204,11 @@ func (rdr *AMQPER) processMessage(msg []byte) (err error) {
 		return
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	rdr.rdrEvents <- &erEvent{
+	rdrEv := rdr.rdrEvents
+	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		rdrEv = rdr.partialEvents
+	}
+	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
 	}

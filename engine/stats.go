@@ -290,7 +290,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
-		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (_ interface{}, _ error) {
 			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)

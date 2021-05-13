@@ -303,7 +303,6 @@ const (
 	StaticValuePrefix       = "^"
 	CSV                     = "csv"
 	FWV                     = "fwv"
-	MetaPartialCSV          = "*partial_csv"
 	MetaCombimed            = "*combimed"
 	MetaMongo               = "*mongo"
 	MetaPostgres            = "*postgres"
@@ -369,7 +368,6 @@ const (
 	MetaS3jsonMap             = "*s3_json_map"
 	ConfigPath                = "/etc/cgrates/"
 	DisconnectCause           = "DisconnectCause"
-	MetaFlatstore             = "*flatstore"
 	MetaRating                = "*rating"
 	NotAvailable              = "N/A"
 	Call                      = "call"
@@ -2077,16 +2075,17 @@ const (
 
 // EventReaderCfg
 const (
-	IDCfg              = "id"
-	CacheCfg           = "cache"
-	FieldSepCfg        = "field_separator"
-	RunDelayCfg        = "run_delay"
-	SourcePathCfg      = "source_path"
-	ProcessedPathCfg   = "processed_path"
-	TenantCfg          = "tenant"
-	FlagsCfg           = "flags"
-	FieldsCfg          = "fields"
-	CacheDumpFieldsCfg = "cache_dump_fields"
+	IDCfg                  = "id"
+	CacheCfg               = "cache"
+	FieldSepCfg            = "field_separator"
+	RunDelayCfg            = "run_delay"
+	SourcePathCfg          = "source_path"
+	ProcessedPathCfg       = "processed_path"
+	TenantCfg              = "tenant"
+	FlagsCfg               = "flags"
+	FieldsCfg              = "fields"
+	CacheDumpFieldsCfg     = "cache_dump_fields"
+	PartialCommitFieldsCfg = "partial_commit_fields"
 )
 
 // RegistrarCCfg
@@ -2331,6 +2330,12 @@ const (
 	KafkaTopic   = "kafkaTopic"
 	KafkaGroupID = "kafkaGroupID"
 	KafkaMaxWait = "kafkaMaxWait"
+
+	// partial
+	PartialOrderFieldOpt    = "partialOrderField"
+	PartialCacheAction      = "partialCacheAction"
+	PartialPathOpt          = "partialPath"
+	PartialCSVFieldSepartor = "partialcsvFieldSeparator"
 )
 
 var (

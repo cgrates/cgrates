@@ -37,16 +37,17 @@ import (
 
 // NewS3ER return a new s3 event reader
 func NewS3ER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, rdrErr chan error,
+	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 
 	rdr := &S3ER{
-		cgrCfg:    cfg,
-		cfgIdx:    cfgIdx,
-		fltrS:     fltrS,
-		rdrEvents: rdrEvents,
-		rdrExit:   rdrExit,
-		rdrErr:    rdrErr,
+		cgrCfg:        cfg,
+		cfgIdx:        cfgIdx,
+		fltrS:         fltrS,
+		rdrEvents:     rdrEvents,
+		partialEvents: partialEvents,
+		rdrExit:       rdrExit,
+		rdrErr:        rdrErr,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
@@ -65,10 +66,11 @@ type S3ER struct {
 	cfgIdx int // index of config instance within ERsCfg.Readers
 	fltrS  *engine.FilterS
 
-	rdrEvents chan *erEvent // channel to dispatch the events created to
-	rdrExit   chan struct{}
-	rdrErr    chan error
-	cap       chan struct{}
+	rdrEvents     chan *erEvent // channel to dispatch the events created to
+	partialEvents chan *erEvent // channel to dispatch the partial events created to
+	rdrExit       chan struct{}
+	rdrErr        chan error
+	cap           chan struct{}
 
 	awsRegion string
 	awsID     string
@@ -131,7 +133,11 @@ func (rdr *S3ER) processMessage(body []byte) (err error) {
 		return
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	rdr.rdrEvents <- &erEvent{
+	rdrEv := rdr.rdrEvents
+	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		rdrEv = rdr.partialEvents
+	}
+	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
 	}

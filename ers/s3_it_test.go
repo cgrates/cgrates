@@ -81,7 +81,7 @@ func TestS3ER(t *testing.T) {
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewS3ER(cfg, 1, rdrEvents,
+	if rdr, err = NewS3ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
@@ -172,7 +172,7 @@ func TestNewS3ER(t *testing.T) {
 		},
 	}
 
-	rdr, err := NewS3ER(cfg, 1, nil,
+	rdr, err := NewS3ER(cfg, 1, nil, nil,
 		nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -213,7 +213,7 @@ func TestNewS3ERCase2(t *testing.T) {
 		},
 	}
 
-	rdr, err := NewS3ER(cfg, 0, nil,
+	rdr, err := NewS3ER(cfg, 0, nil, nil,
 		nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)

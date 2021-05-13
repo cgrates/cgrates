@@ -123,7 +123,7 @@ func (n *DataNode) Field(path []string) (*DataLeaf, error) {
 		if err != nil {
 			return nil, err
 		}
-		if idx < 0 { // in case the index is negative add the slice lenght
+		if idx < 0 { // in case the index is negative add the slice length
 			idx += len(n.Slice)
 		}
 		if idx < 0 || idx >= len(n.Slice) { // check if the index is in range [0,len(slice))
@@ -171,7 +171,7 @@ func (n *DataNode) fieldAsInterface(path []string) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if idx < 0 { // in case the index is negative add the slice lenght
+		if idx < 0 { // in case the index is negative add the slice length
 			idx += len(n.Slice)
 		}
 		if idx < 0 || idx >= len(n.Slice) { // check if the index is in range [0,len(slice))
@@ -233,7 +233,7 @@ func (n *DataNode) Set(path []string, val interface{}) (addedNew bool, err error
 			return true, err
 		}
 		// try dynamic path instead
-		// if idx < 0 { // in case the index is negative add the slice lenght
+		// if idx < 0 { // in case the index is negative add the slice length
 		// idx += len(n.Slice)
 		// path[0] = strconv.Itoa(idx) // update the slice to reflect on orderNavMap
 		// }
@@ -281,7 +281,7 @@ func (n *DataNode) Remove(path []string) error {
 		if err != nil {
 			return err // the only error is when we expect an index but is not int
 		}
-		if idx < 0 { // in case the index is negative add the slice lenght
+		if idx < 0 { // in case the index is negative add the slice length
 			idx += len(n.Slice)
 			path[0] = strconv.Itoa(idx) // update the path for OrdNavMap
 		}
@@ -341,7 +341,7 @@ func (n *DataNode) Append(path []string, val *DataLeaf) (idx int, err error) {
 			return node.Append(path[1:], val)
 		}
 		// try dynamic path instead
-		// if idx < 0 { // in case the index is negative add the slice lenght
+		// if idx < 0 { // in case the index is negative add the slice length
 		// idx += len(n.Slice)
 		// path[0] = strconv.Itoa(idx) // update the slice to reflect on orderNavMap
 		// }
@@ -401,7 +401,7 @@ func (n *DataNode) Compose(path []string, val *DataLeaf) (err error) {
 			return node.Compose(path[1:], val)
 		}
 		// try dynamic path instead
-		// if idx < 0 { // in case the index is negative add the slice lenght
+		// if idx < 0 { // in case the index is negative add the slice length
 		// idx += len(n.Slice)
 		// path[0] = strconv.Itoa(idx) // update the slice to reflect on orderNavMap
 		// }

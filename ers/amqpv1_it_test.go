@@ -76,7 +76,7 @@ func TestAMQPERv1(t *testing.T) {
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewAMQPv1ER(cfg, 1, rdrEvents,
+	if rdr, err = NewAMQPv1ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
@@ -151,7 +151,7 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 		},
 	}
 
-	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil)
+	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -182,7 +182,7 @@ func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 		},
 	}
 
-	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil)
+	result, err := NewAMQPv1ER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

@@ -36,21 +36,22 @@ import (
 )
 
 func NewFWVFileER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, rdrErr chan error,
+	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
 	}
 	fwvER := &FWVFileER{
-		cgrCfg:    cfg,
-		cfgIdx:    cfgIdx,
-		fltrS:     fltrS,
-		rdrDir:    srcPath,
-		rdrEvents: rdrEvents,
-		rdrError:  rdrErr,
-		rdrExit:   rdrExit,
-		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
+		cgrCfg:        cfg,
+		cfgIdx:        cfgIdx,
+		fltrS:         fltrS,
+		rdrDir:        srcPath,
+		rdrEvents:     rdrEvents,
+		partialEvents: partialEvents,
+		rdrError:      rdrErr,
+		rdrExit:       rdrExit,
+		conReqs:       make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
 	var processFile struct{}
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
 		fwvER.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
@@ -66,6 +67,7 @@ type FWVFileER struct {
 	fltrS         *engine.FilterS
 	rdrDir        string
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
+	partialEvents chan *erEvent // channel to dispatch the partial events created to
 	rdrError      chan error
 	rdrExit       chan struct{}
 	conReqs       chan struct{} // limit number of opened files
@@ -218,7 +220,11 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		}
 		rdr.offset += rdr.lineLen // increase the offset
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-		rdr.rdrEvents <- &erEvent{
+		rdrEv := rdr.rdrEvents
+		if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+			rdrEv = rdr.partialEvents
+		}
+		rdrEv <- &erEvent{
 			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
 		}
@@ -306,7 +312,11 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		return err
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	rdr.rdrEvents <- &erEvent{
+	rdrEv := rdr.rdrEvents
+	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		rdrEv = rdr.partialEvents
+	}
+	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
 	}
@@ -348,7 +358,11 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 	}
 	rdr.offset += rdr.headerOffset // increase the offset
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	rdr.rdrEvents <- &erEvent{
+	rdrEv := rdr.rdrEvents
+	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		rdrEv = rdr.partialEvents
+	}
+	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
 	}

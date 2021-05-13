@@ -23,7 +23,6 @@ package ers
 import (
 	"errors"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
@@ -344,7 +343,6 @@ func TestERsListenAndServeCfgRldChan5(t *testing.T) {
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
 	exp := &CSVFileER{
-		RWMutex:   sync.RWMutex{},
 		cgrCfg:    cfg,
 		cfgIdx:    0,
 		fltrS:     nil,
