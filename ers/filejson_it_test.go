@@ -232,7 +232,7 @@ func testJSONKillEngine(t *testing.T) {
 func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -246,7 +246,7 @@ func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -261,7 +261,7 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 // func TestFileJSONServeTimeDefault(t *testing.T) {
 // 	cfg := config.NewDefaultCGRConfig()
 // 	cfgIdx := 0
-// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil,nil)
 // 	if err != nil {
 // 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 // 	}
@@ -291,7 +291,7 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 // func TestFileJSONProcessFile(t *testing.T) {
 // 	cfg := config.NewDefaultCGRConfig()
 // 	cfgIdx := 0
-// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil,nil)
 // 	if err != nil {
 // 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 // 	}

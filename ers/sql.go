@@ -45,16 +45,17 @@ const (
 
 // NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, rdrErr chan error,
+	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 
 	rdr := &SQLEventReader{
-		cgrCfg:    cfg,
-		cfgIdx:    cfgIdx,
-		fltrS:     fltrS,
-		rdrEvents: rdrEvents,
-		rdrExit:   rdrExit,
-		rdrErr:    rdrErr,
+		cgrCfg:        cfg,
+		cfgIdx:        cfgIdx,
+		fltrS:         fltrS,
+		rdrEvents:     rdrEvents,
+		partialEvents: partialEvents,
+		rdrExit:       rdrExit,
+		rdrErr:        rdrErr,
 	}
 	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
 		rdr.cap = make(chan struct{}, concReq)
@@ -85,10 +86,11 @@ type SQLEventReader struct {
 	expConnType   string
 	expTableName  string
 
-	rdrEvents chan *erEvent // channel to dispatch the events created to
-	rdrExit   chan struct{}
-	rdrErr    chan error
-	cap       chan struct{}
+	rdrEvents     chan *erEvent // channel to dispatch the events created to
+	partialEvents chan *erEvent // channel to dispatch the partial events created to
+	rdrExit       chan struct{}
+	rdrErr        chan error
+	cap           chan struct{}
 }
 
 // Config returns the curent configuration
@@ -252,7 +254,11 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 		return
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	rdr.rdrEvents <- &erEvent{
+	rdrEv := rdr.rdrEvents
+	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		rdrEv = rdr.partialEvents
+	}
+	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
 	}

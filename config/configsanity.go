@@ -695,8 +695,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 
 			switch rdr.Type {
-			case utils.MetaFileCSV, utils.MetaPartialCSV:
-				for _, dir := range []string{rdr.ProcessedPath, rdr.SourcePath} {
+			case utils.MetaFileCSV:
+				paths := []string{rdr.ProcessedPath, rdr.SourcePath}
+				if rdr.ProcessedPath == utils.EmptyString {
+					paths = []string{rdr.SourcePath}
+				}
+				for _, dir := range paths {
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)
 					}
@@ -713,42 +717,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if lq, has := rdr.Opts[utils.CSV+utils.LazyQuotes]; has {
 					if _, err := utils.IfaceAsBool(lq); err != nil {
 						return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.CSV+utils.LazyQuotes, err.Error(), rdr.ID)
-					}
-				}
-				if rdr.Type == utils.MetaPartialCSV {
-					if act, has := rdr.Opts[utils.PartialCSVCacheExpiryActionOpt]; has && (utils.IfaceAsString(act) != utils.MetaDumpToFile &&
-						utils.IfaceAsString(act) != utils.MetaPostCDR) {
-						return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
-					}
-					if ttl, has := rdr.Opts[utils.PartialCSVRecordCacheOpt]; has {
-						if _, err := utils.IfaceAsDuration(ttl); err != nil {
-							return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.PartialCSVRecordCacheOpt, err.Error(), rdr.ID)
-						}
-					}
-				}
-			case utils.MetaFlatstore:
-				for _, dir := range []string{rdr.ProcessedPath, rdr.SourcePath} {
-					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-						return fmt.Errorf("<%s> nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)
-					}
-				}
-				if fldSep, has := rdr.Opts[utils.FlatstorePrfx+utils.FieldSepOpt]; has &&
-					utils.IfaceAsString(fldSep) == utils.EmptyString {
-					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.FlatstorePrfx+utils.FieldSepOpt, rdr.ID)
-				}
-				if rowl, has := rdr.Opts[utils.FlatstorePrfx+utils.RowLengthOpt]; has {
-					if _, err := utils.IfaceAsTInt64(rowl); err != nil {
-						return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.FlatstorePrfx+utils.RowLengthOpt, err.Error(), rdr.ID)
-					}
-				}
-				if lq, has := rdr.Opts[utils.FlatstorePrfx+utils.LazyQuotes]; has {
-					if _, err := utils.IfaceAsBool(lq); err != nil {
-						return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.FlatstorePrfx+utils.LazyQuotes, err.Error(), rdr.ID)
-					}
-				}
-				if ttl, has := rdr.Opts[utils.FstPartialRecordCacheOpt]; has {
-					if _, err := utils.IfaceAsDuration(ttl); err != nil {
-						return fmt.Errorf("<%s> error when converting %s: <%s> for reader with ID: %s", utils.ERs, utils.FstPartialRecordCacheOpt, err.Error(), rdr.ID)
 					}
 				}
 			case utils.MetaKafkajsonMap:

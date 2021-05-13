@@ -43,7 +43,7 @@ func TestNewJSONFileER(t *testing.T) {
 	}
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1
 	cfg.ERsCfg().Readers[0].SourcePath = "/"
-	result, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	result, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

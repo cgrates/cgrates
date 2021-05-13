@@ -211,7 +211,7 @@ func TestNewFWVFileER(t *testing.T) {
 		rdrDir: "",
 	}
 	cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs = 1
-	result, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	result, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -252,7 +252,7 @@ func TestFWVFileConfig(t *testing.T) {
 		},
 	}
 	expected := cfg.ERsCfg().Readers[0]
-	rdr, err := NewFWVFileER(cfg, 0, nil, nil, nil, nil)
+	rdr, err := NewFWVFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -312,7 +312,7 @@ func TestFileFWVProcessEvent(t *testing.T) {
 func TestFileFWVServeErrTimeDuration0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -326,7 +326,7 @@ func TestFileFWVServeErrTimeDuration0(t *testing.T) {
 func TestFileFWVServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

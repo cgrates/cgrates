@@ -354,9 +354,12 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"ers": {									// EventReaderService
-	"enabled": false,						// starts the EventReader service: <true|false>
-	"sessions_conns":["*internal"],			// RPC Connections IDs
+"ers": {														// EventReaderService
+	"enabled": false,											// starts the EventReader service: <true|false>
+	"sessions_conns":["*internal"],								// RPC Connections IDs
+	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
+	"partial_cache_action": "*post_cdr",						// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
+	// "partial_path": "/var/spool/cgrates/ers/partial",		// the path were the partial events will be sent
 	"readers": [
 		{
 			"id": "*default",									// identifier of the EventReader profile
@@ -366,25 +369,17 @@ const CGRATES_CFG_JSON = `
 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
 			"opts": {
-				// FileCSV and PartialCSV
+				// Partial
+				// "partialPath": "/",							// the path were the partial events will be sent
+				// "partialCacheAction": "*post_cdr",			// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
+				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
+				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
+				
+				// FileCSV 
 				"csvRowLength": 0,								// Number of fields from csv file
 				"csvFieldSeparator": ",",						// separator used when reading the fields
 				"csvHeaderDefineChar": ":", 					// the starting character for header definition used in case of CSV files
 				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
-
-				// PartialCSV
-				"csvCacheExpiryAction": "*post_cdr",			// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
-				// "csvRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
-
-				// FlatStore
-				"fstRowLength": 0,								// Number of fields from csv file
-				"fstFieldSeparator": ",",						// separator used when reading the fields
-				// "fstFailedCallsPrefix": ""					// Used in case of flatstore CDRs to avoid searching for BYE records
-				// "fstRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
-				// "fstLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
-				"fstMethod": "~*req.0",							// the rsr parser that will determine the method of the current record
-				"fstOriginID": "~*req.3;~*req.1;~*req.2",		// the rsr parser that will determine the originID of the current record
-				"fstMadatoryACK": false,						// if we should receive the ACK before processing the record
 
 				// FileXML
 				"xmlRootPath": "",								// path towards one event in case of XML CDRs
@@ -459,6 +454,7 @@ const CGRATES_CFG_JSON = `
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
 			],
+			"partial_commit_fields": [],
 			"cache_dump_fields": [],
 		},
 	],
@@ -524,7 +520,7 @@ const CGRATES_CFG_JSON = `
 				// "awsKey": "",								// AWSKey        
 				// "awsSecret": "",								// AWSSecret
 				// "awsToken": "",								// AWSToken      
-				// "s3FolderPath": "",							// AWSFolderPath 
+				// "s3FolderPath": "",							// S3FolderPath 
 
 			},													// extra options for exporter
 			"tenant": "",										// tenant used in filterS.Pass

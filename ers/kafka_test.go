@@ -103,7 +103,7 @@ func TestKafkaERServe(t *testing.T) {
 	rdrEvents := make(chan *erEvent, 1)
 	rdrExit := make(chan struct{}, 1)
 	rdrErr := make(chan error, 1)
-	rdr, err := NewKafkaER(cfg, 0, rdrEvents, rdrErr, fltrS, rdrExit)
+	rdr, err := NewKafkaER(cfg, 0, rdrEvents, make(chan *erEvent, 1), rdrErr, fltrS, rdrExit)
 	if err != nil {
 		t.Error(err)
 	}

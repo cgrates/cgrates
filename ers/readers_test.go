@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 func TestNewInvalidReader(t *testing.T) {
@@ -37,7 +36,7 @@ func TestNewInvalidReader(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	if _, err := NewEventReader(cfg, 1, nil, nil, &engine.FilterS{}, nil); err == nil || err.Error() != "unsupported reader type: <Invalid>" {
+	if _, err := NewEventReader(cfg, 1, nil, nil, nil, &engine.FilterS{}, nil); err == nil || err.Error() != "unsupported reader type: <Invalid>" {
 		t.Errorf("Expecting: <unsupported reader type: <Invalid>>, received: <%+v>", err)
 	}
 }
@@ -62,7 +61,7 @@ func TestNewCsvReader(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   nil}
 	var expected EventReader = exp
-	if rcv, err := NewEventReader(cfg, 1, nil, nil, fltr, nil); err != nil {
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else {
 		// because we use function make to init the channel when we create the EventReader reflect.DeepEqual
@@ -85,11 +84,11 @@ func TestNewKafkaReader(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	expected, err := NewKafkaER(cfg, 1, nil, nil, fltr, nil)
+	expected, err := NewKafkaER(cfg, 1, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
-	if rcv, err := NewEventReader(cfg, 1, nil, nil, fltr, nil); err != nil {
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
@@ -110,11 +109,11 @@ func TestNewSQLReader(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	expected, err := NewSQLEventReader(cfg, 1, nil, nil, fltr, nil)
+	expected, err := NewSQLEventReader(cfg, 1, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
-	if rcv, err := NewEventReader(cfg, 1, nil, nil, fltr, nil); err != nil {
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, nil, fltr, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
@@ -132,33 +131,9 @@ func TestNewSQLReaderError(t *testing.T) {
 	reader.SourcePath = "#"
 	reader.ProcessedPath = ""
 	expected := "unknown db_type "
-	_, err := NewSQLEventReader(cfg, 0, nil, nil, fltr, nil)
+	_, err := NewSQLEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, err)
-	}
-}
-
-func TestNewPartialCSVReader(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	fltr := &engine.FilterS{}
-	cfg.ERsCfg().Readers[0].Type = utils.MetaPartialCSV
-	cfg.ERsCfg().Readers[0].SourcePath = "/tmp/ers/in"
-	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1024
-	expected, err := NewPartialCSVFileER(cfg, 0, nil, nil, fltr, nil)
-	if err != nil {
-		t.Errorf("Expecting: <nil>, received: <%+v>", err)
-	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
-	if err != nil {
-		t.Error(err)
-	} else {
-		rcv.(*PartialCSVFileER).conReqs = nil
-		rcv.(*PartialCSVFileER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
-		expected.(*PartialCSVFileER).conReqs = nil
-		expected.(*PartialCSVFileER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
-		if !reflect.DeepEqual(expected, rcv) {
-			t.Errorf("Expecting %v but received %v", expected, rcv)
-		}
 	}
 }
 
@@ -166,11 +141,11 @@ func TestNewFileXMLReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaFileXML
-	expected, err := NewXMLFileER(cfg, 0, nil, nil, fltr, nil)
+	expected, err := NewXMLFileER(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -186,11 +161,11 @@ func TestNewFileFWVReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaFileFWV
-	expected, err := NewFWVFileER(cfg, 0, nil, nil, fltr, nil)
+	expected, err := NewFWVFileER(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(nil)
 	} else {
@@ -202,37 +177,15 @@ func TestNewFileFWVReader(t *testing.T) {
 	}
 }
 
-func TestNewFlatstoreReader(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	fltr := &engine.FilterS{}
-	cfg.ERsCfg().Readers[0].Type = utils.MetaFlatstore
-	expected, err := NewFlatstoreER(cfg, 0, nil, nil, fltr, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
-	if err != nil {
-		t.Error(err)
-	} else {
-		rcv.(*FlatstoreER).conReqs = nil
-		expected.(*FlatstoreER).conReqs = nil
-		rcv.(*FlatstoreER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
-		expected.(*FlatstoreER).cache = ltcache.NewCache(ltcache.UnlimitedCaching, 0, false, nil)
-		if !reflect.DeepEqual(expected, rcv) {
-			t.Errorf("Expecting %v but received %v", expected, rcv)
-		}
-	}
-}
-
 func TestNewJSONReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaFileJSON
-	expected, err := NewJSONFileER(cfg, 0, nil, nil, fltr, nil)
+	expected, err := NewJSONFileER(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -262,7 +215,7 @@ func TestNewAMQPReader(t *testing.T) {
 	exp.setOpts(map[string]interface{}{})
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -287,7 +240,7 @@ func TestNewAMQPv1Reader(t *testing.T) {
 	exp.Config().Opts = map[string]interface{}{}
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -313,7 +266,7 @@ func TestNewS3Reader(t *testing.T) {
 	exp.Config().Opts = map[string]interface{}{}
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
@@ -350,7 +303,7 @@ func TestNewSQSReader(t *testing.T) {
 	exp.Config().Opts = map[string]interface{}{}
 	exp.createPoster()
 	var expected EventReader = exp
-	rcv, err := NewEventReader(cfg, 0, nil, nil, fltr, nil)
+	rcv, err := NewEventReader(cfg, 0, nil, nil, nil, fltr, nil)
 	exp.session = rcv.(*SQSER).session
 	if err != nil {
 		t.Error(err)

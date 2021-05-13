@@ -134,12 +134,6 @@ type
 	**\*file_csv**
 		Reader for *comma separated* files.
 
-	**\*partial_csv**
-		Reader for *comma separated* where content spans over multiple files.
-
-	**\*flatstore**
-		Reader for Kamailio_/OpenSIPS_ *db_flatstore* files.
-
 	**\*file_xml**
 		Reader for *.xml* formatted files.
 

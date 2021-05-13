@@ -320,7 +320,7 @@ var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
-	utils.MetaPartialCSV, utils.MetaFlatstore, utils.MetaFileJSON, utils.MetaNone})
+	utils.MetaFileJSON, utils.MetaNone})
 
 var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaNone, utils.MetaFileFWV,
 	utils.MetaHTTPPost, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,

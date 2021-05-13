@@ -248,7 +248,7 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) e
 		}
 		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], bClone)
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-			sgs := make([]string, len(bClone.SharedGroups)) // aici
+			sgs := make([]string, len(bClone.SharedGroups))
 			i := 0
 			for sgID := range bClone.SharedGroups {
 				// add shared group member

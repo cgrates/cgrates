@@ -156,26 +156,30 @@ type CdrsJsonCfg struct {
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled        *bool
-	Sessions_conns *[]string
-	Readers        *[]*EventReaderJsonCfg
+	Enabled              *bool
+	Sessions_conns       *[]string
+	Readers              *[]*EventReaderJsonCfg
+	Partial_cache_ttl    *string
+	Partial_cache_action *string
+	Partial_path         *string
 }
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
 type EventReaderJsonCfg struct {
-	Id                  *string
-	Type                *string
-	Run_delay           *string
-	Concurrent_requests *int
-	Source_path         *string
-	Processed_path      *string
-	Opts                map[string]interface{}
-	Tenant              *string
-	Timezone            *string
-	Filters             *[]string
-	Flags               *[]string
-	Fields              *[]*FcTemplateJsonCfg
-	Cache_dump_fields   *[]*FcTemplateJsonCfg
+	Id                    *string
+	Type                  *string
+	Run_delay             *string
+	Concurrent_requests   *int
+	Source_path           *string
+	Processed_path        *string
+	Opts                  map[string]interface{}
+	Tenant                *string
+	Timezone              *string
+	Filters               *[]string
+	Flags                 *[]string
+	Fields                *[]*FcTemplateJsonCfg
+	Partial_commit_fields *[]*FcTemplateJsonCfg
+	Cache_dump_fields     *[]*FcTemplateJsonCfg
 }
 
 // EEsJsonCfg contains the configuration of EventExporterService

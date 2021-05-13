@@ -71,7 +71,7 @@ func TestAMQPER(t *testing.T) {
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewAMQPER(cfg, 1, rdrEvents,
+	if rdr, err = NewAMQPER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestAMQPERServeError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
 	expected := "AMQP scheme must be either 'amqp://' or 'amqps://'"
-	rdr, err := NewAMQPER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewAMQPER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

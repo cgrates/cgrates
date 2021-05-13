@@ -304,7 +304,7 @@ func TestNewXMLFileER(t *testing.T) {
 	}
 	var value struct{}
 	expEr.conReqs <- value
-	eR, err := NewXMLFileER(cfg, 0, nil, nil, fltrs, nil)
+	eR, err := NewXMLFileER(cfg, 0, nil, nil, nil, fltrs, nil)
 	expConReq := make(chan struct{}, 1)
 	expConReq <- struct{}{}
 	if <-expConReq != <-eR.(*XMLFileER).conReqs {

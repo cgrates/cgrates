@@ -21,13 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"bytes"
-	"fmt"
-	"log"
 	"net/rpc"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -229,6 +225,7 @@ func testPartITKillEngine(t *testing.T) {
 	}
 }
 
+/*
 func TestNewPartialCSVFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
@@ -933,3 +930,4 @@ func TestPartialCSVPostCDR(t *testing.T) {
 		t.Error("Time limit exceeded")
 	}
 }
+*/
