@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
 	"net/rpc"
 	"os"
 	"path"
@@ -209,7 +210,7 @@ func TestNewFWVFileER(t *testing.T) {
 		rdrDir: "",
 	}
 	cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs = 1
-	result, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	result, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -250,12 +251,464 @@ func TestFWVFileConfig(t *testing.T) {
 		},
 	}
 	expected := cfg.ERsCfg().Readers[0]
-	rdr, err := NewFWVFileER(cfg, 0, nil, nil, nil, nil)
+	rdr, err := NewFWVFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	result := rdr.Config()
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestFileFWVProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestFileFWVProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.fwv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte("test,test2"))
+	file.Close()
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	fname := "file1.fwv"
+	errExpect := "unsupported field prefix: <> when set fields"
+	eR.Config().Fields = []*config.FCTemplate{
+		{
+			Value: config.RSRParsers{
+				{
+					Rules: "~*hdr",
+				},
+			},
+			Type: utils.MetaRemove,
+			// Path: utils.MetaVars,
+		},
+	}
+	eR.Config().Fields[0].ComputePath()
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileFWVServeErrTimeDuration0(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	rdr.Config().RunDelay = time.Duration(0)
+	result := rdr.Serve()
+	if !reflect.DeepEqual(result, nil) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+	}
+}
+
+func TestFileFWVServeErrTimeDurationNeg1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfgIdx := 0
+	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	rdr.Config().RunDelay = time.Duration(-1)
+	expected := "no such file or directory"
+	err = rdr.Serve()
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
+
+func TestFileFWV(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/fwvErs/out"
+	err := os.MkdirAll(filePath, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(filePath, fmt.Sprintf("file%d.fwv", i))); err != nil {
+			t.Error(err)
+		}
+	}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	os.Create(path.Join(filePath, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileFWVServeDefault(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/fwvErs/out"
+	err := os.MkdirAll(filePath, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(filePath, fmt.Sprintf("file%d.fwv", i))); err != nil {
+			t.Error(err)
+		}
+	}
+	os.Create(path.Join(filePath, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	go func() {
+		time.Sleep(20 * time.Millisecond)
+		close(eR.rdrExit)
+	}()
+	eR.serveDefault()
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileFWVExit(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	eR.rdrExit <- struct{}{}
+}
+
+func TestFileFWVProcessTrailer(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	expEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"OriginID": "testOriginID",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/TestFileFWVProcessTrailer/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.txt"))
+	if err != nil {
+		t.Error(err)
+	}
+	trailerFields := []*config.FCTemplate{
+		{
+			Tag:   "OriginId",
+			Path:  "*cgreq.OriginID",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("testOriginID", utils.InfieldSep),
+		},
+	}
+	eR.Config().Fields = trailerFields
+	eR.Config().Fields[0].ComputePath()
+	if err := eR.processTrailer(file, 0, 0, "/tmp/fwvErs/out", trailerFields); err != nil {
+		t.Error(err)
+	}
+	select {
+	case data := <-eR.rdrEvents:
+		expEvent.ID = data.cgrEvent.ID
+		expEvent.Time = data.cgrEvent.Time
+		if !reflect.DeepEqual(data.cgrEvent, expEvent) {
+			t.Errorf("Expected %v but received %v", utils.ToJSON(expEvent), utils.ToJSON(data.cgrEvent))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Error("Time limit exceeded")
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileFWVProcessTrailerError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/TestFileFWVProcessTrailer/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.txt"))
+	if err != nil {
+		t.Error(err)
+	}
+	trailerFields := []*config.FCTemplate{
+		{},
+	}
+	errExpect := "unsupported type: <>"
+	if err := eR.processTrailer(file, 0, 0, "/tmp/fwvErs/out", trailerFields); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestFileFWVProcessTrailerError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	eR.Config().Tenant = config.RSRParsers{
+		{
+			Rules: "cgrates.org",
+		},
+	}
+	filePath := "/tmp/TestFileFWVProcessTrailer/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.txt"))
+	if err != nil {
+		t.Error(err)
+	}
+
+	trailerFields := []*config.FCTemplate{
+		{
+			Tag:   "OriginId",
+			Path:  "*cgreq.OriginID",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("testOriginID", utils.InfieldSep),
+		},
+	}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processTrailer(file, 0, 0, "/tmp/fwvErs/out", trailerFields); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestFileFWVProcessTrailerError3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	trailerFields := []*config.FCTemplate{
+		{
+			Tag:   "OriginId",
+			Path:  "*cgreq.OriginID",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("testOriginID", utils.InfieldSep),
+		},
+	}
+	var file *os.File
+	errExp := "invalid argument"
+	if err := eR.processTrailer(file, 0, 0, "/tmp/fwvErs/out", trailerFields); err == nil || err.Error() != errExp {
+		t.Errorf("Expected %v but received %v", errExp, err)
+	}
+}
+
+func TestFileFWVCreateHeaderMap(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	expEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			"OriginID": "testOriginID",
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	hdrFields := []*config.FCTemplate{
+		{
+			Tag:   "OriginId",
+			Path:  "*cgreq.OriginID",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("testOriginID", utils.InfieldSep),
+		},
+	}
+	eR.Config().Fields = hdrFields
+	eR.Config().Fields[0].ComputePath()
+	record := "testRecord"
+	if err := eR.createHeaderMap(record, 0, 0, "/tmp/fwvErs/out", hdrFields); err != nil {
+		t.Error(err)
+	}
+	select {
+	case data := <-eR.rdrEvents:
+		expEvent.ID = data.cgrEvent.ID
+		expEvent.Time = data.cgrEvent.Time
+		if !reflect.DeepEqual(data.cgrEvent, expEvent) {
+			t.Errorf("Expected %v but received %v", utils.ToJSON(expEvent), utils.ToJSON(data.cgrEvent))
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Error("Time limit exceeded")
+	}
+}
+
+func TestFileFWVCreateHeaderMapError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	trailerFields := []*config.FCTemplate{
+		{},
+	}
+	record := "testRecord"
+	errExpect := "unsupported type: <>"
+	if err := eR.createHeaderMap(record, 0, 0, "/tmp/fwvErs/out", trailerFields); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}
+
+func TestFileFWVCreateHeaderMapError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	eR := &FWVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/fwvErs/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	record := "testRecord"
+	trailerFields := []*config.FCTemplate{
+		{
+			Tag:   "OriginId",
+			Path:  "*cgreq.OriginID",
+			Type:  utils.MetaConstant,
+			Value: config.NewRSRParsersMustCompile("testOriginID", utils.InfieldSep),
+		},
+	}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.createHeaderMap(record, 0, 0, "/tmp/fwvErs/out", trailerFields); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }

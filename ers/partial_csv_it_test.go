@@ -24,7 +24,6 @@ import (
 	"net/rpc"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -224,6 +223,7 @@ func testPartITKillEngine(t *testing.T) {
 	}
 }
 
+/*
 func TestNewPartialCSVFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
@@ -540,3 +540,392 @@ func TestPartialCSVServe2(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "no such file or directory", err)
 	}
 }
+
+func TestPartialCSVServe5(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/partErs1/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	filePath := "/tmp/partErs1/out"
+	err := os.MkdirAll(filePath, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	for i := 1; i < 4; i++ {
+		if _, err := os.Create(path.Join(filePath, fmt.Sprintf("file%d.csv", i))); err != nil {
+			t.Error(err)
+		}
+	}
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+	os.Create(path.Join(filePath, "file1.txt"))
+	eR.Config().RunDelay = 1 * time.Millisecond
+	if err := eR.Serve(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPartialCSVProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(",a,ToR,b,c,d,e,f,g,h,i,j,k,l"))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/partErs1/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	fname := "file1.csv"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+	value := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Partial": true,
+			},
+		},
+		{
+			Tenant: "cgrates2.org",
+			Event: map[string]interface{}{
+				"Partial": true,
+			},
+		},
+	}
+	eR.Config().ProcessedPath = "/tmp"
+	eR.dumpToFile("ID1", value)
+}
+
+func TestPartialCSVProcessEventPrefix(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	cfg.ERsCfg().Readers[0].Opts[utils.HeaderDefineCharOpt] = ":"
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`:Test,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m
+	:Test2,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	fname := "file1.csv"
+	if err := eR.processFile(filePath, fname); err != nil {
+		t.Error(err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPartialCSVProcessEventError1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := &engine.FilterS{}
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, fname))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	eR.Config().Fields = []*config.FCTemplate{
+		{},
+	}
+
+	errExpect := "unsupported type: <>"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPartialCSVProcessEventError2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	cfg.ERsCfg().Readers[0].ProcessedPath = ""
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	filePath := "/tmp/TestPartialCSVProcessEvent/"
+	fname := "file1.csv"
+	if err := os.MkdirAll(filePath, 0777); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Create(path.Join(filePath, "file1.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	file.Write([]byte(`#ToR,OriginID,RequestType,Tenant,Category,Account,Subject,Destination,SetupTime,AnswerTime,Usage
+	,,*voice,OriginCDR1,*prepaid,,cgrates.org,*call,1001,SUBJECT_TEST_1001,1002,2021-01-07 17:00:02 +0000 UTC,2021-01-07 17:00:04 +0000 UTC,1h2m`))
+	file.Close()
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/ers/out/",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	//
+	eR.Config().Filters = []string{"Filter1"}
+	errExpect := "NOT_FOUND:Filter1"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	//
+	eR.Config().Filters = []string{"*exists:~*req..Account:"}
+	errExpect = "Invalid fieldPath [ Account]"
+	if err := eR.processFile(filePath, fname); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+	if err := os.RemoveAll(filePath); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPartialCSVDumpToFileErr1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/partErs1/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	value := []*utils.CGREvent{
+		{
+			Event: map[string]interface{}{
+				"Partial": true,
+			},
+		},
+	}
+	//ProcessedPath is not declared in order to trigger the
+	//file creation error
+	eR.dumpToFile("ID1", value)
+	errExpect := "[ERROR] <ERs> Failed creating /var/spool/cgrates/ers/out/.tmp."
+	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
+		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
+	}
+	value = []*utils.CGREvent{
+		{
+			Event: map[string]interface{}{
+				//Value is false in order to stop
+				//further execution
+				"Partial": false,
+			},
+		},
+	}
+	eR.dumpToFile("ID1", value)
+	eR.postCDR("ID1", value)
+}
+
+func TestPartialCSVDumpToFileErr2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/partErs1/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	value := []*utils.CGREvent{
+		{
+			Event: map[string]interface{}{
+				//Value of field is string in order to trigger
+				//the converting error
+				"Partial": "notBool",
+			},
+		},
+	}
+	eR.dumpToFile("ID1", value)
+	errExpect := `[WARNING] <ERs> Converting Event : <{"Partial":"notBool"}> to cdr , ignoring due to error: <strconv.ParseBool: parsing "notBool": invalid syntax>`
+	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
+		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
+	}
+}
+
+func TestPartialCSVDumpToFileErr3(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	var err error
+	utils.Logger, err = utils.Newlogger(utils.MetaStdLog, utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	utils.Logger.SetLogLevel(7)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/partErs1/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+	value := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Partial": true,
+			},
+		},
+		//Added a second event in order to pass the length check
+		{
+			Tenant: "cgrates2.org",
+			Event: map[string]interface{}{
+				"Partial": "notBool",
+			},
+		},
+	}
+	eR.Config().ProcessedPath = "/tmp"
+	eR.dumpToFile("ID1", value)
+	errExpect := `[WARNING] <ERs> Converting Event : <{"Partial":"notBool"}> to cdr , ignoring due to error: <strconv.ParseBool: parsing "notBool": invalid syntax>`
+	if rcv := buf.String(); !strings.Contains(rcv, errExpect) {
+		t.Errorf("\nExpected %v but \nreceived %v", errExpect, rcv)
+	}
+}
+
+func TestPartialCSVPostCDR(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrs := &engine.FilterS{}
+	eR := &PartialCSVFileER{
+		cgrCfg:    cfg,
+		cfgIdx:    0,
+		fltrS:     fltrs,
+		rdrDir:    "/tmp/partErs1/out",
+		rdrEvents: make(chan *erEvent, 1),
+		rdrError:  make(chan error, 1),
+		rdrExit:   make(chan struct{}),
+		conReqs:   make(chan struct{}, 1),
+	}
+	eR.conReqs <- struct{}{}
+
+	value := []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Partial": true,
+			},
+			APIOpts: map[string]interface{}{
+				"Opt1": "testOpt",
+			},
+		},
+	}
+	expEvent := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		Event:   value[0].Event,
+		APIOpts: value[0].APIOpts,
+	}
+	eR.postCDR("ID1", nil)
+	eR.postCDR("ID1", value)
+	select {
+	case data := <-eR.rdrEvents:
+		expEvent.ID = data.cgrEvent.ID
+		expEvent.Time = data.cgrEvent.Time
+		if !reflect.DeepEqual(expEvent, data.cgrEvent) {
+			t.Errorf("\nExpected %v but \nreceived %v", expEvent, data.cgrEvent)
+		}
+	case <-time.After(50 * time.Millisecond):
+		t.Error("Time limit exceeded")
+	}
+}
+*/

@@ -80,7 +80,7 @@ func TestSQSER(t *testing.T) {
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewSQSER(cfg, 1, rdrEvents,
+	if rdr, err = NewSQSER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}

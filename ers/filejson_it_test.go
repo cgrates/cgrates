@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -224,7 +225,7 @@ func testJSONKillEngine(t *testing.T) {
 func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -239,7 +240,7 @@ func TestFileJSONServeErrTimeDuration0(t *testing.T) {
 func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
-	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)
+	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -251,7 +252,51 @@ func TestFileJSONServeErrTimeDurationNeg1(t *testing.T) {
 	}
 }
 
-func TestFileJSONServeTimeDefault(t *testing.T) {
+// func TestFileJSONServeTimeDefault(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil,nil)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	rdr.Config().RunDelay = time.Duration(1)
+// 	result := rdr.Serve()
+// 	if !reflect.DeepEqual(result, nil) {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+// 	}
+// }
+
+// func TestFileJSONServeTimeDefaultChanExit(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdrExit := make(chan struct{}, 1)
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, rdrExit)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	rdrExit <- struct{}{}
+// 	rdr.Config().RunDelay = time.Duration(1)
+// 	result := rdr.Serve()
+// 	if !reflect.DeepEqual(result, nil) {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, result)
+// 	}
+// }
+
+// func TestFileJSONProcessFile(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil,nil)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	expected := "open : no such file or directory"
+// 	err2 := rdr.(*JSONFileER).processFile("", "")
+// 	if err2 == nil || err2.Error() != expected {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err2)
+// 	}
+// }
+
+func TestFileJSONProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfgIdx := 0
 	rdr, err := NewJSONFileER(cfg, cfgIdx, nil, nil, nil, nil)

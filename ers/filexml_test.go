@@ -38,7 +38,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 		rdrExit:   nil,
 		conReqs:   nil,
 	}
-	result, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
+	result, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -60,7 +60,7 @@ func TestERSXMLFileERConfig(t *testing.T) {
 		Filters:        []string{},
 		Opts:           make(map[string]interface{}),
 	}
-	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
@@ -82,7 +82,7 @@ func TestERSXMLFileERServeNil(t *testing.T) {
 		Filters:        []string{},
 		Opts:           make(map[string]interface{}),
 	}
-	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil)
+	result1, err := NewXMLFileER(cfg, 0, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}

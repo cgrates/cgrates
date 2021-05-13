@@ -228,7 +228,7 @@ func testSQLReader(t *testing.T) {
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
-	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, rdrErr, new(engine.FilterS), rdrExit)
+	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, make(chan *erEvent, 1), rdrErr, new(engine.FilterS), rdrExit)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -474,7 +474,7 @@ func testSQLReader3(t *testing.T) {
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
-	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, rdrErr, new(engine.FilterS), rdrExit)
+	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, make(chan *erEvent, 1), rdrErr, new(engine.FilterS), rdrExit)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -676,7 +676,7 @@ func TestErsSqlPostCDRS(t *testing.T) {
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
-	sqlEvReader, err := NewSQLEventReader(cfg, 1, nil, nil, fltr, nil)
+	sqlEvReader, err := NewSQLEventReader(cfg, 1, nil, nil, nil, fltr, nil)
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
