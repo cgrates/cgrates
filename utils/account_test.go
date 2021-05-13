@@ -929,3 +929,789 @@ func TestAsExtAccountCheckErrors(t *testing.T) {
 	}
 	acc.Balances["BL1"].UnitFactors[0].Factor = NewDecimal(0, 0)
 }
+
+func TestExtAccountEqualsCase1(t *testing.T) {
+	eAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+	}
+
+	extAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "49f2ba",
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Accounts should not match")
+	}
+}
+
+func TestExtAccountEqualsCase2(t *testing.T) {
+	eAc := &ExtAccount{
+		Tenant:    "cgrates.org",
+		ID:        "f43a2c",
+		FilterIDs: []string{"*string:*req.Account:1001"},
+	}
+
+	extAc := &ExtAccount{
+		Tenant:    "cgrates.org",
+		ID:        "f43a2c",
+		FilterIDs: []string{"*string:*req.Account:1003"},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Filters should not match")
+	}
+}
+
+func TestExtAccountEqualsCase3(t *testing.T) {
+	eAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    20,
+			},
+		},
+	}
+
+	extAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    10,
+			},
+		},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Weights should not match")
+	}
+}
+
+func TestExtAccountEqualsCase4(t *testing.T) {
+	eAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Opts: map[string]interface{}{
+			"Opt1": "*opt",
+		},
+	}
+
+	extAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Opts: map[string]interface{}{
+			"Opt1": "*opt2",
+		},
+	}
+
+	if eAc.Equals(extAc) {
+		t.Error("Opts should not match")
+	}
+}
+
+func TestExtAccountEqualsCase5(t *testing.T) {
+	eAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Balances: map[string]*ExtBalance{
+			"*monetary": {
+				ID:        "b24d37",
+				FilterIDs: []string{},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"*string:*req.Account:1001"},
+						Weight:    10,
+					},
+				},
+				Type:  "*monetary",
+				Units: Float64Pointer(3.14),
+				UnitFactors: []*ExtUnitFactor{
+					{
+						FilterIDs: []string{},
+						Factor:    Float64Pointer(2.1),
+					},
+				},
+				Opts:           map[string]interface{}{},
+				CostIncrements: []*ExtCostIncrement{},
+				AttributeIDs:   []string{MetaNone},
+				RateProfileIDs: []string{MetaNone},
+			},
+		},
+	}
+
+	extAc := &ExtAccount{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Balances: map[string]*ExtBalance{
+			"*monetary": {
+				ID:        "b24d37",
+				FilterIDs: []string{},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"*string:*req.Account:1003"},
+						Weight:    10,
+					},
+				},
+				Type:  "*monetary",
+				Units: Float64Pointer(3.14),
+				UnitFactors: []*ExtUnitFactor{
+					{
+						FilterIDs: []string{},
+						Factor:    Float64Pointer(2.1),
+					},
+				},
+				Opts:           map[string]interface{}{},
+				CostIncrements: []*ExtCostIncrement{},
+				AttributeIDs:   []string{MetaNone},
+				RateProfileIDs: []string{MetaNone},
+			},
+		},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Balances should not match")
+	}
+}
+
+func TestExtAccountEqualsCase6(t *testing.T) {
+	eAc := &ExtAccount{
+		Tenant:       "cgrates.org",
+		ID:           "f43a2c",
+		ThresholdIDs: []string{"ACNT_THSD_1003"},
+	}
+
+	extAc := &ExtAccount{
+		Tenant:       "cgrates.org",
+		ID:           "f43a2c",
+		ThresholdIDs: []string{"ACNT_THSD_1001"},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Thresholds should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase1(t *testing.T) {
+	eBL := &ExtBalance{
+		ID: "2f5ba2",
+	}
+
+	extBl := &ExtBalance{
+		ID: "68d1c5",
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Balances should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase2(t *testing.T) {
+	eBL := &ExtBalance{
+		ID: "2f5ba2",
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    10,
+			},
+		},
+	}
+
+	extBl := &ExtBalance{
+		ID: "2f5ba2",
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    20,
+			},
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Balances should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase3(t *testing.T) {
+	eBL := &ExtBalance{
+		ID:        "2f5ba2",
+		FilterIDs: []string{"*string:*req.Account:1001"},
+	}
+
+	extBl := &ExtBalance{
+		ID:        "2f5ba2",
+		FilterIDs: []string{"*string:*req.Account:1002"},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Filters should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase4(t *testing.T) {
+	eBL := &ExtBalance{
+		ID: "2f5ba2",
+		UnitFactors: []*ExtUnitFactor{
+			{
+				FilterIDs: []string{"*string:*req.Account:1001"},
+				Factor:    Float64Pointer(21.7),
+			},
+		},
+	}
+
+	extBl := &ExtBalance{
+		ID: "2f5ba2",
+		UnitFactors: []*ExtUnitFactor{
+			{
+				FilterIDs: []string{"*string:*req.Account:1002"},
+				Factor:    Float64Pointer(4.20),
+			},
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("UnitFactors should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase5(t *testing.T) {
+	eBL := &ExtBalance{
+		ID: "2f5ba2",
+		Opts: map[string]interface{}{
+			"Opt1": "*opt",
+		},
+	}
+
+	extBl := &ExtBalance{
+		ID: "2f5ba2",
+		Opts: map[string]interface{}{
+			"Opt1": "*opt2",
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Opts should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase6(t *testing.T) {
+	eBL := &ExtBalance{
+		ID: "2f5ba2",
+		CostIncrements: []*ExtCostIncrement{
+			{
+				FilterIDs:    []string{},
+				Increment:    Float64Pointer(0.2),
+				FixedFee:     Float64Pointer(0.4),
+				RecurrentFee: Float64Pointer(1.2),
+			},
+		},
+	}
+
+	extBl := &ExtBalance{
+		ID: "2f5ba2",
+		CostIncrements: []*ExtCostIncrement{
+			{
+				FilterIDs:    []string{},
+				Increment:    Float64Pointer(0.3),
+				FixedFee:     Float64Pointer(0.4),
+				RecurrentFee: Float64Pointer(1.2),
+			},
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("CostIncrements should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase7(t *testing.T) {
+	eBL := &ExtBalance{
+		ID:           "2f5ba2",
+		AttributeIDs: []string{"ATTR_ID_1001"},
+	}
+
+	extBl := &ExtBalance{
+		ID:           "2f5ba2",
+		AttributeIDs: []string{"ATTR_ID_1003"},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Attributes should not match")
+	}
+}
+
+func TestExtBalanceEqualsCase8(t *testing.T) {
+	eBL := &ExtBalance{
+		ID:             "2f5ba2",
+		RateProfileIDs: []string{"RP_1001"},
+	}
+
+	extBl := &ExtBalance{
+		ID:             "2f5ba2",
+		RateProfileIDs: []string{"RP_1002"},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestBalanceEqualsCase1(t *testing.T) {
+	eBL := &Balance{
+		ID: "2f5ba2",
+	}
+
+	extBl := &Balance{
+		ID: "68d1c5",
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Balances should not match")
+	}
+}
+
+func TestBalanceEqualsCase2(t *testing.T) {
+	eBL := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1001"},
+				Weight:    10,
+			},
+		},
+	}
+
+	extBl := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    20,
+			},
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Weights should not match")
+	}
+}
+
+func TestBalanceEqualsCase3(t *testing.T) {
+	eBL := &Balance{
+		ID:        "2f5ba2",
+		FilterIDs: []string{"*string:*req.Account:1001"},
+		Units:     NewDecimal(53, 0),
+	}
+
+	extBl := &Balance{
+		ID:        "2f5ba2",
+		FilterIDs: []string{"*string:*req.Account:1002"},
+		Units:     NewDecimal(53, 0),
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Filters should not match")
+	}
+}
+
+func TestBalanceEqualsCase4(t *testing.T) {
+	eBL := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		UnitFactors: []*UnitFactor{
+			{
+				FilterIDs: []string{"*string:*req.Account:1001"},
+				Factor:    NewDecimal(2, 0),
+			},
+		},
+	}
+
+	extBl := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		UnitFactors: []*UnitFactor{
+			{
+				FilterIDs: []string{"*string:*req.Account:1002"},
+				Factor:    NewDecimal(42, 0),
+			},
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("UnitFactors should not match")
+	}
+}
+
+func TestBalanceEqualsCase5(t *testing.T) {
+	eBL := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		Opts: map[string]interface{}{
+			"Opt1": "*opt",
+		},
+	}
+
+	extBl := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		Opts: map[string]interface{}{
+			"Opt1": "*opt2",
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Opts should not match")
+	}
+}
+
+func TestBalanceEqualsCase6(t *testing.T) {
+	eBL := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		CostIncrements: []*CostIncrement{
+			{
+				FilterIDs:    []string{},
+				Increment:    NewDecimal(1, 0),
+				FixedFee:     NewDecimal(3, 0),
+				RecurrentFee: NewDecimal(7, 0),
+			},
+		},
+	}
+
+	extBl := &Balance{
+		ID:    "2f5ba2",
+		Units: NewDecimal(53, 0),
+		CostIncrements: []*CostIncrement{
+			{
+				FilterIDs:    []string{},
+				Increment:    NewDecimal(1, 0),
+				FixedFee:     NewDecimal(2, 0),
+				RecurrentFee: NewDecimal(10, 0),
+			},
+		},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("CostIncrements should not match")
+	}
+}
+
+func TestBalanceEqualsCase7(t *testing.T) {
+	eBL := &Balance{
+		ID:           "2f5ba2",
+		Units:        NewDecimal(53, 0),
+		AttributeIDs: []string{"ATTR_ID_1001"},
+	}
+
+	extBl := &Balance{
+		ID:           "2f5ba2",
+		Units:        NewDecimal(53, 0),
+		AttributeIDs: []string{"ATTR_ID_1003"},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("Attributes should not match")
+	}
+}
+
+func TestBalanceEqualsCase8(t *testing.T) {
+	eBL := &Balance{
+		ID:             "2f5ba2",
+		Units:          NewDecimal(53, 0),
+		RateProfileIDs: []string{"RP_1001"},
+	}
+
+	extBl := &Balance{
+		ID:             "2f5ba2",
+		Units:          NewDecimal(53, 0),
+		RateProfileIDs: []string{"RP_1002"},
+	}
+
+	if rcv := eBL.Equals(extBl); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestExtCostIncrementCase1(t *testing.T) {
+	eCi := &ExtCostIncrement{
+		FilterIDs:    []string{},
+		Increment:    Float64Pointer(0.2),
+		FixedFee:     Float64Pointer(0.4),
+		RecurrentFee: Float64Pointer(1.2),
+	}
+
+	extCi := &ExtCostIncrement{
+		FilterIDs:    []string{"*string:*req.Account:1002"},
+		Increment:    Float64Pointer(0.2),
+		FixedFee:     Float64Pointer(0.4),
+		RecurrentFee: Float64Pointer(1.2),
+	}
+
+	if rcv := eCi.Equals(extCi); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestExtCostIncrementCase2(t *testing.T) {
+	eCi := &ExtCostIncrement{
+		FilterIDs:    []string{"*string:*req.Account:1001"},
+		Increment:    Float64Pointer(0.2),
+		FixedFee:     Float64Pointer(0.4),
+		RecurrentFee: Float64Pointer(1.2),
+	}
+
+	extCi := &ExtCostIncrement{
+		FilterIDs:    []string{"*string:*req.Account:1002"},
+		Increment:    Float64Pointer(0.2),
+		FixedFee:     Float64Pointer(0.4),
+		RecurrentFee: Float64Pointer(1.2),
+	}
+
+	if rcv := eCi.Equals(extCi); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestCostIncrementCase1(t *testing.T) {
+	eCi := &CostIncrement{
+		FilterIDs:    []string{},
+		Increment:    NewDecimal(1, 0),
+		FixedFee:     NewDecimal(3, 0),
+		RecurrentFee: NewDecimal(7, 0),
+	}
+
+	extCi := &CostIncrement{
+		FilterIDs:    []string{"*string:*req.Account:1002"},
+		Increment:    NewDecimal(1, 0),
+		FixedFee:     NewDecimal(3, 0),
+		RecurrentFee: NewDecimal(7, 0),
+	}
+
+	if rcv := eCi.Equals(extCi); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestCostIncrementCase2(t *testing.T) {
+	eCi := &CostIncrement{
+		FilterIDs:    []string{"*string:*req.Account:1001"},
+		Increment:    NewDecimal(1, 0),
+		FixedFee:     NewDecimal(3, 0),
+		RecurrentFee: NewDecimal(7, 0),
+	}
+
+	extCi := &CostIncrement{
+		FilterIDs:    []string{"*string:*req.Account:1002"},
+		Increment:    NewDecimal(1, 0),
+		FixedFee:     NewDecimal(3, 0),
+		RecurrentFee: NewDecimal(7, 0),
+	}
+
+	if rcv := eCi.Equals(extCi); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestExtUnitFactorCase1(t *testing.T) {
+	eUf := &ExtUnitFactor{
+		FilterIDs: []string{},
+		Factor:    Float64Pointer(2.1),
+	}
+
+	extUf := &ExtUnitFactor{
+		FilterIDs: []string{"*string:*req.Account:1002"},
+		Factor:    Float64Pointer(2.1),
+	}
+
+	if rcv := eUf.Equals(extUf); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestExtUnitFactorCase2(t *testing.T) {
+	eUf := &ExtUnitFactor{
+		FilterIDs: []string{"*string:*req.Account:1001"},
+		Factor:    Float64Pointer(2.1),
+	}
+
+	extUf := &ExtUnitFactor{
+		FilterIDs: []string{"*string:*req.Account:1002"},
+		Factor:    Float64Pointer(2.1),
+	}
+
+	if rcv := eUf.Equals(extUf); rcv {
+		t.Error("RateProfiles should not match")
+	}
+}
+
+func TestAccountEqualsCase1(t *testing.T) {
+	eAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+	}
+
+	extAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "49f2ba",
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Accounts should not match")
+	}
+}
+
+func TestAccountEqualsCase2(t *testing.T) {
+	eAc := &Account{
+		Tenant:    "cgrates.org",
+		ID:        "f43a2c",
+		FilterIDs: []string{"*string:*req.Account:1001"},
+	}
+
+	extAc := &Account{
+		Tenant:    "cgrates.org",
+		ID:        "f43a2c",
+		FilterIDs: []string{"*string:*req.Account:1003"},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Filters should not match")
+	}
+}
+
+func TestAccountEqualsCase3(t *testing.T) {
+	eAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    20,
+			},
+		},
+	}
+
+	extAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"*string:*req.Account:1003"},
+				Weight:    10,
+			},
+		},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Weights should not match")
+	}
+}
+
+func TestAccountEqualsCase4(t *testing.T) {
+	eAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Opts: map[string]interface{}{
+			"Opt1": "*opt",
+		},
+	}
+
+	extAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Opts: map[string]interface{}{
+			"Opt1": "*opt2",
+		},
+	}
+
+	if eAc.Equals(extAc) {
+		t.Error("Opts should not match")
+	}
+}
+
+func TestAccountEqualsCase5(t *testing.T) {
+	eAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Balances: map[string]*Balance{
+			"*monetary": {
+				ID:        "b24d37",
+				FilterIDs: []string{},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"*string:*req.Account:1001"},
+						Weight:    10,
+					},
+				},
+				Type:  "*monetary",
+				Units: NewDecimal(42, 1),
+				UnitFactors: []*UnitFactor{
+					{
+						FilterIDs: []string{},
+						Factor:    NewDecimal(2, 1),
+					},
+				},
+				Opts:           map[string]interface{}{},
+				CostIncrements: []*CostIncrement{},
+				AttributeIDs:   []string{MetaNone},
+				RateProfileIDs: []string{MetaNone},
+			},
+		},
+	}
+
+	extAc := &Account{
+		Tenant: "cgrates.org",
+		ID:     "f43a2c",
+		Balances: map[string]*Balance{
+			"*monetary": {
+				ID:        "b24d37",
+				FilterIDs: []string{},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"*string:*req.Account:1001"},
+						Weight:    10,
+					},
+				},
+				Type:  "*monetary",
+				Units: NewDecimal(65, 1),
+				UnitFactors: []*UnitFactor{
+					{
+						FilterIDs: []string{},
+						Factor:    NewDecimal(3, 1),
+					},
+				},
+				Opts:           map[string]interface{}{},
+				CostIncrements: []*CostIncrement{},
+				AttributeIDs:   []string{MetaNone},
+				RateProfileIDs: []string{MetaNone},
+			},
+		},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Balances should not match")
+	}
+}
+
+func TestAccountEqualsCase6(t *testing.T) {
+	eAc := &Account{
+		Tenant:       "cgrates.org",
+		ID:           "f43a2c",
+		ThresholdIDs: []string{"ACNT_THSD_1003"},
+	}
+
+	extAc := &Account{
+		Tenant:       "cgrates.org",
+		ID:           "f43a2c",
+		ThresholdIDs: []string{"ACNT_THSD_1001"},
+	}
+
+	if rcv := eAc.Equals(extAc); rcv {
+		t.Error("Thresholds should not match")
+	}
+}

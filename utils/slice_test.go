@@ -74,3 +74,23 @@ func TestSliceStringToIface(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s", ToJSON(exp), ToJSON(rply))
 	}
 }
+
+func TestSliceStringEqual(t *testing.T) {
+	v1 := []string{"*V1field1", "*V1field2"}
+	v2 := []string{"*V2field1"}
+
+	//When the length don't match
+	if rcv := SliceStringEqual(v1, v2); rcv {
+		t.Error("The length should not match")
+	}
+
+	v2 = append(v2, "*V2field2")
+	if rcv := SliceStringEqual(v1, v2); rcv {
+		t.Error("The values should not match")
+	}
+
+	v2 = v1
+	if rcv := SliceStringEqual(v1, v2); !rcv {
+		t.Error("The slices should match")
+	}
+}

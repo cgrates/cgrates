@@ -781,3 +781,53 @@ func TestATDUsage(t *testing.T) {
 		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, err.Error())
 	}
 }
+
+func TestActivationIntervalEquals(t *testing.T) {
+	aI := &ActivationInterval{
+		ActivationTime: time.Time{},
+		ExpiryTime:     time.Date(2021, 5, 13, 0, 0, 0, 0, time.UTC),
+	}
+
+	actInt := &ActivationInterval{
+		ActivationTime: time.Date(2021, 5, 13, 0, 0, 0, 0, time.UTC),
+		ExpiryTime:     time.Date(2021, 5, 13, 0, 0, 0, 0, time.UTC),
+	}
+
+	if aI.Equals(actInt) {
+		t.Error("ActivationInervals should not match")
+	}
+}
+
+func TestIntervalStart(t *testing.T) {
+	args := &ArgsCostForEvent{
+		[]string{"RP_1001"},
+		&CGREvent{
+			APIOpts: map[string]interface{}{
+				OptsRatesIntervalStart: "1ns",
+			},
+		},
+	}
+	rcv, err := args.IntervalStart()
+	exp := new(decimal.Big).SetUint64(1)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v but received %v", rcv, exp)
+	}
+}
+
+func TestIntervalStartDefault(t *testing.T) {
+	args := &ArgsCostForEvent{
+		[]string{"RP_1001"},
+		&CGREvent{
+			APIOpts: map[string]interface{}{},
+		},
+	}
+	rcv, err := args.IntervalStart()
+	exp := new(decimal.Big).SetUint64(0)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v but received %v", rcv, exp)
+	}
+}
