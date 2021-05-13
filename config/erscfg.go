@@ -26,9 +26,12 @@ import (
 
 // ERsCfg the config for ERs
 type ERsCfg struct {
-	Enabled       bool
-	SessionSConns []string
-	Readers       []*EventReaderCfg
+	Enabled            bool
+	SessionSConns      []string
+	Readers            []*EventReaderCfg
+	PartialCacheTTL    time.Duration
+	PartialCacheAction string
+	PartialPath        string
 }
 
 func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
@@ -47,6 +50,17 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			}
 		}
+	}
+	if jsnCfg.Partial_cache_ttl != nil {
+		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_cache_ttl); err != nil {
+			return
+		}
+	}
+	if jsnCfg.Partial_cache_action != nil {
+		erS.PartialCacheAction = *jsnCfg.Partial_cache_action
+	}
+	if jsnCfg.Partial_path != nil {
+		erS.PartialPath = *jsnCfg.Partial_path
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
 }
@@ -126,19 +140,20 @@ func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interf
 
 // EventReaderCfg the event for the Event Reader
 type EventReaderCfg struct {
-	ID              string
-	Type            string
-	RunDelay        time.Duration
-	ConcurrentReqs  int
-	SourcePath      string
-	ProcessedPath   string
-	Opts            map[string]interface{}
-	Tenant          RSRParsers
-	Timezone        string
-	Filters         []string
-	Flags           utils.FlagsWithParams
-	Fields          []*FCTemplate
-	CacheDumpFields []*FCTemplate
+	ID                  string
+	Type                string
+	RunDelay            time.Duration
+	ConcurrentReqs      int
+	SourcePath          string
+	ProcessedPath       string
+	Opts                map[string]interface{}
+	Tenant              RSRParsers
+	Timezone            string
+	Filters             []string
+	Flags               utils.FlagsWithParams
+	Fields              []*FCTemplate
+	PartialCommitFields []*FCTemplate
+	CacheDumpFields     []*FCTemplate
 }
 
 func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
@@ -202,6 +217,16 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 			er.CacheDumpFields = tpls
 		}
 	}
+	if jsnCfg.Partial_commit_fields != nil {
+		if er.PartialCommitFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Partial_commit_fields, sep); err != nil {
+			return err
+		}
+		if tpls, err := InflateTemplates(er.PartialCommitFields, msgTemplates); err != nil {
+			return err
+		} else if tpls != nil {
+			er.PartialCommitFields = tpls
+		}
+	}
 	if jsnCfg.Opts != nil {
 		for k, v := range jsnCfg.Opts {
 			er.Opts[k] = v
@@ -240,6 +265,12 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		cln.CacheDumpFields = make([]*FCTemplate, len(er.CacheDumpFields))
 		for idx, fld := range er.CacheDumpFields {
 			cln.CacheDumpFields[idx] = fld.Clone()
+		}
+	}
+	if er.PartialCommitFields != nil {
+		cln.PartialCommitFields = make([]*FCTemplate, len(er.PartialCommitFields))
+		for idx, fld := range er.PartialCommitFields {
+			cln.PartialCommitFields[idx] = fld.Clone()
 		}
 	}
 	for k, v := range er.Opts {
@@ -286,6 +317,13 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 			cacheDumpFields[i] = item.AsMapInterface(separator)
 		}
 		initialMP[utils.CacheDumpFieldsCfg] = cacheDumpFields
+	}
+	if er.PartialCommitFields != nil {
+		parCFields := make([]map[string]interface{}, len(er.PartialCommitFields))
+		for i, item := range er.PartialCommitFields {
+			parCFields[i] = item.AsMapInterface(separator)
+		}
+		initialMP[utils.PartialCommitFieldsCfg] = parCFields
 	}
 
 	if er.RunDelay > 0 {

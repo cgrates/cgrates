@@ -33,7 +33,7 @@ import (
 
 func TestS3ERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	rdr, err := NewS3ER(cfg, 0, nil,
+	rdr, err := NewS3ER(cfg, 0, nil, nil,
 		nil, nil, nil)
 	if err != nil {
 		t.Error(err)

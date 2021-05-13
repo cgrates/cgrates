@@ -255,13 +255,13 @@
 			"id": "PartialCSV1",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*partial_csv",
+			"type": "*file_csv",
 			"source_path": "/tmp/partErs1/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/partErs1/out",
 			"opts": {
-				"csvRecordCacheTTL": "500ms",
 				"csvCacheExpiryAction": "*dump_to_file",
+				"partialOrderField": "~*req.AnswerTime",
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -280,7 +280,9 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
-				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},// keep this here for partial cdr field 
+				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]},
 			],
 			"cache_dump_fields": [
 				{"tag": "OriginID", "path":"*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -298,13 +300,13 @@
 			"id": "PartialCSV_PostExpiry",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*partial_csv",
+			"type": "*file_csv",
 			"source_path": "/tmp/partErs2/in",
 			"processed_path": "/tmp/partErs2/out",
 			"flags": ["*cdrs"],
 			"opts": {
-				"csvRecordCacheTTL": "500ms",
 				"csvCacheExpiryAction": "*post_cdr",
+				"partialOrderField": "~*req.AnswerTime",
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -323,7 +325,9 @@
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
-				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]}
+				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},// keep this here for partial cdr field 
+				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]}
 			],
 		},
 		{

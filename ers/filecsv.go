@@ -25,7 +25,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -35,21 +34,22 @@ import (
 )
 
 func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, rdrErr chan error,
+	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
 	}
 	csvEr := &CSVFileER{
-		cgrCfg:    cfg,
-		cfgIdx:    cfgIdx,
-		fltrS:     fltrS,
-		rdrDir:    srcPath,
-		rdrEvents: rdrEvents,
-		rdrError:  rdrErr,
-		rdrExit:   rdrExit,
-		conReqs:   make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
+		cgrCfg:        cfg,
+		cfgIdx:        cfgIdx,
+		fltrS:         fltrS,
+		rdrDir:        srcPath,
+		rdrEvents:     rdrEvents,
+		partialEvents: partialEvents,
+		rdrError:      rdrErr,
+		rdrExit:       rdrExit,
+		conReqs:       make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)}
 	var processFile struct{}
 	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
 		csvEr.conReqs <- processFile // Empty initiate so we do not need to wait later when we pop
@@ -59,15 +59,16 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 
 // CSVFileER implements EventReader interface for .csv files
 type CSVFileER struct {
-	sync.RWMutex
-	cgrCfg    *config.CGRConfig
-	cfgIdx    int // index of config instance within ERsCfg.Readers
-	fltrS     *engine.FilterS
-	rdrDir    string
-	rdrEvents chan *erEvent // channel to dispatch the events created to
-	rdrError  chan error
-	rdrExit   chan struct{}
-	conReqs   chan struct{} // limit number of opened files
+	cgrCfg        *config.CGRConfig
+	cfgIdx        int // index of config instance within ERsCfg.Readers
+	fltrS         *engine.FilterS
+	rdrDir        string
+	rdrEvents     chan *erEvent // channel to dispatch the events created to
+	partialEvents chan *erEvent // channel to dispatch the partial events created to
+	rdrError      chan error
+	rdrExit       chan struct{}
+	conReqs       chan struct{} // limit number of opened files
+
 }
 
 func (rdr *CSVFileER) Config() *config.EventReaderCfg {
@@ -188,7 +189,11 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-		rdr.rdrEvents <- &erEvent{
+		rdrEv := rdr.rdrEvents
+		if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+			rdrEv = rdr.partialEvents
+		}
+		rdrEv <- &erEvent{
 			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
 		}

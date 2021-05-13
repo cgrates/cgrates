@@ -20,6 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package ers
 
+import (
+	"context"
+	"fmt"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	kafka "github.com/segmentio/kafka-go"
+)
+
 var (
 	rdrEvents chan *erEvent
 	rdrErr    chan error
@@ -27,7 +40,6 @@ var (
 	rdr       EventReader
 )
 
-/*
 func TestKafkaER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
@@ -58,7 +70,7 @@ func TestKafkaER(t *testing.T) {
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
 
-	if rdr, err = NewKafkaER(cfg, 1, rdrEvents,
+	if rdr, err = NewKafkaER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +105,7 @@ func TestKafkaER(t *testing.T) {
 			Event: map[string]interface{}{
 				"CGRID": randomCGRID,
 			},
-			Opts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
@@ -103,4 +115,3 @@ func TestKafkaER(t *testing.T) {
 	}
 	close(rdrExit)
 }
-*/
