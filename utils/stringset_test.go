@@ -265,3 +265,28 @@ func TestStringSetJoin(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", ToJSON(expected), ToJSON(rcv))
 	}
 }
+
+func TestStringSetEquals(t *testing.T) {
+	strSet := StringSet{
+		"setField1": struct{}{},
+		"setField2": struct{}{},
+	}
+
+	strSet2 := StringSet{
+		"set2Field1": struct{}{},
+	}
+
+	if rcv := strSet.Equals(strSet2); rcv {
+		t.Error("Length of sets should not match")
+	}
+
+	strSet2.Add("set2Field2")
+	if rcv := strSet.Equals(strSet2); rcv {
+		t.Error("The keys should not match")
+	}
+
+	strSet2 = strSet
+	if rcv := strSet.Equals(strSet2); !rcv {
+		t.Error("The sets should match")
+	}
+}
