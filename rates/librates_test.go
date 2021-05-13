@@ -1843,7 +1843,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		IntervalRates: []*utils.IntervalRate{
 			{
 				IntervalStart: utils.NewDecimal(0, 0),
-				RecurrentFee:  utils.NewDecimal(10, 1),
+				RecurrentFee:  utils.NewDecimal(1, 0),
 				Unit:          minDecimal,
 				Increment:     minDecimal,
 			},
@@ -1905,14 +1905,14 @@ func TestComputeRateSIntervals(t *testing.T) {
 					IncrementStart:    utils.NewDecimal(0, 0),
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "UUID00",
 					CompressFactor:    1,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "UUID01",
 					CompressFactor:    30,
 				},
 			},
@@ -1925,14 +1925,14 @@ func TestComputeRateSIntervals(t *testing.T) {
 					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID10",
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID11",
 					CompressFactor:    10,
 				},
 			},
@@ -1940,61 +1940,42 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 	expCstRts := map[string]*utils.IntervalRate{
-		"RATE0": {
-			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-			RecurrentFee:  utils.NewDecimal(5, 3),
-			Unit:          utils.NewDecimal(int64(time.Minute), 0),
-			Increment:     utils.NewDecimal(int64(10*time.Second), 0),
-		},
-		"RATE01": {
+		"UUID00": {
 			IntervalStart: utils.NewDecimal(0, 0),
 			RecurrentFee:  utils.NewDecimal(1, 0),
 			Unit:          utils.NewDecimal(int64(time.Minute), 0),
 			Increment:     utils.NewDecimal(int64(time.Minute), 0),
 		},
-		"RATE1": {
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(5, 3),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
+		},
+		"UUID10": {
 			IntervalStart: utils.NewDecimal(0, 0),
 			RecurrentFee:  utils.NewDecimal(2, 1),
 			Unit:          utils.NewDecimal(int64(time.Minute), 0),
-			Increment:     utils.NewDecimal(int64(10*time.Second), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
 		},
-		"RATE11": {
+		"UUID11": {
 			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
 			RecurrentFee:  utils.NewDecimal(15, 2),
 			Unit:          utils.NewDecimal(int64(time.Minute), 0),
-			Increment:     utils.NewDecimal(int64(10*time.Second), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
 		},
 	}
-
 	cstRts := make(map[string]*utils.IntervalRate)
 	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(0, 0).Big,
 		utils.NewDecimal(int64(130*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
 	} else {
-		//UUIDSHA1 change
-		eRtIvls[0].Increments[0].RateID = rtIvls[0].Increments[0].RateID
-		eRtIvls[0].Increments[1].RateID = rtIvls[0].Increments[1].RateID
-		eRtIvls[1].Increments[0].RateID = rtIvls[1].Increments[0].RateID
-		eRtIvls[1].Increments[1].RateID = rtIvls[1].Increments[1].RateID
-		if !reflect.DeepEqual(eRtIvls, rtIvls) {
-			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
-		}
-		expCstRts = map[string]*utils.IntervalRate{}
-		for key, val := range cstRts {
-			expCstRts[key] = val
-		}
-		/*
-			expCstRts = cstRts
-			for idx, val := range rtIvls {
-				if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
-					t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
-				}
+		for idx, val := range rtIvls {
+			if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
 			}
-		*/
-		if !reflect.DeepEqual(cstRts, expCstRts) {
-			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
 		}
-
 	}
 
 	rts = []*orderedRate{
@@ -2016,7 +1997,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "UUID01",
 					CompressFactor:    30,
 				},
 			},
@@ -2029,42 +2010,53 @@ func TestComputeRateSIntervals(t *testing.T) {
 					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID10",
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID11",
 					CompressFactor:    10,
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
+	expCstRts = map[string]*utils.IntervalRate{
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(5, 3),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
+		},
+	}
 	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(int64(time.Minute), 0).Big,
 		utils.NewDecimal(int64(70*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
 	} else {
-		//UUIDSHA1 change
-		eRtIvls[0].Increments[0].RateID = rtIvls[0].Increments[0].RateID
-		eRtIvls[1].Increments[0].RateID = rtIvls[1].Increments[0].RateID
-		eRtIvls[1].Increments[1].RateID = rtIvls[1].Increments[1].RateID
-		if !reflect.DeepEqual(eRtIvls, rtIvls) {
-			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
-		}
-		expCstRts = map[string]*utils.IntervalRate{}
-		for key, val := range cstRts {
-			expCstRts[key] = val
-		}
-		if !reflect.DeepEqual(cstRts, expCstRts) {
-			t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+		for idx, val := range rtIvls {
+			if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+			}
 		}
 	}
 }
 
-/*
 func TestComputeRateSIntervals1(t *testing.T) {
 	minDecimal, err := utils.NewDecimalFromUsage("1m")
 	if err != nil {
@@ -2145,7 +2137,7 @@ func TestComputeRateSIntervals1(t *testing.T) {
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "UUID01",
 					CompressFactor:    40,
 				},
 			},
@@ -2158,25 +2150,51 @@ func TestComputeRateSIntervals1(t *testing.T) {
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID10",
 					CompressFactor:    50,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(90*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID11",
 					CompressFactor:    90,
 				},
 			},
 			CompressFactor: 1,
 		},
 	}
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(time.Second), 0),
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          utils.NewDecimal(int64(time.Minute), 0),
+			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
 	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(30*time.Second), 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big); err != nil {
+		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rtIvls, eRtIvls) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -2261,21 +2279,21 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "UUID00",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(-1, 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "UUID00",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "UUID01",
 					CompressFactor:    40,
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 				},
@@ -2288,21 +2306,21 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID10",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(-1, 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID10",
 					CompressFactor:    50,
 					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID11",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(60*time.Second), 0),
 				},
@@ -2310,11 +2328,45 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			FixedFee:      utils.NewDecimal(123, 3),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tsecDecimal,
+			Increment:     tsecDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			FixedFee:      utils.NewDecimal(567, 3),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
 	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big); err != nil {
+		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rtIvls, eRtIvls) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -2387,7 +2439,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE0",
+					RateID:            "UUID00",
 					CompressFactor:    45,
 					Usage:             utils.NewDecimal(int64(45*time.Minute), 0),
 				},
@@ -2400,7 +2452,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID10",
 					CompressFactor:    5,
 					Usage:             utils.NewDecimal(int64(5*time.Minute), 0),
 				},
@@ -2413,7 +2465,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(50*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE0",
+					RateID:            "UUID01",
 					CompressFactor:    10,
 					Usage:             utils.NewDecimal(int64(10*time.Minute), 0),
 				},
@@ -2421,17 +2473,43 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
+	cstRts := make(map[string]*utils.IntervalRate)
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(1, 0),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(50*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+	}
 	sTime := time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(time.Hour), 0)
 	if rcvOrdRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
 		t.Error(eRtIvls)
 	} else if !reflect.DeepEqual(ordRts, rcvOrdRts) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ordRts), utils.ToJSON(rcvOrdRts))
-	} else if rcveRtIvls, err := computeRateSIntervals(rcvOrdRts, utils.NewDecimal(0, 0).Big, usage.Big); err != nil {
+	} else if rcveRtIvls, err := computeRateSIntervals(rcvOrdRts, utils.NewDecimal(0, 0).Big,
+		usage.Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcveRtIvls, eRtIvls) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rcveRtIvls))
+	} else {
+		for idx, val := range rcveRtIvls {
+			if !val.Equals(eRtIvls[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(eRtIvls), utils.ToJSON(rcveRtIvls))
+			}
+		}
 	}
 }
 
@@ -2538,7 +2616,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
@@ -2551,7 +2629,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
@@ -2564,7 +2642,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
@@ -2577,7 +2655,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
@@ -2590,7 +2668,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
@@ -2603,7 +2681,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE2",
+					RateID:            "UUID12",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
@@ -2611,11 +2689,55 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rcvOrdRates, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(25, 2),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID02": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID12": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(35, 2),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRates, expOrdRates) {
-		t.Errorf("Expected %+v,\nreceived %+v", utils.ToJSON(expOrdRates), utils.ToJSON(rcvOrdRates))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRates[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRates), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -2666,10 +2788,10 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 			rt1,
 		},
 	}
-
+	cstRts := make(map[string]*utils.IntervalRate)
 	expected := "intervalStart for rate: <cgrates.org:RATE_PROFILE:RATE1> higher than usage: 0"
 	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big); err == nil || err.Error() != expected {
+		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
@@ -2703,9 +2825,10 @@ func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
 		},
 	}
 
+	cstRts := make(map[string]*utils.IntervalRate)
 	expected := "zero increment to be charged within rate: <>"
 	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(33*time.Second), 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big); err == nil || err.Error() != expected {
+		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
@@ -2759,14 +2882,14 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 					CompressFactor:    6,
 				},
@@ -2774,11 +2897,31 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(25, 3),
+			Unit:          minDecimal,
+			Increment:     ssecDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -2900,14 +3043,14 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(25*time.Second), 0),
 					CompressFactor:    25,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(25*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					CompressFactor:    2,
 				},
@@ -2920,7 +3063,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(35*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE3",
+					RateID:            "UUID30",
 					Usage:             utils.NewDecimal(int64(11*time.Second), 0),
 					CompressFactor:    3,
 				},
@@ -2933,14 +3076,14 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(46*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID20",
 					Usage:             utils.NewDecimal(int64(9*time.Second), 0),
 					CompressFactor:    9,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(55*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID21",
 					Usage:             utils.NewDecimal(int64(5*time.Second), 0),
 					CompressFactor:    1,
 				},
@@ -2953,7 +3096,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE3",
+					RateID:            "UUID31",
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					CompressFactor:    2,
 				},
@@ -2961,12 +3104,55 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(25*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(25, 2),
+			Unit:          minDecimal,
+			Increment:     ssecDecimal,
+		},
+		"UUID30": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          fssecDecimal,
+			Increment:     fsecDecimal,
+		},
+		"UUID20": {
+			IntervalStart: utils.NewDecimal(int64(45*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID21": {
+			IntervalStart: utils.NewDecimal(int64(55*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          tsecDecimal,
+			Increment:     fsecDecimal,
+		},
+		"UUID31": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(5, 3),
+			Unit:          tsecDecimal,
+			Increment:     fsecDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -3081,7 +3267,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
@@ -3094,7 +3280,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
@@ -3107,7 +3293,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE3",
+					RateID:            "UUID20",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    1,
 				},
@@ -3120,7 +3306,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    5,
 				},
@@ -3133,7 +3319,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(3*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(4*time.Minute), 0),
 					CompressFactor:    35,
 				},
@@ -3141,12 +3327,49 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRates, utils.NewDecimal(int64(time.Minute), 0).Big,
-		utils.NewDecimal(int64(6*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID20": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          tsecDecimal,
+			Increment:     tsecDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tsecDecimal,
+			Increment:     ssecDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(3*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          minDecimal,
+			Increment:     ssecDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRates, utils.NewDecimal(int64(time.Minute), 0).Big,
+		utils.NewDecimal(int64(6*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -3263,14 +3486,14 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(4*time.Hour), 0),
 					CompressFactor:    80,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(4*time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(2*time.Hour), 0),
 					CompressFactor:    40,
 				},
@@ -3283,7 +3506,7 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(6*time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(6*time.Hour), 0),
 					CompressFactor:    120,
 				},
@@ -3296,14 +3519,14 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE_GOLDEN_HOUR",
+					RateID:            "UUIDGH0",
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 					CompressFactor:    15,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour+30*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE_GOLDEN_HOUR",
+					RateID:            "UUIDGH1",
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 					CompressFactor:    6,
 				},
@@ -3316,14 +3539,14 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					Usage:             utils.NewDecimal(int64(3*time.Hour), 0),
 					CompressFactor:    60,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(16*time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					Usage:             utils.NewDecimal(int64(9*time.Hour), 0),
 					CompressFactor:    180,
 				},
@@ -3331,12 +3554,55 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(25*time.Hour), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          hourDecimal,
+			Increment:     tminDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(4*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(35, 2),
+			Unit:          hourDecimal,
+			Increment:     tminDecimal,
+		},
+		"UUIDGH0": {
+			IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          thourDecimal,
+			Increment:     dminDecimal,
+		},
+		"UUIDGH1": {
+			IntervalStart: utils.NewDecimal(int64(12*time.Hour+30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          hourDecimal,
+			Increment:     fminDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(13*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(4, 1),
+			Unit:          hourDecimal,
+			Increment:     tminDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(16*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(35, 2),
+			Unit:          hourDecimal,
+			Increment:     tminDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(25*time.Hour), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -3447,7 +3713,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Second), 0),
 				},
@@ -3460,7 +3726,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Second), 0),
 				},
@@ -3473,7 +3739,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Second), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Second), 0),
 				},
@@ -3486,7 +3752,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(3*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(2*time.Second), 0),
 				},
@@ -3499,7 +3765,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(5*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(2*time.Second), 0),
 				},
@@ -3512,7 +3778,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(7*time.Second), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE2",
+					RateID:            "UUID12",
 					CompressFactor:    3,
 					Usage:             utils.NewDecimal(int64(3*time.Second), 0),
 				},
@@ -3520,12 +3786,55 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(10*time.Second), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          tsecDecimal,
+			Increment:     twsecDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          twsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          tsecDecimal,
+			Increment:     twsecDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(48, 2),
+			Unit:          twsecDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID02": {
+			IntervalStart: utils.NewDecimal(int64(4*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(48, 2),
+			Unit:          tsecDecimal,
+			Increment:     twsecDecimal,
+		},
+		"UUID12": {
+			IntervalStart: utils.NewDecimal(int64(6*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(45, 2),
+			Unit:          twsecDecimal,
+			Increment:     secDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(10*time.Second), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -3625,7 +3934,7 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -3638,21 +3947,21 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    10,
 					Usage:             utils.NewDecimal(int64(10*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    15,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE2",
+					RateID:            "UUID12",
 					CompressFactor:    16,
 					Usage:             utils.NewDecimal(int64(16*time.Minute), 0),
 				},
@@ -3665,7 +3974,7 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    6,
 					Usage:             utils.NewDecimal(int64(9*time.Minute), 0),
 				},
@@ -3673,12 +3982,49 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour+10*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 3),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(15*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          tminDeminal,
+			Increment:     ominDeminal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(15, 2),
+			Unit:          tminDeminal,
+			Increment:     ominDeminal,
+		},
+		"UUID12": {
+			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tminDeminal,
+			Increment:     ominDeminal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          fminDeminal,
+			Increment:     cDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour+10*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -3758,7 +4104,7 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    50,
 					Usage:             utils.NewDecimal(int64(25*time.Minute), 0),
 				},
@@ -3771,14 +4117,14 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(25*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    10,
 					Usage:             utils.NewDecimal(int64(5*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
@@ -3786,12 +4132,31 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     tsecDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          minDecimal,
+			Increment:     tsecDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -3918,7 +4283,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
@@ -3931,7 +4296,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    360,
 					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
@@ -3944,7 +4309,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE3",
+					RateID:            "UUID20",
 					CompressFactor:    180,
 					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
@@ -3957,7 +4322,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE4",
+					RateID:            "UUID30",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
@@ -3966,11 +4331,43 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 	}
 
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
-		utils.NewDecimal(int64(210*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(22, 2),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(60*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tminDecimal,
+			Increment:     tensecDecimal,
+		},
+		"UUID20": {
+			IntervalStart: utils.NewDecimal(int64(120*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(18, 2),
+			Unit:          twminDecimal,
+			Increment:     twsecDecimal,
+		},
+		"UUID30": {
+			IntervalStart: utils.NewDecimal(int64(180*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(16, 2),
+			Unit:          trminDecimal,
+			Increment:     tsecDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
+		utils.NewDecimal(int64(210*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -4063,14 +4460,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    2400,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(60*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4083,14 +4480,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    240,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(120*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4103,14 +4500,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(180*time.Minute), 0),
 					IntervalRateIndex: 3,
-					RateID:            "RATE1",
+					RateID:            "UUID03",
 					CompressFactor:    40,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4123,7 +4520,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					IntervalRateIndex: 3,
-					RateID:            "RATE1",
+					RateID:            "UUID03",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
@@ -4131,11 +4528,43 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
-		utils.NewDecimal(int64(210*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(22, 2),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(60*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          tminDecimal,
+			Increment:     tssecDecimal,
+		},
+		"UUID02": {
+			IntervalStart: utils.NewDecimal(int64(120*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(18, 2),
+			Unit:          twminDecimal,
+			Increment:     twsecDecimal,
+		},
+		"UUID03": {
+			IntervalStart: utils.NewDecimal(int64(180*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(16, 2),
+			Unit:          thminDecimal,
+			Increment:     tsecDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
+		utils.NewDecimal(int64(210*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 
 	expOrdRts = []*utils.RateSInterval{
@@ -4145,14 +4574,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(60*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4165,14 +4594,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    240,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(120*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4185,14 +4614,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(180*time.Minute), 0),
 					IntervalRateIndex: 3,
-					RateID:            "RATE1",
+					RateID:            "UUID03",
 					CompressFactor:    40,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4205,7 +4634,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					IntervalRateIndex: 3,
-					RateID:            "RATE1",
+					RateID:            "UUID03",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
@@ -4213,13 +4642,19 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(0*time.Minute), 0).Big,
-		utils.NewDecimal(int64(230*time.Minute), 0).Big); err != nil {
+	cstRts = make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(0*time.Minute), 0).Big,
+		utils.NewDecimal(int64(230*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
+
 }
 
 func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
@@ -4343,7 +4778,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    271,
 					Usage:             utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
 				},
@@ -4356,14 +4791,14 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    27,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+59*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(8*time.Hour+30*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    24,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
@@ -4376,7 +4811,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE_SPECIAL",
+					RateID:            "UUID_SPECIAL",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
@@ -4389,21 +4824,21 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    24,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(16*time.Hour+30*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE2",
+					RateID:            "UUID12",
 					CompressFactor:    27,
 					Usage:             utils.NewDecimal(int64(4*time.Hour), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Hour+30*time.Minute), 0),
 					IntervalRateIndex: 3,
-					RateID:            "RATE2",
+					RateID:            "UUID13",
 					CompressFactor:    24,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
@@ -4416,7 +4851,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(24*time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
@@ -4424,12 +4859,61 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(25*time.Hour), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          twminDecimal,
+			Increment:     minDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(4*time.Hour+30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(45, 2),
+			Unit:          twminDecimal,
+			Increment:     nminDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(8*time.Hour+30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(4, 1),
+			Unit:          twminDecimal,
+			Increment:     nminDecimal,
+		},
+		"UUID_SPECIAL": {
+			IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          twminDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID12": {
+			IntervalStart: utils.NewDecimal(int64(16*time.Hour+30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(35, 2),
+			Unit:          twminDecimal,
+			Increment:     nminDecimal,
+		},
+		"UUID13": {
+			IntervalStart: utils.NewDecimal(int64(20*time.Hour+30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          twminDecimal,
+			Increment:     nminDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(24*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          twminDecimal,
+			Increment:     secDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(25*time.Hour), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -4523,14 +5007,14 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(15*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
@@ -4543,14 +5027,14 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    3,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    6,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 				},
@@ -4558,12 +5042,43 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(15*time.Minute), 0).Big,
-		utils.NewDecimal(int64(time.Hour+15*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(15*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          fminDecimal,
+			Increment:     eminDecimal,
+		},
+		"UUID02": {
+			IntervalStart: utils.NewDecimal(int64(30*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(4, 1),
+			Unit:          fminDecimal,
+			Increment:     nminDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          fminDecimal,
+			Increment:     sminDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          fminDecimal,
+			Increment:     fvminDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(15*time.Minute), 0).Big,
+		utils.NewDecimal(int64(time.Hour+15*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -4652,14 +5167,14 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    378,
 					Usage:             utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    1585,
 					Usage:             utils.NewDecimal(int64(26*time.Minute+25*time.Second), 0),
 				},
@@ -4672,7 +5187,7 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(39*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    3499,
 					Usage:             utils.NewDecimal(int64(58*time.Minute+19*time.Second), 0),
 				},
@@ -4685,7 +5200,7 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE1",
+					RateID:            "UUID02",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(41*time.Second), 0),
 				},
@@ -4693,12 +5208,43 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour+38*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          tminDecimal,
+			Increment:     tsecDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(4, 1),
+			Unit:          sminDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(38*time.Minute+15*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          eminDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID02": {
+			IntervalStart: utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          nminDecimal,
+			Increment:     sminDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour+38*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -4813,7 +5359,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    600,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -4826,7 +5372,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
@@ -4839,7 +5385,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(21*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    570,
 					Usage:             utils.NewDecimal(int64(19*time.Minute), 0),
 				},
@@ -4852,7 +5398,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(40*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID11",
 					CompressFactor:    15,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
@@ -4865,7 +5411,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(41*time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    570,
 					Usage:             utils.NewDecimal(int64(19*time.Minute), 0),
 				},
@@ -4878,7 +5424,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					IntervalRateIndex: 2,
-					RateID:            "RATE2",
+					RateID:            "UUID12",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
@@ -4891,7 +5437,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    1770,
 					Usage:             utils.NewDecimal(int64(59*time.Minute), 0),
 				},
@@ -4904,7 +5450,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Hour), 0),
 					IntervalRateIndex: 3,
-					RateID:            "RATE2",
+					RateID:            "UUID13",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
@@ -4917,7 +5463,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				},
@@ -4925,12 +5471,49 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(2*time.Hour+2*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          tminDecimal,
+			Increment:     tsecDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(4, 1),
+			Unit:          ttminDecimal,
+			Increment:     tsecDecimal,
+		},
+		"UUID11": {
+			IntervalStart: utils.NewDecimal(int64(40*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(3, 1),
+			Unit:          ttminDecimal,
+			Increment:     fsecDecimal,
+		},
+		"UUID12": {
+			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          ttminDecimal,
+			Increment:     tminDecimal,
+		},
+		"UUID13": {
+			IntervalStart: utils.NewDecimal(int64(2*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(1, 1),
+			Unit:          ttminDecimal,
+			Increment:     fminDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(2*time.Hour+2*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -4991,7 +5574,7 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    593,
 					Usage:             utils.NewDecimal(int64(168*time.Hour), 0),
 				},
@@ -5004,7 +5587,7 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(168*time.Hour), 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
 				},
@@ -5012,12 +5595,31 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(169*time.Hour), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          hourDecimal,
+			Increment:     fminDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(168*time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(5, 1),
+			Unit:          minDecimal,
+			Increment:     minDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(169*time.Hour), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -5092,14 +5694,14 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
-					RateID:            "RATE1",
+					RateID:            "UUID00",
 					CompressFactor:    20,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE1",
+					RateID:            "UUID01",
 					CompressFactor:    2400,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
@@ -5112,7 +5714,7 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					IntervalRateIndex: 1,
-					RateID:            "RATE2",
+					RateID:            "UUID10",
 					CompressFactor:    1200,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
@@ -5120,16 +5722,40 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 			CompressFactor: 1,
 		},
 	}
-
-	if rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour+20*time.Minute), 0).Big); err != nil {
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  utils.NewDecimal(2, 1),
+			Unit:          fminDecimal,
+			Increment:     minDecimal,
+		},
+		"UUID01": {
+			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
+			RecurrentFee:  utils.NewDecimal(4, 1),
+			Unit:          minDecimal,
+			Increment:     secDecimal,
+		},
+		"UUID10": {
+			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
+			RecurrentFee:  utils.NewDecimal(5, 3),
+			Unit:          fminDecimal,
+			Increment:     secDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Hour+20*time.Minute), 0).Big, cstRts); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvOrdRts, expOrdRts) {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rcvOrdRts))
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
-*/
 func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	rt1 := &utils.Rate{
 		ID:              "RT_1",
@@ -5156,7 +5782,6 @@ func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	}
 }
 
-/*
 func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
 	if err != nil {
@@ -5185,13 +5810,40 @@ func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 			rt1,
 		},
 	}
-	rcvOrdRts, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big)
-	if err != nil {
-		t.Error(err)
+	expOrdRts := []*utils.RateSInterval{
+		{
+			IntervalStart: utils.NewDecimal(0, 0),
+			Increments: []*utils.RateSIncrement{
+				{
+					IncrementStart:    utils.NewDecimal(0, 0),
+					IntervalRateIndex: 0,
+					RateID:            "UUID00",
+					CompressFactor:    20,
+					Usage:             utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
+				},
+			},
+			CompressFactor: 1,
+		},
 	}
-	if rcvOrdRts != nil {
-		t.Errorf("Expected %+v, \nreceived %+v", utils.ToJSON(nil), utils.ToJSON(rcvOrdRts))
+	expCstRts := map[string]*utils.IntervalRate{
+		"UUID00": {
+			IntervalStart: utils.NewDecimal(0, 0),
+			RecurrentFee:  nil,
+			Unit:          tsecDecimal,
+			Increment:     secDecimal,
+		},
+	}
+	cstRts := make(map[string]*utils.IntervalRate)
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big, cstRts); err != nil {
+		t.Error(err)
+	} else {
+		for idx, val := range rtIvls {
+			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
+				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
+				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
+			}
+		}
 	}
 }
 
@@ -5221,10 +5873,8 @@ func TestComputeRateSIntervalsRecurrentFeeCmpFactorIntInvalidError(t *testing.T)
 
 	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:0 form:2}> increment to Int64"
 	_, err = computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimalFromFloat64(math.Inf(1)).Big)
+		utils.NewDecimalFromFloat64(math.Inf(1)).Big, make(map[string]*utils.IntervalRate))
 	if err == nil || err.Error() != expected {
 		t.Error(err)
 	}
 }
-
-*/
