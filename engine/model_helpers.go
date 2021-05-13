@@ -148,20 +148,6 @@ func getColumnCount(s interface{}) int {
 
 type DestinationMdls []DestinationMdl
 
-func (tps DestinationMdls) AsMapDestinations() (map[string]*Destination, error) {
-	result := make(map[string]*Destination)
-	for _, tp := range tps {
-		var d *Destination
-		var found bool
-		if d, found = result[tp.Tag]; !found {
-			d = &Destination{ID: tp.Tag}
-			result[tp.Tag] = d
-		}
-		d.AddPrefix(tp.Prefix)
-	}
-	return result, nil
-}
-
 // AsTPDestination converts DestinationMdls  into *utils.TPDestination
 func (tps DestinationMdls) AsTPDestinations() (result []*utils.TPDestination) {
 	md := make(map[string]*utils.TPDestination) // Should save us some CPU if we index here for big number of destinations to search

@@ -20,8 +20,6 @@ package engine
 import (
 	"testing"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -69,30 +67,6 @@ func TestMsgpackTime(t *testing.T) {
 	err = m.Unmarshal(buf, &t2)
 	if err != nil || t1 != t2 || !t1.Equal(t2) {
 		t.Errorf("error unmarshalling structure: %#v %#v %v", t1, t2, err)
-	}
-}
-
-func TestStorageDestinationContainsPrefixShort(t *testing.T) {
-	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
-	precision := dest.containsPrefix("0723")
-	if err != nil || precision != 4 {
-		t.Error("Error finding prefix: ", err, precision)
-	}
-}
-
-func TestStorageDestinationContainsPrefixLong(t *testing.T) {
-	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
-	precision := dest.containsPrefix("0723045326")
-	if err != nil || precision != 4 {
-		t.Error("Error finding prefix: ", err, precision)
-	}
-}
-
-func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
-	dest, err := dm.GetDestination("NAT", false, true, utils.NonTransactional)
-	precision := dest.containsPrefix("072")
-	if err != nil || precision != 0 {
-		t.Error("Error finding prefix: ", err, precision)
 	}
 }
 

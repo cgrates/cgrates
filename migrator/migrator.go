@@ -120,10 +120,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 		//only Move
 		case utils.MetaActionProfiles:
 			err = m.migrateActionProfiles()
-		case utils.MetaDestinations:
-			err = m.migrateDestinations()
-		case utils.MetaReverseDestinations:
-			err = m.migrateReverseDestinations()
 		case utils.CacheTimings:
 			err = m.migrateTimings()
 		case utils.MetaResources:
@@ -153,8 +149,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPresources()
 		case utils.MetaTpTimings:
 			err = m.migrateTpTimings()
-		case utils.MetaTpDestinations:
-			err = m.migrateTPDestinations()
 		case utils.MetaTpChargers:
 			err = m.migrateTPChargers()
 		case utils.MetaTpDispatchers:
@@ -174,12 +168,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateAttributeProfile(); err != nil {
 				log.Print("ERROR: ", utils.MetaAttributes, " ", err)
-			}
-			if err := m.migrateDestinations(); err != nil {
-				log.Print("ERROR: ", utils.MetaDestinations, " ", err)
-			}
-			if err := m.migrateReverseDestinations(); err != nil {
-				log.Print("ERROR: ", utils.MetaReverseDestinations, " ", err)
 			}
 			if err := m.migrateTimings(); err != nil {
 				log.Print("ERROR: ", utils.CacheTimings, " ", err)
@@ -219,9 +207,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateTpTimings(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpTimings, " ", err)
-			}
-			if err := m.migrateTPDestinations(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpDestinations, " ", err)
 			}
 			if err := m.migrateTPChargers(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpChargers, " ", err)

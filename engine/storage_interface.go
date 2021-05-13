@@ -49,8 +49,6 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	HasDataDrv(*context.Context, string, string, string) (bool, error)
-	GetDestinationDrv(string, string) (*Destination, error)
-	SetDestinationDrv(*Destination, string) error
 	RemoveDestinationDrv(string, string) error
 	RemoveReverseDestinationDrv(string, string, string) error
 	SetReverseDestinationDrv(string, []string, string) error
