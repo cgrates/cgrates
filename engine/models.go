@@ -225,7 +225,7 @@ type RouteMdl struct {
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
 	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
+	Weight             float64 `index:"3" re:"\d+\.?\d*"`
 	Sorting            string  `index:"4" re:""`
 	SortingParameters  string  `index:"5" re:""`
 	RouteID            string  `index:"6" re:""`
@@ -237,7 +237,6 @@ type RouteMdl struct {
 	RouteWeight        float64 `index:"12" re:"\d+\.?\d*"`
 	RouteBlocker       bool    `index:"13" re:""`
 	RouteParameters    string  `index:"14" re:""`
-	Weight             float64 `index:"15" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }
 

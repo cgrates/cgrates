@@ -742,12 +742,9 @@ func testOnStorITFilter(t *testing.T) {
 
 func testOnStorITRouteProfile(t *testing.T) {
 	splProfile := &RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SPRF_1",
-		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "SPRF_1",
+		FilterIDs:         []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Sorting:           "*lowest_cost",
 		SortingParameters: []string{},
 		Routes: []*Route{

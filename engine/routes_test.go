@@ -31,13 +31,9 @@ import (
 func TestRoutesSort(t *testing.T) {
 	sprs := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RoutePrf1",
-			FilterIDs: []string{},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf1",
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			Sorting:           "",
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -56,13 +52,9 @@ func TestRoutesSort(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RoutePrf2",
-			FilterIDs: []string{},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf2",
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			Sorting:           "",
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -83,13 +75,9 @@ func TestRoutesSort(t *testing.T) {
 	}
 	eRouteProfile := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RoutePrf2",
-			FilterIDs: []string{},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf2",
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			Sorting:           "",
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -108,13 +96,9 @@ func TestRoutesSort(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RoutePrf1",
-			FilterIDs: []string{},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf1",
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
 			Sorting:           "",
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -141,16 +125,13 @@ func TestRoutesSort(t *testing.T) {
 
 func TestRoutesCache(t *testing.T) {
 	var expTimeRoutes = time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var dmSPP *DataManager
 	sppTest := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -169,13 +150,9 @@ func TestRoutesCache(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -214,13 +191,9 @@ func TestRoutesCache(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -320,17 +293,14 @@ func TestRoutesCache(t *testing.T) {
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	var expTimeRoutes = time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	var dmSPP *DataManager
 	var sppTest = RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -349,13 +319,9 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -394,13 +360,9 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -572,17 +534,14 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 
 func TestRoutesSortedForEvent(t *testing.T) {
 	var expTimeRoutes = time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	var dmSPP *DataManager
 	var sppTest = RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -601,13 +560,9 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -646,13 +601,9 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -879,16 +830,13 @@ func TestRoutesSortedForEvent(t *testing.T) {
 
 func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	sppTest := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -907,13 +855,9 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -952,13 +896,9 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1139,16 +1079,13 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 
 func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	sppTest := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1167,13 +1104,9 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1212,13 +1145,9 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1392,16 +1321,13 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 
 func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	sppTest := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1420,13 +1346,9 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1465,13 +1387,9 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1680,16 +1598,13 @@ func TestRoutesAsOptsGetRoutesIgnoreErrors(t *testing.T) {
 
 func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	sppTest := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1708,13 +1623,9 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1753,13 +1664,9 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1934,16 +1841,13 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	expTimeRoutes := time.Now().Add(20 * time.Minute)
+	expTimeStr := expTimeRoutes.Format(time.RFC3339)
 	var routeService *RouteService
 	sppTest := RouteProfiles{
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile1",
-			FilterIDs: []string{"FLTR_RPP_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile1",
+			FilterIDs:         []string{"FLTR_RPP_1", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -1962,13 +1866,9 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 			Weight: 10,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfile2",
-			FilterIDs: []string{"FLTR_SUPP_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfile2",
+			FilterIDs:         []string{"FLTR_SUPP_2", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{
@@ -2007,13 +1907,9 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 			Weight: 20.0,
 		},
 		&RouteProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RouteProfilePrefix",
-			FilterIDs: []string{"FLTR_SUPP_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     expTimeRoutes,
-			},
+			Tenant:            "cgrates.org",
+			ID:                "RouteProfilePrefix",
+			FilterIDs:         []string{"FLTR_SUPP_3", "*ai:*now:2014-07-14T14:25:00Z|" + expTimeStr},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Routes: []*Route{

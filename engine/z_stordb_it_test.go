@@ -580,12 +580,8 @@ func testStorDBitCRUDTPRoutes(t *testing.T) {
 			TPid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "SUPL_1",
-			FilterIDs: []string{"*string:~*req.Accout:1007"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			Sorting: "*lowest_cost",
+			FilterIDs: []string{"*string:~*req.Accout:1007", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			Sorting:   "*lowest_cost",
 			Routes: []*utils.TPRoute{
 				{
 					ID:              "supplier1",
@@ -605,12 +601,8 @@ func testStorDBitCRUDTPRoutes(t *testing.T) {
 			TPid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "SUPL_2",
-			FilterIDs: []string{"*string:~*req.Destination:100"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2015-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			Sorting: "*lowest_cost",
+			FilterIDs: []string{"*string:~*req.Destination:100", "*ai:~*req.AnswerTime:2015-07-29T15:00:00Z"},
+			Sorting:   "*lowest_cost",
 			Routes: []*utils.TPRoute{
 				{
 					ID:              "supplier1",

@@ -2304,8 +2304,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "FltrRoute",
-			ActivationInterval: "2017-11-27T00:00:00Z",
+			FilterIDs:          "FltrRoute;*ai:~*req.AnswerTime:2017-11-27T00:00:00Z",
 			Sorting:            "*weight",
 			SortingParameters:  "srtPrm1",
 			RouteID:            "route1",
@@ -2326,7 +2325,6 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
 			FilterIDs:          "",
-			ActivationInterval: "",
 			Sorting:            "",
 			SortingParameters:  "",
 			RouteID:            "route2",
@@ -2349,11 +2347,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
 			SortingParameters: []string{"srtPrm1"},
-			FilterIDs:         []string{"FltrRoute"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2017-11-27T00:00:00Z",
-				ExpiryTime:     "",
-			},
+			FilterIDs:         []string{"FltrRoute", "*ai:~*req.AnswerTime:2017-11-27T00:00:00Z"},
 			Routes: []*utils.TPRoute{
 				{
 					ID:     "route1",
@@ -2382,7 +2376,6 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
 			FilterIDs:          "",
-			ActivationInterval: "",
 			Sorting:            "",
 			SortingParameters:  "",
 			RouteID:            "route2",
@@ -2402,8 +2395,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "FltrRoute",
-			ActivationInterval: "2017-11-27T00:00:00Z",
+			FilterIDs:          "FltrRoute;*ai:~*req.AnswerTime:2017-11-27T00:00:00Z",
 			Sorting:            "*weight",
 			SortingParameters:  "srtPrm1",
 			RouteID:            "route1",
@@ -2426,11 +2418,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
 			SortingParameters: []string{"srtPrm1"},
-			FilterIDs:         []string{"FltrRoute"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2017-11-27T00:00:00Z",
-				ExpiryTime:     "",
-			},
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
 					ID:     "route1",
@@ -2449,6 +2437,7 @@ func TestTPRoutesAsTPRouteProfile(t *testing.T) {
 		return strings.Compare(rcvRev[0].Routes[i].ID, rcvRev[0].Routes[j].ID) < 0
 	})
 	sort.Strings(rcvRev[0].SortingParameters)
+	sort.Strings(rcvRev[0].FilterIDs)
 	if !reflect.DeepEqual(rcvRev, expPrfRev) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}
@@ -2461,8 +2450,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "FltrRoute",
-			ActivationInterval: "2017-11-27T00:00:00Z;2017-11-28T00:00:00Z",
+			FilterIDs:          "FltrRoute;*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z",
 			Sorting:            "*weight",
 			SortingParameters:  "srtPrm1",
 			RouteID:            "route1",
@@ -2482,8 +2470,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "",
-			ActivationInterval: "2017-11-27T00:00:00Z;2017-11-28T00:00:00Z",
+			FilterIDs:          "*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z",
 			Sorting:            "",
 			SortingParameters:  "",
 			RouteID:            "route2",
@@ -2506,11 +2493,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
 			SortingParameters: []string{"srtPrm1"},
-			FilterIDs:         []string{"FltrRoute"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2017-11-27T00:00:00Z",
-				ExpiryTime:     "2017-11-28T00:00:00Z",
-			},
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
 					ID:     "route1",
@@ -2528,6 +2511,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 	sort.Slice(rcv[0].Routes, func(i, j int) bool {
 		return strings.Compare(rcv[0].Routes[i].ID, rcv[0].Routes[j].ID) < 0
 	})
+	sort.Strings(rcv[0].FilterIDs)
 	if !reflect.DeepEqual(rcv, expPrf) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrf), utils.ToJSON(rcv))
 	}
@@ -2539,7 +2523,6 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
 			FilterIDs:          "",
-			ActivationInterval: "",
 			Sorting:            "",
 			SortingParameters:  "",
 			RouteID:            "route2",
@@ -2559,8 +2542,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			Tpid:               "TP",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "FltrRoute",
-			ActivationInterval: "2017-11-27T00:00:00Z;2017-11-28T00:00:00Z",
+			FilterIDs:          "FltrRoute;*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z",
 			Sorting:            "*weight",
 			SortingParameters:  "srtPrm1",
 			RouteID:            "route1",
@@ -2583,11 +2565,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 			ID:                "RoutePrf",
 			Sorting:           "*weight",
 			SortingParameters: []string{"srtPrm1"},
-			FilterIDs:         []string{"FltrRoute"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2017-11-27T00:00:00Z",
-				ExpiryTime:     "2017-11-28T00:00:00Z",
-			},
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2017-11-27T00:00:00Z|2017-11-28T00:00:00Z", "FltrRoute"},
 			Routes: []*utils.TPRoute{
 				{
 					ID:     "route1",
@@ -2606,6 +2584,7 @@ func TestTPRoutesAsTPRouteProfile2(t *testing.T) {
 		return strings.Compare(rcvRev[0].Routes[i].ID, rcvRev[0].Routes[j].ID) < 0
 	})
 	sort.Strings(rcvRev[0].SortingParameters)
+	sort.Strings(rcvRev[0].FilterIDs)
 	if !reflect.DeepEqual(rcvRev, expPrfRev) {
 		t.Errorf("Expecting: %+v,\nReceived: %+v", utils.ToJSON(expPrfRev), utils.ToJSON(rcvRev))
 	}
@@ -3259,14 +3238,10 @@ func TestAPItoModelTPRoutesCase1(t *testing.T) {
 func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 	tpRoute := []*utils.TPRouteProfile{
 		{
-			TPid:      "TP1",
-			Tenant:    "cgrates.org",
-			ID:        "RoutePrf",
-			FilterIDs: []string{},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "2014-08-29T15:00:00Z",
-			},
+			TPid:              "TP1",
+			Tenant:            "cgrates.org",
+			ID:                "RoutePrf",
+			FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 			Sorting:           "*lc",
 			SortingParameters: []string{},
 			Routes: []*utils.TPRoute{
@@ -3290,8 +3265,7 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "RoutePrf",
-			FilterIDs:          "",
-			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			FilterIDs:          "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
 			Sorting:            "*lc",
 			SortingParameters:  "",
 			RouteID:            "route1",
@@ -3326,14 +3300,10 @@ func TestAPItoModelTPRoutesEmptySlice(t *testing.T) {
 
 func TestAPItoModelTPRoutesCase2(t *testing.T) {
 	structTest := &utils.TPRouteProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "RoutePrf",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-08-29T15:00:00Z",
-		},
+		TPid:              "TP1",
+		Tenant:            "cgrates.org",
+		ID:                "RoutePrf",
+		FilterIDs:         []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 		Sorting:           "*lc",
 		SortingParameters: []string{"PARAM1", "PARAM2"},
 		Routes: []*utils.TPRoute{
@@ -3355,8 +3325,7 @@ func TestAPItoModelTPRoutesCase2(t *testing.T) {
 		Tpid:               "TP1",
 		Tenant:             "cgrates.org",
 		ID:                 "RoutePrf",
-		FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+		FilterIDs:          "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
 		Sorting:            "*lc",
 		SortingParameters:  "PARAM1;PARAM2",
 		RouteID:            "route1",
@@ -3465,13 +3434,7 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 
 func TestRouteProfileToAPICase1(t *testing.T) {
 	structTest := &RouteProfile{
-		FilterIDs: []string{"FilterID1", "FilterID2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2020, time.April,
-				11, 21, 34, 01, 0, time.UTC),
-			ExpiryTime: time.Date(2020, time.April,
-				12, 21, 34, 01, 0, time.UTC),
-		},
+		FilterIDs:         []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z"},
 		SortingParameters: []string{"Param1", "Param2"},
 		Routes: []*Route{
 			&Route{ID: "ResGroup2"},
@@ -3479,11 +3442,7 @@ func TestRouteProfileToAPICase1(t *testing.T) {
 	}
 
 	expStruct := &utils.TPRouteProfile{
-		FilterIDs: []string{"FilterID1", "FilterID2"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2020-04-11T21:34:01Z",
-			ExpiryTime:     "2020-04-12T21:34:01Z",
-		},
+		FilterIDs:         []string{"*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z", "FilterID1", "FilterID2"},
 		SortingParameters: []string{"Param1", "Param2"},
 		Routes: []*utils.TPRoute{{
 			ID: "ResGroup2",
@@ -4453,21 +4412,6 @@ func TestModelHelpersTestAPItoRouteProfile(t *testing.T) {
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
-}
-func TestModelHelpersTestAPItoRouteProfileErr(t *testing.T) {
-	testStruct := &utils.TPRouteProfile{
-		FilterIDs: []string{},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-		},
-		SortingParameters: []string{"param1"},
-		Routes:            []*utils.TPRoute{},
-	}
-	_, err := APItoRouteProfile(testStruct, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
-	}
-
 }
 
 func TestModelHelperAPItoFilterError(t *testing.T) {

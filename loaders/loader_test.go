@@ -911,12 +911,9 @@ func TestLoaderProcessRoutes(t *testing.T) {
 	}
 
 	eSp := &engine.RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RoutePrf1",
-		FilterIDs: []string{"*string:~*req.Account:dan"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "RoutePrf1",
+		FilterIDs:         []string{"*string:~*req.Account:dan"},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
@@ -952,7 +949,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				RouteParameters: utils.EmptyString,
 			},
 		},
-		Weight: 20,
+		Weight: 0,
 	}
 	sort.Slice(eSp.Routes, func(i, j int) bool {
 		return strings.Compare(eSp.Routes[i].ID+strings.Join(eSp.Routes[i].FilterIDs, utils.ConcatenatedKeySep),
@@ -3194,44 +3191,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadRoutesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadRoutesAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRoutes: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRoutes: {
-			utils.RoutesCsv: &openedCSVFile{
-				fileName: utils.RoutesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
