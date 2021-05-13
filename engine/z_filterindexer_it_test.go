@@ -1887,7 +1887,6 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	splProfile := &RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SPL_Weight",
-		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
 		Routes: []*Route{
@@ -1907,7 +1906,6 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	splProfile2 := &RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SPL_Weight2",
-		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
 		Routes: []*Route{
