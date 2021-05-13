@@ -79,20 +79,21 @@ func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, t
 		}
 		if err == utils.ErrNotFound ||
 			alS.cgrcfg.AttributeSCfg().AnyContext {
-			var aPrflAnyIDs utils.StringSet
-			if aPrflAnyIDs, err = MatchingItemIDsForEvent(evNm,
+			aPrflAnyIDs, err := MatchingItemIDsForEvent(apiCtx, evNm,
 				alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes,
 				utils.ConcatenatedKey(tnt, utils.MetaAny),
 				alS.cgrcfg.AttributeSCfg().IndexedSelects,
-				alS.cgrcfg.AttributeSCfg().NestedFields); err != nil {
-				return nil, err
-			}
+				alS.cgrcfg.AttributeSCfg().NestedFields)
+
 			if aPrflIDs.Size() == 0 {
+				if err != nil { // return the error if no attribute matched the needed context
+					return nil, err
+				}
 				aPrflIDs = aPrflAnyIDs
-			} else {
+			} else if err == nil && aPrflAnyIDs.Size() != 0 {
 				aPrflIDs = utils.JoinStringSet(aPrflIDs, aPrflAnyIDs)
 			}
 		}

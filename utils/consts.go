@@ -1924,6 +1924,7 @@ const (
 	IndexedSelectsCfg = "indexed_selects"
 	ProcessRunsCfg    = "process_runs"
 	NestedFieldsCfg   = "nested_fields"
+	AnyContextCfg     = "any_context"
 
 	// ChargerSCfg
 	StoreIntervalCfg = "store_interval"
@@ -1982,6 +1983,9 @@ const (
 	// AccountSCfg
 	MaxIterations = "max_iterations"
 	MaxUsage      = "max_usage"
+
+	// DispatcherSCfg
+	AnySubsystemCfg = "any_subsystem"
 )
 
 // FC Template
