@@ -132,8 +132,8 @@ cgrates.org,ALS1,con1,*string:~*req.Account:1001,20,*string:~*req.Field1:Initial
 cgrates.org,ALS1,con2;con3,,20,,*req.Field2,*variable,Sub2,true
 `
 	ChargersCSVContent = `
-#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
-cgrates.org,Charger1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
+#Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,20,*rated,ATTR_1001_SIMPLEAUTH
 `
 	DispatcherCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,Strategy,Hosts,Weight

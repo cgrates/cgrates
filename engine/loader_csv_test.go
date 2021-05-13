@@ -513,13 +513,10 @@ func TestLoadAttributeProfiles(t *testing.T) {
 func TestLoadChargerProfiles(t *testing.T) {
 	eChargerProfiles := map[utils.TenantID]*utils.TPChargerProfile{
 		{Tenant: "cgrates.org", ID: "Charger1"}: {
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "Charger1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			TPid:         testTPID,
+			Tenant:       "cgrates.org",
+			ID:           "Charger1",
+			FilterIDs:    []string{"*string:~*req.Account:1001"},
 			RunID:        "*rated",
 			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
 			Weight:       20,

@@ -840,27 +840,19 @@ func testStorDBitCRUDTPChargers(t *testing.T) {
 	//WRITE
 	tpChargers := []*utils.TPChargerProfile{
 		{
-			TPid:      "TP_ID",
-			Tenant:    "cgrates.org",
-			ID:        "Chrgs1",
-			FilterIDs: []string{"*string:~*req.Account:1002"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
+			TPid:         "TP_ID",
+			Tenant:       "cgrates.org",
+			ID:           "Chrgs1",
+			FilterIDs:    []string{"*string:~*req.Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			AttributeIDs: make([]string, 0),
 			RunID:        utils.MetaDefault,
 			Weight:       20,
 		},
 		{
-			TPid:      "TP_id",
-			Tenant:    "cgrates.org",
-			ID:        "Chrgs2",
-			FilterIDs: []string{"*string:~*req.Destination:10"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
+			TPid:         "TP_id",
+			Tenant:       "cgrates.org",
+			ID:           "Chrgs2",
+			FilterIDs:    []string{"*string:~*req.Destination:10", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			AttributeIDs: make([]string, 0),
 			RunID:        utils.MetaDefault,
 			Weight:       10,

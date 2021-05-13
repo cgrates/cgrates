@@ -26,13 +26,12 @@ import (
 
 // ChargerProfile is the config for one Charger
 type ChargerProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	RunID              string
-	AttributeIDs       []string // perform data aliasing based on these Attributes
-	Weight             float64
+	Tenant       string
+	ID           string
+	FilterIDs    []string
+	RunID        string
+	AttributeIDs []string // perform data aliasing based on these Attributes
+	Weight       float64
 }
 
 // ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher

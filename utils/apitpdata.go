@@ -712,14 +712,13 @@ type TPAttributeProfile struct {
 
 // TPChargerProfile is used in APIs to manage remotely offline ChargerProfile
 type TPChargerProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	RunID              string
-	AttributeIDs       []string
-	Weight             float64
+	TPid         string
+	Tenant       string
+	ID           string
+	FilterIDs    []string
+	RunID        string
+	AttributeIDs []string
+	Weight       float64
 }
 
 type TPTntID struct {

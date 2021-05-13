@@ -128,11 +128,8 @@ func testJSONAddData(t *testing.T) {
 	//add a charger
 	chargerProfile := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
-			Tenant: "cgrates.org",
-			ID:     "Default",
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			Tenant:       "cgrates.org",
+			ID:           "Default",
 			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"*none"},
 			Weight:       20,

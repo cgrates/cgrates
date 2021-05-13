@@ -1,8 +1,8 @@
-# Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+# Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs
 
 # CGR_DEFAULT is the default charger for events
-cgrates.org,CGR_DEFAULT,,,*default,*none,0
+cgrates.org,CGR_DEFAULT,,0,*default,*none
 
 # CGR_RESELLER1 creates an additional CDR for calculating reseller costs
 # uses ATTR_CRG_RESELLER1 to replace Category and RequestType in events
-cgrates.org,CRG_RESELLER1,,,reseller1,ATTR_CRG_RESELLER1,1
+cgrates.org,CRG_RESELLER1,,1,reseller1,ATTR_CRG_RESELLER1

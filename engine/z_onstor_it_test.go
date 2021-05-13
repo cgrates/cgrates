@@ -986,12 +986,9 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 
 func testOnStorITChargerProfile(t *testing.T) {
 	cpp := &ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "CPP_1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:       "cgrates.org",
+		ID:           "CPP_1",
+		FilterIDs:    []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR_1"},
 		Weight:       20,

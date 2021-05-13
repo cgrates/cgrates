@@ -640,13 +640,11 @@ func TestGetLoadedIdsChargerProfiles(t *testing.T) {
 	tpr := &TpReader{
 		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "ResGroup1",
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				RunID: "RUN_ID",
+				TPid:      testTPID,
+				Tenant:    "cgrates.org",
+				ID:        "ResGroup1",
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+				RunID:     "RUN_ID",
 			},
 		},
 	}
