@@ -115,6 +115,7 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.ProcessRunsCfg:    alS.ProcessRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
+		utils.AnyContextCfg:     alS.AnyContext,
 	}
 	if alS.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*alS.StringIndexedFields))
@@ -178,6 +179,7 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
 		ProcessRuns:    alS.ProcessRuns,
+		AnyContext:     alS.AnyContext,
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = make([]string, len(alS.ResourceSConns))
