@@ -21,8 +21,6 @@
 
 "caches":{
 	"partitions": {
-		"*destinations": {"limit":0 },
-		"*reverse_destinations": {"limit":0 },
 		"*timings": {"limit":0 },
 		"*resource_profiles": {"limit":0 },
 		"*resources": {"limit":0 },
@@ -63,8 +61,6 @@
 	"remote_conns": ["conn1"],
 	"items":{
 		"*accounts":{"remote":true,"replicate":false},
-		"*reverse_destinations": {"remote":true,"replicate":false},
-		"*destinations": {"remote":true,"replicate":false},
 		"*timings": {"remote":true,"replicate":false},
 		"*resource_profiles":{"remote":true,"replicate":false},
 		"*resources":{"remote":true,"replicate":false},

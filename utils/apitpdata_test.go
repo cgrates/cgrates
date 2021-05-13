@@ -548,8 +548,6 @@ func TestCDRsFilterPrepare(t *testing.T) {
 func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 	newAttrReloadCache := &AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
-			DestinationIDs:             {MetaAny},
-			ReverseDestinationIDs:      {MetaAny},
 			ResourceProfileIDs:         {MetaAny},
 			ResourceIDs:                {MetaAny},
 			StatsQueueIDs:              {MetaAny},

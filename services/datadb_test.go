@@ -69,12 +69,6 @@ func TestDataDBCoverage(t *testing.T) {
 			utils.MetaAccounts: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},

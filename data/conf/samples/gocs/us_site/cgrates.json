@@ -33,8 +33,6 @@
     "replication_conns": ["rplConn"],
     "items":{
       "*accounts":{"replicate":true},
-      "*reverse_destinations": {"replicate":false},
-      "*destinations": {"replicate":false},
       "*timings": {"replicate":false},
       "*resource_profiles":{"replicate":false},
       "*resources":{"replicate":false},

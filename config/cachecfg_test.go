@@ -53,7 +53,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &CacheJsonCfg{
 		Partitions: map[string]*CacheParamJsonCfg{
-			utils.MetaDestinations: {
+			utils.MetaDispatchers: {
 				Limit:      utils.IntPointer(10),
 				Ttl:        utils.StringPointer("2"),
 				Static_ttl: utils.BoolPointer(true),
@@ -65,7 +65,7 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.MetaDestinations: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
+			utils.MetaDispatchers: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
 		},
 		ReplicationConns: []string{"conn1", "conn2"},
 	}
@@ -75,9 +75,9 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	} else if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
-		if !reflect.DeepEqual(expected.Partitions[utils.MetaDestinations], jsnCfg.cacheCfg.Partitions[utils.MetaDestinations]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Partitions[utils.MetaDestinations]),
-				utils.ToJSON(jsnCfg.cacheCfg.Partitions[utils.MetaDestinations]))
+		if !reflect.DeepEqual(expected.Partitions[utils.MetaDispatchers], jsnCfg.cacheCfg.Partitions[utils.MetaDispatchers]) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.Partitions[utils.MetaDispatchers]),
+				utils.ToJSON(jsnCfg.cacheCfg.Partitions[utils.MetaDispatchers]))
 		} else if !reflect.DeepEqual(jsnCfg.cacheCfg.ReplicationConns, expected.ReplicationConns) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected.ReplicationConns), utils.ToJSON(jsnCfg.cacheCfg.ReplicationConns))
 		}
@@ -121,7 +121,7 @@ func TestCacheParamCfgloadFromJsonCfg1(t *testing.T) {
 func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
 	jsonCfg := &CacheJsonCfg{
 		Partitions: map[string]*CacheParamJsonCfg{
-			utils.MetaDestinations: {
+			utils.MetaDispatchers: {
 				Ttl: utils.StringPointer("1ss"),
 			},
 		},
@@ -137,13 +137,13 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"caches":{
 			"partitions": {
-				"*destinations": {"limit": 10000, "ttl": "", "static_ttl": false, "precache": true, "replicate": true},
+				"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": true, "replicate": true},
 				},
 			},
 		}`
 	eMap := map[string]interface{}{
 		utils.PartitionsCfg: map[string]interface{}{
-			utils.MetaDestinations: map[string]interface{}{"limit": 10000, "ttl": "", "static_ttl": false, "precache": true, "replicate": true},
+			utils.MetaDispatchers: map[string]interface{}{"limit": -1, "ttl": "", "static_ttl": false, "precache": true, "replicate": true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}
@@ -151,10 +151,10 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 		t.Error(err)
 	} else {
 		newMap := cgrCfg.cacheCfg.AsMapInterface()
-		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations],
-			eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations],
-				newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDestinations])
+		if !reflect.DeepEqual(newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers],
+			eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers]) {
+			t.Errorf("Expected %+v, received %+v", eMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers],
+				newMap[utils.PartitionsCfg].(map[string]interface{})[utils.MetaDispatchers])
 		}
 	}
 }
@@ -162,7 +162,7 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 func TestCacheCfgClone(t *testing.T) {
 	cs := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.MetaDestinations: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
+			utils.MetaDispatchers: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
 		},
 		ReplicationConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 	}
@@ -170,7 +170,7 @@ func TestCacheCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(cs, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cs), utils.ToJSON(rcv))
 	}
-	if rcv.Partitions[utils.MetaDestinations].Limit = 0; cs.Partitions[utils.MetaDestinations].Limit != 10 {
+	if rcv.Partitions[utils.MetaDispatchers].Limit = 0; cs.Partitions[utils.MetaDispatchers].Limit != 10 {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.ReplicationConns[0] = ""; cs.ReplicationConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {

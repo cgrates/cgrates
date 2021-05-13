@@ -39,12 +39,6 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
 			},
-			utils.MetaReverseDestinations: {
-				Replicate: utils.BoolPointer(true),
-			},
-			utils.MetaDestinations: {
-				Replicate: utils.BoolPointer(false),
-			},
 		},
 		Opts: map[string]interface{}{
 			utils.RedisSentinelNameCfg: "sentinel",
@@ -63,12 +57,6 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 			utils.MetaAccounts: {
 				Replicate: true,
 				Remote:    true,
-			},
-			utils.MetaReverseDestinations: {
-				Replicate: true,
-			},
-			utils.MetaDestinations: {
-				Replicate: false,
 			},
 		},
 		Opts: map[string]interface{}{
@@ -313,8 +301,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 	"remote_conns":["Conn1"],
     "items":{
 		"*accounts":{"replicate":true},
-		"*reverse_destinations": {"replicate":false},
-		"*destinations": {"replicate":false},
 	  }	,
 	"opts": {
 		"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
@@ -333,12 +319,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		Items: map[string]*ItemOpt{
 			utils.MetaAccounts: {
 				Replicate: true,
-			},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-			},
-			utils.MetaDestinations: {
-				Replicate: false,
 			},
 		},
 		Opts: map[string]interface{}{
@@ -501,8 +481,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
 		utils.ItemsCfg: map[string]interface{}{
-			utils.MetaAccounts:            map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
-			utils.MetaReverseDestinations: map[string]interface{}{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
+			utils.MetaAccounts: map[string]interface{}{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal"},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -513,10 +492,6 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts],
 				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaAccounts])
-		} else if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
-			rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations]) {
-			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations],
-				rcv[utils.ItemsCfg].(map[string]interface{})[utils.MetaReverseDestinations])
 		}
 	}
 }
@@ -535,12 +510,6 @@ func TestCloneDataDB(t *testing.T) {
 			utils.MetaAccounts: {
 				Replicate: utils.BoolPointer(true),
 				Remote:    utils.BoolPointer(true),
-			},
-			utils.MetaReverseDestinations: {
-				Replicate: utils.BoolPointer(true),
-			},
-			utils.MetaDestinations: {
-				Replicate: utils.BoolPointer(false),
 			},
 		},
 		Opts: map[string]interface{}{

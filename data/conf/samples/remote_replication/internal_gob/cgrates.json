@@ -33,8 +33,6 @@
 	"replication_conns": ["conn2"],
 	"items":{
 		"*accounts":{"remote":true,"replicate":true},
-		"*reverse_destinations": {"remote":true,"replicate":true},
-		"*destinations": {"remote":true,"replicate":true},
 		"*timings": {"remote":true,"replicate":true},
 		"*resource_profiles":{"remote":true,"replicate":true},
 		"*resources":{"remote":true,"replicate":true},

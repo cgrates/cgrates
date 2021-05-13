@@ -67,47 +67,6 @@ func TestDspReplicatorSv1PingErrorNil(t *testing.T) {
 	}
 }
 
-func TestDspReplicatorSv1GetReverseDestinationNilEvent(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	var reply *[]string
-	result := dspSrv.ReplicatorSv1GetReverseDestination(nil, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspReplicatorSv1GetReverseDestinationNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.StringWithAPIOpts{
-		Tenant: "tenant",
-	}
-	var reply *[]string
-	result := dspSrv.ReplicatorSv1GetReverseDestination(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspReplicatorSv1GetReverseDestinationErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.StringWithAPIOpts{
-		Tenant: "tenant",
-	}
-	var reply *[]string
-	result := dspSrv.ReplicatorSv1GetReverseDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
 func TestDspReplicatorSv1GetStatQueueNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
@@ -1229,46 +1188,6 @@ func TestDspReplicatorSv1RemoveIndexesNil(t *testing.T) {
 	var reply *string
 	result := dspSrv.ReplicatorSv1RemoveIndexes(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspReplicatorSv1RemoveDestinationNilEvent(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	var reply *string
-	result := dspSrv.ReplicatorSv1RemoveDestination(nil, reply)
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspReplicatorSv1RemoveDestinationNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &utils.StringWithAPIOpts{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.ReplicatorSv1RemoveDestination(CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestReplicatorSv1RemoveDestinationErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &utils.StringWithAPIOpts{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.ReplicatorSv1RemoveDestination(CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if result == nil || result.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}

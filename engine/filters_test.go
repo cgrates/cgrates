@@ -247,17 +247,6 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewFilterRule(utils.MetaDestinations, "~MetaDestinations", []string{"1001"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	erf = &FilterRule{Type: utils.MetaDestinations, Element: "~MetaDestinations", Values: []string{"1001"}, negative: utils.BoolPointer(false)}
-	if err = erf.CompileValues(); err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(erf, rf) {
-		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
-	}
 	rf, err = NewFilterRule(utils.MetaLessThan, "~MetaLessThan", []string{"20"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)

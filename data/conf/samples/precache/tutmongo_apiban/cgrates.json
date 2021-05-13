@@ -31,8 +31,6 @@
 
 "caches":{
 	"partitions": {
-		"*destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-		"*reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*resources": {"limit": 10000, "ttl":"0s", "precache": true},
 		"*statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
