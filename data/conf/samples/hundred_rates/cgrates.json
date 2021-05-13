@@ -16,8 +16,6 @@
 
  // "caches":{
  //   "partitions": {
- //     "*destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-  //    "*reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
    //   "*rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
    //   "*rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 

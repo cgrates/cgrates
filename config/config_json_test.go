@@ -85,12 +85,6 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 func TestCacheJsonCfg(t *testing.T) {
 	eCfg := &CacheJsonCfg{
 		Partitions: map[string]*CacheParamJsonCfg{
-			utils.CacheDestinations: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheReverseDestinations: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheTimings: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -218,18 +212,13 @@ func TestCacheJsonCfg(t *testing.T) {
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false),
 			},
-
 			utils.CacheVersions: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-
 			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPTimings: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPDestinations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPThresholds: {Limit: utils.IntPointer(-1),
@@ -341,14 +330,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
-			utils.MetaReverseDestinations: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.MetaDestinations: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
 			utils.MetaActions: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
@@ -454,10 +435,6 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		},
 		Items: map[string]*ItemOptJson{
 			utils.CacheTBLTPTimings: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
-			utils.CacheTBLTPDestinations: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},

@@ -734,9 +734,6 @@ func TestEventChargesEquals(t *testing.T) {
 								Factor: NewDecimal(200, 0),
 							},
 						},
-						Opts: map[string]interface{}{
-							Destinations: "1234",
-						},
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"*string:~*req.Account:1004"},
@@ -915,9 +912,6 @@ func TestEventChargesEquals(t *testing.T) {
 							{
 								Factor: NewDecimal(200, 0),
 							},
-						},
-						Opts: map[string]interface{}{
-							Destinations: "1234",
 						},
 						CostIncrements: []*CostIncrement{
 							{
@@ -1109,9 +1103,6 @@ func TestEqualsExtEventCharges(t *testing.T) {
 								Factor: NewDecimal(200, 0),
 							},
 						},
-						Opts: map[string]interface{}{
-							Destinations: "1234",
-						},
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"*string:~*req.Account:1004"},
@@ -1296,9 +1287,6 @@ func TestEqualsExtEventCharges(t *testing.T) {
 							{
 								Factor: Float64Pointer(200),
 							},
-						},
-						Opts: map[string]interface{}{
-							Destinations: "1234",
 						},
 						CostIncrements: []*ExtCostIncrement{
 							{

@@ -336,7 +336,6 @@ func TestAttributeEventReplyDigest(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
-				utils.Destinations: "+491511231234",
 			},
 		},
 	}
@@ -357,7 +356,6 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
-				utils.Destinations: "+491511231234",
 			},
 		},
 	}
@@ -378,7 +376,6 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
-				utils.Destinations: "+491511231234",
 			},
 		},
 	}
@@ -398,7 +395,6 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
-				utils.Destinations: "+491511231234",
 			},
 		},
 	}

@@ -75,7 +75,7 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.StatS: 4, utils.Accounts: 3, utils.Actions: 2,
 		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 7,
 		utils.Timing: 1, utils.RQF: 5, utils.Resource: 1,
-		utils.Subscribers: 1, utils.Destinations: 1, utils.ReverseDestinations: 1,
+		utils.Subscribers: 1,
 		utils.Chargers:    2,
 		utils.Dispatchers: 2, utils.LoadIDsVrs: 1, utils.RateProfiles: 1,
 		utils.ActionProfiles: 1,
@@ -84,7 +84,7 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.CostDetails: 2, utils.SessionSCosts: 3, utils.CDRs: 2,
 		utils.TpFilters: 1, utils.TpThresholds: 1, utils.TpRoutes: 1,
 		utils.TpStats: 1, utils.TpResources: 1, utils.TpTiming: 1,
-		utils.TpResource: 1, utils.TpDestinations: 1,
+		utils.TpResource: 1,
 		utils.TpChargers: 1, utils.TpDispatchers: 1,
 		utils.TpRateProfiles: 1, utils.TpActionProfiles: 1,
 	}

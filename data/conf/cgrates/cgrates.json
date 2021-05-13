@@ -63,9 +63,7 @@
 // 	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
 // 	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
 // 	"items":{
-// 		"*accounts":{"remote":false, "replicate":false}, 					
-// 		"*reverse_destinations": {"remote":false, "replicate":false},
-// 		"*destinations": {"remote":false, "replicate":false}, 
+// 		"*accounts":{"remote":false, "replicate":false},
 // 		"*actions":{"remote":false, "replicate":false}, 
 // 		"*action_plans": {"remote":false, "replicate":false}, 
 // 		"*shared_groups":{"remote":false, "replicate":false}, 
@@ -122,8 +120,7 @@
 // 	"items":{
 // 		"*session_costs": {"remote":false, "replicate":false}, 
 // 		"*cdrs": {"remote":false, "replicate":false}, 		
-// 		"*tp_timings":{"remote":false, "replicate":false}, 					
-// 		"*tp_destinations": {"remote":false, "replicate":false},
+// 		"*tp_timings":{"remote":false, "replicate":false},
 // 		"*tp_rates": {"remote":false, "replicate":false}, 
 // 		"*tp_destination_rates": {"remote":false, "replicate":false}, 
 // 		"*tp_rating_plans":{"remote":false, "replicate":false}, 
@@ -211,8 +208,6 @@
 
 // "caches":{
 // 	"partitions": {
-// 		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// destination caching
-// 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// reverse destinations index caching
 // 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// actions caching
 // 		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// action plans caching
 // 		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// action triggers caching
@@ -268,8 +263,7 @@
 // 		// internal storDB tabels
 // 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 		
-// 		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 					
-// 		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+// 		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 // 		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_rating_plans":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 

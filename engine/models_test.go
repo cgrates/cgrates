@@ -33,12 +33,3 @@ func TestModelsTimingMdlTableName(t *testing.T) {
 		t.Errorf("\nExpected <%+v>,\nreceived <%+v>", exp, result)
 	}
 }
-
-func TestModelsDestinationMdlTableName(t *testing.T) {
-	testStruct := DestinationMdl{}
-	exp := utils.TBLTPDestinations
-	result := testStruct.TableName()
-	if !reflect.DeepEqual(exp, result) {
-		t.Errorf("\nExpected <%+v>,\nreceived <%+v>", exp, result)
-	}
-}

@@ -37,7 +37,7 @@ var csvr *TpReader
 func init() {
 	var err error
 	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSVSep,
-		DestinationsCSVContent, TimingsCSVContent,
+		TimingsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, false)
@@ -378,7 +378,6 @@ func TestLoadFilters(t *testing.T) {
 			Filters: []*utils.TPFilter{
 				{
 					Element: "~*req.Destination",
-					Type:    utils.MetaDestinations,
 					Values:  []string{"DST_DE"},
 				},
 			},
@@ -393,7 +392,6 @@ func TestLoadFilters(t *testing.T) {
 			Filters: []*utils.TPFilter{
 				{
 					Element: "~*req.Destination",
-					Type:    utils.MetaDestinations,
 					Values:  []string{"DST_NL"},
 				},
 			},
