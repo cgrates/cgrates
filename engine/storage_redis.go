@@ -19,12 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"compress/zlib"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"io"
 	"os"
 	"strconv"
 	"time"
@@ -257,42 +254,6 @@ func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		return i == 1, err
 	}
 	return false, errors.New("unsupported HasData category")
-}
-
-// GetDestination retrieves a destination with id from  tp_db
-func (rs *RedisStorage) GetDestinationDrv(key, transactionID string) (dest *Destination, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redisGET, utils.DestinationPrefix+key); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrNotFound
-		return
-	}
-	b := bytes.NewBuffer(values)
-	var r io.ReadCloser
-	if r, err = zlib.NewReader(b); err != nil {
-		return
-	}
-	var out []byte
-	if out, err = io.ReadAll(r); err != nil {
-		return
-	}
-	r.Close()
-	err = rs.ms.Unmarshal(out, &dest)
-	return
-}
-
-func (rs *RedisStorage) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(dest); err != nil {
-		return
-	}
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write(result)
-	w.Close()
-	err = rs.Cmd(nil, redisSET, utils.DestinationPrefix+dest.ID, b.String())
-	return
 }
 
 func (rs *RedisStorage) GetReverseDestinationDrv(key, transactionID string) (ids []string, err error) {

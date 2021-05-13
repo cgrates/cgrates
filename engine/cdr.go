@@ -294,15 +294,6 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
 		case utils.MetaExp + utils.NestingSep + utils.AnswerTime: // Format time based on layout
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
-		case utils.MetaExp + utils.NestingSep + utils.Destination:
-			cdrVal, err = cdr.FieldAsString(rsrFld)
-			if err != nil {
-				return "", err
-			}
-			if cfgCdrFld.MaskLen != -1 && len(cfgCdrFld.MaskDestID) != 0 &&
-				CachedDestHasPrefix(cfgCdrFld.MaskDestID, cdrVal) {
-				cdrVal = utils.MaskSuffix(cdrVal, cfgCdrFld.MaskLen)
-			}
 		default:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
 			if err != nil {
@@ -356,12 +347,6 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, groupedCDRs []*CDR,
 		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs, filterS)
 	case utils.MetaComposed, utils.MetaVariable:
 		outVal, err = cdr.exportFieldValue(cfgFld, filterS)
-	case utils.MetaMaskedDestination:
-		if len(cfgFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgFld.MaskDestID, cdr.Destination) {
-			outVal = "1"
-		} else {
-			outVal = "0"
-		}
 	}
 	if err != nil &&
 		(err != utils.ErrNotFound || cfgFld.Mandatory) {

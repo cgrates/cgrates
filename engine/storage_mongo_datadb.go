@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"compress/zlib"
 	"fmt"
-	"io"
 	"reflect"
 	"strings"
 	"sync"
@@ -671,58 +668,6 @@ func (ms *MongoStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		return err
 	})
 	return has, err
-}
-
-func (ms *MongoStorage) GetDestinationDrv(key, transactionID string) (result *Destination, err error) {
-	var kv struct {
-		Key   string
-		Value []byte
-	}
-	if err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColDst).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&kv); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	b := bytes.NewBuffer(kv.Value)
-	r, err := zlib.NewReader(b)
-	if err != nil {
-		return nil, err
-	}
-	out, err := io.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	r.Close()
-	err = ms.ms.Unmarshal(out, &result)
-	return
-}
-
-func (ms *MongoStorage) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
-	result, err := ms.ms.Marshal(dest)
-	if err != nil {
-		return err
-	}
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write(result)
-	w.Close()
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColDst).UpdateOne(sctx, bson.M{"key": dest.ID},
-			bson.M{"$set": struct {
-				Key   string
-				Value []byte
-			}{Key: dest.ID, Value: b.Bytes()}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
 }
 
 func (ms *MongoStorage) RemoveDestinationDrv(destID string,

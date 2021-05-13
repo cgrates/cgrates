@@ -35,7 +35,6 @@ type TpReader struct {
 	timezone           string
 	dm                 *DataManager
 	lr                 LoadReader
-	destinations       map[string]*Destination
 	timings            map[string]*utils.TPTiming
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
@@ -78,7 +77,6 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 }
 
 func (tpr *TpReader) Init() {
-	tpr.destinations = make(map[string]*Destination)
 	tpr.timings = make(map[string]*utils.TPTiming)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
@@ -93,39 +91,6 @@ func (tpr *TpReader) Init() {
 	tpr.accounts = make(map[utils.TenantID]*utils.TPAccount)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.acntActionPlans = make(map[string][]string)
-}
-
-func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
-	tpDests, err := tpr.lr.GetTPDestinations(tpr.tpid, tag)
-	if err != nil {
-		return false, err
-	} else if len(tpDests) == 0 {
-		return false, nil
-	}
-	transID := utils.GenUUID()
-	for _, tpDst := range tpDests {
-		dst := NewDestinationFromTPDestination(tpDst)
-		// ToDo: Fix transactions at onlineDB level
-		if err = tpr.dm.SetDestination(dst, transID); err != nil {
-			Cache.RollbackTransaction(transID)
-		}
-		if err = tpr.dm.SetReverseDestination(dst.ID, dst.Prefixes, transID); err != nil {
-			Cache.RollbackTransaction(transID)
-		}
-	}
-	Cache.CommitTransaction(transID)
-	return true, nil
-}
-
-func (tpr *TpReader) LoadDestinations() (err error) {
-	tps, err := tpr.lr.GetTPDestinations(tpr.tpid, "")
-	if err != nil {
-		return
-	}
-	for _, tpDst := range tps {
-		tpr.destinations[tpDst.ID] = NewDestinationFromTPDestination(tpDst)
-	}
-	return
 }
 
 func (tpr *TpReader) LoadTimings() (err error) {
@@ -393,9 +358,6 @@ func (tpr *TpReader) LoadDispatcherHosts() error {
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
-	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
 	if err = tpr.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -445,21 +407,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	//generate a loadID
 	loadID := time.Now().UnixNano()
 	loadIDs := make(map[string]int64)
-	if verbose {
-		log.Print("Destinations:")
-	}
-	for _, d := range tpr.destinations {
-		if err = tpr.setDestination(d, disableReverse, utils.NonTransactional); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", d.ID, " : ", d.Prefixes)
-		}
-	}
-	if len(tpr.destinations) != 0 {
-		loadIDs[utils.CacheDestinations] = loadID
-		loadIDs[utils.CacheReverseDestinations] = loadID
-	}
 
 	if verbose {
 		log.Print("Filters:")
@@ -798,20 +745,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 }
 
 func (tpr *TpReader) ShowStatistics() {
-	// destinations
-	destCount := len(tpr.destinations)
-	log.Print("Destinations: ", destCount)
-	prefixDist := make(map[int]int, 50)
-	prefixCount := 0
-	for _, d := range tpr.destinations {
-		prefixDist[len(d.Prefixes)]++
-		prefixCount += len(d.Prefixes)
-	}
-	log.Print("Avg Prefixes: ", prefixCount/destCount)
-	log.Print("Prefixes distribution:")
-	for k, v := range prefixDist {
-		log.Printf("%d: %d", k, v)
-	}
 	// resource profiles
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
@@ -857,22 +790,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			keys[i] = k.TenantID()
 		}
 		return keys, nil
-	case utils.DestinationPrefix:
-		keys := make([]string, len(tpr.destinations))
-		i := 0
-		for k := range tpr.destinations {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
-	case utils.ReverseDestinationPrefix:
-		keys := utils.StringSet{}
-		for _, dst := range tpr.destinations {
-			for _, prfx := range dst.Prefixes {
-				keys.Add(prfx)
-			}
-		}
-		return keys.AsSlice(), nil
 	case utils.TimingsPrefix:
 		keys := make([]string, len(tpr.timings))
 		i := 0
@@ -979,15 +896,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error) {
 	loadID := time.Now().UnixNano()
 	loadIDs := make(map[string]int64)
-	for _, d := range tpr.destinations {
-		if err = tpr.dm.RemoveDestination(d.ID, utils.NonTransactional); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", d.ID, " : ", d.Prefixes)
-		}
-	}
-
 	if verbose {
 		log.Print("ResourceProfiles:")
 	}
@@ -1168,16 +1076,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 			log.Print("\t", t.ID)
 		}
 	}
-	if !disableReverse {
-		if len(tpr.destinations) > 0 {
-			if verbose {
-				log.Print("Removing reverse destinations")
-			}
-			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.ReverseDestinationPrefix); err != nil {
-				return
-			}
-		}
-	}
 	//We remove the filters at the end because of indexes
 	if verbose {
 		log.Print("Filters:")
@@ -1190,10 +1088,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		if verbose {
 			log.Print("\t", utils.ConcatenatedKey(tpFltr.Tenant, tpFltr.ID))
 		}
-	}
-	if len(tpr.destinations) != 0 {
-		loadIDs[utils.CacheDestinations] = loadID
-		loadIDs[utils.CacheReverseDestinations] = loadID
 	}
 	if len(tpr.filters) != 0 {
 		loadIDs[utils.CacheFilters] = loadID
@@ -1509,23 +1403,4 @@ func (tpr *TpReader) addDefaultTimings() {
 		EndTime:   "",
 	}
 
-}
-
-func (tpr *TpReader) setDestination(dest *Destination, disableReverse bool, transID string) (err error) {
-	if disableReverse {
-		return tpr.dm.SetDestination(dest, transID)
-	}
-	var oldDest *Destination
-	if oldDest, err = tpr.dm.GetDestination(dest.ID, false, false, transID); err != nil &&
-		err != utils.ErrNotFound {
-		return
-	}
-	if err = tpr.dm.SetDestination(dest, transID); err != nil {
-		return
-	}
-	if err = Cache.Set(context.TODO(), utils.CacheDestinations, dest.ID, dest, nil,
-		cacheCommit(transID), transID); err != nil {
-		return
-	}
-	return tpr.dm.UpdateReverseDestination(oldDest, dest, transID)
 }

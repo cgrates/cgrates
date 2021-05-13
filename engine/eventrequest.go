@@ -191,19 +191,6 @@ func (eeR *EventRequest) ParseField(
 	cfgFld *config.FCTemplate) (out interface{}, err error) {
 	tmpType := cfgFld.Type
 	switch tmpType {
-	case utils.MetaMaskedDestination:
-		//check if we have destination in the event
-		var dst string
-		if dst, err = eeR.req.FieldAsString([]string{utils.Destination}); err != nil {
-			err = fmt.Errorf("error <%s> getting destination for %s",
-				err, utils.ToJSON(cfgFld))
-			return
-		}
-		if cfgFld.MaskLen != -1 && len(cfgFld.MaskDestID) != 0 &&
-			CachedDestHasPrefix(cfgFld.MaskDestID, dst) {
-			out = utils.MaskSuffix(dst, cfgFld.MaskLen)
-		}
-		return
 	case utils.MetaFiller:
 		cfgFld.Padding = utils.MetaRight
 		tmpType = utils.MetaConstant

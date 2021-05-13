@@ -44,9 +44,6 @@ func init() {
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
-	if err := csvr.LoadDestinations(); err != nil {
-		log.Print("error in LoadDestinations:", err)
-	}
 	if err := csvr.LoadTimings(); err != nil {
 		log.Print("error in LoadTimings:", err)
 	}
@@ -88,52 +85,6 @@ func init() {
 	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database ", err)
-	}
-}
-
-func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 14 {
-		t.Error("Failed to load destinations: ", len(csvr.destinations))
-	}
-	for _, d := range csvr.destinations {
-		switch d.ID {
-		case "NAT":
-			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`, `+49`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "ALL":
-			if !reflect.DeepEqual(d.Prefixes, []string{`49`, `41`, `43`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "RET":
-			if !reflect.DeepEqual(d.Prefixes, []string{`0723`, `0724`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "GERMANY":
-			if !reflect.DeepEqual(d.Prefixes, []string{`49`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "GERMANY_O2":
-			if !reflect.DeepEqual(d.Prefixes, []string{`41`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "GERMANY_PREMIUM":
-			if !reflect.DeepEqual(d.Prefixes, []string{`43`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "PSTN_71":
-			if !reflect.DeepEqual(d.Prefixes, []string{`+4971`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "PSTN_72":
-			if !reflect.DeepEqual(d.Prefixes, []string{`+4972`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		case "PSTN_70":
-			if !reflect.DeepEqual(d.Prefixes, []string{`+4970`}) {
-				t.Error("Faild to load destinations", d)
-			}
-		}
 	}
 }
 

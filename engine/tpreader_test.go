@@ -24,7 +24,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -481,55 +480,6 @@ func TestGetLoadedIdsThresholds(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsDestinations(t *testing.T) {
-	tpr := &TpReader{
-		destinations: map[string]*Destination{
-			"1001": {
-				ID:       "1001_ID",
-				Prefixes: []string{"39", "40"},
-			},
-			"1002": {
-				ID:       "1002_ID",
-				Prefixes: []string{"75", "82"},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.DestinationPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	//Test fails sometimes because of the order of the returned slice
-	expRcv := []string{"1001", "1002"}
-	sort.Strings(rcv)
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
-
-func TestGetLoadedIdsReverseDestinations(t *testing.T) {
-	tpr := &TpReader{
-		destinations: map[string]*Destination{
-			"1001": {
-				ID:       "1001_ID",
-				Prefixes: []string{"39", "75"},
-			},
-			"1002": {
-				ID:       "1002_ID",
-				Prefixes: []string{"87", "21"},
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.ReverseDestinationPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	sort.Strings(rcv)
-	expRcv := []string{"21", "39", "75", "87"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
-
 func TestGetLoadedIdsResourceProfiles(t *testing.T) {
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
@@ -786,7 +736,6 @@ func TestReloadCache(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 		Tenant:  "",
 		ArgsCache: map[string][]string{
-			"DestinationIDs":       {"DestinationsID"},
 			"TimingIDs":            {"TimingsID"},
 			"ResourceProfileIDs":   {"cgrates.org:resourceProfilesID"},
 			"StatsQueueProfileIDs": {"cgrates.org:statProfilesID"},
@@ -821,9 +770,6 @@ func TestReloadCache(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
 	tpr := &TpReader{
-		destinations: map[string]*Destination{
-			"DestinationsID": {},
-		},
 		timings: map[string]*utils.TPTiming{
 			"TimingsID": {},
 		},

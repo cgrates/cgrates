@@ -73,14 +73,6 @@ func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (boo
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetDestinationDrv(string, string) (*Destination, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetDestinationDrv(*Destination, string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) RemoveDestinationDrv(string, string) error {
 	return utils.ErrNotImplemented
 }

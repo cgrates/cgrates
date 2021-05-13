@@ -74,67 +74,6 @@ func TestTPDestinationAsExportSlice(t *testing.T) {
 	}
 }
 
-func TestTpDestinationsAsMapDestinations(t *testing.T) {
-	in := &DestinationMdls{}
-	eOut := map[string]*Destination{}
-
-	if rcv, err := in.AsMapDestinations(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, eOut) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
-	}
-	in = &DestinationMdls{
-		DestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
-		DestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
-	}
-	eOut = map[string]*Destination{
-		"TEST_DEST1": {
-			ID:       "TEST_DEST1",
-			Prefixes: []string{"+491"},
-		},
-		"TEST_DEST2": {
-			ID:       "TEST_DEST2",
-			Prefixes: []string{"+492"},
-		},
-	}
-	var rcv map[string]*Destination
-	if rcv, err = in.AsMapDestinations(); err != nil {
-		t.Error(err)
-	}
-	for key := range rcv {
-		if !reflect.DeepEqual(rcv[key], eOut[key]) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut[key]), utils.ToJSON(rcv[key]))
-		}
-	}
-	in = &DestinationMdls{
-		DestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST1", Prefix: "+491"},
-		DestinationMdl{Tpid: "TEST_TPID", Tag: "TEST_DEST2", Prefix: "+492"},
-		DestinationMdl{Tpid: "TEST_ID", Tag: "", Prefix: ""},
-	}
-	eOut = map[string]*Destination{
-		"TEST_DEST1": {
-			ID:       "TEST_DEST1",
-			Prefixes: []string{"+491"},
-		},
-		"TEST_DEST2": {
-			ID:       "TEST_DEST2",
-			Prefixes: []string{"+492"},
-		},
-		"": {
-			ID:       "",
-			Prefixes: []string{""},
-		},
-	}
-	if rcv, err = in.AsMapDestinations(); err != nil {
-		t.Error(err)
-	}
-	for key := range rcv {
-		if !reflect.DeepEqual(rcv[key], eOut[key]) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut[key]), utils.ToJSON(rcv[key]))
-		}
-	}
-}
-
 func TestTpDestinationsAPItoModelDestination(t *testing.T) {
 	d := &utils.TPDestination{}
 	eOut := DestinationMdls{

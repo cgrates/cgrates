@@ -193,19 +193,6 @@ func (iDB *InternalDB) HasDataDrv(ctx *context.Context, category, subject, tenan
 	return false, errors.New("Unsupported HasData category")
 }
 
-func (iDB *InternalDB) GetDestinationDrv(key, _ string) (dest *Destination, err error) {
-	if x, ok := Cache.Get(utils.CacheDestinations, key); ok && x != nil {
-		return x.(*Destination), nil
-	}
-	return nil, utils.ErrNotFound
-}
-
-func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
-	Cache.SetWithoutReplicate(utils.CacheDestinations, dest.ID, dest, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
 func (iDB *InternalDB) RemoveDestinationDrv(destID string, transactionID string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheDestinations, destID,
 		cacheCommit(transactionID), transactionID)
