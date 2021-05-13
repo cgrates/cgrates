@@ -55,7 +55,6 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTPAttributes,
 	testStorDBitCRUDTPChargers,
 	testStorDBitCRUDTpTimings,
-	testStorDBitCRUDTpDestinations,
 	testStorDBitCRUDTpResources,
 	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
@@ -969,91 +968,6 @@ func testStorDBitCRUDTpTimings(t *testing.T) {
 	}
 	// READ
 	if _, err := storDB.GetTPTimings("testTPid", ""); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testStorDBitCRUDTpDestinations(t *testing.T) {
-	// READ
-	if _, err := storDB.GetTPDestinations("testTPid", ""); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	// WRITE
-	snd := []*utils.TPDestination{
-		{
-			TPid:     "testTPid",
-			ID:       "testTag1",
-			Prefixes: []string{`0256`, `0257`, `0723`, `+49`},
-		},
-		{
-			TPid:     "testTPid",
-			ID:       "testTag2",
-			Prefixes: []string{`0256`, `0257`, `0723`, `+49`},
-		},
-	}
-	if err := storDB.SetTPDestinations(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPDestinations("testTPid", ""); err != nil {
-		t.Error(err)
-	} else {
-		prfs := make(map[string]bool)
-		for _, prf := range snd[0].Prefixes {
-			prfs[prf] = true
-		}
-		pfrOk := true
-		for i := range rcv[0].Prefixes {
-			found1 := prfs[rcv[0].Prefixes[i]]
-			found2 := prfs[rcv[1].Prefixes[i]]
-			if !found1 && !found2 {
-				pfrOk = false
-			}
-		}
-		if pfrOk {
-			rcv[0].Prefixes = snd[0].Prefixes
-			rcv[1].Prefixes = snd[0].Prefixes
-		}
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToJSON(snd[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
-		}
-	}
-	// UPDATE
-	snd[0].Prefixes = []string{`9999`, `0257`, `0723`, `+49`}
-	snd[1].Prefixes = []string{`9999`, `0257`, `0723`, `+49`}
-	if err := storDB.SetTPDestinations(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPDestinations("testTPid", ""); err != nil {
-		t.Error(err)
-	} else {
-		prfs := make(map[string]bool)
-		for _, prf := range snd[0].Prefixes {
-			prfs[prf] = true
-		}
-		pfrOk := true
-		for i := range rcv[0].Prefixes {
-			found1 := prfs[rcv[0].Prefixes[i]]
-			found2 := prfs[rcv[1].Prefixes[i]]
-			if !found1 && !found2 {
-				pfrOk = false
-			}
-		}
-		if pfrOk {
-			rcv[0].Prefixes = snd[0].Prefixes
-			rcv[1].Prefixes = snd[0].Prefixes
-		}
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToJSON(snd[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
-		}
-	}
-	// REMOVE
-	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if _, err := storDB.GetTPDestinations("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

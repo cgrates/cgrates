@@ -144,8 +144,6 @@ func TestSessionSReload2(t *testing.T) {
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	internalChan := make(chan birpc.ClientConnector, 1)
@@ -196,8 +194,6 @@ func TestSessionSReload3(t *testing.T) {
 	chS := engine.NewCacheS(cfg, nil, nil)
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	internalChan := make(chan birpc.ClientConnector, 1)

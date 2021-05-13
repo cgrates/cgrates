@@ -215,7 +215,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
-	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := loaderRPC.Call(utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"},
 		}, &reply); err != nil {
@@ -393,7 +393,7 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 		eAttrPrf.Attributes[0].FilterIDs = nil
 	}
 	var reply *engine.AttributeProfile
-	if err := loaderRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := loaderRPC.Call(utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_12012000001"},
 		}, &reply); err != nil {

@@ -1,2 +1,0 @@
-#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
-cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,

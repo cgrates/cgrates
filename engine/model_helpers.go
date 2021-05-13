@@ -146,46 +146,6 @@ func getColumnCount(s interface{}) int {
 	return count
 }
 
-type DestinationMdls []DestinationMdl
-
-// AsTPDestination converts DestinationMdls  into *utils.TPDestination
-func (tps DestinationMdls) AsTPDestinations() (result []*utils.TPDestination) {
-	md := make(map[string]*utils.TPDestination) // Should save us some CPU if we index here for big number of destinations to search
-	for _, tp := range tps {
-		if d, hasIt := md[tp.Tag]; !hasIt {
-			md[tp.Tag] = &utils.TPDestination{TPid: tp.Tpid, ID: tp.Tag, Prefixes: []string{tp.Prefix}}
-		} else {
-			d.Prefixes = append(d.Prefixes, tp.Prefix)
-		}
-	}
-	result = make([]*utils.TPDestination, len(md))
-	i := 0
-	for _, d := range md {
-		result[i] = d
-		i++
-	}
-	return
-}
-
-func APItoModelDestination(d *utils.TPDestination) (result DestinationMdls) {
-	if d != nil {
-		for _, p := range d.Prefixes {
-			result = append(result, DestinationMdl{
-				Tpid:   d.TPid,
-				Tag:    d.ID,
-				Prefix: p,
-			})
-		}
-		if len(d.Prefixes) == 0 {
-			result = append(result, DestinationMdl{
-				Tpid: d.TPid,
-				Tag:  d.ID,
-			})
-		}
-	}
-	return
-}
-
 type TimingMdls []TimingMdl
 
 func (tps TimingMdls) AsMapTPTimings() (map[string]*utils.ApierTPTiming, error) {

@@ -47,9 +47,6 @@ func TestCdrsReload(t *testing.T) {
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
-
-	close(chS.GetPrecacheChannel(utils.CacheDestinations))
-	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	cfg.ChargerSCfg().Enabled = true

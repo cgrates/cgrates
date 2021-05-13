@@ -83,13 +83,6 @@ func (pgnt Paginator) Clone() Paginator {
 	}
 }
 
-// TPDestination represents one destination in storDB
-type TPDestination struct {
-	TPid     string   // Tariff plan id
-	ID       string   // Destination id
-	Prefixes []string // Prefixes attached to this destination
-}
-
 type ApierTPTiming struct {
 	TPid      string // Tariff plan id
 	ID        string // Timing id
