@@ -597,12 +597,10 @@ func TestGetLoadedIdsRouteProfiles(t *testing.T) {
 	tpr := &TpReader{
 		routeProfiles: map[utils.TenantID]*utils.TPRouteProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "ResGroup1",
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
+				TPid:      testTPID,
+				Tenant:    "cgrates.org",
+				ID:        "ResGroup1",
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			},
 		},
 	}

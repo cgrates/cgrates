@@ -201,13 +201,12 @@ func (m *Migrator) migrateRouteProfiles() (err error) {
 
 func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 	route = &engine.RouteProfile{
-		Tenant:             spp.Tenant,
-		ID:                 spp.ID,
-		FilterIDs:          spp.FilterIDs,
-		ActivationInterval: spp.ActivationInterval,
-		Sorting:            spp.Sorting,
-		SortingParameters:  spp.SortingParameters,
-		Weight:             spp.Weight,
+		Tenant:            spp.Tenant,
+		ID:                spp.ID,
+		FilterIDs:         spp.FilterIDs,
+		Sorting:           spp.Sorting,
+		SortingParameters: spp.SortingParameters,
+		Weight:            spp.Weight,
 	}
 	route.Routes = make([]*engine.Route, len(spp.Suppliers))
 	for i, supl := range spp.Suppliers {

@@ -680,15 +680,14 @@ type TPRoute struct {
 
 // TPRouteProfile is used in APIs to manage remotely offline RouteProfile
 type TPRouteProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	Sorting            string
-	SortingParameters  []string
-	Routes             []*TPRoute
-	Weight             float64
+	TPid              string
+	Tenant            string
+	ID                string
+	FilterIDs         []string
+	Sorting           string
+	SortingParameters []string
+	Routes            []*TPRoute
+	Weight            float64
 }
 
 // TPAttribute is used in TPAttributeProfile

@@ -408,10 +408,7 @@ func TestLoadRouteProfiles(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "RoutePrf1",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-		},
-		Sorting: utils.MetaLC,
+		Sorting:   utils.MetaLC,
 		Routes: []*utils.TPRoute{
 			{
 				ID:              "route1",

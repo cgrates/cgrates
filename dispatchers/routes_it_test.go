@@ -363,12 +363,9 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		},
 	}
 	expected := engine.RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ROUTE_ACNT_1002",
-		FilterIDs: []string{"FLTR_ACNT_1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "ROUTE_ACNT_1002",
+		FilterIDs:         []string{"FLTR_ACNT_1002", "*ai:~*req.AnswerTime:2017-11-27T00:00:00Z"},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{

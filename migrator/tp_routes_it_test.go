@@ -107,14 +107,10 @@ func testTpSplITFlush(t *testing.T) {
 func testTpSplITPopulate(t *testing.T) {
 	tpSuppliers = []*utils.TPRouteProfile{
 		{
-			TPid:      "TP1",
-			Tenant:    "cgrates.org",
-			ID:        "SUPL_1",
-			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
+			TPid:              "TP1",
+			Tenant:            "cgrates.org",
+			ID:                "SUPL_1",
+			FilterIDs:         []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			Sorting:           "*lowest_cost",
 			SortingParameters: []string{},
 			Routes: []*utils.TPRoute{

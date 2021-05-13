@@ -1885,12 +1885,9 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 
 func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	splProfile := &RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SPL_Weight",
-		FilterIDs: []string{},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "SPL_Weight",
+		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
 		Routes: []*Route{
@@ -1908,12 +1905,9 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		Weight: 20,
 	}
 	splProfile2 := &RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SPL_Weight2",
-		FilterIDs: []string{},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "SPL_Weight2",
+		FilterIDs:         []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
 		Routes: []*Route{

@@ -1036,16 +1036,6 @@ func (tps RouteMdls) AsTPRouteProfile() (result []*utils.TPRouteProfile) {
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
 		}
-		if tp.ActivationInterval != utils.EmptyString {
-			th.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-				th.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
 				filterMap[tenID] = make(utils.StringSet)
@@ -1092,14 +1082,6 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 					mdl.SortingParameters += utils.InfieldSep
 				}
 				mdl.SortingParameters += val
-			}
-			if st.ActivationInterval != nil {
-				if st.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
-				}
-				if st.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.InfieldSep + st.ActivationInterval.ExpiryTime
-				}
 			}
 		}
 		mdl.RouteID = supl.ID
@@ -1157,11 +1139,6 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	for i, fli := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = fli
 	}
-	if tpRp.ActivationInterval != nil {
-		if rp.ActivationInterval, err = tpRp.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	for i, route := range tpRp.Routes {
 		rp.Routes[i] = &Route{
 			ID:              route.ID,
@@ -1180,14 +1157,13 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 
 func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 	tpRp = &utils.TPRouteProfile{
-		Tenant:             rp.Tenant,
-		ID:                 rp.ID,
-		FilterIDs:          make([]string, len(rp.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Sorting:            rp.Sorting,
-		SortingParameters:  make([]string, len(rp.SortingParameters)),
-		Routes:             make([]*utils.TPRoute, len(rp.Routes)),
-		Weight:             rp.Weight,
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		FilterIDs:         make([]string, len(rp.FilterIDs)),
+		Sorting:           rp.Sorting,
+		SortingParameters: make([]string, len(rp.SortingParameters)),
+		Routes:            make([]*utils.TPRoute, len(rp.Routes)),
+		Weight:            rp.Weight,
 	}
 
 	for i, route := range rp.Routes {
@@ -1208,14 +1184,6 @@ func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
 	}
 	for i, fli := range rp.SortingParameters {
 		tpRp.SortingParameters[i] = fli
-	}
-	if rp.ActivationInterval != nil {
-		if !rp.ActivationInterval.ActivationTime.IsZero() {
-			tpRp.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !rp.ActivationInterval.ExpiryTime.IsZero() {
-			tpRp.ActivationInterval.ExpiryTime = rp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	return
 }

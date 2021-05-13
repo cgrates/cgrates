@@ -48,14 +48,13 @@ type Route struct {
 
 // RouteProfile represents the configuration of a Route profile
 type RouteProfile struct {
-	Tenant             string
-	ID                 string // LCR Profile ID
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	Sorting            string                    // Sorting strategy
-	SortingParameters  []string
-	Routes             []*Route
-	Weight             float64
+	Tenant            string
+	ID                string // LCR Profile ID
+	FilterIDs         []string
+	Sorting           string // Sorting strategy
+	SortingParameters []string
+	Routes            []*Route
+	Weight            float64
 }
 
 // RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher
@@ -165,10 +164,6 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 				continue
 			}
 			return nil, err
-		}
-		if rPrf.ActivationInterval != nil && ev.Time != nil &&
-			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
-			continue
 		}
 		if pass, err := rpS.filterS.Pass(context.TODO(), tnt, rPrf.FilterIDs,
 			evNm); err != nil {

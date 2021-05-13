@@ -1,5 +1,5 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
-cgrates.org,ROUTE_1,FLTR_ACNT_dan;FLTR_DST_DE,2017-07-29T15:00:00Z,*lc,,route1,FLTR_ACNT_dan,,RPL_1,ResGroup1,Stat1,10,false,SortingParameter1,10
-cgrates.org,ROUTE_WEIGHT_1,FLTR_DST_DE;FLTR_ACNT_1007,2017-11-27T00:00:00Z,*weight,,route1,,,,,,10,,,10
-cgrates.org,ROUTE_WEIGHT_1,FLTR_DST_DE,,,,route2,,,,,,20,,,
-cgrates.org,ROUTE_WEIGHT_1,FLTR_ACNT_1007,,,,route3,FLTR_ACNT_dan,,,,,15,,,
+#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
+cgrates.org,ROUTE_1,FLTR_ACNT_dan;FLTR_DST_DE,10,*lc,,route1,FLTR_ACNT_dan,,RPL_1,ResGroup1,Stat1,10,false,SortingParameter1
+cgrates.org,ROUTE_WEIGHT_1,FLTR_DST_DE;FLTR_ACNT_1007,10,*weight,,route1,,,,,,10,,
+cgrates.org,ROUTE_WEIGHT_1,FLTR_DST_DE,,,,route2,,,,,,20,,
+cgrates.org,ROUTE_WEIGHT_1,FLTR_ACNT_1007,,,,route3,FLTR_ACNT_dan,,,,,15,,
