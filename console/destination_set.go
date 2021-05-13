@@ -22,8 +22,7 @@ import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &CmdSetDestination{
-		name:      "destination_set",
-		rpcMethod: utils.APIerSv1SetDestination,
+		name: "destination_set",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

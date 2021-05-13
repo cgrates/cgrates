@@ -99,7 +99,7 @@ func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 
 func (sqls *SQLStorage) IsDBEmpty() (resp bool, err error) {
 	tbls := []string{
-		utils.TBLTPTimings, utils.TBLTPDestinations,
+		utils.TBLTPTimings,
 		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL,
 		utils.TBLVersions, utils.TBLTPRoutes, utils.TBLTPAttributes, utils.TBLTPChargers,
@@ -123,7 +123,6 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	if colName == "" {
 		for _, clNm := range []string{
 			utils.TBLTPTimings,
-			utils.TBLTPDestinations,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
@@ -229,7 +228,7 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	tx := sqls.db.Begin()
 
 	if len(table) == 0 { // Remove tpid out of all tables
-		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
+		for _, tblName := range []string{utils.TBLTPTimings,
 			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts, utils.TBLTPAccounts,

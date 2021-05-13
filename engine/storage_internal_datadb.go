@@ -82,7 +82,7 @@ func (iDB *InternalDB) SelectDatabase(string) (err error) {
 
 // GetKeysForPrefix returns the keys from cache that have the given prefix
 func (iDB *InternalDB) GetKeysForPrefix(ctx *context.Context, prefix string) (ids []string, err error) {
-	keyLen := len(utils.DestinationPrefix)
+	keyLen := len(utils.AccountPrefix)
 	if len(prefix) < keyLen {
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 		return
@@ -92,18 +92,6 @@ func (iDB *InternalDB) GetKeysForPrefix(ctx *context.Context, prefix string) (id
 	ids = Cache.GetItemIDs(utils.CachePrefixToInstance[category], queryPrefix)
 	for i := range ids {
 		ids[i] = category + ids[i]
-	}
-	return
-}
-
-func (iDB *InternalDB) RemoveKeysForPrefix(prefix string) (err error) {
-	var keys []string
-	if keys, err = iDB.GetKeysForPrefix(context.TODO(), prefix); err != nil {
-		return
-	}
-	for _, key := range keys {
-		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, key,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
 }
@@ -182,8 +170,6 @@ func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
 
 func (iDB *InternalDB) HasDataDrv(ctx *context.Context, category, subject, tenant string) (bool, error) {
 	switch category {
-	case utils.DestinationPrefix:
-		return Cache.HasItem(utils.CachePrefixToInstance[category], subject), nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
@@ -191,59 +177,6 @@ func (iDB *InternalDB) HasDataDrv(ctx *context.Context, category, subject, tenan
 		return Cache.HasItem(utils.CachePrefixToInstance[category], utils.ConcatenatedKey(tenant, subject)), nil
 	}
 	return false, errors.New("Unsupported HasData category")
-}
-
-func (iDB *InternalDB) RemoveDestinationDrv(destID string, transactionID string) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheDestinations, destID,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
-func (iDB *InternalDB) RemoveReverseDestinationDrv(dstID, prfx, transactionID string) (err error) {
-	var revDst []string
-	if Cache.HasItem(utils.CacheReverseDestinations, prfx) {
-		x, ok := Cache.Get(utils.CacheReverseDestinations, prfx)
-		if !ok || x == nil {
-			return utils.ErrNotFound
-		}
-		revDst = x.([]string)
-	}
-	mpRevDst := utils.NewStringSet(revDst)
-	mpRevDst.Remove(dstID)
-	if mpRevDst.Size() != 0 {
-		Cache.SetWithoutReplicate(utils.CacheReverseDestinations, prfx, mpRevDst.AsSlice(), nil,
-			cacheCommit(transactionID), transactionID)
-	} else {
-		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, prfx,
-			cacheCommit(transactionID), transactionID)
-	}
-	return
-}
-
-func (iDB *InternalDB) SetReverseDestinationDrv(destID string, prefixes []string, transactionID string) (err error) {
-	for _, p := range prefixes {
-		var revDst []string
-		if Cache.HasItem(utils.CacheReverseDestinations, p) {
-			if x, ok := Cache.Get(utils.CacheReverseDestinations, p); ok && x != nil {
-				revDst = x.([]string)
-			}
-		}
-		mpRevDst := utils.NewStringSet(revDst)
-		mpRevDst.Add(destID)
-		// for ReverseDestination we will use Groups
-		Cache.SetWithoutReplicate(utils.CacheReverseDestinations, p, mpRevDst.AsSlice(), nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return
-}
-
-func (iDB *InternalDB) GetReverseDestinationDrv(prefix, transactionID string) (ids []string, err error) {
-	if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok && x != nil {
-		if ids = x.([]string); len(ids) != 0 {
-			return
-		}
-	}
-	return nil, utils.ErrNotFound
 }
 
 func (iDB *InternalDB) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {

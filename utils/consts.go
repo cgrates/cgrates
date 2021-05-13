@@ -47,7 +47,7 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
 		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
 
-	dataDBPartition = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheTimings,
+	dataDBPartition = NewStringSet([]string{CacheTimings,
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
@@ -57,7 +57,7 @@ var (
 		CacheActionProfilesFilterIndexes, CacheAccountsFilterIndexes, CacheReverseFilterIndexes,
 		CacheAccounts})
 
-	storDBPartition = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations,
+	storDBPartition = NewStringSet([]string{CacheTBLTPTimings,
 		CacheTBLTPResources, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccounts})
@@ -66,8 +66,6 @@ var (
 	CachePartitions = JoinStringSet(extraDBPartition, dataDBPartition, storDBPartition)
 
 	CacheInstanceToPrefix = map[string]string{
-		CacheDestinations:                DestinationPrefix,
-		CacheReverseDestinations:         ReverseDestinationPrefix,
 		CacheResourceProfiles:            ResourceProfilesPrefix,
 		CacheResources:                   ResourcesPrefix,
 		CacheTimings:                     TimingsPrefix,
@@ -132,7 +130,6 @@ var (
 
 	CacheStorDBPartitions = map[string]string{
 		TBLTPTimings:         CacheTBLTPTimings,
-		TBLTPDestinations:    CacheTBLTPDestinations,
 		TBLTPResources:       CacheTBLTPResources,
 		TBLTPStats:           CacheTBLTPStats,
 		TBLTPThresholds:      CacheTBLTPThresholds,
@@ -153,22 +150,20 @@ var (
 	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 
 	ArgCacheToPrefix = map[string]string{
-		DestinationIDs:        DestinationPrefix,
-		ReverseDestinationIDs: ReverseDestinationPrefix,
-		ResourceProfileIDs:    ResourceProfilesPrefix,
-		ResourceIDs:           ResourcesPrefix,
-		StatsQueueIDs:         StatQueuePrefix,
-		StatsQueueProfileIDs:  StatQueueProfilePrefix,
-		ThresholdIDs:          ThresholdPrefix,
-		ThresholdProfileIDs:   ThresholdProfilePrefix,
-		FilterIDs:             FilterPrefix,
-		RouteProfileIDs:       RouteProfilePrefix,
-		AttributeProfileIDs:   AttributeProfilePrefix,
-		ChargerProfileIDs:     ChargerProfilePrefix,
-		DispatcherProfileIDs:  DispatcherProfilePrefix,
-		DispatcherHostIDs:     DispatcherHostPrefix,
-		RateProfileIDs:        RateProfilePrefix,
-		ActionProfileIDs:      ActionProfilePrefix,
+		ResourceProfileIDs:   ResourceProfilesPrefix,
+		ResourceIDs:          ResourcesPrefix,
+		StatsQueueIDs:        StatQueuePrefix,
+		StatsQueueProfileIDs: StatQueueProfilePrefix,
+		ThresholdIDs:         ThresholdPrefix,
+		ThresholdProfileIDs:  ThresholdProfilePrefix,
+		FilterIDs:            FilterPrefix,
+		RouteProfileIDs:      RouteProfilePrefix,
+		AttributeProfileIDs:  AttributeProfilePrefix,
+		ChargerProfileIDs:    ChargerProfilePrefix,
+		DispatcherProfileIDs: DispatcherProfilePrefix,
+		DispatcherHostIDs:    DispatcherHostPrefix,
+		RateProfileIDs:       RateProfilePrefix,
+		ActionProfileIDs:     ActionProfilePrefix,
 
 		TimingIDs:                    TimingsPrefix,
 		AttributeFilterIndexIDs:      AttributeFilterIndexes,
@@ -186,22 +181,21 @@ var (
 	}
 	CacheInstanceToArg map[string]string
 	ArgCacheToInstance = map[string]string{
-		DestinationIDs:        CacheDestinations,
-		ReverseDestinationIDs: CacheReverseDestinations,
-		ResourceProfileIDs:    CacheResourceProfiles,
-		ResourceIDs:           CacheResources,
-		StatsQueueIDs:         CacheStatQueues,
-		StatsQueueProfileIDs:  CacheStatQueueProfiles,
-		ThresholdIDs:          CacheThresholds,
-		ThresholdProfileIDs:   CacheThresholdProfiles,
-		FilterIDs:             CacheFilters,
-		RouteProfileIDs:       CacheRouteProfiles,
-		AttributeProfileIDs:   CacheAttributeProfiles,
-		ChargerProfileIDs:     CacheChargerProfiles,
-		DispatcherProfileIDs:  CacheDispatcherProfiles,
-		DispatcherHostIDs:     CacheDispatcherHosts,
-		RateProfileIDs:        CacheRateProfiles,
-		ActionProfileIDs:      CacheActionProfiles,
+
+		ResourceProfileIDs:   CacheResourceProfiles,
+		ResourceIDs:          CacheResources,
+		StatsQueueIDs:        CacheStatQueues,
+		StatsQueueProfileIDs: CacheStatQueueProfiles,
+		ThresholdIDs:         CacheThresholds,
+		ThresholdProfileIDs:  CacheThresholdProfiles,
+		FilterIDs:            CacheFilters,
+		RouteProfileIDs:      CacheRouteProfiles,
+		AttributeProfileIDs:  CacheAttributeProfiles,
+		ChargerProfileIDs:    CacheChargerProfiles,
+		DispatcherProfileIDs: CacheDispatcherProfiles,
+		DispatcherHostIDs:    CacheDispatcherHosts,
+		RateProfileIDs:       CacheRateProfiles,
+		ActionProfileIDs:     CacheActionProfiles,
 
 		TimingIDs:                    CacheTimings,
 		AttributeFilterIndexIDs:      CacheAttributeFilterIndexes,
@@ -340,8 +334,6 @@ const (
 
 	MetaVoice                 = "*voice"
 	ACD                       = "ACD"
-	DestinationPrefix         = "dst_"
-	ReverseDestinationPrefix  = "rds_"
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
 	ThresholdPrefix           = "thd_"
@@ -490,81 +482,80 @@ const (
 	UpdateTime               = "UpdateTime"
 	Timings                  = "Timings"
 	Rates                    = "Rates"
-	DestinationRates         = "DestinationRates"
-	RatingPlans              = "RatingPlans"
-	RatingProfiles           = "RatingProfiles"
-	AccountActions           = "AccountActions"
-	Resources                = "Resources"
-	Stats                    = "Stats"
-	Filters                  = "Filters"
-	DispatcherProfiles       = "DispatcherProfiles"
-	DispatcherHosts          = "DispatcherHosts"
-	RateProfiles             = "RateProfiles"
-	ActionProfiles           = "ActionProfiles"
-	AccountsString           = "Accounts"
-	MetaEveryMinute          = "*every_minute"
-	MetaHourly               = "*hourly"
-	ID                       = "ID"
-	Address                  = "Address"
-	Addresses                = "Addresses"
-	Transport                = "Transport"
-	TLS                      = "TLS"
-	Subsystems               = "Subsystems"
-	Strategy                 = "Strategy"
-	StrategyParameters       = "StrategyParameters"
-	ConnID                   = "ConnID"
-	ConnFilterIDs            = "ConnFilterIDs"
-	ConnWeight               = "ConnWeight"
-	ConnBlocker              = "ConnBlocker"
-	ConnParameters           = "ConnParameters"
+	//DestinationRates         = "DestinationRates"
+	RatingPlans        = "RatingPlans"
+	RatingProfiles     = "RatingProfiles"
+	AccountActions     = "AccountActions"
+	Resources          = "Resources"
+	Stats              = "Stats"
+	Filters            = "Filters"
+	DispatcherProfiles = "DispatcherProfiles"
+	DispatcherHosts    = "DispatcherHosts"
+	RateProfiles       = "RateProfiles"
+	ActionProfiles     = "ActionProfiles"
+	AccountsString     = "Accounts"
+	MetaEveryMinute    = "*every_minute"
+	MetaHourly         = "*hourly"
+	ID                 = "ID"
+	Address            = "Address"
+	Addresses          = "Addresses"
+	Transport          = "Transport"
+	TLS                = "TLS"
+	Subsystems         = "Subsystems"
+	Strategy           = "Strategy"
+	StrategyParameters = "StrategyParameters"
+	ConnID             = "ConnID"
+	ConnFilterIDs      = "ConnFilterIDs"
+	ConnWeight         = "ConnWeight"
+	ConnBlocker        = "ConnBlocker"
+	ConnParameters     = "ConnParameters"
 
-	Thresholds            = "Thresholds"
-	Routes                = "Routes"
-	Attributes            = "Attributes"
-	Chargers              = "Chargers"
-	Dispatchers           = "Dispatchers"
-	StatS                 = "Stats"
-	LoadIDsVrs            = "LoadIDs"
-	GlobalVarS            = "GlobalVarS"
-	CostSource            = "CostSource"
-	ExtraInfo             = "ExtraInfo"
-	Meta                  = "*"
-	MetaSysLog            = "*syslog"
-	MetaStdLog            = "*stdout"
-	EventSource           = "EventSource"
-	AccountID             = "AccountID"
-	AccountIDs            = "AccountIDs"
-	ResourceID            = "ResourceID"
-	TotalUsage            = "TotalUsage"
-	StatID                = "StatID"
-	BalanceType           = "BalanceType"
-	BalanceID             = "BalanceID"
-	BalanceDestinationIds = "BalanceDestinationIds"
-	BalanceWeight         = "BalanceWeight"
-	BalanceRatingSubject  = "BalanceRatingSubject"
-	BalanceCategories     = "BalanceCategories"
-	BalanceBlocker        = "BalanceBlocker"
-	BalanceDisabled       = "BalanceDisabled"
-	Units                 = "Units"
-	AccountUpdate         = "AccountUpdate"
-	BalanceUpdate         = "BalanceUpdate"
-	StatUpdate            = "StatUpdate"
-	ResourceUpdate        = "ResourceUpdate"
-	CDR                   = "CDR"
-	CDRs                  = "CDRs"
-	ExpiryTime            = "ExpiryTime"
-	AllowNegative         = "AllowNegative"
-	Disabled              = "Disabled"
-	Action                = "Action"
+	Thresholds  = "Thresholds"
+	Routes      = "Routes"
+	Attributes  = "Attributes"
+	Chargers    = "Chargers"
+	Dispatchers = "Dispatchers"
+	StatS       = "Stats"
+	LoadIDsVrs  = "LoadIDs"
+	GlobalVarS  = "GlobalVarS"
+	CostSource  = "CostSource"
+	ExtraInfo   = "ExtraInfo"
+	Meta        = "*"
+	MetaSysLog  = "*syslog"
+	MetaStdLog  = "*stdout"
+	EventSource = "EventSource"
+	AccountID   = "AccountID"
+	AccountIDs  = "AccountIDs"
+	ResourceID  = "ResourceID"
+	TotalUsage  = "TotalUsage"
+	StatID      = "StatID"
+	BalanceType = "BalanceType"
+	BalanceID   = "BalanceID"
+	//BalanceDestinationIds = "BalanceDestinationIds"
+	BalanceWeight        = "BalanceWeight"
+	BalanceRatingSubject = "BalanceRatingSubject"
+	BalanceCategories    = "BalanceCategories"
+	BalanceBlocker       = "BalanceBlocker"
+	BalanceDisabled      = "BalanceDisabled"
+	Units                = "Units"
+	AccountUpdate        = "AccountUpdate"
+	BalanceUpdate        = "BalanceUpdate"
+	StatUpdate           = "StatUpdate"
+	ResourceUpdate       = "ResourceUpdate"
+	CDR                  = "CDR"
+	CDRs                 = "CDRs"
+	ExpiryTime           = "ExpiryTime"
+	AllowNegative        = "AllowNegative"
+	Disabled             = "Disabled"
+	Action               = "Action"
 
-	SessionSCosts            = "SessionSCosts"
-	Timing                   = "Timing"
-	RQF                      = "RQF"
-	Resource                 = "Resource"
-	User                     = "User"
-	Subscribers              = "Subscribers"
-	Destinations             = "Destinations"
-	ReverseDestinations      = "ReverseDestinations"
+	SessionSCosts = "SessionSCosts"
+	Timing        = "Timing"
+	RQF           = "RQF"
+	Resource      = "Resource"
+	User          = "User"
+	Subscribers   = "Subscribers"
+	//Destinations             = "Destinations"
 	MetaSubscribers          = "*subscribers"
 	MetaStorDB               = "*stordb"
 	MetaDataDB               = "*datadb"
@@ -769,8 +760,6 @@ const (
 	UUID                  = "UUID"
 	ActionsID             = "ActionsID"
 	MetaAct               = "*act"
-	DestinationPrefixName = "DestinationPrefix"
-	DestinationID         = "DestinationID"
 	ExportTemplate        = "ExportTemplate"
 	Synchronous           = "Synchronous"
 	Attempts              = "Attempts"
@@ -890,25 +879,24 @@ const (
 
 // Meta Items
 const (
-	MetaAccounts            = "*accounts"
-	MetaReverseDestinations = "*reverse_destinations"
-	MetaActions             = "*actions"
-	MetaResourceProfile     = "*resource_profiles"
-	MetaStatQueueProfiles   = "*statqueue_profiles"
-	MetaStatQueues          = "*statqueues"
-	MetaThresholdProfiles   = "*threshold_profiles"
-	MetaRouteProfiles       = "*route_profiles"
-	MetaAttributeProfiles   = "*attribute_profiles"
-	MetaIndexes             = "*indexes"
-	MetaDispatcherProfiles  = "*dispatcher_profiles"
-	MetaRateProfiles        = "*rate_profiles"
-	MetaRateProfileRates    = "*rate_profile_rates"
-	MetaChargerProfiles     = "*charger_profiles"
-	MetaThresholds          = "*thresholds"
-	MetaRoutes              = "*routes"
-	MetaAttributes          = "*attributes"
-	MetaActionProfiles      = "*action_profiles"
-	MetaLoadIDs             = "*load_ids"
+	MetaAccounts           = "*accounts"
+	MetaActions            = "*actions"
+	MetaResourceProfile    = "*resource_profiles"
+	MetaStatQueueProfiles  = "*statqueue_profiles"
+	MetaStatQueues         = "*statqueues"
+	MetaThresholdProfiles  = "*threshold_profiles"
+	MetaRouteProfiles      = "*route_profiles"
+	MetaAttributeProfiles  = "*attribute_profiles"
+	MetaIndexes            = "*indexes"
+	MetaDispatcherProfiles = "*dispatcher_profiles"
+	MetaRateProfiles       = "*rate_profiles"
+	MetaRateProfileRates   = "*rate_profile_rates"
+	MetaChargerProfiles    = "*charger_profiles"
+	MetaThresholds         = "*thresholds"
+	MetaRoutes             = "*routes"
+	MetaAttributes         = "*attributes"
+	MetaActionProfiles     = "*action_profiles"
+	MetaLoadIDs            = "*load_ids"
 )
 
 // MetaMetrics
@@ -976,7 +964,6 @@ const (
 	MetaDisableAccount     = "*disable_account"
 	MetaUnlimited          = "*unlimited"
 	CDRLog                 = "*cdrlog"
-	MetaSetDDestinations   = "*set_ddestinations"
 	MetaCgrRpc             = "*cgr_rpc"
 	MetaRemoveSessionCosts = "*remove_session_costs"
 	MetaPostEvent          = "*post_event"
@@ -1008,7 +995,6 @@ const (
 	MetaTpRateProfiles      = "*tp_rate_profiles"
 	MetaTpResources         = "*tp_resources"
 	MetaTpTimings           = "*tp_timings"
-	MetaTpDestinations      = "*tp_destinations"
 	MetaTpChargers          = "*tp_chargers"
 	MetaTpDispatchers       = "*tp_dispatchers"
 	MetaDurationSeconds     = "*duration_seconds"
@@ -1031,7 +1017,6 @@ const (
 	TpResources          = "TpResources"
 	TpTiming             = "TpTiming"
 	TpResource           = "TpResource"
-	TpDestinations       = "TpDestinations"
 	TpChargers           = "TpChargers"
 	TpDispatchers        = "TpDispatchers"
 	TpDispatcherProfiles = "TpDispatcherProfiles"
@@ -1071,7 +1056,6 @@ const (
 	MetaExists             = "*exists"
 	MetaCronExp            = "*cronexp"
 	MetaRSR                = "*rsr"
-	MetaDestinations       = "*destinations"
 	MetaLessThan           = "*lt"
 	MetaLessOrEqual        = "*lte"
 	MetaGreaterThan        = "*gt"
@@ -1090,7 +1074,6 @@ const (
 	MetaNotCronExp            = "*notcronexp"
 	MetaNotRSR                = "*notrsr"
 	MetaNotStatS              = "*notstats"
-	MetaNotDestinations       = "*notdestinations"
 	MetaNotResources          = "*notresources"
 	MetaNotEqual              = "*noteq"
 	MetaNotIPNet              = "*notipnet"
@@ -1102,50 +1085,46 @@ const (
 
 // ReplicatorSv1 APIs
 const (
-	ReplicatorSv1                        = "ReplicatorSv1"
-	ReplicatorSv1Ping                    = "ReplicatorSv1.Ping"
-	ReplicatorSv1GetDestination          = "ReplicatorSv1.GetDestination"
-	ReplicatorSv1GetReverseDestination   = "ReplicatorSv1.GetReverseDestination"
-	ReplicatorSv1GetStatQueue            = "ReplicatorSv1.GetStatQueue"
-	ReplicatorSv1GetFilter               = "ReplicatorSv1.GetFilter"
-	ReplicatorSv1GetThreshold            = "ReplicatorSv1.GetThreshold"
-	ReplicatorSv1GetThresholdProfile     = "ReplicatorSv1.GetThresholdProfile"
-	ReplicatorSv1GetStatQueueProfile     = "ReplicatorSv1.GetStatQueueProfile"
-	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
-	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
-	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
-	ReplicatorSv1GetActions              = "ReplicatorSv1.GetActions"
-	ReplicatorSv1GetRouteProfile         = "ReplicatorSv1.GetRouteProfile"
-	ReplicatorSv1GetAttributeProfile     = "ReplicatorSv1.GetAttributeProfile"
-	ReplicatorSv1GetChargerProfile       = "ReplicatorSv1.GetChargerProfile"
-	ReplicatorSv1GetDispatcherProfile    = "ReplicatorSv1.GetDispatcherProfile"
-	ReplicatorSv1GetRateProfile          = "ReplicatorSv1.GetRateProfile"
-	ReplicatorSv1GetActionProfile        = "ReplicatorSv1.GetActionProfile"
-	ReplicatorSv1GetDispatcherHost       = "ReplicatorSv1.GetDispatcherHost"
-	ReplicatorSv1GetAccount              = "ReplicatorSv1.GetAccount"
-	ReplicatorSv1GetItemLoadIDs          = "ReplicatorSv1.GetItemLoadIDs"
-	ReplicatorSv1SetThresholdProfile     = "ReplicatorSv1.SetThresholdProfile"
-	ReplicatorSv1SetThreshold            = "ReplicatorSv1.SetThreshold"
-	ReplicatorSv1SetDestination          = "ReplicatorSv1.SetDestination"
-	ReplicatorSv1SetReverseDestination   = "ReplicatorSv1.SetReverseDestination"
-	ReplicatorSv1SetStatQueue            = "ReplicatorSv1.SetStatQueue"
-	ReplicatorSv1SetFilter               = "ReplicatorSv1.SetFilter"
-	ReplicatorSv1SetStatQueueProfile     = "ReplicatorSv1.SetStatQueueProfile"
-	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
-	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
-	ReplicatorSv1SetResourceProfile      = "ReplicatorSv1.SetResourceProfile"
-	ReplicatorSv1SetActions              = "ReplicatorSv1.SetActions"
-	ReplicatorSv1SetRouteProfile         = "ReplicatorSv1.SetRouteProfile"
-	ReplicatorSv1SetAttributeProfile     = "ReplicatorSv1.SetAttributeProfile"
-	ReplicatorSv1SetChargerProfile       = "ReplicatorSv1.SetChargerProfile"
-	ReplicatorSv1SetDispatcherProfile    = "ReplicatorSv1.SetDispatcherProfile"
-	ReplicatorSv1SetRateProfile          = "ReplicatorSv1.SetRateProfile"
-	ReplicatorSv1SetActionProfile        = "ReplicatorSv1.SetActionProfile"
-	ReplicatorSv1SetAccount              = "ReplicatorSv1.SetAccount"
-	ReplicatorSv1SetDispatcherHost       = "ReplicatorSv1.SetDispatcherHost"
-	ReplicatorSv1SetLoadIDs              = "ReplicatorSv1.SetLoadIDs"
-	ReplicatorSv1RemoveThreshold         = "ReplicatorSv1.RemoveThreshold"
-	ReplicatorSv1RemoveDestination       = "ReplicatorSv1.RemoveDestination"
+	ReplicatorSv1                     = "ReplicatorSv1"
+	ReplicatorSv1Ping                 = "ReplicatorSv1.Ping"
+	ReplicatorSv1GetStatQueue         = "ReplicatorSv1.GetStatQueue"
+	ReplicatorSv1GetFilter            = "ReplicatorSv1.GetFilter"
+	ReplicatorSv1GetThreshold         = "ReplicatorSv1.GetThreshold"
+	ReplicatorSv1GetThresholdProfile  = "ReplicatorSv1.GetThresholdProfile"
+	ReplicatorSv1GetStatQueueProfile  = "ReplicatorSv1.GetStatQueueProfile"
+	ReplicatorSv1GetTiming            = "ReplicatorSv1.GetTiming"
+	ReplicatorSv1GetResource          = "ReplicatorSv1.GetResource"
+	ReplicatorSv1GetResourceProfile   = "ReplicatorSv1.GetResourceProfile"
+	ReplicatorSv1GetActions           = "ReplicatorSv1.GetActions"
+	ReplicatorSv1GetRouteProfile      = "ReplicatorSv1.GetRouteProfile"
+	ReplicatorSv1GetAttributeProfile  = "ReplicatorSv1.GetAttributeProfile"
+	ReplicatorSv1GetChargerProfile    = "ReplicatorSv1.GetChargerProfile"
+	ReplicatorSv1GetDispatcherProfile = "ReplicatorSv1.GetDispatcherProfile"
+	ReplicatorSv1GetRateProfile       = "ReplicatorSv1.GetRateProfile"
+	ReplicatorSv1GetActionProfile     = "ReplicatorSv1.GetActionProfile"
+	ReplicatorSv1GetDispatcherHost    = "ReplicatorSv1.GetDispatcherHost"
+	ReplicatorSv1GetAccount           = "ReplicatorSv1.GetAccount"
+	ReplicatorSv1GetItemLoadIDs       = "ReplicatorSv1.GetItemLoadIDs"
+	ReplicatorSv1SetThresholdProfile  = "ReplicatorSv1.SetThresholdProfile"
+	ReplicatorSv1SetThreshold         = "ReplicatorSv1.SetThreshold"
+	ReplicatorSv1SetStatQueue         = "ReplicatorSv1.SetStatQueue"
+	ReplicatorSv1SetFilter            = "ReplicatorSv1.SetFilter"
+	ReplicatorSv1SetStatQueueProfile  = "ReplicatorSv1.SetStatQueueProfile"
+	ReplicatorSv1SetTiming            = "ReplicatorSv1.SetTiming"
+	ReplicatorSv1SetResource          = "ReplicatorSv1.SetResource"
+	ReplicatorSv1SetResourceProfile   = "ReplicatorSv1.SetResourceProfile"
+	ReplicatorSv1SetActions           = "ReplicatorSv1.SetActions"
+	ReplicatorSv1SetRouteProfile      = "ReplicatorSv1.SetRouteProfile"
+	ReplicatorSv1SetAttributeProfile  = "ReplicatorSv1.SetAttributeProfile"
+	ReplicatorSv1SetChargerProfile    = "ReplicatorSv1.SetChargerProfile"
+	ReplicatorSv1SetDispatcherProfile = "ReplicatorSv1.SetDispatcherProfile"
+	ReplicatorSv1SetRateProfile       = "ReplicatorSv1.SetRateProfile"
+	ReplicatorSv1SetActionProfile     = "ReplicatorSv1.SetActionProfile"
+	ReplicatorSv1SetAccount           = "ReplicatorSv1.SetAccount"
+	ReplicatorSv1SetDispatcherHost    = "ReplicatorSv1.SetDispatcherHost"
+	ReplicatorSv1SetLoadIDs           = "ReplicatorSv1.SetLoadIDs"
+	ReplicatorSv1RemoveThreshold      = "ReplicatorSv1.RemoveThreshold"
+
 	ReplicatorSv1RemoveStatQueue         = "ReplicatorSv1.RemoveStatQueue"
 	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
@@ -1169,91 +1148,85 @@ const (
 
 // APIerSv1 APIs
 const (
-	AdminSv1ComputeFilterIndexes        = "AdminSv1.ComputeFilterIndexes"
-	AdminSv1ComputeFilterIndexIDs       = "AdminSv1.ComputeFilterIndexIDs"
-	APIerSv1Ping                        = "APIerSv1.Ping"
-	APIerSv1SetDispatcherProfile        = "APIerSv1.SetDispatcherProfile"
-	APIerSv1GetDispatcherProfile        = "APIerSv1.GetDispatcherProfile"
-	APIerSv1GetDispatcherProfileIDs     = "APIerSv1.GetDispatcherProfileIDs"
-	APIerSv1RemoveDispatcherProfile     = "APIerSv1.RemoveDispatcherProfile"
-	APIerSv1SetBalances                 = "APIerSv1.SetBalances"
-	APIerSv1SetDispatcherHost           = "APIerSv1.SetDispatcherHost"
-	APIerSv1GetDispatcherHost           = "APIerSv1.GetDispatcherHost"
-	APIerSv1GetDispatcherHostIDs        = "APIerSv1.GetDispatcherHostIDs"
-	APIerSv1RemoveDispatcherHost        = "APIerSv1.RemoveDispatcherHost"
-	APIerSv1GetEventCost                = "APIerSv1.GetEventCost"
-	APIerSv1LoadTariffPlanFromFolder    = "APIerSv1.LoadTariffPlanFromFolder"
-	APIerSv1ExportToFolder              = "APIerSv1.ExportToFolder"
-	APIerSv1GetCost                     = "APIerSv1.GetCost"
-	AdminSv1GetFilter                   = "AdminSv1.GetFilter"
-	AdminSv1GetFilterIndexes            = "AdminSv1.GetFilterIndexes"
-	AdminSv1RemoveFilterIndexes         = "AdminSv1.RemoveFilterIndexes"
-	AdminSv1RemoveFilter                = "AdminSv1.RemoveFilter"
-	AdminSv1SetFilter                   = "AdminSv1.SetFilter"
-	AdminSv1GetFilterIDs                = "AdminSv1.GetFilterIDs"
-	APIerSv1SetDataDBVersions           = "APIerSv1.SetDataDBVersions"
-	APIerSv1SetStorDBVersions           = "APIerSv1.SetStorDBVersions"
-	APIerSv1GetActions                  = "APIerSv1.GetActions"
-	APIerSv1GetDestination              = "APIerSv1.GetDestination"
-	APIerSv1RemoveDestination           = "APIerSv1.RemoveDestination"
-	APIerSv1GetReverseDestination       = "APIerSv1.GetReverseDestination"
-	APIerSv1GetDataDBVersions           = "APIerSv1.GetDataDBVersions"
-	APIerSv1GetStorDBVersions           = "APIerSv1.GetStorDBVersions"
-	APIerSv1GetCDRs                     = "APIerSv1.GetCDRs"
-	APIerSv1GetTPActions                = "APIerSv1.GetTPActions"
-	APIerSv1GetTPAttributeProfile       = "APIerSv1.GetTPAttributeProfile"
-	APIerSv1SetTPAttributeProfile       = "APIerSv1.SetTPAttributeProfile"
-	APIerSv1GetTPAttributeProfileIds    = "APIerSv1.GetTPAttributeProfileIds"
-	APIerSv1RemoveTPAttributeProfile    = "APIerSv1.RemoveTPAttributeProfile"
-	APIerSv1GetTPCharger                = "APIerSv1.GetTPCharger"
-	APIerSv1SetTPCharger                = "APIerSv1.SetTPCharger"
-	APIerSv1RemoveTPCharger             = "APIerSv1.RemoveTPCharger"
-	APIerSv1GetTPChargerIDs             = "APIerSv1.GetTPChargerIDs"
-	APIerSv1SetTPFilterProfile          = "APIerSv1.SetTPFilterProfile"
-	APIerSv1GetTPFilterProfile          = "APIerSv1.GetTPFilterProfile"
-	APIerSv1GetTPFilterProfileIds       = "APIerSv1.GetTPFilterProfileIds"
-	APIerSv1RemoveTPFilterProfile       = "APIerSv1.RemoveTPFilterProfile"
-	APIerSv1GetTPDestination            = "APIerSv1.GetTPDestination"
-	APIerSv1SetTPDestination            = "APIerSv1.SetTPDestination"
-	APIerSv1GetTPDestinationIDs         = "APIerSv1.GetTPDestinationIDs"
-	APIerSv1RemoveTPDestination         = "APIerSv1.RemoveTPDestination"
-	APIerSv1GetTPResource               = "APIerSv1.GetTPResource"
-	APIerSv1SetTPResource               = "APIerSv1.SetTPResource"
-	APIerSv1RemoveTPResource            = "APIerSv1.RemoveTPResource"
-	APIerSv1SetTPRate                   = "APIerSv1.SetTPRate"
-	APIerSv1GetTPRate                   = "APIerSv1.GetTPRate"
-	APIerSv1RemoveTPRate                = "APIerSv1.RemoveTPRate"
-	APIerSv1GetTPRateIds                = "APIerSv1.GetTPRateIds"
-	APIerSv1SetTPThreshold              = "APIerSv1.SetTPThreshold"
-	APIerSv1GetTPThreshold              = "APIerSv1.GetTPThreshold"
-	APIerSv1GetTPThresholdIDs           = "APIerSv1.GetTPThresholdIDs"
-	APIerSv1RemoveTPThreshold           = "APIerSv1.RemoveTPThreshold"
-	APIerSv1SetTPStat                   = "APIerSv1.SetTPStat"
-	APIerSv1GetTPStat                   = "APIerSv1.GetTPStat"
-	APIerSv1RemoveTPStat                = "APIerSv1.RemoveTPStat"
-	APIerSv1SetTPRouteProfile           = "APIerSv1.SetTPRouteProfile"
-	APIerSv1GetTPRouteProfile           = "APIerSv1.GetTPRouteProfile"
-	APIerSv1GetTPRouteProfileIDs        = "APIerSv1.GetTPRouteProfileIDs"
-	APIerSv1RemoveTPRouteProfile        = "APIerSv1.RemoveTPRouteProfile"
-	APIerSv1GetTPDispatcherProfile      = "APIerSv1.GetTPDispatcherProfile"
-	APIerSv1SetTPDispatcherProfile      = "APIerSv1.SetTPDispatcherProfile"
-	APIerSv1RemoveTPDispatcherProfile   = "APIerSv1.RemoveTPDispatcherProfile"
-	APIerSv1GetTPDispatcherProfileIDs   = "APIerSv1.GetTPDispatcherProfileIDs"
-	APIerSv1ExportCDRs                  = "APIerSv1.ExportCDRs"
-	APIerSv1SetTPRatingPlan             = "APIerSv1.SetTPRatingPlan"
-	APIerSv1SetTPActions                = "APIerSv1.SetTPActions"
-	APIerSv1GetTPActionIds              = "APIerSv1.GetTPActionIds"
-	APIerSv1RemoveTPActions             = "APIerSv1.RemoveTPActions"
-	APIerSv1SetActionPlan               = "APIerSv1.SetActionPlan"
-	APIerSv1ExecuteAction               = "APIerSv1.ExecuteAction"
-	APIerSv1SetTPRatingProfile          = "APIerSv1.SetTPRatingProfile"
-	APIerSv1GetTPRatingProfile          = "APIerSv1.GetTPRatingProfile"
-	APIerSv1SetTPDestinationRate        = "APIerSv1.SetTPDestinationRate"
-	APIerSv1ImportTariffPlanFromFolder  = "APIerSv1.ImportTariffPlanFromFolder"
-	APIerSv1ExportTPToFolder            = "APIerSv1.ExportTPToFolder"
-	APIerSv1SetActions                  = "APIerSv1.SetActions"
-	APIerSv1ComputeReverseDestinations  = "APIerSv1.ComputeReverseDestinations"
-	APIerSv1SetDestination              = "APIerSv1.SetDestination"
+	AdminSv1ComputeFilterIndexes     = "AdminSv1.ComputeFilterIndexes"
+	AdminSv1ComputeFilterIndexIDs    = "AdminSv1.ComputeFilterIndexIDs"
+	APIerSv1Ping                     = "APIerSv1.Ping"
+	APIerSv1SetDispatcherProfile     = "APIerSv1.SetDispatcherProfile"
+	APIerSv1GetDispatcherProfile     = "APIerSv1.GetDispatcherProfile"
+	APIerSv1GetDispatcherProfileIDs  = "APIerSv1.GetDispatcherProfileIDs"
+	APIerSv1RemoveDispatcherProfile  = "APIerSv1.RemoveDispatcherProfile"
+	APIerSv1SetBalances              = "APIerSv1.SetBalances"
+	APIerSv1SetDispatcherHost        = "APIerSv1.SetDispatcherHost"
+	APIerSv1GetDispatcherHost        = "APIerSv1.GetDispatcherHost"
+	APIerSv1GetDispatcherHostIDs     = "APIerSv1.GetDispatcherHostIDs"
+	APIerSv1RemoveDispatcherHost     = "APIerSv1.RemoveDispatcherHost"
+	APIerSv1GetEventCost             = "APIerSv1.GetEventCost"
+	APIerSv1LoadTariffPlanFromFolder = "APIerSv1.LoadTariffPlanFromFolder"
+	APIerSv1ExportToFolder           = "APIerSv1.ExportToFolder"
+	APIerSv1GetCost                  = "APIerSv1.GetCost"
+	AdminSv1GetFilter                = "AdminSv1.GetFilter"
+	AdminSv1GetFilterIndexes         = "AdminSv1.GetFilterIndexes"
+	AdminSv1RemoveFilterIndexes      = "AdminSv1.RemoveFilterIndexes"
+	AdminSv1RemoveFilter             = "AdminSv1.RemoveFilter"
+	AdminSv1SetFilter                = "AdminSv1.SetFilter"
+	AdminSv1GetFilterIDs             = "AdminSv1.GetFilterIDs"
+	APIerSv1SetDataDBVersions        = "APIerSv1.SetDataDBVersions"
+	APIerSv1SetStorDBVersions        = "APIerSv1.SetStorDBVersions"
+	APIerSv1GetActions               = "APIerSv1.GetActions"
+
+	APIerSv1GetDataDBVersions        = "APIerSv1.GetDataDBVersions"
+	APIerSv1GetStorDBVersions        = "APIerSv1.GetStorDBVersions"
+	APIerSv1GetCDRs                  = "APIerSv1.GetCDRs"
+	APIerSv1GetTPActions             = "APIerSv1.GetTPActions"
+	APIerSv1GetTPAttributeProfile    = "APIerSv1.GetTPAttributeProfile"
+	APIerSv1SetTPAttributeProfile    = "APIerSv1.SetTPAttributeProfile"
+	APIerSv1GetTPAttributeProfileIds = "APIerSv1.GetTPAttributeProfileIds"
+	APIerSv1RemoveTPAttributeProfile = "APIerSv1.RemoveTPAttributeProfile"
+	APIerSv1GetTPCharger             = "APIerSv1.GetTPCharger"
+	APIerSv1SetTPCharger             = "APIerSv1.SetTPCharger"
+	APIerSv1RemoveTPCharger          = "APIerSv1.RemoveTPCharger"
+	APIerSv1GetTPChargerIDs          = "APIerSv1.GetTPChargerIDs"
+	APIerSv1SetTPFilterProfile       = "APIerSv1.SetTPFilterProfile"
+	APIerSv1GetTPFilterProfile       = "APIerSv1.GetTPFilterProfile"
+	APIerSv1GetTPFilterProfileIds    = "APIerSv1.GetTPFilterProfileIds"
+	APIerSv1RemoveTPFilterProfile    = "APIerSv1.RemoveTPFilterProfile"
+
+	APIerSv1GetTPResource             = "APIerSv1.GetTPResource"
+	APIerSv1SetTPResource             = "APIerSv1.SetTPResource"
+	APIerSv1RemoveTPResource          = "APIerSv1.RemoveTPResource"
+	APIerSv1SetTPRate                 = "APIerSv1.SetTPRate"
+	APIerSv1GetTPRate                 = "APIerSv1.GetTPRate"
+	APIerSv1RemoveTPRate              = "APIerSv1.RemoveTPRate"
+	APIerSv1GetTPRateIds              = "APIerSv1.GetTPRateIds"
+	APIerSv1SetTPThreshold            = "APIerSv1.SetTPThreshold"
+	APIerSv1GetTPThreshold            = "APIerSv1.GetTPThreshold"
+	APIerSv1GetTPThresholdIDs         = "APIerSv1.GetTPThresholdIDs"
+	APIerSv1RemoveTPThreshold         = "APIerSv1.RemoveTPThreshold"
+	APIerSv1SetTPStat                 = "APIerSv1.SetTPStat"
+	APIerSv1GetTPStat                 = "APIerSv1.GetTPStat"
+	APIerSv1RemoveTPStat              = "APIerSv1.RemoveTPStat"
+	APIerSv1SetTPRouteProfile         = "APIerSv1.SetTPRouteProfile"
+	APIerSv1GetTPRouteProfile         = "APIerSv1.GetTPRouteProfile"
+	APIerSv1GetTPRouteProfileIDs      = "APIerSv1.GetTPRouteProfileIDs"
+	APIerSv1RemoveTPRouteProfile      = "APIerSv1.RemoveTPRouteProfile"
+	APIerSv1GetTPDispatcherProfile    = "APIerSv1.GetTPDispatcherProfile"
+	APIerSv1SetTPDispatcherProfile    = "APIerSv1.SetTPDispatcherProfile"
+	APIerSv1RemoveTPDispatcherProfile = "APIerSv1.RemoveTPDispatcherProfile"
+	APIerSv1GetTPDispatcherProfileIDs = "APIerSv1.GetTPDispatcherProfileIDs"
+	APIerSv1ExportCDRs                = "APIerSv1.ExportCDRs"
+	APIerSv1SetTPRatingPlan           = "APIerSv1.SetTPRatingPlan"
+	APIerSv1SetTPActions              = "APIerSv1.SetTPActions"
+	APIerSv1GetTPActionIds            = "APIerSv1.GetTPActionIds"
+	APIerSv1RemoveTPActions           = "APIerSv1.RemoveTPActions"
+	APIerSv1SetActionPlan             = "APIerSv1.SetActionPlan"
+	APIerSv1ExecuteAction             = "APIerSv1.ExecuteAction"
+	APIerSv1SetTPRatingProfile        = "APIerSv1.SetTPRatingProfile"
+	APIerSv1GetTPRatingProfile        = "APIerSv1.GetTPRatingProfile"
+
+	APIerSv1ImportTariffPlanFromFolder = "APIerSv1.ImportTariffPlanFromFolder"
+	APIerSv1ExportTPToFolder           = "APIerSv1.ExportTPToFolder"
+	APIerSv1SetActions                 = "APIerSv1.SetActions"
+
 	APIerSv1GetDataCost                 = "APIerSv1.GetDataCost"
 	APIerSv1ReplayFailedPosts           = "APIerSv1.ReplayFailedPosts"
 	APIerSv1GetCacheStats               = "APIerSv1.GetCacheStats"
@@ -1579,8 +1552,8 @@ const (
 
 //CSV file name
 const (
-	TimingsCsv            = "Timings.csv"
-	DestinationsCsv       = "Destinations.csv"
+	TimingsCsv = "Timings.csv"
+
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
@@ -1597,8 +1570,8 @@ const (
 
 // Table Name
 const (
-	TBLTPTimings         = "tp_timings"
-	TBLTPDestinations    = "tp_destinations"
+	TBLTPTimings = "tp_timings"
+
 	TBLTPResources       = "tp_resources"
 	TBLTPStats           = "tp_stats"
 	TBLTPThresholds      = "tp_thresholds"
@@ -1619,8 +1592,6 @@ const (
 
 // Cache Name
 const (
-	CacheDestinations                = "*destinations"
-	CacheReverseDestinations         = "*reverse_destinations"
 	CacheResources                   = "*resources"
 	CacheResourceProfiles            = "*resource_profiles"
 	CacheTimings                     = "*timings"
@@ -1669,8 +1640,8 @@ const (
 	CacheReplicationHosts            = "*replication_hosts"
 
 	// storDB
-	CacheTBLTPTimings         = "*tp_timings"
-	CacheTBLTPDestinations    = "*tp_destinations"
+	CacheTBLTPTimings = "*tp_timings"
+
 	CacheTBLTPResources       = "*tp_resources"
 	CacheTBLTPStats           = "*tp_stats"
 	CacheTBLTPThresholds      = "*tp_thresholds"
@@ -2278,8 +2249,6 @@ const (
 
 // ArgCache constats
 const (
-	DestinationIDs               = "DestinationIDs"
-	ReverseDestinationIDs        = "ReverseDestinationIDs"
 	ResourceProfileIDs           = "ResourceProfileIDs"
 	ResourceIDs                  = "ResourceIDs"
 	StatsQueueIDs                = "StatsQueueIDs"

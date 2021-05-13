@@ -180,33 +180,6 @@ func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
-	filter := bson.M{"tpid": tpid}
-	if id != "" {
-		filter["id"] = id
-	}
-	var results []*utils.TPDestination
-	err := ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPDestinations).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var el utils.TPDestination
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
-			}
-			results = append(results, &el)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
 func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
@@ -319,24 +292,6 @@ func (ms *MongoStorage) SetTPTimings(tps []*utils.ApierTPTiming) error {
 	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
 			_, err = ms.getCol(utils.TBLTPTimings).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
-				bson.M{"$set": tp},
-				options.Update().SetUpsert(true),
-			)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-func (ms *MongoStorage) SetTPDestinations(tpDsts []*utils.TPDestination) (err error) {
-	if len(tpDsts) == 0 {
-		return nil
-	}
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tpDsts {
-			_, err = ms.getCol(utils.TBLTPDestinations).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
 				bson.M{"$set": tp},
 				options.Update().SetUpsert(true),
 			)

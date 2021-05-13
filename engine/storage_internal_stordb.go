@@ -75,26 +75,6 @@ func (iDB *InternalDB) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTi
 	return
 }
 
-func (iDB *InternalDB) GetTPDestinations(tpid, id string) (dsts []*utils.TPDestination, err error) {
-	key := tpid
-	if id != utils.EmptyString {
-		key += utils.ConcatenatedKeySep + id
-	}
-	ids := Cache.GetItemIDs(utils.CacheTBLTPDestinations, key)
-	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPDestinations, id)
-		if !ok || x == nil {
-			return nil, utils.ErrNotFound
-		}
-		dsts = append(dsts, x.(*utils.TPDestination))
-	}
-
-	if len(dsts) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
 func (iDB *InternalDB) GetTPResources(tpid, tenant, id string) (resources []*utils.TPResourceProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
@@ -396,16 +376,6 @@ func (iDB *InternalDB) SetTPTimings(timings []*utils.ApierTPTiming) (err error) 
 	}
 	for _, timing := range timings {
 		Cache.SetWithoutReplicate(utils.CacheTBLTPTimings, utils.ConcatenatedKey(timing.TPid, timing.ID), timing, nil,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return
-}
-func (iDB *InternalDB) SetTPDestinations(dests []*utils.TPDestination) (err error) {
-	if len(dests) == 0 {
-		return nil
-	}
-	for _, destination := range dests {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPDestinations, utils.ConcatenatedKey(destination.TPid, destination.ID), destination, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return

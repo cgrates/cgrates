@@ -1149,8 +1149,6 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 		return
 	}
 	// take IDs for each type
-	dstIds, _ := tpr.GetLoadedIds(utils.DestinationPrefix)
-	revDstIDs, _ := tpr.GetLoadedIds(utils.ReverseDestinationPrefix)
 	tmgIds, _ := tpr.GetLoadedIds(utils.TimingsPrefix)
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
 	resIDs, _ := tpr.GetLoadedIds(utils.ResourcesPrefix)
@@ -1170,23 +1168,21 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 
 	//compose Reload Cache argument
 	cacheArgs := map[string][]string{
-		utils.DestinationIDs:        dstIds,
-		utils.ReverseDestinationIDs: revDstIDs,
-		utils.TimingIDs:             tmgIds,
-		utils.ResourceProfileIDs:    rspIDs,
-		utils.ResourceIDs:           resIDs,
-		utils.StatsQueueIDs:         stqIDs,
-		utils.StatsQueueProfileIDs:  stqpIDs,
-		utils.ThresholdIDs:          trsIDs,
-		utils.ThresholdProfileIDs:   trspfIDs,
-		utils.FilterIDs:             flrIDs,
-		utils.RouteProfileIDs:       routeIDs,
-		utils.AttributeProfileIDs:   apfIDs,
-		utils.ChargerProfileIDs:     chargerIDs,
-		utils.DispatcherProfileIDs:  dppIDs,
-		utils.DispatcherHostIDs:     dphIDs,
-		utils.RateProfileIDs:        ratePrfIDs,
-		utils.ActionProfileIDs:      actionPrfIDs,
+		utils.TimingIDs:            tmgIds,
+		utils.ResourceProfileIDs:   rspIDs,
+		utils.ResourceIDs:          resIDs,
+		utils.StatsQueueIDs:        stqIDs,
+		utils.StatsQueueProfileIDs: stqpIDs,
+		utils.ThresholdIDs:         trsIDs,
+		utils.ThresholdProfileIDs:  trspfIDs,
+		utils.FilterIDs:            flrIDs,
+		utils.RouteProfileIDs:      routeIDs,
+		utils.AttributeProfileIDs:  apfIDs,
+		utils.ChargerProfileIDs:    chargerIDs,
+		utils.DispatcherProfileIDs: dppIDs,
+		utils.DispatcherHostIDs:    dphIDs,
+		utils.RateProfileIDs:       ratePrfIDs,
+		utils.ActionProfileIDs:     actionPrfIDs,
 	}
 
 	// verify if we need to clear indexes

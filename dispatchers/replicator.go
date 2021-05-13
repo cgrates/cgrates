@@ -39,23 +39,6 @@ func (dS *DispatcherService) ReplicatorSv1Ping(args *utils.CGREvent, rpl *string
 	return dS.Dispatch(args, utils.MetaReplicator, utils.ReplicatorSv1Ping, args, rpl)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetReverseDestination(args *utils.StringWithAPIOpts, rpl *[]string) (err error) {
-	if args == nil {
-		args = new(utils.StringWithAPIOpts)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1GetReverseDestination, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&utils.CGREvent{
-		Tenant:  args.Tenant,
-		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1GetReverseDestination, args, rpl)
-}
-
 func (dS *DispatcherService) ReplicatorSv1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *engine.StatQueue) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
@@ -645,23 +628,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(args *utils.TenantIDWi
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveThreshold, args, rpl)
-}
-
-func (dS *DispatcherService) ReplicatorSv1RemoveDestination(args *utils.StringWithAPIOpts, rpl *string) (err error) {
-	if args == nil {
-		args = new(utils.StringWithAPIOpts)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1RemoveDestination, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&utils.CGREvent{
-		Tenant:  args.Tenant,
-		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveDestination, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(args *utils.LoadIDsWithAPIOpts, rpl *string) (err error) {
