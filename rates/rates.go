@@ -178,7 +178,8 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		return
 	}
 	rpCost = &utils.RateProfileCost{
-		ID: rtPfl.ID,
+		ID:    rtPfl.ID,
+		Rates: make(map[string]*utils.IntervalRate),
 	}
 	var ok bool
 	if rtPfl.MinCost != nil {
@@ -195,17 +196,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	if ivalStart, err = args.IntervalStart(); err != nil {
 		return
 	}
-	rpCost.Rates = make(map[string]*utils.IntervalRate)
 	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage, rpCost.Rates); err != nil {
 		return nil, err
 	}
 	// in case we have error it is returned in the function from above
 	// this came to light in coverage tests
-	rpCst, err := utils.CostForIntervals(rpCost.RateSIntervals, rpCost.Rates)
-	if err != nil {
-		return nil, err
-	}
-	rpCost.Cost, _ = rpCst.Float64()
+	rpCost.Cost, _ = utils.CostForIntervals(rpCost.RateSIntervals, rpCost.Rates).Float64()
 	return
 }
 
