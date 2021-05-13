@@ -104,12 +104,6 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaAccounts: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
@@ -209,18 +203,16 @@ func TestDataDBReloadBadType(t *testing.T) {
 		utils.Thresholds: 4,
 		utils.Routes:     2,
 		// old version for Attributes
-		utils.Attributes:          5,
-		utils.Timing:              1,
-		utils.RQF:                 5,
-		utils.Resource:            1,
-		utils.Subscribers:         1,
-		utils.Destinations:        1,
-		utils.ReverseDestinations: 1,
-		utils.Chargers:            2,
-		utils.Dispatchers:         2,
-		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
+		utils.Attributes:     5,
+		utils.Timing:         1,
+		utils.RQF:            5,
+		utils.Resource:       1,
+		utils.Subscribers:    1,
+		utils.Chargers:       2,
+		utils.Dispatchers:    2,
+		utils.LoadIDsVrs:     1,
+		utils.RateProfiles:   1,
+		utils.ActionProfiles: 1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -254,12 +246,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
 			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActions: {
@@ -367,12 +353,6 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 			utils.MetaAccounts: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
@@ -462,18 +442,16 @@ func TestDataDBStartVersion(t *testing.T) {
 		utils.Thresholds: 4,
 		utils.Routes:     2,
 		// old version for Attributes
-		utils.Attributes:          5,
-		utils.Timing:              1,
-		utils.RQF:                 5,
-		utils.Resource:            1,
-		utils.Subscribers:         1,
-		utils.Destinations:        1,
-		utils.ReverseDestinations: 1,
-		utils.Chargers:            2,
-		utils.Dispatchers:         2,
-		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
+		utils.Attributes:     5,
+		utils.Timing:         1,
+		utils.RQF:            5,
+		utils.Resource:       1,
+		utils.Subscribers:    1,
+		utils.Chargers:       2,
+		utils.Dispatchers:    2,
+		utils.LoadIDsVrs:     1,
+		utils.RateProfiles:   1,
+		utils.ActionProfiles: 1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -520,18 +498,16 @@ func TestDataDBReloadCastError(t *testing.T) {
 		utils.Thresholds: 4,
 		utils.Routes:     2,
 		// old version for Attributes
-		utils.Attributes:          5,
-		utils.Timing:              1,
-		utils.RQF:                 5,
-		utils.Resource:            1,
-		utils.Subscribers:         1,
-		utils.Destinations:        1,
-		utils.ReverseDestinations: 1,
-		utils.Chargers:            2,
-		utils.Dispatchers:         2,
-		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
+		utils.Attributes:     5,
+		utils.Timing:         1,
+		utils.RQF:            5,
+		utils.Resource:       1,
+		utils.Subscribers:    1,
+		utils.Chargers:       2,
+		utils.Dispatchers:    2,
+		utils.LoadIDsVrs:     1,
+		utils.RateProfiles:   1,
+		utils.ActionProfiles: 1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -565,12 +541,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
 			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActions: {
@@ -665,18 +635,16 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		utils.Thresholds: 4,
 		utils.Routes:     2,
 		// old version for Attributes
-		utils.Attributes:          5,
-		utils.Timing:              1,
-		utils.RQF:                 5,
-		utils.Resource:            1,
-		utils.Subscribers:         1,
-		utils.Destinations:        1,
-		utils.ReverseDestinations: 1,
-		utils.Chargers:            2,
-		utils.Dispatchers:         2,
-		utils.LoadIDsVrs:          1,
-		utils.RateProfiles:        1,
-		utils.ActionProfiles:      1,
+		utils.Attributes:     5,
+		utils.Timing:         1,
+		utils.RQF:            5,
+		utils.Resource:       1,
+		utils.Subscribers:    1,
+		utils.Chargers:       2,
+		utils.Dispatchers:    2,
+		utils.LoadIDsVrs:     1,
+		utils.RateProfiles:   1,
+		utils.ActionProfiles: 1,
 	}, true)
 	if err != nil {
 		t.Fatal(err)
@@ -710,12 +678,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
 			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActions: {
@@ -840,12 +802,6 @@ func TestDataDBReloadError(t *testing.T) {
 		RplConns: []string{},
 		Items: map[string]*config.ItemOpt{
 			utils.MetaAccounts: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaReverseDestinations: {
-				Replicate: false,
-				Remote:    false},
-			utils.MetaDestinations: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaActions: {

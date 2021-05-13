@@ -276,28 +276,6 @@ func (sqls *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 	return nil
 }
 
-func (sqls *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
-	if len(dests) == 0 {
-		return nil
-	}
-	tx := sqls.db.Begin()
-	for _, dst := range dests {
-		// Remove previous
-		if err := tx.Where(&DestinationMdl{Tpid: dst.TPid, Tag: dst.ID}).Delete(DestinationMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, d := range APItoModelDestination(dst) {
-			if err := tx.Create(&d).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
 func (sqls *SQLStorage) SetTPResources(rls []*utils.TPResourceProfile) error {
 	if len(rls) == 0 {
 		return nil
@@ -854,21 +832,6 @@ func (sqls *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		return cdrs, 0, utils.ErrNotFound
 	}
 	return cdrs, 0, nil
-}
-
-func (sqls *SQLStorage) GetTPDestinations(tpid, id string) (uTPDsts []*utils.TPDestination, err error) {
-	var tpDests DestinationMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("tag = ?", id)
-	}
-	if err := q.Find(&tpDests).Error; err != nil {
-		return nil, err
-	}
-	if len(tpDests.AsTPDestinations()) == 0 {
-		return tpDests.AsTPDestinations(), utils.ErrNotFound
-	}
-	return tpDests.AsTPDestinations(), nil
 }
 
 func (sqls *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {

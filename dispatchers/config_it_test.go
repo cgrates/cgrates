@@ -77,7 +77,6 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "cfg12345",
 		},
-		Section: "listen",
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {

@@ -103,22 +103,19 @@ func testDspRPrfCostForEvent(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := allEngine.RPC.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AdminSv1SetRateProfile, rPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
 	var rply *utils.RateProfile
-	if err := allEngine.RPC.Call(utils.APIerSv1GetRateProfile, &utils.TenantID{
+	if err := allEngine.RPC.Call(utils.AdminSv1GetRateProfile, &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "DefaultRate",
 	}, &rply); err != nil {
 		t.Error(err)
 	}
-	rtWeek, err := rPrf.Rates["RT_WEEK"].AsRate()
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	exp := &utils.RateProfileCost{
 		ID:   "DefaultRate",
 		Cost: 0.12,
@@ -127,7 +124,6 @@ func testDspRPrfCostForEvent(t *testing.T) {
 			Increments: []*utils.RateSIncrement{{
 				IncrementStart:    utils.NewDecimal(0, 0),
 				Usage:             utils.NewDecimal(int64(time.Minute), 0),
-				Rate:              rtWeek,
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
 			}},
@@ -175,22 +171,19 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := allEngine.RPC.Call(utils.APIerSv1SetRateProfile, rPrf, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AdminSv1SetRateProfile, rPrf, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
 	var rply *utils.RateProfile
-	if err := allEngine.RPC.Call(utils.APIerSv1GetRateProfile, &utils.TenantID{
+	if err := allEngine.RPC.Call(utils.AdminSv1GetRateProfile, &utils.TenantID{
 		Tenant: "cgrates.org",
 		ID:     "ID_RP",
 	}, &rply); err != nil {
 		t.Error(err)
 	}
-	rtWeek, err := rPrf.Rates["RT_WEEK"].AsRate()
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	exp := &utils.RateProfileCost{
 		ID:   "ID_RP",
 		Cost: 0.25,
@@ -199,7 +192,6 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 			Increments: []*utils.RateSIncrement{{
 				IncrementStart:    utils.NewDecimal(0, 0),
 				Usage:             utils.NewDecimal(int64(time.Minute), 0),
-				Rate:              rtWeek,
 				IntervalRateIndex: 0,
 				CompressFactor:    60,
 			}},

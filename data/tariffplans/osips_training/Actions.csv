@@ -1,4 +1,0 @@
-#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
-TOPUP_MONETARY_5,*topup_reset,,,,*monetary,,*any,,,*unlimited,,10,10,false,false,10
-TOPUP_VOICE_200,*topup_reset,,,,*voice,,DST_ON_NET,,,*unlimited,,12000,20,false,false,10
-LOG_WARNING,*log,,,,,,,,,,,,,false,false,10

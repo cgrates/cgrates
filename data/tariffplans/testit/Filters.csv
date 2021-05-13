@@ -1,6 +1,5 @@
 #Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
 cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001,2014-07-29T15:00:00Z
-cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE_MOBILE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*string,~*req.Account,1003;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*prefix,~*req.Destination,10;20,
 cgrates.org,FLTR_1,*rsr,~*req.Destination,1002,

@@ -153,9 +153,6 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = loader.LoadDestinations(); err != nil {
-		t.Error("Failed loading destinations: ", err.Error())
-	}
 	if err = loader.LoadTimings(); err != nil {
 		t.Error("Failed loading timings: ", err.Error())
 	}
@@ -208,9 +205,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = loader.LoadDestinations(); err != nil {
-		t.Error("Failed loading destinations: ", err.Error())
-	}
 	if err = loader.LoadTimings(); err != nil {
 		t.Error("Failed loading timings: ", err.Error())
 	}
@@ -247,16 +241,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 }
 
 func testLoaderITWriteToDatabase(t *testing.T) {
-	for k, d := range loader.destinations {
-		rcv, err := loader.dm.GetDestination(k, false, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetDestination: ", err.Error())
-		}
-		if !reflect.DeepEqual(d, rcv) {
-			t.Errorf("Expecting: %v, received: %v", d, rcv)
-		}
-	}
-
 	for k, tm := range loader.timings {
 		rcv, err := loader.dm.GetTiming(k, true, utils.NonTransactional)
 		if err != nil {
@@ -414,9 +398,6 @@ func testLoaderITImportToStorDb(t *testing.T) {
 // Loads data from storDb into dataDb
 func testLoaderITLoadFromStorDb(t *testing.T) {
 	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
-	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading destinations: ", err.Error())
-	}
 	if err := loader.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading timings: ", err.Error())
 	}
