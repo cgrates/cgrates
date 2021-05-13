@@ -133,7 +133,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 		Tenant:       "cgrates.org",
 		ID:           "RL_TEST2",
 		Weight:       10,
-		FilterIDs:    []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z;2014-07-03T13:44:00Z"},
+		FilterIDs:    []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
 		Limit:        1,
 		ThresholdIDs: []string{"TEST_ACTIONS"},
 		UsageTTL:     3 * time.Nanosecond,
