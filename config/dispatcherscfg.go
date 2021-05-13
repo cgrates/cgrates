@@ -31,6 +31,7 @@ type DispatcherSCfg struct {
 	SuffixIndexedFields *[]string
 	NestedFields        bool
 	AttributeSConns     []string
+	AnySubsystem        bool
 }
 
 func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -58,6 +59,9 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	if jsnCfg.Nested_fields != nil {
 		dps.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Any_subsystem != nil {
+		dps.AnySubsystem = *jsnCfg.Any_subsystem
+	}
 	return
 }
 
@@ -67,6 +71,7 @@ func (dps *DispatcherSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.EnabledCfg:        dps.Enabled,
 		utils.IndexedSelectsCfg: dps.IndexedSelects,
 		utils.NestedFieldsCfg:   dps.NestedFields,
+		utils.AnySubsystemCfg:   dps.AnySubsystem,
 	}
 	if dps.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*dps.StringIndexedFields)
@@ -89,6 +94,7 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 		Enabled:        dps.Enabled,
 		IndexedSelects: dps.IndexedSelects,
 		NestedFields:   dps.NestedFields,
+		AnySubsystem:   dps.AnySubsystem,
 	}
 
 	if dps.AttributeSConns != nil {
@@ -114,6 +120,7 @@ type DispatcherSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
+	Any_subsystem         *bool
 }
 
 func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *DispatcherSJsonCfg {

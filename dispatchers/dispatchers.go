@@ -120,12 +120,13 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		dS.cfg.DispatcherSCfg().IndexedSelects,
 		dS.cfg.DispatcherSCfg().NestedFields,
 	)
-	if err != nil {
-		// return nil, err
-		if err != utils.ErrNotFound {
-			return nil, err
-		}
-		prflIDs, err = engine.MatchingItemIDsForEvent(context.TODO(), evNm,
+	if err != nil &&
+		err != utils.ErrNotFound {
+		return nil, err
+	}
+	if err == utils.ErrNotFound ||
+		dS.cfg.DispatcherSCfg().AnySubsystem {
+		dPrflAnyIDs, err := engine.MatchingItemIDsForEvent(context.TODO(), evNm,
 			dS.cfg.DispatcherSCfg().StringIndexedFields,
 			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 			dS.cfg.DispatcherSCfg().SuffixIndexedFields,
@@ -133,8 +134,13 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 			dS.cfg.DispatcherSCfg().IndexedSelects,
 			dS.cfg.DispatcherSCfg().NestedFields,
 		)
-		if err != nil {
-			return nil, err
+		if prflIDs.Size() == 0 {
+			if err != nil { // return the error if no dispatcher matched the needed subsystem
+				return nil, err
+			}
+			prflIDs = dPrflAnyIDs
+		} else if err == nil && dPrflAnyIDs.Size() != 0 {
+			prflIDs = utils.JoinStringSet(prflIDs, dPrflAnyIDs)
 		}
 	}
 	for prflID := range prflIDs {

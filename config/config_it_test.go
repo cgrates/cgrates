@@ -154,6 +154,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ProcessRuns:         1,
+		AnyContext:          true,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))
