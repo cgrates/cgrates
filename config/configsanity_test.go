@@ -1206,8 +1206,9 @@ func TestConfigSanityScheduler(t *testing.T) {
 func TestConfigSanityEventReader(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ersCfg = &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{"unexistedConn"},
+		Enabled:            true,
+		SessionSConns:      []string{"unexistedConn"},
+		PartialCacheAction: utils.MetaNone,
 	}
 	expected := "<ERs> connection with id: <unexistedConn> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1298,6 +1299,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 				},
 			},
 		},
+		PartialCacheAction: utils.MetaNone,
 	}
 
 	//CacheDumpFields
@@ -1425,7 +1427,8 @@ func TestConfigSanityEventExporter(t *testing.T) {
 
 	cfg.eesCfg.Exporters[0].Type = utils.MetaFileCSV
 	cfg.eesCfg.Exporters[0].ExportPath = "/"
-	expected = "<EEs> empty FieldSep for exporter with ID: "
+	cfg.eesCfg.Exporters[0].Opts = map[string]interface{}{utils.CSVFieldSepOpt: ""}
+	expected = "<EEs> empty csvFieldSeparator for exporter with ID: "
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

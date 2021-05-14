@@ -358,7 +358,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// starts the EventReader service: <true|false>
 	"sessions_conns":["*internal"],								// RPC Connections IDs
 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
-	"partial_cache_action": "*post_cdr",						// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
+	"partial_cache_action": "*none",							// the action that will be executed for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
 	// "partial_path": "/var/spool/cgrates/ers/partial",		// the path were the partial events will be sent
 	"readers": [
 		{
@@ -371,7 +371,7 @@ const CGRATES_CFG_JSON = `
 			"opts": {
 				// Partial
 				// "partialPath": "/",							// the path were the partial events will be sent
-				// "partialCacheAction": "*post_cdr",			// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
+				// "partialCacheAction": "*none",				// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
 				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
 				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
 				
@@ -514,12 +514,16 @@ const CGRATES_CFG_JSON = `
 				
 
 				// SQS and S3
-				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
-				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 				// "awsRegion": "",								// AWSRegion  
 				// "awsKey": "",								// AWSKey        
 				// "awsSecret": "",								// AWSSecret
 				// "awsToken": "",								// AWSToken      
+
+				//SQS
+				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
+
+				// S3
+				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 				// "s3FolderPath": "",							// S3FolderPath 
 
 			},													// extra options for exporter
@@ -531,7 +535,6 @@ const CGRATES_CFG_JSON = `
 			"attribute_context": "",							// context used to discover matching Attribute profiles
 			"synchronous": false,								// block processing until export has a result
 			"attempts": 1,										// export attempts
-			"field_separator": ",",								// separator used in case of csv files
 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 		},
 	],

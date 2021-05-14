@@ -333,9 +333,12 @@
 // },
 
 
-// "ers": {									// EventReaderService
-// 	"enabled": false,						// starts the EventReader service: <true|false>
-// 	"sessions_conns":["*internal"],			// RPC Connections IDs
+// "ers": {														// EventReaderService
+// 	"enabled": false,											// starts the EventReader service: <true|false>
+// 	"sessions_conns":["*internal"],								// RPC Connections IDs
+// 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
+// 	"partial_cache_action": "*none",							// the action that will be executed for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
+// 	// "partial_path": "/var/spool/cgrates/ers/partial",		// the path were the partial events will be sent
 // 	"readers": [
 // 		{
 // 			"id": "*default",									// identifier of the EventReader profile
@@ -345,22 +348,17 @@
 // 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
 // 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
 // 			"opts": {
-// 				// FileCSV and PartialCSV
+// 				// Partial
+// 				// "partialPath": "/",							// the path were the partial events will be sent
+// 				// "partialCacheAction": "*none",				// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
+// 				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
+// 				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
+				
+// 				// FileCSV 
 // 				"csvRowLength": 0,								// Number of fields from csv file
 // 				"csvFieldSeparator": ",",						// separator used when reading the fields
 // 				"csvHeaderDefineChar": ":", 					// the starting character for header definition used in case of CSV files
 // 				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
-
-// 				// PartialCSV
-// 				"csvCacheExpiryAction": "*post_cdr",			// the action that will be exeuted for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
-// 				// "csvRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
-
-// 				// FlatStore
-// 				"fstRowLength": 0,								// Number of fields from csv file
-// 				"fstFieldSeparator": ",",						// separator used when reading the fields
-// 				// "fstFailedCallsPrefix": ""					// Used in case of flatstore CDRs to avoid searching for BYE records
-// 				// "fstRecordCacheTTL": "1s"					// Duration to cache partial records when not pairing
-// 				// "fstLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
 
 // 				// FileXML
 // 				"xmlRootPath": "",								// path towards one event in case of XML CDRs
@@ -435,6 +433,7 @@
 // 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
 // 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
 // 			],
+// 			"partial_commit_fields": [],
 // 			"cache_dump_fields": [],
 // 		},
 // 	],
@@ -489,18 +488,22 @@
 // 				// AMQP
 // 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
 // 				// "amqpRoutingKey": "",						// RoutingKey
-// 				// "sqlExchange": "",							// Exchange
-// 				// "sqlExchangeType": "",						// ExchangeType
+// 				// "amqpExchange": "",							// Exchange
+// 				// "amqpExchangeType": "",						// ExchangeType
 				
 
 // 				// SQS and S3
-// 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
-// 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 // 				// "awsRegion": "",								// AWSRegion  
 // 				// "awsKey": "",								// AWSKey        
 // 				// "awsSecret": "",								// AWSSecret
 // 				// "awsToken": "",								// AWSToken      
-// 				// "s3FolderPath": "",							// AWSFolderPath 
+
+// 				//SQS
+// 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
+
+// 				// S3
+// 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
+// 				// "s3FolderPath": "",							// S3FolderPath 
 
 // 			},													// extra options for exporter
 // 			"tenant": "",										// tenant used in filterS.Pass
@@ -511,7 +514,6 @@
 // 			"attribute_context": "",							// context used to discover matching Attribute profiles
 // 			"synchronous": false,								// block processing until export has a result
 // 			"attempts": 1,										// export attempts
-// 			"field_separator": ",",								// separator used in case of csv files
 // 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 // 		},
 // 	],

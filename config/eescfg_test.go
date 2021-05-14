@@ -77,7 +77,6 @@ func TestEESClone(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				FieldSep:      ",",
 				Synchronous:   false,
 				Tenant:        NewRSRParsersMustCompile("", utils.InfieldSep),
 				ExportPath:    "/var/spool/cgrates/ees",
@@ -96,7 +95,6 @@ func TestEESClone(t *testing.T) {
 			{
 				ID:            utils.CGRateSLwr,
 				Type:          utils.MetaNone,
-				FieldSep:      ",",
 				Synchronous:   false,
 				Tenant:        NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
 				ExportPath:    "/var/spool/cgrates/ees",
@@ -298,7 +296,6 @@ func TestEventExporterSameID(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
@@ -315,7 +312,6 @@ func TestEventExporterSameID(t *testing.T) {
 			{
 				ID:            "file_exporter1",
 				Type:          utils.MetaFileCSV,
-				FieldSep:      ",",
 				Tenant:        nil,
 				Timezone:      utils.EmptyString,
 				Filters:       []string{},
@@ -387,17 +383,16 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
-				Id:              utils.StringPointer("CSVExporter"),
-				Type:            utils.StringPointer("*file_csv"),
-				Filters:         &[]string{},
-				Attribute_ids:   &[]string{},
-				Flags:           &[]string{"*dryrun"},
-				Export_path:     utils.StringPointer("/tmp/testCSV"),
-				Tenant:          nil,
-				Timezone:        utils.StringPointer("UTC"),
-				Synchronous:     utils.BoolPointer(true),
-				Attempts:        utils.IntPointer(1),
-				Field_separator: utils.StringPointer(","),
+				Id:            utils.StringPointer("CSVExporter"),
+				Type:          utils.StringPointer("*file_csv"),
+				Filters:       &[]string{},
+				Attribute_ids: &[]string{},
+				Flags:         &[]string{"*dryrun"},
+				Export_path:   utils.StringPointer("/tmp/testCSV"),
+				Tenant:        nil,
+				Timezone:      utils.StringPointer("UTC"),
+				Synchronous:   utils.BoolPointer(true),
+				Attempts:      utils.IntPointer(1),
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:   utils.StringPointer(utils.CGRID),
@@ -423,7 +418,6 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
@@ -448,7 +442,6 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Timezone:      "UTC",
 				Synchronous:   true,
 				Attempts:      1,
-				FieldSep:      ",",
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
 				contentFields: []*FCTemplate{
@@ -498,17 +491,16 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
-				Id:              utils.StringPointer("CSVExporter"),
-				Type:            utils.StringPointer("*file_csv"),
-				Filters:         &[]string{},
-				Attribute_ids:   &[]string{},
-				Flags:           &[]string{"*dryrun"},
-				Export_path:     utils.StringPointer("/tmp/testCSV"),
-				Tenant:          nil,
-				Timezone:        utils.StringPointer("UTC"),
-				Synchronous:     utils.BoolPointer(true),
-				Attempts:        utils.IntPointer(1),
-				Field_separator: utils.StringPointer(","),
+				Id:            utils.StringPointer("CSVExporter"),
+				Type:          utils.StringPointer("*file_csv"),
+				Filters:       &[]string{},
+				Attribute_ids: &[]string{},
+				Flags:         &[]string{"*dryrun"},
+				Export_path:   utils.StringPointer("/tmp/testCSV"),
+				Tenant:        nil,
+				Timezone:      utils.StringPointer("UTC"),
+				Synchronous:   utils.BoolPointer(true),
+				Attempts:      utils.IntPointer(1),
 				Fields: &[]*FcTemplateJsonCfg{
 					{
 						Tag:    utils.StringPointer(utils.AnswerTime),
@@ -540,7 +532,6 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				FieldSep:      ",",
 				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
@@ -565,7 +556,6 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Timezone:      "UTC",
 				Synchronous:   true,
 				Attempts:      1,
-				FieldSep:      ",",
 				headerFields:  []*FCTemplate{},
 				trailerFields: []*FCTemplate{},
 				contentFields: []*FCTemplate{
@@ -686,7 +676,6 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.AttributeContextCfg: utils.EmptyString,
 				utils.SynchronousCfg:      false,
 				utils.AttemptsCfg:         1,
-				utils.FieldSepCfg:         ",",
 				utils.FieldsCfg: []map[string]interface{}{
 					{
 						utils.TagCfg:   utils.CGRID,
@@ -713,8 +702,8 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		eMap[utils.ExportersCfg].([]map[string]interface{})[0][utils.FieldsCfg] = nil
 		if !reflect.DeepEqual(rcv[utils.ExportersCfg].([]map[string]interface{})[1],
 			eMap[utils.ExportersCfg].([]map[string]interface{})[0]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[1]),
-				utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[0]))
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.ExportersCfg].([]map[string]interface{})[1]),
+				utils.ToJSON(rcv[utils.ExportersCfg].([]map[string]interface{})[0]))
 		}
 		rcv[utils.ExportersCfg] = nil
 		eMap[utils.ExportersCfg] = nil
