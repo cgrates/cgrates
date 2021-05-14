@@ -28,13 +28,12 @@ import (
 
 // ActionProfile represents the configuration of a Action profile
 type ActionProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval
-	Weight             float64
-	Schedule           string
-	Targets            map[string]utils.StringSet
+	Tenant    string
+	ID        string
+	FilterIDs []string
+	Weight    float64
+	Schedule  string
+	Targets   map[string]utils.StringSet
 
 	Actions []*APAction
 }

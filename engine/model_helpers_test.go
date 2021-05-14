@@ -3797,15 +3797,14 @@ func TestActionProfileMdlsCSVHeader(t *testing.T) {
 func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 	testStruct := ActionProfileMdls{
 		{
-			Tpid:               "test_id",
-			Tenant:             "cgrates.org",
-			ID:                 "RP1",
-			FilterIDs:          "*string:~*req.Subject:1001",
-			ActivationInterval: "2014-07-29T15:00:00Z",
-			Weight:             1,
-			Schedule:           "test_schedule",
-			ActionID:           "test_action_id",
-			ActionFilterIDs:    "test_action_filter_ids",
+			Tpid:            "test_id",
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       "*string:~*req.Subject:1001;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
+			Weight:          1,
+			Schedule:        "test_schedule",
+			ActionID:        "test_action_id",
+			ActionFilterIDs: "test_action_filter_ids",
 		},
 	}
 	expStruct := []*utils.TPActionProfile{
@@ -3813,12 +3812,9 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 			TPid:      "test_id",
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			Weight:   1,
-			Schedule: "test_schedule",
+			FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			Weight:    1,
+			Schedule:  "test_schedule",
 			Actions: []*utils.TPAPAction{
 				{
 					ID:        "test_action_id",
@@ -3837,17 +3833,16 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 	testStruct := ActionProfileMdls{
 		{
-			Tpid:               "test_id",
-			Tenant:             "cgrates.org",
-			ID:                 "RP1",
-			FilterIDs:          "*string:~*req.Subject:1001",
-			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
-			Weight:             1,
-			Schedule:           "test_schedule",
-			TargetType:         utils.MetaAccounts,
-			TargetIDs:          "test_account_id1;test_account_id2",
-			ActionID:           "test_action_id",
-			ActionFilterIDs:    "test_action_filter_ids",
+			Tpid:            "test_id",
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       "*string:~*req.Subject:1001;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
+			Weight:          1,
+			Schedule:        "test_schedule",
+			TargetType:      utils.MetaAccounts,
+			TargetIDs:       "test_account_id1;test_account_id2",
+			ActionID:        "test_action_id",
+			ActionFilterIDs: "test_action_filter_ids",
 		},
 	}
 	expStruct := []*utils.TPActionProfile{
@@ -3855,13 +3850,9 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			TPid:      "test_id",
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "2014-08-29T15:00:00Z",
-			},
-			Weight:   1,
-			Schedule: "test_schedule",
+			FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
+			Weight:    1,
+			Schedule:  "test_schedule",
 			Targets: []*utils.TPActionTarget{
 				&utils.TPActionTarget{
 					TargetType: utils.MetaAccounts,
@@ -3901,13 +3892,9 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 		TPid:      "test_id",
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-08-29T15:00:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{{
 			TargetType: utils.MetaAccounts,
 			TargetIDs:  []string{"test_account_id1", "test_account_id2"},
@@ -3922,17 +3909,16 @@ func TestAPItoModelTPActionProfileTPActionProfile(t *testing.T) {
 	}
 
 	expStruct := ActionProfileMdls{{
-		Tpid:               "test_id",
-		Tenant:             "cgrates.org",
-		ID:                 "RP1",
-		FilterIDs:          "*string:~*req.Subject:1001;*string:~*req.Subject:1002",
-		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
-		Weight:             1,
-		Schedule:           "test_schedule",
-		TargetType:         utils.MetaAccounts,
-		TargetIDs:          "test_account_id1;test_account_id2",
-		ActionID:           "test_action_id",
-		ActionFilterIDs:    "test_action_filter_id1;test_action_filter_id2",
+		Tpid:            "test_id",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       "*string:~*req.Subject:1001;*string:~*req.Subject:1002;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
+		Weight:          1,
+		Schedule:        "test_schedule",
+		TargetType:      utils.MetaAccounts,
+		TargetIDs:       "test_account_id1;test_account_id2",
+		ActionID:        "test_action_id",
+		ActionFilterIDs: "test_action_filter_id1;test_action_filter_id2",
 	}}
 	result := APItoModelTPActionProfile(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
@@ -3944,13 +3930,9 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 	testStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,
@@ -3976,13 +3958,9 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 	expStruct := &ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z", "*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts:  utils.NewStringSet([]string{"test_account_id1", "test_account_id2"}),
 			utils.MetaResources: utils.NewStringSet([]string{"test_ID1", "test_ID2"}),
@@ -4009,45 +3987,13 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 
 }
 
-func TestModelHelpersAPItoActionProfileError1(t *testing.T) {
-	testStruct := &utils.TPActionProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-			ExpiryTime:     "cat",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
-		Actions: []*utils.TPAPAction{
-			{
-				ID:        "test_action_id",
-				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
-				}},
-			},
-		},
-	}
-
-	_, err := APItoActionProfile(testStruct, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
-	}
-}
-
 func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
 	testStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -4070,13 +4016,9 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 	testStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -4099,13 +4041,9 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 	testStruct := &ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Actions: []*APAction{
 			{
 				ID:        "test_action_id",
@@ -4123,14 +4061,10 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 	expStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
-		Targets:  []*utils.TPActionTarget{},
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
+		Targets:   []*utils.TPActionTarget{},
 		Actions: []*utils.TPAPAction{
 			{
 				ID:        "test_action_id",
@@ -5266,13 +5200,9 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 	testStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,
@@ -5294,13 +5224,9 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 	expStruct := &utils.TPActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weight:   1,
-		Schedule: "test_schedule",
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weight:    1,
+		Schedule:  "test_schedule",
 		Targets: []*utils.TPActionTarget{
 			&utils.TPActionTarget{
 				TargetType: utils.MetaAccounts,

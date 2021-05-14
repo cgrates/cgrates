@@ -2404,70 +2404,65 @@ func TestLoaderActionProfile(t *testing.T) {
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActivationInterval",
-				Path:   "ActivationInterval",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-				Layout: time.RFC3339},
 			{Tag: "Weight",
 				Path:   "Weight",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "Schedule",
 				Path:   "Schedule",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "TargetType",
 				Path:   "TargetType",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "TargetIDs",
 				Path:   "TargetIDs",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionID",
 				Path:   "ActionID",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionFilterIDs",
 				Path:   "ActionFilterIDs",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionBlocker",
 				Path:   "ActionBlocker",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionTTL",
 				Path:   "ActionTTL",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionType",
 				Path:   "ActionType",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionOpts",
 				Path:   "ActionOpts",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionPath",
 				Path:   "ActionPath",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionValue",
 				Path:   "ActionValue",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep),
 				Layout: time.RFC3339},
 		},
 	}
@@ -2594,77 +2589,72 @@ func TestLoaderWrongCsv(t *testing.T) {
 				Type:   utils.MetaVariable,
 				Value:  config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
 				Layout: time.RFC3339},
-			{Tag: "ActivationInterval",
-				Path:   "ActivationInterval",
-				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
-				Layout: time.RFC3339},
 			{Tag: "Weight",
 				Path:   "Weight",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "Schedule",
 				Path:   "Schedule",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "AccountIDs",
 				Path:   "AccountIDs",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionID",
 				Path:   "ActionID",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionFilterIDs",
 				Path:   "ActionFilterIDs",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionBlocker",
 				Path:   "ActionBlocker",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionTTL",
 				Path:   "ActionTTL",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionType",
 				Path:   "ActionType",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionOpts",
 				Path:   "ActionOpts",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionPath",
 				Path:   "ActionPath",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
 				Layout: time.RFC3339},
 			{Tag: "ActionValue",
 				Path:   "ActionValue",
 				Type:   utils.MetaVariable,
-				Value:  config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep),
+				Value:  config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep),
 				Layout: time.RFC3339},
 		},
 	}
 
 	//Not a valid comment beginning of csv
 	newCSVContentMiss := `
-//Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBLocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
+//Tenant,ID,FilterIDs,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionBLocker,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
 `
 
 	rdr := io.NopCloser(strings.NewReader(newCSVContentMiss))
@@ -2685,12 +2675,12 @@ cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.
 
 	//Missing fields in csv eg:ActionBLocker
 	newCSVContent := `
-//Tenant,ID,FilterIDs,ActivationInterval,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
+//Tenant,ID,FilterIDs,Weight,Schedule,AccountIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
+cgrates.org,ONE_TIME_ACT,,10,*asap,1001;1002,TOPUP,,false,0s,*add_balance,,*balance.TestBalance.Value,10
+cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_DATA,,false,0s,*set_balance,,*balance.TestDataBalance.Type,*data
+cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_DATA,,false,0s,*add_balance,,*balance.TestDataBalance.Value,1024
+cgrates.org,ONE_TIME_ACT,,,,,SET_BALANCE_TEST_VOICE,,false,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
+cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
 `
 	rdr = io.NopCloser(strings.NewReader(newCSVContent))
 	csvRdr = csv.NewReader(rdr)
@@ -2751,42 +2741,6 @@ cgrates.org,12,NOT_A_BOOLEAN
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expErr := `strconv.ParseBool: parsing "NOT_A_BOOLEAN": invalid syntax`
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+v, received %+v", expErr, err)
-	}
-}
-
-func TestLoaderActionProfileAsStructErrTConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoaderActionProfileAsStructErrType",
-		bufLoaderData: map[string][]LoaderData{},
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaActionProfiles: {
-			{Tag: "ActivationInterval",
-				Path:      "ActivationInterval",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true,
-				Layout:    time.RFC3339},
-		},
-	}
-	actPrfCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(actPrfCsv))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
-				rdr: rdr, csvRdr: csvRdr}},
-	}
-	expErr := `Unsupported time format`
 	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
 		t.Errorf("Expected %+v, received %+v", expErr, err)
 	}
