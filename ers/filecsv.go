@@ -131,12 +131,22 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 		return
 	}
 	defer file.Close()
-	var csvReader *csv.Reader
-	if csvReader, err = newCSVReader(file, rdr.Config().Opts, utils.CSV); err != nil {
+	csvReader := csv.NewReader(file)
+	var rowLength int64
+	if rowLength, err = utils.IfaceAsTInt64(rdr.Config().Opts[utils.CSVRowLengthOpt]); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> failed creating CSV reader for <%s>, due to option parsing error: <%s>",
 				utils.ERs, rdr.Config().ID, err.Error()))
 		return
+	}
+	csvReader.FieldsPerRecord = int(rowLength)
+	csvReader.Comment = utils.CommentChar
+	csvReader.Comma = utils.CSVSep
+	if fieldSep, has := rdr.Config().Opts[utils.CSVFieldSepOpt]; has {
+		csvReader.Comma = rune(utils.IfaceAsString(fieldSep)[0])
+	}
+	if val, has := rdr.Config().Opts[utils.CSVLazyQuotes]; has {
+		csvReader.LazyQuotes, err = utils.IfaceAsBool(val)
 	}
 	var indxAls map[string]int
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
@@ -188,7 +198,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 		}
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		rdrEv := rdr.rdrEvents
-		if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 			rdrEv = rdr.partialEvents
 		}
 		rdrEv <- &erEvent{

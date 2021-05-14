@@ -93,8 +93,12 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 // Clone returns a deep copy of ERsCfg
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
-		Enabled: erS.Enabled,
-		Readers: make([]*EventReaderCfg, len(erS.Readers)),
+		Enabled:            erS.Enabled,
+		SessionSConns:      make([]string, len(erS.SessionSConns)),
+		Readers:            make([]*EventReaderCfg, len(erS.Readers)),
+		PartialCacheTTL:    erS.PartialCacheTTL,
+		PartialCacheAction: erS.PartialCacheAction,
+		PartialPath:        erS.PartialPath,
 	}
 	if erS.SessionSConns != nil {
 		cln.SessionSConns = utils.CloneStringSlice(erS.SessionSConns)
@@ -108,7 +112,13 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg: erS.Enabled,
+		utils.EnabledCfg:            erS.Enabled,
+		utils.PartialCacheTTLCfg:    "0",
+		utils.PartialCacheActionCfg: erS.PartialCacheAction,
+		utils.PartialPathCfg:        erS.PartialPath,
+	}
+	if erS.PartialCacheTTL != 0 {
+		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
 	}
 	if erS.SessionSConns != nil {
 		initialMP[utils.SessionSConnsCfg] = getInternalJSONConns(erS.SessionSConns)

@@ -65,10 +65,7 @@ func (fCsv *FileCSVee) init() (err error) {
 	}
 	fCsv.csvWriter = csv.NewWriter(fCsv.file)
 	fCsv.csvWriter.Comma = utils.CSVSep
-	if len(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].FieldSep) > 0 {
-		fCsv.csvWriter.Comma = rune(fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].FieldSep[0])
-	}
-	if fieldSep, has := fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Opts[utils.CSV+utils.FieldSepOpt]; has {
+	if fieldSep, has := fCsv.cgrCfg.EEsCfg().Exporters[fCsv.cfgIdx].Opts[utils.CSVFieldSepOpt]; has {
 		fCsv.csvWriter.Comma = rune(utils.IfaceAsString(fieldSep)[0])
 	}
 	return fCsv.composeHeader()

@@ -76,9 +76,11 @@
 },
 
 
+
 "ers": {
 	"enabled": true,
 	"sessions_conns": ["*internal"],
+	"partial_cache_ttl": "500ms",
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -264,10 +266,11 @@
 			"type": "*file_csv",
 			"source_path": "/tmp/partErs1/in",
 			"flags": ["*cdrs"],
-			"processed_path": "/tmp/partErs1/out",
+			"processed_path": "",
 			"opts": {
-				"csvCacheExpiryAction": "*dump_to_file",
+				"partialCacheAction": "*dump_to_file",
 				"partialOrderField": "~*req.AnswerTime",
+				"partialPath": "/tmp/partErs1/out",
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -287,8 +290,8 @@
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
 				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},// keep this here for partial cdr field 
-				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
-				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]},
 			],
 			"cache_dump_fields": [
 				{"tag": "OriginID", "path":"*exp.OriginID", "type": "*variable", "value": "~*req.OriginID"},
@@ -299,7 +302,6 @@
 				{"tag": "SetupTime", "path":"*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
 				{"tag": "AnswerTime", "path":"*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
 				{"tag": "Usage", "path":"*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
-				{"tag": "Cost", "path":"*exp.Cost", "type": "*variable", "value": "~*req.Cost","rounding_decimals":5},
 			],
 		},
 		{
@@ -308,11 +310,12 @@
 			"run_delay":  "-1",
 			"type": "*file_csv",
 			"source_path": "/tmp/partErs2/in",
-			"processed_path": "/tmp/partErs2/out",
+			"processed_path": "",
 			"flags": ["*cdrs"],
 			"opts": {
-				"csvCacheExpiryAction": "*post_cdr",
+				"partialCacheAction": "*post_cdr",
 				"partialOrderField": "~*req.AnswerTime",
+				"partialPath": "/tmp/partErs2/out",
 			},
 			"fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
@@ -332,39 +335,63 @@
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4", "mandatory": true},
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
 				{"tag": "Partial", "path": "*cgreq.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},// keep this here for partial cdr field 
-				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
-				{"tag": "Partial", "path": "*opts.Partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]}
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false", "filters":["*notstring:~*req.10:partial"]}
 			],
 		},
 		{
 			"id": "FlatstoreOsips",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*flatstore",
+			"type": "*file_csv",
 			"opts": {
-				"fstFieldSeparator":"|",
-				"fstFailedCallsPrefix": "missed_calls",
-				"fstRecordCacheTTL": "500ms",
+				"csvFieldSeparator":"|",
+				"partialcsvFieldSeparator": "|",
+				"partialCacheAction": "*dump_to_file",
+				"partialOrderField": "~*opts.order",
+				"partialPath": "/tmp/flatstoreErs/out",
 			},
 			"source_path": "/tmp/flatstoreErs/in",
 			"processed_path": "/tmp/flatstoreErs/out",
 			"flags": ["*cdrs"],
 			"fields":[
-				{"tag": "Tor", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
+				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStore", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
-				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*invite.7", "mandatory": true},
-				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*constant", "value": "cgrates.org", "mandatory": true},
-				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call", "mandatory": true},
-				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*invite.8", "mandatory": true},
-				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*invite.8", "mandatory": true},
-				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*invite.9", "mandatory": true},
-				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*invite.6", "mandatory": true},
-				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*invite.6", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.FileName:missed_calls"]},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference","value": "~*bye.6;~*invite.6", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls"]}, 
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.7", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.8", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.8", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.9", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.6", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.6", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
+				{"tag": "EndTime", "path": "*cgreq.EndTime", "type": "*variable","value": "~*req.6", "mandatory": true, "filters": ["*string:~*req.0:BYE"]}, 
 				{"tag": "DisconnectCause", "path": "*cgreq.DisconnectCause", "type": "*variable", "value": "~*req.4; ;~*req.5", "mandatory": true},
-				{"tag": "DialogId", "path": "*cgreq.DialogId", "type": "*variable", "value": "~*req.11"}
+				{"tag": "DialogId", "path": "*cgreq.DialogId", "type": "*variable", "value": "~*req.11"},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "true"},
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*prefix:~*vars.FileName:missed_calls"]},
+				{"tag": "Invite", "path": "*opts.invite", "type": "*constant", "value": "true", "filters":["*string:~*req.0:INVITE"]},
+				{"tag": "Bye", "path": "*opts.bye", "type": "*constant", "value": "true", "filters":["*string:~*req.0:BYE"]},
+				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "0", "filters":["*string:~*req.0:INVITE"]},
+				{"tag": "Order", "path": "*opts.order", "type": "*constant", "value": "1", "filters":["*string:~*req.0:BYE"]},
 			],
+			"partial_commit_fields": [
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.FileName:missed_calls"]},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:"]}, 
+				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:"]},
+			],
+			"cache_dump_fields": [
+				{"tag": "OriginHost",		"path": "*exp.OriginHost", 		"type": "*variable", "value":"~*req.OriginHost"},
+				{"tag": "OriginID",			"path": "*exp.OriginID", 		"type": "*variable", "value":"~*req.OriginID"},
+				{"tag": "RequestType",		"path": "*exp.RequestType", 	"type": "*variable", "value":"~*req.RequestType"},
+				{"tag": "Account",			"path": "*exp.Account", 		"type": "*variable", "value":"~*req.Account"},
+				{"tag": "Subject",			"path": "*exp.Subject", 		"type": "*variable", "value":"~*req.Subject"},
+				{"tag": "Destination",		"path": "*exp.Destination", 	"type": "*variable", "value":"~*req.Destination"},
+				{"tag": "SetupTime",		"path": "*exp.SetupTime", 		"type": "*variable", "value":"~*req.SetupTime"},
+				{"tag": "AnswerTime",		"path": "*exp.AnswerTime", 		"type": "*variable", "value":"~*req.AnswerTime"},
+				{"tag": "EndTime",			"path": "*exp.EndTime", 		"type": "*variable", "value":"~*req.EndTime"},
+				{"tag": "DisconnectCause",	"path": "*exp.DisconnectCause", "type": "*variable", "value":"~*req.DisconnectCause"},
+				{"tag": "DialogId",			"path": "*exp.DialogId", 		"type": "*variable", "value":"~*req.DialogId"},
+			],
+
 		},
 		{
 			"id": "JSONReader",
@@ -400,7 +427,7 @@
 				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2"},
 			],
 		}
-	]
+	],
 },
 
 
