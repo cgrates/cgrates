@@ -114,36 +114,37 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
-	prflIDs, err := engine.MatchingItemIDsForEvent(evNm,
+	var prflIDs utils.StringSet
+	if prflIDs, err = engine.MatchingItemIDsForEvent(evNm,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.cfg.DispatcherSCfg().SuffixIndexedFields,
 		dS.dm, utils.CacheDispatcherFilterIndexes, idxKeyPrfx,
 		dS.cfg.DispatcherSCfg().IndexedSelects,
 		dS.cfg.DispatcherSCfg().NestedFields,
-	)
-	if err != nil &&
+	); err != nil &&
 		err != utils.ErrNotFound {
-		return nil, err
+		return
 	}
 	if err == utils.ErrNotFound ||
 		dS.cfg.DispatcherSCfg().AnySubsystem {
-		dPrflAnyIDs, err := engine.MatchingItemIDsForEvent(evNm,
+		var dPrflAnyIDs utils.StringSet
+		if dPrflAnyIDs, err = engine.MatchingItemIDsForEvent(evNm,
 			dS.cfg.DispatcherSCfg().StringIndexedFields,
 			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 			dS.cfg.DispatcherSCfg().SuffixIndexedFields,
 			dS.dm, utils.CacheDispatcherFilterIndexes, anyIdxPrfx,
 			dS.cfg.DispatcherSCfg().IndexedSelects,
 			dS.cfg.DispatcherSCfg().NestedFields,
-		)
-		if prflIDs.Size() == 0 {
+		); prflIDs.Size() == 0 {
 			if err != nil { // return the error if no dispatcher matched the needed subsystem
-				return nil, err
+				return
 			}
 			prflIDs = dPrflAnyIDs
 		} else if err == nil && dPrflAnyIDs.Size() != 0 {
 			prflIDs = utils.JoinStringSet(prflIDs, dPrflAnyIDs)
 		}
+		err = nil // make sure we ignore the error from *any subsystem matching
 	}
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(tnt, prflID, true, true, utils.NonTransactional)
@@ -153,12 +154,11 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 			}
 			continue
 		}
-		if !(len(prfl.Subsystems) == 1 && prfl.Subsystems[0] == utils.MetaAny) &&
-			!utils.IsSliceMember(prfl.Subsystems, subsys) {
-			continue
-		}
-		if prfl.ActivationInterval != nil && ev.Time != nil &&
-			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
+
+		if ((len(prfl.Subsystems) != 1 || prfl.Subsystems[0] != utils.MetaAny) &&
+			!utils.IsSliceMember(prfl.Subsystems, subsys)) ||
+			(prfl.ActivationInterval != nil && ev.Time != nil &&
+				!prfl.ActivationInterval.IsActiveAtTime(*ev.Time)) { // not active
 			continue
 		}
 		if pass, err := dS.fltrS.Pass(tnt, prfl.FilterIDs,
@@ -172,7 +172,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		}
 	}
 	if dPrlf == nil {
-		return nil, utils.ErrNotFound
+		err = utils.ErrNotFound
 	}
 	return
 }

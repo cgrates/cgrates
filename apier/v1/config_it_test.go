@@ -375,7 +375,6 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		"attribute_context": "",
 		"attribute_ids":     []interface{}{},
 		"export_path":       "/var/spool/cgrates/ees",
-		"field_separator":   ",",
 		"fields":            []interface{}{},
 		"filters":           []interface{}{},
 		"flags":             []interface{}{},

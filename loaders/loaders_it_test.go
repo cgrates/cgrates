@@ -58,6 +58,7 @@ func TestITLoaders(t *testing.T) {
 }
 
 func testV1LoadResource(t *testing.T) {
+	utils.Logger.SetLogLevel(7)
 	flPath := "/tmp/testV1LoadResource"
 	if err := os.MkdirAll(flPath, 0777); err != nil {
 		t.Error(err)
@@ -66,10 +67,21 @@ func testV1LoadResource(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	file.Write([]byte(`
-#Tenant[0],ID[1]
+	if _, err := file.Write([]byte(`#Tenant[0],ID[1]
 cgrates.org,NewRes1
-`))
+`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	file, err = os.Create(path.Join(flPath, "res.lck"))
+	if err != nil {
+		t.Error(err)
+	}
 	file.Close()
 
 	data := engine.NewInternalDB(nil, nil, true)
@@ -81,7 +93,7 @@ cgrates.org,NewRes1
 		FieldSeparator: utils.FieldsSep,
 		TpInDir:        flPath,
 		TpOutDir:       "/tmp",
-		LockFileName:   utils.ResourcesCsv,
+		LockFileName:   "res.lck",
 		Data:           nil,
 	}
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
@@ -100,10 +112,9 @@ cgrates.org,NewRes1
 		},
 	}
 
-	resCsv := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
+	resCsv := `#Tenant[0],ID[1]
+	cgrates.org,NewRes1
+	`
 	rdr := io.NopCloser(strings.NewReader(resCsv))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
@@ -133,8 +144,10 @@ cgrates.org,NewRes1
 	}
 
 	expRes := &engine.ResourceProfile{
-		Tenant: "cgrates.org",
-		ID:     "NewRes1",
+		Tenant:       "cgrates.org",
+		ID:           "NewRes1",
+		FilterIDs:    make([]string, 0),
+		ThresholdIDs: make([]string, 0),
 	}
 
 	if rcv, err := ldrs.ldrs["testV1LoadResource"].dm.GetResourceProfile(expRes.Tenant, expRes.ID,
@@ -144,7 +157,7 @@ cgrates.org,NewRes1
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRes), utils.ToJSON(rcv))
 	}
 
-	if err := os.Remove(flPath); err != nil {
+	if err := os.RemoveAll(flPath); err != nil {
 		t.Error(err)
 	}
 }
