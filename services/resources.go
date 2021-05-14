@@ -111,7 +111,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 	reS.reS.Shutdown() //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	// reS.rpc = nil
-	<-reS.connChan
+	//<-reS.connChan
 	return
 }
 

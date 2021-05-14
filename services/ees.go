@@ -95,8 +95,8 @@ func (es *EventExporterService) Shutdown() (err error) {
 	defer es.Unlock()
 	close(es.stopChan)
 	es.eeS.Shutdown()
-	es.eeS = nil
-	<-es.intConnChan
+	//es.eeS = nil
+	//<-es.intConnChan
 	return
 }
 

@@ -44,7 +44,6 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplResource,
 	testDspRplResourceProfile,
 	testDspRplTiming,
-	testDspRplDestination,
 	testDspRplRateProfile,
 	testDspRplAccount,
 	testDspRplActionProfile,
@@ -892,61 +891,6 @@ func testDspRplTiming(t *testing.T) {
 
 	// Get Timing
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
-	}
-}
-
-//Destination
-func testDspRplDestination(t *testing.T) {
-	// Set Destination
-	var replyStr string
-	setDestination := &engine.DestinationWithAPIOpts{
-		Destination: &engine.Destination{
-			ID: "idDestination"},
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "repl12345",
-		},
-	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetDestination, setDestination, &replyStr); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.SetDestination: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-	// Get Destination
-	var reply engine.Destination
-	argsDestination := &utils.StringWithAPIOpts{
-		Arg:    "idDestination",
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "repl12345",
-		},
-	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.GetDestination: ", err)
-	} else if reply.ID != setDestination.ID {
-		t.Errorf("Expecting: %+v, received: %+v", setDestination.ID, reply.ID)
-	}
-	// Stop engine 1
-	allEngine.stopEngine(t)
-
-	// Get Destination
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
-	}
-
-	// Start engine 1
-	allEngine.startEngine(t)
-
-	// Remove Destination
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveDestination, argsDestination, &replyStr); err != nil {
-		t.Error(err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-
-	// Get Destination
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetDestination, argsDestination, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }

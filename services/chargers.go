@@ -104,7 +104,7 @@ func (chrS *ChargerService) Shutdown() (err error) {
 	chrS.chrS.Shutdown()
 	chrS.chrS = nil
 	// chrS.rpc = nil
-	<-chrS.connChan
+	//<-chrS.connChan
 	return
 }
 
