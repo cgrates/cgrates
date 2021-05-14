@@ -528,6 +528,16 @@ func TestDifference(t *testing.T) {
 
 }
 
+func TestDifferenceTime(t *testing.T) {
+	if diff, err := Difference("", time.Date(2009, 11, 10, 23, 10, 0, 0, time.UTC),
+		time.Date(2009, 11, 10, 23, 13, 0, 0, time.UTC), 10*time.Second); err != nil {
+		t.Error(err)
+	} else if diff != -3*time.Minute+0*time.Second {
+		t.Errorf("Expected %v but received %v %T", "-3m0s", diff, diff)
+	}
+
+}
+
 func TestMultiply(t *testing.T) {
 	if _, err := Multiply(10); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
@@ -1383,5 +1393,89 @@ func TestReflectFieldMethodInterfaceInvalidField(t *testing.T) {
 	_, err := ReflectFieldMethodInterface(obj, "NotExistingField")
 	if err == nil || err != ErrNotFound {
 		t.Errorf("Expected %v but received %v", ErrNotFound, err)
+	}
+}
+
+type Object struct{}
+
+func (obj *Object) TestFunc1() string {
+	return "test"
+}
+
+func (obj *Object) TestFunc2() (string, string, error) {
+	return "test1", "test2", nil
+}
+
+func (obj *Object) TestFunc3(str string) {}
+
+func (obj *Object) TestFunc4() (string, error) {
+	return "test1", nil
+}
+
+func (obj *Object) TestFunc5() (error, string) {
+	return nil, "test1"
+}
+func (obj *Object) TestFunc6() (string, error) {
+	return "test1", ErrNotFound
+}
+
+func TestReflectFieldMethodInterfaceInvalidFieldMethod1(t *testing.T) {
+	myObj := new(Object)
+	rcv, err := ReflectFieldMethodInterface(myObj, "TestFunc1")
+	if err != nil {
+		t.Error(err)
+	}
+	exp := "test"
+	if rcv != exp {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestReflectFieldMethodInterfaceInvalidFieldMethod2(t *testing.T) {
+	myObj := new(Object)
+	_, err := ReflectFieldMethodInterface(myObj, "TestFunc2")
+	exp := "invalid function called"
+	if err == nil || err.Error() != exp {
+		t.Errorf("Expected %v but received %v", exp, err)
+	}
+
+}
+
+func TestReflectFieldMethodInterfaceInvalidFieldMethod3(t *testing.T) {
+	myObj := new(Object)
+	_, err := ReflectFieldMethodInterface(myObj, "TestFunc3")
+	exp := "invalid function called"
+	if err == nil || err.Error() != exp {
+		t.Errorf("Expected %v but received %v", exp, err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceInvalidFieldMethod4(t *testing.T) {
+	myObj := new(Object)
+	rcv, err := ReflectFieldMethodInterface(myObj, "TestFunc4")
+	if err != nil {
+		t.Error(err)
+	}
+	exp := "test1"
+	if rcv != exp {
+		t.Errorf("Expected %v but received %v", exp, rcv)
+	}
+}
+
+func TestReflectFieldMethodInterfaceInvalidFieldMethod5(t *testing.T) {
+	myObj := new(Object)
+	_, err := ReflectFieldMethodInterface(myObj, "TestFunc5")
+	exp := "invalid function called"
+	if err == nil || err.Error() != exp {
+		t.Errorf("Expected %v but received %v", exp, err)
+	}
+}
+
+func TestReflectFieldMethodInterfaceInvalidFieldMethod6(t *testing.T) {
+	myObj := new(Object)
+	_, err := ReflectFieldMethodInterface(myObj, "TestFunc6")
+	exp := ErrNotFound
+	if err == nil || err != exp {
+		t.Errorf("Expected %v but received %v", exp, err)
 	}
 }

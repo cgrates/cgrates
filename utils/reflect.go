@@ -488,14 +488,10 @@ func Difference(tm string, items ...interface{}) (diff interface{}, err error) {
 		diff = d
 	case time.Time:
 		d := dt
-		for i, item := range items[1:] {
+		for _, item := range items[1:] {
 			if itmVal, err := IfaceAsTime(item, tm); err == nil {
 				diff = d.Sub(itmVal)
-				if len(items) == i+1 {
-					return diff, nil
-				}
-				items[i] = diff
-				return Difference(tm, items[i:]...)
+				return diff, nil
 			}
 
 			if itmVal, err := IfaceAsDuration(item); err != nil {
