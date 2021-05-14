@@ -114,7 +114,7 @@ func (sts *StatService) Shutdown() (err error) {
 	sts.sts.Shutdown()
 	sts.sts = nil
 	// sts.rpc = nil
-	<-sts.connChan
+	//<-sts.connChan
 	return
 }
 

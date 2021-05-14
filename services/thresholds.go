@@ -110,7 +110,7 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	thrs.thrs.Shutdown()
 	thrs.thrs = nil
 	// thrs.rpc = nil
-	<-thrs.connChan
+	//<-thrs.connChan
 	return
 }
 

@@ -107,7 +107,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.MetaCronExp: {
+			utils.CacheTimings: {
 				Replicate: false,
 				Remote:    false},
 			utils.MetaResourceProfile: {

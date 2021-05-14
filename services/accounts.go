@@ -115,7 +115,7 @@ func (acts *AccountService) Shutdown() (err error) {
 	acts.acts.Shutdown()
 	acts.acts = nil
 	// acts.rpc = nil
-	<-acts.connChan
+	//<-acts.connChan
 	acts.Unlock()
 	return
 }

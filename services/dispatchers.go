@@ -160,7 +160,7 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	// dspS.rpc = nil
-	<-dspS.connChan
+	//<-dspS.connChan
 	return
 }
 
