@@ -64,8 +64,8 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Tag: "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 			{Tag: "AttributeFilterIDs",
@@ -88,10 +88,6 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
@@ -277,8 +273,8 @@ func TestLoaderProcessResource(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Tag: "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "TTL",
@@ -301,14 +297,10 @@ func TestLoaderProcessResource(t *testing.T) {
 				Path:  "Stored",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 			{Tag: "Thresholds",
 				Path:  "Thresholds",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
@@ -328,7 +320,7 @@ func TestLoaderProcessResource(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		UsageTTL:          time.Second,
 		AllocationMessage: "call",
-		Weight:            0,
+		Weight:            10,
 		Limit:             2,
 		Blocker:           true,
 		Stored:            true,
@@ -340,7 +332,7 @@ func TestLoaderProcessResource(t *testing.T) {
 		FilterIDs:         []string{"*string:~*req.Account:dan"},
 		UsageTTL:          3600 * time.Second,
 		AllocationMessage: "premium_call",
-		Weight:            0,
+		Weight:            10,
 		Limit:             2,
 		Blocker:           true,
 		Stored:            true,
@@ -841,8 +833,8 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Tag: "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "Sorting",
@@ -889,10 +881,6 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Path:  "RouteParameters",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
@@ -949,7 +937,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				RouteParameters: utils.EmptyString,
 			},
 		},
-		Weight: 0,
+		Weight: 20,
 	}
 	sort.Slice(eSp.Routes, func(i, j int) bool {
 		return strings.Compare(eSp.Routes[i].ID+strings.Join(eSp.Routes[i].FilterIDs, utils.ConcatenatedKeySep),
@@ -1068,8 +1056,8 @@ func TestLoaderProcessChargers(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Tag: "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "RunID",
@@ -1080,10 +1068,6 @@ func TestLoaderProcessChargers(t *testing.T) {
 				Path:  "AttributeIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
@@ -1106,7 +1090,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		RunID:        "*rated",
 		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-		Weight:       0,
+		Weight:       20,
 	}
 
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charger1",
@@ -1169,8 +1153,8 @@ func TestLoaderProcessDispatches(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep),
 			},
 			{
-				Tag:   "ActivationInterval",
-				Path:  "ActivationInterval",
+				Tag:   "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep),
 			},
@@ -1216,12 +1200,6 @@ func TestLoaderProcessDispatches(t *testing.T) {
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep),
 			},
-			{
-				Tag:   "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep),
-			},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
@@ -1249,7 +1227,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		StrategyParams: map[string]interface{}{},
 		Strategy:       "*first",
-		Weight:         0,
+		Weight:         20,
 		Hosts: engine.DispatcherHostProfiles{
 			&engine.DispatcherHostProfile{
 				ID:        "C1",
@@ -1523,66 +1501,62 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "Weights",
 				Path:  "Weights",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "MinCost",
 				Path:  "MinCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 			{Tag: "MaxCost",
 				Path:  "MaxCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 			{Tag: "MaxCostStrategy",
 				Path:  "MaxCostStrategy",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 			{Tag: "RateID",
 				Path:  "RateID",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
 			{Tag: "RateFilterIDs",
 				Path:  "RateFilterIDs",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "RateActivationTimes",
 				Path:  "RateActivationTimes",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 			{Tag: "RateWeights",
 				Path:  "RateWeights",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 			{Tag: "RateBlocker",
 				Path:  "RateBlocker",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
 			{Tag: "RateIntervalStart",
 				Path:  "RateIntervalStart",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 			{Tag: "RateFixedFee",
 				Path:  "RateFixedFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
 			{Tag: "RateRecurrentFee",
 				Path:  "RateRecurrentFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
 			{Tag: "RateUnit",
 				Path:  "RateUnit",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 			{Tag: "RateIncrement",
 				Path:  "RateIncrement",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.RateProfileCSVContent))
@@ -1735,77 +1709,73 @@ func TestLoaderProcessRateProfileRates(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "Weights",
 				Path:  "Weights",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "MinCost",
 				Path:  "MinCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 			{Tag: "MaxCost",
 				Path:  "MaxCost",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 			{Tag: "MaxCostStrategy",
 				Path:  "MaxCostStrategy",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 			{Tag: "RateID",
 				Path:  "RateID",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
 			{Tag: "RateFilterIDs",
 				Path:  "RateFilterIDs",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "RateActivationTimes",
 				Path:  "RateActivationTimes",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 			{Tag: "RateWeights",
 				Path:  "RateWeights",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 			{Tag: "RateBlocker",
 				Path:  "RateBlocker",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
 			{Tag: "RateIntervalStart",
 				Path:  "RateIntervalStart",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 			{Tag: "RateFixedFee",
 				Path:  "RateFixedFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.13", utils.InfieldSep)},
 			{Tag: "RateRecurrentFee",
 				Path:  "RateRecurrentFee",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.14", utils.InfieldSep)},
 			{Tag: "RateUnit",
 				Path:  "RateUnit",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 			{Tag: "RateIncrement",
 				Path:  "RateIncrement",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.17", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.16", utils.InfieldSep)},
 		},
 	}
 	ratePrfCnt1 := `
-#Tenant,ID,FilterIDs,ActivationInterval,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP1,*string:~*req.Subject:1001,,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0.4,0.12,1m,1m
-cgrates.org,RP1,,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
+#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP1,*string:~*req.Subject:1001,;0,0.1,0.6,*free,RT_WEEK,,"* * * * 1-5",;0,false,0s,0.4,0.12,1m,1m
+cgrates.org,RP1,,,,,,RT_WEEK,,,,,1m,,0.06,1m,1s
 `
 	ratePrfCnt2 := `
-#Tenant,ID,FilterIDs,ActivationInterval,Weights,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeights,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
-cgrates.org,RP1,,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,,0.06,1m,1s
-cgrates.org,RP1,,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
+#Tenant,ID,FilterIDs,Weights,RoundingMethod,RoundingDecimals,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationTimes,RateWeights,RateBlocker,RateIntervalStart,RateValue,RateUnit,RateIncrement
+cgrates.org,RP1,,,,,,RT_WEEKEND,,"* * * * 0,6",;10,false,0s,,0.06,1m,1s
+cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 `
 	rdr1 := io.NopCloser(strings.NewReader(ratePrfCnt1))
 	csvRdr1 := csv.NewReader(rdr1)
@@ -3337,44 +3307,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadRateProfilesAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadRateProfilesAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaRateProfiles: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaRateProfiles: {
-			utils.RateProfilesCsv: &openedCSVFile{
-				fileName: utils.RateProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

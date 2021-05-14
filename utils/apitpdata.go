@@ -899,16 +899,15 @@ type ArgCacheReplicateRemove struct {
 }
 
 type TPRateProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	Weights            string
-	MinCost            float64
-	MaxCost            float64
-	MaxCostStrategy    string
-	Rates              map[string]*TPRate
+	TPid            string
+	Tenant          string
+	ID              string
+	FilterIDs       []string
+	Weights         string
+	MinCost         float64
+	MaxCost         float64
+	MaxCostStrategy string
+	Rates           map[string]*TPRate
 }
 
 type TPRate struct {

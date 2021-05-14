@@ -1,5 +1,5 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RT_SPECIAL_1002,*string:~*req.Account:1002,,;10,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.01,1m,1s
-cgrates.org,RT_RETAIL1,,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.4,1m,30s
-cgrates.org,RT_RETAIL1,,,,,,,RT_ALWAYS,,"* * * * *",;0,false,1m,,0.2,1m,10s
+#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RT_SPECIAL_1002,*string:~*req.Account:1002,;10,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.01,1m,1s
+cgrates.org,RT_RETAIL1,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.4,1m,30s
+cgrates.org,RT_RETAIL1,,,,,,RT_ALWAYS,,"* * * * *",;0,false,1m,,0.2,1m,10s
 

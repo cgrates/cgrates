@@ -95,14 +95,11 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 		if rPf, err = rS.dm.GetRateProfile(ctx, tnt, rPfID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
+				fmt.Println(err)
 				err = nil
 				continue
 			}
 			return
-		}
-		if rPf.ActivationInterval != nil && args.CGREvent.Time != nil &&
-			!rPf.ActivationInterval.IsActiveAtTime(*args.CGREvent.Time) { // not active
-			continue
 		}
 		var pass bool
 		if pass, err = rS.filterS.Pass(ctx, tnt, rPf.FilterIDs, evNm); err != nil {

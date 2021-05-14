@@ -1236,11 +1236,10 @@ func TestLibratesAsRateProfile(t *testing.T) {
 		Weights: "testWeight",
 	}
 	rp := &RateProfile{
-		Tenant:             ext.Tenant,
-		ID:                 ext.ID,
-		FilterIDs:          ext.FilterIDs,
-		ActivationInterval: ext.ActivationInterval,
-		MaxCostStrategy:    ext.MaxCostStrategy,
+		Tenant:          ext.Tenant,
+		ID:              ext.ID,
+		FilterIDs:       ext.FilterIDs,
+		MaxCostStrategy: ext.MaxCostStrategy,
 	}
 
 	received, err := ext.AsRateProfile()
@@ -1308,11 +1307,10 @@ func TestLibratesAsRateProfileNon0Len(t *testing.T) {
 		},
 	}
 	rp := &RateProfile{
-		Tenant:             ext.Tenant,
-		ID:                 ext.ID,
-		FilterIDs:          ext.FilterIDs,
-		ActivationInterval: ext.ActivationInterval,
-		MaxCostStrategy:    ext.MaxCostStrategy,
+		Tenant:          ext.Tenant,
+		ID:              ext.ID,
+		FilterIDs:       ext.FilterIDs,
+		MaxCostStrategy: ext.MaxCostStrategy,
 	}
 
 	expected := rp
