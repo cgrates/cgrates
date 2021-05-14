@@ -1953,16 +1953,6 @@ func (tps RateProfileMdls) AsTPRateProfile() (result []*utils.TPRateProfile) {
 		if tp.MaxCostStrategy != utils.EmptyString {
 			rPrf.MaxCostStrategy = tp.MaxCostStrategy
 		}
-		if tp.ActivationInterval != utils.EmptyString {
-			rPrf.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				rPrf.ActivationInterval.ActivationTime = aiSplt[0]
-				rPrf.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				rPrf.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
 				filterMap[tenID] = make(utils.StringSet)
@@ -2002,14 +1992,6 @@ func APItoModelTPRateProfile(tPrf *utils.TPRateProfile) (mdls RateProfileMdls) {
 					mdl.FilterIDs += val
 				}
 
-				if tPrf.ActivationInterval != nil {
-					if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
-						mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
-					}
-					if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
-						mdl.ActivationInterval += utils.InfieldSep + tPrf.ActivationInterval.ExpiryTime
-					}
-				}
 				mdl.Weights = tPrf.Weights
 				mdl.MinCost = tPrf.MinCost
 				mdl.MaxCost = tPrf.MaxCost
@@ -2061,11 +2043,6 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *utils.Rat
 	for i, stp := range tpRp.FilterIDs {
 		rp.FilterIDs[i] = stp
 	}
-	if tpRp.ActivationInterval != nil {
-		if rp.ActivationInterval, err = tpRp.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	for key, rate := range tpRp.Rates {
 		rp.Rates[key] = &utils.Rate{
 			ID:              rate.ID,
@@ -2101,13 +2078,12 @@ func APItoRateProfile(tpRp *utils.TPRateProfile, timezone string) (rp *utils.Rat
 
 func RateProfileToAPI(rp *utils.RateProfile) (tpRp *utils.TPRateProfile) {
 	tpRp = &utils.TPRateProfile{
-		Tenant:             rp.Tenant,
-		ID:                 rp.ID,
-		FilterIDs:          make([]string, len(rp.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Weights:            rp.Weights.String(";", "&"),
-		MaxCostStrategy:    rp.MaxCostStrategy,
-		Rates:              make(map[string]*utils.TPRate),
+		Tenant:          rp.Tenant,
+		ID:              rp.ID,
+		FilterIDs:       make([]string, len(rp.FilterIDs)),
+		Weights:         rp.Weights.String(";", "&"),
+		MaxCostStrategy: rp.MaxCostStrategy,
+		Rates:           make(map[string]*utils.TPRate),
 	}
 	if rp.MinCost != nil {
 		//there should not be an invalid value of converting from Decimal into float64
@@ -2153,14 +2129,6 @@ func RateProfileToAPI(rp *utils.RateProfile) (tpRp *utils.TPRateProfile) {
 	}
 	for i, fli := range rp.FilterIDs {
 		tpRp.FilterIDs[i] = fli
-	}
-	if rp.ActivationInterval != nil {
-		if !rp.ActivationInterval.ActivationTime.IsZero() {
-			tpRp.ActivationInterval.ActivationTime = rp.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !rp.ActivationInterval.ExpiryTime.IsZero() {
-			tpRp.ActivationInterval.ExpiryTime = rp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	return
 }

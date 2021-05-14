@@ -2612,14 +2612,10 @@ func TestRateProfileToAPI(t *testing.T) {
 		},
 	}
 	eTPRatePrf := &utils.TPRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		Weights:   ";0",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "",
-			ExpiryTime:     "",
-		},
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001"},
+		Weights:         ";0",
 		MinCost:         0.1,
 		MaxCost:         0.6,
 		MaxCostStrategy: "*free",
@@ -2872,9 +2868,6 @@ func TestAPIToRateProfileError(t *testing.T) {
 	tpRprf := &utils.TPRateProfile{
 		Tenant: "cgrates.org",
 		ID:     "RP1",
-		ActivationInterval: &utils.TPActivationInterval{
-			ExpiryTime: "NOT_A_TIME",
-		},
 		Rates: map[string]*utils.TPRate{
 			"RT_WEEK": {
 				ID:              "RT_WEEK",
@@ -2890,13 +2883,8 @@ func TestAPIToRateProfileError(t *testing.T) {
 			},
 		},
 	}
-	expectedErr := "Unsupported time format"
-	if _, err := APItoRateProfile(tpRprf, "UTC"); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
 
-	expectedErr = "strconv.ParseInt: parsing \"NOT_A_TIME\": invalid syntax"
-	tpRprf.ActivationInterval = nil
+	expectedErr := "strconv.ParseInt: parsing \"NOT_A_TIME\": invalid syntax"
 	if _, err := APItoRateProfile(tpRprf, "UTC"); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+q", expectedErr, err)
 	}
@@ -2942,7 +2930,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			Tenant:              "cgrates.org",
 			ID:                  "RP1",
 			FilterIDs:           "*string:~*req.Subject:1001",
-			ActivationInterval:  "",
 			Weights:             ";0",
 			MinCost:             0.1,
 			MaxCost:             0.6,
@@ -2964,7 +2951,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			Tenant:              "cgrates.org",
 			ID:                  "RP1",
 			FilterIDs:           "",
-			ActivationInterval:  "",
 			Weights:             ";0",
 			MinCost:             0,
 			MaxCost:             0,
@@ -2988,7 +2974,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			Tenant:              "cgrates.org",
 			ID:                  "RP1",
 			FilterIDs:           "*string:~*req.Subject:1001",
-			ActivationInterval:  "",
 			Weights:             ";0",
 			MinCost:             0.1,
 			MaxCost:             0.6,
@@ -3010,7 +2995,6 @@ func TestAPItoModelTPRateProfile(t *testing.T) {
 			Tenant:              "cgrates.org",
 			ID:                  "RP1",
 			FilterIDs:           "",
-			ActivationInterval:  "",
 			Weights:             "",
 			MinCost:             0,
 			MaxCost:             0,
@@ -3041,7 +3025,6 @@ func TestAsTPRateProfile(t *testing.T) {
 			Tenant:              "cgrates.org",
 			ID:                  "RP1",
 			FilterIDs:           "*string:~*req.Subject:1001",
-			ActivationInterval:  "",
 			Weights:             ";0",
 			MinCost:             0.1,
 			MaxCost:             0.6,
@@ -3063,7 +3046,6 @@ func TestAsTPRateProfile(t *testing.T) {
 			Tenant:              "cgrates.org",
 			ID:                  "RP1",
 			FilterIDs:           "",
-			ActivationInterval:  "",
 			Weights:             ";0",
 			MinCost:             0,
 			MaxCost:             0,
@@ -3399,13 +3381,7 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 	testProfile := &utils.RateProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2020, time.April,
-				11, 21, 34, 01, 0, time.UTC),
-			ExpiryTime: time.Date(2020, time.April,
-				12, 21, 34, 01, 0, time.UTC),
-		},
+		FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 0,
@@ -3418,13 +3394,9 @@ func TestRateProfileToAPIWithActInterval(t *testing.T) {
 	}
 
 	expStruct := &utils.TPRateProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RP1",
-		FilterIDs: []string{"*string:~*req.Subject:1001"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2020-04-11T21:34:01Z",
-			ExpiryTime:     "2020-04-12T21:34:01Z",
-		},
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z"},
 		Weights:         ";0",
 		MinCost:         0.1,
 		MaxCost:         0.6,
@@ -3448,11 +3420,7 @@ func TestAPItoModelTPRateProfileNil(t *testing.T) {
 
 func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 	testStruct := &utils.TPRateProfile{
-		FilterIDs: []string{"test_string1", "test_string2"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-08-29T15:00:00Z",
-		},
+		FilterIDs: []string{"test_string1", "test_string2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 		Rates: map[string]*utils.TPRate{"RT_CHRISTMAS": {
 			ID:              "RT_CHRISTMAS",
 			FilterIDs:       []string{"test_string1", "test_string2"},
@@ -3470,8 +3438,7 @@ func TestAPItoModelTPRateProfileCase2(t *testing.T) {
 		},
 	}
 	expStruct := RateProfileMdls{{
-		FilterIDs:           "test_string1;test_string2",
-		ActivationInterval:  "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+		FilterIDs:           "test_string1;test_string2;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
 		RateID:              "RT_CHRISTMAS",
 		RateFilterIDs:       "test_string1;test_string2",
 		RateWeights:         ";30",
@@ -3660,29 +3627,24 @@ func TestChargerProfileToAPILastCase(t *testing.T) {
 
 func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 	testRPMdls := RateProfileMdls{&RateProfileMdl{
-		Tpid:               "",
-		Tenant:             "cgrates.org",
-		ID:                 "RP1",
-		FilterIDs:          "*string:~*req.Subject:1001",
-		ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
-		Weights:            ";1.2",
-		MinCost:            0.1,
-		MaxCost:            0.6,
-		MaxCostStrategy:    "*free",
-		RateID:             "0",
-		RateFilterIDs:      "test_filter_id",
-		RateWeights:        ";2",
+		Tpid:            "",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       "*string:~*req.Subject:1001;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
+		Weights:         ";1.2",
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
+		RateID:          "0",
+		RateFilterIDs:   "test_filter_id",
+		RateWeights:     ";2",
 	},
 	}
 	expStruct := []*utils.TPRateProfile{
 		{TPid: "",
-			Tenant:    "cgrates.org",
-			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "2014-08-29T15:00:00Z",
-			},
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 			Weights:         ";1.2",
 			MinCost:         0.1,
 			MaxCost:         0.6,
@@ -3714,28 +3676,24 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 
 func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 	testRPMdls := RateProfileMdls{&RateProfileMdl{
-		Tpid:               "",
-		Tenant:             "cgrates.org",
-		ID:                 "RP1",
-		FilterIDs:          "*string:~*req.Subject:1001",
-		ActivationInterval: "2014-07-29T15:00:00Z",
-		Weights:            ";1.2",
-		MinCost:            0.1,
-		MaxCost:            0.6,
-		MaxCostStrategy:    "*free",
-		RateID:             "0",
-		RateFilterIDs:      "test_filter_id",
-		RateWeights:        ";2",
+		Tpid:            "",
+		Tenant:          "cgrates.org",
+		ID:              "RP1",
+		FilterIDs:       "*string:~*req.Subject:1001;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
+		Weights:         ";1.2",
+		MinCost:         0.1,
+		MaxCost:         0.6,
+		MaxCostStrategy: "*free",
+		RateID:          "0",
+		RateFilterIDs:   "test_filter_id",
+		RateWeights:     ";2",
 	},
 	}
 	expStruct := []*utils.TPRateProfile{
 		{TPid: "",
-			Tenant:    "cgrates.org",
-			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			Tenant:          "cgrates.org",
+			ID:              "RP1",
+			FilterIDs:       []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*req.Subject:1001"},
 			Weights:         ";1.2",
 			MinCost:         0.1,
 			MaxCost:         0.6,
@@ -3759,6 +3717,7 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 		},
 	}
 	result := testRPMdls.AsTPRateProfile()
+	sort.Strings(result[0].FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}

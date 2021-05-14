@@ -58,59 +58,6 @@ func TestNewRateS(t *testing.T) {
 	}
 }
 
-func TestMatchingRateProfileForEventActivationInterval(t *testing.T) {
-	dftCfg := config.NewDefaultCGRConfig()
-
-	data := engine.NewInternalDB(nil, nil, true)
-	dm := engine.NewDataManager(data, dftCfg.CacheCfg(), nil)
-	filterS := engine.NewFilterS(dftCfg, nil, dm)
-	rateS := RateS{
-		cfg:     dftCfg,
-		filterS: filterS,
-		dm:      dm,
-	}
-
-	rPrf := &utils.RateProfile{
-		Tenant: "cgrates.org",
-		ID:     "RP1",
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC),
-		},
-	}
-
-	err := dm.SetRateProfile(context.Background(), rPrf, true)
-	if err != nil {
-		t.Error(err)
-	}
-	if _, err := rateS.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
-		&utils.ArgsCostForEvent{
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "CACHE1",
-				Time:   utils.TimePointer(time.Date(2020, 7, 21, 11, 0, 0, 0, time.UTC)),
-				Event: map[string]interface{}{
-					utils.AccountField: "1001",
-					utils.Destination:  1002,
-					utils.AnswerTime:   rPrf.ActivationInterval.ExpiryTime.Add(-10 * time.Second),
-				},
-			},
-		}); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-
-	err = dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func TestRateProfileCostForEvent(t *testing.T) {
 	defaultCfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -343,9 +290,6 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 			},
 		},
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		ActivationInterval: &utils.ActivationInterval{
-			ExpiryTime: t1,
-		},
 	}
 	err := dm.SetRateProfile(context.Background(), rpp, true)
 	if err != nil {
@@ -989,10 +933,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 				FilterIDs: []string{"fi"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(9999, 7, 21, 10, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2020-07-21T00:00:00Z|9999-07-21T10:00:00Z"},
 	}
 
 	err := dm.SetRateProfile(context.Background(), rPrf, true)
@@ -1008,11 +949,11 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.AccountField: "1001",
 					utils.Destination:  1002,
-					utils.AnswerTime:   rPrf.ActivationInterval.ExpiryTime.Add(-10 * time.Second),
+					utils.AnswerTime:   time.Date(9999, 7, 21, 10, 0, 0, 0, time.UTC).Add(-10 * time.Second),
 				},
 			},
 		})
-	expectedErr := "NOT_FOUND:fi"
+	expectedErr := "NOT_FOUND"
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedErr, err)
 	}

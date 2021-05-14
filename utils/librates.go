@@ -30,15 +30,14 @@ import (
 
 // RateProfile represents the configuration of a Rate profile
 type RateProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *ActivationInterval
-	Weights            DynamicWeights
-	MinCost            *Decimal
-	MaxCost            *Decimal
-	MaxCostStrategy    string
-	Rates              map[string]*Rate
+	Tenant          string
+	ID              string
+	FilterIDs       []string
+	Weights         DynamicWeights
+	MinCost         *Decimal
+	MaxCost         *Decimal
+	MaxCostStrategy string
+	Rates           map[string]*Rate
 }
 
 func (rp *RateProfile) TenantID() string {
@@ -778,11 +777,10 @@ func CompressIntervals(rtIvls []*RateSInterval) {
 // AsRateProfile converts APIRateProfile to RateProfile
 func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 	rp = &RateProfile{
-		Tenant:             ext.Tenant,
-		ID:                 ext.ID,
-		FilterIDs:          ext.FilterIDs,
-		ActivationInterval: ext.ActivationInterval,
-		MaxCostStrategy:    ext.MaxCostStrategy,
+		Tenant:          ext.Tenant,
+		ID:              ext.ID,
+		FilterIDs:       ext.FilterIDs,
+		MaxCostStrategy: ext.MaxCostStrategy,
 	}
 	if ext.Weights != EmptyString {
 		if rp.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {

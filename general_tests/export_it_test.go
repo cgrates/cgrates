@@ -376,10 +376,9 @@ func testExpVerifyRateProfiles(t *testing.T) {
 	}
 
 	splPrf := &utils.RateProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "RT_SPECIAL_1002",
-		FilterIDs:          []string{"*string:~*req.Account:1002"},
-		ActivationInterval: nil,
+		Tenant:    "cgrates.org",
+		ID:        "RT_SPECIAL_1002",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10,
