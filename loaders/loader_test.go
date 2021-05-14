@@ -1246,10 +1246,10 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		Tenant:         "cgrates.org",
 		ID:             "D1",
 		Subsystems:     []string{"*any"},
-		FilterIDs:      []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		FilterIDs:      []string{"*string:~*req.Account:1001"},
 		StrategyParams: map[string]interface{}{},
 		Strategy:       "*first",
-		Weight:         20,
+		Weight:         0,
 		Hosts: engine.DispatcherHostProfiles{
 			&engine.DispatcherHostProfile{
 				ID:        "C1",
@@ -3261,44 +3261,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadDispatcherAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadDispatcherHostsAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaDispatchers: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaDispatchers: {
-			utils.DispatcherProfilesCsv: &openedCSVFile{
-				fileName: utils.DispatcherProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

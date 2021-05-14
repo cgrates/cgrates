@@ -3517,7 +3517,7 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 
 	expStruct := &utils.TPDispatcherProfile{
 		Subsystems:     []string{},
-		FilterIDs:      []string{"field1", "field2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z", "field1", "field2"},
 		StrategyParams: []interface{}{"Params1"},
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
