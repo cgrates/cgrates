@@ -194,13 +194,9 @@ func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err err
 	// based on load option will store or remove the content
 	switch loadOption {
 	case utils.MetaStore:
-		if err = ldr.processContent(loaderType, caching); err != nil {
-			return
-		}
+		return ldr.processContent(loaderType, caching)
 	case utils.MetaRemove:
-		if err = ldr.removeContent(loaderType, caching); err != nil {
-			return
-		}
+		return ldr.removeContent(loaderType, caching)
 	}
 	return
 }
