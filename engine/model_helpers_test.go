@@ -1858,16 +1858,12 @@ func TestModelAsTPChargers3(t *testing.T) {
 
 func TestAPItoDispatcherProfile(t *testing.T) {
 	tpDPP := &utils.TPDispatcherProfile{
-		TPid:       "TP1",
-		Tenant:     "cgrates.org",
-		ID:         "Dsp",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:   utils.MetaFirst,
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:           "TP1",
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
@@ -1882,14 +1878,11 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 	}
 
 	expected := &DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "Dsp",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:   utils.MetaFirst,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
 		StrategyParams: map[string]interface{}{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
@@ -1911,15 +1904,11 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 
 func TestDispatcherProfileToAPI(t *testing.T) {
 	exp := &utils.TPDispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "Dsp",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:   utils.MetaFirst,
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
@@ -1933,15 +1922,11 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 		},
 	}
 	exp2 := &utils.TPDispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "Dsp",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:   utils.MetaFirst,
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
@@ -1956,14 +1941,11 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 	}
 
 	dspPrf := &DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "Dsp",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:   utils.MetaFirst,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
 		StrategyParams: map[string]interface{}{},
 		Weight:         20,
 		Hosts: DispatcherHostProfiles{
@@ -1985,16 +1967,12 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 
 func TestAPItoModelTPDispatcher(t *testing.T) {
 	tpDPP := &utils.TPDispatcherProfile{
-		TPid:       "TP1",
-		Tenant:     "cgrates.org",
-		ID:         "Dsp",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:   utils.MetaFirst,
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:           "TP1",
+		Tenant:         "cgrates.org",
+		ID:             "Dsp",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
 		Weight:         20,
 		Hosts: []*utils.TPDispatcherHostProfile{
@@ -2016,18 +1994,17 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 	}
 	expected := DispatcherProfileMdls{
 		&DispatcherProfileMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Dsp",
-			Subsystems:         "*any",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			Strategy:           utils.MetaFirst,
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
-			ConnID:             "C1",
-			ConnWeight:         10,
-			ConnBlocker:        false,
-			ConnParameters:     "192.168.54.203",
+			Tpid:           "TP1",
+			Tenant:         "cgrates.org",
+			ID:             "Dsp",
+			Subsystems:     "*any",
+			FilterIDs:      "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			Strategy:       utils.MetaFirst,
+			Weight:         20,
+			ConnID:         "C1",
+			ConnWeight:     10,
+			ConnBlocker:    false,
+			ConnParameters: "192.168.54.203",
 		},
 		&DispatcherProfileMdl{
 			Tpid:           "TP1",
@@ -3526,11 +3503,7 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 func TestDispatcherProfileToAPICase2(t *testing.T) {
 	structTest := &DispatcherProfile{
 		Subsystems: []string{},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 35, 0, 0, time.UTC),
-		},
-		FilterIDs: []string{"field1", "field2"},
+		FilterIDs:  []string{"field1", "field2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		StrategyParams: map[string]interface{}{
 			"Field1": "Params1",
 		},
@@ -3543,12 +3516,8 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 	}
 
 	expStruct := &utils.TPDispatcherProfile{
-		Subsystems: []string{},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
-		FilterIDs:      []string{"field1", "field2"},
+		Subsystems:     []string{},
+		FilterIDs:      []string{"field1", "field2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		StrategyParams: []interface{}{"Params1"},
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
@@ -3594,24 +3563,6 @@ func TestAPItoDispatcherProfileCase2(t *testing.T) {
 	}
 }
 
-func TestAPItoDispatcherProfileError(t *testing.T) {
-	structTest := &utils.TPDispatcherProfile{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat1",
-			ExpiryTime:     "cat2",
-		},
-		StrategyParams: []interface{}{"Param1"},
-		Hosts: []*utils.TPDispatcherHostProfile{{
-			Params: []interface{}{""},
-		}},
-	}
-
-	_, err := APItoDispatcherProfile(structTest, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpected <Unsupported time format>,\n Received <%+v>", err)
-	}
-}
-
 func TestAPItoModelTPDispatcherProfileNil(t *testing.T) {
 	var structTest *utils.TPDispatcherProfile = nil
 	expected := "null"
@@ -3632,15 +3583,12 @@ func TestModelHelpersParamsToString(t *testing.T) {
 func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 	structTest := DispatcherProfileMdls{
 		&DispatcherProfileMdl{
-			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			FilterIDs:          "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z",
 			StrategyParameters: "Param1",
 		},
 	}
 	expStruct := []*utils.TPDispatcherProfile{{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-08-29T15:00:00Z",
-		},
+		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 		StrategyParams: []interface{}{"Param1"},
 	},
 	}
@@ -3653,18 +3601,17 @@ func TestModelHelpersAsTPDispatcherProfiles(t *testing.T) {
 func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
 	structTest := DispatcherProfileMdls{
 		&DispatcherProfileMdl{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Dsp",
-			Subsystems:         "*any",
-			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			Strategy:           utils.MetaFirst,
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			Weight:             20,
-			ConnID:             "C1",
-			ConnWeight:         10,
-			ConnBlocker:        false,
-			ConnParameters:     "192.168.54.203",
+			Tpid:           "TP1",
+			Tenant:         "cgrates.org",
+			ID:             "Dsp",
+			Subsystems:     "*any",
+			FilterIDs:      "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
+			Strategy:       utils.MetaFirst,
+			Weight:         20,
+			ConnID:         "C1",
+			ConnWeight:     10,
+			ConnBlocker:    false,
+			ConnParameters: "192.168.54.203",
 		},
 		&DispatcherProfileMdl{
 			Tpid:           "TP1",
@@ -3820,13 +3767,10 @@ func TestRateProfileMdlsAsTPRateProfileCase3(t *testing.T) {
 
 func TestAPItoModelTPDispatcherProfileCase2(t *testing.T) {
 	structTest := &utils.TPDispatcherProfile{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-07-30T15:00:00Z",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-07-30T15:00:00Z"},
 	}
 	expStruct := DispatcherProfileMdls{{
-		ActivationInterval: "2014-07-29T15:00:00Z;2014-07-30T15:00:00Z",
+		FilterIDs: "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-07-30T15:00:00Z",
 	},
 	}
 	result := APItoModelTPDispatcherProfile(structTest)

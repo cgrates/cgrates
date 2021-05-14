@@ -101,15 +101,14 @@ func (dHPrfls DispatcherHostProfiles) HostIDs() (hostIDs []string) {
 
 // DispatcherProfile is the config for one Dispatcher
 type DispatcherProfile struct {
-	Tenant             string
-	ID                 string
-	Subsystems         []string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // activation interval
-	Strategy           string
-	StrategyParams     map[string]interface{} // ie for distribution, set here the pool weights
-	Weight             float64                // used for profile sorting on match
-	Hosts              DispatcherHostProfiles // dispatch to these connections
+	Tenant         string
+	ID             string
+	Subsystems     []string
+	FilterIDs      []string
+	Strategy       string
+	StrategyParams map[string]interface{} // ie for distribution, set here the pool weights
+	Weight         float64                // used for profile sorting on match
+	Hosts          DispatcherHostProfiles // dispatch to these connections
 }
 
 // DispatcherProfileWithAPIOpts is used in replicatorV1 for dispatcher

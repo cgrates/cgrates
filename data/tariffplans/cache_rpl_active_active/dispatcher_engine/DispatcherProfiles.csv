@@ -1,4 +1,4 @@
-#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
-cgrates.org,InternalDispatcher,*caches;*core,,,*weight,,Self,,20,false,,30
-cgrates.org,Engine1,*any,,,*weight,,Engine1,,20,false,,10
-cgrates.org,Engine2,*chargers,*string:~*req.EventName:TestLoad,,*weight,,Engine1,,20,false,*ratio:1,20
+#Tenant,ID,Subsystems,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+cgrates.org,InternalDispatcher,*caches;*core,,30,*weight,,Self,,20,false,
+cgrates.org,Engine1,*any,,10,*weight,,Engine1,,20,false,
+cgrates.org,Engine2,*chargers,*string:~*req.EventName:TestLoad,20,*weight,,Engine1,,20,false,*ratio:1

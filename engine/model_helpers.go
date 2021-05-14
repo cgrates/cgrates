@@ -1563,16 +1563,7 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 			}
 			filterMap[tenantID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
-		if len(tp.ActivationInterval) != 0 {
-			tpDPP.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				tpDPP.ActivationInterval.ActivationTime = aiSplt[0]
-				tpDPP.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				tpDPP.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
+
 		if tp.Strategy != utils.EmptyString {
 			tpDPP.Strategy = tp.Strategy
 		}
@@ -1654,16 +1645,6 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 	filters := strings.Join(tpDPP.FilterIDs, utils.InfieldSep)
 	subsystems := strings.Join(tpDPP.Subsystems, utils.InfieldSep)
 
-	interval := utils.EmptyString
-	if tpDPP.ActivationInterval != nil {
-		if tpDPP.ActivationInterval.ActivationTime != utils.EmptyString {
-			interval = tpDPP.ActivationInterval.ActivationTime
-		}
-		if tpDPP.ActivationInterval.ExpiryTime != utils.EmptyString {
-			interval += utils.InfieldSep + tpDPP.ActivationInterval.ExpiryTime
-		}
-	}
-
 	strategy := paramsToString(tpDPP.StrategyParams)
 
 	if len(tpDPP.Hosts) == 0 {
@@ -1673,7 +1654,6 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 			ID:                 tpDPP.ID,
 			Subsystems:         subsystems,
 			FilterIDs:          filters,
-			ActivationInterval: interval,
 			Strategy:           tpDPP.Strategy,
 			StrategyParameters: strategy,
 			Weight:             tpDPP.Weight,
@@ -1689,7 +1669,6 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 		ID:                 tpDPP.ID,
 		Subsystems:         subsystems,
 		FilterIDs:          filters,
-		ActivationInterval: interval,
 		Strategy:           tpDPP.Strategy,
 		StrategyParameters: strategy,
 		Weight:             tpDPP.Weight,
@@ -1763,25 +1742,19 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 
 		}
 	}
-	if tpDPP.ActivationInterval != nil {
-		if dpp.ActivationInterval, err = tpDPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	return dpp, nil
 }
 
 func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherProfile) {
 	tpDPP = &utils.TPDispatcherProfile{
-		Tenant:             dpp.Tenant,
-		ID:                 dpp.ID,
-		Subsystems:         make([]string, len(dpp.Subsystems)),
-		FilterIDs:          make([]string, len(dpp.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Strategy:           dpp.Strategy,
-		StrategyParams:     make([]interface{}, len(dpp.StrategyParams)),
-		Weight:             dpp.Weight,
-		Hosts:              make([]*utils.TPDispatcherHostProfile, len(dpp.Hosts)),
+		Tenant:         dpp.Tenant,
+		ID:             dpp.ID,
+		Subsystems:     make([]string, len(dpp.Subsystems)),
+		FilterIDs:      make([]string, len(dpp.FilterIDs)),
+		Strategy:       dpp.Strategy,
+		StrategyParams: make([]interface{}, len(dpp.StrategyParams)),
+		Weight:         dpp.Weight,
+		Hosts:          make([]*utils.TPDispatcherHostProfile, len(dpp.Hosts)),
 	}
 
 	for i, fli := range dpp.FilterIDs {
@@ -1819,14 +1792,6 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 		}
 	}
 
-	if dpp.ActivationInterval != nil {
-		if !dpp.ActivationInterval.ActivationTime.IsZero() {
-			tpDPP.ActivationInterval.ActivationTime = dpp.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !dpp.ActivationInterval.ExpiryTime.IsZero() {
-			tpDPP.ActivationInterval.ExpiryTime = dpp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
-	}
 	return
 }
 

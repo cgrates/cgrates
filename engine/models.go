@@ -287,7 +287,7 @@ type DispatcherProfileMdl struct {
 	ID                 string  `index:"1" re:""`
 	Subsystems         string  `index:"2" re:""`
 	FilterIDs          string  `index:"3" re:""`
-	ActivationInterval string  `index:"4" re:""`
+	Weight             float64 `index:"4" re:"\d+\.?\d*"`
 	Strategy           string  `index:"5" re:""`
 	StrategyParameters string  `index:"6" re:""`
 	ConnID             string  `index:"7" re:""`
@@ -295,7 +295,6 @@ type DispatcherProfileMdl struct {
 	ConnWeight         float64 `index:"9" re:"\d+\.?\d*"`
 	ConnBlocker        bool    `index:"10" re:""`
 	ConnParameters     string  `index:"11" re:""`
-	Weight             float64 `index:"12" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }
 
