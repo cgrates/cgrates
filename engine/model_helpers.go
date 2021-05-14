@@ -2164,16 +2164,6 @@ func (apm ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 			}
 			filterIDsMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
-		if tp.ActivationInterval != utils.EmptyString {
-			aPrf.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
-				aPrf.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.Weight != 0 {
 			aPrf.Weight = tp.Weight
 		}
@@ -2241,14 +2231,6 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 		if i == 0 {
 			mdl.FilterIDs = strings.Join(tPrf.FilterIDs, utils.InfieldSep)
 
-			if tPrf.ActivationInterval != nil {
-				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
-				}
-				if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.InfieldSep + tPrf.ActivationInterval.ExpiryTime
-				}
-			}
 			mdl.Weight = tPrf.Weight
 			mdl.Schedule = tPrf.Schedule
 			for _, target := range tPrf.Targets {
@@ -2294,11 +2276,6 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 	for i, stp := range tpAp.FilterIDs {
 		ap.FilterIDs[i] = stp
 	}
-	if tpAp.ActivationInterval != nil {
-		if ap.ActivationInterval, err = tpAp.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return
-		}
-	}
 	for _, target := range tpAp.Targets {
 		ap.Targets[target.TargetType] = utils.NewStringSet(target.TargetIDs)
 	}
@@ -2338,25 +2315,16 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 
 func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
 	tpAp = &utils.TPActionProfile{
-		Tenant:             ap.Tenant,
-		ID:                 ap.ID,
-		FilterIDs:          make([]string, len(ap.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Weight:             ap.Weight,
-		Schedule:           ap.Schedule,
-		Targets:            make([]*utils.TPActionTarget, 0, len(ap.Targets)),
-		Actions:            make([]*utils.TPAPAction, len(ap.Actions)),
+		Tenant:    ap.Tenant,
+		ID:        ap.ID,
+		FilterIDs: make([]string, len(ap.FilterIDs)),
+		Weight:    ap.Weight,
+		Schedule:  ap.Schedule,
+		Targets:   make([]*utils.TPActionTarget, 0, len(ap.Targets)),
+		Actions:   make([]*utils.TPAPAction, len(ap.Actions)),
 	}
 	for i, fli := range ap.FilterIDs {
 		tpAp.FilterIDs[i] = fli
-	}
-	if ap.ActivationInterval != nil {
-		if !ap.ActivationInterval.ActivationTime.IsZero() {
-			tpAp.ActivationInterval.ActivationTime = ap.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !ap.ActivationInterval.ExpiryTime.IsZero() {
-			tpAp.ActivationInterval.ExpiryTime = ap.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	for targetType, targetIDs := range ap.Targets {
 		tpAp.Targets = append(tpAp.Targets, &utils.TPActionTarget{TargetType: targetType, TargetIDs: targetIDs.AsSlice()})

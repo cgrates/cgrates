@@ -175,10 +175,6 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 			}
 			return
 		}
-		if aPf.ActivationInterval != nil && actTime != nil &&
-			!aPf.ActivationInterval.IsActiveAtTime(*actTime) { // not active
-			continue
-		}
 		var pass bool
 		if pass, err = aS.fltrS.Pass(context.TODO(), tnt, aPf.FilterIDs, evNm); err != nil {
 			return

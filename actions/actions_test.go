@@ -110,16 +110,11 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
-
-	actPrf.ActivationInterval = &utils.ActivationInterval{
-		ActivationTime: time.Date(2012, 7, 21, 0, 0, 0, 0, time.UTC),
-		ExpiryTime:     time.Date(2012, 8, 21, 0, 0, 0, 0, time.UTC),
-	}
+	actPrf.FilterIDs = append(actPrf.FilterIDs, "*ai:~*req.AnswerTime:2012-07-21T00:00:00Z|2012-08-21T00:00:00Z")
 	//this event is not active in this interval time
 	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Date(2012, 6, 21, 0, 0, 0, 0, time.UTC)), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
-	actPrf.ActivationInterval = nil
 
 	//when dataManager is nil, it won't be able to get ActionsProfile from database
 	acts.dm = nil

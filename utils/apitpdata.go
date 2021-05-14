@@ -970,15 +970,14 @@ func (args *ArgsCostForEvent) IntervalStart() (ivlStart *decimal.Big, err error)
 }
 
 type TPActionProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	Weight             float64
-	Schedule           string
-	Targets            []*TPActionTarget
-	Actions            []*TPAPAction
+	TPid      string
+	Tenant    string
+	ID        string
+	FilterIDs []string
+	Weight    float64
+	Schedule  string
+	Targets   []*TPActionTarget
+	Actions   []*TPAPAction
 }
 
 type TPActionTarget struct {
