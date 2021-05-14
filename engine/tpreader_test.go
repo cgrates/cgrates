@@ -662,13 +662,11 @@ func TestGetLoadedIdsDispatcherProfiles(t *testing.T) {
 	tpr := &TpReader{
 		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
 			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:   testTPID,
-				Tenant: "cgrates.org",
-				ID:     "ResGroup1",
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
-				Strategy: utils.MetaMaxCostDisconnect,
+				TPid:      testTPID,
+				Tenant:    "cgrates.org",
+				ID:        "ResGroup1",
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+				Strategy:  utils.MetaMaxCostDisconnect,
 			},
 		},
 	}

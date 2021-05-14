@@ -25,7 +25,6 @@ import (
 	"path"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -178,13 +177,9 @@ func testDspITMigrateAndMove(t *testing.T) {
 	dspPrf := &engine.DispatcherProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Dsp1",
-		FilterIDs: []string{"*string:~*req.Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Strategy: utils.MetaRandom,
-		Weight:   20,
+		FilterIDs: []string{"*string:~*req.Accont:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-14T14:26:00Z"},
+		Strategy:  utils.MetaRandom,
+		Weight:    20,
 	}
 	dspHost := &engine.DispatcherHost{
 		Tenant: "cgrates.org",

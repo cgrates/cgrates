@@ -729,16 +729,15 @@ type TPTntID struct {
 
 // TPDispatcherProfile is used in APIs to manage remotely offline DispatcherProfile
 type TPDispatcherProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	Subsystems         []string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	Strategy           string
-	StrategyParams     []interface{} // ie for distribution, set here the pool weights
-	Weight             float64
-	Hosts              []*TPDispatcherHostProfile
+	TPid           string
+	Tenant         string
+	ID             string
+	Subsystems     []string
+	FilterIDs      []string
+	Strategy       string
+	StrategyParams []interface{} // ie for distribution, set here the pool weights
+	Weight         float64
+	Hosts          []*TPDispatcherHostProfile
 }
 
 // TPDispatcherHostProfile is used in TPDispatcherProfile

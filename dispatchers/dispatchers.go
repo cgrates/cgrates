@@ -149,10 +149,6 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 			!utils.IsSliceMember(prfl.Subsystems, subsys) {
 			continue
 		}
-		if prfl.ActivationInterval != nil && ev.Time != nil &&
-			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
-			continue
-		}
 		if pass, err := dS.fltrS.Pass(context.TODO(), tnt, prfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err

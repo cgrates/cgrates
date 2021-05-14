@@ -536,12 +536,9 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		Tenant:     "cgrates.org",
 		ID:         "D1",
 		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-		},
-		Strategy: "*first",
-		Weight:   20,
+		FilterIDs:  []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		Strategy:   "*first",
+		Weight:     20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",

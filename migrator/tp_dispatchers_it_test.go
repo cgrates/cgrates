@@ -111,14 +111,10 @@ func testTpDispITPopulate(t *testing.T) {
 			TPid:       "TP1",
 			Tenant:     "cgrates.org",
 			ID:         "Dsp1",
-			FilterIDs:  []string{"*string:Account:1002"},
+			FilterIDs:  []string{"*string:Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			Subsystems: make([]string, 0),
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			Strategy: utils.MetaFirst,
-			Weight:   10,
+			Strategy:   utils.MetaFirst,
+			Weight:     10,
 		},
 	}
 	if err := tpDispMigrator.storDBIn.StorDB().SetTPDispatcherProfiles(tpDisps); err != nil {

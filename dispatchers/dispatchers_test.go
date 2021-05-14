@@ -42,15 +42,14 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 		},
 	}, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "321",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          []string{"filter"},
-		ActivationInterval: &utils.ActivationInterval{},
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "321",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      []string{"filter"},
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err == nil {
@@ -498,15 +497,14 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -542,15 +540,14 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -592,15 +589,14 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -636,15 +632,14 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -680,14 +675,9 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundTime(t *testing.T)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "123",
-		Subsystems: []string{utils.MetaAccounts},
-		FilterIDs:  nil,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(1999, 2, 3, 4, 5, 6, 700000000, time.UTC),
-			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
-		},
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -728,15 +718,14 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          []string{"filter"},
-		ActivationInterval: &utils.ActivationInterval{},
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      []string{"filter"},
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -772,15 +761,14 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -818,15 +806,14 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		StrategyParams:     make(map[string]interface{}),
-		Strategy:           utils.MetaWeight,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		StrategyParams: make(map[string]interface{}),
+		Strategy:       utils.MetaWeight,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	value, errDsp := newDispatcher(dm, dsp)
@@ -872,15 +859,14 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          []string{"filter"},
-		ActivationInterval: &utils.ActivationInterval{},
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      []string{"filter"},
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -970,15 +956,14 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          []string{"filter"},
-		ActivationInterval: &utils.ActivationInterval{},
-		Strategy:           "",
-		StrategyParams:     nil,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      []string{"filter"},
+		Strategy:       "",
+		StrategyParams: nil,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
 	if err != nil {
@@ -1028,15 +1013,14 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		StrategyParams:     make(map[string]interface{}),
-		Strategy:           utils.MetaWeight,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		StrategyParams: make(map[string]interface{}),
+		Strategy:       utils.MetaWeight,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	value, errDsp := newDispatcher(dm, dsp)
@@ -1097,15 +1081,14 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	dsp := &engine.DispatcherProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "123",
-		Subsystems:         []string{utils.MetaAccounts},
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		StrategyParams:     make(map[string]interface{}),
-		Strategy:           utils.MetaWeight,
-		Weight:             0,
-		Hosts:              nil,
+		Tenant:         "cgrates.org",
+		ID:             "123",
+		Subsystems:     []string{utils.MetaAccounts},
+		FilterIDs:      nil,
+		StrategyParams: make(map[string]interface{}),
+		Strategy:       utils.MetaWeight,
+		Weight:         0,
+		Hosts:          nil,
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache

@@ -299,24 +299,17 @@ func testStorDBitCRUDTPDispatcherProfiles(t *testing.T) {
 			TPid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1002"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			Strategy: utils.MetaFirst,
-			Weight:   10,
+			FilterIDs: []string{"*string:~*req.Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			Strategy:  utils.MetaFirst,
+			Weight:    10,
 		},
 		{
 			TPid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "Dsp2",
-			FilterIDs: []string{"*string:~*req.Destination:10"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-08-15T14:00:00Z",
-			},
-			Strategy: utils.MetaFirst,
-			Weight:   20,
+			FilterIDs: []string{"*string:~*req.Destination:10", "*ai:~*req.AnswerTime:2014-08-15T14:00:00Z"},
+			Strategy:  utils.MetaFirst,
+			Weight:    20,
 		},
 	}
 	if err := storDB.SetTPDispatcherProfiles(dsp); err != nil {

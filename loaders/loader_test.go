@@ -1243,13 +1243,10 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	eDisp := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "D1",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
-		},
+		Tenant:         "cgrates.org",
+		ID:             "D1",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		StrategyParams: map[string]interface{}{},
 		Strategy:       "*first",
 		Weight:         20,

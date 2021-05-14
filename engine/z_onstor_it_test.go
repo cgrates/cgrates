@@ -1041,11 +1041,8 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	dpp := &DispatcherProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Dsp1",
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		Strategy: utils.MetaFirst,
+		FilterIDs: []string{"*string:Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+		Strategy:  utils.MetaFirst,
 		// Hosts:    []string{"192.168.56.203"},
 		Weight: 20,
 	}
