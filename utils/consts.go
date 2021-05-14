@@ -2349,6 +2349,9 @@ const (
 	FieldsCfg              = "fields"
 	CacheDumpFieldsCfg     = "cache_dump_fields"
 	PartialCommitFieldsCfg = "partial_commit_fields"
+	PartialCacheTTLCfg     = "partial_cache_ttl"
+	PartialCacheActionCfg  = "partial_cache_action"
+	PartialPathCfg         = "partial_path"
 )
 
 // RegistrarCCfg
@@ -2551,31 +2554,10 @@ const (
 	SQLTableNameOpt = "sqlTableName"
 
 	// fileCSV
-	RowLengthOpt        = "RowLength"
-	FieldSepOpt         = "FieldSeparator"
-	LazyQuotes          = "LazyQuotes"
+	CSVRowLengthOpt     = "csvRowLength"
+	CSVFieldSepOpt      = "csvFieldSeparator"
+	CSVLazyQuotes       = "csvLazyQuotes"
 	HeaderDefineCharOpt = "csvHeaderDefineChar"
-
-	// partialCSV
-	PartialCSVCacheExpiryActionOpt = "csvCacheExpiryAction"
-	PartialCSVRecordCacheOpt       = "csvRecordCacheTTL"
-
-	// flatStore
-	FlatstorePrfx = "fst"
-	OptsMethod    = "*method"
-	FstInvite     = "INVITE"
-	FstBye        = "BYE"
-	FstAck        = "ACK"
-
-	MetaInvite = "*invite"
-	MetaBye    = "*bye"
-	MetaAck    = "*ack"
-
-	FstFailedCallsPrefixOpt  = "fstFailedCallsPrefix"
-	FstPartialRecordCacheOpt = "fstRecordCacheTTL"
-	FstMethodOpt             = "fstMethod"
-	FstOriginIDOpt           = "fstOriginID"
-	FstMadatoryACKOpt        = "fstMadatoryACK"
 
 	// fileXML
 	XMLRootPathOpt = "xmlRootPath"
@@ -2600,19 +2582,12 @@ const (
 	KafkaMaxWait = "kafkaMaxWait"
 
 	// partial
-	PartialOrderFieldOpt    = "partialOrderField"
-	PartialCacheAction      = "partialCacheAction"
-	PartialPathOpt          = "partialPath"
-	PartialCSVFieldSepartor = "partialcsvFieldSeparator"
-)
+	PartialOpt = "*partial"
 
-var (
-	// FstMethodToPrfx used for flatstore to convert the method in DP prefix
-	FstMethodToPrfx = map[string]string{
-		FstInvite: MetaInvite,
-		FstBye:    MetaBye,
-		FstAck:    MetaAck,
-	}
+	PartialOrderFieldOpt       = "partialOrderField"
+	PartialCacheActionOpt      = "partialCacheAction"
+	PartialPathOpt             = "partialPath"
+	PartialCSVFieldSepartorOpt = "partialcsvFieldSeparator"
 )
 
 // Analyzers constants

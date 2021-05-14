@@ -158,6 +158,8 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [DataDB] Updated config options
   * [StorDB] Updated config options
   * [ERs] Refactored the reader options
+  * [ERs] Removed *flatstore and *partialcsv
+  * [ERs] Added *opts.*partial to control if the event is partial or not
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 

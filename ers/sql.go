@@ -255,7 +255,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
-	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}
 	rdrEv <- &erEvent{
