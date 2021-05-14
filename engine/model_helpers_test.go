@@ -4534,8 +4534,10 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 	}
 	result, err := testStruct.AsTPAccount()
 	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, result) {
+		t.Fatal(err)
+	}
+	sort.Strings(result[0].FilterIDs)
+	if !reflect.DeepEqual(exp, result) {
 		t.Errorf("Expecting: %+v,\nreceived: %+v", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }

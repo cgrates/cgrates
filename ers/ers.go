@@ -23,12 +23,10 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"sort"
 	"sync"
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -322,25 +320,23 @@ func (erS *ERService) closeAllRdrs() {
 	}
 }
 
-const (
-	partialOpt = "*partial"
-)
-
 type erEvents struct {
 	events []*utils.CGREvent
 	rdrCfg *config.EventReaderCfg
 }
 
+// processPartialEvent process the event as a partial event
 func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.EventReaderCfg) (err error) {
+	// to identify the event the originID and originHost is used to create the CGRID
 	orgID, err := ev.FieldAsString(utils.OriginID)
-	if err == utils.ErrNotFound {
+	if err == utils.ErrNotFound { // the field is missing ignore the event
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> Missing <OriginID> field for partial event <%s>",
 				utils.ERs, utils.ToJSON(ev)))
 		return
 	}
 	orgHost, err := ev.FieldAsString(utils.OriginHost)
-	if err == utils.ErrNotFound {
+	if err == utils.ErrNotFound { // the field is missing ignore the event
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> Missing <OriginHost> field for partial event <%s>",
 				utils.ERs, utils.ToJSON(ev)))
@@ -348,7 +344,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	}
 	cgrID := utils.Sha1(orgID, orgHost)
 
-	evs, has := erS.partialCache.Get(cgrID)
+	evs, has := erS.partialCache.Get(cgrID) // get the existing events from cache
 	var cgrEvs *erEvents
 	if !has || evs == nil {
 		cgrEvs = &erEvents{
@@ -362,107 +358,44 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	}
 
 	var cgrEv *utils.CGREvent
-	if cgrEv, err = erS.preparePartialEvents(cgrEvs.events, cgrEvs.rdrCfg); err != nil {
+	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.filterS, // merge the events
+		erS.cfg.GeneralCfg().DefaultTenant,
+		erS.cfg.GeneralCfg().DefaultTimezone,
+		erS.cfg.GeneralCfg().RSRSep); err != nil {
 		return
 	}
-	if partial := cgrEv.APIOpts[partialOpt]; !utils.IsSliceMember([]string{"false", utils.EmptyString}, utils.IfaceAsString(partial)) {
+	if partial := cgrEv.APIOpts[utils.PartialOpt]; !utils.IsSliceMember([]string{utils.FalseStr, utils.EmptyString},
+		utils.IfaceAsString(partial)) { // if is still partial set it back in cache
 		erS.partialCache.Set(cgrID, cgrEvs, nil)
 		return
 	}
 
-	// complete CDR
-	if len(cgrEvs.events) != 1 {
+	// complete event
+	if len(cgrEvs.events) != 1 { // remove it from cache if there were events in cache
 		erS.partialCache.Set(cgrID, nil, nil) // set it with nil in cache to ignore when we expire the item
 		erS.partialCache.Remove(cgrID)
 	}
-	go func() { erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: rdrCfg} }()
+	go func() { erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: rdrCfg} }() // put the event on the complete events chanel( in a goroutine to not block the select from ListenAndServe)
 	return
 }
 
-func (erS *ERService) preparePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg) (cgrEv *utils.CGREvent, err error) {
-	cgrEv = cgrEvs[0]
-	if len(cgrEvs) != 1 {
-		ordFld := utils.IfaceAsString(cfg.Opts[utils.PartialOrderFieldOpt])
-		if ordFld == utils.EmptyString {
-			return nil, utils.NewErrMandatoryIeMissing(utils.PartialOrderFieldOpt)
-		}
-		fields := make([]interface{}, len(cgrEvs))
-
-		var ordPath config.RSRParsers
-		if ordPath, err = config.NewRSRParsers(ordFld, erS.cfg.GeneralCfg().RSRSep); err != nil {
-			return nil, err
-		}
-
-		for i, ev := range cgrEvs {
-			if fields[i], err = ordPath.ParseDataProviderWithInterfaces(ev.AsDataProvider()); err != nil {
-				return
-			}
-			if fldStr, castStr := fields[i].(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
-				fields[i] = utils.StringToInterface(fldStr)
-			}
-		}
-		//sort CGREvents based on partialOrderFieldOpt
-		sort.Slice(cgrEvs, func(i, j int) bool {
-			gt, serr := utils.GreaterThan(fields[i], fields[j], true)
-			if serr != nil {
-				err = serr
-			}
-			return gt
-		})
-		if err != nil {
-			return
-		}
-
-		// compose the CGREvent from slice
-		cgrEv = &utils.CGREvent{
-			Tenant:  cgrEvs[0].Tenant,
-			ID:      utils.UUIDSha1Prefix(),
-			Time:    utils.TimePointer(time.Now()),
-			Event:   make(map[string]interface{}),
-			APIOpts: make(map[string]interface{}),
-		}
-		for _, ev := range cgrEvs {
-			for key, value := range ev.Event {
-				cgrEv.Event[key] = value
-			}
-			for key, val := range ev.APIOpts {
-				cgrEv.APIOpts[key] = val
-			}
-		}
-	}
-	if len(cfg.PartialCommitFields) != 0 {
-		agReq := agents.NewAgentRequest(
-			utils.MapStorage(cgrEv.Event), nil,
-			nil, nil, cgrEv.APIOpts, cfg.Tenant,
-			erS.cfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(cfg.Timezone,
-				erS.cfg.GeneralCfg().DefaultTimezone),
-			erS.filterS, nil) // create an AgentRequest
-		if err = agReq.SetFields(cfg.PartialCommitFields); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> processing partial event: <%s>, ignoring due to error: <%s>",
-					utils.ERs, utils.ToJSON(cgrEv), err.Error()))
-			return
-		}
-		cgrEv = utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	}
-
-	return
-}
-
+// onEvicted the function that is called when a element is removed from cache
 func (erS *ERService) onEvicted(id string, value interface{}) {
-	if value == nil {
+	if value == nil { // is already complete and sent to erS
 		return
 	}
 	eEvs := value.(*erEvents)
 	action := erS.cfg.ERsCfg().PartialCacheAction
-	if cAct, has := eEvs.rdrCfg.Opts[utils.PartialCacheAction]; has {
+	if cAct, has := eEvs.rdrCfg.Opts[utils.PartialCacheActionOpt]; has { // if the option is present overwrite the global cache action
 		action = utils.IfaceAsString(cAct)
 	}
 	switch action {
-	case utils.MetaNone:
-	case utils.MetaPostCDR:
-		cgrEv, err := erS.preparePartialEvents(eEvs.events, eEvs.rdrCfg)
+	case utils.MetaNone: // do nothing with the events
+	case utils.MetaPostCDR: // merge the events and post the to erS
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS,
+			erS.cfg.GeneralCfg().DefaultTenant,
+			erS.cfg.GeneralCfg().DefaultTimezone,
+			erS.cfg.GeneralCfg().RSRSep)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed posting expired parial events <%s> due error <%s>",
@@ -470,15 +403,43 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 			return
 		}
 		erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: eEvs.rdrCfg}
-	case utils.MetaDumpToFile:
-		tmz := utils.FirstNonEmpty(eEvs.rdrCfg.Timezone, erS.cfg.GeneralCfg().DefaultTimezone)
+	case utils.MetaDumpToFile: // apply the cacheDumpFields to the united events and write the record to file
 		expPath := erS.cfg.ERsCfg().PartialPath
 		if path, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
 			expPath = utils.IfaceAsString(path)
 		}
-		if expPath == utils.EmptyString { // do not send the partial events to any file
+		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
 		}
+		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS, // merge the partial events
+			erS.cfg.GeneralCfg().DefaultTenant,
+			erS.cfg.GeneralCfg().DefaultTimezone,
+			erS.cfg.GeneralCfg().RSRSep)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> failed posting expired parial events <%s> due error <%s>",
+					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
+			return
+		}
+		// convert the event to record
+		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event),
+			utils.MapStorage{}, cgrEv.APIOpts,
+			eEvs.rdrCfg.Tenant, erS.cfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(eEvs.rdrCfg.Timezone, erS.cfg.GeneralCfg().DefaultTimezone),
+			erS.filterS, map[string]*utils.OrderedNavigableMap{
+				utils.MetaExp: utils.NewOrderedNavigableMap(),
+			})
+
+		if err = eeReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+					utils.ERs, id, err.Error()))
+			return
+		}
+
+		record := eeReq.OrdNavMP[utils.MetaExp].OrderedFieldsAsStrings()
+
+		// open the file and write the record
 		dumpFilePath := path.Join(expPath, fmt.Sprintf("%s.%d%s",
 			id, time.Now().Unix(), utils.TmpSuffix))
 		fileOut, err := os.Create(dumpFilePath)
@@ -487,34 +448,17 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 				utils.ERs, dumpFilePath, err.Error()))
 			return
 		}
-		defer fileOut.Close()
 		csvWriter := csv.NewWriter(fileOut)
-		if fldSep, has := eEvs.rdrCfg.Opts[utils.PartialCSVFieldSepartor]; has {
+		if fldSep, has := eEvs.rdrCfg.Opts[utils.PartialCSVFieldSepartorOpt]; has {
 			csvWriter.Comma = rune(utils.IfaceAsString(fldSep)[0])
 		}
-		for _, ev := range eEvs.events {
-			oNm := map[string]*utils.OrderedNavigableMap{
-				utils.MetaExp: utils.NewOrderedNavigableMap(),
-			}
-			eeReq := engine.NewEventRequest(utils.MapStorage(ev.Event), utils.MapStorage{}, ev.APIOpts,
-				eEvs.rdrCfg.Tenant, erS.cfg.GeneralCfg().DefaultTenant,
-				tmz, erS.filterS, oNm)
 
-			if err = eeReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
-						utils.ERs, id, err.Error()))
-				return
-			}
-
-			record := eeReq.OrdNavMP[utils.MetaExp].OrderedFieldsAsStrings()
-			if err = csvWriter.Write(record); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
-					utils.ERs, record, dumpFilePath, err.Error()))
-				return
-			}
+		if err = csvWriter.Write(record); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
+				utils.ERs, record, dumpFilePath, err.Error()))
 		}
 		csvWriter.Flush()
+		fileOut.Close()
 	}
 
 }

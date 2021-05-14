@@ -1,6 +1,9 @@
 cgrates (1.0) UNRELEASED; urgency=medium
-
+  [DanB]
+  * [EEs] Refactored the exporter options
   * [ERs] Refactored the reader options
+  * [ERs] Removed *flatstore and *partialcsv
+  * [ERs] Added *opts.*partial to control if the event is partial or not
 
  -- DanB <danb@cgrates.org>  Thu, 4 May 2021 12:05:00 +0200
 

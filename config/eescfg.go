@@ -148,7 +148,6 @@ type EventExporterCfg struct {
 	AttributeSCtx string   // context to use when querying AttributeS
 	Synchronous   bool
 	Attempts      int
-	FieldSep      string
 	Fields        []*FCTemplate
 	headerFields  []*FCTemplate
 	contentFields []*FCTemplate
@@ -193,9 +192,6 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Attempts != nil {
 		eeC.Attempts = *jsnEec.Attempts
-	}
-	if jsnEec.Field_separator != nil {
-		eeC.FieldSep = *jsnEec.Field_separator
 	}
 	if jsnEec.Fields != nil {
 		eeC.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnEec.Fields, separator)
@@ -262,7 +258,6 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		AttributeSCtx: eeC.AttributeSCtx,
 		Synchronous:   eeC.Synchronous,
 		Attempts:      eeC.Attempts,
-		FieldSep:      eeC.FieldSep,
 		Fields:        make([]*FCTemplate, len(eeC.Fields)),
 		headerFields:  make([]*FCTemplate, len(eeC.headerFields)),
 		contentFields: make([]*FCTemplate, len(eeC.contentFields)),
@@ -306,7 +301,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.TypeCfg:             eeC.Type,
 		utils.ExportPathCfg:       eeC.ExportPath,
 		utils.TenantCfg:           eeC.Tenant.GetRule(separator),
-		utils.FieldSepCfg:         eeC.FieldSep,
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
 		utils.FlagsCfg:            flgs,
@@ -345,7 +339,6 @@ type EventExporterJsonCfg struct {
 	Attribute_context *string
 	Synchronous       *bool
 	Attempts          *int
-	Field_separator   *string
 	Fields            *[]*FcTemplateJsonCfg
 }
 
@@ -390,9 +383,6 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	}
 	if v1.Attempts != v2.Attempts {
 		d.Attempts = utils.IntPointer(v2.Attempts)
-	}
-	if v1.FieldSep != v2.FieldSep {
-		d.Field_separator = utils.StringPointer(v2.FieldSep)
 	}
 	var flds []*FcTemplateJsonCfg
 	if d.Fields != nil {

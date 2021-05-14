@@ -221,7 +221,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		rdr.offset += rdr.lineLen // increase the offset
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 		rdrEv := rdr.rdrEvents
-		if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+		if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 			rdrEv = rdr.partialEvents
 		}
 		rdrEv <- &erEvent{
@@ -313,7 +313,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
-	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}
 	rdrEv <- &erEvent{
@@ -359,7 +359,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 	rdr.offset += rdr.headerOffset // increase the offset
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	rdrEv := rdr.rdrEvents
-	if _, isPartial := cgrEv.APIOpts[partialOpt]; isPartial {
+	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}
 	rdrEv <- &erEvent{
