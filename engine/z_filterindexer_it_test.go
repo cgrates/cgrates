@@ -278,26 +278,24 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1"},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{"Filter1"},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weight:    1.4,
+		ActionIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test2",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1"},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test2",
+		FilterIDs: []string{"Filter1"},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weight:    1.4,
+		ActionIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
@@ -835,15 +833,14 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1"},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{"Filter1"},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weight:    1.4,
+		ActionIDs: []string{},
 	}
 
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
@@ -866,15 +863,14 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	}
 	//Add an InlineFilter
 	th = &ThresholdProfile{ // recreate the profile because if we test on internal
-		Tenant:             "cgrates.org", // each update on the original item will update the item from DB
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1", "*string:~*req.Account:1001"},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
+		ID:        "THD_Test",
+		FilterIDs: []string{"Filter1", "*string:~*req.Account:1001"},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weight:    1.4,
+		ActionIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
@@ -1824,26 +1820,24 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 
 func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	th := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weight:    1.4,
+		ActionIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test2",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{},
-		MaxHits:            12,
-		MinSleep:           0,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test2",
+		FilterIDs: []string{},
+		MaxHits:   12,
+		MinSleep:  0,
+		Blocker:   true,
+		Weight:    1.4,
+		ActionIDs: []string{},
 	}
 
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {

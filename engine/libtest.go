@@ -105,8 +105,8 @@ cgrates.org,TestStats2,,20,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,
 `
 
 	ThresholdsCSVContent = `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionIDs[8],Async[9]
+cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,10,12,10,1s,true,THRESH1,true
 `
 
 	FiltersCSVContent = `

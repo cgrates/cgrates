@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -296,11 +297,7 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
-			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			MaxHits:   -1,
 			MinSleep:  time.Millisecond,
 			Weight:    10.0,
@@ -370,11 +367,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TH_Stats1",
-			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			MaxHits:   -1,
 			MinSleep:  time.Millisecond,
 			Weight:    10.0,

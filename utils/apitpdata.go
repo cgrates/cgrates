@@ -634,18 +634,17 @@ type TPStatProfile struct {
 
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile
 type TPThresholdProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	MaxHits            int
-	MinHits            int
-	MinSleep           string
-	Blocker            bool    // blocker flag to stop processing on filters matched
-	Weight             float64 // Weight to sort the thresholds
-	ActionIDs          []string
-	Async              bool
+	TPid      string
+	Tenant    string
+	ID        string
+	FilterIDs []string
+	MaxHits   int
+	MinHits   int
+	MinSleep  string
+	Blocker   bool    // blocker flag to stop processing on filters matched
+	Weight    float64 // Weight to sort the thresholds
+	ActionIDs []string
+	Async     bool
 }
 
 // TPFilterProfile is used in APIs to manage remotely offline FilterProfile

@@ -110,11 +110,7 @@ func testTpTresITPopulate(t *testing.T) {
 			TPid:      "TH1",
 			Tenant:    "cgrates.org",
 			ID:        "Threhold",
-			FilterIDs: []string{"FLTR_1", "FLTR_2"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
+			FilterIDs: []string{"FLTR_1", "FLTR_2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			MaxHits:   -1,
 			MinSleep:  "1s",
 			Blocker:   true,

@@ -94,20 +94,19 @@ func (StatMdl) TableName() string {
 }
 
 type ThresholdMdl struct {
-	PK                 uint `gorm:"primary_key"`
-	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	MaxHits            int     `index:"4" re:""`
-	MinHits            int     `index:"5" re:""`
-	MinSleep           string  `index:"6" re:""`
-	Blocker            bool    `index:"7" re:""`
-	Weight             float64 `index:"8" re:"\d+\.?\d*"`
-	ActionIDs          string  `index:"9" re:""`
-	Async              bool    `index:"10" re:""`
-	CreatedAt          time.Time
+	PK        uint `gorm:"primary_key"`
+	Tpid      string
+	Tenant    string  `index:"0" re:""`
+	ID        string  `index:"1" re:""`
+	FilterIDs string  `index:"2" re:""`
+	Weight    float64 `index:"3" re:"\d+\.?\d*"`
+	MaxHits   int     `index:"4" re:""`
+	MinHits   int     `index:"5" re:""`
+	MinSleep  string  `index:"6" re:""`
+	Blocker   bool    `index:"7" re:""`
+	ActionIDs string  `index:"8" re:""`
+	Async     bool    `index:"9" re:""`
+	CreatedAt time.Time
 }
 
 func (ThresholdMdl) TableName() string {

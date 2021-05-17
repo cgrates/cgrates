@@ -524,8 +524,8 @@ func TestLoaderProcessThresholds(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Tag: "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "MaxHits",
@@ -544,18 +544,14 @@ func TestLoaderProcessThresholds(t *testing.T) {
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "ActionIDs",
 				Path:  "ActionIDs",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "Async",
 				Path:  "Async",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
@@ -575,9 +571,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 	eTh1 := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Threshold1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  time.Second,
@@ -2987,44 +2981,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadThresholdsAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadThresholdsAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaThresholds: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	thresholdsCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaThresholds: {
-			utils.ThresholdsCsv: &openedCSVFile{
-				fileName: utils.ThresholdsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
