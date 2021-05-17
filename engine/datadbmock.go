@@ -290,15 +290,15 @@ func (dbM *DataDBMock) RemoveRateProfileDrv(*context.Context, string, string) er
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionProfileDrv(string, string) (*ActionProfile, error) {
+func (dbM *DataDBMock) GetActionProfileDrv(*context.Context, string, string) (*ActionProfile, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetActionProfileDrv(*ActionProfile) error {
+func (dbM *DataDBMock) SetActionProfileDrv(*context.Context, *ActionProfile) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveActionProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveActionProfileDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

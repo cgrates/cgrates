@@ -99,9 +99,9 @@ type DataDB interface {
 	GetRateProfileDrv(*context.Context, string, string) (*utils.RateProfile, error)
 	SetRateProfileDrv(*context.Context, *utils.RateProfile) error
 	RemoveRateProfileDrv(*context.Context, string, string) error
-	GetActionProfileDrv(string, string) (*ActionProfile, error)
-	SetActionProfileDrv(*ActionProfile) error
-	RemoveActionProfileDrv(string, string) error
+	GetActionProfileDrv(*context.Context, string, string) (*ActionProfile, error)
+	SetActionProfileDrv(*context.Context, *ActionProfile) error
+	RemoveActionProfileDrv(*context.Context, string, string) error
 	GetAccountDrv(string, string) (*utils.Account, error)
 	SetAccountDrv(profile *utils.Account) error
 	RemoveAccountDrv(string, string) error

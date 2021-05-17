@@ -71,13 +71,14 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		},
 	}
 
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
 	expActionPrf := engine.ActionProfiles{actPrf}
 
-	if rcv, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), []string{}); err != nil {
+	if rcv, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
+		evNM, utils.TimePointer(time.Now()), []string{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expActionPrf) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expActionPrf), utils.ToJSON(rcv))
@@ -90,7 +91,8 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		utils.MetaOpts: map[string]interface{}{},
 	}
 	//This Event is not matching with our filter
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), []string{}); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
+		evNM, utils.TimePointer(time.Now()), []string{}); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -102,38 +104,44 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	}
 	actPrfIDs := []string{"inexisting_id"}
 	//Unable to get from database an ActionProfile if the ID won't match
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
+		evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
 	actPrfIDs = []string{"test_id1"}
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
+		evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 	actPrf.FilterIDs = append(actPrf.FilterIDs, "*ai:~*req.AnswerTime:2012-07-21T00:00:00Z|2012-08-21T00:00:00Z")
 	//this event is not active in this interval time
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Date(2012, 6, 21, 0, 0, 0, 0, time.UTC)), actPrfIDs); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
+		evNM, utils.TimePointer(time.Date(2012, 6, 21, 0, 0, 0, 0, time.UTC)), actPrfIDs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
 	//when dataManager is nil, it won't be able to get ActionsProfile from database
 	acts.dm = nil
-	if _, err := acts.matchingActionProfilesForEvent("INVALID_TENANT", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNoDatabaseConn {
+	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "INVALID_TENANT",
+		evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
 	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	actPrf.FilterIDs = []string{"invalid_filters"}
 	//Set in database and invalid filter, so it won t pass
-	if err := acts.dm.SetActionProfile(actPrf, false); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, false); err != nil {
 		t.Error(err)
 	}
 	expected := "NOT_FOUND:invalid_filters"
-	if _, err := acts.matchingActionProfilesForEvent("cgrates.org", evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err.Error() != expected {
+	if _, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
+		evNM, utils.TimePointer(time.Now()), actPrfIDs); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, false); err != nil {
+	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant,
+		actPrf.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 }
@@ -175,11 +183,11 @@ func TestScheduledActions(t *testing.T) {
 		},
 	}
 
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
-	if rcv, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err != nil {
+	if rcv, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false); err != nil {
 		t.Error(err)
 	} else {
 		expSchedActs := newScheduledActs(context.Background(), cgrEv.Tenant, cgrEv.ID, utils.MetaNone, utils.EmptyString,
@@ -196,7 +204,7 @@ func TestScheduledActions(t *testing.T) {
 			utils.Accounts: "10",
 		},
 	}
-	if _, err := acts.scheduledActions(cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -236,34 +244,34 @@ func TestScheduleAction(t *testing.T) {
 			},
 		},
 	}
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
-	if err := acts.scheduleActions(cgrEv, []string{}, true); err != nil {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, true); err != nil {
 		t.Error(err)
 	}
 
 	//Cannot schedule an action if the ID is invalid
-	if err := acts.scheduleActions(cgrEv, []string{"INVALID_ID1"}, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{"INVALID_ID1"}, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
 	//When schedule is "*asap", the action will execute immediately
 	actPrf.Schedule = utils.MetaASAP
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := acts.scheduleActions(cgrEv, []string{}, true); err != nil {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, true); err != nil {
 		t.Error(err)
 	}
 
 	//Cannot execute the action if the cron is invalid
 	actPrf.Schedule = "* * * *"
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := acts.scheduleActions(cgrEv, []string{}, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
 }
@@ -294,7 +302,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	expSchedActs := newScheduledActs(context.Background(), cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, utils.EmptyString,
 		utils.EmptyString, evNM, nil)
 
-	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
@@ -302,7 +310,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	acts.dm = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
 		utils.EmptyString, evNM, nil)
-	if err := acts.asapExecuteActions(expSchedActs); err == nil || err != utils.ErrNotFound {
+	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -376,22 +384,22 @@ func TestV1ScheduleActions(t *testing.T) {
 		},
 	}
 
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
-	if err := acts.V1ScheduleActions(newArgs, &reply); err != nil {
+	if err := acts.V1ScheduleActions(context.Background(), newArgs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
 	newArgs.ActionProfileIDs = []string{"invalid_id"}
-	if err := acts.V1ScheduleActions(newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.V1ScheduleActions(context.Background(), newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
-	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -433,18 +441,18 @@ func TestV1ExecuteActions(t *testing.T) {
 			},
 		},
 	}
-	if err := acts.dm.SetActionProfile(actPrf, true); err != nil {
+	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
-	if err := acts.V1ExecuteActions(newArgs, &reply); err != nil {
+	if err := acts.V1ExecuteActions(context.Background(), newArgs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
 	newArgs.ActionProfileIDs = []string{"invalid_id"}
-	if err := acts.V1ExecuteActions(newArgs, &reply); err == nil || err != utils.ErrNotFound {
+	if err := acts.V1ExecuteActions(context.Background(), newArgs, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -452,11 +460,11 @@ func TestV1ExecuteActions(t *testing.T) {
 	newDm := engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	newActs := NewActionS(defaultCfg, filters, newDm, nil)
 	newArgs.ActionProfileIDs = []string{}
-	if err := newActs.V1ExecuteActions(newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := newActs.V1ExecuteActions(context.Background(), newArgs, &reply); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
-	if err := acts.dm.RemoveActionProfile(actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -491,7 +499,7 @@ type dataDBMockError struct {
 	*engine.DataDBMock
 }
 
-func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionProfile, error) {
+func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string) (*engine.ActionProfile, error) {
 	return &engine.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "test_id1",
@@ -510,7 +518,7 @@ func (dbM *dataDBMockError) GetActionProfileDrv(string, string) (*engine.ActionP
 	}, nil
 }
 
-func (dbM *dataDBMockError) SetActionProfileDrv(*engine.ActionProfile) error {
+func (dbM *dataDBMockError) SetActionProfileDrv(*context.Context, *engine.ActionProfile) error {
 	return utils.ErrNoDatabaseConn
 }
 
@@ -1061,7 +1069,7 @@ func TestACScheduledActions(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetActionProfile(actPrf, true); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1084,7 +1092,7 @@ func TestACScheduledActions(t *testing.T) {
 
 	acts := NewActionS(cfg, fltrs, dm, nil)
 	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
-	if _, err := acts.scheduledActions("cgrates.org", cgrEv, []string{}, true); err != nil {
+	if _, err := acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, true); err != nil {
 		t.Error(err)
 	} else if rcv := buff.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
@@ -1097,7 +1105,7 @@ func TestACScheduledActions(t *testing.T) {
 			"ID_TEST": {},
 		},
 	}
-	if err := dm.SetActionProfile(actPrf, true); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1117,14 +1125,14 @@ func TestACScheduledActions(t *testing.T) {
 		},
 	}
 	var schedActs []*scheduledActs
-	if schedActs, err = acts.scheduledActions("cgrates.org", cgrEv, []string{}, true); err != nil {
+	if schedActs, err = acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, true); err != nil {
 		t.Error(err)
 	} else {
 
 	}
 	//execute asap the actions
 	schedActs[0].trgID = "invalid_type"
-	if err := acts.asapExecuteActions(schedActs[0]); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.asapExecuteActions(context.Background(), schedActs[0]); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 

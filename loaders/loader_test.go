@@ -2513,7 +2513,7 @@ func TestLoaderActionProfile(t *testing.T) {
 		},
 	}
 
-	aps, err := ldr.dm.GetActionProfile("cgrates.org", "ONE_TIME_ACT",
+	aps, err := ldr.dm.GetActionProfile(context.Background(), "cgrates.org", "ONE_TIME_ACT",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
@@ -4185,7 +4185,7 @@ cgrates.org,REM_ACTPROFILE_1
 		Tenant: "cgrates.org",
 		ID:     "REM_ACTPROFILE_1",
 	}
-	if err := ldr.dm.SetActionProfile(actRtPrf, true); err != nil {
+	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -4339,7 +4339,7 @@ cgrates.org,REM_ACTPROFILE_s
 		ID:     "REM_ACTPROFILE_s",
 	}
 	expectedErr := "NOT_FOUND"
-	if err := ldr.dm.SetActionProfile(actRtPrf, true); err != nil {
+	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
@@ -4391,7 +4391,7 @@ cgrates.org,REM_ACTPROFILE_s
 		ID:     "REM_ACTPROFILE_s",
 	}
 	expectedErr := "NOT_FOUND"
-	if err := ldr.dm.SetActionProfile(actRtPrf, true); err != nil {
+	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
