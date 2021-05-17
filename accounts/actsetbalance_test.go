@@ -23,10 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/utils"
-
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -44,18 +44,21 @@ func TestActSetAccountBalance(t *testing.T) {
 	}
 
 	expected := utils.ErrNoDatabaseConn.Error()
-	if err := actSetAccount(nil, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
+	if err := actSetAccount(context.Background(), nil, "cgrates.org",
+		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	expected = "WRONG_PATH"
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*balance.Concrete1.NOT_A_FIELD"
 
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*balance.Concrete1.Weights"
@@ -93,9 +96,10 @@ func TestActSetAccountBalance(t *testing.T) {
 			},
 		},
 	}
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err != nil {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+		acntID, diktats, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := dm.GetAccount("cgrates.org", acntID); err != nil {
+	} else if rcv, err := dm.GetAccount(context.Background(), "cgrates.org", acntID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expectedAcc) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAcc), utils.ToJSON(rcv))
@@ -117,18 +121,21 @@ func TestActSetAccount(t *testing.T) {
 	}
 
 	expected := "WRONG_PATH"
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*account"
 
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*account.Weights"
 
 	expected = "invalid DynamicWeight format for string <10>"
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err == nil || err.Error() != expected {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Value = ";10"
@@ -142,9 +149,9 @@ func TestActSetAccount(t *testing.T) {
 			},
 		},
 	}
-	if err := actSetAccount(dm, "cgrates.org", acntID, diktats, false); err != nil {
+	if err := actSetAccount(context.Background(), dm, "cgrates.org", acntID, diktats, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := dm.GetAccount("cgrates.org", acntID); err != nil {
+	} else if rcv, err := dm.GetAccount(context.Background(), "cgrates.org", acntID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expectedAcc) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAcc), utils.ToJSON(rcv))

@@ -62,7 +62,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 	}
 	filters := engine.NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
 
-	concrete, err := newBalanceOperator(acntPrf.ID, acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
+	concrete, err := newBalanceOperator(context.Background(), acntPrf.ID, acntPrf.Balances["BL1"], nil, filters, nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -73,10 +73,11 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 		acntID:     acntPrf.ID,
 		blnCfg:     acntPrf.Balances["BL0"],
 		fltrS:      filters,
+		ctx:        context.Background(),
 		cncrtBlncs: cncrtBlncs,
 	}
 	blnCfgs := []*utils.Balance{acntPrf.Balances["BL0"], acntPrf.Balances["BL1"]}
-	if blcOp, err := newBalanceOperators(acntPrf.ID, blnCfgs, filters, nil,
+	if blcOp, err := newBalanceOperators(context.Background(), acntPrf.ID, blnCfgs, filters, nil,
 		nil, nil); err != nil {
 		t.Error(err)
 	} else {
@@ -91,7 +92,7 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 
 	acntPrf.Balances["BL1"].Type = "INVALID_TYPE"
 	expectedErr := "unsupported balance type: <INVALID_TYPE>"
-	if _, err := newBalanceOperators(acntPrf.ID, blnCfgs, filters, nil,
+	if _, err := newBalanceOperators(context.Background(), acntPrf.ID, blnCfgs, filters, nil,
 		nil, nil); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
@@ -135,7 +136,7 @@ func TestProcessAttributeS(t *testing.T) {
 
 	attrsConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	if _, err := processAttributeS(connMgr, cgrEvent, attrsConns, nil); err == nil || err != utils.ErrNotImplemented {
+	if _, err := processAttributeS(context.Background(), connMgr, cgrEvent, attrsConns, nil); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 }
@@ -163,7 +164,7 @@ func TestRateSCostForEvent(t *testing.T) { // coverage purpose
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
 
-	if _, err := rateSCostForEvent(connMgr, cgrEvent, rateSConns, nil); err == nil || err != utils.ErrNotImplemented {
+	if _, err := rateSCostForEvent(context.Background(), connMgr, cgrEvent, rateSConns, nil); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 }
@@ -201,7 +202,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 
 	rateSConns := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS)}
 
-	if _, err := rateSCostForEvent(connMgr, cgrEvent, rateSConns, nil); err != nil {
+	if _, err := rateSCostForEvent(context.Background(), connMgr, cgrEvent, rateSConns, nil); err != nil {
 		t.Error(err)
 	}
 }
@@ -255,10 +256,11 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		},
 		UnitFactors: make(map[string]*utils.UnitFactor),
 		Rating:      make(map[string]*utils.RateSInterval),
+		Rates:       make(map[string]*utils.IntervalRate),
 		Accounts:    make(map[string]*utils.Account),
 	}
 
-	if evCh, err := debitConcreteUnits(decimal.New(700, 0), utils.EmptyString,
+	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(700, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
@@ -277,7 +279,7 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 
-	if _, err := debitConcreteUnits(decimal.New(1100, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), decimal.New(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Errorf("Expected %+v, received %+v", utils.ErrInsufficientCredit, err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
@@ -361,10 +363,11 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 		},
 		UnitFactors: make(map[string]*utils.UnitFactor),
 		Rating:      make(map[string]*utils.RateSInterval),
+		Rates:       make(map[string]*utils.IntervalRate),
 		Accounts:    make(map[string]*utils.Account),
 	}
 
-	if evCh, err := debitConcreteUnits(decimal.New(700, 0), utils.EmptyString,
+	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(700, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
@@ -384,7 +387,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 
-	if _, err := debitConcreteUnits(decimal.New(1000, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), decimal.New(1000, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
@@ -397,7 +400,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 
-	if _, err := debitConcreteUnits(decimal.New(1100, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), decimal.New(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Errorf("Expected %+v, received %+v", utils.ErrInsufficientCredit, err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
@@ -433,7 +436,7 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		fltrS: filterS,
 	}
 
-	if _, err := debitConcreteUnits(decimal.New(200, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), decimal.New(200, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2},
 		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
@@ -470,7 +473,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		fltrS: filterS,
 	}
 
-	if _, err := maxDebitAbstractsFromConcretes(decimal.New(900, 0), utils.EmptyString,
+	if _, err := maxDebitAbstractsFromConcretes(context.Background(), decimal.New(900, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, nil, new(utils.CGREvent),
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
@@ -486,7 +489,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	//debit more than we have in balances with the restored units
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
-	if _, err := maxDebitAbstractsFromConcretes(decimal.New(1100, 0), utils.EmptyString,
+	if _, err := maxDebitAbstractsFromConcretes(context.Background(), decimal.New(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, nil, &utils.CGREvent{
 			ID: "Unique_id",
 		},
@@ -523,17 +526,17 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 			},
 		},
 	}
-	if err := dm.SetAccount(acntPrf, false); err != nil {
+	if err := dm.SetAccount(context.Background(), acntPrf, false); err != nil {
 		t.Error(err)
 	}
 
-	restoreAccounts(dm, []*utils.AccountWithWeight{
+	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
 	})
 
-	if rcv, err := dm.GetAccount("cgrates.org", "1001"); err != nil {
+	if rcv, err := dm.GetAccount(context.Background(), "cgrates.org", "1001"); err != nil {
 		t.Error(err)
 	} else if len(rcv.Balances) != 2 {
 		t.Errorf("Unexpected number of balances received")
@@ -575,7 +578,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
 
-	restoreAccounts(dm, []*utils.AccountWithWeight{
+	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
@@ -611,11 +614,11 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 			},
 		},
 	}
-	if err := dm.SetAccount(acntPrf, false); err != nil {
+	if err := dm.SetAccount(context.Background(), acntPrf, false); err != nil {
 		t.Error(err)
 	}
 
-	restoreAccounts(dm, []*utils.AccountWithWeight{
+	restoreAccounts(context.Background(), dm, []*utils.AccountWithWeight{
 		{acntPrf, 0, utils.EmptyString},
 	}, []utils.AccountBalancesBackup{
 		nil,
@@ -678,7 +681,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetAccount(accPrf, true); err != nil {
+	if err := dm.SetAccount(context.Background(), accPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -711,7 +714,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetRateProfile(rtPrf, true); err != nil {
+	if err := dm.SetRateProfile(context.Background(), rtPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -730,7 +733,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 	exEvCh := utils.ExtEventCharges{
 		Abstracts: utils.Float64Pointer(300),
 	}
-	if err := accnts.V1DebitAbstracts(args, &reply); err != nil {
+	if err := accnts.V1DebitAbstracts(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exEvCh, reply) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
@@ -739,16 +742,16 @@ func TestDebitFromBothBalances(t *testing.T) {
 	accPrf.Balances["AbstractBalance"].Units = utils.NewDecimal(1200, 0)
 	accPrf.Balances["ConcreteBalance2"].Units = utils.NewDecimal(49999999997, 9)
 	//as we debited, the account is changed
-	if rcvAcc, err := dm.GetAccount(accPrf.Tenant, accPrf.ID); err != nil {
+	if rcvAcc, err := dm.GetAccount(context.Background(), accPrf.Tenant, accPrf.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvAcc, accPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(accPrf), utils.ToJSON(rcvAcc))
 	}
 
-	if err := dm.RemoveAccount(accPrf.Tenant, accPrf.ID,
+	if err := dm.RemoveAccount(context.Background(), accPrf.Tenant, accPrf.ID,
 		utils.NonTransactional, true); err != nil {
 		t.Error(err)
-	} else if err := dm.RemoveRateProfile(rtPrf.Tenant, rtPrf.ID,
+	} else if err := dm.RemoveRateProfile(context.Background(), rtPrf.Tenant, rtPrf.ID,
 		utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
@@ -788,7 +791,7 @@ func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 	}
 
 	expectedErr := "inline parse error for string: <*test>"
-	if _, err := maxDebitAbstractsFromConcretes(decimal.New(110, 0), utils.EmptyString,
+	if _, err := maxDebitAbstractsFromConcretes(context.Background(), decimal.New(110, 0), utils.EmptyString,
 		cncrtBlncs, nil, new(utils.CGREvent),
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(2, 0),

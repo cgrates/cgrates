@@ -598,7 +598,7 @@ func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	return
 }
 
-func (iDB *InternalDB) GetAccountDrv(tenant, id string) (ap *utils.Account, err error) {
+func (iDB *InternalDB) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
 	x, ok := Cache.Get(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -606,13 +606,13 @@ func (iDB *InternalDB) GetAccountDrv(tenant, id string) (ap *utils.Account, err 
 	return x.(*utils.Account).Clone(), nil
 }
 
-func (iDB *InternalDB) SetAccountDrv(ap *utils.Account) (err error) {
+func (iDB *InternalDB) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheAccounts, ap.TenantID(), ap, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveAccountDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

@@ -26,11 +26,11 @@ import (
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(acntID string, blnCfg *utils.Balance,
+func newAbstractBalanceOperator(ctx *context.Context, acntID string, blnCfg *utils.Balance,
 	cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
-	return &abstractBalance{acntID, blnCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns}
+	return &abstractBalance{acntID, blnCfg, cncrtBlncs, fltrS, connMgr, ctx, attrSConns, rateSConns}
 }
 
 // abstractBalance is the operator for *abstract balance type
@@ -40,6 +40,7 @@ type abstractBalance struct {
 	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
 	connMgr    *engine.ConnManager
+	ctx        *context.Context
 	attrSConns []string
 	rateSConns []string
 }
@@ -50,7 +51,7 @@ func (aB *abstractBalance) id() string {
 }
 
 // debitAbstracts implements the balanceOperator interface
-func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
+func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.Big,
 	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 
 	evNm := utils.MapStorage{
@@ -60,7 +61,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 
 	// pass the general balance filters
 	var pass bool
-	if pass, err = aB.fltrS.Pass(context.TODO(), cgrEv.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = aB.fltrS.Pass(ctx, cgrEv.Tenant, aB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
@@ -79,13 +80,13 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 
 	// costIncrement
 	var costIcrm *utils.CostIncrement
-	if costIcrm, err = costIncrement(aB.blnCfg.CostIncrements, aB.fltrS,
+	if costIcrm, err = costIncrement(ctx, aB.blnCfg.CostIncrements, aB.fltrS,
 		cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	// unitFactor
 	var uF *utils.UnitFactor
-	if uF, err = unitFactor(aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
+	if uF, err = unitFactor(ctx, aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	var hasUF bool
@@ -111,7 +112,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 		(costIcrm.RecurrentFee != nil &&
 			costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0) {
 		// attempt to debit usage with cost
-		if ecCost, err = maxDebitAbstractsFromConcretes(usage,
+		if ecCost, err = maxDebitAbstractsFromConcretes(ctx, usage,
 			aB.acntID, aB.cncrtBlncs,
 			aB.connMgr, cgrEv,
 			aB.attrSConns, aB.blnCfg.AttributeIDs,
@@ -214,7 +215,7 @@ func (aB *abstractBalance) debitAbstracts(usage *decimal.Big,
 }
 
 // debitConcretes implements the balanceOperator interface
-func (aB *abstractBalance) debitConcretes(_ *decimal.Big,
+func (aB *abstractBalance) debitConcretes(_ *context.Context, _ *decimal.Big,
 	_ *utils.CGREvent, _ *decimal.Big) (ec *utils.EventCharges, err error) {
 	return nil, utils.ErrNotImplemented
 }

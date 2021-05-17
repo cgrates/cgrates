@@ -32,7 +32,7 @@ import (
 )
 
 // newAccountBalances constructs accountBalances
-func newBalanceOperators(acntID string, blnCfgs []*utils.Balance,
+func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
 
@@ -42,7 +42,7 @@ func newBalanceOperators(acntID string, blnCfgs []*utils.Balance,
 		if blnCfg.Type != utils.MetaConcrete {
 			continue
 		}
-		blncOpers[i] = newConcreteBalanceOperator(acntID, blnCfg,
+		blncOpers[i] = newConcreteBalanceOperator(ctx, acntID, blnCfg,
 			fltrS, connMgr, attrSConns, rateSConns)
 		cncrtBlncs = append(cncrtBlncs, blncOpers[i].(*concreteBalance))
 	}
@@ -51,7 +51,7 @@ func newBalanceOperators(acntID string, blnCfgs []*utils.Balance,
 		if blnCfg.Type == utils.MetaConcrete {
 			continue
 		}
-		if blncOpers[i], err = newBalanceOperator(acntID, blnCfg, cncrtBlncs,
+		if blncOpers[i], err = newBalanceOperator(ctx, acntID, blnCfg, cncrtBlncs,
 			fltrS, connMgr, attrSConns, rateSConns); err != nil {
 			return
 		}
@@ -62,24 +62,24 @@ func newBalanceOperators(acntID string, blnCfgs []*utils.Balance,
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
-func newBalanceOperator(acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
+func newBalanceOperator(ctx *context.Context, acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
 	default:
 		return nil, fmt.Errorf("unsupported balance type: <%s>", blncCfg.Type)
 	case utils.MetaConcrete:
-		return newConcreteBalanceOperator(acntID, blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newConcreteBalanceOperator(ctx, acntID, blncCfg, fltrS, connMgr, attrSConns, rateSConns), nil
 	case utils.MetaAbstract:
-		return newAbstractBalanceOperator(acntID, blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
+		return newAbstractBalanceOperator(ctx, acntID, blncCfg, cncrtBlncs, fltrS, connMgr, attrSConns, rateSConns), nil
 	}
 }
 
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	id() string // balance id
-	debitAbstracts(usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
-	debitConcretes(usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
+	debitAbstracts(ctx *context.Context, usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
+	debitConcretes(ctx *context.Context, usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments
@@ -92,7 +92,7 @@ func roundUnitsWithIncrements(usage, incrm *decimal.Big) (rndedUsage *decimal.Bi
 }
 
 // processAttributeS will process the event with AttributeS
-func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attrIDs []string) (rplyEv *engine.AttrSProcessEventReply, err error) {
 	if len(attrSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AttributeS)
@@ -112,7 +112,7 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 		ProcessRuns:  procRuns,
 	}
 	var tmpReply engine.AttrSProcessEventReply
-	if err = connMgr.Call(context.TODO(), attrSConns, utils.AttributeSv1ProcessEvent,
+	if err = connMgr.Call(ctx, attrSConns, utils.AttributeSv1ProcessEvent,
 		attrArgs, &tmpReply); err != nil {
 		return
 	}
@@ -120,13 +120,13 @@ func processAttributeS(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 }
 
 // rateSCostForEvent will process the event with RateS in order to get the cost
-func rateSCostForEvent(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+func rateSCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	rateSConns, rpIDs []string) (rplyCost *utils.RateProfileCost, err error) {
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
 	}
 	var tmpReply utils.RateProfileCost
-	if err = connMgr.Call(context.TODO(), rateSConns, utils.RateSv1CostForEvent,
+	if err = connMgr.Call(ctx, rateSConns, utils.RateSv1CostForEvent,
 		&utils.ArgsCostForEvent{CGREvent: cgrEv, RateProfileIDs: rpIDs}, &tmpReply); err != nil {
 		return
 	}
@@ -134,11 +134,11 @@ func rateSCostForEvent(connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 }
 
 // costIncrement computes the costIncrement for the event
-func costIncrement(cfgCostIncrmts []*utils.CostIncrement,
+func costIncrement(ctx *context.Context, cfgCostIncrmts []*utils.CostIncrement,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
 	for _, cIcrm := range cfgCostIncrmts {
 		var pass bool
-		if pass, err = fltrS.Pass(context.TODO(), tnt, cIcrm.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(ctx, tnt, cIcrm.FilterIDs, ev); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -156,11 +156,11 @@ func costIncrement(cfgCostIncrmts []*utils.CostIncrement,
 }
 
 // unitFactor detects the unitFactor for the event
-func unitFactor(cfgUnitFactors []*utils.UnitFactor,
+func unitFactor(ctx *context.Context, cfgUnitFactors []*utils.UnitFactor,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (uF *utils.UnitFactor, err error) {
 	for _, uFcfg := range cfgUnitFactors {
 		var pass bool
-		if pass, err = fltrS.Pass(context.TODO(), tnt, uFcfg.FilterIDs, ev); err != nil {
+		if pass, err = fltrS.Pass(ctx, tnt, uFcfg.FilterIDs, ev); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -190,14 +190,14 @@ func balanceLimit(optsCfg map[string]interface{}) (bL *utils.Decimal, err error)
 
 // debitConcreteUnits debits concrete units out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debited
-func debitConcreteUnits(cUnits *decimal.Big,
+func debitConcreteUnits(ctx *context.Context, cUnits *decimal.Big,
 	acntID string, cncrtBlncs []*concreteBalance,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for _, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
-		if ecCncrt, err = cB.debitConcretes(new(decimal.Big).Copy(cUnits), cgrEv, nil); err != nil {
+		if ecCncrt, err = cB.debitConcretes(ctx, new(decimal.Big).Copy(cUnits), cgrEv, nil); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return nil, err
 		}
@@ -219,7 +219,7 @@ func debitConcreteUnits(cUnits *decimal.Big,
 }
 
 // maxDebitAbstractsFromConcretes will debit the maximum possible abstract units out of concretes
-func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
+func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	acntID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
@@ -231,7 +231,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 	if calculateCost &&
 		len(attributeIDs) != 0 && attributeIDs[0] != utils.MetaNone { // cost unknown, apply AttributeS to query from RateS
 		var rplyAttrS *engine.AttrSProcessEventReply
-		if rplyAttrS, err = processAttributeS(connMgr, cgrEv, attrSConns,
+		if rplyAttrS, err = processAttributeS(ctx, connMgr, cgrEv, attrSConns,
 			attributeIDs); err != nil {
 			return
 		}
@@ -259,7 +259,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 			var rplyCost *utils.RateProfileCost
 			cgrEv.APIOpts[utils.OptsRatesIntervalStart] = dbtedAUnts
 			cgrEv.APIOpts[utils.OptsRatesUsage] = aUnits
-			if rplyCost, err = rateSCostForEvent(connMgr, cgrEv, rateSConns, rpIDs); err != nil {
+			if rplyCost, err = rateSCostForEvent(ctx, connMgr, cgrEv, rateSConns, rpIDs); err != nil {
 				err = utils.NewErrRateS(err)
 				return
 			}
@@ -286,7 +286,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		}
 		aQried := aUnits // so we can detect loops
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debitConcreteUnits(cUnits, acntID, cncrtBlncs, cgrEv); err != nil {
+		if ecDbt, err = debitConcreteUnits(ctx, cUnits, acntID, cncrtBlncs, cgrEv); err != nil {
 			if err != utils.ErrInsufficientCredit {
 				return
 			}
@@ -307,7 +307,9 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 		} else { // debit for the usage succeeded
 			aPaid = new(decimal.Big).Copy(aUnits)
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
-			ec = utils.NewEventCharges()
+			if ec == nil {
+				ec = utils.NewEventCharges()
+			}
 			ec.Merge(ecDbt)
 			if i == 0 { // no estimation done, covering full
 				break
@@ -338,7 +340,7 @@ func maxDebitAbstractsFromConcretes(aUnits *decimal.Big,
 }
 
 // restoreAccounts will restore the accounts in DataDB out of their backups if present
-func restoreAccounts(dm *engine.DataManager,
+func restoreAccounts(ctx *context.Context, dm *engine.DataManager,
 	acnts []*utils.AccountWithWeight, bkps []utils.AccountBalancesBackup) {
 	for i, bkp := range bkps {
 		if bkp == nil ||
@@ -346,7 +348,7 @@ func restoreAccounts(dm *engine.DataManager,
 			continue
 		}
 		acnts[i].Account.RestoreFromBackup(bkp)
-		if err := dm.SetAccount(acnts[i].Account, false); err != nil {
+		if err := dm.SetAccount(ctx, acnts[i].Account, false); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error <%s> restoring account <%s>",
 				utils.AccountS, err, acnts[i].Account.TenantID()))
 		}

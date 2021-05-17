@@ -667,7 +667,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, acp.TenantID())
-				if err := ldr.dm.SetAccount(acp, true); err != nil {
+				if err := ldr.dm.SetAccount(context.TODO(), acp, true); err != nil {
 					return err
 				}
 			}
@@ -987,7 +987,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveAccount(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveAccount(context.TODO(), tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}

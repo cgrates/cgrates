@@ -1545,9 +1545,9 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	})
 }
 
-func (ms *MongoStorage) GetAccountDrv(tenant, id string) (ap *utils.Account, err error) {
+func (ms *MongoStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
 	ap = new(utils.Account)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColAnp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(ap); err != nil {
 			ap = nil
@@ -1561,8 +1561,8 @@ func (ms *MongoStorage) GetAccountDrv(tenant, id string) (ap *utils.Account, err
 	return
 }
 
-func (ms *MongoStorage) SetAccountDrv(ap *utils.Account) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColAnp).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
 			bson.M{"$set": ap},
 			options.Update().SetUpsert(true),
@@ -1571,8 +1571,8 @@ func (ms *MongoStorage) SetAccountDrv(ap *utils.Account) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveAccountDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColAnp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

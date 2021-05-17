@@ -715,7 +715,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if ap, err = APItoAccount(tpAP, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetAccount(ap, true); err != nil {
+		if err = tpr.dm.SetAccount(context.TODO(), ap, true); err != nil {
 			return
 		}
 		if verbose {
@@ -1056,7 +1056,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("Accounts:")
 	}
 	for _, tpAp := range tpr.accounts {
-		if err = tpr.dm.RemoveAccount(tpAp.Tenant, tpAp.ID,
+		if err = tpr.dm.RemoveAccount(context.TODO(), tpAp.Tenant, tpAp.ID,
 			utils.NonTransactional, true); err != nil {
 			return
 		}

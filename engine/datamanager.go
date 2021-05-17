@@ -2560,15 +2560,15 @@ func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []s
 	return
 }
 
-func (dm *DataManager) GetAccount(tenant, id string) (ap *utils.Account, err error) {
+func (dm *DataManager) GetAccount(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	ap, err = dm.dataDB.GetAccountDrv(tenant, id)
+	ap, err = dm.dataDB.GetAccountDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetAccount,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2576,7 +2576,7 @@ func (dm *DataManager) GetAccount(tenant, id string) (ap *utils.Account, err err
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &ap); err == nil {
-				err = dm.dataDB.SetAccountDrv(ap)
+				err = dm.dataDB.SetAccountDrv(ctx, ap)
 			}
 		}
 		if err != nil {
@@ -2586,22 +2586,22 @@ func (dm *DataManager) GetAccount(tenant, id string) (ap *utils.Account, err err
 	return
 }
 
-func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error) {
+func (dm *DataManager) SetAccount(ctx *context.Context, ap *utils.Account, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, ap.TenantID())
 		}
 	}
-	oldRpp, err := dm.GetAccount(ap.Tenant, ap.ID)
+	oldRpp, err := dm.GetAccount(ctx, ap.Tenant, ap.ID)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetAccountDrv(ap); err != nil {
+	if err = dm.DataDB().SetAccountDrv(ctx, ap); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2609,13 +2609,13 @@ func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error)
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheAccountsFilterIndexes, ap.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheAccountsFilterIndexes, ap.Tenant,
 			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountPrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccount,
@@ -2627,29 +2627,29 @@ func (dm *DataManager) SetAccount(ap *utils.Account, withIndex bool) (err error)
 	return
 }
 
-func (dm *DataManager) RemoveAccount(tenant, id string,
+func (dm *DataManager) RemoveAccount(ctx *context.Context, tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetAccount(tenant, id)
+	oldRpp, err := dm.GetAccount(ctx, tenant, id)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveAccountDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveAccountDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRpp == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheAccountsFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheAccountsFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AccountPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveAccount,

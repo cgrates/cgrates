@@ -705,7 +705,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 			idxSlice := indx.AsSlice()
 			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					ap, e := dm.GetAccount(tnt, id)
+					ap, e := dm.GetAccount(context.Background(), tnt, id)
 					if e != nil {
 						return nil, e
 					}
