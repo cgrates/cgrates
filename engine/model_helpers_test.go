@@ -3587,7 +3587,7 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		{TPid: "",
 			Tenant:          "cgrates.org",
 			ID:              "RP1",
-			FilterIDs:       []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
+			FilterIDs:       []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z", "*string:~*req.Subject:1001"},
 			Weights:         ";1.2",
 			MinCost:         0.1,
 			MaxCost:         0.6,
@@ -3611,6 +3611,7 @@ func TestRateProfileMdlsAsTPRateProfileCase2(t *testing.T) {
 		},
 	}
 	result := testRPMdls.AsTPRateProfile()
+	sort.Strings(result[0].FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -4648,7 +4649,7 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 			TPid:      "TEST_TPID",
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
-			FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z", "FLTR_RES_GR1"},
 			Weights:   "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
@@ -4667,6 +4668,7 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	sort.Strings(result[0].FilterIDs)
 	sort.Strings(exp[0].Balances["VoiceBalance"].RateProfileIDs)
 	sort.Strings(result[0].Balances["VoiceBalance"].RateProfileIDs)
 	if !reflect.DeepEqual(exp, result) {
@@ -4695,7 +4697,7 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 			TPid:      "TEST_TPID",
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
-			FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z"},
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-24T15:00:00Z", "FLTR_RES_GR1"},
 			Weights:   "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
@@ -4758,7 +4760,7 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		TPid:      "TEST_TPID",
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z", "FLTR_RES_GR1"},
 		Weights:   "10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
@@ -4899,7 +4901,7 @@ func TestApitoAccountCase2(t *testing.T) {
 	exp := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-15T14:25:00Z|2014-07-15T14:25:00Z"},
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10.0,
