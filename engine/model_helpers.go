@@ -2290,16 +2290,6 @@ func (apm AccountMdls) AsTPAccount() (result []*utils.TPAccount, err error) {
 			}
 			thresholdIDsMap[tenID].AddSlice(strings.Split(tp.ThresholdIDs, utils.InfieldSep))
 		}
-		if tp.ActivationInterval != utils.EmptyString {
-			aPrf.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
-				aPrf.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				aPrf.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.BalanceID != utils.EmptyString {
 			aPrf.Balances[tp.BalanceID] = &utils.TPAccountBalance{
 				ID:      tp.BalanceID,
@@ -2392,14 +2382,6 @@ func APItoModelTPAccount(tPrf *utils.TPAccount) (mdls AccountMdls) {
 				}
 				mdl.ThresholdIDs += val
 			}
-			if tPrf.ActivationInterval != nil {
-				if tPrf.ActivationInterval.ActivationTime != utils.EmptyString {
-					mdl.ActivationInterval = tPrf.ActivationInterval.ActivationTime
-				}
-				if tPrf.ActivationInterval.ExpiryTime != utils.EmptyString {
-					mdl.ActivationInterval += utils.InfieldSep + tPrf.ActivationInterval.ExpiryTime
-				}
-			}
 			mdl.Weights = tPrf.Weights
 		}
 		mdl.BalanceID = balance.ID
@@ -2461,12 +2443,6 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 	for i, stp := range tpAp.FilterIDs {
 		ap.FilterIDs[i] = stp
 	}
-	if tpAp.ActivationInterval != nil {
-		if ap.ActivationInterval, err = tpAp.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return
-		}
-	}
-
 	for id, bal := range tpAp.Balances {
 		ap.Balances[id] = &utils.Balance{
 			ID:        bal.ID,
@@ -2539,26 +2515,16 @@ func APItoAccount(tpAp *utils.TPAccount, timezone string) (ap *utils.Account, er
 
 func AccountToAPI(ap *utils.Account) (tpAp *utils.TPAccount) {
 	tpAp = &utils.TPAccount{
-		Tenant:             ap.Tenant,
-		ID:                 ap.ID,
-		Weights:            ap.Weights.String(";", "&"),
-		FilterIDs:          make([]string, len(ap.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		Balances:           make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
-		ThresholdIDs:       make([]string, len(ap.ThresholdIDs)),
+		Tenant:       ap.Tenant,
+		ID:           ap.ID,
+		Weights:      ap.Weights.String(";", "&"),
+		FilterIDs:    make([]string, len(ap.FilterIDs)),
+		Balances:     make(map[string]*utils.TPAccountBalance, len(ap.Balances)),
+		ThresholdIDs: make([]string, len(ap.ThresholdIDs)),
 	}
 	for i, fli := range ap.FilterIDs {
 		tpAp.FilterIDs[i] = fli
 	}
-	if ap.ActivationInterval != nil {
-		if !ap.ActivationInterval.ActivationTime.IsZero() {
-			tpAp.ActivationInterval.ActivationTime = ap.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !ap.ActivationInterval.ExpiryTime.IsZero() {
-			tpAp.ActivationInterval.ExpiryTime = ap.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
-	}
-
 	for i, bal := range ap.Balances {
 		tpAp.Balances[i] = &utils.TPAccountBalance{
 			ID:             bal.ID,

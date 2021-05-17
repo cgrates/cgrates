@@ -756,9 +756,7 @@ func TestEventChargesEquals(t *testing.T) {
 						Weight: 25,
 					},
 				},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
-				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
 					Subsys: MetaSessionS,
 				},
@@ -935,9 +933,7 @@ func TestEventChargesEquals(t *testing.T) {
 						Weight: 25,
 					},
 				},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
-				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
 					Subsys: MetaSessionS,
 				},
@@ -1125,9 +1121,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 						Weight: 25,
 					},
 				},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, 10, 10, 10, 0, 0, 0, time.UTC),
-				},
+				FilterIDs: []string{"*ai:~*req.AnswerTime:2020-10-10T10:00:00Z"},
 				Opts: map[string]interface{}{
 					Subsys: MetaSessionS,
 				},

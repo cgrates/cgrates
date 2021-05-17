@@ -1241,11 +1241,7 @@ func testOnStorITAccount(t *testing.T) {
 	acctPrf := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"test_filterId"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"test_filterId", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 2,

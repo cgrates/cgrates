@@ -156,17 +156,13 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1004",
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC),
-		},
 		Weights: utils.DynamicWeights{
 			{
 				FilterIDs: []string{"invalid_filter_format"},
 				Weight:    20,
 			},
 		},
-		FilterIDs: []string{"*string:~*req.Account:1004"},
+		FilterIDs: []string{"*string:~*req.Account:1004", "*ai:~*req.AnswerTime:2020-07-21T00:00:00Z|2020-07-21T10:00:00Z"},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",
@@ -463,17 +459,13 @@ func TestV1AccountsForEvent(t *testing.T) {
 	accPrf := &utils.Account{
 		Tenant: "cgrates.org",
 		ID:     "1004",
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC),
-		},
 		Weights: utils.DynamicWeights{
 			{
 				FilterIDs: []string{"invalid_filter_format"},
 				Weight:    20,
 			},
 		},
-		FilterIDs: []string{"*string:~*req.Account:1004"},
+		FilterIDs: []string{"*string:~*req.Account:1004", "*ai:~*req.AnswerTime:2020-07-21T00:00:00Z|2020-07-21T10:00:00Z"},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",

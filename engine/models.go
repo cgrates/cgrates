@@ -374,20 +374,19 @@ type AccountMdl struct {
 	Tenant                string  `index:"0" re:""`
 	ID                    string  `index:"1" re:""`
 	FilterIDs             string  `index:"2" re:""`
-	ActivationInterval    string  `index:"3" re:""`
-	Weights               string  `index:"4" re:""`
-	Opts                  string  `index:"5" re:""`
-	BalanceID             string  `index:"6" re:""`
-	BalanceFilterIDs      string  `index:"7" re:""`
-	BalanceWeights        string  `index:"8" re:""`
-	BalanceType           string  `index:"9" re:""`
-	BalanceUnits          float64 `index:"10" re:"\d+\.?\d*"`
-	BalanceUnitFactors    string  `index:"11" re:""`
-	BalanceOpts           string  `index:"12" re:""`
-	BalanceCostIncrements string  `index:"13" re:""`
-	BalanceAttributeIDs   string  `index:"14" re:""`
-	BalanceRateProfileIDs string  `index:"15" re:""`
-	ThresholdIDs          string  `index:"16" re:""`
+	Weights               string  `index:"3" re:""`
+	Opts                  string  `index:"4" re:""`
+	BalanceID             string  `index:"5" re:""`
+	BalanceFilterIDs      string  `index:"6" re:""`
+	BalanceWeights        string  `index:"7" re:""`
+	BalanceType           string  `index:"8" re:""`
+	BalanceUnits          float64 `index:"9" re:"\d+\.?\d*"`
+	BalanceUnitFactors    string  `index:"10" re:""`
+	BalanceOpts           string  `index:"11" re:""`
+	BalanceCostIncrements string  `index:"12" re:""`
+	BalanceAttributeIDs   string  `index:"13" re:""`
+	BalanceRateProfileIDs string  `index:"14" re:""`
+	ThresholdIDs          string  `index:"15" re:""`
 	CreatedAt             time.Time
 }
 

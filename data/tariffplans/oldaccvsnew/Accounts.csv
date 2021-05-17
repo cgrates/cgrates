@@ -1,6 +1,6 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,*string:~*req.Account:1001,,,,VoiceBalance,,;10,*abstract,3600000000000,,,*string:~*req.ToR:*voice;1000000000;0;0,,,
-cgrates.org,1002,*string:~*req.Account:1002,,,,VoiceBalance,,;10,*abstract,3600000000000,,,*string:~*req.ToR:*voice;1000000000;;,,RP_ANY,
-cgrates.org,1002,,,,,MonetaryBalance,,;10,*concrete,100,,,,,,
-cgrates.org,1003,*string:~*req.Account:1003,,,,VoiceBalance,,;10,*abstract,3600000000000,,,*string:~*req.ToR:*voice;1000000000;;,,,
-cgrates.org,1003,,,,,MonetaryBalance,,;10,*concrete,100,,,,,,
+#Tenant,ID,FilterIDs,Weights,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
+cgrates.org,1001,*string:~*req.Account:1001,,,VoiceBalance,,;10,*abstract,3600000000000,,,*string:~*req.ToR:*voice;1000000000;0;0,,,
+cgrates.org,1002,*string:~*req.Account:1002,,,VoiceBalance,,;10,*abstract,3600000000000,,,*string:~*req.ToR:*voice;1000000000;;,,RP_ANY,
+cgrates.org,1002,,,,MonetaryBalance,,;10,*concrete,100,,,,,,
+cgrates.org,1003,*string:~*req.Account:1003,,,VoiceBalance,,;10,*abstract,3600000000000,,,*string:~*req.ToR:*voice;1000000000;;,,,
+cgrates.org,1003,,,,MonetaryBalance,,;10,*concrete,100,,,,,,

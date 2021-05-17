@@ -155,11 +155,7 @@ func TestActSetAccountFields(t *testing.T) {
 	accPrf := &utils.Account{}
 
 	expectedAccprf := &utils.Account{
-		FilterIDs: []string{"*string:~*req.ToR:*sms"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 8, 29, 15, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"*string:~*req.ToR:*sms", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
 		Weights: []*utils.DynamicWeight{
 			{
 				Weight: 10,

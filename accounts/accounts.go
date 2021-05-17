@@ -104,12 +104,6 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 			return
 		}
-		if _, isDisabled := qAcnt.Opts[utils.Disabled]; isDisabled ||
-			(qAcnt.ActivationInterval != nil && cgrEv.Time != nil &&
-				!qAcnt.ActivationInterval.IsActiveAtTime(*cgrEv.Time)) { // not active
-			guardian.Guardian.UnguardIDs(refID)
-			continue
-		}
 		var pass bool
 		if pass, err = aS.fltrS.Pass(context.TODO(), tnt, qAcnt.FilterIDs, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
