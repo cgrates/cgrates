@@ -26,14 +26,25 @@ import (
 )
 
 //SetFilter add a new Filter
-func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
+	var argC map[string][]string
+	tntID := arg.TenantID()
+	if fltr, err := apierSv1.DataManager.GetFilter(arg.Filter.Tenant, arg.Filter.ID, true, false, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	} else if argC, err = composeCacheArgsForFilter(apierSv1.DataManager, fltr, fltr.Tenant, tntID, map[string][]string{utils.FilterIDs: {tntID}}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	if err := apierSv1.DataManager.SetFilter(arg.Filter, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+
+	if argC, err = composeCacheArgsForFilter(apierSv1.DataManager, arg.Filter, arg.Filter.Tenant, tntID, argC); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database
@@ -41,8 +52,10 @@ func (apierSv1 *APIerSv1) SetFilter(arg *engine.FilterWithAPIOpts, reply *string
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheFilters,
-		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
+	if err := callCacheForFilter(apierSv1.ConnMgr, apierSv1.Config.ApierCfg().CachesConns,
+		utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]),
+		apierSv1.Config.GeneralCfg().DefaultCaching,
+		arg.Tenant, argC, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
