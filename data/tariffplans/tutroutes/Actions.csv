@@ -1,4 +1,4 @@
 #ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],Units[11],BalanceWeight[12],BalanceBlocker[13],BalanceDisabled[14],Weight[15]
 
 # TOPUP_RST_MONETARY_10 resets the <*default> <*monetary> balance to 10 units
-TOPUP_RST_MONETARY_10,*topup_reset,,,*default,*monetary,,,,,,,10,10,,,10
+TOPUP_RST_MONETARY_10,*topup_reset,,,*default,*monetary,,,,,,10,10,,,10

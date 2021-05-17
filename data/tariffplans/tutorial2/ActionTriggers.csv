@@ -1,7 +1,0 @@
-#ID[0],UniqueID[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],ExpiryTime[6],ActivationTime[7],BalanceTag[8],BalanceType[9],BalanceCategories[10],BalanceDestinationIDs[11],BalanceRatingSubject[12],BalanceSharedGroup[13],BalanceExpiryTime[14],BalanceWeight[15],BalanceBlocker[16],BalanceDisabled[17],ActionsID[18],Weight[19]
-
-# STANDARD_TRIGGERS *min_balance will call the action <TOPUP_BONUS_10SMS> when the monetary balance will go bellow 2 units
-STANDARD_TRIGGERS,,*min_balance,2,,,,,,*monetary,,,,,,,,,,TOPUP_BONUS_10SMS,10
-
-# STANDARD_TRIGGERS *max_balance will call <DISABLE_ACCOUNT> action when the monetary balance will go above 100 units
-STANDARD_TRIGGERS,,*max_balance,100,,,,,,*monetary,,,,,,,,,,DISABLE_ACCOUNT,10

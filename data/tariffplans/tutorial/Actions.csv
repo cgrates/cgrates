@@ -1,3 +1,0 @@
-#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],Units[11],BalanceWeight[12],BalanceBlocker[13],BalanceDisabled[14],Weight[15]
-ACT_TOPUP_RST_10,*topup_reset,,,test,*monetary,,*any,,,*unlimited,,10,10,false,false,10
-ACT_LOG_WARNING,*log,,,,,,,,,,,,,false,false,10
