@@ -175,7 +175,6 @@ func testStsITFlush(t *testing.T) {
 // 		// 		ID: "Test",
 // 		// 		Balance: &engine.BalanceFilter{
 // 		// 			ID:             utils.StringPointer("TESTB"),
-// 		// 			Timings:        []*engine.RITiming{},
 // 		// 			ExpirationDate: utils.TimePointer(tim),
 // 		// 			Type:           utils.StringPointer(utils.MetaMonetary),
 // 		// 		},
@@ -357,7 +356,6 @@ func testStsITMigrateFromv1(t *testing.T) {
 		// 		ID: "Test",
 		// 		Balance: &engine.BalanceFilter{
 		// 			ID:             utils.StringPointer("TESTB"),
-		// 			Timings:        []*engine.RITiming{},
 		// 			ExpirationDate: utils.TimePointer(tim),
 		// 			Type:           utils.StringPointer(utils.MetaMonetary),
 		// 		},

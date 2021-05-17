@@ -85,9 +85,6 @@ func TestDfCoreSJsonCfg(t *testing.T) {
 func TestCacheJsonCfg(t *testing.T) {
 	eCfg := &CacheJsonCfg{
 		Partitions: map[string]*CacheParamJsonCfg{
-			utils.CacheTimings: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheResourceProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -218,9 +215,6 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheTBLTPResources: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
-			utils.CacheTBLTPTimings: {Limit: utils.IntPointer(-1),
-				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-				Replicate: utils.BoolPointer(false)},
 			utils.CacheTBLTPThresholds: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Replicate: utils.BoolPointer(false)},
@@ -334,10 +328,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
 			},
-			utils.CacheTimings: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
 			utils.MetaResourceProfile: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),
@@ -434,10 +424,6 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 			utils.MysqlLocation:         "Local",
 		},
 		Items: map[string]*ItemOptJson{
-			utils.CacheTBLTPTimings: {
-				Replicate: utils.BoolPointer(false),
-				Remote:    utils.BoolPointer(false),
-			},
 			utils.CacheTBLTPResources: {
 				Replicate: utils.BoolPointer(false),
 				Remote:    utils.BoolPointer(false),

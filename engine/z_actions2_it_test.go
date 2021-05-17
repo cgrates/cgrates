@@ -172,7 +172,6 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 		Actions: []*utils.TPAction{
 			{
 				Identifier:      utils.MetaRemoveSessionCosts,
-				TimingTags:      utils.MetaASAP,
 				ExtraParameters: "*string:~*sc.OriginID:13;*notstring:~*sc.OriginID:12",
 				Weight:          20,
 			},
@@ -205,7 +204,6 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 		Actions: []*utils.TPAction{
 			{
 				Identifier:      utils.MetaRemoveSessionCosts,
-				TimingTags:      utils.MetaASAP,
 				ExtraParameters: "",
 				Weight:          20,
 			},

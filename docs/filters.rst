@@ -77,9 +77,6 @@ The following types are implemented:
 \*notexists
 	Is the negation of *\*exists*.
 
-\*timings
-	Will compare the time contained in *Element* with one of the TimingIDs defined in Values.
-
 \*nottimings
 	Is the negation of *\*timings*.
 

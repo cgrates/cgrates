@@ -47,7 +47,6 @@ var (
 		// ToDo: testOnStorITLoadAccountingCache
 		testOnStorITResource,
 		testOnStorITResourceProfile,
-		testOnStorITTiming,
 		//testOnStorITCRUDHistory,
 		testOnStorITCRUDStructVersion,
 		testOnStorITStatQueueProfile,
@@ -236,76 +235,6 @@ func testOnStorITResource(t *testing.T) {
 	//check database if removed
 	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
 		false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITTiming(t *testing.T) {
-	tmg := &utils.TPTiming{
-		ID:        "TEST",
-		Years:     utils.Years{2016, 2017},
-		Months:    utils.Months{time.January, time.February, time.March},
-		MonthDays: utils.MonthDays{1, 2, 3, 4},
-		WeekDays:  utils.WeekDays{1, 2, 3},
-		StartTime: "00:00:00",
-		EndTime:   "",
-	}
-	if _, rcvErr := onStor.GetTiming(tmg.ID, false,
-		utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetTiming(context.TODO(), tmg); err != nil {
-		t.Error(err)
-	}
-	if onStor.dataDB.GetStorageType() != utils.Internal {
-		//get from cache
-		if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(tmg, rcv) {
-			t.Errorf("Expecting: %v, received: %v", tmg, rcv)
-		}
-	}
-	//get from database
-	if rcv, err := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tmg, rcv) {
-		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
-	}
-	expectedT := []string{"tmg_TEST"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.TimingsPrefix); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedT, itm) {
-		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
-	}
-	//update
-	tmg.MonthDays = utils.MonthDays{1, 2, 3, 4, 5, 6, 7}
-	if err := onStor.SetTiming(context.TODO(), tmg); err != nil {
-		t.Error(err)
-	}
-
-	//get from cache
-	if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tmg, rcv) {
-		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
-	}
-	//get from database
-	if rcv, err := onStor.GetTiming(tmg.ID, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tmg, rcv) {
-		t.Errorf("Expecting: %v, received: %v", tmg, rcv)
-	}
-	if err := onStor.RemoveTiming(tmg.ID, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetTiming(tmg.ID, false,
-		utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	//check database if removed
-	if _, rcvErr := onStor.GetTiming(tmg.ID, true,
-		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

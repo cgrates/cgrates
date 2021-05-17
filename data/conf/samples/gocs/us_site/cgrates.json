@@ -33,7 +33,6 @@
     "replication_conns": ["rplConn"],
     "items":{
       "*accounts":{"replicate":true},
-      "*timings": {"replicate":false},
       "*resource_profiles":{"replicate":false},
       "*resources":{"replicate":false},
       "*statqueue_profiles": {"replicate":false},

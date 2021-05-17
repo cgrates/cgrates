@@ -134,8 +134,6 @@ func testTutSMGCacheStats(t *testing.T) {
 	// 	SupplierProfiles: 3, AttributeProfiles: 2}
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
-	expectedStats[utils.CacheDestinations].Items = 5
-	expectedStats[utils.CacheReverseDestinations].Items = 7
 	expectedStats[utils.CacheRatingPlans].Items = 4
 	expectedStats[utils.CacheRatingProfiles].Items = 5
 	expectedStats[utils.CacheActions].Items = 9
@@ -155,7 +153,6 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheLoadIDs].Items = 33
 	expectedStats[utils.CacheChargerProfiles].Items = 1
 	expectedStats[utils.CacheRPCConnections].Items = 2
-	expectedStats[utils.CacheTimings].Items = 14
 	expectedStats[utils.CacheThresholdFilterIndexes].Items = 10
 	expectedStats[utils.CacheThresholdFilterIndexes].Groups = 1
 	expectedStats[utils.CacheStatFilterIndexes].Items = 2

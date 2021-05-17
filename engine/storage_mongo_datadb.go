@@ -58,7 +58,6 @@ const (
 	ColVer  = "versions"
 	ColRsP  = "resource_profiles"
 	ColIndx = "indexes"
-	ColTmg  = "timings"
 	ColRes  = "resources"
 	ColSqs  = "statqueues"
 	ColSqp  = "statqueue_profiles"
@@ -864,42 +863,6 @@ func (ms *MongoStorage) SetResourceDrv(r *Resource) (err error) {
 func (ms *MongoStorage) RemoveResourceDrv(tenant, id string) (err error) {
 	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColRes).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	})
-}
-
-func (ms *MongoStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
-	t = new(utils.TPTiming)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(ColTmg).FindOne(sctx, bson.M{"id": id})
-		if err := cur.Decode(t); err != nil {
-			t = nil
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	})
-	return
-}
-
-func (ms *MongoStorage) SetTimingDrv(t *utils.TPTiming) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColTmg).UpdateOne(sctx, bson.M{"id": t.ID},
-			bson.M{"$set": t},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(ColTmg).DeleteOne(sctx, bson.M{"id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

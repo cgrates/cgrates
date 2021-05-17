@@ -718,7 +718,6 @@ func TestReloadCache(t *testing.T) {
 		APIOpts: map[string]interface{}{},
 		Tenant:  "",
 		ArgsCache: map[string][]string{
-			"TimingIDs":            {"TimingsID"},
 			"ResourceProfileIDs":   {"cgrates.org:resourceProfilesID"},
 			"StatsQueueProfileIDs": {"cgrates.org:statProfilesID"},
 			"ThresholdProfileIDs":  {"cgrates.org:thresholdProfilesID"},
@@ -752,9 +751,6 @@ func TestReloadCache(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
 	})
 	tpr := &TpReader{
-		timings: map[string]*utils.TPTiming{
-			"TimingsID": {},
-		},
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
 		},

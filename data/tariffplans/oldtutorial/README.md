@@ -4,8 +4,6 @@ CGRateS Tutorial
 Scenario:
 ---------
 
-- Create the necessary timings (always, asap, peak, offpeak).
-- Configure 3 destinations (1002, 1003 and 10 used as catch all rule).
 - As rating we configure the following:
 
  - Rate id: *RT_10CNT* with connect fee of 20cents, 10cents per minute for the first 60s in 60s increments followed by 5cents per minute in 1s increments.

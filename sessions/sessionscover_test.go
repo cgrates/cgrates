@@ -2053,12 +2053,10 @@ func TestEndSession(t *testing.T) {
 					Rating: map[string]*engine.RatingUnit{
 						"RATING_ID_TEST": {
 							RatesID:          utils.EmptyString,
-							TimingID:         utils.EmptyString,
 							RoundingDecimals: 2,
 						},
 						utils.MetaRounding: {
 							RatesID:  utils.EmptyString,
-							TimingID: utils.EmptyString,
 						},
 						"RATING_ID": {
 							RatingFiltersID:  utils.EmptyString,
@@ -4458,7 +4456,6 @@ func TestBiRPCv1GetCost(t *testing.T) {
 			Accounting:    map[string]*engine.BalanceCharge{},
 			RatingFilters: map[string]engine.RatingMatchedFilters{},
 			Rates:         map[string]engine.RateGroups{},
-			Timings:       map[string]*engine.ChargedTiming{},
 		},
 	}
 	expectedVal.EventCost.Compute()

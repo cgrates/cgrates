@@ -83,54 +83,6 @@ func (pgnt Paginator) Clone() Paginator {
 	}
 }
 
-type ApierTPTiming struct {
-	TPid      string // Tariff plan id
-	ID        string // Timing id
-	Years     string // semicolon separated list of years this timing is valid on, *any supported
-	Months    string // semicolon separated list of months this timing is valid on, *any supported
-	MonthDays string // semicolon separated list of month's days this timing is valid on, *any supported
-	WeekDays  string // semicolon separated list of week day names this timing is valid on *any supported
-	Time      string // String representing the time this timing starts on
-}
-
-type TPTiming struct {
-	ID        string
-	Years     Years
-	Months    Months
-	MonthDays MonthDays
-	WeekDays  WeekDays
-	StartTime string
-	EndTime   string
-}
-
-// TPTimingWithAPIOpts is used in replicatorV1 for dispatcher
-type TPTimingWithAPIOpts struct {
-	*TPTiming
-	Tenant  string
-	APIOpts map[string]interface{}
-}
-
-func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
-	rt = &TPTiming{}
-	rt.ID = ID
-	rt.Years.Parse(years, InfieldSep)
-	rt.Months.Parse(mounths, InfieldSep)
-	rt.MonthDays.Parse(mounthdays, InfieldSep)
-	rt.WeekDays.Parse(weekdays, InfieldSep)
-	times := strings.Split(time, InfieldSep)
-	rt.StartTime = times[0]
-	if len(times) > 1 {
-		rt.EndTime = times[1]
-	}
-	return
-}
-
-type AttrSetDestination struct {
-	Id        string
-	Prefixes  []string
-	Overwrite bool
-}
-
 type AttrGetCdrs struct {
 	CgrIds          []string // If provided, it will filter based on the cgrids present in list
 	MediationRunIds []string // If provided, it will filter on mediation runid
@@ -657,7 +609,7 @@ type TPFilterProfile struct {
 
 // TPFilter is used in TPFilterProfile
 type TPFilter struct {
-	Type    string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	Type    string   // Filter type (*string, *rsr_filters, *cdr_stats)
 	Element string   // Name of the field providing us the Values to check (used in case of some )
 	Values  []string // Filter definition
 }

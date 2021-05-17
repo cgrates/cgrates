@@ -1,4 +1,4 @@
-#Id,ActionsId,TimingId,Weight
+#Id,ActionsId,Weight
 PACKAGE_10,TOPUP_RST_10,*asap,10
 PACKAGE_10_SHARED_A_5,TOPUP_RST_5,*asap,10
 PACKAGE_10_SHARED_A_5,TOPUP_RST_SHARED_5,*asap,10

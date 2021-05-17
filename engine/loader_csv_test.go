@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,15 +36,11 @@ var csvr *TpReader
 func init() {
 	var err error
 	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSVSep,
-		TimingsCSVContent,
 		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
-	}
-	if err := csvr.LoadTimings(); err != nil {
-		log.Print("error in LoadTimings:", err)
 	}
 	if err := csvr.LoadFilters(); err != nil {
 		log.Print("error in LoadFilter:", err)
@@ -85,56 +80,6 @@ func init() {
 	}
 	if err := csvr.WriteToDatabase(false, false); err != nil {
 		log.Print("error when writing into database ", err)
-	}
-}
-
-func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.timings) != 14 {
-		t.Error("Failed to load timings: ", csvr.timings)
-	}
-	timing := csvr.timings["WORKDAYS_00"]
-	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		ID:        "WORKDAYS_00",
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
-		StartTime: "00:00:00",
-	}) {
-		t.Error("Error loading timing: ", timing)
-	}
-	timing = csvr.timings["WORKDAYS_18"]
-	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		ID:        "WORKDAYS_18",
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
-		StartTime: "18:00:00",
-	}) {
-		t.Error("Error loading timing: ", timing)
-	}
-	timing = csvr.timings["WEEKENDS"]
-	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		ID:        "WEEKENDS",
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
-		StartTime: "00:00:00",
-	}) {
-		t.Error("Error loading timing: ", timing)
-	}
-	timing = csvr.timings["ONE_TIME_RUN"]
-	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		ID:        "ONE_TIME_RUN",
-		Years:     utils.Years{2012},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: "*asap",
-	}) {
-		t.Error("Error loading timing: ", timing)
 	}
 }
 

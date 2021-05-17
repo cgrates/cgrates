@@ -1,2 +1,2 @@
-#Id,ActionsId,TimingId,Weight
-AP_PACKAGE_10,ACT_TOPUP_RST_10,*asap,10
+#Id,ActionsId,Weight
+AP_PACKAGE_10,ACT_TOPUP_RST_10,10

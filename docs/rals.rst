@@ -287,9 +287,6 @@ Categories
 SharedGroup
 	Pointing towards a shared balance ID.
 
-TimingIDs
-	List of :ref:`Timing` profiles this *Balance* will match for, considering event's *AnswerTime* field.
-
 Disabled
 	Makes the *Balance* invisible to charging.
 

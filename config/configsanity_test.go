@@ -1005,11 +1005,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 	cfg.dataDbCfg.Type = utils.Internal
 
 	cfg.cacheCfg = &CacheCfg{
-		Partitions: map[string]*CacheParamCfg{
-			utils.CacheTimings: {
-				Limit: 0,
-			},
-		},
+		Partitions: map[string]*CacheParamCfg{},
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)

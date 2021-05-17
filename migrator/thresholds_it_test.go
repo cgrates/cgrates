@@ -191,7 +191,6 @@ func testTrsITFlush(t *testing.T) {
 // 		ActivationDate: tim,
 // 		Balance: &engine.BalanceFilter{
 // 			ID:             utils.StringPointer("TESTZ"),
-// 			Timings:        []*engine.RITiming{},
 // 			ExpirationDate: utils.TimePointer(tim),
 // 			Type:           utils.StringPointer(utils.MetaMonetary),
 // 		},

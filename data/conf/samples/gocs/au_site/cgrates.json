@@ -33,7 +33,6 @@
     "remote_conns": ["rmtConn"],
     "items":{
       "*accounts":{"remote":true},
-      "*timings": {"remote":true},
       "*filters": {"remote":true},
       "*route_profiles":{"remote":true},
       "*attribute_profiles":{"remote":true},
