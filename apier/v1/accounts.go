@@ -137,6 +137,9 @@ func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		}
 		if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				TenantArg: utils.TenantArg{
+					Tenant: attrs.Tenant,
+				},
 				AttrReloadCache: utils.AttrReloadCache{
 					ArgsCache: utils.ArgsCache{ActionPlanIDs: []string{attrs.ActionPlanId}},
 				},
@@ -151,6 +154,9 @@ func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		if len(remAcntAPids) != 0 {
 			if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg: utils.TenantArg{
+						Tenant: attrs.Tenant,
+					},
 					AttrReloadCache: utils.AttrReloadCache{
 						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: remAcntAPids},
 					},
@@ -251,6 +257,9 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				}
 				if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
 					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+						TenantArg: utils.TenantArg{
+							Tenant: attr.Tenant,
+						},
 						AttrReloadCache: utils.AttrReloadCache{
 							ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{accID}, ActionPlanIDs: apIDs},
 						},
@@ -349,6 +358,9 @@ func (api *APIerSv1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	}
 	if err = api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			TenantArg: utils.TenantArg{
+				Tenant: attr.Tenant,
+			},
 			AttrReloadCache: utils.AttrReloadCache{
 				ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{accID}},
 			},

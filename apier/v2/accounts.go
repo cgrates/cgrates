@@ -191,6 +191,9 @@ func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 			return 0, apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg: utils.TenantArg{
+						Tenant: attr.Tenant,
+					},
 					AttrReloadCache: utils.AttrReloadCache{
 						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{accID}, ActionPlanIDs: apIDs},
 					},
