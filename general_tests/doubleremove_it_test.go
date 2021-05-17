@@ -111,12 +111,9 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 	// set
 	statConfig := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant: doubleRemoveTenant,
-			ID:     "TEST_PROFILE1",
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      doubleRemoveTenant,
+			ID:          "TEST_PROFILE1",
+			FilterIDs:   []string{"*ai:~*req.AnswerTime:2020-04-18T14:25:00Z|2020-04-18T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*engine.MetricWithFilters{

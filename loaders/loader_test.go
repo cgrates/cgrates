@@ -636,8 +636,8 @@ func TestLoaderProcessStats(t *testing.T) {
 				Path:  "FilterIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.2", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
+			{Tag: "Weight",
+				Path:  "Weight",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
 			{Tag: "QueueLength",
@@ -668,15 +668,10 @@ func TestLoaderProcessStats(t *testing.T) {
 				Path:  "Stored",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
-			{Tag: "Weight",
-				Path:  "Weight",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
-
 			{Tag: "ThresholdIDs",
 				Path:  "ThresholdIDs",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*req.11", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.StatsCSVContent))
@@ -694,12 +689,9 @@ func TestLoaderProcessStats(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	eSt1 := &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TestStats",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
-		},
+		Tenant:      "cgrates.org",
+		ID:          "TestStats",
+		FilterIDs:   []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         time.Second,
 		Metrics: []*engine.MetricWithFilters{
@@ -2957,44 +2949,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadStatsAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadStatsAsStructErrType",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	statsCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(statsCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaStats: {
-			utils.StatsCsv: &openedCSVFile{
-				fileName: utils.StatsCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

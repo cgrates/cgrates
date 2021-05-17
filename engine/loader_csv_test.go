@@ -176,13 +176,10 @@ func TestLoadResourceProfiles(t *testing.T) {
 func TestLoadStatQueueProfiles(t *testing.T) {
 	eStats := map[utils.TenantID]*utils.TPStatProfile{
 		{Tenant: "cgrates.org", ID: "TestStats"}: {
-			Tenant:    "cgrates.org",
-			TPid:      testTPID,
-			ID:        "TestStats",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			Tenant:      "cgrates.org",
+			TPid:        testTPID,
+			ID:          "TestStats",
+			FilterIDs:   []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
@@ -203,13 +200,10 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			MinItems:     2,
 		},
 		{Tenant: "cgrates.org", ID: "TestStats2"}: {
-			Tenant:    "cgrates.org",
-			TPid:      testTPID,
-			ID:        "TestStats2",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			Tenant:      "cgrates.org",
+			TPid:        testTPID,
+			ID:          "TestStats2",
+			FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{

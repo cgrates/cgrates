@@ -618,19 +618,18 @@ type MetricWithFilters struct {
 
 // TPStatProfile is used in APIs to manage remotely offline StatProfile
 type TPStatProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	QueueLength        int
-	TTL                string
-	Metrics            []*MetricWithFilters
-	Blocker            bool // blocker flag to stop processing on filters matched
-	Stored             bool
-	Weight             float64
-	MinItems           int
-	ThresholdIDs       []string
+	TPid         string
+	Tenant       string
+	ID           string
+	FilterIDs    []string
+	QueueLength  int
+	TTL          string
+	Metrics      []*MetricWithFilters
+	Blocker      bool // blocker flag to stop processing on filters matched
+	Stored       bool
+	Weight       float64
+	MinItems     int
+	ThresholdIDs []string
 }
 
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile

@@ -392,14 +392,13 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 
 func testOnStorITStatQueueProfile(t *testing.T) {
 	sq := &StatQueueProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"*string:~*req.Account:1001"},
-		QueueLength:        2,
-		TTL:                0,
-		Stored:             true,
-		ThresholdIDs:       []string{"Thresh1"},
+		Tenant:       "cgrates.org",
+		ID:           "test",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		QueueLength:  2,
+		TTL:          0,
+		Stored:       true,
+		ThresholdIDs: []string{"Thresh1"},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {

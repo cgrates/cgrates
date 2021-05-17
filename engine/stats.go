@@ -163,10 +163,6 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 			}
 			return nil, err
 		}
-		if sqPrfl.ActivationInterval != nil && actTime != nil &&
-			!sqPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
-			continue
-		}
 		if pass, err := sS.filterS.Pass(context.TODO(), tnt, sqPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err

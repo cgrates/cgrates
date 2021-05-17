@@ -97,11 +97,11 @@ cgrates.org,ResGroup21,*string:~*req.Account:1001,10,1s,2,call,true,true,
 cgrates.org,ResGroup22,*string:~*req.Account:dan,10,3600s,2,premium_call,true,true,
 `
 	StatsCSVContent = `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
-cgrates.org,TestStats,*string:~*req.Account:1001,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,20,Th1;Th2
-cgrates.org,TestStats,,,,,2,*sum#~*req.Usage,,true,true,20,
-cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,20,Th
-cgrates.org,TestStats2,,,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,20,
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
+cgrates.org,TestStats,*string:~*req.Account:1001,20,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,Th1;Th2
+cgrates.org,TestStats,,20,,,2,*sum#~*req.Usage,,true,true,
+cgrates.org,TestStats2,FLTR_1,20,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,Th
+cgrates.org,TestStats2,,20,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,
 `
 
 	ThresholdsCSVContent = `

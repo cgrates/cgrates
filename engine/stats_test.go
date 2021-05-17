@@ -58,12 +58,9 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	var dmSTS *DataManager
 	sqps := []*StatQueueProfile{
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile1",
-			FilterIDs: []string{"FLTR_STATS_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile1",
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -78,12 +75,9 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile2",
-			FilterIDs: []string{"FLTR_STATS_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile2",
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -98,12 +92,9 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfilePrefix",
-			FilterIDs: []string{"FLTR_STATS_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfilePrefix",
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -298,12 +289,9 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	var dmSTS *DataManager
 	sqps := []*StatQueueProfile{
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile1",
-			FilterIDs: []string{"FLTR_STATS_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile1",
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -318,12 +306,9 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile2",
-			FilterIDs: []string{"FLTR_STATS_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile2",
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -338,12 +323,9 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfilePrefix",
-			FilterIDs: []string{"FLTR_STATS_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfilePrefix",
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -539,12 +521,9 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	var dmSTS *DataManager
 	sqps := []*StatQueueProfile{
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile1",
-			FilterIDs: []string{"FLTR_STATS_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile1",
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -559,12 +538,9 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile2",
-			FilterIDs: []string{"FLTR_STATS_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile2",
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -579,12 +555,9 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfilePrefix",
-			FilterIDs: []string{"FLTR_STATS_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfilePrefix",
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -780,12 +753,9 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	var dmSTS *DataManager
 	sqps := []*StatQueueProfile{
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile1",
-			FilterIDs: []string{"FLTR_STATS_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile1",
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -800,12 +770,9 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfile2",
-			FilterIDs: []string{"FLTR_STATS_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfile2",
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -820,12 +787,9 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 			MinItems:     1,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "StatQueueProfilePrefix",
-			FilterIDs: []string{"FLTR_STATS_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			Tenant:      "cgrates.org",
+			ID:          "StatQueueProfilePrefix",
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -978,12 +942,9 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		}
 	}
 	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "StatQueueProfile3",
-		FilterIDs: []string{"FLTR_STATS_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:      "cgrates.org",
+		ID:          "StatQueueProfile3",
+		FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		QueueLength: 10,
 		TTL:         10 * time.Second,
 		Metrics: []*MetricWithFilters{

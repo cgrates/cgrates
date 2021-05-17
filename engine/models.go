@@ -72,22 +72,21 @@ func (ResourceMdl) TableName() string {
 }
 
 type StatMdl struct {
-	PK                 uint `gorm:"primary_key"`
-	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	QueueLength        int     `index:"4" re:""`
-	TTL                string  `index:"5" re:""`
-	MinItems           int     `index:"6" re:""`
-	MetricIDs          string  `index:"7" re:""`
-	MetricFilterIDs    string  `index:"8" re:""`
-	Stored             bool    `index:"9" re:""`
-	Blocker            bool    `index:"10" re:""`
-	Weight             float64 `index:"11" re:"\d+\.?\d*"`
-	ThresholdIDs       string  `index:"12" re:""`
-	CreatedAt          time.Time
+	PK              uint `gorm:"primary_key"`
+	Tpid            string
+	Tenant          string  `index:"0" re:""`
+	ID              string  `index:"1" re:""`
+	FilterIDs       string  `index:"2" re:""`
+	Weight          float64 `index:"3" re:"\d+\.?\d*"`
+	QueueLength     int     `index:"4" re:""`
+	TTL             string  `index:"5" re:""`
+	MinItems        int     `index:"6" re:""`
+	MetricIDs       string  `index:"7" re:""`
+	MetricFilterIDs string  `index:"8" re:""`
+	Stored          bool    `index:"9" re:""`
+	Blocker         bool    `index:"10" re:""`
+	ThresholdIDs    string  `index:"11" re:""`
+	CreatedAt       time.Time
 }
 
 func (StatMdl) TableName() string {
