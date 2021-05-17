@@ -9,151 +9,6 @@
 			"name": "Offline TP (Tariff Plan)",
 			"item": [
 				{
-					"name": "TP Timing",
-					"item": [
-						{
-							"name": "APIerSv1.SetTPTiming",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\",\n            \"MonthDays\": \"*any\",\n            \"Months\": \"*any\",\n            \"Time\": \"00:00:00\",\n            \"WeekDays\": \"*any\",\n            \"Years\": \"*any\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.GetTPTiming",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 5,\n    \"method\": \"APIerSv1.GetTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TP_TIMING_TEST\",\n            \"ID\": \"TP_TIMINGID\",\n            \"TimingId\": \"TP_TIMING_ID\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "APIerSv1.GetTPTimingIds",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.GetTPTimingIds\",\n    \"params\": [\n        {\n            \"TPid\": \"Tim_always\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Remove TP Timing",
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"id\": 1,\n    \"method\": \"APIerSv1.RemoveTPTiming\",\n    \"params\": [\n        {\n            \"TPid\": \"TEST_SQL\"\n        }\n    ]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/jsonrpc",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"jsonrpc"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "ca5a193b-eb51-4062-9136-f817a36bcfed",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "0555884a-5b75-42cd-ab61-fda1154101ae",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
 					"name": "APIerSv1.GetTPIds",
 					"request": {
 						"auth": {
@@ -952,7 +807,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.SetTPActionPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"always\",\n            \"ActionPlan\": [\n                {\n                    \"ActionsId\": \"fafsafa\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.SetTPActionPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"always\",\n            \"ActionPlan\": [\n                {\n                    \"ActionsId\": \"fafsafa\",\n                                   \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -1109,35 +964,6 @@
 									"language": "json"
 								}
 							}
-						},
-						"url": {
-							"raw": "{{base_url}}/jsonrpc",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "APIerSv1.RemoveActionTiming (Remove ActionPlan From Account)",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.RemoveActionTiming\",\n    \"params\": [\n        {\n            \"ActionPlanId\": \"AP_VOICE_PACKAGE_200\",\n            \"ActionTimingId\": \"\",\n            \"Tenant\": \"sip.TEST_SUPPLIER_NAME.gr\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"ReloadScheduler\": true\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1533,7 +1359,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3332\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"test;test1\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    \r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3332\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                      \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    \r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1562,7 +1388,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice1\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3331\",\r\n            \"BalanceID\": \"BalanceID1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"*any\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n   \r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice1\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3331\",\r\n            \"BalanceID\": \"BalanceID1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                 \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n   \r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1591,7 +1417,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n    \t {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"e11ae605-9ca1-402d-930c-581893e54f33\",\r\n            \"BalanceID\": null,\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 30000000000000,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"DST_+30xxxxxxxxxx\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 20,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n    \t {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"e11ae605-9ca1-402d-930c-581893e54f33\",\r\n            \"BalanceID\": null,\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 30000000000000,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                   \"Weight\": 20,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1620,7 +1446,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": null,\r\n            \"BalanceID\": \"balance1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": null,\r\n            \"TimingIds\": null,\r\n            \"Weight\": null,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": null,\r\n            \"BalanceID\": \"balance1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                     \"Weight\": null,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1649,7 +1475,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"5a2fb811-1694-46bf-8066-6065a849ecf8\",\r\n            \"BalanceID\": \"\",\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 1000000,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"DST_+30xxxxxxxxxx\",\r\n            \"TimingIds\": null,\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n                    "
+							"raw": "{\r\n    \"method\": \"APIerSv1.SetBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"5a2fb811-1694-46bf-8066-6065a849ecf8\",\r\n            \"BalanceID\": \"\",\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 1000000,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                     \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n                    "
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1678,7 +1504,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.DebitBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceUuid\": \"e9c0a7f4-8904-481d-8b2d-a08d9a2b311c\",\n            \"BalanceId\": \"23456\",\n            \"BalanceType\": \"*monetary\",\n            \"Directions\": null,\n            \"Value\": 8,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n            \"DestinationIds\": null,\n            \"TimingIds\": null,\n            \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Overwrite\": false,\n            \"Blocker\": null,\n            \"Disabled\": null,\n            \"Cdrlog\": null,\n        \t\"ExtraData\": null\n        \t\t\n    }],\n    \"id\": 5\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.DebitBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceUuid\": \"e9c0a7f4-8904-481d-8b2d-a08d9a2b311c\",\n            \"BalanceId\": \"23456\",\n            \"BalanceType\": \"*monetary\",\n            \"Directions\": null,\n            \"Value\": 8,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n                       \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Overwrite\": false,\n            \"Blocker\": null,\n            \"Disabled\": null,\n            \"Cdrlog\": null,\n        \t\"ExtraData\": null\n        \t\t\n    }],\n    \"id\": 5\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1707,7 +1533,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxxx\",\n            \"BalanceType\": \"*voice\",\n            \"BalanceUUID\": null,\n            \"BalanceID\": \"9d867c57-31b4-407d-afc7-fb4dc359ae4\",\n            \"Directions\": \"*out\",\n            \"Value\": 600,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n            \"DestinationIds\": null,\n            \"TimingIds\": null,\n            \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Blocker\": null,\n            \"Disabled\": null\n    }],\n    \"id\": 28\n}\n"
+							"raw": "{\n    \"method\": \"APIerSv1.SetBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxxx\",\n            \"BalanceType\": \"*voice\",\n            \"BalanceUUID\": null,\n            \"BalanceID\": \"9d867c57-31b4-407d-afc7-fb4dc359ae4\",\n            \"Directions\": \"*out\",\n            \"Value\": 600,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n                    \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Blocker\": null,\n            \"Disabled\": null\n    }],\n    \"id\": 28\n}\n"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1736,7 +1562,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"914e1dc3-2e44-458d-9fb6-6365bdd9da3d\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": \"test;test1\",\r\n            \"TimingIds\": \"*any\",\r\n            \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
+							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"914e1dc3-2e44-458d-9fb6-6365bdd9da3d\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                         \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1765,7 +1591,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": null,\r\n            \"BalanceID\": null,\r\n            \"Directions\": null,\r\n            \"Value\": null,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n            \"DestinationIds\": null,\r\n            \"TimingIds\": null,\r\n            \"Weight\": null,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
+							"raw": "{\r\n    \"method\": \"APIerSv1.RemoveBalances\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": null,\r\n            \"BalanceID\": null,\r\n            \"Directions\": null,\r\n            \"Value\": null,\r\n            \"ExpiryTime\": null,\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n             \"Weight\": null,\r\n            \"SharedGroups\": null,\r\n            \"Blocker\": null,\r\n            \"Disabled\": null\r\n    }],\r\n    \"id\": 6\r\n}\r\n\r\n"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -2939,7 +2765,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\",\n            \"RatingPlanBindings\": [\n                {\n                    \"DestinationRatesId\": \"TP_DST_RT_RETAIL_GR_LANDLINE_2019_01\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_API_TESTS\",\n            \"ID\": \"TP_RP_RETAIL_GR_LANDLINE_2019_01\",\n            \"RatingPlanBindings\": [\n                {\n                                       \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",
@@ -5229,7 +5055,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Filter\": \"\",\n                    \"ExtraParameters\": \"\",\n                    \"BalanceWeight\": 10,\n                    \"BalanceType\": \"*monetary\",\n                    \"SharedGroups\": \"\",\n                    \"Categories\": \"\",\n                    \"Directions\": \"*out\",\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceId\": \"balance1\",\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"RatingSubject\": \"\",\n                    \"Identifier\": \"*topup_reset\",\n                    \"DestinationIds\": \"*any\",\n                    \"Weight\": 10,\n                    \"BalanceDisabled\": \"false\",\n                    \"Units\": 100,\n                    \"TimingTags\": \"\",\n                    \"BalanceUuid\": \"e0669a66-86c2-42ea-bcb9-ae072e447d97\"\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"ACT_TOPUP_RST_10\"\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Filter\": \"\",\n                    \"ExtraParameters\": \"\",\n                    \"BalanceWeight\": 10,\n                    \"BalanceType\": \"*monetary\",\n                    \"SharedGroups\": \"\",\n                    \"Categories\": \"\",\n                    \"Directions\": \"*out\",\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceId\": \"balance1\",\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"RatingSubject\": \"\",\n                    \"Identifier\": \"*topup_reset\",\n                    \"DestinationIds\": \"*any\",\n                    \"Weight\": 10,\n                    \"BalanceDisabled\": \"false\",\n                    \"Units\": 100,\n                         \"BalanceUuid\": \"e0669a66-86c2-42ea-bcb9-ae072e447d97\"\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"ACT_TOPUP_RST_10\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -5258,7 +5084,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Filter\": null,\n                    \"ExtraParameters\": null,\n                    \"BalanceWeight\": null,\n                    \"BalanceType\": null,\n                    \"SharedGroups\": null,\n                    \"Categories\": null,\n                    \"Directions\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceId\": null,\n                    \"ExpiryTime\": null,\n                    \"RatingSubject\": null,\n                    \"Identifier\": \"*log\",\n                    \"DestinationIds\": null,\n                    \"Weight\": 10,\n                    \"BalanceDisabled\": \"false\",\n                    \"Units\": null,\n                    \"TimingTags\": \"\",\n                    \"BalanceUuid\": \"\"\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"test1\"\n        }\n    ]\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Filter\": null,\n                    \"ExtraParameters\": null,\n                    \"BalanceWeight\": null,\n                    \"BalanceType\": null,\n                    \"SharedGroups\": null,\n                    \"Categories\": null,\n                    \"Directions\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceId\": null,\n                    \"ExpiryTime\": null,\n                    \"RatingSubject\": null,\n                    \"Identifier\": \"*log\",\n                    \"DestinationIds\": null,\n                    \"Weight\": 10,\n                    \"BalanceDisabled\": \"false\",\n                    \"Units\": null,\n                        \"BalanceUuid\": \"\"\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"test1\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -6222,7 +6048,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"GR_LANDLINE\",\n                    \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500_GR\"\n        }\n    ]\n}",
+													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                               \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500_GR\"\n        }\n    ]\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -6335,7 +6161,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"GR_LANDLINE\",\n                    \"RatingSubject\": \"*zero1m\",\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500M_GR_LANDLINE_FREE_UNLIMITED\"\n        }\n    ]\n}"
+													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                             \"RatingSubject\": \"*zero1m\",\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500M_GR_LANDLINE_FREE_UNLIMITED\"\n        }\n    ]\n}"
 												},
 												"url": {
 													"raw": "{{base_url}}/jsonrpc",
@@ -6429,7 +6255,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"PKG_500M_GR_LANDLINE_FREE_30D\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"2019-07-23T13:03:38Z\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"GR_LANDLINE\",\n                    \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500M_GR_LANDLINE_FREE_30D\"\n        }\n    ]\n}"
+													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"PKG_500M_GR_LANDLINE_FREE_30D\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"2019-07-23T13:03:38Z\",\n                    \"Filter\": null,\n                         \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500M_GR_LANDLINE_FREE_30D\"\n        }\n    ]\n}"
 												},
 												"url": {
 													"raw": "{{base_url}}/jsonrpc",
@@ -6552,7 +6378,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"PKG_500M_GR_UNLIMITED\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"GR_MOBILE;GR_LANDLINE\",\n                    \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500M_GR_UNLIMITED\"\n        }\n    ]\n}"
+													"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"PKG_500M_GR_UNLIMITED\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                                  \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_500M_GR_UNLIMITED\"\n        }\n    ]\n}"
 												},
 												"url": {
 													"raw": "{{base_url}}/jsonrpc",
@@ -6657,7 +6483,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"DST_+30xxxxxxxxxx\",\n                    \"RatingSubject\": \"*zero1m\",\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_1000_GR\"\n        }\n    ]\n}"
+											"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                        \"RatingSubject\": \"*zero1m\",\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_1000_GR\"\n        }\n    ]\n}"
 										},
 										"url": {
 											"raw": "{{base_url}}/jsonrpc",
@@ -6686,7 +6512,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"100EURO\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc71\",\n                    \"BalanceType\": \"*monetary\",\n                    \"Directions\": null,\n                    \"Units\": 100,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"*any\",\n                    \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 20,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                },\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                    \"TimingTags\": \"*any\",\n                    \"DestinationIds\": \"DST_+30xxxxxxxxxx\",\n                    \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_1000_GR\"\n        }\n    ]\n}"
+											"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"100EURO\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc71\",\n                    \"BalanceType\": \"*monetary\",\n                    \"Directions\": null,\n                    \"Units\": 100,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                           \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 20,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                },\n                {\n                    \"Identifier\": \"*topup_reset\",\n                    \"BalanceId\": \"500MINUTES\",\n                    \"BalanceUuid\": \"71e73e45-a471-4059-b738-7f66adc72\",\n                    \"BalanceType\": \"*voice\",\n                    \"Directions\": null,\n                    \"Units\": 30000000000000,\n                    \"ExpiryTime\": \"*unlimited\",\n                    \"Filter\": null,\n                                  \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": 30,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"TOPUP_PKG_1000_GR\"\n        }\n    ]\n}"
 										},
 										"url": {
 											"raw": "{{base_url}}/jsonrpc",
@@ -6876,7 +6702,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_SPL_TESTSUPPLIER1_2019_01\",\n            \"ID\": \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\",\n            \"RatingPlanBindings\": [\n                {\n                    \"DestinationRatesId\": \"SPL_TESTSUPPLIER1_DST_RT_GR_LANDLINE_2019_01\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
+											"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"CGR_SPL_TESTSUPPLIER1_2019_01\",\n            \"ID\": \"TP_RP_SPL_TESTSUPPLIER1_DST_ID_RT_GR_LANDLINE_2019_01\",\n            \"RatingPlanBindings\": [\n                {\n                    \"DestinationRatesId\": \"SPL_TESTSUPPLIER1_DST_RT_GR_LANDLINE_2019_01\",\n                        \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
 										},
 										"url": {
 											"raw": "{{base_url}}/jsonrpc",
@@ -7116,7 +6942,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"TPID_VL_INTERNAL_INBOUND_CALLS\",\n            \"ID\": \"RatingPlan_CLI_VL_INTERNAL_INBOUND_CALLS_GR_MOBILE\",\n            \"RatingPlanBindings\": [\n                {\n                    \"DestinationRatesId\": \"TP_DSTRATE_CLI_VL_INTERNAL_INBOUND_CALLS_GR_MOBILE\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                },\n                {\n                    \"DestinationRatesId\": \"DSTRATE_VL_INTERNAL_INBOUND_CALLS_ΑΝΥ\",\n                    \"TimingId\": \"*any\",\n                    \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
+											"raw": "{\n    \"id\": 3,\n    \"method\": \"APIerSv1.SetTPRatingPlan\",\n    \"params\": [\n        {\n            \"TPid\": \"TPID_VL_INTERNAL_INBOUND_CALLS\",\n            \"ID\": \"RatingPlan_CLI_VL_INTERNAL_INBOUND_CALLS_GR_MOBILE\",\n            \"RatingPlanBindings\": [\n                {\n                    \"DestinationRatesId\": \"TP_DSTRATE_CLI_VL_INTERNAL_INBOUND_CALLS_GR_MOBILE\",\n                                 \"Weight\": 10\n                },\n                {\n                    \"DestinationRatesId\": \"DSTRATE_VL_INTERNAL_INBOUND_CALLS_ΑΝΥ\",\n                           \"Weight\": 10\n                }\n            ]\n        }\n    ]\n}"
 										},
 										"url": {
 											"raw": "{{base_url}}/jsonrpc",
@@ -7395,7 +7221,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*log\",\n                    \"BalanceId\": null,\n                    \"BalanceUuid\": null,\n                    \"BalanceType\": null,\n                    \"Directions\": null,\n                    \"Units\": null,\n                    \"ExpiryTime\": null,\n                    \"Filter\": null,\n                    \"TimingTags\": null,\n                    \"DestinationIds\": null,\n                    \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": null,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"ACT_LOG_WARNING\"\n        }\n    ]\n}"
+									"raw": "{\n    \"method\": \"APIerSv1.SetActions\",\n    \"params\": [\n        {\n            \"Actions\": [\n                {\n                    \"Identifier\": \"*log\",\n                    \"BalanceId\": null,\n                    \"BalanceUuid\": null,\n                    \"BalanceType\": null,\n                    \"Directions\": null,\n                    \"Units\": null,\n                    \"ExpiryTime\": null,\n                    \"Filter\": null,\n                             \"RatingSubject\": null,\n                    \"Categories\": null,\n                    \"SharedGroups\": null,\n                    \"BalanceWeight\": null,\n                    \"ExtraParameters\": null,\n                    \"BalanceBlocker\": \"false\",\n                    \"BalanceDisabled\": \"false\",\n                    \"Weight\": 10\n                }\n            ],\n            \"Overwrite\": true,\n            \"ActionsId\": \"ACT_LOG_WARNING\"\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/jsonrpc",

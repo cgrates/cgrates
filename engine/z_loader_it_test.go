@@ -52,7 +52,6 @@ var (
 		testLoaderITWriteToDatabase,
 		testLoaderITImportToStorDb,
 		testLoaderITInitDataDB,
-		testLoaderITLoadFromStorDb,
 		testLoaderITInitDataDB,
 	}
 )
@@ -153,9 +152,6 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = loader.LoadTimings(); err != nil {
-		t.Error("Failed loading timings: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -205,9 +201,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err = loader.LoadTimings(); err != nil {
-		t.Error("Failed loading timings: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -241,15 +234,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 }
 
 func testLoaderITWriteToDatabase(t *testing.T) {
-	for k, tm := range loader.timings {
-		rcv, err := loader.dm.GetTiming(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetTiming: ", err.Error())
-		}
-		if !reflect.DeepEqual(tm, rcv) {
-			t.Errorf("Expecting: %v, received: %v", tm, rcv)
-		}
-	}
 
 	for tenantid, fltr := range loader.filters {
 		rcv, err := loader.dm.GetFilter(context.TODO(), tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
@@ -392,14 +376,6 @@ func testLoaderITImportToStorDb(t *testing.T) {
 		t.Error("Error when querying storDb for imported data: ", err)
 	} else if len(tpids) != 1 || tpids[0] != utils.TestSQL {
 		t.Errorf("Data in storDb is different than expected %v", tpids)
-	}
-}
-
-// Loads data from storDb into dataDb
-func testLoaderITLoadFromStorDb(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
-	if err := loader.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading timings: ", err.Error())
 	}
 }
 

@@ -1,2 +1,2 @@
-#ID,DestinationRatesID,TimingID,Weight
-RP_1CNT,DR_1CNT,*any,0
+#ID,DestinationRatesID,Weight
+RP_1CNT,DR_1CNT,0

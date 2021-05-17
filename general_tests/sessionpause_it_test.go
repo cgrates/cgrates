@@ -329,7 +329,6 @@ func testSesPauseItAllPause(t *testing.T) {
 				RoundingDecimals: 5,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          utils.MetaPause,
 				RatingFiltersID:  utils.MetaPause,
 			},
@@ -359,17 +358,7 @@ func testSesPauseItAllPause(t *testing.T) {
 				RateUnit:           1,
 			}},
 		},
-		Timings: engine.ChargedTimings{
-			"": {
-				StartTime: "00:00:00",
-			},
-		},
 	}
-	// the Timings are not relevant for this test
-	for _, r := range cd.Rating {
-		r.TimingID = ""
-	}
-	cd.Timings = evCost.Timings
 	if !reflect.DeepEqual(evCost, cd) {
 		t.Errorf("Expected %s \n received: %s", utils.ToJSON(evCost), utils.ToJSON(cd))
 	}
@@ -476,7 +465,6 @@ func testSesPauseItInitPause(t *testing.T) {
 				RoundingDecimals: 5,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          utils.MetaPause,
 				RatingFiltersID:  utils.MetaPause,
 			},
@@ -486,7 +474,6 @@ func testSesPauseItInitPause(t *testing.T) {
 				RoundingDecimals: 4,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          "3d3179b",
 				RatingFiltersID:  "00eaefb",
 			},
@@ -539,11 +526,6 @@ func testSesPauseItInitPause(t *testing.T) {
 				RateIncrement:      time.Second,
 				RateUnit:           60 * time.Second,
 			}},
-		},
-		Timings: engine.ChargedTimings{
-			"": {
-				StartTime: "00:00:00",
-			},
 		},
 	}
 	// we already tested that the keys are populated corectly
@@ -671,7 +653,6 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 				RoundingDecimals: 5,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          utils.MetaPause,
 				RatingFiltersID:  utils.MetaPause,
 			},
@@ -681,7 +662,6 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 				RoundingDecimals: 4,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          "3d3179b",
 				RatingFiltersID:  "00eaefb",
 			},
@@ -734,11 +714,6 @@ func testSesPauseItInitUpdatePause(t *testing.T) {
 				RateIncrement:      time.Second,
 				RateUnit:           60 * time.Second,
 			}},
-		},
-		Timings: engine.ChargedTimings{
-			"": {
-				StartTime: "00:00:00",
-			},
 		},
 	}
 	// we already tested that the keys are populated corectly
@@ -868,7 +843,6 @@ func testSesPauseItUpdatePause(t *testing.T) {
 				RoundingDecimals: 5,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          utils.MetaPause,
 				RatingFiltersID:  utils.MetaPause,
 			},
@@ -878,7 +852,6 @@ func testSesPauseItUpdatePause(t *testing.T) {
 				RoundingDecimals: 4,
 				MaxCost:          0,
 				MaxCostStrategy:  "",
-				TimingID:         "",
 				RatesID:          "3d3179b",
 				RatingFiltersID:  "00eaefb",
 			},
@@ -937,15 +910,6 @@ func testSesPauseItUpdatePause(t *testing.T) {
 				RateIncrement:      time.Second,
 				RateUnit:           60 * time.Second,
 			}},
-		},
-		Timings: engine.ChargedTimings{
-			"": {
-				Years:     utils.Years{},
-				Months:    utils.Months{},
-				MonthDays: utils.MonthDays{},
-				WeekDays:  utils.WeekDays{},
-				StartTime: "00:00:00",
-			},
 		},
 	}
 	// we already tested that the keys are populated corectly

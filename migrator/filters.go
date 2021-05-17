@@ -801,7 +801,7 @@ type v1Filter struct {
 }
 
 type v1FilterRule struct {
-	Type      string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	Type      string            // Filter type (*string,  *rsr_filters, *stats, *lt, *lte, *gt, *gte)
 	FieldName string            // Name of the field providing us the Values to check (used in case of some )
 	Values    []string          // Filter definition
 	rsrFields config.RSRParsers // Cache here the RSRFilter Values

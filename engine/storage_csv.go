@@ -44,7 +44,6 @@ type CSVStorage struct {
 	sep       rune
 	generator func() csvReaderCloser
 	// file names
-	timingsFn            []string
 	resProfilesFn        []string
 	statsFn              []string
 	thresholdsFn         []string
@@ -117,7 +116,7 @@ func NewFileCSVStorage(sep rune, dataPath string) *CSVStorage {
 }
 
 // NewStringCSVStorage creates a csv storage from strings
-func NewStringCSVStorage(sep rune, timingsFn,
+func NewStringCSVStorage(sep rune,
 	resProfilesFn, statsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn,
 	rateProfilesFn, actionProfilesFn, accountsFn string) *CSVStorage {

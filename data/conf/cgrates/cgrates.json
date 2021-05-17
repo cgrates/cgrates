@@ -66,8 +66,7 @@
 // 		"*accounts":{"remote":false, "replicate":false},
 // 		"*actions":{"remote":false, "replicate":false}, 
 // 		"*action_plans": {"remote":false, "replicate":false}, 
-// 		"*shared_groups":{"remote":false, "replicate":false}, 
-// 		"*timings": {"remote":false, "replicate":false}, 
+// 		"*shared_groups":{"remote":false, "replicate":false},
 // 		"*resource_profiles":{"remote":false, "replicate":false}, 
 // 		"*resources":{"remote":false, "replicate":false}, 
 // 		"*statqueue_profiles": {"remote":false, "replicate":false}, 
@@ -119,8 +118,7 @@
 // 	},
 // 	"items":{
 // 		"*session_costs": {"remote":false, "replicate":false}, 
-// 		"*cdrs": {"remote":false, "replicate":false}, 		
-// 		"*tp_timings":{"remote":false, "replicate":false},
+// 		"*cdrs": {"remote":false, "replicate":false},
 // 		"*tp_rates": {"remote":false, "replicate":false}, 
 // 		"*tp_destination_rates": {"remote":false, "replicate":false}, 
 // 		"*tp_rating_plans":{"remote":false, "replicate":false}, 
@@ -212,7 +210,6 @@
 // 		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// action plans caching
 // 		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// action triggers caching
 // 		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// shared groups caching
-// 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// timings caching
 // 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
 // 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control resources caching
 // 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// matching resources to events

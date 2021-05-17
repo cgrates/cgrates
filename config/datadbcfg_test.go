@@ -408,7 +408,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 			},
 			"remote_conns":["Conn1"],
 			"items":{
-				"*timings": {"remote":false, "replicate":false}, 
 				"*resource_profiles":{"remote":false, "replicate":false}, 
 				"*resources":{"remote":false, "replicate":false}, 
 				"*statqueue_profiles": {"remote":false, "replicate":false}, 
@@ -428,7 +427,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		},
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpt{
-			utils.CacheTimings:          {},
 			utils.MetaResourceProfile:   {},
 			utils.MetaResources:         {},
 			utils.MetaStatQueueProfiles: {},

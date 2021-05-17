@@ -299,13 +299,6 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
 	} else if aps[0].Id != "ATMS_1" {
-		t.Errorf("Expected: ATMS_1,\n received: %v", aps[0].Id)
-	} else if aps[0].ActionTimings[0].ActionsID != "ACTS_2" {
-		t.Errorf("Expected: ACTS_2,\n received: %v", aps[0].ActionTimings[0].ActionsID)
-	} else if aps[0].ActionTimings[0].Weight != 20.0 {
-		t.Errorf("Expected: 20.0,\n received: %v", aps[0].ActionTimings[0].Weight)
-	}
-
 	// remove
 	if err := sesRPC.Call(utils.APIerSv1RemoveActionPlan, &v1.AttrGetActionPlan{
 		ID: "ATMS_1"}, &reply); err != nil {

@@ -25,13 +25,12 @@ import (
 
 func TestMissingStructFieldsCorrect(t *testing.T) {
 	var attr = struct {
-		Tenant          string
-		Account         string
-		Type            string
-		ActionTimingsID string
-	}{"bevoip.eu", "danconns0001", MetaPrepaid, "mama"}
+		Tenant  string
+		Account string
+		Type    string
+	}{"bevoip.eu", "danconns0001", MetaPrepaid}
 	if missing := MissingStructFields(&attr,
-		[]string{"Tenant", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
+		[]string{"Tenant", "Account", "Type"}); len(missing) != 0 {
 		t.Error("Found missing field on correct struct", missing)
 	}
 }
@@ -80,13 +79,12 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 
 func TestMissingStructFieldsAppend(t *testing.T) {
 	var attr = struct {
-		Tenant          string
-		Account         string
-		Type            string
-		ActionTimingsID string
-	}{"", "", MetaPrepaid, ""}
+		Tenant  string
+		Account string
+		Type    string
+	}{"", "", MetaPrepaid}
 	missing := MissingStructFields(&attr,
-		[]string{"Tenant", "Account", "Type", "ActionTimingsID"})
+		[]string{"Tenant", "Account", "Type"})
 	if len(missing) == 0 {
 		t.Error("Required missing field not found")
 	}

@@ -262,7 +262,7 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 // FilterRule filters requests coming into various places
 // Pass rule: default negative, one matching rule should pass the filter
 type FilterRule struct {
-	Type       string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	Type       string            // Filter type (*string, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
 	Element    string            // Name of the field providing us the Values to check (used in case of some )
 	Values     []string          // Filter definition
 	rsrValues  config.RSRParsers // Cache here the

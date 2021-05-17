@@ -107,9 +107,6 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaActions: {
 				Replicate: false,
 				Remote:    false},
-			utils.CacheTimings: {
-				Replicate: false,
-				Remote:    false},
 			utils.MetaResourceProfile: {
 				Replicate: false,
 				Remote:    false},
@@ -204,7 +201,6 @@ func TestDataDBReloadBadType(t *testing.T) {
 		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:     5,
-		utils.Timing:         1,
 		utils.RQF:            5,
 		utils.Resource:       1,
 		utils.Subscribers:    1,
@@ -443,7 +439,6 @@ func TestDataDBStartVersion(t *testing.T) {
 		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:     5,
-		utils.Timing:         1,
 		utils.RQF:            5,
 		utils.Resource:       1,
 		utils.Subscribers:    1,
@@ -499,7 +494,6 @@ func TestDataDBReloadCastError(t *testing.T) {
 		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:     5,
-		utils.Timing:         1,
 		utils.RQF:            5,
 		utils.Resource:       1,
 		utils.Subscribers:    1,
@@ -636,7 +630,6 @@ func TestDataDBReloadIfaceAsDurationError(t *testing.T) {
 		utils.Routes:     2,
 		// old version for Attributes
 		utils.Attributes:     5,
-		utils.Timing:         1,
 		utils.RQF:            5,
 		utils.Resource:       1,
 		utils.Subscribers:    1,

@@ -89,34 +89,6 @@ func TestClonePaginator(t *testing.T) {
 	}
 }
 
-func TestNewTiming(t *testing.T) {
-	eOut := &TPTiming{
-		ID:        "1",
-		Years:     Years{2020},
-		Months:    []time.Month{time.April},
-		MonthDays: MonthDays{18},
-		WeekDays:  WeekDays{06},
-		StartTime: "00:00:00",
-		EndTime:   "11:11:11",
-	}
-	rcv := NewTiming("1", "2020", "04", "18", "06", "00:00:00;11:11:11")
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expected %+v, received %+v", eOut, rcv)
-	}
-	//without endtime, check if .Split method works (only one timestamp)
-	rcv = NewTiming("1", "2020", "04", "18", "06", "00:00:00")
-	eOut.EndTime = ""
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expected %+v, received %+v", eOut, rcv)
-	}
-	//check if .Split method works (ignoring the last timestamp)
-	rcv = NewTiming("1", "2020", "04", "18", "06", "00:00:00;11:11:11;22:22:22")
-	eOut.EndTime = "11:11:11"
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expected %+v, received %+v", eOut, rcv)
-	}
-}
-
 //now working here
 func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 	attrGetCdrs := &AttrGetCdrs{
@@ -561,7 +533,6 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 			DispatcherProfileIDs:       {MetaAny},
 			DispatcherHostIDs:          {MetaAny},
 			RateProfileIDs:             {MetaAny},
-			TimingIDs:                  {MetaAny},
 			AttributeFilterIndexIDs:    {MetaAny},
 			ResourceFilterIndexIDs:     {MetaAny},
 			StatFilterIndexIDs:         {MetaAny},

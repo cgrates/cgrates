@@ -86,7 +86,6 @@ const CGRATES_CFG_JSON = `
 	"items":{
 		"*accounts":{"remote":false, "replicate":false},
 		"*actions":{"remote":false, "replicate":false},
-		"*timings": {"remote":false, "replicate":false}, 
 		"*resource_profiles":{"remote":false, "replicate":false}, 
 		"*resources":{"remote":false, "replicate":false}, 
 		"*statqueue_profiles": {"remote":false, "replicate":false}, 
@@ -137,8 +136,7 @@ const CGRATES_CFG_JSON = `
 	},
 	"items":{
 		"*session_costs": {"remote":false, "replicate":false}, 
-		"*cdrs": {"remote":false, "replicate":false}, 		
-		"*tp_timings":{"remote":false, "replicate":false},
+		"*cdrs": {"remote":false, "replicate":false},
 		"*tp_resources":{"remote":false, "replicate":false}, 
 		"*tp_stats":{"remote":false, "replicate":false}, 
 		"*tp_thresholds": {"remote":false, "replicate":false}, 
@@ -207,7 +205,6 @@ const CGRATES_CFG_JSON = `
 
 "caches":{
 	"partitions": {
-		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// timings caching
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control resource profiles caching
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},				// control resources caching
 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},							// matching resources to events
@@ -256,8 +253,7 @@ const CGRATES_CFG_JSON = `
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for version storing
 		// internal storDB tabels
 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 		
-		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 
 		"*tp_resources":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 		"*tp_stats":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 

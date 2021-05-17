@@ -54,7 +54,6 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTPThresholds,
 	testStorDBitCRUDTPAttributes,
 	testStorDBitCRUDTPChargers,
-	testStorDBitCRUDTpTimings,
 	testStorDBitCRUDTpResources,
 	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
@@ -868,67 +867,6 @@ func testStorDBitCRUDTPChargers(t *testing.T) {
 	if err := storDB.RemTpData(utils.EmptyString, tpChargers[0].TPid, nil); err != nil {
 		t.Error(err)
 	} else if _, err := storDB.GetTPChargers(tpChargers[0].TPid, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testStorDBitCRUDTpTimings(t *testing.T) {
-	// READ
-	if _, err := storDB.GetTPTimings("testTPid", ""); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	// WRITE
-	var snd = []*utils.ApierTPTiming{
-		{
-			TPid:      "testTPid",
-			ID:        "testTag1",
-			Years:     "*any",
-			Months:    "*any",
-			MonthDays: "*any",
-			WeekDays:  "1;2;3;4;5",
-			Time:      "01:00:00",
-		},
-		{
-			TPid:      "testTPid",
-			ID:        "testTag2",
-			Years:     "*any",
-			Months:    "*any",
-			MonthDays: "*any",
-			WeekDays:  "1;2;3;4;5",
-			Time:      "01:00:00",
-		},
-	}
-	if err := storDB.SetTPTimings(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPTimings("testTPid", ""); err != nil {
-		t.Error(err)
-	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToJSON(snd[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
-		}
-	}
-	// UPDATE
-	snd[0].Time = "02:00:00"
-	snd[1].Time = "02:00:00"
-	if err := storDB.SetTPTimings(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPTimings("testTPid", ""); err != nil {
-		t.Error(err)
-	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("Expecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToJSON(snd[0]), utils.ToJSON(rcv[0]), utils.ToJSON(rcv[1]))
-		}
-	}
-	// REMOVE
-	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if _, err := storDB.GetTPTimings("testTPid", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

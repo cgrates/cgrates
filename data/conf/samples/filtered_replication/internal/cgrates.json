@@ -29,7 +29,6 @@
 	"replication_filtered": true,
 	"items":{
 		"*accounts":{"remote":false,"replicate":true},
-		"*timings": {"remote":false,"replicate":true},
 		"*resource_profiles":{"remote":false,"replicate":true},
 		"*resources":{"remote":false,"replicate":true},
 		"*statqueue_profiles": {"remote":false,"replicate":true},

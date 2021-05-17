@@ -60,12 +60,6 @@ URG,112
 EU_LANDLINE,444
 EXOTIC,999
 `
-	TimingsCSVContent = `
-WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
-WORKDAYS_18,*any,*any,*any,1;2;3;4;5,18:00:00
-WEEKENDS,*any,*any,*any,6;7,00:00:00
-ONE_TIME_RUN,2012,,,,*asap
-`
 
 	ActionsCSVContent = `
 MINI,*topup_reset,,,,*monetary,,,,,*unlimited,,10,10,false,false,10

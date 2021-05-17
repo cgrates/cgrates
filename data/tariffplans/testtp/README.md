@@ -4,7 +4,6 @@ CGRateS - FSGermanyPrep1
 Scenario:
 ---------
 
-* Create the necessary timings (always, asap).
 * Configure 1 destination: FS_USERS.
 * Calls to FreeSWITCH users will be free and time independent.
 * This rating profile will be valid for any rating subject.

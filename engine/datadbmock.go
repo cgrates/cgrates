@@ -113,14 +113,6 @@ func (dbM *DataDBMock) RemoveResourceDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetTimingDrv(string) (*utils.TPTiming, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetTimingDrv(*utils.TPTiming) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) RemoveTimingDrv(string) error {
 	return utils.ErrNotImplemented
 }

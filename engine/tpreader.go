@@ -35,7 +35,6 @@ type TpReader struct {
 	timezone           string
 	dm                 *DataManager
 	lr                 LoadReader
-	timings            map[string]*utils.TPTiming
 	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
 	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
 	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
@@ -70,14 +69,11 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 		isInternalDB: isInternalDB,
 	}
 	tpr.Init()
-	//add default timing tag (in case of no timings file)
-	tpr.addDefaultTimings()
 
 	return tpr, nil
 }
 
 func (tpr *TpReader) Init() {
-	tpr.timings = make(map[string]*utils.TPTiming)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
@@ -1244,99 +1240,4 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) { // ToDoNext: ad
 	// 	log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 	// }
 	return
-}
-
-func (tpr *TpReader) addDefaultTimings() {
-	tpr.timings[utils.MetaAny] = &utils.TPTiming{
-		ID:        utils.MetaAny,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: "00:00:00",
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaASAP] = &utils.TPTiming{
-		ID:        utils.MetaASAP,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.MetaASAP,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaEveryMinute] = &utils.TPTiming{
-		ID:        utils.MetaEveryMinute,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(time.Now().Second())),
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaHourly] = &utils.TPTiming{
-		ID:        utils.MetaHourly,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(time.Now().Minute()), strconv.Itoa(time.Now().Second())),
-		EndTime:   "",
-	}
-	startTime := time.Now().Format("15:04:05")
-	tpr.timings[utils.MetaDaily] = &utils.TPTiming{
-		ID:        utils.MetaDaily,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaWeekly] = &utils.TPTiming{
-		ID:        utils.MetaWeekly,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{},
-		WeekDays:  utils.WeekDays{time.Now().Weekday()},
-		StartTime: startTime,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaMonthly] = &utils.TPTiming{
-		ID:        utils.MetaMonthly,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{time.Now().Day()},
-		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaMonthlyEstimated] = &utils.TPTiming{
-		ID:        utils.MetaMonthlyEstimated,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{time.Now().Day()},
-		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaMonthEnd] = &utils.TPTiming{
-		ID:        utils.MetaMonthEnd,
-		Years:     utils.Years{},
-		Months:    utils.Months{},
-		MonthDays: utils.MonthDays{-1},
-		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
-		EndTime:   "",
-	}
-	tpr.timings[utils.MetaYearly] = &utils.TPTiming{
-		ID:        utils.MetaYearly,
-		Years:     utils.Years{},
-		Months:    utils.Months{time.Now().Month()},
-		MonthDays: utils.MonthDays{time.Now().Day()},
-		WeekDays:  utils.WeekDays{},
-		StartTime: startTime,
-		EndTime:   "",
-	}
-
 }

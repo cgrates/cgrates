@@ -27,7 +27,6 @@
 	"remote_conn_id": "engine1",
 	"items":{
 		"*accounts":{"remote":true,"replicate":false},
-		"*timings": {"remote":true,"replicate":false},
 		"*resource_profiles":{"remote":true,"replicate":false},
 		"*resources":{"remote":true,"replicate":false},
 		"*statqueue_profiles": {"remote":true,"replicate":false},
