@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/actions"
 
@@ -62,6 +64,8 @@ type ActionService struct {
 	connMgr     *engine.ConnManager
 	server      *cores.Server
 
+	rpc *apis.ActionSv1
+
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
@@ -94,11 +98,12 @@ func (acts *ActionService) Start() (err error) {
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ActionS))
-	// acts.rpc = v1.NewActionSv1(acts.acts)
-	// if !acts.cfg.DispatcherSCfg().Enabled {
-	// acts.server.RpcRegister(acts.rpc)
-	// }
-	// acts.connChan <- acts.anz.GetInternalCodec(acts.rpc, utils.ActionS)
+	acts.rpc = apis.NewActionSv1(acts.acts)
+	srv, _ := birpc.NewService(acts.rpc, "", false)
+	if !acts.cfg.DispatcherSCfg().Enabled {
+		acts.server.RpcRegister(acts.rpc)
+	}
+	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.ActionS)
 	return
 }
 
@@ -115,7 +120,7 @@ func (acts *ActionService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	// acts.rpc = nil
+	acts.rpc = nil
 	<-acts.connChan
 	return
 }

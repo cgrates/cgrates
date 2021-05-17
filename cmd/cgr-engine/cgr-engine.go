@@ -179,8 +179,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		// 	internalEEsChan <- eeS
 		case rateS := <-internalRateSChan:
 			internalRateSChan <- rateS
-		// case actionS := <-internalActionSChan:
-		// 	internalActionSChan <- actionS
+		case actionS := <-internalActionSChan:
+			internalActionSChan <- actionS
 		// case accountS := <-internalAccountSChan:
 		// 	internalAccountSChan <- accountS
 		case <-shdChan.Done():
@@ -334,7 +334,7 @@ func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 			shdWg.Done()
 			return
 		case <-reloadSignal:
-			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
+			//  do it in it's own goroutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
 				if err := config.CgrConfig().V1ReloadConfig(context.Background(),
@@ -536,6 +536,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRateS):          internalRateSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts):       internalAccountSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions):        internalActionSChan,
 
 		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
 	})
