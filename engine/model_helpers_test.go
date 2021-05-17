@@ -587,7 +587,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 		{
 			TPid:      tps[0].Tpid,
 			ID:        tps[0].ID,
-			FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "FilterID1", "FilterID2"},
 			MinSleep:  tps[0].MinSleep,
 			MaxHits:   tps[0].MaxHits,
 			MinHits:   tps[0].MinHits,
@@ -598,7 +598,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 		{
 			TPid:      tps[0].Tpid,
 			ID:        tps[0].ID,
-			FilterIDs: []string{"FilterID2", "FilterID1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "FilterID2", "FilterID1"},
 			MinSleep:  tps[0].MinSleep,
 			MaxHits:   tps[0].MaxHits,
 			MinHits:   tps[0].MinHits,
@@ -642,13 +642,19 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: "FilterID1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			FilterIDs: "FilterID1",
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: "WARN3",
+		},
+		{
+			Tpid:      "TP1",
+			ID:        "TH_1",
+			Tenant:    "cgrates.org",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
 		},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -675,7 +681,7 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: "FLTR_1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			FilterIDs: "FLTR_1",
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
@@ -688,6 +694,12 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
 			FilterIDs: "FLTR_2",
+		},
+		{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
 		},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -714,7 +726,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: "FLTR_1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			FilterIDs: "FLTR_1",
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
@@ -727,6 +739,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
 			ActionIDs: "LOG",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
 		},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -4276,13 +4289,19 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 			Tpid:      "TP1",
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: "FilterID1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			FilterIDs: "FilterID1",
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
 			Blocker:   false,
 			Weight:    20.0,
 			ActionIDs: "WARN3",
+		},
+		{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
 		},
 	}
 

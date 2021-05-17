@@ -571,7 +571,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 	eTh1 := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Threshold1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  time.Second,
