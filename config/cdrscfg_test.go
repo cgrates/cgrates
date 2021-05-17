@@ -176,3 +176,70 @@ func TestCdrsCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffCdrsJsonCfg(t *testing.T) {
+	var d *CdrsJsonCfg
+
+	v1 := &CdrsCfg{
+		Enabled: false,
+		ExtraFields: RSRParsers{
+			{
+				Rules: "Rule1",
+			},
+		},
+		StoreCdrs:        false,
+		SMCostRetries:    2,
+		ChargerSConns:    []string{"*localhost"},
+		AttributeSConns:  []string{"*localhost"},
+		ThresholdSConns:  []string{"*localhost"},
+		StatSConns:       []string{"*localhost"},
+		OnlineCDRExports: []string{},
+		ActionSConns:     []string{"*localhost"},
+		EEsConns:         []string{"*localhost"},
+	}
+
+	v2 := &CdrsCfg{
+		Enabled: true,
+		ExtraFields: RSRParsers{
+			{
+				Rules: "Rule2",
+			},
+		},
+		StoreCdrs:        true,
+		SMCostRetries:    1,
+		ChargerSConns:    []string{"*birpc"},
+		AttributeSConns:  []string{"*birpc"},
+		ThresholdSConns:  []string{"*birpc"},
+		StatSConns:       []string{"*birpc"},
+		OnlineCDRExports: []string{"val1"},
+		ActionSConns:     []string{"*birpc"},
+		EEsConns:         []string{"*birpc"},
+	}
+
+	expected := &CdrsJsonCfg{
+		Enabled:              utils.BoolPointer(true),
+		Extra_fields:         &[]string{"Rule2"},
+		Store_cdrs:           utils.BoolPointer(true),
+		Session_cost_retries: utils.IntPointer(1),
+		Chargers_conns:       &[]string{"*birpc"},
+		Attributes_conns:     &[]string{"*birpc"},
+		Thresholds_conns:     &[]string{"*birpc"},
+		Stats_conns:          &[]string{"*birpc"},
+		Online_cdr_exports:   &[]string{"val1"},
+		Actions_conns:        &[]string{"*birpc"},
+		Ees_conns:            &[]string{"*birpc"},
+	}
+
+	rcv := diffCdrsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &CdrsJsonCfg{}
+
+	rcv = diffCdrsJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

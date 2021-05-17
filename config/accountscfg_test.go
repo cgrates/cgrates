@@ -153,3 +153,110 @@ func TestAccountSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffAccountSJsonCfg(t *testing.T) {
+	var d *AccountSJsonCfg
+
+	v1 := &AccountSCfg{
+		Enabled:             true,
+		AttributeSConns:     []string{"*localhost"},
+		RateSConns:          []string{},
+		ThresholdSConns:     []string{},
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"~*req.Index1"},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+		MaxIterations:       1,
+		MaxUsage:            nil,
+	}
+
+	v2 := &AccountSCfg{
+		Enabled:             false,
+		AttributeSConns:     []string{"*localhost", "*birpc"},
+		RateSConns:          []string{"*localhost"},
+		ThresholdSConns:     []string{"*localhost"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"~*req.Index1"},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        false,
+		MaxIterations:       3,
+		MaxUsage:            utils.NewDecimal(60, 0),
+	}
+
+	expected1 := &AccountSJsonCfg{
+		Enabled:               utils.BoolPointer(false),
+		Indexed_selects:       utils.BoolPointer(false),
+		Attributes_conns:      &[]string{"*localhost", "*birpc"},
+		Rates_conns:           &[]string{"*localhost"},
+		Thresholds_conns:      &[]string{"*localhost"},
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         utils.BoolPointer(false),
+		Max_iterations:        utils.IntPointer(3),
+		Max_usage:             utils.StringPointer("60"),
+	}
+
+	rcv := diffAccountSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected1) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected1), utils.ToJSON(rcv))
+	}
+
+	//MaxUsage is nil in v2
+	v2_2 := &AccountSCfg{
+		Enabled:             false,
+		AttributeSConns:     []string{"*localhost", "*birpc"},
+		RateSConns:          []string{"*localhost"},
+		ThresholdSConns:     []string{"*localhost"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"~*req.Index1"},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        false,
+		MaxIterations:       3,
+		MaxUsage:            nil,
+	}
+
+	expected2 := &AccountSJsonCfg{
+		Enabled:               utils.BoolPointer(false),
+		Indexed_selects:       utils.BoolPointer(false),
+		Attributes_conns:      &[]string{"*localhost", "*birpc"},
+		Rates_conns:           &[]string{"*localhost"},
+		Thresholds_conns:      &[]string{"*localhost"},
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         utils.BoolPointer(false),
+		Max_iterations:        utils.IntPointer(3),
+		Max_usage:             nil,
+	}
+
+	rcv = diffAccountSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+
+	//Make the two Accounts equal in order to get a nil "d"
+
+	v2_3 := v1
+	expected3 := &AccountSJsonCfg{
+		Enabled:               nil,
+		Indexed_selects:       nil,
+		Attributes_conns:      nil,
+		Rates_conns:           nil,
+		Thresholds_conns:      nil,
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         nil,
+		Max_iterations:        nil,
+		Max_usage:             nil,
+	}
+
+	rcv = diffAccountSJsonCfg(d, v1, v2_3)
+	if !reflect.DeepEqual(rcv, expected3) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected3), utils.ToJSON(rcv))
+	}
+}

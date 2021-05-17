@@ -175,3 +175,58 @@ func TestAttributeSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffAttributeSJsonCfg(t *testing.T) {
+	var d *AttributeSJsonCfg
+
+	v1 := &AttributeSCfg{
+		Enabled:             false,
+		StatSConns:          []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		ApierSConns:         []string{"*localhost"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		ProcessRuns:         2,
+		NestedFields:        true,
+	}
+
+	v2 := &AttributeSCfg{
+		Enabled:             true,
+		StatSConns:          []string{"*birpc"},
+		ResourceSConns:      []string{"*birpc"},
+		ApierSConns:         []string{"*birpc"},
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.Field1"},
+		PrefixIndexedFields: nil,
+		SuffixIndexedFields: nil,
+		ProcessRuns:         3,
+		NestedFields:        false,
+	}
+
+	expected := &AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Stats_conns:           &[]string{"*birpc"},
+		Resources_conns:       &[]string{"*birpc"},
+		Admins_conns:          &[]string{"*birpc"},
+		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: &[]string{"*req.Field1"},
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Process_runs:          utils.IntPointer(3),
+		Nested_fields:         utils.BoolPointer(false),
+	}
+
+	rcv := diffAttributeSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &AttributeSJsonCfg{}
+	rcv = diffAttributeSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
