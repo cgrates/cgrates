@@ -72,11 +72,7 @@ func TestCloneAccount(t *testing.T) {
 	actPrf := &Account{
 		Tenant:    "cgrates.org",
 		ID:        "Profile_id1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		ActivationInterval: &ActivationInterval{
-			ActivationTime: time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 7, 22, 10, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2020-07-21T10:00:00Z|2020-07-22T10:00:00Z"},
 		Weights: DynamicWeights{
 			{
 				Weight: 2.4,
@@ -123,7 +119,6 @@ func TestCloneAccount(t *testing.T) {
 	}
 
 	actPrf.Opts = nil
-	actPrf.ActivationInterval = nil
 	if rcv := actPrf.Clone(); !reflect.DeepEqual(rcv, actPrf) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(actPrf), ToJSON(rcv))
 	}
@@ -446,12 +441,8 @@ func TestAPAccount(t *testing.T) {
 			Account: &Account{
 				Tenant:    "testTenant1",
 				ID:        "testID1",
-				FilterIDs: []string{"testFID1", "testFID2"},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
-					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
-				},
-				Weights: nil,
+				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
+				Weights:   nil,
 				Balances: map[string]*Balance{
 					"testBalance1": {
 						ID:    "testBalance1",
@@ -467,12 +458,8 @@ func TestAPAccount(t *testing.T) {
 			Account: &Account{
 				Tenant:    "testTenant2",
 				ID:        "testID2",
-				FilterIDs: []string{"testFID1", "testFID2"},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
-					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
-				},
-				Weights: nil,
+				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
+				Weights:   nil,
 				Balances: map[string]*Balance{
 					"testBalance2": {
 						ID:    "testBalance2",
@@ -503,12 +490,8 @@ func TestAPLockIDs(t *testing.T) {
 			Account: &Account{
 				Tenant:    "testTenant1",
 				ID:        "testID1",
-				FilterIDs: []string{"testFID1", "testFID2"},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
-					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
-				},
-				Weights: nil,
+				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
+				Weights:   nil,
 				Balances: map[string]*Balance{
 					"testBalance1": {
 						ID:    "testBalance1",
@@ -524,12 +507,8 @@ func TestAPLockIDs(t *testing.T) {
 			Account: &Account{
 				Tenant:    "testTenant2",
 				ID:        "testID2",
-				FilterIDs: []string{"testFID1", "testFID2"},
-				ActivationInterval: &ActivationInterval{
-					ActivationTime: time.Date(2020, time.April, 12, 0, 0, 0, 0, time.UTC),
-					ExpiryTime:     time.Date(2020, time.April, 12, 10, 0, 0, 0, time.UTC),
-				},
-				Weights: nil,
+				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
+				Weights:   nil,
 				Balances: map[string]*Balance{
 					"testBalance2": {
 						ID:    "testBalance2",
@@ -731,11 +710,7 @@ func TestAsExtAccount(t *testing.T) {
 	acc := &Account{
 		Tenant:    "tcgrates.org",
 		ID:        "TestAsExtAccount",
-		FilterIDs: []string{"fltr1", "fltr2"},
-		ActivationInterval: &ActivationInterval{
-			ActivationTime: time.Date(2021, time.December, 12, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2021, time.May, 12, 10, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"fltr1", "fltr2", "*ai:~*req.AnswerTime:2021-12-12T00:00:00Z|2021-05-12T10:00:00Z"},
 		Weights: DynamicWeights{
 			{
 				FilterIDs: []string{},
@@ -845,11 +820,7 @@ func TestAsExtAccountCheckErrors(t *testing.T) {
 	acc := &Account{
 		Tenant:    "tcgrates.org",
 		ID:        "TestAsExtAccount",
-		FilterIDs: []string{"fltr1", "fltr2"},
-		ActivationInterval: &ActivationInterval{
-			ActivationTime: time.Date(2021, time.December, 12, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2021, time.May, 12, 10, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"fltr1", "fltr2", "*ai:~*req.AnswerTime:2021-12-12T00:00:00Z|2021-05-12T10:00:00Z"},
 		Weights: DynamicWeights{
 			{
 				FilterIDs: []string{},

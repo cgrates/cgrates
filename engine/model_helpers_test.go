@@ -4608,13 +4608,12 @@ func TestModelHelpersCSVLoadErrorBool(t *testing.T) {
 
 func TestAccountMdlsCSVHeader(t *testing.T) {
 	testStruct := AccountMdls{{
-		Tpid:               "TEST_TPID",
-		Tenant:             "cgrates.org",
-		ID:                 "ResGroup1",
-		FilterIDs:          "FLTR_RES_GR1",
-		ActivationInterval: "2014-07-29T15:00:00Z",
-		Weights:            "10.0",
-		ThresholdIDs:       "WARN_RES1;WARN_RES1",
+		Tpid:         "TEST_TPID",
+		Tenant:       "cgrates.org",
+		ID:           "ResGroup1",
+		FilterIDs:    "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;FLTR_RES_GR1",
+		Weights:      "10.0",
+		ThresholdIDs: "WARN_RES1;WARN_RES1",
 	},
 	}
 	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
@@ -4633,8 +4632,7 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 		Tpid:                  "TEST_TPID",
 		Tenant:                "cgrates.org",
 		ID:                    "ResGroup1",
-		FilterIDs:             "FLTR_RES_GR1",
-		ActivationInterval:    "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		FilterIDs:             "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z;FLTR_RES_GR1",
 		Weights:               "10.0",
 		BalanceID:             "VoiceBalance",
 		BalanceFilterIDs:      "FLTR_RES_GR2",
@@ -4650,12 +4648,8 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 			TPid:      "TEST_TPID",
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
-			FilterIDs: []string{"FLTR_RES_GR1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-24T15:00:00Z",
-				ExpiryTime:     "2014-07-25T15:00:00Z",
-			},
-			Weights: "10.0",
+			FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
+			Weights:   "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
 					ID:             "VoiceBalance",
@@ -4682,19 +4676,18 @@ func TestAccountMdlsAsTPAccount(t *testing.T) {
 
 func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 	testStruct := AccountMdls{{
-		PK:                 0,
-		Tpid:               "TEST_TPID",
-		Tenant:             "cgrates.org",
-		ID:                 "ResGroup1",
-		FilterIDs:          "FLTR_RES_GR1",
-		ActivationInterval: "2014-07-24T15:00:00Z",
-		Weights:            "10.0",
-		BalanceID:          "VoiceBalance",
-		BalanceFilterIDs:   "FLTR_RES_GR2",
-		BalanceWeights:     "10",
-		BalanceType:        utils.MetaVoice,
-		BalanceUnits:       3600000000000,
-		ThresholdIDs:       "WARN_RES1",
+		PK:               0,
+		Tpid:             "TEST_TPID",
+		Tenant:           "cgrates.org",
+		ID:               "ResGroup1",
+		FilterIDs:        "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z;FLTR_RES_GR1",
+		Weights:          "10.0",
+		BalanceID:        "VoiceBalance",
+		BalanceFilterIDs: "FLTR_RES_GR2",
+		BalanceWeights:   "10",
+		BalanceType:      utils.MetaVoice,
+		BalanceUnits:     3600000000000,
+		ThresholdIDs:     "WARN_RES1",
 	},
 	}
 	exp := []*utils.TPAccount{
@@ -4702,11 +4695,8 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 			TPid:      "TEST_TPID",
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup1",
-			FilterIDs: []string{"FLTR_RES_GR1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-24T15:00:00Z",
-			},
-			Weights: "10.0",
+			FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z"},
+			Weights:   "10.0",
 			Balances: map[string]*utils.TPAccountBalance{
 				"VoiceBalance": {
 					ID:        "VoiceBalance",
@@ -4768,12 +4758,8 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		TPid:      "TEST_TPID",
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-24T15:00:00Z",
-			ExpiryTime:     "2014-07-25T15:00:00Z",
-		},
-		Weights: "10.0",
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
+		Weights:   "10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:            "VoiceBalance",
@@ -4787,18 +4773,17 @@ func TestAPItoModelTPAccount(t *testing.T) {
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
 	exp := AccountMdls{{
-		Tpid:               "TEST_TPID",
-		Tenant:             "cgrates.org",
-		ID:                 "ResGroup1",
-		FilterIDs:          "FLTR_RES_GR1",
-		ActivationInterval: "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
-		Weights:            "10.0",
-		BalanceID:          "VoiceBalance",
-		BalanceFilterIDs:   "FLTR_RES_GR2",
-		BalanceWeights:     "10",
-		BalanceType:        utils.MetaVoice,
-		BalanceUnits:       3600000000000,
-		ThresholdIDs:       "WARN_RES1",
+		Tpid:             "TEST_TPID",
+		Tenant:           "cgrates.org",
+		ID:               "ResGroup1",
+		FilterIDs:        "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z;FLTR_RES_GR1",
+		Weights:          "10.0",
+		BalanceID:        "VoiceBalance",
+		BalanceFilterIDs: "FLTR_RES_GR2",
+		BalanceWeights:   "10",
+		BalanceType:      utils.MetaVoice,
+		BalanceUnits:     3600000000000,
+		ThresholdIDs:     "WARN_RES1",
 	}}
 	result := APItoModelTPAccount(testStruct)
 	if !reflect.DeepEqual(exp, result) {
@@ -4808,14 +4793,10 @@ func TestAPItoModelTPAccount(t *testing.T) {
 
 func TestAPItoModelTPAccountNoBalance(t *testing.T) {
 	testStruct := &utils.TPAccount{
-		TPid:      "TEST_TPID",
-		Tenant:    "cgrates.org",
-		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-24T15:00:00Z",
-			ExpiryTime:     "2014-07-25T15:00:00Z",
-		},
+		TPid:         "TEST_TPID",
+		Tenant:       "cgrates.org",
+		ID:           "ResGroup1",
+		FilterIDs:    []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
 		Weights:      "10.0",
 		ThresholdIDs: []string{"WARN_RES1"},
 	}
@@ -4831,12 +4812,8 @@ func TestAPItoModelTPAccountCase2(t *testing.T) {
 		TPid:      "TEST_TPID",
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-24T15:00:00Z",
-			ExpiryTime:     "2014-07-25T15:00:00Z",
-		},
-		Weights: "10.0",
+		FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR2", "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z"},
+		Weights:   "10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -4878,8 +4855,7 @@ func TestAPItoModelTPAccountCase2(t *testing.T) {
 		Tpid:                  "TEST_TPID",
 		Tenant:                "cgrates.org",
 		ID:                    "ResGroup1",
-		FilterIDs:             "FLTR_RES_GR1;FLTR_RES_GR2",
-		ActivationInterval:    "2014-07-24T15:00:00Z;2014-07-25T15:00:00Z",
+		FilterIDs:             "*ai:~*req.AnswerTime:2014-07-24T15:00:00Z|2014-07-25T15:00:00Z;FLTR_RES_GR1;FLTR_RES_GR2",
 		Weights:               "10.0",
 		BalanceID:             "VoiceBalance",
 		BalanceFilterIDs:      "FLTR_RES_GR1;FLTR_RES_GR2",
@@ -4905,12 +4881,8 @@ func TestApitoAccountCase2(t *testing.T) {
 	testStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weights: ";10",
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";10",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:             "VoiceBalance",
@@ -4927,11 +4899,7 @@ func TestApitoAccountCase2(t *testing.T) {
 	exp := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-15T14:25:00Z|2014-07-15T14:25:00Z"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 10.0,
@@ -4987,44 +4955,12 @@ func TestApiToAccountWeightsError(t *testing.T) {
 	}
 }
 
-func TestApitoAccountCaseTimeError(t *testing.T) {
-	testStruct := &utils.TPAccount{
-		Tenant:    "cgrates.org",
-		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "test_time",
-			ExpiryTime:     "test_time2",
-		},
-		Weights: ";10",
-		Balances: map[string]*utils.TPAccountBalance{
-			"VoiceBalance": {
-				ID:             "VoiceBalance",
-				FilterIDs:      []string{"FLTR_RES_GR2"},
-				RateProfileIDs: []string{"RT_GR2"},
-				Weights:        ";10",
-				Type:           utils.MetaVoice,
-				Units:          3600000000000,
-			},
-		},
-		ThresholdIDs: []string{"WARN_RES1"},
-	}
-	_, err := APItoAccount(testStruct, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("Expecting: <Unsupported time format>,\nreceived: <%+v>", err)
-	}
-}
-
 func TestApitoAccountCaseTimeError2(t *testing.T) {
 	testStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup1",
-		FilterIDs: []string{"FLTR_RES_GR1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weights: ";10.0",
+		FilterIDs: []string{"FLTR_RES_GR1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";10.0",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",
@@ -5111,11 +5047,7 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 	testStruct := &utils.Account{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"test_filterId"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"test_filterId", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		Weights: utils.DynamicWeights{
 			{
 				Weight: 2,
@@ -5157,12 +5089,8 @@ func TestModelHelpersAccountToAPI(t *testing.T) {
 	expStruct := &utils.TPAccount{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
-		FilterIDs: []string{"test_filterId"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
-		Weights: ";2",
+		FilterIDs: []string{"test_filterId", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
+		Weights:   ";2",
 		Balances: map[string]*utils.TPAccountBalance{
 			"VoiceBalance": {
 				ID:        "VoiceBalance",

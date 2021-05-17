@@ -84,17 +84,6 @@ func actSetAccountFields(ac *utils.Account, path []string, value string) (err er
 	// the tenant and ID should come from user and should not change
 	case utils.FilterIDs:
 		ac.FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
-	case utils.ActivationIntervalString:
-		// similar how the TP are loaded split the value based on ;
-		// the first element is ActivationTime and the second if any ExpiryTime
-		ac.ActivationInterval = &utils.ActivationInterval{}
-		valSpl := strings.SplitN(value, utils.InfieldSep, 2)
-		if ac.ActivationInterval.ActivationTime, err = utils.ParseTimeDetectLayout(valSpl[0], utils.EmptyString); err != nil {
-			return
-		}
-		if len(valSpl) == 2 {
-			ac.ActivationInterval.ExpiryTime, err = utils.ParseTimeDetectLayout(valSpl[1], utils.EmptyString)
-		}
 	case utils.Weights:
 		ac.Weights, err = utils.NewDynamicWeightsFromString(value, utils.InfieldSep, utils.ANDSep)
 	case utils.Opts:

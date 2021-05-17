@@ -28,14 +28,13 @@ import (
 
 // Account represents one Account on a Tenant
 type Account struct {
-	Tenant             string
-	ID                 string // Account identificator, unique within the tenant
-	FilterIDs          []string
-	ActivationInterval *ActivationInterval
-	Weights            DynamicWeights
-	Opts               map[string]interface{}
-	Balances           map[string]*Balance
-	ThresholdIDs       []string
+	Tenant       string
+	ID           string // Account identificator, unique within the tenant
+	FilterIDs    []string
+	Weights      DynamicWeights
+	Opts         map[string]interface{}
+	Balances     map[string]*Balance
+	ThresholdIDs []string
 }
 
 // BalancesAltered detects altering of the Balances by comparing the Balance values with the ones from backup
@@ -121,9 +120,6 @@ func (aC *Account) AsExtAccount() (eAc *ExtAccount, err error) {
 		for idx, val := range aC.FilterIDs {
 			eAc.FilterIDs[idx] = val
 		}
-	}
-	if aC.ActivationInterval != nil {
-		eAc.ActivationInterval = aC.ActivationInterval
 	}
 	if aC.Weights != nil {
 		eAc.Weights = aC.Weights
@@ -638,10 +634,6 @@ func (aC *Account) Equals(acnt *Account) (eq bool) {
 		(aC.FilterIDs == nil && acnt.FilterIDs != nil ||
 			aC.FilterIDs != nil && acnt.FilterIDs == nil ||
 			len(aC.FilterIDs) != len(acnt.FilterIDs)) ||
-		(aC.ActivationInterval == nil && acnt.ActivationInterval != nil ||
-			aC.ActivationInterval != nil && acnt.ActivationInterval == nil ||
-			(aC.ActivationInterval != nil && acnt.ActivationInterval != nil &&
-				!aC.ActivationInterval.Equals(acnt.ActivationInterval))) ||
 		(aC.Weights == nil && acnt.Weights != nil ||
 			aC.Weights != nil && acnt.Weights == nil ||
 			len(aC.Weights) != len(acnt.Weights)) ||
@@ -687,10 +679,9 @@ func (aC *Account) Equals(acnt *Account) (eq bool) {
 // Clone returns a clone of the Account
 func (aP *Account) Clone() (acnt *Account) {
 	acnt = &Account{
-		Tenant:             aP.Tenant,
-		ID:                 aP.ID,
-		ActivationInterval: aP.ActivationInterval.Clone(),
-		Weights:            aP.Weights.Clone(),
+		Tenant:  aP.Tenant,
+		ID:      aP.ID,
+		Weights: aP.Weights.Clone(),
 	}
 	if aP.FilterIDs != nil {
 		acnt.FilterIDs = make([]string, len(aP.FilterIDs))
@@ -873,12 +864,11 @@ type APIAccount struct {
 // AsAccount convert APIAccount struct to Account struct
 func (ext *APIAccount) AsAccount() (profile *Account, err error) {
 	profile = &Account{
-		Tenant:             ext.Tenant,
-		ID:                 ext.ID,
-		FilterIDs:          ext.FilterIDs,
-		ActivationInterval: ext.ActivationInterval,
-		Opts:               ext.Opts,
-		ThresholdIDs:       ext.ThresholdIDs,
+		Tenant:       ext.Tenant,
+		ID:           ext.ID,
+		FilterIDs:    ext.FilterIDs,
+		Opts:         ext.Opts,
+		ThresholdIDs: ext.ThresholdIDs,
 	}
 	if ext.Weights != EmptyString {
 		if profile.Weights, err = NewDynamicWeightsFromString(ext.Weights, ";", "&"); err != nil {

@@ -998,14 +998,13 @@ type TPAPDiktat struct {
 }
 
 type TPAccount struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *TPActivationInterval
-	Weights            string
-	Balances           map[string]*TPAccountBalance
-	ThresholdIDs       []string
+	TPid         string
+	Tenant       string
+	ID           string
+	FilterIDs    []string
+	Weights      string
+	Balances     map[string]*TPAccountBalance
+	ThresholdIDs []string
 }
 
 type TPAccountBalance struct {
