@@ -85,17 +85,6 @@ func (tpExp *TPExporter) Run() error {
 	var withError bool
 	toExportMap := make(map[string][]interface{})
 
-	storDataTimings, err := tpExp.storDB.GetTPTimings(tpExp.tpID, "")
-	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.AdminS, err, utils.TpTiming))
-		withError = true
-
-	}
-	storDataModelTimings := APItoModelTimings(storDataTimings)
-	for i, sd := range storDataModelTimings {
-		toExportMap[utils.TimingsCsv][i] = sd
-	}
-
 	storDataResources, err := tpExp.storDB.GetTPResources(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.AdminS, err, utils.TpResources))

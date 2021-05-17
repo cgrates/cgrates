@@ -40,7 +40,6 @@ type TPCSVImporter struct {
 // Maps csv file to handler which should process it. Defined like this since tests on 1.0.3 were failing on Travis.
 // Change it to func(string) error as soon as Travis updates.
 var fileHandlers = map[string]func(*TPCSVImporter, string) error{
-	utils.TimingsCsv:            (*TPCSVImporter).importTimings,
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
@@ -73,22 +72,6 @@ func (tpImp *TPCSVImporter) Run() error {
 		return utils.ErrPartiallyExecuted
 	}
 	return nil
-}
-
-// Handler importing timings from file, saved row by row to storDb
-func (tpImp *TPCSVImporter) importTimings(fn string) error {
-	if tpImp.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
-	tps, err := tpImp.csvr.GetTPTimings(tpImp.TPid, "")
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = tpImp.TPid
-	}
-
-	return tpImp.StorDB.SetTPTimings(tps)
 }
 
 func (tpImp *TPCSVImporter) importResources(fn string) error {

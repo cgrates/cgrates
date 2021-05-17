@@ -93,24 +93,6 @@ func (tpr *TpReader) Init() {
 	tpr.acntActionPlans = make(map[string][]string)
 }
 
-func (tpr *TpReader) LoadTimings() (err error) {
-	tps, err := tpr.lr.GetTPTimings(tpr.tpid, "")
-	if err != nil {
-		return err
-	}
-	var tpTimings map[string]*utils.TPTiming
-	if tpTimings, err = MapTPTimings(tps); err != nil {
-		return
-	}
-	// add default timings
-	tpr.addDefaultTimings()
-	// add timings defined by user
-	for timingID, timing := range tpTimings {
-		tpr.timings[timingID] = timing
-	}
-	return err
-}
-
 func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	rls, err := tpr.lr.GetTPResources(tpr.tpid, "", tag)
 	if err != nil {
@@ -358,9 +340,6 @@ func (tpr *TpReader) LoadDispatcherHosts() error {
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
-	if err = tpr.LoadTimings(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
 	if err = tpr.LoadFilters(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -726,21 +705,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		loadIDs[utils.CacheAccounts] = loadID
 	}
 
-	if verbose {
-		log.Print("Timings:")
-	}
-	for _, t := range tpr.timings {
-		if err = tpr.dm.SetTiming(context.Background(), t); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", t.ID)
-		}
-	}
-	if len(tpr.timings) != 0 {
-		loadIDs[utils.CacheTimings] = loadID
-	}
-
 	return tpr.dm.SetLoadIDs(context.TODO(), loadIDs)
 }
 
@@ -788,14 +752,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.thresholds))
 		for i, k := range tpr.thresholds {
 			keys[i] = k.TenantID()
-		}
-		return keys, nil
-	case utils.TimingsPrefix:
-		keys := make([]string, len(tpr.timings))
-		i := 0
-		for k := range tpr.timings {
-			keys[i] = k
-			i++
 		}
 		return keys, nil
 	case utils.ResourceProfilesPrefix:
@@ -1065,17 +1021,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 	}
 
-	if verbose {
-		log.Print("Timings:")
-	}
-	for _, t := range tpr.timings {
-		if err = tpr.dm.RemoveTiming(t.ID, utils.NonTransactional); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", t.ID)
-		}
-	}
 	//We remove the filters at the end because of indexes
 	if verbose {
 		log.Print("Filters:")
@@ -1134,9 +1079,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.accounts) != 0 {
 		loadIDs[utils.CacheAccounts] = loadID
 	}
-	if len(tpr.timings) != 0 {
-		loadIDs[utils.CacheTimings] = loadID
-	}
 	return tpr.dm.SetLoadIDs(context.TODO(), loadIDs)
 }
 
@@ -1149,7 +1091,6 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 		return
 	}
 	// take IDs for each type
-	tmgIds, _ := tpr.GetLoadedIds(utils.TimingsPrefix)
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
 	resIDs, _ := tpr.GetLoadedIds(utils.ResourcesPrefix)
 	stqIDs, _ := tpr.GetLoadedIds(utils.StatQueuePrefix)
@@ -1168,7 +1109,6 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 
 	//compose Reload Cache argument
 	cacheArgs := map[string][]string{
-		utils.TimingIDs:            tmgIds,
 		utils.ResourceProfileIDs:   rspIDs,
 		utils.ResourceIDs:          resIDs,
 		utils.StatsQueueIDs:        stqIDs,

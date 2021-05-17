@@ -129,23 +129,6 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueueProfile(args *utils.Tenant
 	}, utils.MetaReplicator, utils.ReplicatorSv1GetStatQueueProfile, args, reply)
 }
 
-func (dS *DispatcherService) ReplicatorSv1GetTiming(args *utils.StringWithAPIOpts, rpl *utils.TPTiming) (err error) {
-	if args == nil {
-		args = new(utils.StringWithAPIOpts)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1GetTiming, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&utils.CGREvent{
-		Tenant:  args.Tenant,
-		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1GetTiming, args, rpl)
-}
-
 func (dS *DispatcherService) ReplicatorSv1GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
@@ -419,23 +402,6 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueueProfile(args *engine.StatQ
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1SetStatQueueProfile, args, rpl)
-}
-
-func (dS *DispatcherService) ReplicatorSv1SetTiming(args *utils.TPTimingWithAPIOpts, rpl *string) (err error) {
-	if args == nil {
-		args = &utils.TPTimingWithAPIOpts{}
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1SetTiming, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&utils.CGREvent{
-		Tenant:  args.Tenant,
-		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1SetTiming, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1SetResource(args *engine.ResourceWithAPIOpts, rpl *string) (err error) {
@@ -721,23 +687,6 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueueProfile(args *utils.Ten
 		Tenant:  args.Tenant,
 		APIOpts: args.APIOpts,
 	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveStatQueueProfile, args, rpl)
-}
-
-func (dS *DispatcherService) ReplicatorSv1RemoveTiming(args *utils.StringWithAPIOpts, rpl *string) (err error) {
-	if args == nil {
-		args = new(utils.StringWithAPIOpts)
-	}
-	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ReplicatorSv1RemoveTiming, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&utils.CGREvent{
-		Tenant:  args.Tenant,
-		APIOpts: args.APIOpts,
-	}, utils.MetaReplicator, utils.ReplicatorSv1RemoveTiming, args, rpl)
 }
 
 func (dS *DispatcherService) ReplicatorSv1RemoveResource(args *utils.TenantIDWithAPIOpts, rpl *string) (err error) {

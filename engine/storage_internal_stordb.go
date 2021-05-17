@@ -55,26 +55,6 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct []string,
 	return
 }
 
-func (iDB *InternalDB) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTiming, err error) {
-	key := tpid
-	if id != utils.EmptyString {
-		key += utils.ConcatenatedKeySep + id
-	}
-
-	ids := Cache.GetItemIDs(utils.CacheTBLTPTimings, key)
-	for _, id := range ids {
-		x, ok := Cache.Get(utils.CacheTBLTPTimings, id)
-		if !ok || x == nil {
-			return nil, utils.ErrNotFound
-		}
-		timings = append(timings, x.(*utils.ApierTPTiming))
-	}
-	if len(timings) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
 func (iDB *InternalDB) GetTPResources(tpid, tenant, id string) (resources []*utils.TPResourceProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
@@ -365,17 +345,6 @@ func (iDB *InternalDB) RemTpData(table, tpid string, args map[string]string) (er
 	ids := Cache.GetItemIDs(utils.CacheStorDBPartitions[table], key)
 	for _, id := range ids {
 		Cache.RemoveWithoutReplicate(utils.CacheStorDBPartitions[table], id,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	}
-	return
-}
-
-func (iDB *InternalDB) SetTPTimings(timings []*utils.ApierTPTiming) (err error) {
-	if len(timings) == 0 {
-		return nil
-	}
-	for _, timing := range timings {
-		Cache.SetWithoutReplicate(utils.CacheTBLTPTimings, utils.ConcatenatedKey(timing.TPid, timing.ID), timing, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return

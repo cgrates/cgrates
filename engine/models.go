@@ -27,30 +27,6 @@ import (
 // Structs here are one to one mapping of the tables and fields
 // to be used by gorm orm
 
-type TimingMdl struct {
-	ID        int64
-	Tpid      string
-	Tag       string `index:"0" re:"\w+\s*,\s*"`
-	Years     string `index:"1" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	Months    string `index:"2" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	MonthDays string `index:"3" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	WeekDays  string `index:"4" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
-	Time      string `index:"5" re:"\d{2}:\d{2}:\d{2}|\*asap"`
-	CreatedAt time.Time
-}
-
-func (TimingMdl) TableName() string {
-	return utils.TBLTPTimings
-}
-
-type DestinationMdl struct {
-	ID        int64
-	Tpid      string
-	Tag       string `index:"0" re:"\w+\s*,\s*"`
-	Prefix    string `index:"1" re:"\+?\d+.?\d*"`
-	CreatedAt time.Time
-}
-
 type ResourceMdl struct {
 	PK                uint `gorm:"primary_key"`
 	Tpid              string

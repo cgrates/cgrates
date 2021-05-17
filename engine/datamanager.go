@@ -44,7 +44,6 @@ var (
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.ResourceProfilesPrefix:        {},
-		utils.TimingsPrefix:                 {},
 		utils.ResourcesPrefix:               {},
 		utils.StatQueuePrefix:               {},
 		utils.StatQueueProfilePrefix:        {},
@@ -155,8 +154,6 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
-		case utils.TimingsPrefix:
-			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -934,97 +931,6 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) GetTiming(id string, skipCache bool,
-	transactionID string) (t *utils.TPTiming, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheTimings, id); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*utils.TPTiming), nil
-		}
-	}
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	t, err = dm.dataDB.GetTimingDrv(id)
-	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.CacheTimings]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetTiming,
-				&utils.StringWithAPIOpts{
-					Arg:    id,
-					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &t); err == nil {
-				err = dm.dataDB.SetTimingDrv(t)
-			}
-		}
-		if err != nil {
-			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound {
-				if errCh := Cache.Set(context.TODO(), utils.CacheTimings, id, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return nil, errCh
-				}
-
-			}
-			return nil, err
-		}
-	}
-	if errCh := Cache.Set(context.TODO(), utils.CacheTimings, id, t, nil,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return nil, errCh
-	}
-	return
-}
-
-func (dm *DataManager) SetTiming(ctx *context.Context, t *utils.TPTiming) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if err = dm.DataDB().SetTimingDrv(t); err != nil {
-		return
-	}
-	if err = dm.CacheDataFromDB(ctx, utils.TimingsPrefix, []string{t.ID}, true); err != nil {
-		return
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.CacheTimings]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.TimingsPrefix, t.ID, // this are used to get the host IDs from cache
-			utils.ReplicatorSv1SetTiming,
-			&utils.TPTimingWithAPIOpts{
-				TPTiming: t,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if err = dm.DataDB().RemoveTimingDrv(id); err != nil {
-		return
-	}
-	if errCh := Cache.Remove(context.TODO(), utils.CacheTimings, id,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
-	}
-	if config.CgrConfig().DataDbCfg().Items[utils.CacheTimings].Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.TimingsPrefix, id, // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveTiming,
-			id)
 	}
 	return
 }

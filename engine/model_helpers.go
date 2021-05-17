@@ -146,67 +146,6 @@ func getColumnCount(s interface{}) int {
 	return count
 }
 
-type TimingMdls []TimingMdl
-
-func (tps TimingMdls) AsMapTPTimings() (map[string]*utils.ApierTPTiming, error) {
-	result := make(map[string]*utils.ApierTPTiming)
-	for _, tp := range tps {
-		t := &utils.ApierTPTiming{
-			TPid:      tp.Tpid,
-			ID:        tp.Tag,
-			Years:     tp.Years,
-			Months:    tp.Months,
-			MonthDays: tp.MonthDays,
-			WeekDays:  tp.WeekDays,
-			Time:      tp.Time,
-		}
-		result[tp.Tag] = t
-	}
-	return result, nil
-}
-
-func MapTPTimings(tps []*utils.ApierTPTiming) (map[string]*utils.TPTiming, error) {
-	result := make(map[string]*utils.TPTiming)
-	for _, tp := range tps {
-		t := utils.NewTiming(tp.ID, tp.Years, tp.Months, tp.MonthDays, tp.WeekDays, tp.Time)
-		if _, found := result[tp.ID]; found {
-			return nil, fmt.Errorf("duplicate timing tag: %s", tp.ID)
-		}
-		result[tp.ID] = t
-	}
-	return result, nil
-}
-
-func (tps TimingMdls) AsTPTimings() (result []*utils.ApierTPTiming) {
-	ats, _ := tps.AsMapTPTimings()
-	for _, tp := range ats {
-		result = append(result, tp)
-	}
-	return result
-}
-
-func APItoModelTiming(t *utils.ApierTPTiming) (result TimingMdl) {
-	return TimingMdl{
-		Tpid:      t.TPid,
-		Tag:       t.ID,
-		Years:     t.Years,
-		Months:    t.Months,
-		MonthDays: t.MonthDays,
-		WeekDays:  t.WeekDays,
-		Time:      t.Time,
-	}
-}
-
-func APItoModelTimings(ts []*utils.ApierTPTiming) (result TimingMdls) {
-	for _, t := range ts {
-		if t != nil {
-			at := APItoModelTiming(t)
-			result = append(result, at)
-		}
-	}
-	return result
-}
-
 type ResourceMdls []*ResourceMdl
 
 // CSVHeader return the header for csv fields as a slice of string
