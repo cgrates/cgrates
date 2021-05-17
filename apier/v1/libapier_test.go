@@ -213,3 +213,79 @@ func TestCallCache(t *testing.T) {
 		t.Fatal("Expected call cache to not be called")
 	}
 }
+
+func TestCallCacheForFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	tnt := "cgrates.org"
+	flt := &engine.Filter{
+		Tenant: tnt,
+		ID:     "FLTR1",
+		Rules: []*engine.FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001"},
+		}},
+	}
+	if err := flt.Compile(); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetFilter(flt, true); err != nil {
+		t.Fatal(err)
+	}
+	th := &engine.ThresholdProfile{
+		Tenant:    tnt,
+		ID:        "TH1",
+		FilterIDs: []string{flt.ID},
+	}
+	if err := dm.SetThresholdProfile(th, true); err != nil {
+		t.Fatal(err)
+	}
+	attr := &engine.AttributeProfile{
+		Tenant:    tnt,
+		ID:        "Attr1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{flt.ID},
+	}
+	if err := dm.SetAttributeProfile(attr, true); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := map[string][]string{
+		utils.FilterIDs:               {"cgrates.org:FLTR1"},
+		utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001"},
+		utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001"},
+	}
+	rpl, err := composeCacheArgsForFilter(dm, flt, tnt, flt.TenantID(), map[string][]string{utils.FilterIDs: {"cgrates.org:FLTR1"}})
+	if err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rpl, exp) {
+		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+	flt = &engine.Filter{
+		Tenant: tnt,
+		ID:     "FLTR1",
+		Rules: []*engine.FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1002"},
+		}},
+	}
+	if err := flt.Compile(); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetFilter(flt, true); err != nil {
+		t.Fatal(err)
+	}
+	exp = map[string][]string{
+		utils.FilterIDs:               {"cgrates.org:FLTR1"},
+		utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+		utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+	}
+	rpl, err = composeCacheArgsForFilter(dm, flt, tnt, flt.TenantID(), rpl)
+	if err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rpl, exp) {
+		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+}
