@@ -564,9 +564,6 @@ func TestGetLoadedIdsFilters(t *testing.T) {
 				TPid:   testTPID,
 				Tenant: "cgrates.org",
 				ID:     "ResGroup1",
-				ActivationInterval: &utils.TPActivationInterval{
-					ActivationTime: "2014-07-29T15:00:00Z",
-				},
 				Filters: []*utils.TPFilter{
 					{
 						Type:    "~*req",

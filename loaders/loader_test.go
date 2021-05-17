@@ -389,10 +389,6 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Path:  "Values",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 		},
 	}
 	rdr := io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
@@ -449,9 +445,6 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Values:  []string{"1002"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
 	}
 	if err := eFltr1.Compile(); err != nil {
 		t.Error(err)
@@ -473,9 +466,6 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 				Values:  []string{"DST_DE"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
 	}
 	if err := eFltr2.Compile(); err != nil {
@@ -2867,44 +2857,6 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func TestLoadFiltersAsStructErrConversion(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true)
-	ldr := &Loader{
-		ldrID:         "TestLoadFiltersAsStructErrConversion",
-		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
-		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaFilters: {
-			{Tag: "ActivationInterval",
-				Path:  "ActivationInterval",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-		},
-	}
-	filtersCsv := `
-#ActivationInterval
-* * * * * *
-`
-	rdr := io.NopCloser(strings.NewReader(filtersCsv))
-	rdrCsv := csv.NewReader(rdr)
-	rdrCsv.Comment = '#'
-	ldr.rdrs = map[string]map[string]*openedCSVFile{
-		utils.MetaFilters: {
-			utils.FiltersCsv: &openedCSVFile{
-				fileName: utils.FiltersCsv,
-				rdr:      rdr,
-				csvRdr:   rdrCsv,
-			},
-		},
-	}
-	expectedErr := "Unsupported time format"
 	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}

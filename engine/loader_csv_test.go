@@ -334,9 +334,6 @@ func TestLoadFilters(t *testing.T) {
 					Values:  []string{"1002"},
 				},
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
 		},
 		{Tenant: "cgrates.org", ID: "FLTR_ACNT_dan"}: {
 			TPid:   testTPID,
@@ -349,9 +346,6 @@ func TestLoadFilters(t *testing.T) {
 					Values:  []string{"dan"},
 				},
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
 		},
 		{Tenant: "cgrates.org", ID: "FLTR_DST_DE"}: {
 			TPid:   testTPID,
@@ -363,9 +357,6 @@ func TestLoadFilters(t *testing.T) {
 					Values:  []string{"DST_DE"},
 				},
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
 		},
 		{Tenant: "cgrates.org", ID: "FLTR_DST_NL"}: {
 			TPid:   testTPID,
@@ -376,9 +367,6 @@ func TestLoadFilters(t *testing.T) {
 					Element: "~*req.Destination",
 					Values:  []string{"DST_NL"},
 				},
-			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 		},
 	}

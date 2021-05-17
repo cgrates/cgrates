@@ -531,10 +531,6 @@ func testOnStorITThresholdProfile(t *testing.T) {
 				Values:  []string{"1001", "1002"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 	}
 	th := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -653,10 +649,6 @@ func testOnStorITFilter(t *testing.T) {
 				Type:    utils.MetaString,
 				Values:  []string{"1001", "1002"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := fp.Compile(); err != nil {

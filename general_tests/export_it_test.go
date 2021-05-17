@@ -196,9 +196,6 @@ func testExpVerifyFilters(t *testing.T) {
 				Values:  []string{"1001"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
 	}
 	var reply *engine.Filter
 	if err := expRpc.Call(utils.APIerSv1GetFilter,

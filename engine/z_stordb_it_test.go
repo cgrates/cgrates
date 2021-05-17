@@ -435,10 +435,6 @@ func testStorDBitCRUDTPFilters(t *testing.T) {
 					Values:  []string{"1001", "1002"},
 				},
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
 		},
 		{
 			TPid:   "TP1",
@@ -450,10 +446,6 @@ func testStorDBitCRUDTPFilters(t *testing.T) {
 					Element: "Destination",
 					Values:  []string{"10"},
 				},
-			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2015-07-29T15:00:00Z",
-				ExpiryTime:     "",
 			},
 		},
 	}

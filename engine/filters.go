@@ -65,10 +65,6 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 			}
 			return false, err
 		}
-		if f.ActivationInterval != nil &&
-			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
-			continue
-		}
 		for _, fltr := range f.Rules {
 			if pass, err = fltr.Pass(ctx, dDP); err != nil || !pass {
 				return pass, err
@@ -131,11 +127,6 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 			}
 			return
 		}
-		if f.ActivationInterval != nil &&
-			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
-			continue
-		}
-
 		for _, rule := range f.Rules {
 			if !verifyPrefixes(rule, pathPrfxs) {
 				lazyCheckRules = append(lazyCheckRules, rule)
@@ -194,10 +185,9 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 
 // Filter structure to define a basic filter
 type Filter struct {
-	Tenant             string
-	ID                 string
-	Rules              []*FilterRule
-	ActivationInterval *utils.ActivationInterval
+	Tenant string
+	ID     string
+	Rules  []*FilterRule
 }
 
 // FilterWithOpts the arguments for the replication

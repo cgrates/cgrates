@@ -269,10 +269,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 				Values:  []string{"Event1", "Event2"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
@@ -332,10 +328,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 				Values:  []string{"1001", "1002"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp2, true); err != nil {
 		t.Error(err)
@@ -377,10 +369,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 				Element: "~*req.Destination",
 				Values:  []string{"10", "20"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp3, true); err != nil {
@@ -427,10 +415,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 				Type:    utils.MetaString,
 				Values:  []string{"30", "50"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp3, true); err != nil {
@@ -505,10 +489,6 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 				Element: "~*req.EventType",
 				Values:  []string{"Event1", "Event2"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
@@ -596,10 +576,6 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 				Values:  []string{"Event3", "~*req.Event4"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
@@ -664,10 +640,6 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 				Element: "EventType",
 				Values:  []string{"~*req.Event1", "~*req.Event2"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
@@ -755,10 +727,6 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 				Values:  []string{"Event3", "~*req.Event4"},
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
@@ -823,10 +791,6 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 				Element: "~*req.EventType",
 				Values:  []string{"Event1", "Event2"},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
