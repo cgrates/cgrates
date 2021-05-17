@@ -177,3 +177,170 @@ func TestCacheCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffCacheParamJsonCfg(t *testing.T) {
+	var d *CacheParamJsonCfg
+
+	v1 := &CacheParamCfg{
+		Limit:     2,
+		TTL:       2 * time.Minute,
+		StaticTTL: false,
+		Precache:  true,
+		Replicate: false,
+	}
+
+	v2 := &CacheParamCfg{
+		Limit:     3,
+		TTL:       5 * time.Minute,
+		StaticTTL: true,
+		Precache:  false,
+		Replicate: true,
+	}
+
+	expected := &CacheParamJsonCfg{
+		Limit:      utils.IntPointer(3),
+		Ttl:        utils.StringPointer("5m0s"),
+		Static_ttl: utils.BoolPointer(true),
+		Precache:   utils.BoolPointer(false),
+		Replicate:  utils.BoolPointer(true),
+	}
+
+	rcv := diffCacheParamJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &CacheParamJsonCfg{
+		Limit:      nil,
+		Ttl:        nil,
+		Static_ttl: nil,
+		Precache:   nil,
+		Replicate:  nil,
+	}
+	rcv = diffCacheParamJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffCacheParamsJsonCfg(t *testing.T) {
+	var d map[string]*CacheParamJsonCfg
+
+	v1 := map[string]*CacheParamCfg{
+		"CACHE_1": {
+			Limit:     2,
+			TTL:       2 * time.Minute,
+			StaticTTL: false,
+			Precache:  true,
+			Replicate: false,
+		},
+	}
+
+	v2 := map[string]*CacheParamCfg{
+		"CACHE_2": {
+			Limit:     3,
+			TTL:       5 * time.Minute,
+			StaticTTL: true,
+			Precache:  false,
+			Replicate: true,
+		},
+	}
+
+	expected := map[string]*CacheParamJsonCfg{
+		"CACHE_2": {
+			Limit:      utils.IntPointer(3),
+			Ttl:        utils.StringPointer("5m0s"),
+			Static_ttl: utils.BoolPointer(true),
+			Precache:   nil,
+			Replicate:  utils.BoolPointer(true),
+		},
+	}
+
+	rcv := diffCacheParamsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := map[string]*CacheParamJsonCfg{
+		"CACHE_1": {
+			Limit:      nil,
+			Ttl:        nil,
+			Static_ttl: nil,
+			Precache:   nil,
+			Replicate:  nil,
+		},
+	}
+	rcv = diffCacheParamsJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffCacheJsonCfg(t *testing.T) {
+	var d *CacheJsonCfg
+
+	v1 := &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			"CACHE_1": {
+				Limit:     2,
+				TTL:       2 * time.Minute,
+				StaticTTL: false,
+				Precache:  true,
+				Replicate: false,
+			},
+		},
+		ReplicationConns: []string{},
+	}
+
+	v2 := &CacheCfg{
+		Partitions: map[string]*CacheParamCfg{
+			"CACHE_2": {
+				Limit:     3,
+				TTL:       5 * time.Minute,
+				StaticTTL: true,
+				Precache:  false,
+				Replicate: true,
+			},
+		},
+		ReplicationConns: []string{"*repl_conn"},
+	}
+
+	expected := &CacheJsonCfg{
+		Partitions: map[string]*CacheParamJsonCfg{
+			"CACHE_2": {
+				Limit:      utils.IntPointer(3),
+				Ttl:        utils.StringPointer("5m0s"),
+				Static_ttl: utils.BoolPointer(true),
+				Precache:   nil,
+				Replicate:  utils.BoolPointer(true),
+			},
+		},
+		Replication_conns: &[]string{"*repl_conn"},
+	}
+
+	rcv := diffCacheJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &CacheJsonCfg{
+		Partitions: map[string]*CacheParamJsonCfg{
+			"CACHE_1": {
+				Limit:      nil,
+				Ttl:        nil,
+				Static_ttl: nil,
+				Precache:   nil,
+				Replicate:  nil,
+			},
+		},
+		Replication_conns: nil,
+	}
+
+	rcv = diffCacheJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

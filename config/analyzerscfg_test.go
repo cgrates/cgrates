@@ -117,3 +117,49 @@ func TestAnalyzerSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffAnalyzerSJsonCfg(t *testing.T) {
+	var d *AnalyzerSJsonCfg
+
+	v1 := &AnalyzerSCfg{
+		Enabled:         false,
+		DBPath:          "",
+		IndexType:       utils.MetaPrefix,
+		TTL:             2 * time.Minute,
+		CleanupInterval: time.Hour,
+	}
+
+	v2 := &AnalyzerSCfg{
+		Enabled:         true,
+		DBPath:          "/var/spool/cgrates/analyzers",
+		IndexType:       utils.MetaString,
+		TTL:             3 * time.Minute,
+		CleanupInterval: 30 * time.Minute,
+	}
+
+	expected := &AnalyzerSJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
+		Index_type:       utils.StringPointer(utils.MetaString),
+		Ttl:              utils.StringPointer("3m0s"),
+		Cleanup_interval: utils.StringPointer("30m0s"),
+	}
+
+	rcv := diffAnalyzerSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &AnalyzerSJsonCfg{
+		Enabled:          nil,
+		Db_path:          nil,
+		Index_type:       nil,
+		Ttl:              nil,
+		Cleanup_interval: nil,
+	}
+	rcv = diffAnalyzerSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

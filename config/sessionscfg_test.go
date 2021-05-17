@@ -841,6 +841,174 @@ func TestAsteriskAgentCfgClone(t *testing.T) {
 	}
 }
 
+func TestDiffAstConnJsonCfg(t *testing.T) {
+	v1 := &AsteriskConnCfg{
+		Alias:           "AsteriskAlias",
+		Address:         "localhost:8080",
+		User:            "cgrates.org",
+		Password:        "CGRateS.org",
+		ConnectAttempts: 2,
+		Reconnects:      2,
+	}
+
+	v2 := &AsteriskConnCfg{
+		Alias:           "",
+		Address:         "localhost:8037",
+		User:            "itsyscom.com",
+		Password:        "ITSysCOM.com",
+		ConnectAttempts: 3,
+		Reconnects:      3,
+	}
+
+	expected := &AstConnJsonCfg{
+		Alias:            utils.StringPointer(""),
+		Address:          utils.StringPointer("localhost:8037"),
+		User:             utils.StringPointer("itsyscom.com"),
+		Password:         utils.StringPointer("ITSysCOM.com"),
+		Connect_attempts: utils.IntPointer(3),
+		Reconnects:       utils.IntPointer(3),
+	}
+
+	rcv := diffAstConnJsonCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &AstConnJsonCfg{
+		Alias:            nil,
+		Address:          nil,
+		User:             nil,
+		Password:         nil,
+		Connect_attempts: nil,
+		Reconnects:       nil,
+	}
+
+	rcv = diffAstConnJsonCfg(v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestEqualsAstConnJsonCfg(t *testing.T) {
+
+	//When not equal
+	v1 := []*AsteriskConnCfg{
+		{
+			Alias:           "AsteriskAlias",
+			Address:         "localhost:8080",
+			User:            "cgrates.org",
+			Password:        "CGRateS.org",
+			ConnectAttempts: 2,
+			Reconnects:      2,
+		},
+	}
+
+	v2 := []*AsteriskConnCfg{
+		{
+			Alias:           "",
+			Address:         "localhost:8037",
+			User:            "itsyscom.com",
+			Password:        "ITSysCOM.com",
+			ConnectAttempts: 3,
+			Reconnects:      3,
+		},
+	}
+
+	rcv := equalsAstConnJsonCfg(v1, v2)
+	if rcv {
+		t.Error("Cfgs should not match")
+	}
+
+	//When equal
+	v2 = v1
+	rcv = equalsAstConnJsonCfg(v1, v2)
+	if !rcv {
+		t.Error("Cfgs should match")
+	}
+
+	v2 = []*AsteriskConnCfg{
+		{
+			Alias:           "",
+			Address:         "localhost:8037",
+			User:            "itsyscom.com",
+			Password:        "ITSysCOM.com",
+			ConnectAttempts: 3,
+			Reconnects:      3,
+		},
+		{
+			Alias:           "AsteriskAlias",
+			Address:         "localhost:8080",
+			User:            "cgrates.org",
+			Password:        "CGRateS.org",
+			ConnectAttempts: 2,
+			Reconnects:      2,
+		},
+	}
+
+	rcv = equalsAstConnJsonCfg(v1, v2)
+	if rcv {
+		t.Error("Length of cfgs should not match")
+	}
+}
+
+func TestDiffAsteriskAgentJsonCfg(t *testing.T) {
+	var d *AsteriskAgentJsonCfg
+
+	v1 := &AsteriskAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*localhost"},
+		CreateCDR:     false,
+		AsteriskConns: []*AsteriskConnCfg{
+			{
+				Alias:           "",
+				Address:         "localhost:8037",
+				User:            "itsyscom.com",
+				Password:        "ITSysCOM.com",
+				ConnectAttempts: 3,
+				Reconnects:      3,
+			},
+		},
+	}
+
+	v2 := &AsteriskAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*birpc"},
+		CreateCDR:     true,
+		AsteriskConns: []*AsteriskConnCfg{
+			{
+				Alias:           "AsteriskAlias",
+				Address:         "localhost:8080",
+				User:            "cgrates.org",
+				Password:        "CGRateS.org",
+				ConnectAttempts: 2,
+				Reconnects:      2,
+			},
+		},
+	}
+
+	expected := &AsteriskAgentJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{"*birpc"},
+		Create_cdr:     utils.BoolPointer(true),
+		Asterisk_conns: &[]*AstConnJsonCfg{
+			{
+				Alias:            utils.StringPointer("AsteriskAlias"),
+				Address:          utils.StringPointer("localhost:8080"),
+				User:             utils.StringPointer("cgrates.org"),
+				Password:         nil,
+				Connect_attempts: utils.IntPointer(2),
+				Reconnects:       utils.IntPointer(2),
+			},
+		},
+	}
+
+	rcv := diffAsteriskAgentJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
 func TestFsAgentCfgClone(t *testing.T) {
 	ban := &FsAgentCfg{
 		Enabled:             true,

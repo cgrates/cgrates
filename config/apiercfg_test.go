@@ -117,3 +117,50 @@ func TestApierCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestApierCfgDiffAdminSJsonCfg(t *testing.T) {
+	var d *AdminSJsonCfg
+
+	v1 := &AdminSCfg{
+		Enabled:         false,
+		CachesConns:     []string{"*localhost"},
+		ActionSConns:    []string{"*localhost"},
+		AttributeSConns: []string{"*localhost"},
+		EEsConns:        []string{"*localhost"},
+	}
+
+	v2 := &AdminSCfg{
+		Enabled:         true,
+		CachesConns:     []string{"*birpc"},
+		ActionSConns:    []string{"*birpc"},
+		AttributeSConns: []string{"*birpc"},
+		EEsConns:        []string{"*birpc"},
+	}
+
+	expected := &AdminSJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Caches_conns:     &[]string{"*birpc"},
+		Actions_conns:    &[]string{"*birpc"},
+		Attributes_conns: &[]string{"*birpc"},
+		Ees_conns:        &[]string{"*birpc"},
+	}
+
+	rcv := diffAdminSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &AdminSJsonCfg{
+		Enabled:          nil,
+		Caches_conns:     nil,
+		Actions_conns:    nil,
+		Attributes_conns: nil,
+		Ees_conns:        nil,
+	}
+
+	rcv = diffAdminSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(expected2, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

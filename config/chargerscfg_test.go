@@ -131,3 +131,50 @@ func TestChargerSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffChargerSJsonCfg(t *testing.T) {
+	var d *ChargerSJsonCfg
+
+	v1 := &ChargerSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		AttributeSConns:     []string{"*localhost"},
+		StringIndexedFields: &[]string{},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        true,
+	}
+
+	v2 := &ChargerSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		AttributeSConns:     []string{"*birpc"},
+		StringIndexedFields: &[]string{"*req.Account"},
+		PrefixIndexedFields: nil,
+		SuffixIndexedFields: nil,
+		NestedFields:        false,
+	}
+
+	expected := &ChargerSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Attributes_conns:      &[]string{"*birpc"},
+		String_indexed_fields: &[]string{"*req.Account"},
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         utils.BoolPointer(false),
+	}
+
+	rcv := diffChargerSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &ChargerSJsonCfg{}
+
+	rcv = diffChargerSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
