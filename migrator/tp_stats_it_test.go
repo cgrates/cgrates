@@ -109,12 +109,8 @@ func testTpStatsITPopulate(t *testing.T) {
 			Tenant:    "cgrates.org",
 			TPid:      "TPS1",
 			ID:        "Stat1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			TTL: "1",
+			FilterIDs: []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			TTL:       "1",
 			Metrics: []*utils.MetricWithFilters{
 				&utils.MetricWithFilters{
 					MetricID: "*sum#Param1",

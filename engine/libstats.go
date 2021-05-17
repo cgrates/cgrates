@@ -31,18 +31,17 @@ import (
 
 // StatsConfig represents the configuration of a  StatsInstance in StatS
 type StatQueueProfile struct {
-	Tenant             string
-	ID                 string // QueueID
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	QueueLength        int
-	TTL                time.Duration
-	MinItems           int
-	Metrics            []*MetricWithFilters // list of metrics to build
-	Stored             bool
-	Blocker            bool // blocker flag to stop processing on filters matched
-	Weight             float64
-	ThresholdIDs       []string // list of thresholds to be checked after changes
+	Tenant       string
+	ID           string // QueueID
+	FilterIDs    []string
+	QueueLength  int
+	TTL          time.Duration
+	MinItems     int
+	Metrics      []*MetricWithFilters // list of metrics to build
+	Stored       bool
+	Blocker      bool // blocker flag to stop processing on filters matched
+	Weight       float64
+	ThresholdIDs []string // list of thresholds to be checked after changes
 }
 
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher

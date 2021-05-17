@@ -1,4 +1,4 @@
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
-cgrates.org,Stats1,FLTR_STS1,2014-07-29T15:00:00Z,100,1s,2,*asr;*acc;*tcc;*acd;*tcd,,true,false,20,*none
-cgrates.org,Stats1,,,,,,*sum#~*req.Usage;*average#~*req.Usage,,,,,
-cgrates.org,Stats1,,,,,,*pdd,*exists:~PDD:,,,,
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],ThresholdIDs[11]
+cgrates.org,Stats1,FLTR_STS1,20,100,1s,2,*asr;*acc;*tcc;*acd;*tcd,,true,false,*none
+cgrates.org,Stats1,,,,,,*sum#~*req.Usage;*average#~*req.Usage,,,,
+cgrates.org,Stats1,,,,,,*pdd,*exists:~PDD:,,,

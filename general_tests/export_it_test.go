@@ -263,12 +263,9 @@ func testExpVerifyResources(t *testing.T) {
 
 func testExpVerifyStats(t *testing.T) {
 	sPrf := &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Stat_1",
-		FilterIDs: []string{"FLTR_STAT_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
+		Tenant:      "cgrates.org",
+		ID:          "Stat_1",
+		FilterIDs:   []string{"FLTR_STAT_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         10 * time.Second,
 		Metrics: []*engine.MetricWithFilters{

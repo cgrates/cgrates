@@ -430,16 +430,6 @@ func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
 			}
 			thresholdMap[key.TenantID()].AddSlice(strings.Split(model.ThresholdIDs, utils.InfieldSep))
 		}
-		if len(model.ActivationInterval) != 0 {
-			st.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(model.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				st.ActivationInterval.ActivationTime = aiSplt[0]
-				st.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				st.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if model.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[key.TenantID()]; !has {
 				filterMap[key.TenantID()] = make(utils.StringSet)
@@ -495,14 +485,6 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls StatMdls) {
 						mdl.FilterIDs += utils.InfieldSep
 					}
 					mdl.FilterIDs += val
-				}
-				if st.ActivationInterval != nil {
-					if st.ActivationInterval.ActivationTime != utils.EmptyString {
-						mdl.ActivationInterval = st.ActivationInterval.ActivationTime
-					}
-					if st.ActivationInterval.ExpiryTime != utils.EmptyString {
-						mdl.ActivationInterval += utils.InfieldSep + st.ActivationInterval.ExpiryTime
-					}
 				}
 				mdl.QueueLength = st.QueueLength
 				mdl.TTL = st.TTL
@@ -560,27 +542,21 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 	for i, fltr := range tpST.FilterIDs {
 		st.FilterIDs[i] = fltr
 	}
-	if tpST.ActivationInterval != nil {
-		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	return st, nil
 }
 
 func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	tpST = &utils.TPStatProfile{
-		Tenant:             st.Tenant,
-		ID:                 st.ID,
-		FilterIDs:          make([]string, len(st.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		QueueLength:        st.QueueLength,
-		Metrics:            make([]*utils.MetricWithFilters, len(st.Metrics)),
-		Blocker:            st.Blocker,
-		Stored:             st.Stored,
-		Weight:             st.Weight,
-		MinItems:           st.MinItems,
-		ThresholdIDs:       make([]string, len(st.ThresholdIDs)),
+		Tenant:       st.Tenant,
+		ID:           st.ID,
+		FilterIDs:    make([]string, len(st.FilterIDs)),
+		QueueLength:  st.QueueLength,
+		Metrics:      make([]*utils.MetricWithFilters, len(st.Metrics)),
+		Blocker:      st.Blocker,
+		Stored:       st.Stored,
+		Weight:       st.Weight,
+		MinItems:     st.MinItems,
+		ThresholdIDs: make([]string, len(st.ThresholdIDs)),
 	}
 	for i, metric := range st.Metrics {
 		tpST.Metrics[i] = &utils.MetricWithFilters{
@@ -602,15 +578,6 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 	}
 	for i, fli := range st.ThresholdIDs {
 		tpST.ThresholdIDs[i] = fli
-	}
-
-	if st.ActivationInterval != nil {
-		if !st.ActivationInterval.ActivationTime.IsZero() {
-			tpST.ActivationInterval.ActivationTime = st.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !st.ActivationInterval.ExpiryTime.IsZero() {
-			tpST.ActivationInterval.ExpiryTime = st.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	return
 }

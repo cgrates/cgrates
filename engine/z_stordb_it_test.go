@@ -1048,13 +1048,10 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 	//WRITE
 	eTPs := []*utils.TPStatProfile{
 		{
-			TPid:      "TEST_TPID",
-			Tenant:    "Test",
-			ID:        "Stats1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			TPid:        "TEST_TPID",
+			Tenant:      "Test",
+			ID:          "Stats1",
+			FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{
@@ -1093,13 +1090,10 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 	}
 	eTPsReverse := []*utils.TPStatProfile{
 		{
-			TPid:      "TEST_TPID",
-			Tenant:    "Test",
-			ID:        "Stats1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			TPid:        "TEST_TPID",
+			Tenant:      "Test",
+			ID:          "Stats1",
+			FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			QueueLength: 100,
 			TTL:         "1s",
 			Metrics: []*utils.MetricWithFilters{

@@ -355,48 +355,45 @@ func TestAPItoModelResource(t *testing.T) {
 func TestTPStatsAsTPStats(t *testing.T) {
 	tps := StatMdls{
 		&StatMdl{
-			Tpid:               "TEST_TPID",
-			Tenant:             "cgrates.org",
-			ID:                 "Stats1",
-			FilterIDs:          "FLTR_1",
-			ActivationInterval: "2014-07-29T15:00:00Z",
-			QueueLength:        100,
-			TTL:                "1s",
-			MinItems:           2,
-			MetricIDs:          "*asr;*acc;*tcc;*acd;*tcd;*pdd",
-			Stored:             true,
-			Blocker:            true,
-			Weight:             20.0,
+			Tpid:        "TEST_TPID",
+			Tenant:      "cgrates.org",
+			ID:          "Stats1",
+			FilterIDs:   "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;FLTR_1",
+			QueueLength: 100,
+			TTL:         "1s",
+			MinItems:    2,
+			MetricIDs:   "*asr;*acc;*tcc;*acd;*tcd;*pdd",
+			Stored:      true,
+			Blocker:     true,
+			Weight:      20.0,
 		},
 		&StatMdl{
-			Tpid:               "TEST_TPID",
-			Tenant:             "cgrates.org",
-			ID:                 "Stats1",
-			FilterIDs:          "FLTR_1",
-			ActivationInterval: "2014-07-29T15:00:00Z",
-			QueueLength:        100,
-			TTL:                "1s",
-			MinItems:           2,
-			MetricIDs:          "*sum#BalanceValue;*average#BalanceValue;*tcc",
-			ThresholdIDs:       "THRESH3",
-			Stored:             true,
-			Blocker:            true,
-			Weight:             20.0,
+			Tpid:         "TEST_TPID",
+			Tenant:       "cgrates.org",
+			ID:           "Stats1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;FLTR_1",
+			QueueLength:  100,
+			TTL:          "1s",
+			MinItems:     2,
+			MetricIDs:    "*sum#BalanceValue;*average#BalanceValue;*tcc",
+			ThresholdIDs: "THRESH3",
+			Stored:       true,
+			Blocker:      true,
+			Weight:       20.0,
 		},
 		&StatMdl{
-			Tpid:               "TEST_TPID",
-			Tenant:             "itsyscom.com",
-			ID:                 "Stats1",
-			FilterIDs:          "FLTR_1",
-			ActivationInterval: "2014-07-29T15:00:00Z",
-			QueueLength:        100,
-			TTL:                "1s",
-			MinItems:           2,
-			MetricIDs:          "*sum#BalanceValue;*average#BalanceValue;*tcc",
-			ThresholdIDs:       "THRESH4",
-			Stored:             true,
-			Blocker:            true,
-			Weight:             20.0,
+			Tpid:         "TEST_TPID",
+			Tenant:       "itsyscom.com",
+			ID:           "Stats1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;FLTR_1",
+			QueueLength:  100,
+			TTL:          "1s",
+			MinItems:     2,
+			MetricIDs:    "*sum#BalanceValue;*average#BalanceValue;*tcc",
+			ThresholdIDs: "THRESH4",
+			Stored:       true,
+			Blocker:      true,
+			Weight:       20.0,
 		},
 	}
 	rcvTPs := tps.AsTPStats()
@@ -418,12 +415,11 @@ func TestTPStatsAsTPStats(t *testing.T) {
 
 func TestAPItoTPStats(t *testing.T) {
 	tps := &utils.TPStatProfile{
-		TPid:               testTPID,
-		ID:                 "Stats1",
-		FilterIDs:          []string{"FLTR_1"},
-		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
-		QueueLength:        100,
-		TTL:                "1s",
+		TPid:        testTPID,
+		ID:          "Stats1",
+		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		QueueLength: 100,
+		TTL:         "1s",
 		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
@@ -455,7 +451,7 @@ func TestAPItoTPStats(t *testing.T) {
 			},
 		},
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
-		FilterIDs:    []string{"FLTR_1"},
+		FilterIDs:    []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Stored:       tps.Stored,
 		Blocker:      tps.Blocker,
 		Weight:       20.0,
@@ -464,8 +460,6 @@ func TestAPItoTPStats(t *testing.T) {
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
-	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
-	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 
 	if st, err := APItoStats(tps, "UTC"); err != nil {
 		t.Error(err)
@@ -476,12 +470,11 @@ func TestAPItoTPStats(t *testing.T) {
 
 func TestStatQueueProfileToAPI(t *testing.T) {
 	expected := &utils.TPStatProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "Stats1",
-		FilterIDs:          []string{"FLTR_1"},
-		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
-		QueueLength:        100,
-		TTL:                "1s",
+		Tenant:      "cgrates.org",
+		ID:          "Stats1",
+		FilterIDs:   []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		QueueLength: 100,
+		TTL:         "1s",
 		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
@@ -501,9 +494,6 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ID:          "Stats1",
 		QueueLength: 100,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
 		Metrics: []*MetricWithFilters{
 			{
 				MetricID: "*sum#BalanceValue",
@@ -517,7 +507,7 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 		},
 		TTL:          time.Second,
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
-		FilterIDs:    []string{"FLTR_1"},
+		FilterIDs:    []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		Weight:       20.0,
 		MinItems:     1,
 	}
@@ -529,14 +519,10 @@ func TestStatQueueProfileToAPI(t *testing.T) {
 
 func TestAPItoModelStats(t *testing.T) {
 	tpS := &utils.TPStatProfile{
-		TPid:      "TPS1",
-		Tenant:    "cgrates.org",
-		ID:        "Stat1",
-		FilterIDs: []string{"*string:Account:1002"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "",
-		},
+		TPid:        "TPS1",
+		Tenant:      "cgrates.org",
+		ID:          "Stat1",
+		FilterIDs:   []string{"*string:Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
 		Metrics: []*utils.MetricWithFilters{
@@ -556,19 +542,18 @@ func TestAPItoModelStats(t *testing.T) {
 	rcv := APItoModelStats(tpS)
 	eRcv := StatMdls{
 		&StatMdl{
-			Tpid:               "TPS1",
-			Tenant:             "cgrates.org",
-			ID:                 "Stat1",
-			FilterIDs:          "*string:Account:1002",
-			ActivationInterval: "2014-07-29T15:00:00Z",
-			QueueLength:        100,
-			TTL:                "1s",
-			MinItems:           2,
-			MetricIDs:          "*tcc",
-			Stored:             true,
-			Blocker:            true,
-			Weight:             20.0,
-			ThresholdIDs:       "Th1",
+			Tpid:         "TPS1",
+			Tenant:       "cgrates.org",
+			ID:           "Stat1",
+			FilterIDs:    "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z;*string:Account:1002",
+			QueueLength:  100,
+			TTL:          "1s",
+			MinItems:     2,
+			MetricIDs:    "*tcc",
+			Stored:       true,
+			Blocker:      true,
+			Weight:       20.0,
+			ThresholdIDs: "Th1",
 		},
 		&StatMdl{
 			Tpid:      "TPS1",
@@ -4428,13 +4413,9 @@ func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 
 func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 	testStruct := &StatQueueProfile{
-		Tenant:    "",
-		ID:        "",
-		FilterIDs: []string{"test_filter_Id"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:      "",
+		ID:          "",
+		FilterIDs:   []string{"test_filter_Id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		QueueLength: 0,
 		MinItems:    0,
 		Metrics: []*MetricWithFilters{{
@@ -4447,13 +4428,9 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 		ThresholdIDs: []string{"threshold_id"},
 	}
 	expStruct := &utils.TPStatProfile{
-		Tenant:    "",
-		ID:        "",
-		FilterIDs: []string{"test_filter_Id"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
+		Tenant:      "",
+		ID:          "",
+		FilterIDs:   []string{"test_filter_Id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		QueueLength: 0,
 		MinItems:    0,
 		Metrics: []*utils.MetricWithFilters{
@@ -4474,39 +4451,11 @@ func TestModelHelpersStatQueueProfileToAPIFilterIds(t *testing.T) {
 
 func TestModelHelpersAPItoStatsError1(t *testing.T) {
 	testStruct := &utils.TPStatProfile{
-		TPid:               "",
-		Tenant:             "",
-		ID:                 "",
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		QueueLength:        0,
-		TTL:                "cat",
-		Metrics:            nil,
-		Blocker:            false,
-		Stored:             false,
-		Weight:             0,
-		MinItems:           0,
-		ThresholdIDs:       nil,
-	}
-	_, err := APItoStats(testStruct, "")
-	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
-		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoStatsError2(t *testing.T) {
-	testStruct := &utils.TPStatProfile{
-		TPid:      "",
-		Tenant:    "",
-		ID:        "",
-		FilterIDs: nil,
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-			ExpiryTime:     "cat",
-		},
+		TPid:         "",
+		Tenant:       "",
+		ID:           "",
 		QueueLength:  0,
-		TTL:          "",
-		Metrics:      nil,
+		TTL:          "cat",
 		Blocker:      false,
 		Stored:       false,
 		Weight:       0,
@@ -4514,21 +4463,17 @@ func TestModelHelpersAPItoStatsError2(t *testing.T) {
 		ThresholdIDs: nil,
 	}
 	_, err := APItoStats(testStruct, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
 	}
 }
 
 func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 	testStruct := &utils.TPStatProfile{
-		TPid:      "TPS1",
-		Tenant:    "cgrates.org",
-		ID:        "Stat1",
-		FilterIDs: []string{"*string:Account:1002", "*string:Account:1003"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-25T15:00:00Z",
-			ExpiryTime:     "2014-07-26T15:00:00Z",
-		},
+		TPid:        "TPS1",
+		Tenant:      "cgrates.org",
+		ID:          "Stat1",
+		FilterIDs:   []string{"*string:Account:1002", "*string:Account:1003", "*ai:~*req.AnswerTime:2014-07-25T15:00:00Z|2014-07-26T15:00:00Z"},
 		QueueLength: 100,
 		TTL:         "1s",
 		Metrics: []*utils.MetricWithFilters{
@@ -4545,20 +4490,19 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 	}
 	expStruct := StatMdls{
 		&StatMdl{
-			Tpid:               "TPS1",
-			Tenant:             "cgrates.org",
-			ID:                 "Stat1",
-			FilterIDs:          "*string:Account:1002;*string:Account:1003",
-			ActivationInterval: "2014-07-25T15:00:00Z;2014-07-26T15:00:00Z",
-			QueueLength:        100,
-			TTL:                "1s",
-			MinItems:           2,
-			MetricIDs:          "*tcc",
-			MetricFilterIDs:    "test_filter_id1;test_filter_id2",
-			Stored:             true,
-			Blocker:            true,
-			Weight:             20.0,
-			ThresholdIDs:       "Th1;Th2",
+			Tpid:            "TPS1",
+			Tenant:          "cgrates.org",
+			ID:              "Stat1",
+			FilterIDs:       "*ai:~*req.AnswerTime:2014-07-25T15:00:00Z|2014-07-26T15:00:00Z;*string:Account:1002;*string:Account:1003",
+			QueueLength:     100,
+			TTL:             "1s",
+			MinItems:        2,
+			MetricIDs:       "*tcc",
+			MetricFilterIDs: "test_filter_id1;test_filter_id2",
+			Stored:          true,
+			Blocker:         true,
+			Weight:          20.0,
+			ThresholdIDs:    "Th1;Th2",
 		},
 	}
 	result := APItoModelStats(testStruct)
@@ -4569,15 +4513,12 @@ func TestModelHelpersAPItoModelStatsCase2(t *testing.T) {
 
 func TestStatMdlsAsTPStatsCase2(t *testing.T) {
 	testStruct := StatMdls{{
-		ActivationInterval: "2014-07-25T15:00:00Z;2014-07-26T15:00:00Z",
-		MetricIDs:          "test_id",
-		MetricFilterIDs:    "test_filter_id",
+		FilterIDs:       "*ai:~*req.AnswerTime:2014-07-25T15:00:00Z|2014-07-26T15:00:00Z",
+		MetricIDs:       "test_id",
+		MetricFilterIDs: "test_filter_id",
 	}}
 	expStruct := []*utils.TPStatProfile{{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-25T15:00:00Z",
-			ExpiryTime:     "2014-07-26T15:00:00Z",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-25T15:00:00Z|2014-07-26T15:00:00Z"},
 		Metrics: []*utils.MetricWithFilters{
 			{
 				MetricID:  "test_id",
@@ -4593,22 +4534,21 @@ func TestStatMdlsAsTPStatsCase2(t *testing.T) {
 
 func TestStatMdlsCSVHeader(t *testing.T) {
 	testStruct := StatMdls{{
-		PK:                 0,
-		Tpid:               "",
-		Tenant:             "test_tenant",
-		ID:                 "test_id",
-		FilterIDs:          "test_filter_id",
-		ActivationInterval: "test_interval",
-		QueueLength:        0,
-		TTL:                "",
-		MinItems:           0,
-		MetricIDs:          "",
-		MetricFilterIDs:    "",
-		Stored:             false,
-		Blocker:            false,
-		Weight:             0,
-		ThresholdIDs:       "",
-		CreatedAt:          time.Time{},
+		PK:              0,
+		Tpid:            "",
+		Tenant:          "test_tenant",
+		ID:              "test_id",
+		FilterIDs:       "test_filter_id",
+		QueueLength:     0,
+		TTL:             "",
+		MinItems:        0,
+		MetricIDs:       "",
+		MetricFilterIDs: "",
+		Stored:          false,
+		Blocker:         false,
+		Weight:          0,
+		ThresholdIDs:    "",
+		CreatedAt:       time.Time{},
 	}}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
