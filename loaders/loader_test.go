@@ -691,7 +691,7 @@ func TestLoaderProcessStats(t *testing.T) {
 	eSt1 := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
 		ID:          "TestStats",
-		FilterIDs:   []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		FilterIDs:   []string{"*string:~*req.Account:1001"},
 		QueueLength: 100,
 		TTL:         time.Second,
 		Metrics: []*engine.MetricWithFilters{

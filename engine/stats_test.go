@@ -60,7 +60,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfile1",
-			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -77,7 +77,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfile2",
-			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -94,7 +94,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfilePrefix",
-			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -291,7 +291,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfile1",
-			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -308,7 +308,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfile2",
-			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -325,7 +325,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfilePrefix",
-			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -523,7 +523,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfile1",
-			FilterIDs:   []string{"FLTR_STATS_1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_1", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -540,7 +540,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfile2",
-			FilterIDs:   []string{"FLTR_STATS_2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_2", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
@@ -557,7 +557,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		{
 			Tenant:      "cgrates.org",
 			ID:          "StatQueueProfilePrefix",
-			FilterIDs:   []string{"FLTR_STATS_3", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs:   []string{"FLTR_STATS_3", "*ai:*now:2014-07-14T14:25:00Z"},
 			QueueLength: 10,
 			TTL:         10 * time.Second,
 			Metrics: []*MetricWithFilters{
