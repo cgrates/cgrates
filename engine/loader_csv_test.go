@@ -271,10 +271,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
@@ -289,10 +286,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
-			FilterIDs: []string{"*string:~*req.RunID:*default", "*string:~*req.Account:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
+			FilterIDs: []string{"*string:~*req.RunID:*default", "*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",

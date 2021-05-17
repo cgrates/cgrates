@@ -572,26 +572,22 @@ func TestAPItoModelStats(t *testing.T) {
 func TestTPThresholdsAsTPThreshold(t *testing.T) {
 	tps := []*ThresholdMdl{
 		{
-			Tpid:               "TEST_TPID",
-			ID:                 "Threhold",
-			FilterIDs:          "FilterID1;FilterID2;FilterID1;FilterID2;FilterID2",
-			ActivationInterval: "2014-07-29T15:00:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TEST_TPID",
+			ID:        "Threhold",
+			FilterIDs: "FilterID1;FilterID2;FilterID1;FilterID2;FilterID2;*ai:~*req.AnswerTime:2014-07-29T15:00:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 	}
 	eTPs := []*utils.TPThresholdProfile{
 		{
 			TPid:      tps[0].Tpid,
 			ID:        tps[0].ID,
-			FilterIDs: []string{"FilterID1", "FilterID2"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: tps[0].ActivationInterval,
-			},
+			FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			MinSleep:  tps[0].MinSleep,
 			MaxHits:   tps[0].MaxHits,
 			MinHits:   tps[0].MinHits,
@@ -602,10 +598,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 		{
 			TPid:      tps[0].Tpid,
 			ID:        tps[0].ID,
-			FilterIDs: []string{"FilterID2", "FilterID1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: tps[0].ActivationInterval,
-			},
+			FilterIDs: []string{"FilterID2", "FilterID1", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			MinSleep:  tps[0].MinSleep,
 			MaxHits:   tps[0].MaxHits,
 			MinHits:   tps[0].MinHits,
@@ -636,11 +629,7 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{"FilterID1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -650,17 +639,16 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 	}
 	models := ThresholdMdls{
 		{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "TH_1",
-			FilterIDs:          "FilterID1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "FilterID1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -674,11 +662,7 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{"FLTR_1", "FLTR_2"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_1", "FLTR_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -688,17 +672,16 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 	}
 	models := ThresholdMdls{
 		{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "TH_1",
-			FilterIDs:          "FLTR_1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "FLTR_1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 		{
 			Tpid:      "TP1",
@@ -718,11 +701,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{"FLTR_1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -732,17 +711,16 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 	}
 	models := ThresholdMdls{
 		{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "TH_1",
-			FilterIDs:          "FLTR_1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "FLTR_1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 		{
 			Tpid:      "TP1",
@@ -762,11 +740,7 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -776,16 +750,16 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 	}
 	models := ThresholdMdls{
 		{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "TH_1",
-			ActivationInterval: "2014-07-14T14:35:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 		{
 			Tpid:      "TP1",
@@ -805,11 +779,7 @@ func TestAPItoModelTPThreshold5(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{"FLTR_1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "",
-		},
+		FilterIDs: []string{"FLTR_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -825,16 +795,15 @@ func TestAPItoModelTPThreshold5(t *testing.T) {
 
 func TestAPItoTPThreshold(t *testing.T) {
 	tps := &utils.TPThresholdProfile{
-		TPid:               testTPID,
-		ID:                 "TH1",
-		FilterIDs:          []string{"FilterID1", "FilterID2"},
-		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
-		MaxHits:            12,
-		MinHits:            10,
-		MinSleep:           "1s",
-		Blocker:            false,
-		Weight:             20.0,
-		ActionIDs:          []string{"WARN3"},
+		TPid:      testTPID,
+		ID:        "TH1",
+		FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3"},
 	}
 
 	eTPs := &ThresholdProfile{
@@ -849,8 +818,6 @@ func TestAPItoTPThreshold(t *testing.T) {
 	if eTPs.MinSleep, err = utils.ParseDurationWithNanosecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
 	}
-	at, _ := utils.ParseTimeDetectLayout("2014-07-29T15:00:00Z", "UTC")
-	eTPs.ActivationInterval = &utils.ActivationInterval{ActivationTime: at}
 	if st, err := APItoThresholdProfile(tps, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTPs, st) {
@@ -860,25 +827,20 @@ func TestAPItoTPThreshold(t *testing.T) {
 
 func TestThresholdProfileToAPI(t *testing.T) {
 	expected := &utils.TPThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "TH1",
-		FilterIDs:          []string{"FilterID1", "FilterID2"},
-		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
-		MaxHits:            12,
-		MinHits:            10,
-		MinSleep:           "1s",
-		Weight:             20.0,
-		ActionIDs:          []string{"WARN3"},
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3"},
 	}
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH1",
-		FilterIDs: []string{"FilterID1", "FilterID2"},
-
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  time.Second,
@@ -4223,19 +4185,11 @@ func TestFilterMdlsCSVHeader(t *testing.T) {
 
 func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
 	testStruct := &ThresholdProfile{
-		FilterIDs: []string{"test_filter_id"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		ActionIDs: []string{"test_action_id"},
 	}
 	expStruct := &utils.TPThresholdProfile{
-		FilterIDs: []string{"test_filter_id"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:25:00Z",
-			ExpiryTime:     "2014-07-15T14:25:00Z",
-		},
+		FilterIDs: []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
 		ActionIDs: []string{"test_action_id"},
 	}
 	result := ThresholdProfileToAPI(testStruct)
@@ -4246,45 +4200,21 @@ func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
 
 func TestModelHelpersAPItoThresholdProfileError1(t *testing.T) {
 	testStruct := &utils.TPThresholdProfile{
-		TPid:               "",
-		Tenant:             "",
-		ID:                 "",
-		FilterIDs:          nil,
-		ActivationInterval: nil,
-		MaxHits:            0,
-		MinHits:            0,
-		MinSleep:           "cat",
-		Blocker:            false,
-		Weight:             0,
-		ActionIDs:          nil,
-		Async:              false,
-	}
-	_, err := APItoThresholdProfile(testStruct, "")
-	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
-		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
-	}
-}
-
-func TestModelHelpersAPItoThresholdProfileError2(t *testing.T) {
-	testStruct := &utils.TPThresholdProfile{
 		TPid:      "",
 		Tenant:    "",
 		ID:        "",
 		FilterIDs: nil,
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-		},
 		MaxHits:   0,
 		MinHits:   0,
-		MinSleep:  "",
+		MinSleep:  "cat",
 		Blocker:   false,
 		Weight:    0,
 		ActionIDs: nil,
 		Async:     false,
 	}
 	_, err := APItoThresholdProfile(testStruct, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
+	if err == nil || err.Error() != "time: invalid duration \"cat\"" {
+		t.Errorf("\nExpecting <time: invalid duration \"cat\">,\n Received <%+v>", err)
 	}
 }
 
@@ -4293,11 +4223,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime1(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -4307,16 +4233,16 @@ func TestModelHelpersAPItoModelTPThresholdExpTime1(t *testing.T) {
 	}
 	expStruct := ThresholdMdls{
 		{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "TH_1",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 		{
 			Tpid:      "TP1",
@@ -4337,11 +4263,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 		TPid:      "TP1",
 		Tenant:    "cgrates.org",
 		ID:        "TH_1",
-		FilterIDs: []string{"FilterID1"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-14T14:35:00Z",
-			ExpiryTime:     "2014-07-15T14:35:00Z",
-		},
+		FilterIDs: []string{"FilterID1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		MaxHits:   12,
 		MinHits:   10,
 		MinSleep:  "1s",
@@ -4351,17 +4273,16 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 	}
 	expStruct := ThresholdMdls{
 		{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "TH_1",
-			FilterIDs:          "FilterID1",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			MaxHits:            12,
-			MinHits:            10,
-			MinSleep:           "1s",
-			Blocker:            false,
-			Weight:             20.0,
-			ActionIDs:          "WARN3",
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "FilterID1;*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: "WARN3",
 		},
 	}
 
@@ -4374,35 +4295,31 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 func TestThresholdMdlsAsTPThresholdActivationTime(t *testing.T) {
 	testStruct := ThresholdMdls{
 		{
-			Tpid:               "",
-			Tenant:             "",
-			ID:                 "",
-			FilterIDs:          "",
-			ActivationInterval: "2014-07-14T14:35:00Z;2014-07-15T14:35:00Z",
-			MaxHits:            0,
-			MinHits:            0,
-			MinSleep:           "",
-			Blocker:            false,
-			Weight:             0,
-			ActionIDs:          "",
-			Async:              false,
+			Tpid:      "",
+			Tenant:    "",
+			ID:        "",
+			FilterIDs: "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z",
+			MaxHits:   0,
+			MinHits:   0,
+			MinSleep:  "",
+			Blocker:   false,
+			Weight:    0,
+			ActionIDs: "",
+			Async:     false,
 		},
 	}
 	expStruct := []*utils.TPThresholdProfile{
 		{
-			TPid:   "",
-			Tenant: "",
-			ID:     "",
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-14T14:35:00Z",
-				ExpiryTime:     "2014-07-15T14:35:00Z",
-			},
-			MaxHits:  0,
-			MinHits:  0,
-			MinSleep: "",
-			Blocker:  false,
-			Weight:   0,
-			Async:    false,
+			TPid:      "",
+			Tenant:    "",
+			ID:        "",
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
+			MaxHits:   0,
+			MinHits:   0,
+			MinSleep:  "",
+			Blocker:   false,
+			Weight:    0,
+			Async:     false,
 		},
 	}
 	result := testStruct.AsTPThreshold()

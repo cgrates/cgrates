@@ -52,10 +52,7 @@ func TestThresholdsCache(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: []string{"FLTR_TH_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
@@ -65,10 +62,7 @@ func TestThresholdsCache(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_2",
-			FilterIDs: []string{"FLTR_TH_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -79,10 +73,7 @@ func TestThresholdsCache(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_3",
-			FilterIDs: []string{"FLTR_TH_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -200,10 +191,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: []string{"FLTR_TH_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
@@ -213,10 +201,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_2",
-			FilterIDs: []string{"FLTR_TH_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -227,10 +212,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_3",
-			FilterIDs: []string{"FLTR_TH_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,

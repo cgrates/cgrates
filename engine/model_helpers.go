@@ -619,16 +619,6 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
 		}
-		if len(tp.ActivationInterval) != 0 {
-			th.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-				th.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenID]; !has {
 				filterMap[tenID] = make(utils.StringSet)
@@ -671,14 +661,6 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 				mdl.MinHits = th.MinHits
 				mdl.MinSleep = th.MinSleep
 				mdl.Async = th.Async
-				if th.ActivationInterval != nil {
-					if th.ActivationInterval.ActivationTime != utils.EmptyString {
-						mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-					}
-					if th.ActivationInterval.ExpiryTime != utils.EmptyString {
-						mdl.ActivationInterval += utils.InfieldSep + th.ActivationInterval.ExpiryTime
-					}
-				}
 			}
 			mdl.FilterIDs = th.FilterIDs[i]
 			mdl.ActionIDs = th.ActionIDs[i]
@@ -710,14 +692,6 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 					mdl.MinHits = th.MinHits
 					mdl.MinSleep = th.MinSleep
 					mdl.Async = th.Async
-					if th.ActivationInterval != nil {
-						if th.ActivationInterval.ActivationTime != utils.EmptyString {
-							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-						}
-						if th.ActivationInterval.ExpiryTime != utils.EmptyString {
-							mdl.ActivationInterval += utils.InfieldSep + th.ActivationInterval.ExpiryTime
-						}
-					}
 				}
 				mdl.ActionIDs = th.ActionIDs[i]
 				mdls = append(mdls, mdl)
@@ -751,26 +725,20 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 	for i, fli := range tpTH.FilterIDs {
 		th.FilterIDs[i] = fli
 	}
-	if tpTH.ActivationInterval != nil {
-		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	return th, nil
 }
 
 func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile) {
 	tpTH = &utils.TPThresholdProfile{
-		Tenant:             th.Tenant,
-		ID:                 th.ID,
-		FilterIDs:          make([]string, len(th.FilterIDs)),
-		ActivationInterval: new(utils.TPActivationInterval),
-		MaxHits:            th.MaxHits,
-		MinHits:            th.MinHits,
-		Blocker:            th.Blocker,
-		Weight:             th.Weight,
-		ActionIDs:          make([]string, len(th.ActionIDs)),
-		Async:              th.Async,
+		Tenant:    th.Tenant,
+		ID:        th.ID,
+		FilterIDs: make([]string, len(th.FilterIDs)),
+		MaxHits:   th.MaxHits,
+		MinHits:   th.MinHits,
+		Blocker:   th.Blocker,
+		Weight:    th.Weight,
+		ActionIDs: make([]string, len(th.ActionIDs)),
+		Async:     th.Async,
 	}
 	if th.MinSleep != time.Duration(0) {
 		tpTH.MinSleep = th.MinSleep.String()
@@ -780,15 +748,6 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 	}
 	for i, fli := range th.ActionIDs {
 		tpTH.ActionIDs[i] = fli
-	}
-
-	if th.ActivationInterval != nil {
-		if !th.ActivationInterval.ActivationTime.IsZero() {
-			tpTH.ActivationInterval.ActivationTime = th.ActivationInterval.ActivationTime.Format(time.RFC3339)
-		}
-		if !th.ActivationInterval.ExpiryTime.IsZero() {
-			tpTH.ActivationInterval.ExpiryTime = th.ActivationInterval.ExpiryTime.Format(time.RFC3339)
-		}
 	}
 	return
 }

@@ -1,3 +1,3 @@
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,THD_ACNT_1001,FLTR_ACNT_1001,2014-07-29T15:00:00Z,1,1,1s,false,10,ACT_LOG_WARNING,true
-cgrates.org,THD_ACNT_1002,FLTR_ACNT_1002,2014-07-29T15:00:00Z,-1,1,1s,false,10,ACT_LOG_WARNING,true
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionIDs[8],Async[9]
+cgrates.org,THD_ACNT_1001,FLTR_ACNT_1001,10,1,1,1s,false,ACT_LOG_WARNING,true
+cgrates.org,THD_ACNT_1002,FLTR_ACNT_1002,10,-1,1,1s,false,ACT_LOG_WARNING,true

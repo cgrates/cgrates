@@ -38,17 +38,16 @@ type ThresholdProfileWithAPIOpts struct {
 
 // ThresholdProfile the profile for threshold
 type ThresholdProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
-	MaxHits            int
-	MinHits            int
-	MinSleep           time.Duration
-	Blocker            bool    // blocker flag to stop processing on filters matched
-	Weight             float64 // Weight to sort the thresholds
-	ActionIDs          []string
-	Async              bool
+	Tenant    string
+	ID        string
+	FilterIDs []string
+	MaxHits   int
+	MinHits   int
+	MinSleep  time.Duration
+	Blocker   bool    // blocker flag to stop processing on filters matched
+	Weight    float64 // Weight to sort the thresholds
+	ActionIDs []string
+	Async     bool
 }
 
 // TenantID returns the concatenated key beteen tenant and ID
@@ -248,10 +247,6 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *Thresho
 				continue
 			}
 			return nil, err
-		}
-		if tPrfl.ActivationInterval != nil && args.Time != nil &&
-			!tPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
-			continue
 		}
 		if pass, err := tS.filterS.Pass(context.TODO(), tnt, tPrfl.FilterIDs,
 			evNm); err != nil {

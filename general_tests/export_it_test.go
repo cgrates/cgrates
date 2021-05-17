@@ -215,10 +215,7 @@ func testExpVerifyThresholds(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_ACNT_1001",
-			FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"FLTR_ACCOUNT_1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
 			MaxHits:   -1,
 			MinHits:   0,
 			MinSleep:  0,
