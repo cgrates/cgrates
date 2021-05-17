@@ -27,7 +27,6 @@ import (
 	"testing"
 	"time"
 
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -145,7 +144,7 @@ func testJSONAddData(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	attrSetAcnt := v2.AttrSetAccount{
+	attrSetAcnt := apis.AttrSetAccount{
 		Tenant:  "cgrates.org",
 		Account: "voiceAccount",
 	}
