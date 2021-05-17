@@ -608,6 +608,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 		},
 	}
 	rcvTPs := ThresholdMdls(tps).AsTPThreshold()
+	sort.Strings(rcvTPs[0].FilterIDs)
 	if !reflect.DeepEqual(eTPs[0], rcvTPs[0]) && !reflect.DeepEqual(eTPs[1], rcvTPs[0]) {
 		t.Errorf("Expecting: %+v , Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
@@ -3754,7 +3755,7 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 			TPid:      "test_id",
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*req.Subject:1001"},
 			Weight:    1,
 			Schedule:  "test_schedule",
 			Actions: []*utils.TPAPAction{
@@ -3767,6 +3768,7 @@ func TestActionProfileMdlsAsTPActionProfileTimeLen1(t *testing.T) {
 		},
 	}
 	result := testStruct.AsTPActionProfile()
+	sort.Strings(result[0].FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting %s,\n Received %s", utils.ToJSON(expStruct), utils.ToJSON(result))
 	}
@@ -3792,7 +3794,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 			TPid:      "test_id",
 			Tenant:    "cgrates.org",
 			ID:        "RP1",
-			FilterIDs: []string{"*string:~*req.Subject:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
+			FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z", "*string:~*req.Subject:1001"},
 			Weight:    1,
 			Schedule:  "test_schedule",
 			Targets: []*utils.TPActionTarget{
@@ -3812,6 +3814,7 @@ func TestActionProfileMdlsAsTPActionProfile(t *testing.T) {
 	}
 
 	result := testStruct.AsTPActionProfile()
+	sort.Strings(result[0].FilterIDs)
 	sort.Slice(result[0].Targets[0].TargetIDs, func(i, j int) bool {
 		return result[0].Targets[0].TargetIDs[i] < result[0].Targets[0].TargetIDs[j]
 	})
