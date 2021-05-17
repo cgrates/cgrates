@@ -665,6 +665,7 @@ func (tID *TenantID) TenantID() string {
 type PaginatorWithTenant struct {
 	Tenant string
 	Paginator
+	APIOpts map[string]interface{}
 }
 
 type TenantWithAPIOpts struct {

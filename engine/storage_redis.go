@@ -869,7 +869,7 @@ func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err
 	return rs.Cmd(nil, redisHDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
 }
 
-func (rs *RedisStorage) GetAccountDrv(tenant, id string) (ap *utils.Account, err error) {
+func (rs *RedisStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.AccountPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -881,7 +881,7 @@ func (rs *RedisStorage) GetAccountDrv(tenant, id string) (ap *utils.Account, err
 	return
 }
 
-func (rs *RedisStorage) SetAccountDrv(ap *utils.Account) (err error) {
+func (rs *RedisStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(ap); err != nil {
 		return
@@ -889,6 +889,6 @@ func (rs *RedisStorage) SetAccountDrv(ap *utils.Account) (err error) {
 	return rs.Cmd(nil, redisSET, utils.AccountPrefix+utils.ConcatenatedKey(ap.Tenant, ap.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveAccountDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.AccountPrefix+utils.ConcatenatedKey(tenant, id))
 }

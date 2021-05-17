@@ -45,10 +45,10 @@ func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) 
 }
 
 // newConcreteBalance constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(acntID string, blnCfg *utils.Balance,
+func newConcreteBalanceOperator(ctx *context.Context, acntID string, blnCfg *utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
-	return &concreteBalance{acntID, blnCfg, fltrS, connMgr, attrSConns, rateSConns}
+	return &concreteBalance{acntID, blnCfg, fltrS, connMgr, ctx, attrSConns, rateSConns}
 }
 
 // concreteBalance is the operator for *concrete balance type
@@ -57,6 +57,7 @@ type concreteBalance struct {
 	blnCfg     *utils.Balance
 	fltrS      *engine.FilterS
 	connMgr    *engine.ConnManager
+	ctx        *context.Context
 	attrSConns []string
 	rateSConns []string
 }
@@ -67,12 +68,12 @@ func (cB *concreteBalance) id() string {
 }
 
 // debitAbstracts implements the balanceOperator interface
-func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
+func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.Big,
 	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(context.TODO(), cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(ctx, cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
@@ -80,12 +81,12 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 
 	// costIncrement
 	var costIcrm *utils.CostIncrement
-	if costIcrm, err = costIncrement(cB.blnCfg.CostIncrements,
+	if costIcrm, err = costIncrement(ctx, cB.blnCfg.CostIncrements,
 		cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	var ecCncrt *utils.EventCharges
-	if ecCncrt, err = maxDebitAbstractsFromConcretes(aUnits,
+	if ecCncrt, err = maxDebitAbstractsFromConcretes(ctx, aUnits,
 		cB.acntID, []*concreteBalance{cB},
 		cB.connMgr, cgrEv,
 		cB.attrSConns, cB.blnCfg.AttributeIDs,
@@ -99,9 +100,10 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 	ec.Abstracts = ecCncrt.Abstracts
 	ec.Concretes = ecCncrt.Concretes
 	// RatingID
-	var ratingID string
+	var ratingID, rateID string
 	if costIcrm != nil {
 		ratingID = utils.UUIDSha1Prefix()
+		rateID = utils.UUIDSha1Prefix()
 		ec.Rating[ratingID] = &utils.RateSInterval{
 			Increments: []*utils.RateSIncrement{
 				{
@@ -117,15 +119,22 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 						},
 
 					*/
-
+					RateID:         rateID,
 					CompressFactor: 1,
 				},
 			},
 			CompressFactor: 1,
 		}
+		ec.Rates[rateID] = &utils.IntervalRate{
+			FixedFee:     costIcrm.FixedFee,
+			RecurrentFee: costIcrm.RecurrentFee,
+		}
 	} else { // take it from first increment
 		ratingID = ecCncrt.Accounting[ecCncrt.Charges[0].ChargingID].RatingID
 		ec.Rating[ratingID] = ecCncrt.Rating[ratingID]
+		for _, incr := range ecCncrt.Rating[ratingID].Increments {
+			ec.Rates[incr.RateID] = ecCncrt.Rates[incr.RateID]
+		}
 	}
 	// AccountingID
 	acntID := utils.UUIDSha1Prefix()
@@ -153,12 +162,12 @@ func (cB *concreteBalance) debitAbstracts(aUnits *decimal.Big,
 }
 
 // debitConcretes implements the balanceOperator interface
-func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
+func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.Big,
 	cgrEv *utils.CGREvent, debited *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
-	if pass, err = cB.fltrS.Pass(context.TODO(), cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
+	if pass, err = cB.fltrS.Pass(ctx, cgrEv.Tenant, cB.blnCfg.FilterIDs, evNm); err != nil {
 		return
 	} else if !pass {
 		return nil, utils.ErrFilterNotPassingNoCaps
@@ -166,7 +175,7 @@ func (cB *concreteBalance) debitConcretes(cUnits *decimal.Big,
 
 	// unitFactor
 	var uF *utils.UnitFactor
-	if uF, err = unitFactor(cB.blnCfg.UnitFactors, cB.fltrS, cgrEv.Tenant, evNm); err != nil {
+	if uF, err = unitFactor(ctx, cB.blnCfg.UnitFactors, cB.fltrS, cgrEv.Tenant, evNm); err != nil {
 		return
 	}
 	var hasUF bool

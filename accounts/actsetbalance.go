@@ -23,14 +23,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // actSetAccount updates the balances base on the diktat
-func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (err error) {
+func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (err error) {
 	var qAcnt *utils.Account
-	if qAcnt, err = dm.GetAccount(tnt, acntID); err != nil {
+	if qAcnt, err = dm.GetAccount(ctx, tnt, acntID); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -75,7 +76,7 @@ func actSetAccount(dm *engine.DataManager, tnt, acntID string, diktats []*utils.
 			return utils.ErrWrongPath
 		}
 	}
-	return dm.SetAccount(qAcnt, false)
+	return dm.SetAccount(ctx, qAcnt, false)
 }
 
 // actSetAccountFields sets the fields inside the account

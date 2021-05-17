@@ -63,7 +63,7 @@ func (aS *AccountS) Shutdown() {
 // matchingAccountsForEvent returns the matched Accounts for the given event
 // if lked option is passed, each Account will be also locked
 //   so it becomes responsibility of upper layers to release the lock
-func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
+func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	acntIDs []string, lked bool) (acnts utils.AccountsWithWeight, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
@@ -72,7 +72,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 	if len(acntIDs) == 0 {
 		var actIDsMp utils.StringSet
 		if actIDsMp, err = engine.MatchingItemIDsForEvent(
-			context.TODO(),
+			ctx,
 			evNm,
 			aS.cfg.AccountSCfg().StringIndexedFields,
 			aS.cfg.AccountSCfg().PrefixIndexedFields,
@@ -95,7 +95,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 				aS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		}
 		var qAcnt *utils.Account
-		if qAcnt, err = aS.dm.GetAccount(tnt, acntID); err != nil {
+		if qAcnt, err = aS.dm.GetAccount(ctx, tnt, acntID); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err == utils.ErrNotFound {
 				err = nil
@@ -111,7 +111,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			continue
 		}
 		var pass bool
-		if pass, err = aS.fltrS.Pass(context.TODO(), tnt, qAcnt.FilterIDs, evNm); err != nil {
+		if pass, err = aS.fltrS.Pass(ctx, tnt, qAcnt.FilterIDs, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			unlockAccounts(acnts)
 			return
@@ -120,7 +120,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 			continue
 		}
 		var weight float64
-		if weight, err = engine.WeightFromDynamics(context.TODO(), qAcnt.Weights,
+		if weight, err = engine.WeightFromDynamics(ctx, qAcnt.Weights,
 			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			unlockAccounts(acnts)
@@ -136,7 +136,7 @@ func (aS *AccountS) matchingAccountsForEvent(tnt string, cgrEv *utils.CGREvent,
 }
 
 // accountsDebit will debit an usage out of multiple accounts
-func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
+func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	usage := decimal.New(int64(72*time.Hour), 0)
 	var usgEv time.Duration
@@ -164,10 +164,10 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 		}
 		acntBkps[i] = acnt.Account.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = aS.accountDebit(acnt.Account,
+		if ecDbt, err = aS.accountDebit(ctx, acnt.Account,
 			new(decimal.Big).Copy(usage), cgrEv, concretes, dbted); err != nil {
 			if store {
-				restoreAccounts(aS.dm, acnts, acntBkps)
+				restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 			}
 			return
 		}
@@ -178,8 +178,8 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 			ec = utils.NewEventCharges()
 		}
 		if store && acnt.Account.BalancesAltered(acntBkps[i]) {
-			if err = aS.dm.SetAccount(acnt.Account, false); err != nil {
-				restoreAccounts(aS.dm, acnts, acntBkps)
+			if err = aS.dm.SetAccount(ctx, acnt.Account, false); err != nil {
+				restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 				return
 			}
 		}
@@ -197,13 +197,13 @@ func (aS *AccountS) accountsDebit(acnts []*utils.AccountWithWeight,
 }
 
 // accountDebit will debit the usage out of an Account
-func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
+func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usage *decimal.Big,
 	cgrEv *utils.CGREvent, concretes bool, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
 		var weight float64
-		if weight, err = engine.WeightFromDynamics(context.TODO(), blnCfg.Weights,
+		if weight, err = engine.WeightFromDynamics(ctx, blnCfg.Weights,
 			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
 			return
 		}
@@ -211,7 +211,7 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 	}
 	blcsWithWeight.Sort()
 	var blncOpers []balanceOperator
-	if blncOpers, err = newBalanceOperators(acnt.ID, blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
+	if blncOpers, err = newBalanceOperators(ctx, acnt.ID, blcsWithWeight.Balances(), aS.fltrS, aS.connMgr,
 		aS.cfg.AccountSCfg().AttributeSConns, aS.cfg.AccountSCfg().RateSConns); err != nil {
 		return
 	}
@@ -225,7 +225,7 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debFunc(new(decimal.Big).Copy(usage), cgrEv, dbted); err != nil {
+		if ecDbt, err = debFunc(ctx, new(decimal.Big).Copy(usage), cgrEv, dbted); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps ||
 				err == utils.ErrNotImplemented {
 				err = nil
@@ -254,9 +254,9 @@ func (aS *AccountS) accountDebit(acnt *utils.Account, usage *decimal.Big,
 }
 
 // V1AccountsForEvent returns the matching Accounts for Event
-func (aS *AccountS) V1AccountsForEvent(args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) (err error) {
+func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.ArgsAccountsForEvent, aps *[]*utils.Account) (err error) {
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -268,9 +268,9 @@ func (aS *AccountS) V1AccountsForEvent(args *utils.ArgsAccountsForEvent, aps *[]
 }
 
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -280,7 +280,7 @@ func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, false); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, false, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -292,9 +292,9 @@ func (aS *AccountS) V1MaxAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.
 }
 
 // V1DebitAbstracts performs debit for the provided event
-func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -304,7 +304,7 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, false, true); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, false, true); err != nil {
 		return
 	}
 
@@ -318,9 +318,9 @@ func (aS *AccountS) V1DebitAbstracts(args *utils.ArgsAccountsForEvent, eEc *util
 }
 
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -330,7 +330,7 @@ func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, false); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, true, false); err != nil {
 		return
 	}
 	var rcvEec *utils.ExtEventCharges
@@ -342,9 +342,9 @@ func (aS *AccountS) V1MaxConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.
 }
 
 // V1DebitConcretes performs debit of concrete units for the provided event
-func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
+func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.ArgsAccountsForEvent, eEc *utils.ExtEventCharges) (err error) {
 	var acnts utils.AccountsWithWeight
-	if acnts, err = aS.matchingAccountsForEvent(args.CGREvent.Tenant,
+	if acnts, err = aS.matchingAccountsForEvent(ctx, args.CGREvent.Tenant,
 		args.CGREvent, args.AccountIDs, true); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -354,7 +354,7 @@ func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *util
 	defer unlockAccounts(acnts)
 
 	var procEC *utils.EventCharges
-	if procEC, err = aS.accountsDebit(acnts, args.CGREvent, true, true); err != nil {
+	if procEC, err = aS.accountsDebit(ctx, acnts, args.CGREvent, true, true); err != nil {
 		return
 	}
 
@@ -368,7 +368,7 @@ func (aS *AccountS) V1DebitConcretes(args *utils.ArgsAccountsForEvent, eEc *util
 }
 
 // V1ActionSetBalance performs an update for a specific balance in account
-func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *string) (err error) {
+func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
 	}
@@ -379,8 +379,8 @@ func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *stri
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if _, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-		return nil, actSetAccount(aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
+	if _, err = guardian.Guardian.Guard(ctx, func(_ *context.Context) (interface{}, error) {
+		return nil, actSetAccount(ctx, aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
 		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
@@ -391,7 +391,7 @@ func (aS *AccountS) V1ActionSetBalance(args *utils.ArgsActSetBalance, rply *stri
 }
 
 // V1RemoveBalance removes a balance for a specific account
-func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rply *string) (err error) {
+func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
 	}
@@ -402,15 +402,15 @@ func (aS *AccountS) V1ActionRemoveBalance(args *utils.ArgsActRemoveBalances, rpl
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
-	if _, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (interface{}, error) {
-		qAcnt, err := aS.dm.GetAccount(tnt, args.AccountID)
+	if _, err = guardian.Guardian.Guard(ctx, func(_ *context.Context) (interface{}, error) {
+		qAcnt, err := aS.dm.GetAccount(ctx, tnt, args.AccountID)
 		if err != nil {
 			return nil, err
 		}
 		for _, balID := range args.BalanceIDs {
 			delete(qAcnt.Balances, balID)
 		}
-		return nil, aS.dm.SetAccount(qAcnt, false)
+		return nil, aS.dm.SetAccount(ctx, qAcnt, false)
 	}, aS.cfg.GeneralCfg().LockingTimeout,
 		utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return

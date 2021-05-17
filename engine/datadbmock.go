@@ -302,15 +302,15 @@ func (dbM *DataDBMock) RemoveActionProfileDrv(*context.Context, string, string) 
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountDrv(string, string) (*utils.Account, error) {
+func (dbM *DataDBMock) GetAccountDrv(*context.Context, string, string) (*utils.Account, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAccountDrv(profile *utils.Account) error {
+func (dbM *DataDBMock) SetAccountDrv(ctx *context.Context, profile *utils.Account) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAccountDrv(string, string) error {
+func (dbM *DataDBMock) RemoveAccountDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

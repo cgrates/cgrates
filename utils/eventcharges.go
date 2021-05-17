@@ -28,6 +28,7 @@ func NewEventCharges() (ec *EventCharges) {
 		Accounting:  make(map[string]*AccountCharge),
 		UnitFactors: make(map[string]*UnitFactor),
 		Rating:      make(map[string]*RateSInterval),
+		Rates:       make(map[string]*IntervalRate),
 		Accounts:    make(map[string]*Account),
 	}
 	return
