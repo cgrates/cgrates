@@ -153,33 +153,6 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct []string,
 	return distinctIds.AsSlice(), nil
 }
 
-func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
-	filter := bson.M{"tpid": tpid}
-	if id != "" {
-		filter["id"] = id
-	}
-	var results []*utils.ApierTPTiming
-	err := ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPTimings).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var el utils.ApierTPTiming
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
-			}
-			results = append(results, &el)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
 func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
@@ -282,24 +255,6 @@ func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) er
 			return utils.ErrNotFound
 		}
 		return err
-	})
-}
-
-func (ms *MongoStorage) SetTPTimings(tps []*utils.ApierTPTiming) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tps {
-			_, err = ms.getCol(utils.TBLTPTimings).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
-				bson.M{"$set": tp},
-				options.Update().SetUpsert(true),
-			)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
 	})
 }
 

@@ -54,9 +54,6 @@ type DataDB interface {
 	GetResourceDrv(string, string) (*Resource, error)
 	SetResourceDrv(*Resource) error
 	RemoveResourceDrv(string, string) error
-	GetTimingDrv(string) (*utils.TPTiming, error)
-	SetTimingDrv(*utils.TPTiming) error
-	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
@@ -136,7 +133,6 @@ type LoadReader interface {
 	GetTpIds(string) ([]string, error)
 	GetTpTableIds(string, string, []string,
 		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
-	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
@@ -153,7 +149,6 @@ type LoadReader interface {
 
 type LoadWriter interface {
 	RemTpData(string, string, map[string]string) error
-	SetTPTimings([]*utils.ApierTPTiming) error
 	SetTPResources([]*utils.TPResourceProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPThresholds([]*utils.TPThresholdProfile) error

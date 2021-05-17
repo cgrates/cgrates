@@ -217,26 +217,6 @@ func (iDB *InternalDB) RemoveResourceDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetTimingDrv(id string) (tmg *utils.TPTiming, err error) {
-	x, ok := Cache.Get(utils.CacheTimings, id)
-	if !ok || x == nil {
-		return nil, utils.ErrNotFound
-	}
-	return x.(*utils.TPTiming), nil
-}
-
-func (iDB *InternalDB) SetTimingDrv(timing *utils.TPTiming) (err error) {
-	Cache.SetWithoutReplicate(utils.CacheTimings, timing.ID, timing, nil,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveTimingDrv(id string) (err error) {
-	Cache.RemoveWithoutReplicate(utils.CacheTimings, id,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	return
-}
-
 func (iDB *InternalDB) GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error) {
 	return nil, nil
 }

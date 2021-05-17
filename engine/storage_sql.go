@@ -99,7 +99,6 @@ func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 
 func (sqls *SQLStorage) IsDBEmpty() (resp bool, err error) {
 	tbls := []string{
-		utils.TBLTPTimings,
 		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL,
 		utils.TBLVersions, utils.TBLTPRoutes, utils.TBLTPAttributes, utils.TBLTPChargers,
@@ -122,7 +121,6 @@ func (sqls *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	var qryStr string
 	if colName == "" {
 		for _, clNm := range []string{
-			utils.TBLTPTimings,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
@@ -228,7 +226,7 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	tx := sqls.db.Begin()
 
 	if len(table) == 0 { // Remove tpid out of all tables
-		for _, tblName := range []string{utils.TBLTPTimings,
+		for _, tblName := range []string{
 			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 			utils.TBLTPFilters, utils.TBLTPRoutes, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts, utils.TBLTPAccounts,
@@ -250,27 +248,6 @@ func (sqls *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 	if err := tx.Delete(nil).Error; err != nil {
 		tx.Rollback()
 		return err
-	}
-	tx.Commit()
-	return nil
-}
-
-func (sqls *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
-	if len(timings) == 0 {
-		return nil
-	}
-
-	tx := sqls.db.Begin()
-	for _, timing := range timings {
-		if err := tx.Where(&TimingMdl{Tpid: timing.TPid, Tag: timing.ID}).Delete(TimingMdl{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		t := APItoModelTiming(timing)
-		if err := tx.Create(&t).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
 	}
 	tx.Commit()
 	return nil
@@ -832,22 +809,6 @@ func (sqls *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		return cdrs, 0, utils.ErrNotFound
 	}
 	return cdrs, 0, nil
-}
-
-func (sqls *SQLStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
-	var tpTimings TimingMdls
-	q := sqls.db.Where("tpid = ?", tpid)
-	if len(id) != 0 {
-		q = q.Where("tag = ?", id)
-	}
-	if err := q.Find(&tpTimings).Error; err != nil {
-		return nil, err
-	}
-	ts := tpTimings.AsTPTimings()
-	if len(ts) == 0 {
-		return ts, utils.ErrNotFound
-	}
-	return ts, nil
 }
 
 func (sqls *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {

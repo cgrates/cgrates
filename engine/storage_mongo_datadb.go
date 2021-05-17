@@ -317,14 +317,6 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		if err = ms.enusureIndex(col, true, "id"); err != nil {
 			return
 		}
-		//StorDB
-	case utils.TBLTPTimings,
-		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
-		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
-		utils.TBLTPRoutes, utils.TBLTPThresholds:
-		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
-			return
-		}
 	case utils.CDRsTBL:
 		if err = ms.enusureIndex(col, true, CGRIDLow, RunIDLow,
 			OriginIDLow); err != nil {
@@ -372,15 +364,6 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) (err error) {
 			}
 		}
 	}
-	if ms.storageType == utils.StorDB {
-		for _, col := range []string{utils.TBLTPTimings,
-			utils.TBLTPStats, utils.TBLTPResources,
-			utils.CDRsTBL, utils.SessionCostsTBL} {
-			if err = ms.ensureIndexesForCol(col); err != nil {
-				return
-			}
-		}
-	}
 	return
 }
 
@@ -419,8 +402,6 @@ func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
 		colName = ColLht
 	case utils.VersionPrefix:
 		colName = ColVer
-	case utils.TimingsPrefix:
-		colName = ColTmg
 	case utils.ResourcesPrefix:
 		colName = ColRes
 	case utils.ResourceProfilesPrefix:
@@ -559,8 +540,6 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (r
 			result, err = ms.getField2(sctx, ColSqs, utils.StatQueuePrefix, subject, tntID)
 		case utils.StatQueueProfilePrefix:
 			result, err = ms.getField2(sctx, ColSqp, utils.StatQueueProfilePrefix, subject, tntID)
-		case utils.TimingsPrefix:
-			result, err = ms.getField(sctx, ColTmg, utils.TimingsPrefix, subject, "id")
 		case utils.FilterPrefix:
 			result, err = ms.getField2(sctx, ColFlt, utils.FilterPrefix, subject, tntID)
 		case utils.ThresholdPrefix:

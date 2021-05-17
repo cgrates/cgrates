@@ -47,7 +47,7 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan,
 		CacheCapsEvents, CacheVersions, CacheReplicationHosts})
 
-	dataDBPartition = NewStringSet([]string{CacheTimings,
+	dataDBPartition = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
@@ -57,7 +57,7 @@ var (
 		CacheActionProfilesFilterIndexes, CacheAccountsFilterIndexes, CacheReverseFilterIndexes,
 		CacheAccounts})
 
-	storDBPartition = NewStringSet([]string{CacheTBLTPTimings,
+	storDBPartition = NewStringSet([]string{
 		CacheTBLTPResources, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
 		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
 		CacheTBLTPDispatcherHosts, CacheTBLTPRateProfiles, CacheTBLTPActionProfiles, CacheTBLTPAccounts})
@@ -68,7 +68,6 @@ var (
 	CacheInstanceToPrefix = map[string]string{
 		CacheResourceProfiles:            ResourceProfilesPrefix,
 		CacheResources:                   ResourcesPrefix,
-		CacheTimings:                     TimingsPrefix,
 		CacheStatQueueProfiles:           StatQueueProfilePrefix,
 		CacheStatQueues:                  StatQueuePrefix,
 		CacheThresholdProfiles:           ThresholdProfilePrefix,
@@ -129,7 +128,6 @@ var (
 	}
 
 	CacheStorDBPartitions = map[string]string{
-		TBLTPTimings:         CacheTBLTPTimings,
 		TBLTPResources:       CacheTBLTPResources,
 		TBLTPStats:           CacheTBLTPStats,
 		TBLTPThresholds:      CacheTBLTPThresholds,
@@ -165,7 +163,6 @@ var (
 		RateProfileIDs:       RateProfilePrefix,
 		ActionProfileIDs:     ActionProfilePrefix,
 
-		TimingIDs:                    TimingsPrefix,
 		AttributeFilterIndexIDs:      AttributeFilterIndexes,
 		ResourceFilterIndexIDs:       ResourceFilterIndexes,
 		StatFilterIndexIDs:           StatFilterIndexes,
@@ -197,7 +194,6 @@ var (
 		RateProfileIDs:       CacheRateProfiles,
 		ActionProfileIDs:     CacheActionProfiles,
 
-		TimingIDs:                    CacheTimings,
 		AttributeFilterIndexIDs:      CacheAttributeFilterIndexes,
 		ResourceFilterIndexIDs:       CacheResourceFilterIndexes,
 		StatFilterIndexIDs:           CacheStatFilterIndexes,
@@ -337,7 +333,6 @@ const (
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
 	ThresholdPrefix           = "thd_"
-	TimingsPrefix             = "tmg_"
 	FilterPrefix              = "ftr_"
 	CDRsStatsPrefix           = "cst_"
 	VersionPrefix             = "ver_"
@@ -480,7 +475,6 @@ const (
 	BalanceMap               = "BalanceMap"
 	UnitCounters             = "UnitCounters"
 	UpdateTime               = "UpdateTime"
-	Timings                  = "Timings"
 	Rates                    = "Rates"
 	//DestinationRates         = "DestinationRates"
 	RatingPlans        = "RatingPlans"
@@ -550,7 +544,6 @@ const (
 	Action               = "Action"
 
 	SessionSCosts = "SessionSCosts"
-	Timing        = "Timing"
 	RQF           = "RQF"
 	Resource      = "Resource"
 	User          = "User"
@@ -611,7 +604,6 @@ const (
 	RateFixedFee             = "RateFixedFee"
 	RateRecurrentFee         = "RateRecurrentFee"
 	RateBlocker              = "RateBlocker"
-	TimingID                 = "TimingID"
 	RatesID                  = "RatesID"
 	RatingFiltersID          = "RatingFiltersID"
 	AccountingID             = "AccountingID"
@@ -833,7 +825,6 @@ const (
 	Loadid                = "loadid"
 	ActionPlan            = "ActionPlan"
 	ActionsId             = "ActionsId"
-	TimingId              = "TimingId"
 	Prefixes              = "Prefixes"
 	RateSlots             = "RateSlots"
 	RatingPlanBindings    = "RatingPlanBindings"
@@ -994,7 +985,6 @@ const (
 	MetaTpActionProfiles    = "*tp_action_profiles"
 	MetaTpRateProfiles      = "*tp_rate_profiles"
 	MetaTpResources         = "*tp_resources"
-	MetaTpTimings           = "*tp_timings"
 	MetaTpChargers          = "*tp_chargers"
 	MetaTpDispatchers       = "*tp_dispatchers"
 	MetaDurationSeconds     = "*duration_seconds"
@@ -1015,7 +1005,6 @@ const (
 	TpAttributes         = "TpAttributes"
 	TpStats              = "TpStats"
 	TpResources          = "TpResources"
-	TpTiming             = "TpTiming"
 	TpResource           = "TpResource"
 	TpChargers           = "TpChargers"
 	TpDispatchers        = "TpDispatchers"
@@ -1092,7 +1081,6 @@ const (
 	ReplicatorSv1GetThreshold         = "ReplicatorSv1.GetThreshold"
 	ReplicatorSv1GetThresholdProfile  = "ReplicatorSv1.GetThresholdProfile"
 	ReplicatorSv1GetStatQueueProfile  = "ReplicatorSv1.GetStatQueueProfile"
-	ReplicatorSv1GetTiming            = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource          = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile   = "ReplicatorSv1.GetResourceProfile"
 	ReplicatorSv1GetActions           = "ReplicatorSv1.GetActions"
@@ -1110,7 +1098,6 @@ const (
 	ReplicatorSv1SetStatQueue         = "ReplicatorSv1.SetStatQueue"
 	ReplicatorSv1SetFilter            = "ReplicatorSv1.SetFilter"
 	ReplicatorSv1SetStatQueueProfile  = "ReplicatorSv1.SetStatQueueProfile"
-	ReplicatorSv1SetTiming            = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource          = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile   = "ReplicatorSv1.SetResourceProfile"
 	ReplicatorSv1SetActions           = "ReplicatorSv1.SetActions"
@@ -1129,7 +1116,6 @@ const (
 	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
 	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
 	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
-	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
 	ReplicatorSv1RemoveActions           = "ReplicatorSv1.RemoveActions"
@@ -1257,10 +1243,6 @@ const (
 
 // APIerSv1 TP APIs
 const (
-	APIerSv1SetTPTiming              = "APIerSv1.SetTPTiming"
-	APIerSv1GetTPTiming              = "APIerSv1.GetTPTiming"
-	APIerSv1RemoveTPTiming           = "APIerSv1.RemoveTPTiming"
-	APIerSv1GetTPTimingIds           = "APIerSv1.GetTPTimingIds"
 	APIerSv1LoadTariffPlanFromStorDb = "APIerSv1.LoadTariffPlanFromStorDb"
 	APIerSv1RemoveTPFromFolder       = "APIerSv1.RemoveTPFromFolder"
 )
@@ -1552,8 +1534,6 @@ const (
 
 //CSV file name
 const (
-	TimingsCsv = "Timings.csv"
-
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
@@ -1570,8 +1550,6 @@ const (
 
 // Table Name
 const (
-	TBLTPTimings = "tp_timings"
-
 	TBLTPResources       = "tp_resources"
 	TBLTPStats           = "tp_stats"
 	TBLTPThresholds      = "tp_thresholds"
@@ -1594,7 +1572,6 @@ const (
 const (
 	CacheResources                   = "*resources"
 	CacheResourceProfiles            = "*resource_profiles"
-	CacheTimings                     = "*timings"
 	CacheEventResources              = "*event_resources"
 	CacheStatQueueProfiles           = "*statqueue_profiles"
 	CacheStatQueues                  = "*statqueues"
@@ -1640,7 +1617,6 @@ const (
 	CacheReplicationHosts            = "*replication_hosts"
 
 	// storDB
-	CacheTBLTPTimings = "*tp_timings"
 
 	CacheTBLTPResources       = "*tp_resources"
 	CacheTBLTPStats           = "*tp_stats"
@@ -2264,7 +2240,6 @@ const (
 	DispatcherRoutesIDs          = "DispatcherRoutesIDs"
 	RateProfileIDs               = "RateProfileIDs"
 	ActionProfileIDs             = "ActionProfileIDs"
-	TimingIDs                    = "TimingIDs"
 	AttributeFilterIndexIDs      = "AttributeFilterIndexIDs"
 	ResourceFilterIndexIDs       = "ResourceFilterIndexIDs"
 	StatFilterIndexIDs           = "StatFilterIndexIDs"

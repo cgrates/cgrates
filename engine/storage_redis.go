@@ -381,30 +381,6 @@ func (rs *RedisStorage) RemoveResourceDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redisGET, utils.TimingsPrefix+id); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrNotFound
-		return
-	}
-	err = rs.ms.Unmarshal(values, &t)
-	return
-}
-
-func (rs *RedisStorage) SetTimingDrv(t *utils.TPTiming) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(t); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redisSET, utils.TimingsPrefix+t.ID, string(result))
-}
-
-func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
-	return rs.Cmd(nil, redisDEL, utils.TimingsPrefix+id)
-}
-
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
 	if itm != "" {
 		var fldVal int64

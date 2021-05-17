@@ -802,7 +802,6 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 			DispatcherProfileIDs:       {MetaAny},
 			DispatcherHostIDs:          {MetaAny},
 			RateProfileIDs:             {MetaAny},
-			TimingIDs:                  {MetaAny},
 			AttributeFilterIndexIDs:    {MetaAny},
 			ResourceFilterIndexIDs:     {MetaAny},
 			StatFilterIndexIDs:         {MetaAny},
