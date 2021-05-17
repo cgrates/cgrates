@@ -191,7 +191,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
-			FilterIDs: []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			FilterIDs: []string{"FLTR_TH_1", "*ai:*now:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
@@ -201,7 +201,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_2",
-			FilterIDs: []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			FilterIDs: []string{"FLTR_TH_2", "*ai:*now:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -212,7 +212,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		{
 			Tenant:    "cgrates.org",
 			ID:        "TH_3",
-			FilterIDs: []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			FilterIDs: []string{"FLTR_TH_3", "*ai:*now:2014-07-14T14:35:00Z"},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
