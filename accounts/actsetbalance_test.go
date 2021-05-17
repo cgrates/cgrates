@@ -155,7 +155,7 @@ func TestActSetAccountFields(t *testing.T) {
 	accPrf := &utils.Account{}
 
 	expectedAccprf := &utils.Account{
-		FilterIDs: []string{"*string:~*req.ToR:*sms", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z"},
+		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z", "*string:~*req.ToR:*sms"},
 		Weights: []*utils.DynamicWeight{
 			{
 				Weight: 10,
@@ -166,9 +166,7 @@ func TestActSetAccountFields(t *testing.T) {
 		},
 		ThresholdIDs: []string{"TH_ID1"},
 	}
-	if err := actSetAccountFields(accPrf, []string{utils.FilterIDs}, "*string:~*req.ToR:*sms"); err != nil {
-		t.Error(err)
-	} else if err := actSetAccountFields(accPrf, []string{utils.ActivationIntervalString}, "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z"); err != nil {
+	if err := actSetAccountFields(accPrf, []string{utils.FilterIDs}, "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z;*string:~*req.ToR:*sms"); err != nil {
 		t.Error(err)
 	} else if err := actSetAccountFields(accPrf, []string{utils.Weights}, ";10"); err != nil {
 		t.Error(err)
@@ -180,11 +178,7 @@ func TestActSetAccountFields(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAccprf), utils.ToJSON(accPrf))
 	}
 
-	expected := "Unsupported time format"
-	if err := actSetAccountFields(accPrf, []string{utils.ActivationIntervalString}, "not_a_time"); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-	expected = "WRONG_PATH"
+	expected := "WRONG_PATH"
 	if err := actSetAccountFields(accPrf, []string{"not_an_account_field"}, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

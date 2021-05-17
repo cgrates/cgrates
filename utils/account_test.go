@@ -759,11 +759,7 @@ func TestAsExtAccount(t *testing.T) {
 	expAcc := &ExtAccount{
 		Tenant:    "tcgrates.org",
 		ID:        "TestAsExtAccount",
-		FilterIDs: []string{"fltr1", "fltr2"},
-		ActivationInterval: &ActivationInterval{
-			ActivationTime: time.Date(2021, time.December, 12, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2021, time.May, 12, 10, 0, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"fltr1", "fltr2", "*ai:~*req.AnswerTime:2021-12-12T00:00:00Z|2021-05-12T10:00:00Z"},
 		Weights: DynamicWeights{
 			{
 				FilterIDs: []string{},

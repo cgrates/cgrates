@@ -99,14 +99,13 @@ func NewDefaultBalance(id string) *Balance {
 }
 
 type ExtAccount struct {
-	Tenant             string
-	ID                 string // Account identificator, unique within the tenant
-	FilterIDs          []string
-	ActivationInterval *ActivationInterval
-	Weights            DynamicWeights
-	Opts               map[string]interface{}
-	Balances           map[string]*ExtBalance
-	ThresholdIDs       []string
+	Tenant       string
+	ID           string // Account identificator, unique within the tenant
+	FilterIDs    []string
+	Weights      DynamicWeights
+	Opts         map[string]interface{}
+	Balances     map[string]*ExtBalance
+	ThresholdIDs []string
 }
 
 // AsExtAccount converts Account to ExtAccount
@@ -155,10 +154,6 @@ func (eAc *ExtAccount) Equals(extAc *ExtAccount) (eq bool) {
 		(eAc.FilterIDs == nil && extAc.FilterIDs != nil ||
 			eAc.FilterIDs != nil && extAc.FilterIDs == nil ||
 			len(eAc.FilterIDs) != len(extAc.FilterIDs)) ||
-		(eAc.ActivationInterval == nil && extAc.ActivationInterval != nil ||
-			eAc.ActivationInterval != nil && extAc.ActivationInterval == nil ||
-			(eAc.ActivationInterval != nil && extAc.ActivationInterval != nil &&
-				!eAc.ActivationInterval.Equals(extAc.ActivationInterval))) ||
 		(eAc.Weights == nil && extAc.Weights != nil ||
 			eAc.Weights != nil && extAc.Weights == nil ||
 			len(eAc.Weights) != len(extAc.Weights)) ||
