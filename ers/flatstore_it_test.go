@@ -46,16 +46,29 @@ BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0|200|OK|14
 INVITE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|1436454657|*prepaid|1001|1002||2407:1884881533
 BYE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|1436454661|||||2407:1884881533
 INVITE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454690|*prepaid|1001|1002||3099:1909036290
-BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454692|||||3099:1909036290`  // 4
+BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454692|||||3099:1909036290`
 
 	fullMissed = `INVITE|ef6c6256|da501581|0bfdd176d1b93e7df3de5c6f4873ee04@0:0:0:0:0:0:0:0|487|Request Terminated|1436454643|*prepaid|1001|1002||1224:339382783
 INVITE|7905e511||81880da80a94bda81b425b09009e055c@0:0:0:0:0:0:0:0|404|Not Found|1436454668|*prepaid|1001|1002||1980:1216490844
-INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Busy here|1436454687|*postpaid|1002|1001||474:130115066`  // 3
+INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Busy here|1436454687|*postpaid|1002|1001||474:130115066`
 
-	part1 = `BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:0:0|200|OK|1436454651|||||1877:893549742` //1
+	part1 = `BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:0:0|200|OK|1436454651|||||1877:893549742`
 
 	part2 = `INVITE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:0:0|200|OK|1436454647|*postpaid|1002|1003||1877:893549742
-INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`  //1
+INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`
+
+	ackSuccessfull = `INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK||*prepaid|1001|1002||3401:2069362475|flatstore"1.0
+ACK|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475|flatstore"1.0
+BYE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454410|||||3401:2069362475|flatstore"1.0
+INVITE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0|200|OK||*postpaid|1002|1001||1877:893549741|flatstore"1.0
+ACK|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0|200|OK|1436454647|*postpaid|1002|1001||1877:893549741|flatstore"1.0
+BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0|200|OK|1436454651|||||1877:893549741|flatstore"1.0
+INVITE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK||*prepaid|1001|1002||2407:1884881533|flatstore"1.0
+ACK|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|1436454657|*prepaid|1001|1002||2407:1884881533|flatstore"1.0
+BYE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|1436454661|||||2407:1884881533|flatstore"1.0
+INVITE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK||*prepaid|1001|1002||3099:1909036290|flatstore"1.0
+ACK|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454690|*prepaid|1001|1002||3099:1909036290|flatstore"1.0
+BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454692|||||3099:1909036290|flatstore"1.0`
 
 	flatstoreTests = []func(t *testing.T){
 		testCreateDirs,
@@ -67,6 +80,8 @@ INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK
 		testFlatstoreITLoadTPFromFolder,
 		testFlatstoreITHandleCdr1File,
 		testFlatstoreITAnalyseCDRs,
+		testFlatstoreITHandleCdr2File,
+		testFlatstoreITAnalyseCDRs2,
 		testCleanupFiles,
 		testFlatstoreITKillEngine,
 	}
@@ -214,6 +229,43 @@ func testFlatstoreITAnalyseCDRs(t *testing.T) {
 	}
 }
 
+// The default scenario, out of ers defined in .cfg file
+func testFlatstoreITHandleCdr2File(t *testing.T) {
+	if err := os.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(ackSuccessfull), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	//Rename(oldpath, newpath string)
+	if err := os.Rename(path.Join("/tmp", "acc_1.log"), path.Join("/tmp/flatstoreACKErs/in", "acc_1.log")); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second)
+	// check the files to be processed
+	filesInDir, _ := os.ReadDir("/tmp/flatstoreErs/in")
+	if len(filesInDir) != 0 {
+		fls := make([]string, len(filesInDir))
+		for i, fs := range filesInDir {
+			fls[i] = fs.Name()
+		}
+		t.Errorf("Files in ersInDir: %+v", fls)
+	}
+	filesOutDir, _ := os.ReadDir("/tmp/flatstoreACKErs/out")
+	ids := []string{}
+	for _, fD := range filesOutDir {
+		ids = append(ids, fD.Name())
+	}
+	if len(filesOutDir) != 1 {
+		t.Errorf("Unexpected number of files in output directory: %+v, %q", len(filesOutDir), ids)
+	}
+}
+
+func testFlatstoreITAnalyseCDRs2(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatStoreACK"}, MinUsage: "1"}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 4 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
 func testFlatstoreITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
