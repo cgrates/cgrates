@@ -414,10 +414,8 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_2",
-			FilterIDs: []string{"*string:~*req.Account:dan"},
+			FilterIDs: []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
 			Contexts:  []string{utils.MetaAny},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -571,10 +569,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_1",
-			FilterIDs: []string{"*string:~*req.Account:1007"},
+			FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
 			Contexts:  []string{utils.MetaCDRs, utils.MetaSessionS},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -674,10 +670,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Search_and_replace",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Category:call"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.Category:call", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Category",
@@ -734,10 +727,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.InitialField:InitialValue"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -752,10 +742,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field1:Value1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -770,10 +757,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.NotFound:NotFound"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -849,10 +833,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.InitialField:InitialValue"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -867,10 +848,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field1:Value1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -885,10 +863,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field2:Value2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",

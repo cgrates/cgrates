@@ -617,7 +617,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 func TestCSVHeader(t *testing.T) {
 	var tps ResourceMdls
 	eOut := []string{
-		"#Tenant", "ID", "FilterIDs", "ActivationInterval", "UsageTTL", "Limit", "AllocationMessage", "Blocker", "Stored", "Weight", "ThresholdIDs",
+		"#Tenant", "ID", "FilterIDs", "Weight", "UsageTTL", "Limit", "AllocationMessage", "Blocker", "Stored", "ThresholdIDs",
 	}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -1142,11 +1142,11 @@ func TestFilterToTPFilter(t *testing.T) {
 func TestCsvHeader(t *testing.T) {
 	var tps RouteMdls
 	eOut := []string{
-		"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+		"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
 		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteRateProfileIDs, utils.RouteResourceIDs,
 		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
-		utils.RouteParameters, utils.Weight,
+		utils.RouteParameters,
 	}
 	if rcv := tps.CSVHeader(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -3401,7 +3401,7 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 	testRPMdls := RateProfileMdls{}
 	result := testRPMdls.CSVHeader()
 	expected := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.MinCost,
+		utils.Weight, utils.ConnectFee, utils.MinCost,
 		utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
 		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
 		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement}
@@ -3533,9 +3533,9 @@ func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
 			ConnParameters: "192.168.54.204",
 		},
 	}
-	expected := []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.ActivationIntervalString,
+	expected := []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.Weight,
 		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
-		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters, utils.Weight}
+		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters}
 	result := structTest.CSVHeader()
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", expected, result)
@@ -3696,9 +3696,9 @@ func ModelHelpersTestStatMdlsCSVHeader(t *testing.T) {
 			ThresholdIDs: "WARN_RES1;WARN_RES1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.UsageTTL, utils.Limit, utils.AllocationMessage, utils.Blocker, utils.Stored,
-		utils.Weight, utils.ThresholdIDs}
+		utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -3712,9 +3712,9 @@ func TestThresholdMdlsCSVHeader(t *testing.T) {
 			Tenant: "test_tenant",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
-		utils.Blocker, utils.Weight, utils.ActionProfileIDs, utils.Async}
+		utils.Blocker, utils.ActionProfileIDs, utils.Async}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -3728,7 +3728,7 @@ func TestActionProfileMdlsCSVHeader(t *testing.T) {
 		},
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.Schedule, utils.TargetType,
+		utils.Weight, utils.Schedule, utils.TargetType,
 		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
@@ -4037,8 +4037,8 @@ func TestChargerMdlsCSVHeader(t *testing.T) {
 			ID:     "RP1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.RunID, utils.AttributeIDs, utils.Weight}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+		utils.RunID, utils.AttributeIDs}
 
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
@@ -4109,8 +4109,8 @@ func TestAttributeMdlsCSVHeader(t *testing.T) {
 			ID:     "ALS1",
 		},
 	}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker, utils.Weight}
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4160,7 +4160,7 @@ func TestFilterMdlsCSVHeader(t *testing.T) {
 		Tenant: "test_tenant",
 	}}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.Type, utils.Element,
-		utils.Values, utils.ActivationIntervalString}
+		utils.Values}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4458,9 +4458,9 @@ func TestStatMdlsCSVHeader(t *testing.T) {
 		ThresholdIDs:    "",
 		CreatedAt:       time.Time{},
 	}}
-	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
-		utils.Stored, utils.Blocker, utils.Weight, utils.ThresholdIDs}
+		utils.Stored, utils.Blocker, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -4618,7 +4618,7 @@ func TestAccountMdlsCSVHeader(t *testing.T) {
 	},
 	}
 	exp := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
+		utils.Weight, utils.BalanceID,
 		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
 		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs}
 	result := testStruct.CSVHeader()

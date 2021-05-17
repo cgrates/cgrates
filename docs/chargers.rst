@@ -19,7 +19,7 @@ Is a process of receiving an event as input and *deriving* that into multiples (
 Processing logic
 ----------------
 
-For the received *Event* we will retrieve the list of matching *ChargingProfiles' via :ref:`FilterS`. These profiles will be then ordered based on their *Weight* - higher *Weight* will have more priority. If no profile will match due to *Filter* or *ActivationInterval*, *NOT_FOUND* will be returned back to the RPC client.
+For the received *Event* we will retrieve the list of matching *ChargingProfiles' via :ref:`FilterS`. These profiles will be then ordered based on their *Weight* - higher *Weight* will have more priority. If no profile will match due to *Filter*, *NOT_FOUND* will be returned back to the RPC client.
 
 Each *ChargingProfile* matching the *Event*  will produce a standalone event based on configured *RunID*. These events will each have a special field added (or overwritten), the *RunID*, which is taken from the applied *ChargingProfile*. 
 
@@ -42,9 +42,6 @@ ID
 
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the ChargerProfile matching the event.
-
-ActivationInterval
-	Is the time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
 
 RunID
 	The identifier for a single bill run / charged output *Event*.

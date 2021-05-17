@@ -57,9 +57,6 @@ ID
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the *ResourceProfile* matching the event.
 
-ActivationInterval
-	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
-
 UsageTTL
 	Autoexpire resource allocation after this time duration.
 

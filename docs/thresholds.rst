@@ -93,9 +93,6 @@ ID
 FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
 
-ActivationInterval
-	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
-
 MaxHits
 	Limit number of hits for this threshold. Once this is reached, the threshold is considered disabled.
 

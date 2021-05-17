@@ -465,7 +465,7 @@ func TestV1AccountsForEvent(t *testing.T) {
 				Weight:    20,
 			},
 		},
-		FilterIDs: []string{"*string:~*req.Account:1004", "*ai:~*req.AnswerTime:2020-07-21T00:00:00Z|2020-07-21T10:00:00Z"},
+		FilterIDs: []string{"*string:~*req.Account:1004"},
 		Balances: map[string]*utils.Balance{
 			"AbstractBalance1": {
 				ID: "AbstractBalance1",

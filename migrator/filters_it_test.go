@@ -160,11 +160,10 @@ func testFltrITMigrateAndMove(t *testing.T) {
 	}
 	expFilters.Compile()
 	attrProf := &engine.AttributeProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "ATTR_1",
-		Contexts:           []string{utils.MetaAny},
-		FilterIDs:          []string{"*string:Account:1001", "FLTR_2"},
-		ActivationInterval: nil,
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:Account:1001"},
@@ -175,11 +174,10 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Weight: 10,
 	}
 	expAttrProf := &engine.AttributeProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "ATTR_1",
-		Contexts:           []string{utils.MetaAny},
-		FilterIDs:          []string{"*string:~*req.Account:1001", "FLTR_2"},
-		ActivationInterval: nil,
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -356,11 +354,10 @@ func testFltrITMigratev2(t *testing.T) {
 	}
 	expFilters.Compile()
 	attrProf := &engine.AttributeProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "ATTR_1",
-		Contexts:           []string{utils.MetaAny},
-		FilterIDs:          []string{"*string:~Account:1001", "FLTR_2"},
-		ActivationInterval: nil,
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:~Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~Account:1001"},
@@ -371,11 +368,10 @@ func testFltrITMigratev2(t *testing.T) {
 		Weight: 10,
 	}
 	expAttrProf := &engine.AttributeProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "ATTR_1",
-		Contexts:           []string{utils.MetaAny},
-		FilterIDs:          []string{"*string:~*req.Account:1001", "FLTR_2"},
-		ActivationInterval: nil,
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},

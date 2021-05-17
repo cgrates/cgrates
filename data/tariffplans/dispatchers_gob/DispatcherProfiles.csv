@@ -1,4 +1,4 @@
-#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
+#Tenant,ID,Subsystems,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
 cgrates.org,PING1,*any,,10,*weight,,ALL,,20,false,
 cgrates.org,PING1,,,,,,ALL2,,10,,
 cgrates.org,PING2,*any,*string:~*req.EventName:NonexistingHost,20,*weight,,NonexistingHost,,20,false,

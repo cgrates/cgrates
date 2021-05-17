@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -307,10 +308,6 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -326,10 +323,6 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -368,7 +361,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		} else if vrs[utils.Attributes] != 6 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 		}
-		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal("Error when getting Attribute ", err.Error())
@@ -381,10 +374,10 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: 1, received: %+v", attrMigrator.stats[utils.Attributes])
 		}
 	case utils.Move:
-		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf, false); err != nil {
+		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(context.TODO(), attrPrf, false); err != nil {
 			t.Error(err)
 		}
-		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf2, false); err != nil {
+		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(context.TODO(), attrPrf2, false); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -393,11 +386,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Attributes ", err.Error())
 		}
 		// make sure we don't have attributes in dmOut
-		if _, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		if _, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
-		if _, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.com",
+		if _, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.com",
 			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -407,7 +400,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Attributes ", err.Error())
 		}
 		// verify ATTR_1 with tenant cgrates.org
-		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal(err)
@@ -418,7 +411,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", attrPrf, result)
 		}
 		// verify ATTR_1 with tenant cgrates.com
-		result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.com",
+		result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.com",
 			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal(err)
@@ -429,11 +422,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", attrPrf2, result)
 		}
 		// make sure we don't have attributes in dmIn
-		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.org",
+		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
-		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.com",
+		if _, err = attrMigrator.dmIN.DataManager().GetAttributeProfile(context.TODO(), "cgrates.com",
 			"ATTR_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		} else if attrMigrator.stats[utils.Attributes] != 2 {
@@ -472,10 +465,6 @@ func testAttrITMigrateV2(t *testing.T) {
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -513,7 +502,7 @@ func testAttrITMigrateV2(t *testing.T) {
 	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"ATTR_1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal("Error when getting Attribute ", err.Error())
@@ -554,10 +543,6 @@ func testAttrITMigrateV3(t *testing.T) {
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -595,7 +580,7 @@ func testAttrITMigrateV3(t *testing.T) {
 	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"ATTR_1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal("Error when getting Attribute ", err.Error())
@@ -640,10 +625,6 @@ func testAttrITMigrateV4(t *testing.T) {
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:~*req.Accont:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
@@ -681,7 +662,7 @@ func testAttrITMigrateV4(t *testing.T) {
 	} else if vrs[utils.Attributes] != 6 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"ATTR_1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal("Error when getting Attribute ", err.Error())
@@ -749,10 +730,6 @@ func testAttrITV1ToV5(t *testing.T) {
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -767,10 +744,6 @@ func testAttrITV1ToV5(t *testing.T) {
 		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -793,7 +766,7 @@ func testAttrITV1ToV5(t *testing.T) {
 	}
 
 	// check the first AttributeProfile
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -806,7 +779,7 @@ func testAttrITV1ToV5(t *testing.T) {
 		}
 	}
 	// check the second AttributeProfile
-	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile2", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -888,10 +861,6 @@ func testAttrITV2ToV5(t *testing.T) {
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -906,10 +875,6 @@ func testAttrITV2ToV5(t *testing.T) {
 		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -932,7 +897,7 @@ func testAttrITV2ToV5(t *testing.T) {
 	}
 
 	//check the first AttributeProfile
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err) //only encoded map or array can be decoded into a struct
@@ -945,7 +910,7 @@ func testAttrITV2ToV5(t *testing.T) {
 		}
 	}
 	//check the second AttributeProfile
-	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile2", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -1016,10 +981,6 @@ func testAttrITV3ToV5(t *testing.T) {
 		ID:        "attributeprofile1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -1034,10 +995,6 @@ func testAttrITV3ToV5(t *testing.T) {
 		ID:        "attributeprofile2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:test:test"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2020, 4, 18, 14, 25, 0, 0, time.UTC),
-		},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -1060,7 +1017,7 @@ func testAttrITV3ToV5(t *testing.T) {
 	}
 
 	//check the first AttributeProfile
-	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err) //only encoded map or array can be decoded into a struct
@@ -1073,7 +1030,7 @@ func testAttrITV3ToV5(t *testing.T) {
 		}
 	}
 	//check the second AttributeProfile
-	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	result, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile2", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -1137,7 +1094,7 @@ func testAttrITdryRunV2ToV5(t *testing.T) {
 
 	// Check if the attribute profile was set into DB
 	// Expecting NOT_FOUND as it was a dryRun migration
-	_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)
@@ -1195,7 +1152,7 @@ func testAttrITdryRunV3ToV5(t *testing.T) {
 
 	// Check if the attribute profile was set into DB
 	// Expecting NOT_FOUND as it was a dryRun migration
-	_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
+	_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
 		"attributeprofile1", false, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ErrNotFound, err)

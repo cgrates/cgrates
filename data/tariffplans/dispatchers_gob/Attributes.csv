@@ -1,4 +1,4 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+#Tenant,ID,Contexts,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
 cgrates.org,ATTR_1001_SIMPLEAUTH,*any,*string:~*req.Account:1001,20,,*req.Password,*constant,CGRateS.org,false
 cgrates.org,ATTR_1001_SIMPLEAUTH,*any,,20,,*req.EventName,*constant,*remove,false
 cgrates.org,ATTR_1003_SIMPLEAUTH,*any,*string:~*req.Account:1003,20,,*req.Password,*constant,CGRateS.com,false

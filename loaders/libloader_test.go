@@ -48,8 +48,8 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 			Path:  "FilterIDs",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		{Tag: "ActivationInterval",
-			Path:  "ActivationInterval",
+		{Tag: "Weight",
+			Path:  "Weight",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 		{Tag: "Path",
@@ -68,15 +68,11 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 			Path:  "Append",
 			Type:  utils.MetaComposed,
 			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-		{Tag: "Weight",
-			Path:  "Weight",
-			Type:  utils.MetaComposed,
-			Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 	}
 
 	rows := [][]string{
-		{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "2014-01-14T00:00:00Z", "Account", "*any", "1001", "false", "10"},
-		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true", ""},
+		{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "10", "Account", "*any", "1001", "false"},
+		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true"},
 	}
 	lData := make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
@@ -84,15 +80,14 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
-		"ID":                 "ATTR_1",
-		"Contexts":           "*sessions;*cdrs",
-		"FilterIDs":          "*string:Account:1007",
-		"ActivationInterval": "2014-01-14T00:00:00Z",
-		"Path":               "Account",
-		"Initial":            "*any",
-		"Substitute":         "1001",
-		"Append":             "false",
-		"Weight":             "10",
+		"ID":         "ATTR_1",
+		"Contexts":   "*sessions;*cdrs",
+		"FilterIDs":  "*string:Account:1007",
+		"Weight":     "10",
+		"Path":       "Account",
+		"Initial":    "*any",
+		"Substitute": "1001",
+		"Append":     "false",
 	}
 	if !reflect.DeepEqual(eLData, lData) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
@@ -103,15 +98,14 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
-		"ID":                 "ATTR_1",
-		"Contexts":           "",
-		"FilterIDs":          "",
-		"ActivationInterval": "",
-		"Path":               "Subject",
-		"Initial":            "*any",
-		"Substitute":         "1001",
-		"Append":             "true",
-		"Weight":             "",
+		"ID":         "ATTR_1",
+		"Contexts":   "",
+		"FilterIDs":  "",
+		"Weight":     "",
+		"Path":       "Subject",
+		"Initial":    "*any",
+		"Substitute": "1001",
+		"Append":     "true",
 	}
 	if !reflect.DeepEqual(eLData, lData) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
@@ -138,8 +132,8 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 			Path:  "FilterIDs",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.3", utils.InfieldSep)},
-		{Tag: "ActivationInterval",
-			Path:  "ActivationInterval",
+		{Tag: "Weight",
+			Path:  "Weight",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.4", utils.InfieldSep)},
 		{Tag: "Path",
@@ -158,15 +152,11 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 			Path:  "Append",
 			Type:  utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
-		{Tag: "Weight",
-			Path:  "Weight",
-			Type:  utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("~*req.9", utils.InfieldSep)},
 	}
 
 	rows := [][]string{
-		{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "2014-01-14T00:00:00Z", "Account", "*any", "1001", "false", "10"},
-		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true", ""},
+		{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "10", "Account", "*any", "1001", "false"},
+		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true"},
 	}
 	lData := make(LoaderData)
 	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
@@ -174,15 +164,14 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
-		"ID":                 "ATTR_1",
-		"Contexts":           "*sessions;*cdrs",
-		"FilterIDs":          "*string:Account:1007",
-		"ActivationInterval": "2014-01-14T00:00:00Z",
-		"Path":               "Account",
-		"Initial":            "*any",
-		"Substitute":         "1001",
-		"Append":             "false",
-		"Weight":             "10",
+		"ID":         "ATTR_1",
+		"Contexts":   "*sessions;*cdrs",
+		"FilterIDs":  "*string:Account:1007",
+		"Weight":     "10",
+		"Path":       "Account",
+		"Initial":    "*any",
+		"Substitute": "1001",
+		"Append":     "false",
 	}
 	if !reflect.DeepEqual(eLData, lData) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
@@ -193,15 +182,14 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
-		"ID":                 "ATTR_1",
-		"Contexts":           "",
-		"FilterIDs":          "",
-		"ActivationInterval": "",
-		"Path":               "Subject",
-		"Initial":            "*any",
-		"Substitute":         "1001",
-		"Append":             "true",
-		"Weight":             "",
+		"ID":         "ATTR_1",
+		"Contexts":   "",
+		"FilterIDs":  "",
+		"Weight":     "",
+		"Path":       "Subject",
+		"Initial":    "*any",
+		"Substitute": "1001",
+		"Append":     "true",
 	}
 	if !reflect.DeepEqual(eLData, lData) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)

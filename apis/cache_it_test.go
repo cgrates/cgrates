@@ -442,10 +442,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.InitialField:InitialValue"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -460,10 +457,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field1:Value1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -478,10 +472,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field2:Value2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
+			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",

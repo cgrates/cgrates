@@ -89,14 +89,13 @@ type ExternalAttribute struct {
 
 // APIAttributeProfile used by APIs
 type APIAttributeProfile struct {
-	Tenant             string
-	ID                 string
-	Contexts           []string // bind this AttributeProfile to multiple contexts
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	Attributes         []*ExternalAttribute
-	Blocker            bool // blocker flag to stop processing on multiple runs
-	Weight             float64
+	Tenant     string
+	ID         string
+	Contexts   []string // bind this AttributeProfile to multiple contexts
+	FilterIDs  []string
+	Attributes []*ExternalAttribute
+	Blocker    bool // blocker flag to stop processing on multiple runs
+	Weight     float64
 }
 
 type AttributeWithAPIOpts struct {
