@@ -10,7 +10,6 @@ started with custom configuration, depending on the tutorial you have followed.
 For our tutorial we load again prepared data out of shared folder, containing
 following rules:
 
-- Create the necessary timings (always, asap, peak, offpeak).
 - Configure 3 destinations (1002, 1003 and 10 used as catch all rule).
 - As rating we configure the following:
 

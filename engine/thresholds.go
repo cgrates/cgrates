@@ -98,11 +98,6 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 	// }
 
 	// for _, actionSetID := range t.tPrfl.ActionIDs {
-	// at := &ActionTiming{
-	// 	Uuid:      utils.GenUUID(),
-	// 	ActionsID: actionSetID,
-	// 	ExtraData: args.CGREvent,
-	// }
 	// if tntAcnt != utils.EmptyString {
 	// 	at.accountIDs = utils.NewStringMap(tntAcnt)
 	// }

@@ -43,7 +43,6 @@ var sTestsDspRpl = []func(t *testing.T){
 	testDspRplStatQueueProfile,
 	testDspRplResource,
 	testDspRplResourceProfile,
-	testDspRplTiming,
 	testDspRplRateProfile,
 	testDspRplAccount,
 	testDspRplActionProfile,
@@ -833,64 +832,6 @@ func testDspRplResourceProfile(t *testing.T) {
 
 	// Get ResourceProfile
 	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetResourceProfile, argsResourceProfile, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
-	}
-}
-
-func testDspRplTiming(t *testing.T) {
-	// Set Timing
-	var replyStr string
-	setTiming := &utils.TPTimingWithAPIOpts{
-		TPTiming: &utils.TPTiming{
-			ID:    "testTimings",
-			Years: utils.Years{1999},
-		},
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "repl12345",
-		},
-	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1SetTiming, setTiming, &replyStr); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.SetTiming: ", err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-	// Get Timing
-	var reply utils.TPTiming
-	argsTiming := &utils.StringWithAPIOpts{
-		Arg:    "testTimings",
-		Tenant: "cgrates.org",
-		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "repl12345",
-		},
-	}
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err != nil {
-		t.Error("Unexpected error when calling ReplicatorSv1.GetTiming: ", err)
-	} else if reply.ID != argsTiming.Arg {
-		t.Errorf("Expecting: %+v, received: %+v", argsTiming.Arg, reply.ID)
-	} else if reply.Years[0] != 1999 {
-		t.Errorf("Expecting: %+v, received: %+v", utils.Years{1999}, reply.Years)
-	}
-	// Stop engine 1
-	allEngine.stopEngine(t)
-
-	// Get Timing
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
-	}
-
-	// Start engine 1
-	allEngine.startEngine(t)
-
-	// Remove Timing
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1RemoveTiming, argsTiming, &replyStr); err != nil {
-		t.Error(err)
-	} else if replyStr != utils.OK {
-		t.Error("Unexpected reply returned", replyStr)
-	}
-
-	// Get Timing
-	if err := dispEngine.RPC.Call(utils.ReplicatorSv1GetTiming, argsTiming, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expecting: %+v, received: %+v, ", utils.ErrNotFound, err)
 	}
 }

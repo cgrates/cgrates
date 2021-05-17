@@ -113,10 +113,6 @@ func (dbM *DataDBMock) RemoveResourceDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveTimingDrv(string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error) {
 	return nil, utils.ErrNotImplemented
 }
