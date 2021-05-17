@@ -94,11 +94,11 @@ func (aS *ActionS) schedInit() {
 			},
 		}
 	}
-	aS.scheduleActions(cgrEvs, nil, true)
+	aS.scheduleActions(context.Background(), cgrEvs, nil, true)
 }
 
 // scheduleActions will set up cron and load the matching data
-func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREvent, aPrflIDs []string, crnReset bool) (err error) {
+func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, crnReset bool) (err error) {
 	aS.crnLk.Lock() // make sure we don't have parallel processes running  setu
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
@@ -108,7 +108,7 @@ func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREvent, aPrflIDs []string, 
 	var partExec bool
 	for _, cgrEv := range cgrEvs {
 		var schedActSet []*scheduledActs
-		if schedActSet, err = aS.scheduledActions(cgrEv.Tenant, cgrEv, aPrflIDs, false); err != nil {
+		if schedActSet, err = aS.scheduledActions(ctx, cgrEv.Tenant, cgrEv, aPrflIDs, false); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> scheduler init, ignoring tenant: <%s>, error: <%s>",
@@ -118,7 +118,7 @@ func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREvent, aPrflIDs []string, 
 		}
 		for _, sActs := range schedActSet {
 			if sActs.schedule == utils.MetaASAP {
-				go aS.asapExecuteActions(sActs)
+				go aS.asapExecuteActions(ctx, sActs)
 				continue
 			}
 			if _, err = crn.AddFunc(sActs.schedule, sActs.ScheduledExecute); err != nil {
@@ -145,12 +145,12 @@ func (aS *ActionS) scheduleActions(cgrEvs []*utils.CGREvent, aPrflIDs []string, 
 }
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
-func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
+func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
 	evNm utils.MapStorage, actTime *time.Time, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
 	if len(aPrflIDs) == 0 {
 		var aPfIDMp utils.StringSet
 		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
-			context.TODO(),
+			ctx,
 			evNm,
 			aS.cfg.ActionSCfg().StringIndexedFields,
 			aS.cfg.ActionSCfg().PrefixIndexedFields,
@@ -167,7 +167,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 	}
 	for _, aPfID := range aPrflIDs {
 		var aPf *engine.ActionProfile
-		if aPf, err = aS.dm.GetActionProfile(tnt, aPfID,
+		if aPf, err = aS.dm.GetActionProfile(ctx, tnt, aPfID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = nil
@@ -180,7 +180,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 			continue
 		}
 		var pass bool
-		if pass, err = aS.fltrS.Pass(context.TODO(), tnt, aPf.FilterIDs, evNm); err != nil {
+		if pass, err = aS.fltrS.Pass(ctx, tnt, aPf.FilterIDs, evNm); err != nil {
 			return
 		} else if !pass {
 			continue
@@ -195,14 +195,14 @@ func (aS *ActionS) matchingActionProfilesForEvent(tnt string,
 }
 
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
-func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
+func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	forceASAP bool) (schedActs []*scheduledActs, err error) {
 	var aPfs engine.ActionProfiles
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
-	if aPfs, err = aS.matchingActionProfilesForEvent(tnt, evNm, cgrEv.Time, aPrflIDs); err != nil {
+	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, cgrEv.Time, aPrflIDs); err != nil {
 		return
 	}
 
@@ -243,10 +243,10 @@ func (aS *ActionS) scheduledActions(tnt string, cgrEv *utils.CGREvent, aPrflIDs 
 
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
-func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
-	_, err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
+func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs) (err error) {
+	_, err = guardian.Guardian.Guard(ctx, func(_ *context.Context) (gRes interface{}, gErr error) {
 		var ap *engine.ActionProfile
-		if ap, gErr = aS.dm.GetActionProfile(sActs.tenant, sActs.apID, true, true, utils.NonTransactional); gErr != nil {
+		if ap, gErr = aS.dm.GetActionProfile(ctx, sActs.tenant, sActs.apID, true, true, utils.NonTransactional); gErr != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> querying ActionProfile with id: <%s:%s>, error: <%s>",
@@ -257,7 +257,7 @@ func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
 			return
 		}
 		delete(ap.Targets[sActs.trgTyp], sActs.trgID)
-		if gErr = aS.dm.SetActionProfile(ap, true); gErr != nil {
+		if gErr = aS.dm.SetActionProfile(ctx, ap, true); gErr != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> saving ActionProfile with id: <%s:%s>, error: <%s>",
@@ -269,8 +269,8 @@ func (aS *ActionS) asapExecuteActions(sActs *scheduledActs) (err error) {
 }
 
 // V1ScheduleActions will be called to schedule actions matching the arguments
-func (aS *ActionS) V1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
-	if err = aS.scheduleActions([]*utils.CGREvent{args.CGREvent},
+func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args.CGREvent},
 		args.ActionProfileIDs, false); err != nil {
 		return
 	}
@@ -279,16 +279,16 @@ func (aS *ActionS) V1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rp
 }
 
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
-func (aS *ActionS) V1ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
+func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
 	var schedActSet []*scheduledActs
-	if schedActSet, err = aS.scheduledActions(args.CGREvent.Tenant,
+	if schedActSet, err = aS.scheduledActions(ctx, args.CGREvent.Tenant,
 		args.CGREvent, args.ActionProfileIDs, true); err != nil {
 		return
 	}
 	var partExec bool
 	// execute the actions
 	for _, sActs := range schedActSet {
-		if err = aS.asapExecuteActions(sActs); err != nil {
+		if err = aS.asapExecuteActions(ctx, sActs); err != nil {
 			partExec = true
 		}
 	}

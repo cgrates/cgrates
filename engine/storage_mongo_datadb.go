@@ -1382,9 +1382,9 @@ func (ms *MongoStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 	})
 }
 
-func (ms *MongoStorage) GetActionProfileDrv(tenant, id string) (ap *ActionProfile, err error) {
+func (ms *MongoStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (ap *ActionProfile, err error) {
 	ap = new(ActionProfile)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColApp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(ap); err != nil {
 			ap = nil
@@ -1398,8 +1398,8 @@ func (ms *MongoStorage) GetActionProfileDrv(tenant, id string) (ap *ActionProfil
 	return
 }
 
-func (ms *MongoStorage) SetActionProfileDrv(ap *ActionProfile) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetActionProfileDrv(ctx *context.Context, ap *ActionProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColApp).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
 			bson.M{"$set": ap},
 			options.Update().SetUpsert(true),
@@ -1408,8 +1408,8 @@ func (ms *MongoStorage) SetActionProfileDrv(ap *ActionProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveActionProfileDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColApp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

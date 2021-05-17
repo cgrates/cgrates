@@ -696,7 +696,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if ap, err = APItoActionProfile(tpAP, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetActionProfile(ap, true); err != nil {
+		if err = tpr.dm.SetActionProfile(context.TODO(), ap, true); err != nil {
 			return
 		}
 		if verbose {
@@ -1043,7 +1043,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ActionProfiles:")
 	}
 	for _, tpAp := range tpr.actionProfiles {
-		if err = tpr.dm.RemoveActionProfile(tpAp.Tenant, tpAp.ID,
+		if err = tpr.dm.RemoveActionProfile(context.TODO(), tpAp.Tenant, tpAp.ID,
 			utils.NonTransactional, true); err != nil {
 			return
 		}

@@ -186,7 +186,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetRateProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ActionProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetActionProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetActionProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
@@ -2247,7 +2247,7 @@ func (dm *DataManager) SetRateProfileRates(ctx *context.Context, rpp *utils.Rate
 	return
 }
 
-func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ap *ActionProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -2262,10 +2262,10 @@ func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	ap, err = dm.dataDB.GetActionProfileDrv(tenant, id)
+	ap, err = dm.dataDB.GetActionProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetActionProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -2273,13 +2273,13 @@ func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &ap); err == nil {
-				err = dm.dataDB.SetActionProfileDrv(ap)
+				err = dm.dataDB.SetActionProfileDrv(ctx, ap)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheActionProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheActionProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -2289,7 +2289,7 @@ func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheActionProfiles, tntID, ap, nil,
+		if errCh := Cache.Set(ctx, utils.CacheActionProfiles, tntID, ap, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -2297,22 +2297,22 @@ func (dm *DataManager) GetActionProfile(tenant, id string, cacheRead, cacheWrite
 	return
 }
 
-func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *ActionProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, ap.TenantID())
 		}
 	}
-	oldRpp, err := dm.GetActionProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetActionProfile(ctx, ap.Tenant, ap.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetActionProfileDrv(ap); err != nil {
+	if err = dm.DataDB().SetActionProfileDrv(ctx, ap); err != nil {
 		return err
 	}
 	if withIndex {
@@ -2320,13 +2320,13 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheActionProfilesFilterIndexes, ap.Tenant,
 			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ActionProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionProfile,
@@ -2338,29 +2338,29 @@ func (dm *DataManager) SetActionProfile(ap *ActionProfile, withIndex bool) (err 
 	return
 }
 
-func (dm *DataManager) RemoveActionProfile(tenant, id string,
+func (dm *DataManager) RemoveActionProfile(ctx *context.Context, tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetActionProfile(tenant, id, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetActionProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveActionProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveActionProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRpp == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheActionProfilesFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheActionProfilesFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ActionProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveActionProfile,

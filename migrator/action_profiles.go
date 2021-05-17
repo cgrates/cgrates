@@ -39,17 +39,17 @@ func (m *Migrator) migrateCurrentActionProfiles() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating from action profiles", id)
 		}
-		ap, err := m.dmIN.DataManager().GetActionProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		ap, err := m.dmIN.DataManager().GetActionProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if ap == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetActionProfile(ap, true); err != nil {
+		if err := m.dmOut.DataManager().SetActionProfile(context.TODO(), ap, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveActionProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveActionProfile(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.ActionProfiles]++
