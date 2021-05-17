@@ -544,6 +544,10 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	}
 
 	if len(ldr.cacheConns) != 0 {
+		var tnt string
+		if tnt, err = ldr.tenant.ParseValue(""); err != nil {
+			return
+		}
 		var reply string
 		switch caching {
 		case utils.META_NONE:
@@ -551,18 +555,21 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
@@ -570,6 +577,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 			cacheArgs.FlushAll = true
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
@@ -800,6 +808,10 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 	}
 
 	if len(ldr.cacheConns) != 0 {
+		var tnt string
+		if tnt, err = ldr.tenant.ParseValue(""); err != nil {
+			return
+		}
 		var reply string
 		switch caching {
 		case utils.META_NONE:
@@ -807,18 +819,21 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 		case utils.MetaReload:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
@@ -826,6 +841,7 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			cacheArgs.FlushAll = true
 			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
 				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg:       utils.TenantArg{Tenant: tnt},
 					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}

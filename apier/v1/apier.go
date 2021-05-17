@@ -155,6 +155,9 @@ func (apiv1 *APIerSv1) SetDestination(attrs utils.AttrSetDestination, reply *str
 	}
 	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			TenantArg: utils.TenantArg{
+				Tenant: apiv1.Config.GeneralCfg().DefaultTenant,
+			},
 			AttrReloadCache: utils.AttrReloadCache{
 				ArgsCache: utils.ArgsCache{ReverseDestinationIDs: dest.Prefixes,
 					DestinationIDs: []string{attrs.Id}},
@@ -232,6 +235,9 @@ func (apiv1 *APIerSv1) LoadDestination(attrs AttrLoadDestination, reply *string)
 	}
 	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			TenantArg: utils.TenantArg{
+				Tenant: apiv1.Config.GeneralCfg().DefaultTenant,
+			},
 			AttrReloadCache: utils.AttrReloadCache{
 				ArgsCache: utils.ArgsCache{DestinationIDs: []string{attrs.ID}},
 			},
@@ -690,6 +696,9 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 		}
 		if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				TenantArg: utils.TenantArg{
+					Tenant: apiv1.Config.GeneralCfg().DefaultTenant,
+				},
 				AttrReloadCache: utils.AttrReloadCache{
 					ArgsCache: utils.ArgsCache{ActionPlanIDs: []string{ap.Id}},
 				},
@@ -705,6 +714,9 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 			sl := prevAccountIDs.Slice()
 			if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg: utils.TenantArg{
+						Tenant: apiv1.Config.GeneralCfg().DefaultTenant,
+					},
 					AttrReloadCache: utils.AttrReloadCache{
 						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
 					},
@@ -806,6 +818,9 @@ func (apiv1 *APIerSv1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (
 			sl := prevAccountIDs.Slice()
 			if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg: utils.TenantArg{
+						Tenant: apiv1.Config.GeneralCfg().DefaultTenant,
+					},
 					AttrReloadCache: utils.AttrReloadCache{
 						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: sl},
 					},

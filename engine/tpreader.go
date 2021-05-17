@@ -835,6 +835,9 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
 				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					TenantArg: utils.TenantArg{
+						Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+					},
 					AttrReloadCache: utils.AttrReloadCache{
 						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: []string{id},
 							ActionPlanIDs: []string{accountAction.ActionPlanId}},
@@ -2399,6 +2402,9 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 
 	//compose Reload Cache argument
 	cacheArgs := utils.AttrReloadCacheWithArgDispatcher{
+		TenantArg: utils.TenantArg{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		},
 		ArgDispatcher: argDispatcher,
 		AttrReloadCache: utils.AttrReloadCache{
 			ArgsCache: utils.ArgsCache{
@@ -2480,6 +2486,9 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 		log.Print("Clearing indexes")
 	}
 	clearArgs := &utils.AttrCacheIDsWithArgDispatcher{
+		TenantArg: utils.TenantArg{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		},
 		ArgDispatcher: argDispatcher,
 		CacheIDs:      cacheIDs,
 	}
