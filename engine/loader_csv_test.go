@@ -286,7 +286,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
-			FilterIDs: []string{"*string:~*req.RunID:*default", "*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			FilterIDs: []string{"*string:~*req.RunID:*default", "*string:~*req.Account:1001"},
 			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
@@ -301,8 +301,8 @@ func TestLoadThresholdProfiles(t *testing.T) {
 		t.Errorf("Failed to load ThresholdProfiles: %s", utils.ToIJSON(csvr.thProfiles))
 	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) &&
 		!reflect.DeepEqual(eThresholdReverse[thkey], csvr.thProfiles[thkey]) {
-		t.Errorf("Expecting: %+v , %+v , received: %+v", eThresholds[thkey],
-			eThresholdReverse[thkey], csvr.thProfiles[thkey])
+		t.Errorf("Expecting: %+v , %+v , received: %+v", utils.ToJSON(eThresholds[thkey]),
+			utils.ToJSON(eThresholdReverse[thkey]), utils.ToJSON(csvr.thProfiles[thkey]))
 	}
 }
 

@@ -815,22 +815,13 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 		Tenant:         "cgrates.org",
 		ID:             "123",
 		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      []string{"filter"},
+		FilterIDs:      []string{"*string:~*req.RunID:1"},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
 		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	fltr := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "filter",
-		Rules:  nil,
-	}
-	err = dm.SetFilter(context.Background(), fltr, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -908,22 +899,13 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 		Tenant:         "cgrates.org",
 		ID:             "123",
 		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      []string{"filter"},
+		FilterIDs:      []string{"*string:~*req.RunID:1"},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
 		Hosts:          nil,
 	}
 	err := dm.SetDispatcherProfile(dsp, false)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	fltr := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "filter",
-		Rules:  nil,
-	}
-	err = dm.SetFilter(context.Background(), fltr, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
