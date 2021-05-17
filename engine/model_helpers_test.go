@@ -899,22 +899,17 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 func TestTPFilterAsTPFilterWithDynValues(t *testing.T) {
 	tps := []*FilterMdl{
 		{
-			Tpid:               "TEST_TPID",
-			ID:                 "Filter1",
-			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
-			Type:               utils.MetaString,
-			Element:            "CustomField",
-			Values:             "1001;~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>;1002;~*uch.<~*rep.CGRID;~*rep.RunID>",
+			Tpid:    "TEST_TPID",
+			ID:      "Filter1",
+			Type:    utils.MetaString,
+			Element: "CustomField",
+			Values:  "1001;~*uch.<~*rep.CGRID;~*rep.RunID;-Cost>;1002;~*uch.<~*rep.CGRID;~*rep.RunID>",
 		},
 	}
 	eTPs := []*utils.TPFilterProfile{
 		{
 			TPid: tps[0].Tpid,
 			ID:   tps[0].ID,
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "2014-08-29T15:00:00Z",
-			},
 			Filters: []*utils.TPFilter{
 				{
 					Type:    utils.MetaString,
@@ -1056,10 +1051,6 @@ func TestAPItoModelTPFilter(t *testing.T) {
 		TPid:   "TPid",
 		ID:     "testID",
 		Tenant: "cgrates.org",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-			ExpiryTime:     "2014-08-29T15:00:00Z",
-		},
 		Filters: []*utils.TPFilter{
 			{
 				Type:    utils.MetaString,
@@ -1070,13 +1061,12 @@ func TestAPItoModelTPFilter(t *testing.T) {
 	}
 	eOut = FilterMdls{
 		{
-			Tpid:               "TPid",
-			Tenant:             "cgrates.org",
-			ID:                 "testID",
-			Type:               "*string",
-			Element:            "CustomField",
-			Values:             "1001;~*uch.\u003c~*rep.CGRID;~*rep.RunID;-Cost\u003e;1002;~*uch.\u003c~*rep.CGRID;~*rep.RunID\u003e",
-			ActivationInterval: "2014-07-29T15:00:00Z;2014-08-29T15:00:00Z",
+			Tpid:    "TPid",
+			Tenant:  "cgrates.org",
+			ID:      "testID",
+			Type:    "*string",
+			Element: "CustomField",
+			Values:  "1001;~*uch.\u003c~*rep.CGRID;~*rep.RunID;-Cost\u003e;1002;~*uch.\u003c~*rep.CGRID;~*rep.RunID\u003e",
 		},
 	}
 	if rcv := APItoModelTPFilter(th); !reflect.DeepEqual(eOut, rcv) {
@@ -1123,10 +1113,6 @@ func TestFilterToTPFilter(t *testing.T) {
 	filter := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Fltr1",
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
-		},
 		Rules: []*FilterRule{
 			{
 				Element: "Account",
@@ -1138,10 +1124,6 @@ func TestFilterToTPFilter(t *testing.T) {
 	tpfilter := &utils.TPFilterProfile{
 		ID:     "Fltr1",
 		Tenant: "cgrates.org",
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-01-14T00:00:00Z",
-			ExpiryTime:     "2014-01-14T00:00:00Z",
-		},
 		Filters: []*utils.TPFilter{
 			{
 				Element: "Account",
@@ -4164,20 +4146,6 @@ func TestModelHelperAPItoFilterError(t *testing.T) {
 	_, err := APItoFilter(testStruct, "")
 	if err == nil || err.Error() != "emtpy RSRParser in rule: <>" {
 		t.Errorf("\nExpecting <emtpy RSRParser in rule: <>>,\n Received <%+v>", err)
-	}
-
-}
-
-func TestModelHelperAPItoFilterError2(t *testing.T) {
-	testStruct := &utils.TPFilterProfile{
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "cat",
-		},
-	}
-
-	_, err := APItoFilter(testStruct, "")
-	if err == nil || err.Error() != "Unsupported time format" {
-		t.Errorf("\nExpecting <Unsupported time format>,\n Received <%+v>", err)
 	}
 
 }

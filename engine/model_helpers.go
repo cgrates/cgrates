@@ -772,16 +772,6 @@ func (tps FilterMdls) AsTPFilter() (result []*utils.TPFilterProfile) {
 				ID:     tp.ID,
 			}
 		}
-		if len(tp.ActivationInterval) != 0 {
-			th.ActivationInterval = new(utils.TPActivationInterval)
-			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
-			if len(aiSplt) == 2 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-				th.ActivationInterval.ExpiryTime = aiSplt[1]
-			} else if len(aiSplt) == 1 {
-				th.ActivationInterval.ActivationTime = aiSplt[0]
-			}
-		}
 		if tp.Type != utils.EmptyString {
 			var vals []string
 			if tp.Values != utils.EmptyString {
@@ -816,14 +806,6 @@ func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls FilterMdls) {
 		}
 		mdl.Type = fltr.Type
 		mdl.Element = fltr.Element
-		if th.ActivationInterval != nil {
-			if th.ActivationInterval.ActivationTime != utils.EmptyString {
-				mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-			}
-			if th.ActivationInterval.ExpiryTime != utils.EmptyString {
-				mdl.ActivationInterval += utils.InfieldSep + th.ActivationInterval.ExpiryTime
-			}
-		}
 		for i, val := range fltr.Values {
 			if i != 0 {
 				mdl.Values += utils.InfieldSep
@@ -848,20 +830,14 @@ func APItoFilter(tpTH *utils.TPFilterProfile, timezone string) (th *Filter, err 
 		}
 		th.Rules[i] = rf
 	}
-	if tpTH.ActivationInterval != nil {
-		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
-			return nil, err
-		}
-	}
 	return th, nil
 }
 
 func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	tpFltr = &utils.TPFilterProfile{
-		Tenant:             f.Tenant,
-		ID:                 f.ID,
-		Filters:            make([]*utils.TPFilter, len(f.Rules)),
-		ActivationInterval: new(utils.TPActivationInterval),
+		Tenant:  f.Tenant,
+		ID:      f.ID,
+		Filters: make([]*utils.TPFilter, len(f.Rules)),
 	}
 	for i, reqFltr := range f.Rules {
 		tpFltr.Filters[i] = &utils.TPFilter{
@@ -871,12 +847,6 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 		}
 		for j, val := range reqFltr.Values {
 			tpFltr.Filters[i].Values[j] = val
-		}
-	}
-	if f.ActivationInterval != nil {
-		tpFltr.ActivationInterval = &utils.TPActivationInterval{
-			ActivationTime: f.ActivationInterval.ActivationTime.Format(time.RFC3339),
-			ExpiryTime:     f.ActivationInterval.ExpiryTime.Format(time.RFC3339),
 		}
 	}
 	return

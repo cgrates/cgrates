@@ -1,5 +1,5 @@
-#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
-cgrates.org,FLTR_INTRALATA_NEWYORK,*string,~*req.CallerLATA,224;222;220;132,
-cgrates.org,FLTR_INTRALATA_NEWYORK,*string,~*req.DestinationLATA,224;222;220;132,
-cgrates.org,FLTR_INTRALATA_ILLINOIS,*string,~*req.CallerLATA,358;359,
-cgrates.org,FLTR_INTRALATA_ILLINOIS,*string,~*req.DestinationLATA,358;359,
+#Tenant[0],ID[1],Type[2],Path[3],Values[4]
+cgrates.org,FLTR_INTRALATA_NEWYORK,*string,~*req.CallerLATA,224;222;220;132
+cgrates.org,FLTR_INTRALATA_NEWYORK,*string,~*req.DestinationLATA,224;222;220;132
+cgrates.org,FLTR_INTRALATA_ILLINOIS,*string,~*req.CallerLATA,358;359
+cgrates.org,FLTR_INTRALATA_ILLINOIS,*string,~*req.DestinationLATA,358;359

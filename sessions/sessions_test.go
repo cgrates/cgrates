@@ -1778,10 +1778,6 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	mpStr.SetFilterDrv(context.TODO(), &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Now().Add(-2 * time.Hour),
-			ExpiryTime:     time.Now().Add(-time.Hour),
-		},
 	})
 	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{}

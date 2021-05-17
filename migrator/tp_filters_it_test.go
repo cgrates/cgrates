@@ -116,10 +116,6 @@ func testTpFltrITPopulate(t *testing.T) {
 					Values:  []string{"1001", "1002"},
 				},
 			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
 		},
 	}
 	if err := tpFltrMigrator.storDBIn.StorDB().SetTPFilters(tpFilters); err != nil {

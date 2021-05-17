@@ -649,11 +649,10 @@ type TPThresholdProfile struct {
 
 // TPFilterProfile is used in APIs to manage remotely offline FilterProfile
 type TPFilterProfile struct {
-	TPid               string
-	Tenant             string
-	ID                 string
-	Filters            []*TPFilter
-	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	TPid    string
+	Tenant  string
+	ID      string
+	Filters []*TPFilter
 }
 
 // TPFilter is used in TPFilterProfile

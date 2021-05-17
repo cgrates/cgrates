@@ -399,8 +399,6 @@ func testStsITMigrateFromv1(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", config.CgrConfig().GeneralCfg().DefaultTenant, filter.Tenant)
 	} else if !reflect.DeepEqual(v1Sts.Id, filter.ID) {
 		t.Errorf("Expecting: %+v, received: %+v", v1Sts.Id, filter.ID)
-	} else if filter.ActivationInterval != nil {
-		t.Errorf("Expecting: nil, received: %+v", filter.ActivationInterval)
 	}
 
 	for _, itm := range filter.Rules {

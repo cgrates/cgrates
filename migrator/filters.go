@@ -65,10 +65,9 @@ var filterTypes = utils.NewStringSet([]string{utils.MetaRSR, utils.MetaStats, ut
 
 func migrateFilterV1(fl *v1Filter) (fltr *engine.Filter) {
 	fltr = &engine.Filter{
-		Tenant:             fl.Tenant,
-		ID:                 fl.ID,
-		Rules:              make([]*engine.FilterRule, len(fl.Rules)),
-		ActivationInterval: fl.ActivationInterval,
+		Tenant: fl.Tenant,
+		ID:     fl.ID,
+		Rules:  make([]*engine.FilterRule, len(fl.Rules)),
 	}
 	for i, rule := range fl.Rules {
 		fltr.Rules[i] = &engine.FilterRule{
@@ -88,10 +87,9 @@ func migrateFilterV1(fl *v1Filter) (fltr *engine.Filter) {
 
 func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 	fltr = &engine.Filter{
-		Tenant:             fl.Tenant,
-		ID:                 fl.ID,
-		Rules:              make([]*engine.FilterRule, len(fl.Rules)),
-		ActivationInterval: fl.ActivationInterval,
+		Tenant: fl.Tenant,
+		ID:     fl.ID,
+		Rules:  make([]*engine.FilterRule, len(fl.Rules)),
 	}
 	for i, rule := range fl.Rules {
 		fltr.Rules[i] = &engine.FilterRule{
@@ -129,10 +127,9 @@ func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
 
 func migrateFilterV3(fl *v1Filter) (fltr *engine.Filter) {
 	fltr = &engine.Filter{
-		Tenant:             fl.Tenant,
-		ID:                 fl.ID,
-		Rules:              make([]*engine.FilterRule, len(fl.Rules)),
-		ActivationInterval: fl.ActivationInterval,
+		Tenant: fl.Tenant,
+		ID:     fl.ID,
+		Rules:  make([]*engine.FilterRule, len(fl.Rules)),
 	}
 	for i, rule := range fl.Rules {
 		fltr.Rules[i] = &engine.FilterRule{
@@ -821,10 +818,9 @@ func (m *Migrator) migrateRequestFilterV4(v4Fltr *engine.Filter) (fltr *engine.F
 	}
 	//migrate
 	fltr = &engine.Filter{
-		Tenant:             v4Fltr.Tenant,
-		ID:                 v4Fltr.ID,
-		Rules:              make([]*engine.FilterRule, 0, len(v4Fltr.Rules)),
-		ActivationInterval: v4Fltr.ActivationInterval,
+		Tenant: v4Fltr.Tenant,
+		ID:     v4Fltr.ID,
+		Rules:  make([]*engine.FilterRule, 0, len(v4Fltr.Rules)),
 	}
 	for _, rule := range v4Fltr.Rules {
 		if rule.Type != utils.MetaRSR &&

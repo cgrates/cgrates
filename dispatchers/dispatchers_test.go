@@ -59,10 +59,6 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 		Tenant: "cgrates.org",
 		ID:     "filter",
 		Rules:  nil,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(1999, 2, 3, 4, 5, 6, 700000000, time.UTC),
-			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
-		},
 	}
 	err = dm.SetFilter(context.Background(), fltr, false)
 	if err == nil {
@@ -833,10 +829,6 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "filter",
 		Rules:  nil,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(1999, 2, 3, 4, 5, 6, 700000000, time.UTC),
-			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
-		},
 	}
 	err = dm.SetFilter(context.Background(), fltr, false)
 	if err != nil {
@@ -930,10 +922,6 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 		Tenant: "cgrates.org",
 		ID:     "filter",
 		Rules:  nil,
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(1999, 2, 3, 4, 5, 6, 700000000, time.UTC),
-			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
-		},
 	}
 	err = dm.SetFilter(context.Background(), fltr, false)
 	if err != nil {

@@ -718,10 +718,6 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 		if err != nil {
 			continue
 		}
-		if f.ActivationInterval != nil &&
-			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
-			continue
-		}
 		for _, fltr := range f.Rules {
 			fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
 			if fltr.Type != utils.MetaString ||
