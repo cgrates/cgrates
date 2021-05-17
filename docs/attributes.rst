@@ -64,9 +64,6 @@ Context
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the *AttributeProfile* matching the event.
 
-ActivationInterval
-	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
-
 Blocker
 	In case of multiple *process runs* are allowed, this flag will break further processing.
 

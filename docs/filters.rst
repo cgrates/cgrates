@@ -21,7 +21,6 @@ Definition::
 	Tenant             string
 	ID                 string
 	Rules              []*FilterRule
-	ActivationInterval *utils.ActivationInterval
  }
 
 A Filter profile can be shared between multiple subsystem profile definitions.

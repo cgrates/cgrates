@@ -211,9 +211,9 @@ type ResourceMdls []*ResourceMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ResourceMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.UsageTTL, utils.Limit, utils.AllocationMessage, utils.Blocker, utils.Stored,
-		utils.Weight, utils.ThresholdIDs}
+		utils.ThresholdIDs}
 }
 
 func (tps ResourceMdls) AsTPResources() (result []*utils.TPResourceProfile) {
@@ -380,9 +380,9 @@ type StatMdls []*StatMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps StatMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.QueueLength, utils.TTL, utils.MinItems, utils.MetricIDs, utils.MetricFilterIDs,
-		utils.Stored, utils.Blocker, utils.Weight, utils.ThresholdIDs}
+		utils.Stored, utils.Blocker, utils.ThresholdIDs}
 }
 
 func (tps StatMdls) AsTPStats() (result []*utils.TPStatProfile) {
@@ -586,9 +586,9 @@ type ThresholdMdls []*ThresholdMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ThresholdMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
-		utils.Blocker, utils.Weight, utils.ActionProfileIDs, utils.Async}
+		utils.Blocker, utils.ActionProfileIDs, utils.Async}
 }
 
 func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
@@ -757,7 +757,7 @@ type FilterMdls []*FilterMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps FilterMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.Type, utils.Element,
-		utils.Values, utils.ActivationIntervalString}
+		utils.Values}
 }
 
 func (tps FilterMdls) AsTPFilter() (result []*utils.TPFilterProfile) {
@@ -856,11 +856,11 @@ type RouteMdls []*RouteMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps RouteMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.Sorting, utils.SortingParameters, utils.RouteID, utils.RouteFilterIDs,
-		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteRateProfileIDs, utils.RouteResourceIDs,
-		utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
-		utils.RouteParameters, utils.Weight,
+		utils.RouteAccountIDs, utils.RouteRatingplanIDs, utils.RouteRateProfileIDs,
+		utils.RouteResourceIDs, utils.RouteStatIDs, utils.RouteWeight, utils.RouteBlocker,
+		utils.RouteParameters,
 	}
 }
 
@@ -1088,8 +1088,8 @@ type AttributeMdls []*AttributeMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps AttributeMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker, utils.Weight}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+		utils.AttributeFilterIDs, utils.Path, utils.Type, utils.Value, utils.Blocker}
 }
 
 func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
@@ -1251,8 +1251,8 @@ type ChargerMdls []*ChargerMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps ChargerMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
-		utils.RunID, utils.AttributeIDs, utils.Weight}
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
+		utils.RunID, utils.AttributeIDs}
 }
 
 func (tps ChargerMdls) AsTPChargers() (result []*utils.TPChargerProfile) {
@@ -1426,9 +1426,9 @@ type DispatcherProfileMdls []*DispatcherProfileMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps DispatcherProfileMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.ActivationIntervalString,
+	return []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.Weight,
 		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
-		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters, utils.Weight}
+		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters}
 }
 
 func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
@@ -1773,10 +1773,10 @@ type RateProfileMdls []*RateProfileMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (tps RateProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.ConnectFee, utils.MinCost,
-		utils.MaxCost, utils.MaxCostStrategy, utils.RateID,
-		utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight, utils.RateBlocker,
-		utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee, utils.RateUnit, utils.RateIncrement,
+		utils.Weight, utils.ConnectFee, utils.MinCost, utils.MaxCost, utils.MaxCostStrategy,
+		utils.RateID, utils.RateFilterIDs, utils.RateActivationStart, utils.RateWeight,
+		utils.RateBlocker, utils.RateIntervalStart, utils.RateFixedFee, utils.RateRecurrentFee,
+		utils.RateUnit, utils.RateIncrement,
 	}
 }
 
@@ -2034,8 +2034,8 @@ type ActionProfileMdls []*ActionProfileMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm ActionProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.Schedule, utils.TargetType,
-		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
+		utils.Weight, utils.Schedule, utils.TargetType, utils.TargetIDs,
+		utils.ActionID, utils.ActionFilterIDs, utils.ActionBlocker, utils.ActionTTL,
 		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
 	}
 }
@@ -2256,9 +2256,9 @@ type AccountMdls []*AccountMdl
 // CSVHeader return the header for csv fields as a slice of string
 func (apm AccountMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
-		utils.ActivationIntervalString, utils.Weight, utils.BalanceID,
-		utils.BalanceFilterIDs, utils.BalanceWeight, utils.BalanceBlocker,
-		utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits, utils.ThresholdIDs,
+		utils.Weight, utils.BalanceID, utils.BalanceFilterIDs, utils.BalanceWeight,
+		utils.BalanceBlocker, utils.BalanceType, utils.BalanceOpts, utils.BalanceUnits,
+		utils.ThresholdIDs,
 	}
 }
 

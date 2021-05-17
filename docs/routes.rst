@@ -98,9 +98,6 @@ ID
 FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
 
-ActivationInterval
-	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
-
 Sorting
 	Sorting strategy applied when ordering the individual *Routes* defined bellow. Possible values are:
 

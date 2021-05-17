@@ -846,14 +846,13 @@ type ArgsAccountsForEvent struct {
 
 // APIAccount represents one APIAccount on a Tenant
 type APIAccount struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *ActivationInterval
-	Weights            string
-	Opts               map[string]interface{}
-	Balances           map[string]*APIBalance
-	ThresholdIDs       []string
+	Tenant       string
+	ID           string
+	FilterIDs    []string
+	Weights      string
+	Opts         map[string]interface{}
+	Balances     map[string]*APIBalance
+	ThresholdIDs []string
 }
 
 // AsAccount convert APIAccount struct to Account struct

@@ -73,9 +73,6 @@ ID
 FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
 
-ActivationInterval
-	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
-
 QueueLength
 	Maximum number of items stored in the queue. Once the *QueueLength* is reached, new items entering will cause oldest one to be dropped (FIFO mode).
 

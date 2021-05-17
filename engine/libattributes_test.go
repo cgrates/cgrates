@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -70,14 +69,10 @@ func TestConvertExternalToProfile(t *testing.T) {
 
 func TestConvertExternalToProfileMissing(t *testing.T) {
 	external := &APIAttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_ID",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		Tenant:     "cgrates.org",
+		ID:         "ATTR_ID",
+		Contexts:   []string{utils.MetaSessionS, utils.MetaCDRs},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 		Attributes: []*ExternalAttribute{},
 		Weight:     20,
 	}
@@ -94,11 +89,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 		Attributes: []*ExternalAttribute{
 			{
 				Path: utils.MetaReq + utils.NestingSep + "Account",

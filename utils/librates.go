@@ -808,16 +808,15 @@ func (ext *APIRateProfile) AsRateProfile() (rp *RateProfile, err error) {
 }
 
 type APIRateProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *ActivationInterval
-	Weights            string
-	MinCost            *float64
-	MaxCost            *float64
-	MaxCostStrategy    string
-	Rates              map[string]*APIRate
-	APIOpts            map[string]interface{}
+	Tenant          string
+	ID              string
+	FilterIDs       []string
+	Weights         string
+	MinCost         *float64
+	MaxCost         *float64
+	MaxCostStrategy string
+	Rates           map[string]*APIRate
+	APIOpts         map[string]interface{}
 }
 
 // AsRate converts APIRate to Rate
