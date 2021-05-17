@@ -88,14 +88,6 @@ func (admS *AdminSv1) GetActionProfileIDsCount(ctx *context.Context, args *utils
 	return
 }
 
-/*
-type ActionProfileWithCache struct {
-	*engine.ActionProfileWithAPIOpts
-	Cache *string
-}
-
-*/
-
 //SetActionProfile add/update a new Action Profile
 func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *engine.ActionProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {

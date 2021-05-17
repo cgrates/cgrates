@@ -39,17 +39,17 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating from account ", id)
 		}
-		ap, err := m.dmIN.DataManager().GetAccount(tntID[0], tntID[1])
+		ap, err := m.dmIN.DataManager().GetAccount(context.TODO(), tntID[0], tntID[1])
 		if err != nil {
 			return err
 		}
 		if ap == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetAccount(ap, true); err != nil {
+		if err := m.dmOut.DataManager().SetAccount(context.TODO(), ap, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveAccount(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveAccount(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.AccountsString]++
