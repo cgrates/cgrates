@@ -1109,7 +1109,7 @@ func (sS *SessionS) syncSessions() {
 		}()
 		select {
 		case err = <-errChan:
-			if err != nil {
+			if err != nil && err.Error() != utils.ErrNoActiveSession.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error <%s> quering session ids", utils.SessionS, err.Error()))
 			}

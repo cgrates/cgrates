@@ -348,6 +348,9 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(_ *context.Context, _ string,
 		return err
 	}
 	var sIDs []*sessions.SessionID
+	if len(slMpIface) == 0 {
+		return utils.ErrNoActiveSession
+	}
 	for _, mpIface := range slMpIface {
 		sIDs = append(sIDs, &sessions.SessionID{
 			OriginHost: strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0],

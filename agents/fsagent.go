@@ -431,6 +431,9 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ctx *context.Context, _ string,
 			})
 		}
 	}
+	if len(sIDs) == 0 {
+		return utils.ErrNoActiveSession
+	}
 	*sessionIDs = sIDs
 	return
 }
