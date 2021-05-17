@@ -259,8 +259,7 @@
 // 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},									// for account storing
 // 		// internal storDB tabels
 // 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
-// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 		
-// 		"*tp_timings":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
+// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false},
 // 		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 
 // 		"*tp_rating_plans":{"limit": -1, "ttl": "", "static_ttl": false, "replicate": false}, 

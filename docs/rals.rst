@@ -51,7 +51,7 @@ FallbackSubjects
 RatingPlan
 ^^^^^^^^^^
 
-Groups together rates per destination and relates them to event timing. Configured via the following parameters:
+Groups together rates per destination. Configured via the following parameters:
 
 ID
 	The tag uniquely idenfying each RatingPlan. There can be multiple entries grouped by the same ID.
@@ -59,11 +59,8 @@ ID
 DestinationRatesID
 	The identifier of the :ref:`DestinationRate` set.
 
-TimingID
-	The itentifier of the :ref:`Timing` profile.
-
 Weight
-	Priority of matching rule (*DestinationRatesID*+*TimingID*). Higher value equals higher priority.
+	Priority of matching rule (*DestinationRatesID*). Higher value equals higher priority.
 
 
 .. _DestinationRate:
@@ -148,36 +145,6 @@ RateIncrement
 
 GroupIntervalStart
 	Activates the rate at specific usage within the event.
-
-
-.. _Timing:
-
-Timing
-^^^^^^
-
-A *Timing* profile is giving time awarness to an event. Configured via the following parameters:
-
-ID
-	The tag uniquely idenfying each *Timing* profile.
-
-Years
-	List of years to match within the event. Defaults to the catch-all meta: *\*any*.
-
-Months
-	List of months to match within the event. Defaults to the catch-all meta: *\*any*.
-
-MonthDays
-	List of month days to match within the event. Defaults to the catch-all meta: *\*any*.
-
-WeekDays
-	List of week days to match within the event as integer values. Special case for *Sunday* which matches for both 0 and 7.
-
-Time
-	The exact time to match (mostly as time start). Defined in the format: *hh:mm:ss*
-
-
-
-.. Note:: Due to optimization, CGRateS encapsulates and stores the rating information into just three objects: *Destinations*, *RatingProfiles* and *RatingPlan* (composed out of *RatingPlan*, *DestinationRate*, *Rate* and *Timing* objects).
 
 
 

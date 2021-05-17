@@ -77,9 +77,6 @@ The following types are implemented:
 \*notexists
 	Is the negation of *\*exists*.
 
-\*nottimings
-	Is the negation of *\*timings*.
-
 \*destinations
 	Will make sure that the *Element* is a prefix contained inside one of the destination IDs as *Values*.
 
