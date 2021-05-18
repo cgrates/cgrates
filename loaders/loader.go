@@ -541,7 +541,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, dsp.TenantID())
-				if err := ldr.dm.SetDispatcherProfile(dsp, true); err != nil {
+				if err := ldr.dm.SetDispatcherProfile(context.TODO(), dsp, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.DispatcherProfileIDs] = ids
@@ -900,7 +900,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveDispatcherProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveDispatcherProfile(context.TODO(), tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}

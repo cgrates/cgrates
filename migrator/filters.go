@@ -552,7 +552,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for dispatcherProfile", id)
 		}
-		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -562,7 +562,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 		for i, fl := range dpp.FilterIDs {
 			dpp.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
+		if err := m.dmOut.DataManager().SetDispatcherProfile(context.TODO(), dpp, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -773,7 +773,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for dispatcherProfile", id)
 		}
-		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting dispatcher profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -784,7 +784,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 		for i, fl := range dpp.FilterIDs {
 			dpp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
+		if err := m.dmOut.DataManager().SetDispatcherProfile(context.TODO(), dpp, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting dispatcher profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}

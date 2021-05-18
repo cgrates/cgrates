@@ -399,7 +399,7 @@ func (iDB *InternalDB) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetDispatcherProfileDrv(tenant, id string) (dpp *DispatcherProfile, err error) {
+func (iDB *InternalDB) GetDispatcherProfileDrv(ctx *context.Context, tenant, id string) (dpp *DispatcherProfile, err error) {
 	x, ok := Cache.Get(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -407,13 +407,13 @@ func (iDB *InternalDB) GetDispatcherProfileDrv(tenant, id string) (dpp *Dispatch
 	return x.(*DispatcherProfile), nil
 }
 
-func (iDB *InternalDB) SetDispatcherProfileDrv(dpp *DispatcherProfile) (err error) {
+func (iDB *InternalDB) SetDispatcherProfileDrv(ctx *context.Context, dpp *DispatcherProfile) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheDispatcherProfiles, dpp.TenantID(), dpp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveDispatcherProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

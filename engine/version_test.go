@@ -73,7 +73,7 @@ func TestVersionCompare(t *testing.T) {
 func TestCurrentDBVersions(t *testing.T) {
 	expVersDataDB := Versions{
 		utils.StatS: 4, utils.Accounts: 3, utils.Actions: 2,
-		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 7,
+		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 6,
 		utils.RQF: 5, utils.Resource: 1,
 		utils.Subscribers: 1,
 		utils.Chargers:    2,

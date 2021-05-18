@@ -174,7 +174,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.DispatcherProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetDispatcherProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetDispatcherProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.DispatcherHostPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1582,7 +1582,7 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	return
 }
 
-func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetDispatcherProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (dpp *DispatcherProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -1597,10 +1597,10 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dpp, err = dm.dataDB.GetDispatcherProfileDrv(tenant, id)
+	dpp, err = dm.dataDB.GetDispatcherProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDispatcherProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -1608,13 +1608,13 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &dpp); err == nil {
-				err = dm.dataDB.SetDispatcherProfileDrv(dpp)
+				err = dm.dataDB.SetDispatcherProfileDrv(ctx, dpp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheDispatcherProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheDispatcherProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1624,7 +1624,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheDispatcherProfiles, tntID, dpp, nil,
+		if errCh := Cache.Set(ctx, utils.CacheDispatcherProfiles, tntID, dpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1632,22 +1632,22 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 	return
 }
 
-func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetDispatcherProfile(ctx *context.Context, dpp *DispatcherProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), dpp.Tenant, dpp.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, dpp.Tenant, dpp.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, dpp.TenantID())
 		}
 	}
-	oldDpp, err := dm.GetDispatcherProfile(dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
+	oldDpp, err := dm.GetDispatcherProfile(ctx, dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetDispatcherProfileDrv(dpp); err != nil {
+	if err = dm.DataDB().SetDispatcherProfileDrv(ctx, dpp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -1657,13 +1657,13 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 			oldContexes = &oldDpp.Subsystems
 			oldFiltersIDs = &oldDpp.FilterIDs
 		}
-		if err = updatedIndexesWithContexts(context.TODO(), dm, utils.CacheDispatcherFilterIndexes, dpp.Tenant, dpp.ID,
+		if err = updatedIndexesWithContexts(ctx, dm, utils.CacheDispatcherFilterIndexes, dpp.Tenant, dpp.ID,
 			oldContexes, oldFiltersIDs, dpp.Subsystems, dpp.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DispatcherProfilePrefix, dpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDispatcherProfile,
@@ -1675,34 +1675,34 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 	return
 }
 
-func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
+func (dm *DataManager) RemoveDispatcherProfile(ctx *context.Context, tenant, id string,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldDpp, err := dm.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
+	oldDpp, err := dm.GetDispatcherProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveDispatcherProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveDispatcherProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldDpp == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheDispatcherFilterIndexes, tenant, id, oldDpp.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheDispatcherFilterIndexes, tenant, id, oldDpp.FilterIDs); err != nil {
 			return
 		}
-		for _, ctx := range oldDpp.Subsystems {
-			if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheDispatcherFilterIndexes,
-				tenant, ctx, id, oldDpp.FilterIDs); err != nil {
+		for _, sub := range oldDpp.Subsystems {
+			if err = removeItemFromFilterIndex(ctx, dm, utils.CacheDispatcherFilterIndexes,
+				tenant, sub, id, oldDpp.FilterIDs); err != nil {
 				return
 			}
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DispatcherProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveDispatcherProfile,

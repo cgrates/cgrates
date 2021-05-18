@@ -39,17 +39,17 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating dispatcher profiles", id)
 		}
-		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if dpp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
+		if err := m.dmOut.DataManager().SetDispatcherProfile(context.TODO(), dpp, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveDispatcherProfile(tntID[0],
+		if err := m.dmIN.DataManager().RemoveDispatcherProfile(context.TODO(), tntID[0],
 			tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func (m *Migrator) migrateDispatchers() (err error) {
 
 		if !m.dryRun {
 			//set action plan
-			if err = m.dmOut.DataManager().SetDispatcherProfile(v2, true); err != nil {
+			if err = m.dmOut.DataManager().SetDispatcherProfile(context.TODO(), v2, true); err != nil {
 				return
 			}
 		}

@@ -965,15 +965,15 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 		// Hosts:    []string{"192.168.56.203"},
 		Weight: 20,
 	}
-	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+	if _, rcvErr := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
+	if err := onStor.SetDispatcherProfile(context.TODO(), dpp, false); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+	if rcv, err := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(dpp, rcv)) {
@@ -987,23 +987,23 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	}
 	//update
 	dpp.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
-	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
+	if err := onStor.SetDispatcherProfile(context.TODO(), dpp, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+	if rcv, err := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(dpp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
 	}
-	if err := onStor.RemoveDispatcherProfile(dpp.Tenant, dpp.ID,
+	if err := onStor.RemoveDispatcherProfile(context.TODO(), dpp.Tenant, dpp.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+	if _, rcvErr := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -1121,16 +1121,16 @@ func testOnStorITActionProfile(t *testing.T) {
 	}
 
 	//empty in database
-	if _, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+	if _, err := onStor.GetActionProfile(context.TODO(), "cgrates.org", "TEST_ID1",
 		true, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
 	//get from database
-	if err := onStor.SetActionProfile(actPrf, false); err != nil {
+	if err := onStor.SetActionProfile(context.TODO(), actPrf, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+	if rcv, err := onStor.GetActionProfile(context.TODO(), "cgrates.org", "TEST_ID1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, actPrf) {
@@ -1147,9 +1147,9 @@ func testOnStorITActionProfile(t *testing.T) {
 
 	//updateFilters
 	actPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
-	if err := onStor.SetActionProfile(actPrf, false); err != nil {
+	if err := onStor.SetActionProfile(context.TODO(), actPrf, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+	} else if rcv, err := onStor.GetActionProfile(context.TODO(), "cgrates.org", "TEST_ID1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(actPrf, rcv) {
@@ -1157,10 +1157,10 @@ func testOnStorITActionProfile(t *testing.T) {
 	}
 
 	//remove from database
-	if err := onStor.RemoveActionProfile("cgrates.org", "TEST_ID1",
+	if err := onStor.RemoveActionProfile(context.TODO(), "cgrates.org", "TEST_ID1",
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	} else if _, err := onStor.GetActionProfile("cgrates.org", "TEST_ID1",
+	} else if _, err := onStor.GetActionProfile(context.TODO(), "cgrates.org", "TEST_ID1",
 		false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1197,15 +1197,15 @@ func testOnStorITAccount(t *testing.T) {
 	}
 
 	//empty in database
-	if _, err := onStor.GetAccount("cgrates.org", "RP1"); err != utils.ErrNotFound {
+	if _, err := onStor.GetAccount(context.TODO(), "cgrates.org", "RP1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
 	//get from database
-	if err := onStor.SetAccount(acctPrf, false); err != nil {
+	if err := onStor.SetAccount(context.TODO(), acctPrf, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAccount("cgrates.org", "RP1"); err != nil {
+	if rcv, err := onStor.GetAccount(context.TODO(), "cgrates.org", "RP1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, acctPrf) {
 		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
@@ -1221,19 +1221,19 @@ func testOnStorITAccount(t *testing.T) {
 
 	//updateFilters
 	acctPrf.FilterIDs = []string{"*prefix:~*req.Destination:10"}
-	if err := onStor.SetAccount(acctPrf, false); err != nil {
+	if err := onStor.SetAccount(context.TODO(), acctPrf, false); err != nil {
 		t.Error(err)
-	} else if rcv, err := onStor.GetAccount("cgrates.org", "RP1"); err != nil {
+	} else if rcv, err := onStor.GetAccount(context.TODO(), "cgrates.org", "RP1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acctPrf, rcv) {
 		t.Errorf("Expecting: %v, received: %v", acctPrf, rcv)
 	}
 
 	//remove from database
-	if err := onStor.RemoveAccount("cgrates.org", "RP1",
+	if err := onStor.RemoveAccount(context.TODO(), "cgrates.org", "RP1",
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	} else if _, err := onStor.GetAccount("cgrates.org", "RP1"); err != utils.ErrNotFound {
+	} else if _, err := onStor.GetAccount(context.TODO(), "cgrates.org", "RP1"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

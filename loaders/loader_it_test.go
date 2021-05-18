@@ -32,6 +32,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -482,7 +483,7 @@ cgrates.org,SET_ACTPROFILE_3
 		Targets:   map[string]utils.StringSet{},
 		Actions:   []*engine.APAction{},
 	}
-	if rcv, err := ldr.dm.GetActionProfile(expACtPrf.Tenant, expACtPrf.ID,
+	if rcv, err := ldr.dm.GetActionProfile(context.TODO(), expACtPrf.Tenant, expACtPrf.ID,
 		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expACtPrf, rcv) {
@@ -605,14 +606,14 @@ cgrates.org,SET_ACTPROFILE_3
 		Targets:   map[string]utils.StringSet{},
 		Actions:   []*engine.APAction{},
 	}
-	if err := ldr.dm.SetActionProfile(expACtPrf, true); err != nil {
+	if err := ldr.dm.SetActionProfile(context.TODO(), expACtPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaRemove, true); err != nil {
 		t.Error(err)
 	}
 	//nothing to get from database
-	if _, err := ldr.dm.GetActionProfile(expACtPrf.Tenant, expACtPrf.ID,
+	if _, err := ldr.dm.GetActionProfile(context.TODO(), expACtPrf.Tenant, expACtPrf.ID,
 		true, true, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -631,7 +632,7 @@ cgrates.org,SET_ACTPROFILE_3
 			},
 		},
 	}
-	if err := ldr.dm.SetActionProfile(expACtPrf, true); err != nil {
+	if err := ldr.dm.SetActionProfile(context.TODO(), expACtPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.ProcessFolder(utils.MetaReload, utils.MetaRemove, true); err != utils.ErrNotFound {

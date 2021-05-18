@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -189,7 +190,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 			Transport: utils.MetaJSON,
 		},
 	}
-	if err := dspMigrator.dmIN.DataManager().SetDispatcherProfile(dspPrf, false); err != nil {
+	if err := dspMigrator.dmIN.DataManager().SetDispatcherProfile(context.TODO(), dspPrf, false); err != nil {
 		t.Error(err)
 	}
 	if err := dspMigrator.dmIN.DataManager().SetDispatcherHost(dspHost); err != nil {
@@ -201,7 +202,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 		t.Error("Error when setting version for Dispatchers ", err.Error())
 	}
 
-	_, err = dspMigrator.dmOut.DataManager().GetDispatcherProfile("cgrates.org",
+	_, err = dspMigrator.dmOut.DataManager().GetDispatcherProfile(context.TODO(), "cgrates.org",
 		"Dsp1", false, false, utils.NonTransactional)
 	if err != utils.ErrNotFound {
 		t.Error(err)
@@ -211,7 +212,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if err != nil {
 		t.Error("Error when migrating Dispatchers ", err.Error())
 	}
-	result, err := dspMigrator.dmOut.DataManager().GetDispatcherProfile("cgrates.org",
+	result, err := dspMigrator.dmOut.DataManager().GetDispatcherProfile(context.TODO(), "cgrates.org",
 		"Dsp1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -219,7 +220,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if !reflect.DeepEqual(result, dspPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", dspPrf, result)
 	}
-	result, err = dspMigrator.dmIN.DataManager().GetDispatcherProfile("cgrates.org",
+	result, err = dspMigrator.dmIN.DataManager().GetDispatcherProfile(context.TODO(), "cgrates.org",
 		"Dsp1", false, false, utils.NonTransactional)
 	if err != utils.ErrNotFound {
 		t.Error(err)

@@ -25,6 +25,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -115,7 +116,7 @@ func testLoadIdsITFlush(t *testing.T) {
 
 func testLoadIdsITMigrateAndMove(t *testing.T) {
 
-	err := loadMigrator.dmIN.DataManager().DataDB().SetLoadIDsDrv(map[string]int64{"account": 1}) // this will be deleated
+	err := loadMigrator.dmIN.DataManager().DataDB().SetLoadIDsDrv(context.TODO(), map[string]int64{"account": 1}) // this will be deleated
 	if err != nil {
 		t.Error("Error when setting new loadID ", err.Error())
 	}

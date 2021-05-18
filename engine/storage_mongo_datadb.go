@@ -1175,9 +1175,9 @@ func (ms *MongoStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetDispatcherProfileDrv(tenant, id string) (r *DispatcherProfile, err error) {
+func (ms *MongoStorage) GetDispatcherProfileDrv(ctx *context.Context, tenant, id string) (r *DispatcherProfile, err error) {
 	r = new(DispatcherProfile)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColDpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
 			r = nil
@@ -1191,8 +1191,8 @@ func (ms *MongoStorage) GetDispatcherProfileDrv(tenant, id string) (r *Dispatche
 	return
 }
 
-func (ms *MongoStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetDispatcherProfileDrv(ctx *context.Context, r *DispatcherProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColDpp).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
 			options.Update().SetUpsert(true),
@@ -1201,8 +1201,8 @@ func (ms *MongoStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error
 	})
 }
 
-func (ms *MongoStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveDispatcherProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColDpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

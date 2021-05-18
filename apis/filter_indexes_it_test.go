@@ -500,6 +500,7 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 			FilterIDs: []string{"fltr_for_attr3"},
 			Attributes: []*engine.ExternalAttribute{
 				{
+					Path:  "*req.Destinations",
 					Type:  utils.MetaConstant,
 					Value: "1008",
 				},

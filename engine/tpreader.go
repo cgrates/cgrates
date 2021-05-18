@@ -618,7 +618,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoDispatcherProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetDispatcherProfile(th, true); err != nil {
+		if err = tpr.dm.SetDispatcherProfile(context.TODO(), th, true); err != nil {
 			return
 		}
 		if verbose {
@@ -957,7 +957,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("DispatcherProfiles:")
 	}
 	for _, tpDsp := range tpr.dispatcherProfiles {
-		if err = tpr.dm.RemoveDispatcherProfile(tpDsp.Tenant, tpDsp.ID,
+		if err = tpr.dm.RemoveDispatcherProfile(context.TODO(), tpDsp.Tenant, tpDsp.ID,
 			utils.NonTransactional, true); err != nil {
 			return
 		}

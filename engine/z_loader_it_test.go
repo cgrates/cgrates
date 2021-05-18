@@ -105,8 +105,7 @@ func testLoaderITInitDataDB(t *testing.T) {
 		}
 	}
 	cacheChan := make(chan birpc.ClientConnector, 1)
-	srv, _ := birpc.NewService(NewCacheS(lCfg, dataDbCsv, nil), "", false)
-	srv.UpdateMethodName(func(key string) (newKey string) {
+	srv, _ := birpc.NewServiceWithMethodsRename(NewCacheS(lCfg, dataDbCsv, nil), "", false, func(key string) (newKey string) {
 		return strings.TrimPrefix(key, "V1")
 	})
 	cacheChan <- srv
@@ -335,7 +334,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, dpp := range loader.dispatcherProfiles {
-		rcv, err := loader.dm.GetDispatcherProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetDispatcherProfile(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetDispatcherProfile, tenant: %s, id: %s,  error: %s ", dpp.Tenant, dpp.ID, err.Error())
 		}

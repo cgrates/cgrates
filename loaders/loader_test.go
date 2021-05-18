@@ -1222,7 +1222,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		},
 	}
 
-	rcv, err := ldr.dm.GetDispatcherProfile("cgrates.org", "D1",
+	rcv, err := ldr.dm.GetDispatcherProfile(context.TODO(), "cgrates.org", "D1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
@@ -3858,7 +3858,7 @@ cgrates.org,REM_DISPATCHERS_1
 		Tenant: "cgrates.org",
 		ID:     "REM_DISPATCHERS_1",
 	}
-	if err := ldr.dm.SetDispatcherProfile(expDispatchers, true); err != nil {
+	if err := ldr.dm.SetDispatcherProfile(context.TODO(), expDispatchers, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
