@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -68,7 +69,7 @@ type ArgsProcessFolder struct {
 	StopOnError bool
 }
 
-func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
+func (ldrS *LoaderService) V1Load(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
@@ -94,14 +95,14 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	if args.Caching != nil {
 		caching = *args.Caching
 	}
-	if err := ldr.ProcessFolder(caching, utils.MetaStore, args.StopOnError); err != nil {
+	if err := ldr.ProcessFolder(ctx, caching, utils.MetaStore, args.StopOnError); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK
 	return
 }
 
-func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
+func (ldrS *LoaderService) V1Remove(ctx *context.Context, args *ArgsProcessFolder,
 	rply *string) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
@@ -127,7 +128,7 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 	if args.Caching != nil {
 		caching = *args.Caching
 	}
-	if err := ldr.ProcessFolder(caching, utils.MetaRemove, args.StopOnError); err != nil {
+	if err := ldr.ProcessFolder(ctx, caching, utils.MetaRemove, args.StopOnError); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK

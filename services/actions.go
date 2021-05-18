@@ -101,7 +101,7 @@ func (acts *ActionService) Start() (err error) {
 	acts.rpc = apis.NewActionSv1(acts.acts)
 	srv, _ := birpc.NewService(acts.rpc, "", false)
 	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.server.RpcRegister(acts.rpc)
+		acts.server.RpcRegister(srv)
 	}
 	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.ActionS)
 	return

@@ -1,0 +1,61 @@
+{
+  // CGRateS Configuration file
+  // used for apis/preload_it_test.go
+
+  "general": {
+    "log_level": 7,
+  },
+
+  "data_db": {
+    "db_type": "*internal"
+  },
+
+  "stor_db": {
+    "db_type": "*internal"
+  },
+
+  "loaders": [
+    {
+      "id": "Rates_Loader",
+      "enabled": true,
+      "dry_run": false,
+      "tenant": "cgrates.org",
+      "run_delay": "0",
+      "lock_filename": ".cgr.lock",
+      "caches_conns": ["*internal"],
+      "field_separator": ",",
+      "tp_in_dir": "/tmp/RatesIn",
+      "tp_out_dir": "/tmp/RatesOut",
+      "data":[
+        {
+          "type": "*rate_profiles",
+          "file_name": "RateProfiles.csv",
+          "fields": [
+            {"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+            {"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+            {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+            {"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
+            {"tag": "MinCost", "path": "MinCost", "type": "*variable", "value": "~*req.4"},
+            {"tag": "MaxCost", "path": "MaxCost", "type": "*variable", "value": "~*req.5"},
+            {"tag": "MaxCostStrategy", "path": "MaxCostStrategy", "type": "*variable", "value": "~*req.6"},
+            {"tag": "RateID", "path": "RateID", "type": "*variable", "value": "~*req.7"},
+            {"tag": "RateFilterIDs", "path": "RateFilterIDs", "type": "*variable", "value": "~*req.8"},
+            {"tag": "RateActivationTimes", "path": "RateActivationTimes", "type": "*variable", "value": "~*req.9"},
+            {"tag": "RateWeights", "path": "RateWeights", "type": "*variable", "value": "~*req.10"},
+            {"tag": "RateBlocker", "path": "RateBlocker", "type": "*variable", "value": "~*req.11"},
+            {"tag": "RateIntervalStart", "path": "RateIntervalStart", "type": "*variable", "value": "~*req.12"},
+            {"tag": "RateFixedFee", "path": "RateFixedFee", "type": "*variable", "value": "~*req.13"},
+            {"tag": "RateRecurrentFee", "path": "RateRecurrentFee", "type": "*variable", "value": "~*req.14"},
+            {"tag": "RateUnit", "path": "RateUnit", "type": "*variable", "value": "~*req.15"},
+            {"tag": "RateIncrement", "path": "RateIncrement", "type": "*variable", "value": "~*req.16"},
+          ],
+        },
+      ],
+    },
+  ],
+
+  "admins": {
+    "enabled": true,
+  },
+
+}

@@ -1184,7 +1184,7 @@ func CallCache(connMgr *ConnManager, ctx *context.Context, cacheConns []string, 
 		}
 	}
 	var method, reply string
-	var cacheArgs interface{} = utils.AttrReloadCacheWithAPIOpts{
+	var cacheArgs interface{} = &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:   opts,
 		ArgsCache: args,
 	}

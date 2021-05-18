@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/accounts"
 
@@ -65,14 +67,14 @@ type AccountService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	acts *accounts.AccountS
-	// rpc      *v1.AccountSv1             // useful on restart
+	acts     *accounts.AccountS
+	rpc      *apis.AccountSv1           // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start should handle the service start
 func (acts *AccountService) Start() (err error) {
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -94,11 +96,12 @@ func (acts *AccountService) Start() (err error) {
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AccountS))
-	// acts.rpc = v1.NewAccountSv1(acts.acts)
-	// if !acts.cfg.DispatcherSCfg().Enabled {
-	// acts.server.RpcRegister(acts.rpc)
-	// }
-	// acts.connChan <- acts.anz.GetInternalCodec(acts.rpc, utils.AccountS)
+	acts.rpc = apis.NewAccountSv1(acts.acts)
+	srv, _ := birpc.NewService(acts.rpc, "", false)
+	if !acts.cfg.DispatcherSCfg().Enabled {
+		acts.server.RpcRegister(srv)
+	}
+	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.AccountS)
 	return
 }
 
@@ -114,8 +117,8 @@ func (acts *AccountService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	// acts.rpc = nil
-	//<-acts.connChan
+	acts.rpc = nil
+	<-acts.connChan
 	acts.Unlock()
 	return
 }

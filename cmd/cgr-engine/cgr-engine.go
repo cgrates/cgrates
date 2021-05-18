@@ -171,8 +171,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		// 	internalSuplSChan <- splS
 		// case analyzerS := <-internalAnalyzerSChan:
 		// 	internalAnalyzerSChan <- analyzerS
-		// case loaderS := <-internalLoaderSChan:
-		// 	internalLoaderSChan <- loaderS
+		case loaderS := <-internalLoaderSChan:
+			internalLoaderSChan <- loaderS
 		case chS := <-internalCacheSChan: // added in order to start the RPC before precaching is done
 			internalCacheSChan <- chS
 		// case eeS := <-internalEEsChan:
@@ -181,8 +181,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 			internalRateSChan <- rateS
 		case actionS := <-internalActionSChan:
 			internalActionSChan <- actionS
-		// case accountS := <-internalAccountSChan:
-		// 	internalAccountSChan <- accountS
+		case accountS := <-internalAccountSChan:
+			internalAccountSChan <- accountS
 		case <-shdChan.Done():
 			return
 		}
@@ -357,13 +357,12 @@ func runPreload(loader *services.LoaderService, internalLoaderSChan chan birpc.C
 		shdChan.CloseOnce()
 		return
 	}
-
 	ldrs := <-internalLoaderSChan
 	internalLoaderSChan <- ldrs
 
 	var reply string
 	for _, loaderID := range strings.Split(*preload, utils.FieldsSep) {
-		if err := loader.GetLoaderS().V1Load(&loaders.ArgsProcessFolder{
+		if err := loader.GetLoaderS().V1Load(context.Background(), &loaders.ArgsProcessFolder{
 			ForceLock:   true, // force lock will unlock the file in case is locked and return error
 			LoaderID:    loaderID,
 			StopOnError: true,
