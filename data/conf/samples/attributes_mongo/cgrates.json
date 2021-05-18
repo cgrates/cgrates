@@ -1,0 +1,33 @@
+{
+  // CGRateS Configuration file
+  // used in general_tests/attributes_filters_index_it_test.go
+  "general": {
+    "log_level": 7,
+  },
+
+
+  "data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017,
+  },
+  
+  
+  "stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017,
+  },
+  
+
+  "apiers": {
+    "enabled": true,
+  },
+
+  "attributes": {
+    "enabled": true,
+    "string_indexed_fields": [],
+    "prefix_indexed_fields": ["*req.Subject"],
+  },
+
+}
