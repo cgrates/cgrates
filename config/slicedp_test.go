@@ -27,19 +27,17 @@ import (
 )
 
 func TestNewSliceDp(t *testing.T) {
-	record := []string{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:~*req.Account:1007", "2014-01-14T00:00:00Z", "*req.Account", "*constant", "1001", "false", "10"}
+	record := []string{"cgrates.org", "ATTR_1", "*string:~*opts.*context:*sessions|*cdrs;*string:~*req.Account:1007", "10", "*req.Account", "*constant", "1001", "false"}
 	index := map[string]int{
 		"Tenant":             1,
 		"ID":                 2,
-		"Contexts":           3,
-		"FilterIDs":          4,
-		"ActivationInterval": 5,
-		"AttributeFilterIDs": 6,
-		"Path":               8,
-		"Type":               9,
-		"Value":              10,
-		"Blocker":            11,
-		"Weight":             12,
+		"FilterIDs":          3,
+		"Weight":             4,
+		"AttributeFilterIDs": 5,
+		"Path":               6,
+		"Type":               7,
+		"Value":              8,
+		"Blocker":            9,
 	}
 	expected := &SliceDP{
 		req:    record,
@@ -55,15 +53,13 @@ func TestGetIndexValue(t *testing.T) {
 	index := map[string]int{
 		"Tenant":             1,
 		"ID":                 2,
-		"Contexts":           3,
-		"FilterIDs":          4,
-		"ActivationInterval": 5,
-		"AttributeFilterIDs": 6,
-		"Path":               8,
-		"Type":               9,
-		"Value":              10,
-		"Blocker":            11,
-		"Weight":             12,
+		"FilterIDs":          3,
+		"Weight":             4,
+		"AttributeFilterIDs": 5,
+		"Path":               6,
+		"Type":               7,
+		"Value":              8,
+		"Blocker":            9,
 	}
 	sliceDp := SliceDP{
 		idxAls: index,
@@ -80,15 +76,13 @@ func TestGetIndexValueKey(t *testing.T) {
 	index := map[string]int{
 		"Tenant":             1,
 		"ID":                 2,
-		"Contexts":           3,
-		"FilterIDs":          4,
-		"ActivationInterval": 5,
-		"AttributeFilterIDs": 6,
-		"Path":               8,
-		"Type":               9,
-		"Value":              10,
-		"Blocker":            11,
-		"Weight":             12,
+		"FilterIDs":          3,
+		"Weight":             4,
+		"AttributeFilterIDs": 5,
+		"Path":               6,
+		"Type":               7,
+		"Value":              8,
+		"Blocker":            9,
 	}
 	sliceDp := SliceDP{
 		idxAls: index,
