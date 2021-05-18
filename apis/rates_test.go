@@ -497,3 +497,64 @@ func TestApisRateSetRateProfileError(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestApisRateSetRateProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+			ID:     "2",
+		},
+	}
+	var result utils.RateProfile
+	err = admS.GetRateProfile(context.Background(), args, &result)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected := utils.RateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	if !reflect.DeepEqual(result.Rates["RT_WEEK"].ID, expected.Rates["RT_WEEK"].ID) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.Rates["RT_WEEK"].ID, result.Rates["RT_WEEK"].ID)
+	}
+	if !reflect.DeepEqual(result.Rates["RT_WEEK"].ActivationTimes, expected.Rates["RT_WEEK"].ActivationTimes) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected.Rates["RT_WEEK"].ActivationTimes, result.Rates["RT_WEEK"].ActivationTimes)
+	}
+	if !reflect.DeepEqual("tenant:2:RT_WEEK", result.Rates["RT_WEEK"].UID()) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "tenant:2:RT_WEEK", result.Rates["RT_WEEK"].UID())
+	}
+	result.Rates = nil
+	expected.Rates = nil
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
