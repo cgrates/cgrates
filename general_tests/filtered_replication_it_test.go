@@ -160,7 +160,6 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        attrID,
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.Account:dan"},
 			Attributes: []*engine.Attribute{
 				{

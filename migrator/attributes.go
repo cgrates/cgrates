@@ -389,7 +389,6 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	attrPrf = &engine.AttributeProfile{
 		Tenant:    v4AttrPrf.Tenant,
 		ID:        v4AttrPrf.ID,
-		Contexts:  v4AttrPrf.Contexts,
 		FilterIDs: v4AttrPrf.FilterIDs,
 		Weight:    v4AttrPrf.Weight,
 	}

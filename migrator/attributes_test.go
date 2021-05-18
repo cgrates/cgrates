@@ -236,8 +236,7 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
+		FilterIDs: []string{"filter1", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
@@ -423,8 +422,7 @@ func TestAsAttributeProfileV5(t *testing.T) {
 	eOut := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"filter1"},
+		FilterIDs: []string{"filter1", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},

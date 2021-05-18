@@ -54,14 +54,9 @@ func (alS *AttributeService) Shutdown() {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, tnt string, ctx *string, attrsIDs []string,
+func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, tnt string, attrsIDs []string,
 	evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
-	contextVal := utils.MetaDefault
-	if ctx != nil && *ctx != "" {
-		contextVal = *ctx
-	}
-	attrIdxKey := utils.ConcatenatedKey(tnt, contextVal)
 	if len(attrsIDs) != 0 {
 		attrIDs = attrsIDs
 	} else {
@@ -69,7 +64,7 @@ func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, t
 			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 			alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
-			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey,
+			alS.dm, utils.CacheAttributeFilterIndexes, tnt,
 			alS.cgrcfg.AttributeSCfg().IndexedSelects,
 			alS.cgrcfg.AttributeSCfg().NestedFields,
 		)
@@ -106,10 +101,6 @@ func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, t
 				continue
 			}
 			return nil, err
-		}
-		if !(len(aPrfl.Contexts) == 1 && aPrfl.Contexts[0] == utils.MetaAny) &&
-			!utils.IsSliceMember(aPrfl.Contexts, contextVal) {
-			continue
 		}
 		if pass, err := alS.filterS.Pass(apiCtx, tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
@@ -157,8 +148,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 // AttrArgsProcessEvent arguments used for proccess event
 type AttrArgsProcessEvent struct {
 	AttributeIDs []string
-	Context      *string // attach the event to a context
-	ProcessRuns  *int    // number of loops for ProcessEvent
+	ProcessRuns  *int // number of loops for ProcessEvent
 	*utils.CGREvent
 	clnb bool //rpcclonable
 }
@@ -185,10 +175,6 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 			attrIDs[i] = id
 		}
 	}
-	var ctx *string
-	if attr.Context != nil {
-		ctx = utils.StringPointer(*attr.Context)
-	}
 	var procRuns *int
 	if attr.ProcessRuns != nil {
 		procRuns = new(int)
@@ -196,7 +182,6 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 	}
 	return &AttrArgsProcessEvent{
 		AttributeIDs: attrIDs,
-		Context:      ctx,
 		ProcessRuns:  procRuns,
 		CGREvent:     attr.CGREvent.Clone(),
 	}
@@ -206,7 +191,7 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, args.AttributeIDs, evNm, lastID); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -275,7 +260,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, utils.MapStorage{
+	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, args.AttributeIDs, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{

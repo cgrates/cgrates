@@ -103,10 +103,10 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 			procRuns = utils.IntPointer(int(v))
 		}
 	}
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.MetaAccounts)
 	attrArgs := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.FirstNonEmpty(
-			engine.MapEvent(cgrEv.APIOpts).GetStringIgnoreErrors(utils.OptsContext),
-			utils.MetaAccounts)),
 		CGREvent:     cgrEv,
 		AttributeIDs: attrIDs,
 		ProcessRuns:  procRuns,

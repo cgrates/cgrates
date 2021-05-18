@@ -121,9 +121,9 @@ cgrates.org,RoutePrf1,,,,,route1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,
 cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,10,,
 `
 	AttributesCSVContent = `
-#Tenant,ID,Contexts,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
-cgrates.org,ALS1,con1,*string:~*req.Account:1001,20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true
-cgrates.org,ALS1,con2;con3,,20,,*req.Field2,*variable,Sub2,true
+#Tenant,ID,FilterIDs,Weight,AttributeFilterIDs,Path,Type,Value,Blocker
+cgrates.org,ALS1,*string:~*req.Account:1001;*string:~*opts.*context:con1,20,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true
+cgrates.org,ALS1,*string:~*opts.*context:con2|con3,20,,*req.Field2,*variable,Sub2,true
 `
 	ChargersCSVContent = `
 #Tenant,ID,FilterIDs,Weight,RunID,AttributeIDs

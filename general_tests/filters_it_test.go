@@ -998,8 +998,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.new",
 			ID:        "ATTR_1001",
-			FilterIDs: []string{"*prefix:~*req.CustomField:2007|+2007", "*prefix:~*req.CustomField2:2007|+2007", "FLTR_1"},
-			Contexts:  []string{"prefix"},
+			FilterIDs: []string{"*prefix:~*req.CustomField:2007|+2007", "*prefix:~*req.CustomField2:2007|+2007", "FLTR_1", "*string:~*opts.*context:prefix"},
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{},
@@ -1042,9 +1041,10 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 				"CustomField2":    "+2007",
 				utils.Destination: "+1207",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: "prefix",
+			},
 		},
-		Context: utils.StringPointer("prefix"),
 	}
 	var result2 *engine.AttrSProcessEventReply
 	if err := fltrRpc.Call(utils.AttributeSv1ProcessEvent, cgrEv, &result2); err != nil {

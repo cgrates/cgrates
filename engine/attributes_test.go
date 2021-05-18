@@ -38,7 +38,6 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_CHANGE_TENANT_FROM_USER",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~*req.Account:dan@itsyscom.com|adrian@itsyscom.com"},
 		Attributes: []*Attribute{
 			{
@@ -69,9 +68,8 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	}
 
 	attr2 := &AttributeProfile{
-		Tenant:   "adrian.itsyscom.com.co.uk",
-		ID:       "ATTR_MATCH_TENANT",
-		Contexts: []string{utils.MetaAny},
+		Tenant: "adrian.itsyscom.com.co.uk",
+		ID:     "ATTR_MATCH_TENANT",
 		Attributes: []*Attribute{
 			{
 				FilterIDs: nil,

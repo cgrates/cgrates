@@ -306,8 +306,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001"},
+		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -321,8 +320,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 	attrPrf2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.com",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001"},
+		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -463,8 +461,7 @@ func testAttrITMigrateV2(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001"},
+		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -541,8 +538,7 @@ func testAttrITMigrateV3(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Accont:1001"},
+		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -623,8 +619,7 @@ func testAttrITMigrateV4(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~*req.Accont:1001"},
+		FilterIDs: []string{"*string:~*req.Accont:1001", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
@@ -728,8 +723,7 @@ func testAttrITV1ToV5(t *testing.T) {
 	eOut1 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test"},
+		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -742,8 +736,7 @@ func testAttrITV1ToV5(t *testing.T) {
 	eOut2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test"},
+		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -859,8 +852,7 @@ func testAttrITV2ToV5(t *testing.T) {
 	eOut1 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test"},
+		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -873,8 +865,7 @@ func testAttrITV2ToV5(t *testing.T) {
 	eOut2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test"},
+		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -979,8 +970,7 @@ func testAttrITV3ToV5(t *testing.T) {
 	eOut1 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test"},
+		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
@@ -993,8 +983,7 @@ func testAttrITV3ToV5(t *testing.T) {
 	eOut2 := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:test:test"},
+		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},

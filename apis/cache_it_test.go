@@ -124,7 +124,6 @@ func testCacheSSetAttributeProfile(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
-			Contexts:  []string{"*any"},
 			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Attributes: []*engine.ExternalAttribute{
 				{
@@ -232,7 +231,6 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 	expectedAttr := &engine.APIAttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST",
-		Contexts:  []string{"*any"},
 		FilterIDs: []string{"*string:~*req.Account:1002"},
 		Attributes: []*engine.ExternalAttribute{
 			{
@@ -441,8 +439,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -456,8 +453,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -471,8 +467,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",

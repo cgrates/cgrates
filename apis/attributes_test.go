@@ -413,7 +413,6 @@ func TestGetAttributeForEvent(t *testing.T) {
 	attrPrf := &engine.AttributeWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
-			Contexts:  []string{"*any"},
 			ID:        "TestGetAttributeProfile",
 			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Attributes: []*engine.ExternalAttribute{
@@ -447,7 +446,6 @@ func TestGetAttributeForEvent(t *testing.T) {
 	}
 	expAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
-		Contexts:  []string{"*any"},
 		ID:        "TestGetAttributeProfile",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
 		Attributes: []*engine.Attribute{

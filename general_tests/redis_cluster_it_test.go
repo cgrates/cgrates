@@ -190,8 +190,7 @@ func testClsrSetGetAttribute(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ClsrTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
@@ -230,8 +229,7 @@ func testClsrSetGetAttribute2(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ClsrTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
@@ -275,8 +273,7 @@ func testClsrGetAttribute(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ClsrTest2",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,

@@ -1034,7 +1034,6 @@ func (tps AttributeMdls) CSVHeader() (result []string) {
 func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	mst := make(map[string]*utils.TPAttributeProfile)
 	filterMap := make(map[string]utils.StringSet)
-	contextMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		key := &utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -1056,12 +1055,6 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 			}
 			filterMap[key.TenantID()].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
-		if tp.Contexts != utils.EmptyString {
-			if _, has := contextMap[tenID]; !has {
-				contextMap[key.TenantID()] = make(utils.StringSet)
-			}
-			contextMap[key.TenantID()].AddSlice(strings.Split(tp.Contexts, utils.InfieldSep))
-		}
 		if tp.Path != utils.EmptyString {
 			filterIDs := make([]string, 0)
 			if tp.AttributeFilterIDs != utils.EmptyString {
@@ -1081,38 +1074,31 @@ func (tps AttributeMdls) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	for tntID, th := range mst {
 		result[i] = th
 		result[i].FilterIDs = filterMap[tntID].AsSlice()
-		result[i].Contexts = contextMap[tntID].AsSlice()
 		i++
 	}
 	return
 }
 
-func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls AttributeMdls) {
-	if len(th.Attributes) == 0 {
+func APItoModelTPAttribute(ap *utils.TPAttributeProfile) (mdls AttributeMdls) {
+	if len(ap.Attributes) == 0 {
 		return
 	}
-	for i, reqAttribute := range th.Attributes {
+	for i, reqAttribute := range ap.Attributes {
 		mdl := &AttributeMdl{
-			Tpid:   th.TPid,
-			Tenant: th.Tenant,
-			ID:     th.ID,
+			Tpid:   ap.TPid,
+			Tenant: ap.Tenant,
+			ID:     ap.ID,
 		}
 		if i == 0 {
-			mdl.Blocker = th.Blocker
-			for i, val := range th.Contexts {
-				if i != 0 {
-					mdl.Contexts += utils.InfieldSep
-				}
-				mdl.Contexts += val
-			}
-			for i, val := range th.FilterIDs {
+			mdl.Blocker = ap.Blocker
+			for i, val := range ap.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.InfieldSep
 				}
 				mdl.FilterIDs += val
 			}
-			if th.Weight != 0 {
-				mdl.Weight = th.Weight
+			if ap.Weight != 0 {
+				mdl.Weight = ap.Weight
 			}
 		}
 		mdl.Path = reqAttribute.Path
@@ -1131,14 +1117,10 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		Weight:     tpAttr.Weight,
 		Blocker:    tpAttr.Blocker,
 		FilterIDs:  make([]string, len(tpAttr.FilterIDs)),
-		Contexts:   make([]string, len(tpAttr.Contexts)),
 		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
 	}
 	for i, fli := range tpAttr.FilterIDs {
 		attrPrf.FilterIDs[i] = fli
-	}
-	for i, context := range tpAttr.Contexts {
-		attrPrf.Contexts[i] = context
 	}
 	for i, reqAttr := range tpAttr.Attributes {
 		if reqAttr.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
@@ -1164,16 +1146,12 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 		Tenant:     attrPrf.Tenant,
 		ID:         attrPrf.ID,
 		FilterIDs:  make([]string, len(attrPrf.FilterIDs)),
-		Contexts:   make([]string, len(attrPrf.Contexts)),
 		Attributes: make([]*utils.TPAttribute, len(attrPrf.Attributes)),
 		Blocker:    attrPrf.Blocker,
 		Weight:     attrPrf.Weight,
 	}
 	for i, fli := range attrPrf.FilterIDs {
 		tpAttr.FilterIDs[i] = fli
-	}
-	for i, fli := range attrPrf.Contexts {
-		tpAttr.Contexts[i] = fli
 	}
 	for i, attr := range attrPrf.Attributes {
 		tpAttr.Attributes[i] = &utils.TPAttribute{

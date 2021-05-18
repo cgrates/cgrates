@@ -109,7 +109,7 @@ func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.Attr
 		return utils.APIErrorHandler(err)
 	}
 	if err := admS.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), alsPrf.Tenant, utils.CacheAttributeProfiles,
-		alsPrf.TenantID(), &alsPrf.FilterIDs, alsPrf.Contexts, arg.APIOpts); err != nil {
+		alsPrf.TenantID(), &alsPrf.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

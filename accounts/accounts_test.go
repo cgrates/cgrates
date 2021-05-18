@@ -1346,9 +1346,8 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 
 	// provision the data
 	atrPrfl := &engine.AttributeProfile{
-		Tenant:   utils.CGRateSorg,
-		ID:       "ATTR_ATTACH_RATES_PROFILE_RP_2",
-		Contexts: []string{utils.MetaAny},
+		Tenant: utils.CGRateSorg,
+		ID:     "ATTR_ATTACH_RATES_PROFILE_RP_2",
 		Attributes: []*engine.Attribute{
 			{
 				Path:  "*opts.RateSProfile",

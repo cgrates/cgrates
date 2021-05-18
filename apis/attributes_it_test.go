@@ -161,7 +161,6 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
-			Contexts:  []string{"*any"},
 			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Attributes: []*engine.ExternalAttribute{
 				{
@@ -188,7 +187,6 @@ func testAttributeSetAttributeProfile(t *testing.T) {
 	expectedAttr := &engine.APIAttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST",
-		Contexts:  []string{"*any"},
 		FilterIDs: []string{"*string:~*req.Account:1002"},
 		Attributes: []*engine.ExternalAttribute{
 			{
@@ -262,9 +260,9 @@ func testGetAttributeProfileBeforeSet2(t *testing.T) {
 func testAttributeSetAttributeProfile2(t *testing.T) {
 	attrPrf := &engine.AttributeWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
-			Tenant:   utils.CGRateSorg,
-			ID:       "TEST_ATTRIBUTES_IT_TEST_SECOND",
-			Contexts: []string{"*sessions"},
+			Tenant:    utils.CGRateSorg,
+			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
+			FilterIDs: []string{"*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*tenant",
@@ -283,9 +281,9 @@ func testAttributeSetAttributeProfile2(t *testing.T) {
 	}
 
 	expectedAttr := &engine.APIAttributeProfile{
-		Tenant:   utils.CGRateSorg,
-		ID:       "TEST_ATTRIBUTES_IT_TEST_SECOND",
-		Contexts: []string{"*sessions"},
+		Tenant:    utils.CGRateSorg,
+		ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
+		FilterIDs: []string{"*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.ExternalAttribute{
 			{
 				Path:  "*tenant",
@@ -370,8 +368,7 @@ func testAttributeSetAttributeProfileBrokenReference(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
-			Contexts:  []string{"*sessions"},
-			FilterIDs: []string{"invalid_filter_format"},
+			FilterIDs: []string{"invalid_filter_format", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*tenant",
@@ -400,13 +397,15 @@ func testAttributeSGetAttributeForEventMissingEvent(t *testing.T) {
 
 func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaCDRs),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 			Event: map[string]interface{}{
 				utils.AccountField: "dan",
 				utils.Destination:  "+491511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaCDRs,
 			},
 		},
 	}
@@ -415,7 +414,6 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
-			Contexts:  []string{utils.MetaAny},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -451,7 +449,6 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
-		Contexts:  []string{utils.MetaAny},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -470,7 +467,6 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 
 func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaAny),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
@@ -490,7 +486,6 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
-		Contexts:  []string{utils.MetaAny},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -509,13 +504,15 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 
 func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaCDRs),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 			Event: map[string]interface{}{
 				utils.AccountField: "dann",
 				utils.Destination:  "+491511231234",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaCDRs,
 			},
 		},
 	}
@@ -528,7 +525,6 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 
 func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -536,14 +532,16 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				utils.AccountField: "1007",
 				utils.Destination:  "+491511231234",
 			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
-		Contexts:  []string{utils.MetaCDRs, utils.MetaSessionS},
+		FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z", "*string:~*opts.*context:*cdrs|*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -569,8 +567,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_1",
-			FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z"},
-			Contexts:  []string{utils.MetaCDRs, utils.MetaSessionS},
+			FilterIDs: []string{"*string:~*req.Account:1007", "*ai:~*req.AnswerTime:2014-01-14T00:00:00Z", "*string:~*opts.*context:*cdrs|*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -602,7 +599,6 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	}
 	attrReply.Compile()
 	eAttrPrf.Compile()
-	sort.Strings(attrReply.Contexts)
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
@@ -617,7 +613,6 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 
 	attrPrf.Compile()
 	// Populate private variables in RSRParsers
-	sort.Strings(attrReply.Contexts)
 	if !reflect.DeepEqual(eAttrPrf, attrPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attrPrf))
 	}
@@ -630,12 +625,14 @@ func testAttributeProcessEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 	args := &engine.AttrArgsProcessEvent{
-		Context:     utils.StringPointer(utils.MetaCDRs),
 		ProcessRuns: utils.IntPointer(1),
 		CGREvent: &utils.CGREvent{
 			Event: map[string]interface{}{
 				utils.ToR:          utils.MetaVoice,
 				utils.AccountField: "1002",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaCDRs,
 			},
 		},
 	}
@@ -669,8 +666,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Search_and_replace",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Category:call", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.Category:call", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Category",
@@ -690,12 +686,14 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
-		Context:     utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
 			Event: map[string]interface{}{
 				"Category": "call",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -726,8 +724,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -741,8 +738,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -756,8 +752,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.NotFound:NotFound", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -788,13 +783,15 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"InitialField": "InitialValue",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -832,8 +829,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
@@ -847,8 +843,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -862,8 +857,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
+			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
@@ -894,13 +888,15 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"InitialField": "InitialValue",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}

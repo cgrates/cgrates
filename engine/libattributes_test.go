@@ -31,8 +31,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 	external := &APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*ExternalAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
@@ -45,8 +44,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 	expAttr := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
@@ -71,8 +69,7 @@ func TestConvertExternalToProfileMissing(t *testing.T) {
 	external := &APIAttributeProfile{
 		Tenant:     "cgrates.org",
 		ID:         "ATTR_ID",
-		Contexts:   []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*ExternalAttribute{},
 		Weight:     20,
 	}
@@ -88,8 +85,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 	external := &APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*ExternalAttribute{
 			{
 				Path: utils.MetaReq + utils.NestingSep + "Account",
@@ -108,9 +104,8 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 func TestNewAttributeFromInline(t *testing.T) {
 	attrID := "*sum:*req.Field2:10&~*req.NumField&20;*sum:*req.Field3:10&~*req.NumField4&20"
 	expAttrPrf1 := &AttributeProfile{
-		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:       attrID,
-		Contexts: []string{utils.MetaAny},
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     attrID,
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
@@ -135,9 +130,8 @@ func TestNewAttributeFromInline(t *testing.T) {
 func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 	attrID := "*constant:*req.RequestType:*rated;*constant:*req.Category:call"
 	expAttrPrf1 := &AttributeProfile{
-		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:       attrID,
-		Contexts: []string{utils.MetaAny},
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     attrID,
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
@@ -176,9 +170,8 @@ func TestNewAttributeFromInlineWithMultipleRuns2(t *testing.T) {
 func TestNewAttributeFromInlineWithMultipleVaslues(t *testing.T) {
 	attrID := "*variable:*req.Category:call_&*req.OriginID;*constant:*req.RequestType:*rated"
 	expAttrPrf1 := &AttributeProfile{
-		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
-		ID:       attrID,
-		Contexts: []string{utils.MetaAny},
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     attrID,
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",

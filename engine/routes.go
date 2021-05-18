@@ -573,10 +573,10 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 				processRuns = utils.IntPointer(int(v))
 			}
 		}
+		args.CGREvent.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+			utils.IfaceAsString(args.CGREvent.APIOpts[utils.OptsContext]),
+			utils.MetaRoutes)
 		attrArgs := &AttrArgsProcessEvent{
-			Context: utils.StringPointer(utils.FirstNonEmpty(
-				utils.IfaceAsString(args.CGREvent.Event[utils.OptsContext]),
-				utils.MetaRoutes)),
 			CGREvent:    args.CGREvent,
 			ProcessRuns: processRuns,
 		}

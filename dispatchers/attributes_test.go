@@ -84,10 +84,7 @@ func TestDspAttributeSv1GetAttributeForEventError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	processEvent := &engine.AttrArgsProcessEvent{
-		AttributeIDs: nil,
-		Context:      nil,
-		ProcessRuns:  nil,
-		CGREvent:     &utils.CGREvent{},
+		CGREvent: &utils.CGREvent{},
 	}
 	var reply *engine.AttributeProfile
 	err := dspSrv.AttributeSv1GetAttributeForEvent(processEvent, reply)
@@ -102,9 +99,6 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	processEvent := &engine.AttrArgsProcessEvent{
-		AttributeIDs: nil,
-		Context:      nil,
-		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
@@ -121,9 +115,6 @@ func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	processEvent := &engine.AttrArgsProcessEvent{
-		AttributeIDs: nil,
-		Context:      nil,
-		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
@@ -141,9 +132,6 @@ func TestDspAttributeSv1ProcessEventError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	processEvent := &engine.AttrArgsProcessEvent{
-		AttributeIDs: nil,
-		Context:      nil,
-		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
@@ -162,9 +150,6 @@ func TestDspAttributeSv1ProcessEventErrorAttributeSConns(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	processEvent := &engine.AttrArgsProcessEvent{
-		AttributeIDs: nil,
-		Context:      nil,
-		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
