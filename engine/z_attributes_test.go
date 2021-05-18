@@ -441,7 +441,7 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), "", false, false); err != nil {
+		attrPrf.Tenant, "", false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -456,17 +456,25 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS), "", false, false); err != nil {
+		attrPrf.Tenant, "", false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 		}
 	}
+
+	expected := map[string]utils.StringSet{
+		"*string:*opts.*context:*sessions": {
+			"AttrPrf": {},
+		},
+	}
 	//verify if old index was deleted ( context *any)
-	if _, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), "", false, false); err != utils.ErrNotFound {
+	if rcv, err := dmAtr.GetIndexes(context.TODO(), utils.CacheAttributeFilterIndexes,
+		attrPrf.Tenant, "", false, false); err != nil {
 		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expected, rcv)
 	}
 }
 

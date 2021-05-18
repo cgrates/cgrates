@@ -393,7 +393,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:con1|con2|con3"},
+			FilterIDs: []string{"*string:~*opts.*context:con1", "*string:~*opts.*context:con2|con3", "*string:~*req.Account:1001"},
 			Attributes: []*utils.TPAttribute{
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
@@ -412,7 +412,9 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			Weight:  20,
 		},
 	}
+
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}
+	sort.Strings(csvr.attributeProfiles[resKey].FilterIDs)
 	if len(csvr.attributeProfiles) != len(eAttrProfiles) {
 		t.Errorf("Failed to load attributeProfiles: %s", utils.ToIJSON(csvr.attributeProfiles))
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Tenant, csvr.attributeProfiles[resKey].Tenant) {
