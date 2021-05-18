@@ -188,15 +188,15 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 			{Tag: "Weight",
 				Path:  "Weight",
 				Type:  utils.MetaString,
-				Value: config.NewRSRParsersMustCompile("3", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("10", utils.InfieldSep)},
 			{Tag: "Path",
 				Path:  "Path",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).5", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
 			{Tag: "Value",
 				Path:  "Value",
 				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).6", utils.InfieldSep)},
+				Value: config.NewRSRParsersMustCompile("~*file(File1.csv).7", utils.InfieldSep)},
 		},
 	}
 	rdr1 := io.NopCloser(strings.NewReader(file1CSV))
