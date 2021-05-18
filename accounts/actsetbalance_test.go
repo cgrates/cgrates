@@ -20,6 +20,7 @@ package accounts
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -181,8 +182,12 @@ func TestActSetAccountFields(t *testing.T) {
 		t.Error(err)
 	} else if err := actSetAccountFields(accPrf, []string{utils.ThresholdIDs}, "TH_ID1"); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedAccprf, accPrf) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAccprf), utils.ToJSON(accPrf))
+	} else {
+		sort.Strings(expectedAccprf.FilterIDs)
+		sort.Strings(accPrf.FilterIDs)
+		if !reflect.DeepEqual(expectedAccprf, accPrf) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedAccprf), utils.ToJSON(accPrf))
+		}
 	}
 
 	expected := "WRONG_PATH"

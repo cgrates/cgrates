@@ -140,7 +140,7 @@ cgrates.org,MOCK_RELOAD_ID,20
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaLoad); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.MetaLoad); err != nil {
 		t.Error(err)
 	}
 
@@ -159,7 +159,7 @@ cgrates.org,MOCK_RELOAD_ID,20
 		},
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaLoad); err == nil || err.Error() != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.MetaLoad); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -238,7 +238,7 @@ cgrates.org,MOCK_RELOAD_ID,20
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaReload); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 
@@ -257,7 +257,7 @@ cgrates.org,MOCK_RELOAD_ID,20
 		},
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.MetaReload); err == nil || err.Error() != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.MetaReload); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -332,7 +332,7 @@ cgrates.org,MOCK_RELOAD_ID
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAttributes, utils.MetaRemove); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.MetaRemove); err != nil {
 		t.Error(err)
 	}
 
@@ -351,7 +351,7 @@ cgrates.org,MOCK_RELOAD_ID
 		},
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.processContent(utils.MetaAttributes, utils.MetaRemove); err == nil || err.Error() != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.MetaRemove); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -370,7 +370,7 @@ cgrates.org,MOCK_RELOAD_ID
 		},
 	}
 	expected = "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.processContent(utils.MetaAttributes, "invalid_caching_api"); err == nil || err.Error() != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, "invalid_caching_api"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -436,7 +436,7 @@ cgrates.org,MOCK_RELOAD_ID
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAttributes, utils.MetaClear); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.MetaClear); err != nil {
 		t.Error(err)
 	}
 
@@ -453,7 +453,7 @@ cgrates.org,MOCK_RELOAD_ID
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAttributes, utils.MetaNone); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 
@@ -472,7 +472,7 @@ cgrates.org,MOCK_RELOAD_ID
 		},
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.processContent(utils.MetaAttributes, utils.MetaClear); err == nil || err.Error() != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.MetaClear); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -551,10 +551,10 @@ cgrates.org,MOCK_RELOAD_2
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_2",
 	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaReload); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 
@@ -574,11 +574,11 @@ cgrates.org,MOCK_RELOAD_2
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaReload); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaReload); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -657,10 +657,10 @@ cgrates.org,MOCK_RELOAD_3
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_3",
 	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaLoad); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaLoad); err != nil {
 		t.Error(err)
 	}
 
@@ -680,11 +680,11 @@ cgrates.org,MOCK_RELOAD_3
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaLoad); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaLoad); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -763,10 +763,10 @@ cgrates.org,MOCK_RELOAD_4
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_4",
 	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaRemove); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaRemove); err != nil {
 		t.Error(err)
 	}
 
@@ -786,11 +786,11 @@ cgrates.org,MOCK_RELOAD_4
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaRemove); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaRemove); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -807,10 +807,10 @@ cgrates.org,MOCK_RELOAD_4
 			},
 		},
 	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaNone); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaNone); err != nil {
 		t.Error(err)
 	}
 }
@@ -880,10 +880,10 @@ cgrates.org,MOCK_RELOAD_3
 		Tenant: "cgrates.org",
 		ID:     "MOCK_RELOAD_3",
 	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaClear); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaClear); err != nil {
 		t.Error(err)
 	}
 
@@ -903,11 +903,11 @@ cgrates.org,MOCK_RELOAD_3
 	}
 
 	//set and remove again from database
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.removeContent(utils.MetaAttributes, utils.MetaClear); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.MetaClear); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -924,11 +924,11 @@ cgrates.org,MOCK_RELOAD_3
 			},
 		},
 	}
-	if err := ldr.dm.SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+	if err := ldr.dm.SetAttributeProfile(context.Background(), attrPrf, true); err != nil {
 		t.Error(err)
 	}
 	expected = "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.removeContent(utils.MetaAttributes, "invalid_caching_api"); err == nil || err.Error() != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, "invalid_caching_api"); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
