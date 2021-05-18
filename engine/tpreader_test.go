@@ -82,7 +82,7 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply interface{}) error {
-				expArgs := utils.AttrReloadCacheWithAPIOpts{
+				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
@@ -231,7 +231,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1LoadCache: func(_ *context.Context, args, reply interface{}) error {
-				expArgs := utils.AttrReloadCacheWithAPIOpts{
+				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
@@ -302,7 +302,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	mCC := &ccMock{
 		calls: map[string]func(_ *context.Context, args interface{}, reply interface{}) error{
 			utils.CacheSv1RemoveItems: func(_ *context.Context, args, reply interface{}) error {
-				expArgs := utils.AttrReloadCacheWithAPIOpts{
+				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]interface{}{
 						utils.Subsys: utils.MetaChargers,
 					},
@@ -714,7 +714,7 @@ func TestGetLoadedIdsError(t *testing.T) {
 func TestReloadCache(t *testing.T) {
 	data := NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]interface{}{},
 		Tenant:  "",
 		ArgsCache: map[string][]string{

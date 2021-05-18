@@ -101,11 +101,11 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 
 	//cannot set AttributeProfile when dryrun is true
 	ldr.dryRun = true
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
-	//processContent successfully when dryrun is false
+	//processContent context.Background(), successfully when dryrun is false
 	ldr.dryRun = false
 	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
@@ -115,7 +115,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -163,7 +163,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expectedErr := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err == nil || err != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -221,7 +221,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 			"File2.csv": &openedCSVFile{fileName: "File2.csv",
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	eAP := &engine.AttributeProfile{
@@ -311,7 +311,7 @@ func TestLoaderProcessResource(t *testing.T) {
 			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	eResPrf1 := &engine.ResourceProfile{
@@ -402,11 +402,11 @@ func TestLoaderProcessFilters(t *testing.T) {
 
 	//Cannot set filterProfile when dryrun is true
 	ldr.dryRun = true
-	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
-	//processContent when dryrun is false
+	//processContent context.Background(), when dryrun is false
 	ldr.dryRun = false
 	rdr = io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
 	csvRdr = csv.NewReader(rdr)
@@ -416,7 +416,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -552,7 +552,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 			utils.ThresholdsCsv: &openedCSVFile{fileName: utils.ThresholdsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -591,7 +591,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -666,7 +666,7 @@ func TestLoaderProcessStats(t *testing.T) {
 			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -719,7 +719,7 @@ func TestLoaderProcessStats(t *testing.T) {
 			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -757,10 +757,10 @@ not_a_valid_metric_type,true,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expected := "SERVER_ERROR: unsupported metric type <not_a_valid_metric_type>"
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -777,10 +777,10 @@ not_a_valid_metric_type,true,
 			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -867,7 +867,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -944,7 +944,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 			utils.RoutesCsv: &openedCSVFile{fileName: utils.RoutesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -986,7 +986,7 @@ cgrates.org,ACTPRF_ID1
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -1003,7 +1003,7 @@ cgrates.org,ACTPRF_ID1
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -1054,7 +1054,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -1087,7 +1087,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -1190,7 +1190,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -1247,7 +1247,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -1308,7 +1308,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -1347,7 +1347,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -1412,7 +1412,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := ldr.removeContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -1434,7 +1434,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 	}
 
 	//now should be empty, nothing to remove
-	if err := ldr.removeContent(utils.MetaAttributes, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -1448,7 +1448,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.removeContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -1543,7 +1543,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -1654,7 +1654,7 @@ func TestLoaderProcessRateProfile(t *testing.T) {
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -1761,7 +1761,7 @@ cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 			utils.RateProfilesCsv: &openedCSVFile{fileName: utils.RateProfilesCsv,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -1835,7 +1835,7 @@ cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,,0.06,1m,1s
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -2099,7 +2099,7 @@ cgrates.org,RP1,
 				rdr: rdr1, csvRdr: csvRdr1}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -2170,7 +2170,7 @@ cgrates.org,RP1,
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -2287,7 +2287,7 @@ cgrates.org,RP2
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	expectedErr := "cannot find RateIDs in <map[ID:RP2 Tenant:cgrates.org]>"
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -2450,7 +2450,7 @@ func TestLoaderActionProfile(t *testing.T) {
 			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -2533,7 +2533,7 @@ func TestLoaderActionProfile(t *testing.T) {
 			utils.ActionProfilesCsv: &openedCSVFile{fileName: utils.ActionProfilesCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -2645,7 +2645,7 @@ cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.T
 		},
 	}
 	expectedErr := "invalid syntax"
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
+	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
 	}
 
@@ -2670,7 +2670,7 @@ cgrates.org,ONE_TIME_ACT,,,,,TOPUP_TEST_VOICE,,false,0s,*add_balance,,*balance.T
 		},
 	}
 	expectedErr = "invalid syntax"
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
+	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || !strings.Contains(err.Error(), expectedErr) {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
 	}
 }
@@ -2717,7 +2717,7 @@ cgrates.org,12,NOT_A_BOOLEAN
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expErr := `strconv.ParseBool: parsing "NOT_A_BOOLEAN": invalid syntax`
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
+	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expErr {
 		t.Errorf("Expected %+v, received %+v", expErr, err)
 	}
 }
@@ -2751,7 +2751,7 @@ true
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expectedErr := "strconv.ParseFloat: parsing \"true\": invalid syntax"
-	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaAttributes, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Error(err)
 	}
 }
@@ -2785,7 +2785,7 @@ NOT_A_BOOLEAN
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expectedErr := "strconv.ParseBool: parsing \"NOT_A_BOOLEAN\": invalid syntax"
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -2819,7 +2819,7 @@ func TestLoadResourcesAsStructErrConversion(t *testing.T) {
 				rdr: rdr, csvRdr: csvRdr}},
 	}
 	expectedErr := "time: unknown unit \"ss\" in duration \"12ss\""
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -2857,7 +2857,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -2895,7 +2895,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -2933,7 +2933,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -2971,7 +2971,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3009,7 +3009,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3047,7 +3047,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3085,7 +3085,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3123,7 +3123,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3174,7 +3174,7 @@ cgrates.org,1001,MonetaryBalance,fltr1&fltr2;100;fltr3
 		},
 	}
 	expectedErr := "invlid key: <fltr1&fltr2;100;fltr3> for BalanceUnitFactors"
-	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3212,7 +3212,7 @@ NOT_UINT
 		},
 	}
 	expectedErr := "cannot update unsupported struct field: 0"
-	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -3258,7 +3258,7 @@ cgrates.org,NewRes1
 	}
 
 	//because of dryrun, database will be empty again
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3284,7 +3284,7 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err != nil {
+	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3307,7 +3307,7 @@ cgrates.org,NewRes1
 
 	//cannot remove when dryrun is on true
 	ldr.dryRun = true
-	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3321,7 +3321,7 @@ cgrates.org,NewRes1
 			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
 				rdr: rdr, csvRdr: rdrCsv}},
 	}
-	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3331,7 +3331,7 @@ cgrates.org,NewRes1
 	}
 
 	//nothing to remove
-	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3346,7 +3346,7 @@ cgrates.org,NewRes1
 				rdr: rdr, csvRdr: rdrCsv}},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3396,12 +3396,12 @@ cgrates.org,FILTERS_REM_1
 	if err := ldr.dm.SetFilter(context.Background(), eFltr1, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3419,7 +3419,7 @@ cgrates.org,FILTERS_REM_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaFilters, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3439,7 +3439,7 @@ cgrates.org,FILTERS_REM_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaFilters, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3489,12 +3489,12 @@ cgrates.org,REM_STATS_1
 	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3512,7 +3512,7 @@ cgrates.org,REM_STATS_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3532,7 +3532,7 @@ cgrates.org,REM_STATS_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3582,12 +3582,12 @@ cgrates.org,REM_THRESHOLDS_1,
 	if err := ldr.dm.SetThresholdProfile(expThresholdPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3605,7 +3605,7 @@ cgrates.org,REM_THRESHOLDS_1,
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3625,7 +3625,7 @@ cgrates.org,REM_THRESHOLDS_1,
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3675,12 +3675,12 @@ cgrates.org,ROUTES_REM_1
 	if err := ldr.dm.SetRouteProfile(expRoutes, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3698,7 +3698,7 @@ cgrates.org,ROUTES_REM_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaRoutes, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3718,7 +3718,7 @@ cgrates.org,ROUTES_REM_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaRoutes, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3767,12 +3767,12 @@ cgrates.org,REM_ROUTES_1
 	}
 	if err := ldr.dm.SetChargerProfile(expChargers, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remvoe from database
-	if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3790,7 +3790,7 @@ cgrates.org,REM_ROUTES_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaChargers, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3811,7 +3811,7 @@ cgrates.org,REM_ROUTES_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaChargers, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3860,12 +3860,12 @@ cgrates.org,REM_DISPATCHERS_1
 	}
 	if err := ldr.dm.SetDispatcherProfile(expDispatchers, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remvoe from database
-	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3883,7 +3883,7 @@ cgrates.org,REM_DISPATCHERS_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -3903,7 +3903,7 @@ cgrates.org,REM_DISPATCHERS_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatchers, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -3954,12 +3954,12 @@ cgrates.org,REM_DISPATCHERH_1
 	}
 	if err := ldr.dm.SetDispatcherHost(expDispatchers); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3977,7 +3977,7 @@ cgrates.org,REM_DISPATCHERH_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -4038,7 +4038,7 @@ func TestProcessContentEmptyDataBase(t *testing.T) {
 		},
 	}
 	expectedErr := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err != expectedErr {
+	if err := ldr.processContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err == nil || err != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -4087,12 +4087,12 @@ cgrates.org,REM_RATEPROFILE_1
 	}
 	if err := ldr.dm.SetRateProfile(context.Background(), expRtPrf, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remvoe from database
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -4110,7 +4110,7 @@ cgrates.org,REM_RATEPROFILE_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
@@ -4175,7 +4175,7 @@ cgrates.org,REM_ACTPROFILE_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -4187,12 +4187,12 @@ cgrates.org,REM_ACTPROFILE_1
 	}
 	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -4210,7 +4210,7 @@ cgrates.org,REM_ACTPROFILE_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -4254,7 +4254,7 @@ cgrates.org,REM_ACTPROFILE_1
 		},
 	}
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaAccounts, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -4266,12 +4266,12 @@ cgrates.org,REM_ACTPROFILE_1
 	}
 	if err := ldr.dm.SetAccount(context.Background(), acntPrf, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaAccounts, utils.EmptyString); err != nil {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 
 	//nothing to remove from database
-	if err := ldr.removeContent(utils.MetaAccounts, utils.EmptyString); err != utils.ErrNotFound {
+	if err := ldr.removeContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -4289,7 +4289,7 @@ cgrates.org,REM_ACTPROFILE_1
 			},
 		},
 	}
-	if err := ldr.removeContent(utils.MetaAccounts, utils.EmptyString); err != nil {
+	if err := ldr.removeContent(context.Background(), utils.MetaAccounts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 }
@@ -4341,7 +4341,7 @@ cgrates.org,REM_ACTPROFILE_s
 	expectedErr := "NOT_FOUND"
 	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -4393,7 +4393,7 @@ cgrates.org,REM_ACTPROFILE_s
 	expectedErr := "NOT_FOUND"
 	if err := ldr.dm.SetActionProfile(context.Background(), actRtPrf, true); err != nil {
 		t.Error(err)
-	} else if err := ldr.removeContent(utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaActionProfiles, utils.EmptyString); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -4471,7 +4471,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
 	ldr.dm = nil
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 
@@ -4488,7 +4488,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 		},
 	}
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{"INVALID_FLAGS"})
-	if err := ldr.processContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 
@@ -4499,7 +4499,7 @@ cgrates.org,REM_RATEPROFILE_1,RT_WEEKEND
 
 	ldr.dm = nil
 	ldr.flagsTpls[utils.MetaRateProfiles] = utils.FlagsWithParamsFromSlice([]string{utils.MetaPartial})
-	if err := ldr.removeContent(utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaRateProfiles, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(err))
 	}
 }
@@ -4555,9 +4555,9 @@ cgrates.org,REM_THRESHOLDS_1,
 	newData := &dataDBMockError{}
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := utils.ErrNoDatabaseConn
-	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.removeContent(utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
+	} else if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
@@ -4614,9 +4614,9 @@ cgrates.org,REM_STATS_1
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := utils.ErrNoDatabaseConn
 
-	if err := ldr.removeContent(utils.MetaStats, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err == nil || err != expected {
+	} else if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4669,9 +4669,9 @@ cgrates.org,NewRes1
 	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := utils.ErrNoDatabaseConn
 
-	if err := ldr.removeContent(utils.MetaResources, utils.EmptyString); err == nil || err != expected {
+	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
-	} else if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err == nil || err != expected {
+	} else if err := ldr.processContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -4711,7 +4711,7 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -4753,7 +4753,7 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaAttributes, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaAttributes, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -4762,7 +4762,7 @@ func TestStoreLoadedDataResources(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -4809,7 +4809,7 @@ func TestStoreLoadedDataResources(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaResources, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaResources, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -4818,7 +4818,7 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -4860,7 +4860,7 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaFilters, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaFilters, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -4869,7 +4869,7 @@ func TestStoreLoadedDataStats(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -4916,7 +4916,7 @@ func TestStoreLoadedDataStats(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaStats, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaStats, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -4925,7 +4925,7 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -4972,7 +4972,7 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaThresholds, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaThresholds, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -4981,7 +4981,7 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -5023,7 +5023,7 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaRoutes, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaRoutes, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -5032,7 +5032,7 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -5074,7 +5074,7 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaChargers, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaChargers, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -5083,7 +5083,7 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -5125,7 +5125,7 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaDispatchers, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaDispatchers, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
@@ -5134,7 +5134,7 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -5177,7 +5177,7 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.storeLoadedData(utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
+	if err := ldr.storeLoadedData(context.Background(), utils.MetaDispatcherHosts, lds, utils.MetaReload); err != nil {
 		t.Error(err)
 	}
 }
