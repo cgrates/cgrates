@@ -113,13 +113,13 @@ func (ldr *Loader) ListenAndServe(stopChan chan struct{}) (err error) {
 }
 
 // ProcessFolder will process the content in the folder with locking
-func (ldr *Loader) ProcessFolder(caching, loadOption string, stopOnError bool) (err error) {
+func (ldr *Loader) ProcessFolder(ctx *context.Context, caching, loadOption string, stopOnError bool) (err error) {
 	if err = ldr.lockFolder(); err != nil {
 		return
 	}
 	defer ldr.unlockFolder()
 	for ldrType := range ldr.rdrs {
-		if err = ldr.processFiles(ldrType, caching, loadOption); err != nil {
+		if err = ldr.processFiles(ctx, ldrType, caching, loadOption); err != nil {
 			if stopOnError {
 				return
 			}
@@ -128,7 +128,8 @@ func (ldr *Loader) ProcessFolder(caching, loadOption string, stopOnError bool) (
 			continue
 		}
 	}
-	return ldr.moveFiles()
+	err = ldr.moveFiles()
+	return err
 }
 
 // lockFolder will attempt to lock the folder by creating the lock file
@@ -180,7 +181,7 @@ func (ldr *Loader) moveFiles() (err error) {
 	return
 }
 
-func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err error) {
+func (ldr *Loader) processFiles(ctx *context.Context, loaderType, caching, loadOption string) (err error) {
 	for fName := range ldr.rdrs[loaderType] {
 		var rdr *os.File
 		if rdr, err = os.Open(path.Join(ldr.tpInDir, fName)); err != nil {
@@ -196,11 +197,11 @@ func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err err
 	// based on load option will store or remove the content
 	switch loadOption {
 	case utils.MetaStore:
-		if err = ldr.processContent(loaderType, caching); err != nil {
+		if err = ldr.processContent(ctx, loaderType, caching); err != nil {
 			return
 		}
 	case utils.MetaRemove:
-		if err = ldr.removeContent(loaderType, caching); err != nil {
+		if err = ldr.removeContent(ctx, loaderType, caching); err != nil {
 			return
 		}
 	}
@@ -208,7 +209,7 @@ func (ldr *Loader) processFiles(loaderType, caching, loadOption string) (err err
 }
 
 //processContent will process the contect and will store it into database
-func (ldr *Loader) processContent(loaderType, caching string) (err error) {
+func (ldr *Loader) processContent(ctx *context.Context, loaderType, caching string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
 	lineNr := 0
@@ -253,7 +254,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 			for prevTntID = range ldr.bufLoaderData {
 				break // have stolen the existing key in buffer
 			}
-			if err = ldr.storeLoadedData(loaderType,
+			if err = ldr.storeLoadedData(ctx, loaderType,
 				map[string][]LoaderData{prevTntID: ldr.bufLoaderData[prevTntID]}, caching); err != nil {
 				return
 			}
@@ -266,7 +267,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 	for tntID = range ldr.bufLoaderData {
 		break // get the first tenantID
 	}
-	if err = ldr.storeLoadedData(loaderType,
+	if err = ldr.storeLoadedData(ctx, loaderType,
 		map[string][]LoaderData{tntID: ldr.bufLoaderData[tntID]}, caching); err != nil {
 		return
 	}
@@ -274,7 +275,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 	return
 }
 
-func (ldr *Loader) storeLoadedData(loaderType string,
+func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 	lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
 	cacheArgs := make(map[string][]string)
@@ -303,7 +304,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, apf.TenantID())
-				if err := ldr.dm.SetAttributeProfile(context.TODO(), apf, true); err != nil {
+				if err := ldr.dm.SetAttributeProfile(ctx, apf, true); err != nil {
 					return err
 				}
 			}
@@ -376,7 +377,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, fltrPrf.TenantID())
-				if err := ldr.dm.SetFilter(context.TODO(), fltrPrf, true); err != nil {
+				if err := ldr.dm.SetFilter(ctx, fltrPrf, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.FilterIDs] = ids
@@ -599,11 +600,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				// get IDs so we can reload in cache
 				ids = append(ids, rpl.TenantID())
 				if ldr.flagsTpls[loaderType].GetBool(utils.MetaPartial) {
-					if err := ldr.dm.SetRateProfileRates(context.TODO(), rpl, true); err != nil {
+					if err := ldr.dm.SetRateProfileRates(ctx, rpl, true); err != nil {
 						return err
 					}
 				} else {
-					if err := ldr.dm.SetRateProfile(context.TODO(), rpl, true); err != nil {
+					if err := ldr.dm.SetRateProfile(ctx, rpl, true); err != nil {
 						return err
 					}
 				}
@@ -634,7 +635,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, acp.TenantID())
-				if err := ldr.dm.SetActionProfile(context.TODO(), acp, true); err != nil {
+				if err := ldr.dm.SetActionProfile(ctx, acp, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.ActionProfileIDs] = ids
@@ -667,21 +668,20 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, acp.TenantID())
-				if err := ldr.dm.SetAccount(context.TODO(), acp, true); err != nil {
+				if err := ldr.dm.SetAccount(ctx, acp, true); err != nil {
 					return err
 				}
 			}
 		}
 	}
-
 	if len(ldr.cacheConns) != 0 {
-		return engine.CallCache(ldr.connMgr, context.TODO(), ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false)
+		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false)
 	}
 	return
 }
 
 //removeContent will process the content and will remove it from database
-func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
+func (ldr *Loader) removeContent(ctx *context.Context, loaderType, caching string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
 	lineNr := 0
@@ -726,7 +726,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 			for prevTntID = range ldr.bufLoaderData {
 				break // have stolen the existing key in buffer
 			}
-			if err = ldr.removeLoadedData(loaderType,
+			if err = ldr.removeLoadedData(ctx, loaderType,
 				map[string][]LoaderData{prevTntID: ldr.bufLoaderData[prevTntID]}, caching); err != nil {
 				return
 			}
@@ -739,7 +739,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 	for tntID = range ldr.bufLoaderData {
 		break // get the first tenantID
 	}
-	if err = ldr.removeLoadedData(loaderType,
+	if err = ldr.removeLoadedData(ctx, loaderType,
 		map[string][]LoaderData{tntID: ldr.bufLoaderData[tntID]}, caching); err != nil {
 		return
 	}
@@ -749,7 +749,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 
 //removeLoadedData will remove the data from database
 //since we remove we don't need to compose the struct we only need the Tenant and the ID of the profile
-func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderData, caching string) (err error) {
+func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
 	cacheArgs := make(map[string][]string)
 	var cacheIDs []string // verify if we need to clear indexe
@@ -765,7 +765,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveAttributeProfile(context.TODO(), tntIDStruct.Tenant, tntIDStruct.ID,
+				if err := ldr.dm.RemoveAttributeProfile(ctx, tntIDStruct.Tenant, tntIDStruct.ID,
 					utils.NonTransactional, true); err != nil {
 					return err
 				}
@@ -806,7 +806,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveFilter(context.TODO(), tntIDStruct.Tenant, tntIDStruct.ID,
+				if err := ldr.dm.RemoveFilter(ctx, tntIDStruct.Tenant, tntIDStruct.ID,
 					utils.NonTransactional, true); err != nil {
 					return err
 				}
@@ -944,12 +944,12 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 					if err != nil {
 						return err
 					}
-					if err := ldr.dm.RemoveRateProfileRates(context.TODO(), tntIDStruct.Tenant,
+					if err := ldr.dm.RemoveRateProfileRates(ctx, tntIDStruct.Tenant,
 						tntIDStruct.ID, rateIDs, true); err != nil {
 						return err
 					}
 				} else {
-					if err := ldr.dm.RemoveRateProfile(context.TODO(), tntIDStruct.Tenant,
+					if err := ldr.dm.RemoveRateProfile(ctx, tntIDStruct.Tenant,
 						tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 						return err
 					}
@@ -969,7 +969,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveActionProfile(context.TODO(), tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveActionProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
@@ -987,7 +987,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveAccount(context.TODO(), tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveAccount(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
@@ -996,7 +996,7 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 	}
 
 	if len(ldr.cacheConns) != 0 {
-		return engine.CallCache(ldr.connMgr, context.TODO(), ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false)
+		return engine.CallCache(ldr.connMgr, ctx, ldr.cacheConns, caching, cacheArgs, cacheIDs, nil, false)
 	}
 	return
 }
@@ -1016,7 +1016,7 @@ func (ldr *Loader) serve(stopChan chan struct{}) (err error) {
 
 func (ldr *Loader) handleFolder(stopChan chan struct{}) {
 	for {
-		go ldr.ProcessFolder(config.CgrConfig().GeneralCfg().DefaultCaching, utils.MetaStore, false)
+		go ldr.ProcessFolder(context.Background(), config.CgrConfig().GeneralCfg().DefaultCaching, utils.MetaStore, false)
 		timer := time.NewTimer(ldr.runDelay)
 		select {
 		case <-stopChan:
@@ -1058,7 +1058,7 @@ func (ldr *Loader) processFile(_, itmID string) (err error) {
 		defer ldr.unreferenceFile(loaderType, fName)
 	}
 
-	err = ldr.processContent(loaderType, config.CgrConfig().GeneralCfg().DefaultCaching)
+	err = ldr.processContent(context.Background(), loaderType, config.CgrConfig().GeneralCfg().DefaultCaching)
 
 	if ldr.tpOutDir == utils.EmptyString {
 		return
