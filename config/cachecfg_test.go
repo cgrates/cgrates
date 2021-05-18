@@ -283,7 +283,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 
 	v1 := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			"CACHE_1": {
+			"CACHE_2": {
 				Limit:     2,
 				TTL:       2 * time.Minute,
 				StaticTTL: false,
@@ -313,7 +313,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(3),
 				Ttl:        utils.StringPointer("5m0s"),
 				Static_ttl: utils.BoolPointer(true),
-				Precache:   nil,
+				Precache:   utils.BoolPointer(false),
 				Replicate:  utils.BoolPointer(true),
 			},
 		},
@@ -328,7 +328,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 	v2_2 := v1
 	expected2 := &CacheJsonCfg{
 		Partitions: map[string]*CacheParamJsonCfg{
-			"CACHE_1": {
+			"CACHE_2": {
 				Limit:      nil,
 				Ttl:        nil,
 				Static_ttl: nil,

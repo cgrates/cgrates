@@ -328,3 +328,49 @@ func TestDNSAgentCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffDNSAgentJsonCfg(t *testing.T) {
+	var d *DNSAgentJsonCfg
+
+	v1 := &DNSAgentCfg{
+		Enabled:           false,
+		Listen:            "localhost:8080",
+		ListenNet:         "tcp",
+		SessionSConns:     []string{"*localhost"},
+		Timezone:          "UTC",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	v2 := &DNSAgentCfg{
+		Enabled:           true,
+		Listen:            "localhost:8037",
+		ListenNet:         "udp",
+		SessionSConns:     []string{"*birpc"},
+		Timezone:          "EEST",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	expected := &DNSAgentJsonCfg{
+		Enabled:            utils.BoolPointer(true),
+		Listen:             utils.StringPointer("localhost:8037"),
+		Listen_net:         utils.StringPointer("udp"),
+		Sessions_conns:     &[]string{"*birpc"},
+		Timezone:           utils.StringPointer("EEST"),
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &DNSAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv = diffDNSAgentJsonCfg(d, v1, v2_2, ";")
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

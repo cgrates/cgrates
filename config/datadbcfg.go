@@ -233,10 +233,10 @@ func (itm *ItemOpt) Clone() *ItemOpt {
 func (itm *ItemOpt) Equals(itm2 *ItemOpt) bool {
 	return (itm == nil && itm2 == nil) ||
 		(itm != nil && itm2 != nil &&
-			itm.Remote != itm2.Remote &&
-			itm.Replicate != itm2.Replicate &&
-			itm.RouteID != itm2.RouteID &&
-			itm.APIKey != itm2.APIKey)
+			itm.Remote == itm2.Remote &&
+			itm.Replicate == itm2.Replicate &&
+			itm.RouteID == itm2.RouteID &&
+			itm.APIKey == itm2.APIKey)
 }
 
 type ItemOptJson struct {
@@ -271,8 +271,10 @@ func diffMapItemOptJson(d map[string]*ItemOptJson, v1, v2 map[string]*ItemOpt) m
 		d = make(map[string]*ItemOptJson)
 	}
 	for k, val2 := range v2 {
-		if val1, has := v1[k]; !has || !val1.Equals(val2) {
-			d[k] = diffItemOptJson(d[k], val2, val2)
+		if val1, has := v1[k]; !has {
+			d[k] = diffItemOptJson(d[k], new(ItemOpt), val2)
+		} else if !val1.Equals(val2) {
+			d[k] = diffItemOptJson(d[k], val1, val2)
 		}
 	}
 	return d
