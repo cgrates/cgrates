@@ -112,3 +112,38 @@ func TestConfigSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffConfigSCfgJson(t *testing.T) {
+	var d *ConfigSCfgJson
+
+	v1 := &ConfigSCfg{
+		Enabled: false,
+		URL:     "localhost:8080",
+		RootDir: "/usr/share/cgrates",
+	}
+
+	v2 := &ConfigSCfg{
+		Enabled: true,
+		URL:     "localhost:7777",
+		RootDir: "/another/dir",
+	}
+
+	expected := &ConfigSCfgJson{
+		Enabled:  utils.BoolPointer(true),
+		Url:      utils.StringPointer("localhost:7777"),
+		Root_dir: utils.StringPointer("/another/dir"),
+	}
+
+	rcv := diffConfigSCfgJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &ConfigSCfgJson{}
+
+	rcv = diffConfigSCfgJson(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

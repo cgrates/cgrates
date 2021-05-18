@@ -532,3 +532,208 @@ func TestCloneDataDB(t *testing.T) {
 		}
 	}
 }
+
+func TestDataDbEqualsTrue(t *testing.T) {
+	itm := &ItemOpt{
+		Remote:    true,
+		Replicate: false,
+		RouteID:   "RouteID",
+		APIKey:    "APIKey",
+	}
+
+	itm2 := &ItemOpt{
+		Remote:    true,
+		Replicate: false,
+		RouteID:   "RouteID",
+		APIKey:    "APIKey",
+	}
+
+	if !itm.Equals(itm2) {
+		t.Error("Items should match")
+	}
+}
+
+func TestDataDbEqualsFalse(t *testing.T) {
+	itm := &ItemOpt{
+		Remote:    true,
+		Replicate: false,
+		RouteID:   "RouteID",
+		APIKey:    "APIKey",
+	}
+
+	itm2 := &ItemOpt{
+		Remote:    false,
+		Replicate: true,
+		RouteID:   "RouteID2",
+		APIKey:    "APIKey2",
+	}
+
+	if itm.Equals(itm2) {
+		t.Error("Items should not match")
+	}
+}
+
+func TestDiffItemOptJson(t *testing.T) {
+	var d *ItemOptJson
+
+	v1 := &ItemOpt{
+		Remote:    true,
+		Replicate: false,
+		RouteID:   "RouteID",
+		APIKey:    "APIKey",
+	}
+
+	v2 := &ItemOpt{
+		Remote:    false,
+		Replicate: true,
+		RouteID:   "RouteID2",
+		APIKey:    "APIKey2",
+	}
+
+	expected := &ItemOptJson{
+		Remote:    utils.BoolPointer(false),
+		Replicate: utils.BoolPointer(true),
+		Route_id:  utils.StringPointer("RouteID2"),
+		Api_key:   utils.StringPointer("APIKey2"),
+	}
+
+	rcv := diffItemOptJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &ItemOptJson{}
+	rcv = diffItemOptJson(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffMapItemOptJson(t *testing.T) {
+	var d map[string]*ItemOptJson
+
+	v1 := map[string]*ItemOpt{
+		"ITEM_OPT1": {
+			Remote:    true,
+			Replicate: false,
+			RouteID:   "RouteID",
+			APIKey:    "APIKey",
+		},
+	}
+
+	v2 := map[string]*ItemOpt{
+		"ITEM_OPT1": {
+			Remote:    false,
+			Replicate: true,
+			RouteID:   "RouteID2",
+			APIKey:    "APIKey2",
+		},
+	}
+
+	expected := map[string]*ItemOptJson{
+		"ITEM_OPT1": {
+			Remote:    utils.BoolPointer(false),
+			Replicate: utils.BoolPointer(true),
+			Route_id:  utils.StringPointer("RouteID2"),
+			Api_key:   utils.StringPointer("APIKey2"),
+		},
+	}
+
+	rcv := diffMapItemOptJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := map[string]*ItemOptJson{}
+	rcv = diffMapItemOptJson(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffDataDbJsonCfg(t *testing.T) {
+	var d *DbJsonCfg
+
+	v1 := &DataDbCfg{
+		Type:        "mysql",
+		Host:        "/host",
+		Port:        "8080",
+		Name:        "cgrates.org",
+		User:        "cgrates",
+		Password:    "CGRateSPassword",
+		RmtConns:    []string{"itsyscom.com"},
+		RmtConnID:   "connID",
+		RplConns:    []string{},
+		RplFiltered: true,
+		RplCache:    "RplCache",
+		Items:       map[string]*ItemOpt{},
+		Opts:        map[string]interface{}{},
+	}
+
+	v2 := &DataDbCfg{
+		Type:        "postgres",
+		Host:        "/host2",
+		Port:        "8037",
+		Name:        "itsyscom.com",
+		User:        "itsyscom",
+		Password:    "ITsysCOMPassword",
+		RmtConns:    []string{"cgrates.org"},
+		RmtConnID:   "connID2",
+		RplConns:    []string{"RplConn1"},
+		RplFiltered: false,
+		RplCache:    "RplCache2",
+		Items: map[string]*ItemOpt{
+			"ITEM_1": {
+				Remote:    true,
+				Replicate: true,
+				RouteID:   "RouteID2",
+				APIKey:    "APIKey2",
+			},
+		},
+		Opts: map[string]interface{}{
+			"OPT_1": "OptValue",
+		},
+	}
+
+	expected := &DbJsonCfg{
+		Db_type:              utils.StringPointer("postgres"),
+		Db_host:              utils.StringPointer("/host2"),
+		Db_port:              utils.IntPointer(8037),
+		Db_name:              utils.StringPointer("itsyscom.com"),
+		Db_user:              utils.StringPointer("itsyscom"),
+		Db_password:          utils.StringPointer("ITsysCOMPassword"),
+		Remote_conns:         &[]string{"cgrates.org"},
+		Remote_conn_id:       utils.StringPointer("connID2"),
+		Replication_conns:    &[]string{"RplConn1"},
+		Replication_filtered: utils.BoolPointer(false),
+		Replication_cache:    utils.StringPointer("RplCache2"),
+		Items: map[string]*ItemOptJson{
+			"ITEM_1": {
+				Remote:    utils.BoolPointer(true),
+				Replicate: utils.BoolPointer(true),
+				Route_id:  utils.StringPointer("RouteID2"),
+				Api_key:   utils.StringPointer("APIKey2"),
+			},
+		},
+		Opts: map[string]interface{}{
+			"OPT_1": "OptValue",
+		},
+	}
+
+	rcv := diffDataDbJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &DbJsonCfg{
+		Items: map[string]*ItemOptJson{},
+		Opts:  map[string]interface{}{},
+	}
+	rcv = diffDataDbJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

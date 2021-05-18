@@ -155,3 +155,50 @@ func TestDispatcherSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDispatcherSJsonCfg(t *testing.T) {
+	var d *DispatcherSJsonCfg
+
+	v1 := &DispatcherSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.Field1"},
+		PrefixIndexedFields: nil,
+		SuffixIndexedFields: nil,
+		NestedFields:        true,
+		AttributeSConns:     []string{"*localhost"},
+	}
+
+	v2 := &DispatcherSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.Field2"},
+		PrefixIndexedFields: &[]string{},
+		SuffixIndexedFields: &[]string{},
+		NestedFields:        false,
+		AttributeSConns:     []string{"*birpc"},
+	}
+
+	expected := &DispatcherSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: &[]string{"*req.Field2"},
+		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
+		Attributes_conns:      &[]string{"*birpc"},
+	}
+
+	rcv := diffDispatcherSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &DispatcherSJsonCfg{}
+
+	rcv = diffDispatcherSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

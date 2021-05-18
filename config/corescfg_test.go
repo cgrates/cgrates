@@ -128,3 +128,41 @@ func TestCoreSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffCoreSJsonCfg(t *testing.T) {
+	var d *CoreSJsonCfg
+
+	v1 := &CoreSCfg{
+		Caps:              2,
+		CapsStrategy:      utils.MetaTopUpReset,
+		CapsStatsInterval: 3 * time.Second,
+		ShutdownTimeout:   5 * time.Minute,
+	}
+
+	v2 := &CoreSCfg{
+		Caps:              3,
+		CapsStrategy:      utils.MetaMaxCostDisconnect,
+		CapsStatsInterval: 1 * time.Second,
+		ShutdownTimeout:   2 * time.Minute,
+	}
+
+	expected := &CoreSJsonCfg{
+		Caps:                utils.IntPointer(3),
+		Caps_strategy:       utils.StringPointer(utils.MetaMaxCostDisconnect),
+		Caps_stats_interval: utils.StringPointer("1s"),
+		Shutdown_timeout:    utils.StringPointer("2m0s"),
+	}
+
+	rcv := diffCoreSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2_2 := v1
+	expected2 := &CoreSJsonCfg{}
+
+	rcv = diffCoreSJsonCfg(d, v1, v2_2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}
