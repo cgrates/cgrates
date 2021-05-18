@@ -166,7 +166,6 @@ func testDspSupGetSupFailover(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
 			Event: map[string]interface{}{
 				utils.EventName:    "Event1",
 				utils.AccountField: "1002",
@@ -201,8 +200,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 	var rpl engine.SortedRoutesList
 	args := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
-			ID:   utils.UUIDSha1Prefix(),
-			Time: &nowTime,
+			ID: utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
 				utils.Subject:      "1002",
@@ -252,7 +250,6 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
 			Event: map[string]interface{}{
 				utils.AccountField: "1002",
 				utils.Subject:      "1002",
@@ -317,7 +314,6 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
 			Event: map[string]interface{}{
 				utils.EventName:    "RoundRobin",
 				utils.AccountField: "1002",

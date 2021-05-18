@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -57,9 +55,6 @@ func (self *CmdSessionsProcessCDR) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdSessionsProcessCDR) PostprocessRpcParams() error {
-	if self.rpcParams.Time == nil {
-		self.rpcParams.Time = utils.TimePointer(time.Now())
-	}
 	return nil
 }
 

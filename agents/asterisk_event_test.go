@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -342,13 +341,12 @@ func TestSMAEventExtraParameters(t *testing.T) {
 }
 
 func TestSMAEventV1AuthorizeArgs(t *testing.T) {
-	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1", "")
-	cgrEv, err := smaEv.AsCGREvent(timezone)
+	cgrEv, err := smaEv.AsCGREvent()
 	if err != nil {
 		t.Error(err)
 	}
@@ -367,7 +365,7 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 	}
 	smaEv2 := NewSMAsteriskEvent(ev2, "127.0.0.1", "")
 	//smaEv2.parseStasisArgs()
-	cgrEv2, err := smaEv2.AsCGREvent(timezone)
+	cgrEv2, err := smaEv2.AsCGREvent()
 	if err != nil {
 		t.Error(err)
 	}

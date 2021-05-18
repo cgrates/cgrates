@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -195,7 +194,7 @@ func TestDispatcherAuthorizeError(t *testing.T) {
 	}
 	connMng := engine.NewConnManager(cfg, nil)
 	dsp := NewDispatcherService(nil, cfg, nil, connMng)
-	err := dsp.authorize("", "cgrates.org", utils.APIMethods, nil)
+	err := dsp.authorize("", "cgrates.org", utils.APIMethods)
 	expected := "dial tcp: address error: missing port in address"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -220,7 +219,7 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 	}
 	connMng := engine.NewConnManager(cfg, nil)
 	dsp := NewDispatcherService(nil, cfg, nil, connMng)
-	err := dsp.authorize("", "cgrates.org", utils.APIMethods, nil)
+	err := dsp.authorize("", "cgrates.org", utils.APIMethods)
 	expected := "dial tcp: address error: missing port in address"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -303,7 +302,6 @@ func TestDispatcherServiceAuthorizeEventError3(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "testTenant",
 		ID:      "testID",
-		Time:    nil,
 		Event:   map[string]interface{}{},
 		APIOpts: nil,
 	}
@@ -336,7 +334,6 @@ func (*mockTypeCon3) Call(ctx *context.Context, serviceMethod string, args, repl
 		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
 			ID:     "testID",
-			Time:   nil,
 			Event: map[string]interface{}{
 				utils.APIMethods: "yes",
 			},
@@ -374,7 +371,7 @@ func TestDispatcherServiceAuthorizeError(t *testing.T) {
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey", &time.Time{})
+	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey")
 	expected := "UNAUTHORIZED_API"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -389,7 +386,6 @@ func (*mockTypeCon4) Call(ctx *context.Context, serviceMethod string, args, repl
 		CGREvent: &utils.CGREvent{
 			Tenant:  "testTenant",
 			ID:      "testID",
-			Time:    nil,
 			Event:   map[string]interface{}{},
 			APIOpts: nil,
 		},
@@ -425,7 +421,7 @@ func TestDispatcherServiceAuthorizeError2(t *testing.T) {
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey", &time.Time{})
+	err := dsp.authorize(utils.APIMethods, "testTenant", "apikey")
 	expected := "NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -440,7 +436,6 @@ func (*mockTypeCon5) Call(ctx *context.Context, serviceMethod string, args, repl
 		CGREvent: &utils.CGREvent{
 			Tenant: "testTenant",
 			ID:     "testID",
-			Time:   nil,
 			Event: map[string]interface{}{
 				utils.APIMethods: "testMethod",
 			},
@@ -478,7 +473,7 @@ func TestDispatcherServiceAuthorizeError3(t *testing.T) {
 	engine.Cache = newCache
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "testID",
 		value, nil, true, utils.NonTransactional)
-	err := dsp.authorize("testMethod", "testTenant", "apikey", &time.Time{})
+	err := dsp.authorize("testMethod", "testTenant", "apikey")
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -510,7 +505,6 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -553,7 +547,6 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -602,7 +595,6 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -645,7 +637,6 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -731,7 +722,6 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -785,7 +775,6 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -966,7 +955,6 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",
@@ -1028,7 +1016,6 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.AccountField: "1001",
 			"Password":         "CGRateS.org",

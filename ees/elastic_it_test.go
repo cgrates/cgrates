@@ -123,7 +123,6 @@ func testElasticExportEvents(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
@@ -151,7 +150,6 @@ func testElasticExportEvents(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
@@ -179,7 +177,6 @@ func testElasticExportEvents(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
@@ -207,7 +204,6 @@ func testElasticExportEvents(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("sms2", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,

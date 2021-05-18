@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -71,14 +70,13 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	return
 }
 
-func (dS *DispatcherService) authorize(method, tenant string, apiKey string, evTime *time.Time) (err error) {
+func (dS *DispatcherService) authorize(method, tenant string, apiKey string) (err error) {
 	if apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
 	ev := &utils.CGREvent{
 		Tenant: tenant,
 		ID:     utils.UUIDSha1Prefix(),
-		Time:   evTime,
 		Event: map[string]interface{}{
 			utils.APIKey: apiKey,
 		},

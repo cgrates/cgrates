@@ -261,7 +261,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		"RequestEncoding":    "*gob",
 		"RequestID":          3.,
 		"RequestMethod":      "CoreSv1.Ping",
-		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Time":null,"Event":null,"APIOpts":{"EventSource":"*attributes"}}`),
+		"RequestParams":      json.RawMessage(`{"Tenant":"","ID":"","Event":null,"APIOpts":{"EventSource":"*attributes"}}`),
 		"Reply":              json.RawMessage(`"Pong"`),
 		"RequestSource":      "127.0.0.1:5566",
 		"RequestStartTime":   t1.Add(-24 * time.Hour).UTC().Format(time.RFC3339),

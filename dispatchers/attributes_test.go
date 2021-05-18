@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -43,11 +42,7 @@ func TestDspAttributeSv1PingErrorTenant(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrEvent := &utils.CGREvent{
-		Tenant:  "tenant",
-		ID:      "",
-		Time:    nil,
-		Event:   nil,
-		APIOpts: nil,
+		Tenant: "tenant",
 	}
 	var reply *string
 	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
@@ -73,11 +68,8 @@ func TestDspAttributeSv1PingErrorAttributeSConns(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrEvent := &utils.CGREvent{
-		Tenant:  "tenant",
-		ID:      "ID",
-		Time:    nil,
-		Event:   nil,
-		APIOpts: nil,
+		Tenant: "tenant",
+		ID:     "ID",
 	}
 	var reply *string
 	err := dspSrv.AttributeSv1Ping(cgrEvent, reply)
@@ -95,13 +87,7 @@ func TestDspAttributeSv1GetAttributeForEventError(t *testing.T) {
 		AttributeIDs: nil,
 		Context:      nil,
 		ProcessRuns:  nil,
-		CGREvent: &utils.CGREvent{
-			Tenant:  "",
-			ID:      "",
-			Time:    &time.Time{},
-			Event:   nil,
-			APIOpts: nil,
-		},
+		CGREvent:     &utils.CGREvent{},
 	}
 	var reply *engine.AttributeProfile
 	err := dspSrv.AttributeSv1GetAttributeForEvent(processEvent, reply)
@@ -120,11 +106,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorTenant(t *testing.T) {
 		Context:      nil,
 		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
-			Tenant:  "tenant",
-			ID:      "",
-			Time:    &time.Time{},
-			Event:   nil,
-			APIOpts: nil,
+			Tenant: "tenant",
 		},
 	}
 	var reply *engine.AttributeProfile
@@ -143,11 +125,7 @@ func TestDspAttributeSv1GetAttributeForEventErrorAttributeS(t *testing.T) {
 		Context:      nil,
 		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
-			Tenant:  "tenant",
-			ID:      "",
-			Time:    &time.Time{},
-			Event:   nil,
-			APIOpts: nil,
+			Tenant: "tenant",
 		},
 	}
 
@@ -167,11 +145,7 @@ func TestDspAttributeSv1ProcessEventError(t *testing.T) {
 		Context:      nil,
 		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
-			Tenant:  "tenant",
-			ID:      "",
-			Time:    &time.Time{},
-			Event:   nil,
-			APIOpts: nil,
+			Tenant: "tenant",
 		},
 	}
 
@@ -192,11 +166,7 @@ func TestDspAttributeSv1ProcessEventErrorAttributeSConns(t *testing.T) {
 		Context:      nil,
 		ProcessRuns:  nil,
 		CGREvent: &utils.CGREvent{
-			Tenant:  "tenant",
-			ID:      "",
-			Time:    &time.Time{},
-			Event:   nil,
-			APIOpts: nil,
+			Tenant: "tenant",
 		},
 	}
 

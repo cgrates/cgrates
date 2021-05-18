@@ -194,12 +194,10 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 
 	cgrEvent.APIOpts = make(map[string]interface{})
-	cgrEvent.Time = utils.TimePointer(time.Date(2020, 8, 21, 0, 0, 0, 0, time.UTC))
 	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
 		[]string{}, true); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
-	cgrEvent.Time = utils.TimePointer(time.Date(2020, 7, 21, 5, 0, 0, 0, time.UTC))
 
 	accPrf.FilterIDs = []string{"invalid_filter_format"}
 	expected := "NOT_FOUND:invalid_filter_format"

@@ -188,7 +188,6 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 		cgrEvent: &utils.CGREvent{
 			Tenant:  "",
 			ID:      "",
-			Time:    nil,
 			Event:   nil,
 			APIOpts: nil,
 		},
@@ -433,7 +432,6 @@ func TestERsProcessEvent(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "",
 		ID:      "",
-		Time:    nil,
 		Event:   nil,
 		APIOpts: nil,
 	}
@@ -462,7 +460,6 @@ func TestERsProcessEvent2(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant:  "",
 		ID:      "",
-		Time:    nil,
 		Event:   nil,
 		APIOpts: nil,
 	}
@@ -544,7 +541,6 @@ func TestERsProcessEvent5(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Time:   nil,
 		Event:  nil,
 		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
@@ -627,7 +623,6 @@ func TestERsProcessEvent8(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Time:   nil,
 		Event:  nil,
 		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
@@ -658,7 +653,6 @@ func TestERsProcessEvent9(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Time:   nil,
 		Event:  nil,
 		APIOpts: map[string]interface{}{
 			utils.OptsRoutesLimit: true,
@@ -690,7 +684,6 @@ func TestERsProcessEvent10(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.Usage: time.Second,
 		},
@@ -747,7 +740,6 @@ func TestERsProcessEvent11(t *testing.T) {
 	cgrEvent := &utils.CGREvent{
 		Tenant: "",
 		ID:     "",
-		Time:   nil,
 		Event: map[string]interface{}{
 			utils.Usage: 0,
 		},

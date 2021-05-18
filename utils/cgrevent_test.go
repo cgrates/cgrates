@@ -195,11 +195,9 @@ func TestCGREventFieldAsString(t *testing.T) {
 }
 
 func TestCGREventClone(t *testing.T) {
-	now := time.Now()
 	ev := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
-		Time:   &now,
 		Event: map[string]interface{}{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
@@ -214,9 +212,6 @@ func TestCGREventClone(t *testing.T) {
 	cloned := ev.Clone()
 	if !reflect.DeepEqual(ev, cloned) {
 		t.Errorf("Expecting: %+v, received: %+v", ev, cloned)
-	}
-	if cloned.Time == ev.Time {
-		t.Errorf("Expecting: different pointer but received: %+v", cloned.Time)
 	}
 }
 
@@ -481,7 +476,6 @@ func TestNMAsCGREvent(t *testing.T) {
 	}
 	if cgrEv := NMAsCGREvent(nM, "cgrates.org",
 		NestingSep, MapStorage{}); cgrEv.Tenant != "cgrates.org" ||
-		cgrEv.Time == nil ||
 		!reflect.DeepEqual(eEv, cgrEv.Event) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", ToJSON(eEv), ToJSON(cgrEv.Event))
 	}

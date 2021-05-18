@@ -21,7 +21,6 @@ package actions
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -87,7 +86,6 @@ func (aS *ActionS) schedInit() {
 	for i, tnt := range tnts {
 		cgrEvs[i] = &utils.CGREvent{
 			Tenant: tnt,
-			Time:   utils.TimePointer(time.Now()),
 			APIOpts: map[string]interface{}{
 				utils.EventType: utils.SchedulerInit,
 				utils.NodeID:    aS.cfg.GeneralCfg().NodeID,
@@ -146,7 +144,7 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
-	evNm utils.MapStorage, actTime *time.Time, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
+	evNm utils.MapStorage, aPrflIDs []string) (aPfs engine.ActionProfiles, err error) {
 	if len(aPrflIDs) == 0 {
 		var aPfIDMp utils.StringSet
 		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
@@ -198,7 +196,7 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
-	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, cgrEv.Time, aPrflIDs); err != nil {
+	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs); err != nil {
 		return
 	}
 
