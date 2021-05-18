@@ -805,37 +805,24 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				}
 			}
 		case utils.CacheAttributeFilterIndexes:
-			for itemID := range indx {
-				var ap *AttributeProfile
-				if ap, err = dm.GetAttributeProfile(apiCtx, newFlt.Tenant, itemID,
-					true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				for _, ctx := range ap.Contexts {
-					tntCtx := utils.ConcatenatedKey(newFlt.Tenant, ctx)
-					if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType,
-						tntCtx, // remove the indexes for the filter
-						removeIndexKeys, indx); err != nil {
-						return
+			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+				removeIndexKeys, indx); err != nil {
+				return
+			}
+			idxSlice := indx.AsSlice()
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, _ string) (*[]string, error) {
+					ap, e := dm.GetAttributeProfile(ctx, tnt, id, true, false, utils.NonTransactional)
+					if e != nil {
+						return nil, e
 					}
-					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
-					var updIdx map[string]utils.StringSet
-					if updIdx, err = newFilterIndex(apiCtx, dm, idxItmType,
-						newFlt.Tenant, ctx, itemID, ap.FilterIDs, newFlt); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
-						return
+					fltrIDs := make([]string, len(ap.FilterIDs))
+					for i, fltrID := range ap.FilterIDs {
+						fltrIDs[i] = fltrID
 					}
-					for _, idx := range updIdx {
-						idx.Add(itemID)
-					}
-					if err = dm.SetIndexes(apiCtx, idxItmType, tntCtx,
-						updIdx, false, utils.NonTransactional); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
-						return
-					}
-					guardian.Guardian.UnguardIDs(refID)
-				}
+					return &fltrIDs, nil
+				}, newFlt); err != nil && err != utils.ErrNotFound {
+				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheDispatcherFilterIndexes:
 			for itemID := range indx {

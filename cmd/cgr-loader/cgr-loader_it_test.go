@@ -295,8 +295,7 @@ func testLoadItCheckAttributes(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1001_SIMPLEAUTH",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Contexts:  []string{"simpleauth"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:simpleauth"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},

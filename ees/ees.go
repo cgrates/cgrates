@@ -110,9 +110,9 @@ func (eeS *EventExporterS) attrSProcessEvent(cgrEv *utils.CGREvent, attrIDs []st
 			processRuns = utils.IntPointer(int(v))
 		}
 	}
+	cgrEv.APIOpts[utils.OptsContext] = ctx
 	attrArgs := &engine.AttrArgsProcessEvent{
 		AttributeIDs: attrIDs,
-		Context:      utils.StringPointer(ctx),
 		CGREvent:     cgrEv,
 		ProcessRuns:  processRuns,
 	}
@@ -167,8 +167,7 @@ func (eeS *EventExporterS) V1ProcessEvent(cgrEv *utils.CGREventWithEeIDs, rply *
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if err = eeS.attrSProcessEvent(
 				cgrEv.CGREvent,
-				eeCfg.AttributeSIDs,
-				utils.FirstNonEmpty(
+				eeCfg.AttributeSIDs, utils.FirstNonEmpty(
 					eeCfg.AttributeSCtx,
 					utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 					utils.MetaEEs)); err != nil {

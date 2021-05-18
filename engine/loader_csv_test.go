@@ -393,8 +393,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
-			Contexts:  []string{"con1", "con2", "con3"},
-			FilterIDs: []string{"*string:~*req.Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:con1|con2|con3"},
 			Attributes: []*utils.TPAttribute{
 				{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
@@ -420,8 +419,6 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Tenant, csvr.attributeProfiles[resKey].Tenant)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID)
-	} else if len(eAttrProfiles[resKey].Contexts) != len(csvr.attributeProfiles[resKey].Contexts) {
-		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Contexts, csvr.attributeProfiles[resKey].Contexts)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {

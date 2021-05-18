@@ -163,7 +163,6 @@ func testFltrITMigrateAndMove(t *testing.T) {
 	attrProf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
@@ -177,7 +176,6 @@ func testFltrITMigrateAndMove(t *testing.T) {
 	expAttrProf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
@@ -357,7 +355,6 @@ func testFltrITMigratev2(t *testing.T) {
 	attrProf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{
@@ -371,7 +368,6 @@ func testFltrITMigratev2(t *testing.T) {
 	expAttrProf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
 		Attributes: []*engine.Attribute{
 			{

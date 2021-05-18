@@ -487,7 +487,7 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
-	Context          string
+	Subsystem        string
 	APIOpts          map[string]interface{}
 	AttributeIDs     []string
 	ResourceIDs      []string
@@ -503,7 +503,7 @@ type ArgsComputeFilterIndexIDs struct {
 
 type ArgsComputeFilterIndexes struct {
 	Tenant      string
-	Context     string
+	Subsystem   string
 	APIOpts     map[string]interface{}
 	AttributeS  bool
 	ResourceS   bool
@@ -653,7 +653,6 @@ type TPAttributeProfile struct {
 	Tenant     string
 	ID         string
 	FilterIDs  []string
-	Contexts   []string // bind this TPAttribute to multiple context
 	Attributes []*TPAttribute
 	Blocker    bool
 	Weight     float64

@@ -127,7 +127,6 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
@@ -135,7 +134,9 @@ func testAttributeSProcessEvent(t *testing.T) {
 				utils.EventName: "VariableTest",
 				utils.ToR:       utils.MetaVoice,
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 	eRply := engine.AttrSProcessEventReply{
@@ -172,7 +173,6 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddAccountInfo", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -206,14 +206,15 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithAccount",
 			Event: map[string]interface{}{
 				"EventName": "AddAccountInfo",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -250,7 +251,6 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_ACCOUNT2",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddFullAccount", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -284,14 +284,15 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithAccount2",
 			Event: map[string]interface{}{
 				"EventName": "AddFullAccount",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -376,7 +377,6 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddStatEvent", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -411,15 +411,15 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
-
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName": "AddStatEvent",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -455,7 +455,6 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_STATS2",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddFullStats", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -490,14 +489,15 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName": "AddFullStats",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -597,7 +597,6 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddResourceUsages", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -631,15 +630,15 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
-
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithResource",
 			Event: map[string]interface{}{
 				"EventName": "AddResourceUsages",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -676,7 +675,6 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_RESOURCE2",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddFullResource", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -710,12 +708,14 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithResource2",
 			Event: map[string]interface{}{
 				"EventName": "AddFullResource",
+			},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
 			},
 		},
 	}
@@ -763,7 +763,6 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER2",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddDestinationCarrier", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -797,7 +796,6 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithLibPhoneNumber2",
@@ -805,7 +803,9 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 				"EventName":   "AddDestinationCarrier",
 				"Destination": "+447779330921",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -843,7 +843,6 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER_COMPOSED",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddComposedInfo", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -895,7 +894,6 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithLibPhoneNumberComposed",
@@ -903,7 +901,9 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 				"EventName":   "AddComposedInfo",
 				"Destination": "+447779330921",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 
@@ -941,7 +941,6 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_LIBPHONENUMBER",
-			Contexts:  []string{utils.MetaAny},
 			FilterIDs: []string{"*string:~*req.EventName:AddDestinationDetails", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
 			Attributes: []*engine.Attribute{
 				{
@@ -975,7 +974,6 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventWithLibPhoneNumber",
@@ -983,7 +981,9 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 				"EventName":   "AddDestinationDetails",
 				"Destination": "+447779330921",
 			},
-			APIOpts: map[string]interface{}{},
+			APIOpts: map[string]interface{}{
+				utils.OptsContext: utils.MetaSessionS,
+			},
 		},
 	}
 

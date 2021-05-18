@@ -161,10 +161,10 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 			processRuns = utils.IntPointer(int(v))
 		}
 	}
+	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
+		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
+		utils.MetaCDRs)
 	attrArgs := &AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.FirstNonEmpty(
-			utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
-			utils.MetaCDRs)),
 		CGREvent:    cgrEv,
 		ProcessRuns: processRuns,
 	}

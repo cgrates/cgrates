@@ -155,8 +155,7 @@ func testExpVerifyAttributes(t *testing.T) {
 	exp := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"FLTR_ACCOUNT_1001", "*string:~*opts.*context:*sessions"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + "OfficeGroup",

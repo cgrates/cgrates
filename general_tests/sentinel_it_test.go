@@ -141,8 +141,7 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
@@ -174,8 +173,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*reqAccount:1001"},
+		FilterIDs: []string{"*string:~*reqAccount:1001", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
@@ -267,8 +265,7 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:~*req.Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
 		Attributes: []*engine.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,

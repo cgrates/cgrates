@@ -1392,15 +1392,13 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 		return err
 	}
 	if withIndex {
-		var oldContexes *[]string
 		var oldFiltersIDs *[]string
 		if oldAP != nil {
-			oldContexes = &oldAP.Contexts
 			oldFiltersIDs = &oldAP.FilterIDs
 		}
-		if err = updatedIndexesWithContexts(ctx, dm, utils.CacheAttributeFilterIndexes, ap.Tenant, ap.ID,
-			oldContexes, oldFiltersIDs, ap.Contexts, ap.FilterIDs); err != nil {
-			return
+		if err := updatedIndexes(context.TODO(), dm, utils.CacheAttributeFilterIndexes, ap.Tenant,
+			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
+			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
@@ -1431,14 +1429,12 @@ func (dm *DataManager) RemoveAttributeProfile(apiCtx *context.Context, tenant, i
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(apiCtx, dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
 			return
 		}
-		for _, ctx := range oldAttr.Contexts {
-			if err = removeItemFromFilterIndex(apiCtx, dm, utils.CacheAttributeFilterIndexes,
-				tenant, ctx, id, oldAttr.FilterIDs); err != nil {
-				return
-			}
+		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheAttributeFilterIndexes,
+			tenant, utils.EmptyString, id, oldAttr.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {

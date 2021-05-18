@@ -168,8 +168,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"fltr_for_attr"},
+			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
@@ -333,8 +332,7 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2", "fltr_for_attr3"},
+			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
@@ -436,7 +434,7 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 	// compute our indexes
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
-		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, Subsystem: utils.MetaSessionS,
 			AttributeS: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -481,8 +479,7 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_new_fltr",
-			Contexts:  []string{utils.MetaChargers},
-			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3"},
+			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*chargers"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
@@ -496,8 +493,7 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTE3",
-			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"fltr_for_attr3"},
+			FilterIDs: []string{"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
 				{
 					Path:  "*req.Destinations",
@@ -602,7 +598,7 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 
 	// now we will ComputeFilterIndexes by IDs for *chargers context
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Subsystem: utils.MetaChargers,
 			AttributeIDs: []string{"TEST_ATTRIBUTES_new_fltr"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -627,7 +623,7 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 
 	// now we will ComputeFilterIndexes by IDs for *sessions context(but just only 1 profile, not both)
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Subsystem: utils.MetaSessionS,
 			AttributeIDs: []string{"TEST_ATTRIBUTE3"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -651,7 +647,7 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 
 	// compute for the last profile remain
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Subsystem: utils.MetaSessionS,
 			AttributeIDs: []string{"TEST_ATTRIBUTES_IT_TEST"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

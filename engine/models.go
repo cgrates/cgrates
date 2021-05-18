@@ -222,14 +222,13 @@ type AttributeMdl struct {
 	Tpid               string
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
-	Contexts           string  `index:"2" re:""`
-	FilterIDs          string  `index:"3" re:""`
-	Weight             float64 `index:"4" re:"\d+\.?\d*"`
-	AttributeFilterIDs string  `index:"5" re:""`
-	Path               string  `index:"6" re:""`
-	Type               string  `index:"7" re:""`
-	Value              string  `index:"8" re:""`
-	Blocker            bool    `index:"9" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	Weight             float64 `index:"3" re:"\d+\.?\d*"`
+	AttributeFilterIDs string  `index:"4" re:""`
+	Path               string  `index:"5" re:""`
+	Type               string  `index:"6" re:""`
+	Value              string  `index:"7" re:""`
+	Blocker            bool    `index:"8" re:""`
 	CreatedAt          time.Time
 }
 

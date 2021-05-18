@@ -768,8 +768,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-		Contexts:  []string{"con1"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con1"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
@@ -806,7 +805,6 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	attrProfile.Contexts = []string{"con1", "con2", "con3"}
 	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
 		t.Error(err)
 	}
@@ -845,8 +843,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-		Contexts:  []string{"con1"},
+		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con1"},
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",

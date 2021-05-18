@@ -60,7 +60,6 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 		utils.AttributeSv1ProcessEvent,
 		&engine.AttrArgsProcessEvent{
 			CGREvent: ev,
-			Context:  utils.StringPointer(utils.MetaAuth),
 		}, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
@@ -80,7 +79,10 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string) (er
 		Event: map[string]interface{}{
 			utils.APIKey: apiKey,
 		},
-		APIOpts: map[string]interface{}{utils.Subsys: utils.MetaDispatchers},
+		APIOpts: map[string]interface{}{
+			utils.Subsys:      utils.MetaDispatchers,
+			utils.OptsContext: utils.MetaAuth,
+		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {

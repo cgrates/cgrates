@@ -39,7 +39,6 @@ type Attribute struct {
 type AttributeProfile struct {
 	Tenant     string
 	ID         string
-	Contexts   []string // bind this AttributeProfile to multiple contexts
 	FilterIDs  []string
 	Attributes []*Attribute
 	Blocker    bool // blocker flag to stop processing on multiple runs
@@ -91,7 +90,6 @@ type ExternalAttribute struct {
 type APIAttributeProfile struct {
 	Tenant     string
 	ID         string
-	Contexts   []string // bind this AttributeProfile to multiple contexts
 	FilterIDs  []string
 	Attributes []*ExternalAttribute
 	Blocker    bool // blocker flag to stop processing on multiple runs
@@ -107,7 +105,6 @@ func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 	ext = &APIAttributeProfile{
 		Tenant:     attr.Tenant,
 		ID:         attr.ID,
-		Contexts:   attr.Contexts,
 		FilterIDs:  attr.FilterIDs,
 		Attributes: make([]*ExternalAttribute, len(attr.Attributes)),
 		Blocker:    attr.Blocker,
@@ -148,7 +145,6 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 	}
 	attr.Tenant = ext.Tenant
 	attr.ID = ext.ID
-	attr.Contexts = ext.Contexts
 	attr.FilterIDs = ext.FilterIDs
 	attr.Blocker = ext.Blocker
 	attr.Weight = ext.Weight
@@ -158,9 +154,8 @@ func (ext *APIAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, er
 // NewAttributeFromInline parses an inline rule into a compiled AttributeProfile
 func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, err error) {
 	attr = &AttributeProfile{
-		Tenant:   tenant,
-		ID:       inlnRule,
-		Contexts: []string{utils.MetaAny},
+		Tenant: tenant,
+		ID:     inlnRule,
 	}
 	for _, rule := range strings.Split(inlnRule, utils.InfieldSep) {
 		ruleSplt := strings.SplitN(rule, utils.InInFieldSep, 3)

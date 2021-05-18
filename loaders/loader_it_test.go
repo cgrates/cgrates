@@ -27,7 +27,6 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -194,8 +193,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
-		Contexts:  []string{"con1", "con2", "con3"},
-		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*opts.*context:con1|con2|con3"},
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
@@ -224,8 +222,6 @@ func testLoaderCheckAttributes(t *testing.T) {
 	}
 	eAttrPrf.Compile()
 	reply.Compile()
-	sort.Strings(eAttrPrf.Contexts)
-	sort.Strings(reply.Contexts)
 	if !reflect.DeepEqual(eAttrPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(reply))
 	}
@@ -379,7 +375,6 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_12012000001",
-		Contexts:  []string{"*any"},
 		FilterIDs: []string{"*string:~*req.Destination:12012000001"},
 		Attributes: []*engine.Attribute{
 			{
