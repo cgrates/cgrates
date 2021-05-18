@@ -1,0 +1,22 @@
+{
+    // CGRateS Configuration file
+    // used in general_tests/attributes_filters_index_it_test.go
+    "general": {
+      "log_level": 7,
+    },
+  
+    "stor_db": {
+      "db_password": "CGRateS.org"
+    },
+  
+    "admins": {
+      "enabled": true,
+    },
+  
+    "attributes": {
+      "enabled": true,
+      "string_indexed_fields": [],
+      "prefix_indexed_fields": ["*req.Subject"],
+    },
+  
+  }

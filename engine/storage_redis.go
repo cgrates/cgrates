@@ -637,7 +637,7 @@ func (rs *RedisStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ChargerProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetDispatcherProfileDrv(tenant, id string) (r *DispatcherProfile, err error) {
+func (rs *RedisStorage) GetDispatcherProfileDrv(ctx *context.Context, tenant, id string) (r *DispatcherProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -649,7 +649,7 @@ func (rs *RedisStorage) GetDispatcherProfileDrv(tenant, id string) (r *Dispatche
 	return
 }
 
-func (rs *RedisStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error) {
+func (rs *RedisStorage) SetDispatcherProfileDrv(ctx *context.Context, r *DispatcherProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -657,7 +657,7 @@ func (rs *RedisStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error
 	return rs.Cmd(nil, redisSET, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveDispatcherProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 

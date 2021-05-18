@@ -145,7 +145,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		err = nil // make sure we ignore the error from *any subsystem matching
 	}
 	for prflID := range prflIDs {
-		prfl, err := dS.dm.GetDispatcherProfile(tnt, prflID, true, true, utils.NonTransactional)
+		prfl, err := dS.dm.GetDispatcherProfile(context.TODO(), tnt, prflID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err

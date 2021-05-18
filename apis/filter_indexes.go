@@ -347,7 +347,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.DispatcherFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Context, utils.CacheDispatcherFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				dsp, e := adms.dm.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
+				dsp, e := adms.dm.GetDispatcherProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
@@ -556,7 +556,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//DispatcherProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Context, utils.CacheDispatcherFilterIndexes,
 		&args.DispatcherIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			dsp, e := adms.dm.GetDispatcherProfile(tnt, id, true, false, utils.NonTransactional)
+			dsp, e := adms.dm.GetDispatcherProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}

@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -240,7 +241,7 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 	switch ratePrfAction {
 	case utils.Migrate: //QQ for the moment only one version of rate profiles exists
 	case utils.Move:
-		if err := ratePrfMigrator.dmIN.DataManager().SetRateProfile(rPrf, true); err != nil {
+		if err := ratePrfMigrator.dmIN.DataManager().SetRateProfile(context.TODO(), rPrf, true); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -249,7 +250,7 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for RatePrf ", err.Error())
 		}
 
-		_, err = ratePrfMigrator.dmOut.DataManager().GetRateProfile("cgrates.org", "RP1", false, false, utils.NonTransactional)
+		_, err = ratePrfMigrator.dmOut.DataManager().GetRateProfile(context.TODO(), "cgrates.org", "RP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -258,14 +259,14 @@ func testRatePrfITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating RatePrf ", err.Error())
 		}
-		ratePrfult, err := ratePrfMigrator.dmOut.DataManager().GetRateProfile("cgrates.org", "RP1", false, false, utils.NonTransactional)
+		ratePrfult, err := ratePrfMigrator.dmOut.DataManager().GetRateProfile(context.TODO(), "cgrates.org", "RP1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(ratePrfult, rPrf) {
 			t.Errorf("Expecting: %+v, received: %+v", rPrf, ratePrfult)
 		}
-		ratePrfult, err = ratePrfMigrator.dmIN.DataManager().GetRateProfile("cgrates.org", "RP1", false, false, utils.NonTransactional)
+		ratePrfult, err = ratePrfMigrator.dmIN.DataManager().GetRateProfile(context.TODO(), "cgrates.org", "RP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if ratePrfMigrator.stats[utils.RateProfiles] != 1 {

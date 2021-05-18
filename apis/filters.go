@@ -24,14 +24,26 @@ import (
 )
 
 //SetFilter add a new Filter
-func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	tntID := arg.TenantID()
+	argC := map[string][]string{utils.FilterIDs: {tntID}}
+	if fltr, err := adms.dm.GetFilter(ctx, arg.Filter.Tenant, arg.Filter.ID, true, false, utils.NonTransactional); err != nil {
+		if err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
+	} else if argC, err = composeCacheArgsForFilter(adms.dm, ctx, fltr, fltr.Tenant, tntID, argC); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	if err := adms.dm.SetFilter(ctx, arg.Filter, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	if argC, err = composeCacheArgsForFilter(adms.dm, ctx, arg.Filter, arg.Filter.Tenant, tntID, argC); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database
@@ -40,8 +52,10 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheFilters,
-		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
+	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,
+		utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]),
+		adms.cfg.GeneralCfg().DefaultCaching,
+		arg.Tenant, argC, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -104,8 +118,10 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheFilters,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+	if err := callCacheForFilter(adms.connMgr, adms.cfg.AdminSCfg().CachesConns, ctx,
+		utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]),
+		adms.cfg.GeneralCfg().DefaultCaching,
+		arg.Tenant, map[string][]string{utils.FilterIDs: {utils.ConcatenatedKey(tnt, arg.ID)}}, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

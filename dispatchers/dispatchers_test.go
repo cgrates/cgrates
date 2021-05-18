@@ -51,7 +51,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err == nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -502,7 +502,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -545,7 +545,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -594,7 +594,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -637,7 +637,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -680,7 +680,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -723,7 +723,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -777,7 +777,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	engine.Cache = newCache
 	engine.Cache.Set(ctx, utils.CacheDispatchers, dsp.TenantID(), value, nil, true, utils.EmptyString)
 
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -821,7 +821,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -905,7 +905,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 		Weight:         0,
 		Hosts:          nil,
 	}
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -958,7 +958,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	engine.Cache = newCache
 	engine.Cache.Set(ctx, utils.CacheDispatchers, dsp.TenantID(), value, nil, true, utils.EmptyString)
 
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -1020,7 +1020,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 
-	err := dm.SetDispatcherProfile(dsp, false)
+	err := dm.SetDispatcherProfile(context.TODO(), dsp, false)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}

@@ -252,3 +252,103 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 		method, args, &reply)
 }
 */
+
+func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, fltr *engine.Filter, tnt, tntID string, args map[string][]string) (_ map[string][]string, err error) {
+	indxIDs := make([]string, 0, len(fltr.Rules))
+	for _, flt := range fltr.Rules {
+		if !engine.FilterIndexTypes.Has(flt.Type) {
+			continue
+		}
+		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+		for _, fldVal := range flt.Values {
+			if isDyn {
+				if !strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+					indxIDs = append(indxIDs, utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal))
+				}
+			} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
+				indxIDs = append(indxIDs, utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element))
+			}
+		}
+	}
+	if len(indxIDs) == 0 { // no index
+		return args, nil
+	}
+
+	var rcvIndx map[string]utils.StringSet
+	if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntID,
+		utils.EmptyString, true, true); err != nil && err != utils.ErrNotFound { // error when geting the revers
+		return
+	}
+	if err == utils.ErrNotFound || len(rcvIndx) == 0 { // no reverse index for this filter
+		return args, nil
+	}
+
+	for k, ids := range rcvIndx {
+		switch k {
+		default:
+			if cField, has := utils.CacheInstanceToArg[k]; has {
+				for _, indx := range indxIDs {
+					args[cField] = append(args[cField], utils.ConcatenatedKey(tnt, indx))
+				}
+			}
+		case utils.CacheAttributeFilterIndexes: // this is slow
+			for attrID := range ids {
+				var attr *engine.AttributeProfile
+				if attr, err = dm.GetAttributeProfile(ctx, tnt, attrID, true, true, utils.NonTransactional); err != nil {
+					return
+				}
+				for _, ctx := range attr.Contexts {
+					for _, indx := range indxIDs {
+						args[utils.AttributeFilterIndexIDs] = append(args[utils.AttributeFilterIndexIDs], utils.ConcatenatedKey(tnt, ctx, indx))
+					}
+				}
+			}
+		case utils.CacheDispatcherFilterIndexes: // this is slow
+			for attrID := range ids {
+				var attr *engine.DispatcherProfile
+				if attr, err = dm.GetDispatcherProfile(ctx, tnt, attrID, true, true, utils.NonTransactional); err != nil {
+					return
+				}
+				for _, ctx := range attr.Subsystems {
+					for _, indx := range indxIDs {
+						args[utils.DispatcherFilterIndexIDs] = append(args[utils.DispatcherFilterIndexIDs], utils.ConcatenatedKey(tnt, ctx, indx))
+					}
+				}
+			}
+		}
+	}
+	return args, nil
+}
+
+// callCacheForFilter will call the cache for filter
+func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, ctx *context.Context, cacheopt, dftCache, tnt string,
+	argC map[string][]string, opts map[string]interface{}) (err error) {
+	var reply, method string
+	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
+		Tenant:    tnt,
+		ArgsCache: argC,
+		APIOpts:   opts,
+	}
+	switch utils.FirstNonEmpty(cacheopt, dftCache) {
+	case utils.MetaNone:
+		return
+	case utils.MetaReload:
+		method = utils.CacheSv1ReloadCache
+	case utils.MetaLoad:
+		method = utils.CacheSv1LoadCache
+	case utils.MetaRemove:
+		method = utils.CacheSv1RemoveItems
+	case utils.MetaClear:
+		cacheIDs := make([]string, 0, len(argC))
+		for k := range argC {
+			cacheIDs = append(cacheIDs, utils.ArgCacheToInstance[k])
+		}
+		method = utils.CacheSv1Clear
+		args = &utils.AttrCacheIDsWithAPIOpts{
+			Tenant:   tnt,
+			CacheIDs: cacheIDs,
+			APIOpts:  opts,
+		}
+	}
+	return connMgr.Call(ctx, cacheConns, method, args, &reply)
+}

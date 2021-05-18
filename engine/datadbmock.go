@@ -230,15 +230,15 @@ func (dbM *DataDBMock) RemoveChargerProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetDispatcherProfileDrv(string, string) (*DispatcherProfile, error) {
+func (dbM *DataDBMock) GetDispatcherProfileDrv(*context.Context, string, string) (*DispatcherProfile, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetDispatcherProfileDrv(*DispatcherProfile) error {
+func (dbM *DataDBMock) SetDispatcherProfileDrv(*context.Context, *DispatcherProfile) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveDispatcherProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveDispatcherProfileDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

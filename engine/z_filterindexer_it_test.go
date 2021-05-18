@@ -974,9 +974,9 @@ func testITAccountIndexes(t *testing.T) {
 		},
 	}
 
-	if err := dataManager.SetAccount(accPrf1, true); err != nil {
+	if err := dataManager.SetAccount(context.TODO(), accPrf1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetAccount(accPrf2, true); err != nil {
+	} else if err := dataManager.SetAccount(context.TODO(), accPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1028,7 +1028,7 @@ func testITAccountIndexes(t *testing.T) {
 			},
 		},
 	}
-	if err := dataManager.SetAccount(accPrf3, true); err != nil {
+	if err := dataManager.SetAccount(context.TODO(), accPrf3, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1514,10 +1514,10 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		Subsystems: []string{"thresholds"},
 		FilterIDs:  []string{"DISPATCHER_FLTR2", "*prefix:23:~*req.Destination"},
 	}
-	if err := dataManager.SetDispatcherProfile(dspPrf1, true); err != nil {
+	if err := dataManager.SetDispatcherProfile(context.TODO(), dspPrf1, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetDispatcherProfile(dspPrf2, true); err != nil {
+	if err := dataManager.SetDispatcherProfile(context.TODO(), dspPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1610,9 +1610,9 @@ func testITActionProfileIndexes(t *testing.T) {
 		ID:        "ACTPRF2",
 		FilterIDs: []string{"ACTPRF_FLTR2"},
 	}
-	if err := dataManager.SetActionProfile(actPrf1, true); err != nil {
+	if err := dataManager.SetActionProfile(context.TODO(), actPrf1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetActionProfile(actPrf2, true); err != nil {
+	} else if err := dataManager.SetActionProfile(context.TODO(), actPrf2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1680,9 +1680,9 @@ func testITActionProfileIndexes(t *testing.T) {
 		ID:        "CHANGED_ACTPRF2",
 		FilterIDs: []string{"ACTPRF_FLTR2"},
 	}
-	if err := dataManager.SetActionProfile(actPrf1, true); err != nil {
+	if err := dataManager.SetActionProfile(context.TODO(), actPrf1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetActionProfile(actPrf2, true); err != nil {
+	} else if err := dataManager.SetActionProfile(context.TODO(), actPrf2, true); err != nil {
 		t.Error(err)
 	}
 
