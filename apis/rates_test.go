@@ -19,6 +19,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/rates"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
@@ -558,3 +560,51 @@ func TestApisRateSetRateProfile(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
+
+func TestApisRateNewRateSv1(t *testing.T) {
+	rateS := &rates.RateS{}
+	expected := &RateSv1{
+		rS: rateS,
+	}
+	result := NewRateSv1(rateS)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+/*
+func TestApisRateCostForEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	rateS := rates.NewRateS(cfg, nil, dm)
+	expected := &RateSv1{
+		rS: rateS,
+	}
+	rateSv1 := NewRateSv1(rateS)
+	if !reflect.DeepEqual(rateSv1, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, rateSv1)
+	}
+	args := &utils.ArgsCostForEvent{
+		RateProfileIDs: []string{"rtID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "tenant",
+			ID:      "ID",
+			Time:    nil,
+			Event:   nil,
+			APIOpts: nil,
+		},
+	}
+	rpCost := &utils.RateProfileCost{}
+	err := rateSv1.CostForEvent(context.Background(), args, rpCost)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	}
+	expected2 := &utils.RateProfileCost{}
+	if !reflect.DeepEqual(rpCost, expected2) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected2, rpCost)
+	}
+}
+*/
