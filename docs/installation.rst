@@ -35,7 +35,7 @@ Add the gpg key:
 
 ::
 
-    sudo wget -O - http://apt.cgrates.org/apt.cgrates.org.gpg.key | sudo apt-key add -
+    sudo wget -O - https://apt.cgrates.org/apt.cgrates.org.gpg.key | sudo apt-key add -
 
 Add the repository in apt sources list:
 
@@ -89,7 +89,7 @@ To install CGRateS out of YUM execute the following commands
     baseurl=http://yum.cgrates.org/yum/nightly/
     enabled=1
     gpgcheck=1
-    gpgkey=http://yum.cgrates.org/yum.cgrates.org.gpg.key
+    gpgkey=https://yum.cgrates.org/yum.cgrates.org.gpg.key
     EOT
     sudo yum update
     sudo yum install cgrates
