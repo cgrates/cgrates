@@ -139,7 +139,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, actTime *time.Time, evNm utils.MapStorage) (sqs StatQueues, err error) {
+func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, evNm utils.MapStorage) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
 		sqIDs, err = MatchingItemIDsForEvent(context.TODO(), evNm,
@@ -274,7 +274,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args.StatIDs, args.Time, evNm)
+	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args.StatIDs, evNm)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +382,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args.StatIDs, args.Time, utils.MapStorage{
+	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args.StatIDs, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}); err != nil {

@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,7 +31,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (e
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1Ping,
 			args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -46,7 +44,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -59,7 +57,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueStringMetrics,
 			args.TenantID.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -76,7 +74,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1ProcessEvent,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -88,7 +86,7 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueFloatMetrics,
 			args.TenantID.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -107,7 +105,7 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithAPIOpts,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.StatSv1GetQueueIDs, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}

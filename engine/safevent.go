@@ -252,7 +252,6 @@ func (se *SafEvent) AsCGREvent(tnt string) (cgrEv *utils.CGREvent) {
 	cgrEv = &utils.CGREvent{
 		Tenant: tnt,
 		ID:     utils.UUIDSha1Prefix(),
-		Time:   utils.TimePointer(time.Now()),
 		Event:  se.Me.Data(),
 	}
 	se.RUnlock()

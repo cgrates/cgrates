@@ -123,14 +123,12 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply interface{}) error {
-			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
 			} else if rargs, can := arg.(*sessions.V1AuthorizeArgs); !can {
 				t.Errorf("args is not of sessions.V1AuthorizeArgs type")
 			} else {
-				tm = rargs.Time // need time
 				id = rargs.ID
 			}
 			expargs := &sessions.V1AuthorizeArgs{
@@ -138,7 +136,6 @@ func TestProcessRequest(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
-					Time:   tm,
 					Event: map[string]interface{}{
 						"Account":     "1001",
 						"Category":    "call",
@@ -165,14 +162,12 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 		utils.SessionSv1InitiateSession: func(_ *context.Context, arg, rply interface{}) error {
-			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
 			} else if rargs, can := arg.(*sessions.V1InitSessionArgs); !can {
 				t.Errorf("args is not of sessions.V1InitSessionArgs type")
 			} else {
-				tm = rargs.Time // need time
 				id = rargs.ID
 			}
 			expargs := &sessions.V1InitSessionArgs{
@@ -181,7 +176,6 @@ func TestProcessRequest(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
-					Time:   tm,
 					Event: map[string]interface{}{
 						"Account":     "1001",
 						"Category":    "call",
@@ -230,14 +224,12 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 		utils.SessionSv1UpdateSession: func(_ *context.Context, arg, rply interface{}) error {
-			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
 			} else if rargs, can := arg.(*sessions.V1UpdateSessionArgs); !can {
 				t.Errorf("args is not of sessions.V1UpdateSessionArgs type")
 			} else {
-				tm = rargs.Time // need time
 				id = rargs.ID
 			}
 			expargs := &sessions.V1UpdateSessionArgs{
@@ -246,7 +238,6 @@ func TestProcessRequest(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
-					Time:   tm,
 					Event: map[string]interface{}{
 						"Account":     "1001",
 						"Category":    "call",
@@ -295,20 +286,17 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 		utils.SessionSv1ProcessCDR: func(_ *context.Context, arg, rply interface{}) error {
-			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
 			} else if rargs, can := arg.(*utils.CGREvent); !can {
 				t.Errorf("args is not of utils.CGREventWithOpts type")
 			} else {
-				tm = rargs.Time // need time
 				id = rargs.ID
 			}
 			expargs := &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     id,
-				Time:   tm,
 				Event: map[string]interface{}{
 					"Account":     "1001",
 					"Category":    "call",
@@ -332,14 +320,12 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 		utils.SessionSv1TerminateSession: func(_ *context.Context, arg, rply interface{}) error {
-			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
 			} else if rargs, can := arg.(*sessions.V1TerminateSessionArgs); !can {
 				t.Errorf("args is not of sessions.V1TerminateSessionArgs type")
 			} else {
-				tm = rargs.Time // need time
 				id = rargs.ID
 			}
 			expargs := &sessions.V1TerminateSessionArgs{
@@ -348,7 +334,6 @@ func TestProcessRequest(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
-					Time:   tm,
 					Event: map[string]interface{}{
 						"Account":     "1001",
 						"Category":    "call",
@@ -373,14 +358,12 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 		utils.SessionSv1ProcessMessage: func(_ *context.Context, arg, rply interface{}) error {
-			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
 			} else if rargs, can := arg.(*sessions.V1ProcessMessageArgs); !can {
 				t.Errorf("args is not of sessions.V1ProcessMessageArgs type")
 			} else {
-				tm = rargs.Time // need time
 				id = rargs.ID
 			}
 			expargs := &sessions.V1ProcessMessageArgs{
@@ -389,7 +372,6 @@ func TestProcessRequest(t *testing.T) {
 				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     id,
-					Time:   tm,
 					Event: map[string]interface{}{
 						"Account":     "1001",
 						"Category":    "call",

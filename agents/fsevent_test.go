@@ -553,22 +553,15 @@ func TestParseEventValue(t *testing.T) {
 func TestFsEvAsCGREvent(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
-	if err != nil {
-		t.Error(err)
-	}
 	expected := &utils.CGREvent{
 		Tenant: ev.GetTenant(utils.MetaDefault),
 		ID:     utils.UUIDSha1Prefix(),
-		Time:   &sTime,
 		Event:  ev.AsMapStringInterface(timezone),
 	}
 	if rcv, err := ev.AsCGREvent(timezone); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
-	} else if !reflect.DeepEqual(expected.Time, rcv.Time) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.Time, rcv.Time)
 	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
 	}
@@ -1017,16 +1010,11 @@ variable_rtp_audio_rtcp_octet_count: 0`
 func TestFsEvV1AuthorizeArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
-	if err != nil {
-		t.Error(err)
-	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: ev.GetTenant(utils.MetaDefault),
 			ID:     utils.UUIDSha1Prefix(),
-			Time:   &sTime,
 			Event:  ev.AsMapStringInterface(timezone),
 		},
 		GetRoutes:          true,
@@ -1038,8 +1026,6 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 	rcv := ev.V1AuthorizeArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Time, rcv.CGREvent.Time) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Time, rcv.CGREvent.Time)
 	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
 	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
@@ -1060,24 +1046,17 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 func TestFsEvV1InitSessionArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
-	if err != nil {
-		t.Error(err)
-	}
 	expected := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: ev.GetTenant(utils.MetaDefault),
 			ID:     utils.UUIDSha1Prefix(),
-			Time:   &sTime,
 			Event:  ev.AsMapStringInterface(timezone),
 		},
 	}
 	rcv := ev.V1InitSessionArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Time, rcv.CGREvent.Time) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Time, rcv.CGREvent.Time)
 	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
 	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
@@ -1090,24 +1069,17 @@ func TestFsEvV1InitSessionArgs(t *testing.T) {
 func TestFsEvV1TerminateSessionArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
-	if err != nil {
-		t.Error(err)
-	}
 	expected := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: ev.GetTenant(utils.MetaDefault),
 			ID:     utils.UUIDSha1Prefix(),
-			Time:   &sTime,
 			Event:  ev.AsMapStringInterface(timezone),
 		},
 	}
 	rcv := ev.V1TerminateSessionArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
-	} else if !reflect.DeepEqual(expected.CGREvent.Time, rcv.CGREvent.Time) {
-		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Time, rcv.CGREvent.Time)
 	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Event, rcv.CGREvent.Event)
 	} else if !reflect.DeepEqual(expected.CGREvent.Event, rcv.CGREvent.Event) {

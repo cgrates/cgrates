@@ -37,7 +37,7 @@ func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREvent,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1Ping, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -53,7 +53,7 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsW
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetItemIDs, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -72,7 +72,7 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithAPI
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1HasItem, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -93,7 +93,7 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheI
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetItemExpiryTime, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -113,7 +113,7 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveItem, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -132,7 +132,7 @@ func (dS *DispatcherService) CacheSv1RemoveItems(args utils.AttrReloadCacheWithA
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveItems, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -151,7 +151,7 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithAPIOpts,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1Clear, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -170,7 +170,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithA
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetCacheStats, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -188,7 +188,7 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1PrecacheStatus, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -207,7 +207,7 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithAPIOpt
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1HasGroup, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -226,7 +226,7 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWit
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1GetGroupItemIDs, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -244,7 +244,7 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithAPI
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1RemoveGroup, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -262,7 +262,7 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithA
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReloadCache, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -280,7 +280,7 @@ func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithAPI
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1LoadCache, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -298,7 +298,7 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplica
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReplicateRemove, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -316,7 +316,7 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(args *utils.ArgCacheReplicateS
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CacheSv1ReplicateSet, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}

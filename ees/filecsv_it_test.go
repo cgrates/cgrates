@@ -108,7 +108,6 @@ func testCsvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
@@ -134,7 +133,6 @@ func testCsvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
@@ -160,7 +158,6 @@ func testCsvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
@@ -227,7 +224,6 @@ func testCsvExportComposedEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:         utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:           utils.MetaVoice,
@@ -256,7 +252,6 @@ func testCsvExportComposedEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:         utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:           utils.MetaSMS,
@@ -320,7 +315,6 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
@@ -348,7 +342,6 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "dataEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("abcdef", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaData,
@@ -376,7 +369,6 @@ func testCsvExportEventWithInflateTemplate(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "SMSEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("sdfwer", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaSMS,
@@ -444,7 +436,6 @@ func testCsvExportNotFoundExporter(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,

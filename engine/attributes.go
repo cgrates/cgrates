@@ -55,7 +55,7 @@ func (alS *AttributeService) Shutdown() {
 
 // attributeProfileForEvent returns the matching attribute
 func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, tnt string, ctx *string, attrsIDs []string,
-	actTime *time.Time, evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
+	evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	contextVal := utils.MetaDefault
 	if ctx != nil && *ctx != "" {
@@ -206,7 +206,7 @@ func (attr *AttrArgsProcessEvent) Clone() *AttrArgsProcessEvent {
 func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args *AttrArgsProcessEvent, evNm utils.MapStorage, dynDP utils.DataProvider, lastID string) (
 	rply *AttrSProcessEventReply, err error) {
 	var attrPrf *AttributeProfile
-	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, args.Time, evNm, lastID); err != nil {
+	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, evNm, lastID); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -275,7 +275,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ctx *context.Context, args *
 	if tnt == utils.EmptyString {
 		tnt = alS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, args.Time, utils.MapStorage{
+	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, args.Context, args.AttributeIDs, utils.MapStorage{
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{

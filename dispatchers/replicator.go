@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,7 +30,7 @@ func (dS *DispatcherService) ReplicatorSv1Ping(args *utils.CGREvent, rpl *string
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -46,7 +44,7 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueue(args *utils.TenantIDWithA
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetStatQueue, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -64,7 +62,7 @@ func (dS *DispatcherService) ReplicatorSv1GetFilter(args *utils.TenantIDWithAPIO
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetFilter, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -82,7 +80,7 @@ func (dS *DispatcherService) ReplicatorSv1GetThreshold(args *utils.TenantIDWithA
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetThreshold, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -100,7 +98,7 @@ func (dS *DispatcherService) ReplicatorSv1GetThresholdProfile(args *utils.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetThresholdProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -118,7 +116,7 @@ func (dS *DispatcherService) ReplicatorSv1GetStatQueueProfile(args *utils.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetStatQueueProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -136,7 +134,7 @@ func (dS *DispatcherService) ReplicatorSv1GetResource(args *utils.TenantIDWithAP
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetResource, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -154,7 +152,7 @@ func (dS *DispatcherService) ReplicatorSv1GetResourceProfile(args *utils.TenantI
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetResourceProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -172,7 +170,7 @@ func (dS *DispatcherService) ReplicatorSv1GetRouteProfile(args *utils.TenantIDWi
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetRouteProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -190,7 +188,7 @@ func (dS *DispatcherService) ReplicatorSv1GetAttributeProfile(args *utils.Tenant
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetAttributeProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -208,7 +206,7 @@ func (dS *DispatcherService) ReplicatorSv1GetChargerProfile(args *utils.TenantID
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetChargerProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -226,7 +224,7 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherProfile(args *utils.Tenan
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetDispatcherProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -244,7 +242,7 @@ func (dS *DispatcherService) ReplicatorSv1GetDispatcherHost(args *utils.TenantID
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetDispatcherHost, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -262,7 +260,7 @@ func (dS *DispatcherService) ReplicatorSv1GetRateProfile(args *utils.TenantIDWit
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetRateProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -280,7 +278,7 @@ func (dS *DispatcherService) ReplicatorSv1GetActionProfile(args *utils.TenantIDW
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetActionProfile, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -298,7 +296,7 @@ func (dS *DispatcherService) ReplicatorSv1GetItemLoadIDs(args *utils.StringWithA
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetItemLoadIDs, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -317,7 +315,7 @@ func (dS *DispatcherService) ReplicatorSv1SetThresholdProfile(args *engine.Thres
 	args.ThresholdProfile.Tenant = utils.FirstNonEmpty(args.ThresholdProfile.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetThresholdProfile, args.ThresholdProfile.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -336,7 +334,7 @@ func (dS *DispatcherService) ReplicatorSv1SetThreshold(args *engine.ThresholdWit
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetThreshold, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -355,7 +353,7 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueue(args *engine.StatQueueWit
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetStatQueue, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -374,7 +372,7 @@ func (dS *DispatcherService) ReplicatorSv1SetFilter(args *engine.FilterWithAPIOp
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetFilter, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -394,7 +392,7 @@ func (dS *DispatcherService) ReplicatorSv1SetStatQueueProfile(args *engine.StatQ
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetStatQueueProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -414,7 +412,7 @@ func (dS *DispatcherService) ReplicatorSv1SetResource(args *engine.ResourceWithA
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetResource, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -433,7 +431,7 @@ func (dS *DispatcherService) ReplicatorSv1SetResourceProfile(args *engine.Resour
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetResourceProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -452,7 +450,7 @@ func (dS *DispatcherService) ReplicatorSv1SetRouteProfile(args *engine.RouteProf
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetRouteProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -471,7 +469,7 @@ func (dS *DispatcherService) ReplicatorSv1SetAttributeProfile(args *engine.Attri
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetAttributeProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -490,7 +488,7 @@ func (dS *DispatcherService) ReplicatorSv1SetChargerProfile(args *engine.Charger
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetChargerProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -509,7 +507,7 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherProfile(args *engine.Disp
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetDispatcherProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -528,7 +526,7 @@ func (dS *DispatcherService) ReplicatorSv1SetRateProfile(args *utils.RateProfile
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetRateProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -547,7 +545,7 @@ func (dS *DispatcherService) ReplicatorSv1SetActionProfile(args *engine.ActionPr
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetActionProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -566,7 +564,7 @@ func (dS *DispatcherService) ReplicatorSv1SetDispatcherHost(args *engine.Dispatc
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetDispatcherHost, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -586,7 +584,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThreshold(args *utils.TenantIDWi
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveThreshold, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -603,7 +601,7 @@ func (dS *DispatcherService) ReplicatorSv1SetLoadIDs(args *utils.LoadIDsWithAPIO
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetLoadIDs, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -622,7 +620,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueue(args *utils.TenantIDWi
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveStatQueue, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -641,7 +639,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveFilter(args *utils.TenantIDWithA
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveFilter, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -660,7 +658,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveThresholdProfile(args *utils.Ten
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveThresholdProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -679,7 +677,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveStatQueueProfile(args *utils.Ten
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveStatQueueProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -699,7 +697,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResource(args *utils.TenantIDWit
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveResource, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -718,7 +716,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveResourceProfile(args *utils.Tena
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveResourceProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -735,7 +733,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActions(args *utils.StringWithAP
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveActions, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -755,7 +753,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRouteProfile(args *utils.TenantI
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveRouteProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -774,7 +772,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAttributeProfile(args *utils.Ten
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveAttributeProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -793,7 +791,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveChargerProfile(args *utils.Tenan
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveChargerProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -812,7 +810,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherProfile(args *utils.Te
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveDispatcherProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -831,7 +829,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveDispatcherHost(args *utils.Tenan
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveDispatcherHost, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -850,7 +848,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveRateProfile(args *utils.TenantID
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveRateProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -869,7 +867,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveActionProfile(args *utils.Tenant
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveActionProfile, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -887,7 +885,7 @@ func (dS *DispatcherService) ReplicatorSv1GetIndexes(args *utils.GetIndexesArg, 
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetIndexes, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -905,7 +903,7 @@ func (dS *DispatcherService) ReplicatorSv1SetIndexes(args *utils.SetIndexesArg, 
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetIndexes, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -923,7 +921,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveIndexes(args *utils.GetIndexesAr
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveIndexes, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -940,7 +938,7 @@ func (dS *DispatcherService) ReplicatorSv1GetAccount(args *utils.TenantIDWithAPI
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1GetAccount, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -960,7 +958,7 @@ func (dS *DispatcherService) ReplicatorSv1SetAccount(args *utils.AccountWithAPIO
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1SetAccount, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -979,7 +977,7 @@ func (dS *DispatcherService) ReplicatorSv1RemoveAccount(args *utils.TenantIDWith
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ReplicatorSv1RemoveAccount, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}

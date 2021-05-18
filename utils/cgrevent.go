@@ -27,7 +27,6 @@ import (
 type CGREvent struct {
 	Tenant  string
 	ID      string
-	Time    *time.Time // event time
 	Event   map[string]interface{}
 	APIOpts map[string]interface{}
 }
@@ -100,9 +99,6 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 		ID:      ev.ID,
 		Event:   make(map[string]interface{}), // a bit forced but safe
 		APIOpts: make(map[string]interface{}),
-	}
-	if ev.Time != nil {
-		clned.Time = TimePointer(*ev.Time)
 	}
 	for k, v := range ev.Event {
 		clned.Event[k] = v
@@ -186,7 +182,6 @@ func NMAsCGREvent(nM *OrderedNavigableMap, tnt string, pathSep string, opts MapS
 	cgrEv = &CGREvent{
 		Tenant:  tnt,
 		ID:      UUIDSha1Prefix(),
-		Time:    TimePointer(time.Now()),
 		Event:   make(map[string]interface{}),
 		APIOpts: opts,
 	}

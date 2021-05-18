@@ -33,7 +33,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREvent, reply *string)
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ChargerSv1Ping, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -48,7 +48,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREvent,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -63,7 +63,7 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREvent,
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ChargerSv1ProcessEvent, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}

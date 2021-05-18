@@ -33,7 +33,6 @@ func TestDspCacheSv1PingError(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant:  "tenant",
 		ID:      "",
-		Time:    &time.Time{},
 		Event:   nil,
 		APIOpts: nil,
 	}
@@ -63,7 +62,6 @@ func TestDspCacheSv1PingErrorAttributeSConns(t *testing.T) {
 	CGREvent := &utils.CGREvent{
 		Tenant:  "tenant",
 		ID:      "",
-		Time:    &time.Time{},
 		Event:   nil,
 		APIOpts: nil,
 	}

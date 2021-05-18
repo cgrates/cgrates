@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -104,7 +103,6 @@ func (aL *actExport) execute(ctx *context.Context, data utils.MapStorage, _ stri
 			EeIDs: exporterIDs,
 			CGREvent: &utils.CGREvent{
 				Tenant:  aL.tnt,
-				Time:    utils.TimePointer(time.Now()),
 				ID:      utils.GenUUID(),
 				Event:   data[utils.MetaReq].(map[string]interface{}),
 				APIOpts: data[utils.MetaOpts].(map[string]interface{}),

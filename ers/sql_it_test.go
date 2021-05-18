@@ -243,7 +243,6 @@ func testSQLReader(t *testing.T) {
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Time:   ev.cgrEvent.Time,
 			Event: map[string]interface{}{
 				"CGRID": cdr.CGRID,
 			},
@@ -277,7 +276,6 @@ func testSQLReader2(t *testing.T) {
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Time:   ev.cgrEvent.Time,
 			Event: map[string]interface{}{
 				"CGRID": cdr.CGRID,
 			},
@@ -490,7 +488,6 @@ func testSQLReader3(t *testing.T) {
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Time:   ev.cgrEvent.Time,
 			Event: map[string]interface{}{
 				"CGRID": cdr.CGRID,
 			},
@@ -524,7 +521,6 @@ func testSQLReader4(t *testing.T) {
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Time:   ev.cgrEvent.Time,
 			Event: map[string]interface{}{
 				"CGRID": cdr.CGRID,
 			},

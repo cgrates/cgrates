@@ -944,7 +944,6 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "CACHE1",
-				Time:   utils.TimePointer(time.Date(2020, 7, 21, 11, 0, 0, 0, time.UTC)),
 				Event: map[string]interface{}{
 					utils.AccountField: "1001",
 					utils.Destination:  1002,

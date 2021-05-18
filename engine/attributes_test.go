@@ -107,7 +107,6 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "adrian.itsyscom.com.co.uk",
 			ID:     "123",
-			Time:   nil,
 			Event: map[string]interface{}{
 				utils.AccountField: "andrei.itsyscom.com",
 				"Password":         "CGRATES.ORG",

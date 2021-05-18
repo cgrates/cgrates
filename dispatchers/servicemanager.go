@@ -31,7 +31,7 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ServiceManagerV1Ping, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}

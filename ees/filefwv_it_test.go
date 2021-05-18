@@ -101,7 +101,6 @@ func testFwvExportEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.OrderID:      1,
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),

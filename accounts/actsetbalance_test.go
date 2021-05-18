@@ -163,7 +163,7 @@ func TestActSetAccountFields(t *testing.T) {
 	accPrf := &utils.Account{}
 
 	expectedAccprf := &utils.Account{
-		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z", "*string:~*req.ToR:*sms"},
+		FilterIDs: []string{"*string:~*req.ToR:*sms"},
 		Weights: []*utils.DynamicWeight{
 			{
 				Weight: 10,
@@ -174,7 +174,7 @@ func TestActSetAccountFields(t *testing.T) {
 		},
 		ThresholdIDs: []string{"TH_ID1"},
 	}
-	if err := actSetAccountFields(accPrf, []string{utils.FilterIDs}, "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z|2014-08-29T15:00:00Z;*string:~*req.ToR:*sms"); err != nil {
+	if err := actSetAccountFields(accPrf, []string{utils.FilterIDs}, "*string:~*req.ToR:*sms"); err != nil {
 		t.Error(err)
 	} else if err := actSetAccountFields(accPrf, []string{utils.Weights}, ";10"); err != nil {
 		t.Error(err)

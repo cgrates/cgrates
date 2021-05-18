@@ -21,7 +21,6 @@ package agents
 import (
 	"encoding/json"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
@@ -152,42 +151,10 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 
 // AsCGREvent converts KamEvent into CGREvent
 func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
-	var sTime time.Time
-	switch kev[EVENT] {
-	case CGR_AUTH_REQUEST:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
-		if err != nil {
-			return nil, err
-		}
-		sTime = sTimePrv
-	case CGR_CALL_START:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return nil, err
-		}
-		sTime = sTimePrv
-	case CGR_CALL_END:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return nil, err
-		}
-		sTime = sTimePrv
-	case CGR_PROCESS_MESSAGE:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return nil, err
-		}
-		sTime = sTimePrv
-	case CGR_PROCESS_CDR:
-		sTime = time.Now()
-	default: // no/unsupported event
-		return
-	}
 	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Time:    &sTime,
 		Event:   kev.AsMapStringInterface(),
 		APIOpts: kev.GetOptions(),
 	}

@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -32,7 +30,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREvent, reply *strin
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1Ping, args.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -45,7 +43,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Thre
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdsForEvent,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -58,7 +56,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ThresholdsArg
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1ProcessEvent,
 			args.CGREvent.Tenant,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.CGREvent.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -72,7 +70,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdIDs,
-			tnt, utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			tnt, utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
@@ -89,7 +87,7 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAP
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThreshold, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}

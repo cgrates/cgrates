@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,7 +26,6 @@ func NewCGRSafEventFromCGREvent(cgrEv *utils.CGREvent) *CGRSafEvent {
 	return &CGRSafEvent{
 		Tenant: cgrEv.Tenant,
 		ID:     cgrEv.ID,
-		Time:   cgrEv.Time,
 		Event:  NewSafEvent(cgrEv.Event),
 	}
 }
@@ -37,7 +34,6 @@ func NewCGRSafEventFromCGREvent(cgrEv *utils.CGREvent) *CGRSafEvent {
 type CGRSafEvent struct {
 	Tenant string
 	ID     string
-	Time   *time.Time // event time
 	Event  *SafEvent
 }
 
@@ -45,7 +41,6 @@ func (cgrSafEv *CGRSafEvent) AsCGREvent() *utils.CGREvent {
 	return &utils.CGREvent{
 		Tenant: cgrSafEv.Tenant,
 		ID:     cgrSafEv.ID,
-		Time:   cgrSafEv.Time,
 		Event:  cgrSafEv.Event.AsMapInterface(),
 	}
 }

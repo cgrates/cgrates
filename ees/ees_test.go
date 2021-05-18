@@ -164,7 +164,6 @@ func TestV1ProcessEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.CGRID:        utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
 				utils.ToR:          utils.MetaVoice,
@@ -215,7 +214,6 @@ func TestV1ProcessEvent2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event: map[string]interface{}{
 				utils.Subject: "1001",
 				"ExtraFields": map[string]string{"extra1": "val_extra1",
@@ -255,7 +253,6 @@ func TestV1ProcessEvent3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
 		},
 	}
@@ -289,7 +286,6 @@ func TestV1ProcessEvent4(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
 			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
@@ -340,7 +336,6 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
 			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
@@ -369,7 +364,6 @@ func TestV1ProcessEvent5(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
 			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},
@@ -400,7 +394,6 @@ func TestV1ProcessEvent6(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "voiceEvent",
-			Time:   utils.TimePointer(time.Now()),
 			Event:  map[string]interface{}{},
 			APIOpts: map[string]interface{}{
 				utils.OptsEEsVerbose: struct{}{},

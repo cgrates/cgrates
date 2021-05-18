@@ -21,7 +21,6 @@ package agents
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
@@ -270,17 +269,11 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 }
 
 // AsCGREvent converts AsteriskEvent into CGREvent
-func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
-	var setupTime time.Time
-	if setupTime, err = utils.ParseTimeDetectLayout(
-		smaEv.Timestamp(), timezone); err != nil {
-		return
-	}
+func (smaEv *SMAsteriskEvent) AsCGREvent() (cgrEv *utils.CGREvent, err error) {
 	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(smaEv.Tenant(),
 			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
-		Time:    &setupTime,
 		Event:   smaEv.AsMapStringInterface(),
 		APIOpts: smaEv.opts,
 	}
@@ -288,7 +281,7 @@ func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent
 }
 
 func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cgrEv, err := smaEv.AsCGREvent()
 	if err != nil {
 		return
 	}

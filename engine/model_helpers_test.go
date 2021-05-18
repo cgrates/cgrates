@@ -4533,6 +4533,7 @@ func TestAccountMdlsAsTPAccountCase2(t *testing.T) {
 		},
 	}
 	result, err := testStruct.AsTPAccount()
+	sort.Strings(result[0].FilterIDs)
 	if err != nil {
 		t.Fatal(err)
 	}
