@@ -229,7 +229,7 @@ func (ldr *Loader) processContent(ctx *context.Context, loaderType, caching stri
 				continue
 			}
 
-			if err := lData.UpdateFromCSV(fName, record,
+			if err := lData.UpdateFromCSV(ctx, fName, record,
 				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> <%s> line: %d, error: %s",
@@ -701,7 +701,7 @@ func (ldr *Loader) removeContent(ctx *context.Context, loaderType, caching strin
 				continue
 			}
 
-			if err := lData.UpdateFromCSV(fName, record,
+			if err := lData.UpdateFromCSV(ctx, fName, record,
 				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> <%s> line: %d, error: %s",

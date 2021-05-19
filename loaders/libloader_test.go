@@ -22,6 +22,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
+
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -75,7 +77,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true"},
 	}
 	lData := make(LoaderData)
-	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
+	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[0], attrSFlds,
 		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
@@ -93,7 +95,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
 	}
 	lData = make(LoaderData)
-	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
+	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[1], attrSFlds,
 		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
@@ -159,7 +161,7 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 		{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true"},
 	}
 	lData := make(LoaderData)
-	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
+	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[0], attrSFlds,
 		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
@@ -177,7 +179,7 @@ func TestDataUpdateFromCSVOneFile2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
 	}
 	lData = make(LoaderData)
-	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
+	if err := lData.UpdateFromCSV(context.Background(), "Attributes.csv", rows[1], attrSFlds,
 		config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 		t.Error(err)
 	}
@@ -240,7 +242,7 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	}
 	lData := make(LoaderData)
 	for fName, record := range loadRun1 {
-		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
+		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,
 			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), nil); err != nil {
 			t.Error(err)
 		}
@@ -288,7 +290,7 @@ func TestUpdateFromCsvParseValueError(t *testing.T) {
 	}
 	tnt := config.NewRSRParsersMustCompile("asd{*duration_seconds}", utils.InfieldSep)
 	expected := "time: invalid duration \"asd\""
-	if err := ldrData.UpdateFromCSV("File1.csv", nil, nil, tnt, nil); err == nil || err.Error() != expected {
+	if err := ldrData.UpdateFromCSV(context.Background(), "File1.csv", nil, nil, tnt, nil); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -320,7 +322,7 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 
 	for fName, record := range loadRunStr {
 		expected := "Ignoring record: [\"cgrates.org\" \"TEST_1\"] with error : strconv.Atoi: parsing \"Account\": invalid syntax"
-		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
+		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,
 			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), filterS); err == nil || err.Error() != expected {
 			t.Errorf("Expected %+v, received %+v", expected, err)
 		}
@@ -353,7 +355,7 @@ func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 	filterS := engine.NewFilterS(dftCfg, nil, dm)
 
 	for fName, record := range loadRunStr {
-		if err := lData.UpdateFromCSV(fName, record, attrSFlds,
+		if err := lData.UpdateFromCSV(context.Background(), fName, record, attrSFlds,
 			config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep), filterS); err != nil {
 			t.Error(err)
 		}
