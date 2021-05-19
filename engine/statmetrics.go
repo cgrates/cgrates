@@ -556,6 +556,8 @@ func (acc *StatACC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 		return
 	} else if cost, err = utils.IfaceAsFloat64(val); err != nil {
 		return
+	} else if cost < 0 {
+		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
 	}
 	acc.Sum += cost
 	if val, has := acc.Events[evID]; !has {
@@ -686,6 +688,8 @@ func (tcc *StatTCC) AddEvent(evID string, ev utils.DataProvider) (err error) {
 		return
 	} else if cost, err = utils.IfaceAsFloat64(val); err != nil {
 		return
+	} else if cost < 0 {
+		return utils.ErrPrefix(utils.ErrNegative, utils.Cost)
 	}
 	tcc.Sum += cost
 	if val, has := tcc.Events[evID]; !has {
