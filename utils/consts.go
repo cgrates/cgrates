@@ -1228,11 +1228,11 @@ const (
 	APIerSv1SetTPRateProfile            = "APIerSv1.SetTPRateProfile"
 	APIerSv1GetTPRateProfileIds         = "APIerSv1.GetTPRateProfileIds"
 	APIerSv1RemoveTPRateProfile         = "APIerSv1.RemoveTPRateProfile"
-	APIerSv1SetAccount                  = "APIerSv1.SetAccount"
-	APIerSv1GetAccount                  = "APIerSv1.GetAccount"
-	APIerSv1GetAccountIDs               = "APIerSv1.GetAccountIDs"
-	APIerSv1RemoveAccount               = "APIerSv1.RemoveAccount"
-	APIerSv1GetAccountIDsCount          = "APIerSv1.GetAccountIDsCount"
+	AdminSv1SetAccount                  = "AdminSv1.SetAccount"
+	AdminSv1GetAccount                  = "AdminSv1.GetAccount"
+	AdminSv1GetAccountIDs               = "AdminSv1.GetAccountIDs"
+	AdminSv1RemoveAccount               = "AdminSv1.RemoveAccount"
+	AdminSv1GetAccountIDsCount          = "AdminSv1.GetAccountIDsCount"
 	APIerSv1GetTPAccountIDs             = "APIerSv1.GetTPAccountIDs"
 	APIerSv1GetTPAccount                = "APIerSv1.GetTPAccount"
 	APIerSv1SetTPAccount                = "APIerSv1.SetTPAccount"
@@ -1500,11 +1500,11 @@ const (
 
 // ActionProfile APIs
 const (
-	APIerSv1SetActionProfile         = "APIerSv1.SetActionProfile"
-	APIerSv1GetActionProfile         = "APIerSv1.GetActionProfile"
-	APIerSv1GetActionProfileIDs      = "APIerSv1.GetActionProfileIDs"
-	APIerSv1GetActionProfileIDsCount = "APIerSv1.GetActionProfileIDsCount"
-	APIerSv1RemoveActionProfile      = "APIerSv1.RemoveActionProfile"
+	AdminSv1SetActionProfile         = "AdminSv1.SetActionProfile"
+	AdminSv1GetActionProfile         = "AdminSv1.GetActionProfile"
+	AdminSv1GetActionProfileIDs      = "AdminSv1.GetActionProfileIDs"
+	AdminSv1GetActionProfileIDsCount = "AdminSv1.GetActionProfileIDsCount"
+	AdminSv1RemoveActionProfile      = "AdminSv1.RemoveActionProfile"
 )
 
 // AdminSv1
