@@ -145,6 +145,8 @@ func testTpResITCheckData(t *testing.T) {
 		t.Error("Error when getting TpResources ", err.Error())
 	}
 	sort.Strings(result[0].ThresholdIDs)
+	sort.Strings(result[0].FilterIDs)
+	sort.Strings(tpResources[0].FilterIDs)
 	if !reflect.DeepEqual(tpResources[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpResources[0]), utils.ToJSON(result[0]))
 	}

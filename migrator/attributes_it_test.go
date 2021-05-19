@@ -274,7 +274,7 @@ func testAttrITMigrateOnlyVersion(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	if attrMigrator.stats[utils.Attributes] != 0 {
@@ -356,7 +356,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 
 		if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.Attributes] != 6 {
+		} else if vrs[utils.Attributes] != 7 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 		}
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
@@ -496,7 +496,7 @@ func testAttrITMigrateV2(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
@@ -573,7 +573,7 @@ func testAttrITMigrateV3(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
@@ -654,7 +654,7 @@ func testAttrITMigrateV4(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile(context.TODO(), "cgrates.org",
@@ -754,7 +754,7 @@ func testAttrITV1ToV5(t *testing.T) {
 	// check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
@@ -883,7 +883,7 @@ func testAttrITV2ToV5(t *testing.T) {
 	//check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 
@@ -1001,7 +1001,7 @@ func testAttrITV3ToV5(t *testing.T) {
 	//check the version
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 6 {
+	} else if vrs[utils.Attributes] != 7 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 

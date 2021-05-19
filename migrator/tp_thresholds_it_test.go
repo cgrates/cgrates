@@ -143,6 +143,7 @@ func testTpTresITCheckData(t *testing.T) {
 		t.Error("Error when getting TpThresholds ", err.Error())
 	}
 	sort.Strings(result[0].FilterIDs)
+	sort.Strings(tpThresholds[0].FilterIDs)
 	sort.Strings(result[0].ActionIDs)
 	if !reflect.DeepEqual(tpThresholds[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpThresholds[0]), utils.ToJSON(result[0]))
