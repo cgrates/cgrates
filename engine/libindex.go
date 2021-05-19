@@ -805,14 +805,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				}
 			}
 		case utils.CacheAttributeFilterIndexes:
-			if err = removeFilterIndexesForFilter(dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, _ string) (*[]string, error) {
-					ap, e := dm.GetAttributeProfile(ctx, tnt, id, true, false, utils.NonTransactional)
+					ap, e := dm.GetAttributeProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
