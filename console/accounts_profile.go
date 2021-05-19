@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetAccounts{
 		name:      "accounts",
-		rpcMethod: utils.APIerSv1GetAccount,
+		rpcMethod: utils.AdminSv1GetAccount,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}
 	commands[c.Name()] = c

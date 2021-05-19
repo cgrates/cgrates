@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdSetAccount{
 		name:      "accounts_set",
-		rpcMethod: utils.APIerSv1SetAccount,
+		rpcMethod: utils.AdminSv1SetAccount,
 		rpcParams: &utils.APIAccountWithOpts{},
 	}
 	commands[c.Name()] = c
