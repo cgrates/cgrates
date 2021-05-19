@@ -121,3 +121,31 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
 		APIOpts: args.APIOpts,
 	}, utils.MetaResponder, utils.ResponderShutdown, args, reply)
 }
+
+func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ResponderShutdown, tnt,
+			utils.IfaceAsString(arg.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: arg.APIOpts,
+	}, utils.MetaResponder, utils.ResponderGetCostOnRatingPlans, arg, reply)
+}
+
+func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
+	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.ResponderShutdown, tnt,
+			utils.IfaceAsString(arg.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: arg.APIOpts,
+	}, utils.MetaResponder, utils.ResponderGetMaxSessionTimeOnAccounts, arg, reply)
+}

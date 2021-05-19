@@ -1397,6 +1397,7 @@ type GetCostOnRatingPlansArgs struct {
 	SetupTime     time.Time
 	Usage         time.Duration
 	RatingPlanIDs []string
+	APIOpts       map[string]interface{}
 }
 
 type GetMaxSessionTimeOnAccountsArgs struct {
@@ -1406,6 +1407,7 @@ type GetMaxSessionTimeOnAccountsArgs struct {
 	SetupTime   time.Time
 	Usage       time.Duration
 	AccountIDs  []string
+	APIOpts     map[string]interface{}
 }
 
 type ArgExportToFolder struct {
