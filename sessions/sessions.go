@@ -118,8 +118,16 @@ func (sS *SessionS) ListenAndServe(exitChan chan bool) (err error) {
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
-	for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-		sS.terminateSession(s, nil, nil, nil, false)
+	if len(sS.cgrCfg.SessionSCfg().ReplicationConns) == 0 {
+		var hasErr bool
+		for _, s := range sS.getSessions("", false) { // Force sessions shutdown
+			if err = sS.terminateSession(s, nil, nil, nil, false); err != nil {
+				hasErr = true
+			}
+		}
+		if hasErr {
+			return utils.ErrPartiallyExecuted
+		}
 	}
 	return
 }
