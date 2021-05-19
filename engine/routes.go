@@ -231,6 +231,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 				SetupTime:   sTime,
 				Usage:       usage,
 				AccountIDs:  acntIDs,
+				APIOpts:     ev.APIOpts,
 			}, &acntCost); err != nil {
 			return nil, err
 		}
@@ -265,6 +266,7 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 				SetupTime:     sTime,
 				Usage:         usage,
 				RatingPlanIDs: rpIDs,
+				APIOpts:       ev.APIOpts,
 			}, &rpCost); err != nil {
 			return nil, err
 		}
