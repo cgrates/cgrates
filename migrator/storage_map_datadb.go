@@ -133,7 +133,7 @@ func (iDBMig *internalMigrator) remV3AttributeProfile(tenant, id string) (err er
 func (iDBMig *internalMigrator) getV4AttributeProfile() (v4attrPrf *v4AttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (iDBMig *internalMigrator) getV5AttributeProfile() (v4attrPrf *engine.AttributeProfile, err error) {
+func (iDBMig *internalMigrator) getV5AttributeProfile() (v4attrPrf *v6AttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 

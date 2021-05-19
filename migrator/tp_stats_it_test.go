@@ -24,6 +24,7 @@ import (
 	"log"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -147,6 +148,8 @@ func testTpStatsITCheckData(t *testing.T) {
 		t.Error("Error when getting TpStat ", err.Error())
 	}
 	tpStats[0].Metrics[0].MetricID = "*sum#Param1" //add parametrics to metricID to use multiple parameters for same metric
+	sort.Strings(tpStats[0].FilterIDs)
+	sort.Strings(result[0].FilterIDs)
 	if !reflect.DeepEqual(tpStats[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpStats[0]), utils.ToJSON(result[0]))

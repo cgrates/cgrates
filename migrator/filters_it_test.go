@@ -267,7 +267,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 
 			if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(context.TODO(),
 				utils.CacheAttributeFilterIndexes,
-				utils.ConcatenatedKey(attrProf.Tenant, utils.MetaAny),
+				attrProf.Tenant,
 				"", false, false); err != nil {
 				t.Error(err)
 			} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
@@ -461,7 +461,7 @@ func testFltrITMigratev2(t *testing.T) {
 
 		if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(context.TODO(),
 			utils.CacheAttributeFilterIndexes,
-			utils.ConcatenatedKey(attrProf.Tenant, utils.MetaAny),
+			attrProf.Tenant,
 			"", false, true); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {

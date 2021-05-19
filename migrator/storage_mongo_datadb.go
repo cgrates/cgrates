@@ -296,7 +296,7 @@ func (v1ms *mongoMigrator) getV4AttributeProfile() (v4attrPrf *v4AttributeProfil
 	return v4attrPrf, nil
 }
 
-func (v1ms *mongoMigrator) getV5AttributeProfile() (v5attrPrf *engine.AttributeProfile, err error) {
+func (v1ms *mongoMigrator) getV5AttributeProfile() (v5attrPrf *v6AttributeProfile, err error) {
 	if v1ms.cursor == nil {
 		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
@@ -308,7 +308,7 @@ func (v1ms *mongoMigrator) getV5AttributeProfile() (v5attrPrf *engine.AttributeP
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
-	v5attrPrf = new(engine.AttributeProfile)
+	v5attrPrf = new(v6AttributeProfile)
 	if err := (*v1ms.cursor).Decode(v5attrPrf); err != nil {
 		return nil, err
 	}

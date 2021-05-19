@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -233,12 +232,13 @@ func TestV4AttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &v6AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		FilterIDs: []string{"filter1", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		Attributes: []*v6Attribute{
+			&v6Attribute{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Type:  utils.MetaVariable,
 				Value: config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_UK_Mobile_Vodafone_GBRVF/", utils.InfieldSep),
@@ -419,12 +419,13 @@ func TestAsAttributeProfileV5(t *testing.T) {
 		Weight: 20,
 	}
 
-	eOut := &engine.AttributeProfile{
+	eOut := &v6AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		FilterIDs: []string{"filter1", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		Attributes: []*v6Attribute{
+			&v6Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,

@@ -110,7 +110,7 @@ func testTpSplITPopulate(t *testing.T) {
 			TPid:              "TP1",
 			Tenant:            "cgrates.org",
 			ID:                "SUPL_1",
-			FilterIDs:         []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			FilterIDs:         []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 			Sorting:           "*lowest_cost",
 			SortingParameters: []string{},
 			Routes: []*utils.TPRoute{
@@ -152,8 +152,9 @@ func testTpSplITCheckData(t *testing.T) {
 	if err != nil {
 		t.Error("Error when getting TpSuppliers ", err.Error())
 	}
-	sort.Strings(result[0].FilterIDs)
 	tpSuppliers[0].SortingParameters = nil // because of converting and empty string into a slice
+	sort.Strings(result[0].FilterIDs)
+	sort.Strings(tpSuppliers[0].FilterIDs)
 	if !reflect.DeepEqual(tpSuppliers[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSuppliers[0]), utils.ToJSON(result[0]))
 	}
