@@ -345,7 +345,7 @@ func testCacheSLoadCache(t *testing.T) {
 	expstats[utils.CacheAttributeProfiles].Items = 1
 	expstats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expstats[utils.CacheAttributeFilterIndexes].Items = 1
-	expstats[utils.CacheLoadIDs].Items = 26
+	expstats[utils.CacheLoadIDs].Items = 23
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
@@ -518,9 +518,9 @@ func testCacheGetStatusMoreIDs(t *testing.T) {
 	expstats[utils.CacheRateProfilesFilterIndexes].Items = 1
 	expstats[utils.CacheRateFilterIndexes].Groups = 1
 	expstats[utils.CacheRateFilterIndexes].Items = 1
-	expstats[utils.CacheFilters].Items = 4
+	expstats[utils.CacheFilters].Items = 5
 	expstats[utils.CacheRPCConnections].Items = 1
-	expstats[utils.CacheLoadIDs].Items = 26
+	expstats[utils.CacheLoadIDs].Items = 23
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)

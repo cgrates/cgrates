@@ -49,13 +49,20 @@ var (
 		testPreloadITStartEngine,
 		testPreloadITRPCConn,
 		testPreloadITVerifyRateProfile,
+		testPreloadITVerifyAccounts,
+		testPreloadITVerifyActionProfiles,
 		testCleanupFiles,
 		testPreloadITKillEngine,
 	}
 )
 
 func TestPreloadIT(t *testing.T) {
-	preloadCfgDir = "preload_internal"
+	switch *dbType {
+	case utils.MetaInternal:
+		preloadCfgDir = "preload_internal"
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	}
 	for _, test := range preloadTests {
 		t.Run("Running TestPreloadIT:", test)
 	}
@@ -63,7 +70,9 @@ func TestPreloadIT(t *testing.T) {
 
 func testPreloadITCreateDirectories(t *testing.T) {
 	// creating the directories
-	for _, dir := range []string{"/tmp/RatesIn", "/tmp/RatesOut"} {
+	for _, dir := range []string{"/tmp/RatesIn", "/tmp/RatesOut",
+		"/tmp/AccountsIn", "/tmp/AccountsOut",
+		"/tmp/ActionsIn", "/tmp/ActionsOut"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatalf("Error when removing the directory: %s because of %v", dir, err)
 		}
@@ -71,9 +80,17 @@ func testPreloadITCreateDirectories(t *testing.T) {
 			t.Fatalf("Cannot create directory %s because of %v", dir, err)
 		}
 	}
-	// writing in files the csv containing the profile
+	// writing in files the csv containing the profile for RateProfile
 	if err := os.WriteFile(path.Join("/tmp/RatesIn", utils.RateProfilesCsv), []byte(engine.RateProfileCSVContent), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.RateProfilesCsv)
+	}
+	// writing in files the csv containing the profile for Accounts
+	if err := os.WriteFile(path.Join("/tmp/AccountsIn", utils.AccountsCsv), []byte(engine.AccountCSVContent), 0644); err != nil {
+		t.Fatalf("Err %v when writing in file %s", err, utils.AccountsCsv)
+	}
+	// writing in files the csv containing the profile for ActionProfile
+	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionProfilesCsv), []byte(engine.ActionProfileCSVContent), 0644); err != nil {
+		t.Fatalf("Err %v when writing in file %s", err, utils.ActionProfilesCsv)
 	}
 }
 
@@ -90,8 +107,8 @@ func testPreloadITStartEngine(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
-	engine := exec.Command(enginePath, "-config_path", preloadCfgPath, "-preload", "Rates_Loader")
+	engine := exec.Command(enginePath, "-config_path", preloadCfgPath, "-preload",
+		"Rates_Loader,Accounts_Loader,Actions_Loader")
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
@@ -202,8 +219,158 @@ func testPreloadITVerifyRateProfile(t *testing.T) {
 	}
 }
 
+func testPreloadITVerifyAccounts(t *testing.T) {
+	expAcc := &utils.Account{
+		Tenant:    utils.CGRateSorg,
+		ID:        "1001",
+		FilterIDs: []string{},
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 20,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			"MonetaryBalance": {
+				ID: "MonetaryBalance",
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaMonetary,
+				Units: utils.NewDecimal(14, 0),
+				UnitFactors: []*utils.UnitFactor{
+					{
+						FilterIDs: []string{"fltr1", "fltr2"},
+						Factor:    utils.NewDecimal(100, 0),
+					},
+					{
+						FilterIDs: []string{"fltr3"},
+						Factor:    utils.NewDecimal(200, 0),
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"fltr1", "fltr2"},
+						Increment:    utils.NewDecimal(13, 1),
+						FixedFee:     utils.NewDecimal(23, 1),
+						RecurrentFee: utils.NewDecimal(33, 1),
+					},
+				},
+				AttributeIDs: []string{"attr1", "attr2"},
+			},
+			"VoiceBalance": {
+				ID: "VoiceBalance",
+				Weights: []*utils.DynamicWeight{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaVoice,
+				Units: utils.NewDecimal(int64(time.Hour), 0),
+			},
+		},
+		ThresholdIDs: []string{"*none"},
+	}
+	var reply *utils.Account
+	if err := preloadRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "1001", Tenant: "cgrates.org"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAcc, reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expAcc), utils.ToJSON(reply))
+	}
+}
+
+func testPreloadITVerifyActionProfiles(t *testing.T) {
+	var reply *engine.ActionProfile
+	expected := &engine.ActionProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ONE_TIME_ACT",
+		FilterIDs: []string{},
+		Schedule:  utils.MetaASAP,
+		Targets: map[string]utils.StringSet{
+			"*accounts": {
+				"1001": {},
+				"1002": {},
+			},
+		},
+		Actions: []*engine.APAction{
+			{
+				ID:   "TOPUP",
+				TTL:  0,
+				Type: utils.MetaAddBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "*balance.TestBalance.Value",
+						Value: "10",
+					},
+				},
+			},
+			{
+				ID:   "SET_BALANCE_TEST_DATA",
+				TTL:  0,
+				Type: utils.MetaSetBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "*balance.TestDataBalance.Type",
+						Value: utils.MetaData,
+					},
+				},
+			},
+			{
+				ID:   "TOPUP_TEST_DATA",
+				TTL:  0,
+				Type: utils.MetaAddBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "*balance.TestDataBalance.Value",
+						Value: "1024",
+					},
+				},
+			},
+			{
+				ID:   "SET_BALANCE_TEST_VOICE",
+				TTL:  0,
+				Type: utils.MetaSetBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "*balance.TestVoiceBalance.Type",
+						Value: utils.MetaVoice,
+					},
+				},
+			},
+			{
+				ID:   "TOPUP_TEST_VOICE",
+				TTL:  0,
+				Type: utils.MetaAddBalance,
+				Diktats: []*engine.APDiktat{
+					{
+						Path:  "*balance.TestVoiceBalance.Value",
+						Value: "15m15s",
+					},
+					{
+						Path:  "*balance.TestVoiceBalance2.Value",
+						Value: "15m15s",
+					},
+				},
+			},
+		},
+	}
+	if err := preloadRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ONE_TIME_ACT", Tenant: "cgrates.org"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+
+}
+
 func testCleanupFiles(t *testing.T) {
-	for _, dir := range []string{"/tmp/RatesIn", "/tmp/RatesOut"} {
+	for _, dir := range []string{"/tmp/RatesIn", "/tmp/RatesOut",
+		"/tmp/AccountsIn", "/tmp/AccountsOut",
+		"/tmp/ActionsIn", "/tmp/ActionsOut"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
