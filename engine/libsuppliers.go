@@ -194,7 +194,7 @@ type SupplierWithParams struct {
 
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters
 type SuppliersSorter interface {
-	SortSuppliers(string, []*Supplier, *utils.CGREvent, *optsGetSuppliers) (*SortedSuppliers, error)
+	SortSuppliers(string, []*Supplier, *utils.CGREvent, *optsGetSuppliers, *utils.ArgDispatcher) (*SortedSuppliers, error)
 }
 
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
@@ -215,10 +215,10 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers, argDsp *utils.ArgDispatcher) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortSuppliers(prflID, suppls, suplEv, extraOpts)
+	return sd.SortSuppliers(prflID, suppls, suplEv, extraOpts, argDsp)
 }

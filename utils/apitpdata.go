@@ -1423,6 +1423,7 @@ type GetCostOnRatingPlansArgs struct {
 	SetupTime     time.Time
 	Usage         time.Duration
 	RatingPlanIDs []string
+	*ArgDispatcher
 }
 
 type GetMaxSessionTimeOnAccountsArgs struct {
@@ -1432,4 +1433,5 @@ type GetMaxSessionTimeOnAccountsArgs struct {
 	SetupTime   time.Time
 	Usage       time.Duration
 	AccountIDs  []string
+	*ArgDispatcher
 }

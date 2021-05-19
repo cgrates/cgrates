@@ -101,6 +101,8 @@ type ResponderInterface interface {
 	RefundRounding(arg *engine.CallDescriptorWithArgDispatcher, reply *float64) (err error)
 	GetMaxSessionTime(arg *engine.CallDescriptorWithArgDispatcher, reply *time.Duration) (err error)
 	Shutdown(arg *utils.TenantWithArgDispatcher, reply *string) (err error)
+	GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error)
+	GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error)
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
