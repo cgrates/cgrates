@@ -17,7 +17,7 @@
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.14'
+    golang_version: '1.16.3'
     go_version_target: "go version go{{ golang_version }} linux/amd64"
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'

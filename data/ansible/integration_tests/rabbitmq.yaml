@@ -1,26 +1,36 @@
 ---
 - name: Add an apt key by id for rabbitmq
+  become: yes
   apt_key:
-    url: https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc 
+    url: "{{ item }}"
     state: present
+  with_items:
+    - https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc 
+    - https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/gpg.E495BB49CC4BBE5B.key 
+    - https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/gpg.9F4587F226208342.key 
+
 
 - name: Install the apt-transport-https
+  become: yes
   apt:
     name: apt-transport-https
 
 - name: Add apt repository for erlang
+  become: yes
   apt_repository:
-    repo: "deb https://dl.bintray.com/rabbitmq-erlang/debian {{ ansible_distribution_release }} erlang-21.x"
+    repo: "deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/deb/debian {{ ansible_distribution_release }} main"
     filename: rabbitmq_erlang
     update_cache: no
 
 - name: Add apt repository for rabbitmq
+  become: yes
   apt_repository:
-    repo: "deb https://dl.bintray.com/rabbitmq/debian {{ ansible_distribution_release }} main"
+    repo: "deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/debian {{ ansible_distribution_release }} main"
     filename: rabbitmq_main
     update_cache: yes
 
 - name: Install RabbitMQ
+  become: yes
   apt:
     name: "rabbitmq-server"
     state: present

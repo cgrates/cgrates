@@ -1,20 +1,24 @@
 ---
 - name: Ensure group "kafka" exists
+  become: yes
   group:
     name: "{{ kafka_user }}"
     state: present
 
 - name: Add the user 'kafka'
+  become: yes
   user:
     name:  "{{ kafka_user }}"
     # password: "{{ kafka_user_password }}"
     groups: "sudo,{{ kafka_user }}"
 
 - name: Install the java 
+  become: yes
   apt:
     name: default-jdk
 
 - name: Ensure download folder
+  become: yes
   file:
     state: directory
     mode: 'u=rwx,go=rx'
@@ -23,11 +27,13 @@
     path: "{{ kafka_download_folder }}"
 
 - name: Fetch kafka binary package
+  become: yes
   get_url:
     dest: "{{ kafka_download_folder }}/{{ kafka_base_name }}.tgz"
     url: "{{ kafka_url }}"
 
 - name: Uncompress the kafka tar
+  become: yes
   unarchive:
     copy: no
     creates: "/home/{{ kafka_user }}/{{ kafka_base_name }}"
@@ -38,6 +44,7 @@
     group: "{{ kafka_user }}"
 
 - name: Link kafka to the right version
+  become: yes
   file:
     path: "{{ kafka_install_folder }}/kafka"
     src: "{{ kafka_install_folder }}/{{ kafka_base_name }}"

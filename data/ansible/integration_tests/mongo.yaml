@@ -1,16 +1,27 @@
 ---
 - name: Add an apt key for MongoDB
+  become: yes
   apt_key:
-    url: https://www.mongodb.org/static/pgp/server-4.0.asc
+    url: https://www.mongodb.org/static/pgp/server-4.4.asc
     state: present
 
 - name: Add apt repository for MongoDB
+  become: yes
   apt_repository:
-    repo: "deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/4.0 main"
-    filename: mongodb-org-4.0
+    repo: "deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/4.4 main"
+    filename: mongodb-org-4.4
     update_cache: yes
 
 - name: Install MongoDB
+  become: yes
   apt:
     name: "mongodb-org"
     state: present
+
+- name: Enable mongod service  and ensure it is not masked
+  become: yes
+  systemd:
+    name: mongod
+    state: started
+    enabled: yes
+    masked: no
