@@ -125,7 +125,7 @@ var (
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeIDMatch",
-			FilterIDs: []string{"*gte:~*req.DistinctMatch:20", "*string:~*opts.*context:*sessions"},
+			FilterIDs: []string{"*gte:~*req.DistinctMatch:20"},
 			Attributes: []*Attribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
@@ -451,7 +451,10 @@ func TestAttributeIndexer(t *testing.T) {
 	//Set AttributeProfile with new context (*sessions)
 	cpAttrPrf := new(AttributeProfile)
 	*cpAttrPrf = *attrPrf
-	attrPrf.FilterIDs = append(attrPrf.FilterIDs, "*string:~*opts.*context:*sessions")
+	cpAttrPrf.FilterIDs = append(attrPrf.FilterIDs, "*string:~*opts.*context:*sessions")
+	eIdxes["*string:*opts.*context:*sessions"] = utils.StringSet{
+		"AttrPrf": {},
+	}
 	if err := dmAtr.SetAttributeProfile(context.TODO(), cpAttrPrf, true); err != nil {
 		t.Error(err)
 	}
@@ -466,6 +469,9 @@ func TestAttributeIndexer(t *testing.T) {
 
 	expected := map[string]utils.StringSet{
 		"*string:*opts.*context:*sessions": {
+			"AttrPrf": {},
+		},
+		"*string:*req.Account:1007": {
 			"AttrPrf": {},
 		},
 	}
