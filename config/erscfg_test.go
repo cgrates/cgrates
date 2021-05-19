@@ -1163,3 +1163,290 @@ func TestGetDefaultExporter(t *testing.T) {
 		t.Fatalf("Unexpected default cfg returned: %s", utils.ToJSON(dft))
 	}
 }
+
+func TestDiffEventReaderJsonCfg(t *testing.T) {
+	var d *EventReaderJsonCfg
+
+	v1 := &EventReaderCfg{
+		ID:             "ERS_ID",
+		Type:           "xml",
+		RunDelay:       1 * time.Second,
+		ConcurrentReqs: 2,
+		SourcePath:     "/tmp/ers/in",
+		ProcessedPath:  "/tmp/ers/out",
+		Opts:           map[string]interface{}{},
+		Tenant: RSRParsers{
+			{
+				Rules: "cgrates.org",
+			},
+		},
+		Timezone:        "UTC",
+		Filters:         []string{"Filter1"},
+		Flags:           utils.FlagsWithParams{},
+		Fields:          []*FCTemplate{},
+		CacheDumpFields: []*FCTemplate{},
+	}
+
+	v2 := &EventReaderCfg{
+		ID:             "ERS_ID2",
+		Type:           "json",
+		RunDelay:       3 * time.Second,
+		ConcurrentReqs: 1,
+		SourcePath:     "/var/tmp/ers/in",
+		ProcessedPath:  "/var/tmp/ers/out",
+		Opts: map[string]interface{}{
+			"OPT": "opt",
+		},
+		Tenant: RSRParsers{
+			{
+				Rules: "itsyscom.com",
+			},
+		},
+		Timezone: "EEST",
+		Filters:  []string{"Filter2"},
+		Flags: utils.FlagsWithParams{
+			"FLAG1": {
+				"PARAM_1": []string{"param1"},
+			},
+		},
+		Fields: []*FCTemplate{
+			{
+				Type: "*string",
+			},
+		},
+		CacheDumpFields: []*FCTemplate{
+			{
+				Type: "*string",
+			},
+		},
+	}
+
+	expected := &EventReaderJsonCfg{
+		Id:                  utils.StringPointer("ERS_ID2"),
+		Type:                utils.StringPointer("json"),
+		Run_delay:           utils.StringPointer("3s"),
+		Concurrent_requests: utils.IntPointer(1),
+		Source_path:         utils.StringPointer("/var/tmp/ers/in"),
+		Processed_path:      utils.StringPointer("/var/tmp/ers/out"),
+		Opts: map[string]interface{}{
+			"OPT": "opt",
+		},
+		Tenant:   utils.StringPointer("itsyscom.com"),
+		Timezone: utils.StringPointer("EEST"),
+		Filters:  &[]string{"Filter2"},
+		Flags:    &[]string{"FLAG1:PARAM_1:param1"},
+		Fields: &[]*FcTemplateJsonCfg{
+			{
+				Type:   utils.StringPointer("*string"),
+				Layout: utils.StringPointer(""),
+			},
+		},
+		Cache_dump_fields: &[]*FcTemplateJsonCfg{
+			{
+				Type:   utils.StringPointer("*string"),
+				Layout: utils.StringPointer(""),
+			},
+		},
+	}
+
+	rcv := diffEventReaderJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestGetEventReaderJsonCfg(t *testing.T) {
+	d := []*EventReaderJsonCfg{
+		{
+			Id: utils.StringPointer("ERS_ID"),
+		},
+	}
+
+	expected := &EventReaderJsonCfg{
+		Id: utils.StringPointer("ERS_ID"),
+	}
+
+	rcv, idx := getEventReaderJsonCfg(d, "ERS_ID")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	} else if idx != 0 {
+		t.Errorf("Expected %v \n but received \n %v", 0, idx)
+	}
+
+	d = []*EventReaderJsonCfg{
+		{
+			Id: nil,
+		},
+	}
+	rcv, idx = getEventReaderJsonCfg(d, "ERS_ID")
+	if rcv != nil {
+		t.Error("Received value should be null")
+	} else if idx != -1 {
+		t.Errorf("Expected %v \n but received \n %v", -1, idx)
+	}
+}
+
+func TestGetEventReaderCfg(t *testing.T) {
+	d := []*EventReaderCfg{
+		{
+			ID: "ERS_ID",
+		},
+	}
+
+	expected := &EventReaderCfg{
+		ID: "ERS_ID",
+	}
+
+	rcv := getEventReaderCfg(d, "ERS_ID")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	d = []*EventReaderCfg{
+		{
+			ID: "ERS_ID2",
+		},
+	}
+
+	rcv = getEventReaderCfg(d, "ERS_ID")
+	if !reflect.DeepEqual(rcv, new(EventReaderCfg)) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(new(EventReaderCfg)), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffEventReadersJsonCfg(t *testing.T) {
+	var d *[]*EventReaderJsonCfg
+
+	v1 := []*EventReaderCfg{
+		{
+			ID:             "ERS_ID",
+			Type:           "xml",
+			RunDelay:       1 * time.Second,
+			ConcurrentReqs: 2,
+			SourcePath:     "/tmp/ers/in",
+			ProcessedPath:  "/tmp/ers/out",
+			Opts:           map[string]interface{}{},
+			Tenant: RSRParsers{
+				{
+					Rules: "cgrates.org",
+				},
+			},
+			Timezone:        "UTC",
+			Filters:         []string{"Filter1"},
+			Flags:           utils.FlagsWithParams{},
+			Fields:          []*FCTemplate{},
+			CacheDumpFields: []*FCTemplate{},
+		},
+	}
+
+	v2 := []*EventReaderCfg{
+		{
+			ID:             "ERS_ID2",
+			Type:           "json",
+			RunDelay:       3 * time.Second,
+			ConcurrentReqs: 1,
+			SourcePath:     "/var/tmp/ers/in",
+			ProcessedPath:  "/var/tmp/ers/out",
+			Opts: map[string]interface{}{
+				"OPT": "opt",
+			},
+			Tenant: RSRParsers{
+				{
+					Rules: "itsyscom.com",
+				},
+			},
+			Timezone: "EEST",
+			Filters:  []string{"Filter2"},
+			Flags: utils.FlagsWithParams{
+				"FLAG1": {
+					"PARAM_1": []string{"param1"},
+				},
+			},
+			Fields: []*FCTemplate{
+				{
+					Type: "*string",
+				},
+			},
+			CacheDumpFields: []*FCTemplate{
+				{
+					Type: "*string",
+				},
+			},
+		},
+	}
+
+	expected := &[]*EventReaderJsonCfg{
+		{
+			Id:                  utils.StringPointer("ERS_ID2"),
+			Type:                utils.StringPointer("json"),
+			Run_delay:           utils.StringPointer("3s"),
+			Concurrent_requests: utils.IntPointer(1),
+			Source_path:         utils.StringPointer("/var/tmp/ers/in"),
+			Processed_path:      utils.StringPointer("/var/tmp/ers/out"),
+			Opts: map[string]interface{}{
+				"OPT": "opt",
+			},
+			Tenant:   utils.StringPointer("itsyscom.com"),
+			Timezone: utils.StringPointer("EEST"),
+			Filters:  &[]string{"Filter2"},
+			Flags:    &[]string{"FLAG1:PARAM_1:param1"},
+			Fields: &[]*FcTemplateJsonCfg{
+				{
+					Type:   utils.StringPointer("*string"),
+					Layout: utils.StringPointer(""),
+				},
+			},
+			Cache_dump_fields: &[]*FcTemplateJsonCfg{
+				{
+					Type:   utils.StringPointer("*string"),
+					Layout: utils.StringPointer(""),
+				},
+			},
+		},
+	}
+
+	rcv := diffEventReadersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffERsJsonCfg(t *testing.T) {
+	var d *ERsJsonCfg
+
+	v1 := &ERsCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*birpc"},
+		Readers:       []*EventReaderCfg{
+			// {
+			// 	ID: "ERS_ID",
+			// },
+		},
+	}
+
+	v2 := &ERsCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*localhost"},
+		Readers:       []*EventReaderCfg{
+			// {
+			// 	ID: "ERS_ID2",
+			// },
+		},
+	}
+
+	expected := &ERsJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{"*localhost"},
+		Readers:        &[]*EventReaderJsonCfg{
+			// {
+			// 	Id:   utils.StringPointer("ERS_ID2"),
+			// 	Opts: map[string]interface{}{},
+			// },
+		},
+	}
+
+	rcv := diffERsJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
