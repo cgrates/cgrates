@@ -1052,6 +1052,12 @@ func TestACCGetStringValue(t *testing.T) {
 	if strVal := acc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong acc value: %s", strVal)
 	}
+	expErr := "NEGATIVE:Cost"
+	if err := acc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: utils.MapStorage{
+		utils.Cost: -1,
+	}}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %s received %v", expErr, err)
+	}
 }
 
 func TestACCGetStringValue2(t *testing.T) {
@@ -1321,6 +1327,13 @@ func TestTCCGetStringValue(t *testing.T) {
 	tcc.RemEvent(ev5.ID)
 	if strVal := tcc.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != utils.NotAvailable {
 		t.Errorf("wrong tcc value: %s", strVal)
+	}
+
+	expErr := "NEGATIVE:Cost"
+	if err := tcc.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: utils.MapStorage{
+		utils.Cost: -1,
+	}}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error: %s received %v", expErr, err)
 	}
 }
 

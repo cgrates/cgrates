@@ -6,7 +6,7 @@ cgrates (1.0) UNRELEASED; urgency=medium
   * [ERs] Added *opts.*partial to control if the event is partial or not
   * [AttributeS] Added any_context config to control the matching attributes
   * [DispatcherS] Added any_subsyste config to control the matching dispatchers
-
+  * [StatS] AverageCallCost and TotalCallCost now returns error for negative Cost field
 
  -- DanB <danb@cgrates.org>  Thu, 4 May 2021 12:05:00 +0200
 
