@@ -723,3 +723,365 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		}
 	}
 }
+
+func TestDiffEventExporterJsonCfg(t *testing.T) {
+	var d *EventExporterJsonCfg
+
+	v1 := &EventExporterCfg{
+		ID:         "EES_ID",
+		Type:       "xml",
+		ExportPath: "/tmp/ees",
+		Opts:       map[string]interface{}{},
+		Tenant: RSRParsers{
+			{
+				Rules: "Rule1",
+			},
+		},
+
+		Timezone: "UTC",
+		Filters:  []string{"Filter1"},
+		Flags: utils.FlagsWithParams{
+			"FLAG_1": {
+				"PARAM_1": []string{"param1"},
+			},
+		},
+		AttributeSIDs: []string{"ATTR_PRF"},
+		AttributeSCtx: "*sessions",
+		Synchronous:   false,
+		Attempts:      2,
+		FieldSep:      "",
+		Fields: []*FCTemplate{
+			{
+				Type: "*string",
+			},
+		},
+		headerFields: []*FCTemplate{
+			{
+				Type: "*string",
+			},
+		},
+		contentFields: []*FCTemplate{
+			{
+				Type: "*string",
+			},
+		},
+		trailerFields: []*FCTemplate{
+			{
+				Type: "*string",
+			},
+		},
+	}
+
+	v2 := &EventExporterCfg{
+		ID:         "EES_ID2",
+		Type:       "http",
+		ExportPath: "/var/tmp/ees",
+		Opts: map[string]interface{}{
+			"OPT": "opt",
+		},
+		Tenant: RSRParsers{
+			{
+				Rules: "cgrates.org",
+			},
+		},
+
+		Timezone: "EEST",
+		Filters:  []string{"Filter2"},
+		Flags: utils.FlagsWithParams{
+			"FLAG_2": {
+				"PARAM_2": []string{"param2"},
+			},
+		},
+		AttributeSIDs: []string{"ATTR_PRF_2"},
+		AttributeSCtx: "*actions",
+		Synchronous:   true,
+		Attempts:      3,
+		FieldSep:      ";",
+		Fields: []*FCTemplate{
+			{
+				Type: "*prefix",
+			},
+		},
+		headerFields: []*FCTemplate{
+			{
+				Type: "*prefix",
+			},
+		},
+		contentFields: []*FCTemplate{
+			{
+				Type: "*prefix",
+			},
+		},
+		trailerFields: []*FCTemplate{
+			{
+				Type: "*prefix",
+			},
+		},
+	}
+
+	expected := &EventExporterJsonCfg{
+		Id:          utils.StringPointer("EES_ID2"),
+		Type:        utils.StringPointer("http"),
+		Export_path: utils.StringPointer("/var/tmp/ees"),
+		Opts: map[string]interface{}{
+			"OPT": "opt",
+		},
+		Tenant:            utils.StringPointer("cgrates.org"),
+		Timezone:          utils.StringPointer("EEST"),
+		Filters:           &[]string{"Filter2"},
+		Flags:             &[]string{"FLAG_2:PARAM_2:param2"},
+		Attribute_ids:     &[]string{"ATTR_PRF_2"},
+		Attribute_context: utils.StringPointer("*actions"),
+		Synchronous:       utils.BoolPointer(true),
+		Attempts:          utils.IntPointer(3),
+		Field_separator:   utils.StringPointer(";"),
+		Fields: &[]*FcTemplateJsonCfg{
+			{
+				Type:   utils.StringPointer("*prefix"),
+				Layout: utils.StringPointer(""),
+			},
+		},
+	}
+
+	rcv := diffEventExporterJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestGetEventExporterJsonCfg(t *testing.T) {
+	d := []*EventExporterJsonCfg{
+		{
+			Id: utils.StringPointer("EES_ID"),
+		},
+	}
+
+	expected := &EventExporterJsonCfg{
+		Id: utils.StringPointer("EES_ID"),
+	}
+
+	rcv, idx := getEventExporterJsonCfg(d, "EES_ID")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	} else if idx != 0 {
+		t.Errorf("Expected %v \n but received \n %v", 0, idx)
+	}
+
+	d = []*EventExporterJsonCfg{
+		{
+			Id: nil,
+		},
+	}
+	rcv, idx = getEventExporterJsonCfg(d, "EES_ID")
+	if rcv != nil {
+		t.Error("Received value should be null")
+	} else if idx != -1 {
+		t.Errorf("Expected %v \n but received \n %v", -1, idx)
+	}
+}
+
+func TestGetEventExporterCfg(t *testing.T) {
+	d := []*EventExporterCfg{
+		{
+			ID: "EES_ID",
+		},
+	}
+
+	expected := &EventExporterCfg{
+		ID: "EES_ID",
+	}
+
+	rcv := getEventExporterCfg(d, "EES_ID")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	d = []*EventExporterCfg{
+		{
+			ID: "EES_ID2",
+		},
+	}
+
+	rcv = getEventExporterCfg(d, "EES_ID")
+	if !reflect.DeepEqual(rcv, new(EventExporterCfg)) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(new(EventExporterCfg)), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffEventExportersJsonCfg(t *testing.T) {
+	var d *[]*EventExporterJsonCfg
+
+	v1 := []*EventExporterCfg{
+		{
+			ID:         "EES_ID",
+			Type:       "xml",
+			ExportPath: "/tmp/ees",
+			Opts:       map[string]interface{}{},
+			Tenant: RSRParsers{
+				{
+					Rules: "Rule1",
+				},
+			},
+
+			Timezone: "UTC",
+			Filters:  []string{"Filter1"},
+			Flags: utils.FlagsWithParams{
+				"FLAG_1": {
+					"PARAM_1": []string{"param1"},
+				},
+			},
+			AttributeSIDs: []string{"ATTR_PRF"},
+			AttributeSCtx: "*sessions",
+			Synchronous:   false,
+			Attempts:      2,
+			FieldSep:      "",
+			Fields: []*FCTemplate{
+				{
+					Type: "*string",
+				},
+			},
+			headerFields: []*FCTemplate{
+				{
+					Type: "*string",
+				},
+			},
+			contentFields: []*FCTemplate{
+				{
+					Type: "*string",
+				},
+			},
+			trailerFields: []*FCTemplate{
+				{
+					Type: "*string",
+				},
+			},
+		},
+	}
+
+	v2 := []*EventExporterCfg{
+		{
+			ID:         "EES_ID2",
+			Type:       "http",
+			ExportPath: "/var/tmp/ees",
+			Opts: map[string]interface{}{
+				"OPT": "opt",
+			},
+			Tenant: RSRParsers{
+				{
+					Rules: "cgrates.org",
+				},
+			},
+
+			Timezone: "EEST",
+			Filters:  []string{"Filter2"},
+			Flags: utils.FlagsWithParams{
+				"FLAG_2": {
+					"PARAM_2": []string{"param2"},
+				},
+			},
+			AttributeSIDs: []string{"ATTR_PRF_2"},
+			AttributeSCtx: "*actions",
+			Synchronous:   true,
+			Attempts:      3,
+			FieldSep:      ";",
+			Fields: []*FCTemplate{
+				{
+					Type: "*prefix",
+				},
+			},
+			headerFields: []*FCTemplate{
+				{
+					Type: "*prefix",
+				},
+			},
+			contentFields: []*FCTemplate{
+				{
+					Type: "*prefix",
+				},
+			},
+			trailerFields: []*FCTemplate{
+				{
+					Type: "*prefix",
+				},
+			},
+		},
+	}
+
+	expected := &[]*EventExporterJsonCfg{
+		{
+			Id:          utils.StringPointer("EES_ID2"),
+			Type:        utils.StringPointer("http"),
+			Export_path: utils.StringPointer("/var/tmp/ees"),
+			Opts: map[string]interface{}{
+				"OPT": "opt",
+			},
+			Tenant:            utils.StringPointer("cgrates.org"),
+			Timezone:          utils.StringPointer("EEST"),
+			Filters:           &[]string{"Filter2"},
+			Flags:             &[]string{"FLAG_2:PARAM_2:param2"},
+			Attribute_ids:     &[]string{"ATTR_PRF_2"},
+			Attribute_context: utils.StringPointer("*actions"),
+			Synchronous:       utils.BoolPointer(true),
+			Attempts:          utils.IntPointer(3),
+			Field_separator:   utils.StringPointer(";"),
+			Fields: &[]*FcTemplateJsonCfg{
+				{
+					Type:   utils.StringPointer("*prefix"),
+					Layout: utils.StringPointer(""),
+				},
+			},
+		},
+	}
+
+	rcv := diffEventExportersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffEEsJsonCfg(t *testing.T) {
+	var d *EEsJsonCfg
+
+	v1 := &EEsCfg{
+		Enabled:         false,
+		AttributeSConns: []string{"*localhost"},
+		Cache:           map[string]*CacheParamCfg{},
+		Exporters:       []*EventExporterCfg{},
+	}
+
+	v2 := &EEsCfg{
+		Enabled:         true,
+		AttributeSConns: []string{"*birpc"},
+		Cache: map[string]*CacheParamCfg{
+			"CACHE_1": {
+				Limit: 1,
+			},
+		},
+		Exporters: []*EventExporterCfg{
+			// {
+			// 	ID: "EES_ID",
+			// },
+		},
+	}
+
+	expected := &EEsJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Attributes_conns: &[]string{"*birpc"},
+		Cache: map[string]*CacheParamJsonCfg{
+			"CACHE_1": {
+				Limit: utils.IntPointer(1),
+			},
+		},
+		Exporters: &[]*EventExporterJsonCfg{
+			// {
+			// 	Id:   utils.StringPointer("EES_ID"),
+			// 	Opts: map[string]interface{}{},
+			// },
+		},
+	}
+
+	rcv := diffEEsJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
