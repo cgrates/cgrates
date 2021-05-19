@@ -95,7 +95,6 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 		if rPf, err = rS.dm.GetRateProfile(ctx, tnt, rPfID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
-				fmt.Println(err)
 				err = nil
 				continue
 			}
