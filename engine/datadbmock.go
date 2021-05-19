@@ -24,6 +24,8 @@ import (
 )
 
 type DataDBMock struct {
+	SetRateProfileDrvF    func(*context.Context, *utils.RateProfile) error
+	GetRateProfileDrvF    func(*context.Context, string, string) (*utils.RateProfile, error)
 	GetKeysForPrefixF     func(*context.Context, string) ([]string, error)
 	GetChargerProfileDrvF func(string, string) (*ChargerProfile, error)
 	GetFilterDrvF         func(string, string) (*Filter, error)
@@ -266,11 +268,17 @@ func (dbM *DataDBMock) RemoveDispatcherHostDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRateProfileDrv(*context.Context, string, string) (*utils.RateProfile, error) {
+func (dbM *DataDBMock) GetRateProfileDrv(ctx *context.Context, tnt string, id string) (*utils.RateProfile, error) {
+	if dbM.GetRateProfileDrvF != nil {
+		return dbM.GetRateProfileDrvF(ctx, tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRateProfileDrv(*context.Context, *utils.RateProfile) error {
+func (dbM *DataDBMock) SetRateProfileDrv(ctx *context.Context, rt *utils.RateProfile) error {
+	if dbM.SetRateProfileDrvF != nil {
+		return dbM.SetRateProfileDrvF(ctx, rt)
+	}
 	return utils.ErrNotImplemented
 }
 
