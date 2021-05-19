@@ -1,11 +1,11 @@
 ---
-- hosts: all
+- hosts: local
   vars:
     ###############################################################
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.14'
+    golang_version: '1.16.3'
     go_version_target: "go version go{{ golang_version }} linux/amd64"
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
@@ -42,15 +42,18 @@
 ###########################################################################################################################
 # install dependencies
   - name: Install build-essential
+    become: yes
     apt:
       name: build-essential
       state: present
 
   - name: Install the git
+    become: yes
     apt:
       name: git
 
   - name: Install the redis
+    become: yes
     apt:
       name: redis-server
 
@@ -59,14 +62,17 @@
   #     name: mongodb-server
 
   - name: Install the mysql
+    become: yes
     apt:
       name: mariadb-server
 
   - name: Install the postgresql
+    become: yes
     apt:
       name: postgresql
 
   - name: Install the postgresql-contrib
+    become: yes
     apt:
       name: postgresql-contrib
 
@@ -117,10 +123,13 @@
 
   - name:  build cgrates
     command: 'sh {{ cgrates_dir }}/build.sh'
+    environment:
+      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
     args:
       chdir: '{{ cgrates_dir }}'
 
   - name: symbol link
+    become: yes
     file:
       src: "{{ cgrates_dir }}/data"
       dest: "/usr/share/cgrates"
@@ -130,16 +139,24 @@
 ###########################################################################################################################
 # post install
   - name:  post install mysql
+    become: yes
     command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_cgr_db.sh root CGRateS.org localhost'
     args:
       chdir: '{{ cgrates_dir }}/data/storage/mysql/'
 
   - name:  post install postgres2
+    become: yes
     command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
     args:
       chdir: '{{ cgrates_dir }}/data/storage/postgres/'
 
   - name:  post install mongo
+    become: yes
     command: 'sh {{ cgrates_dir }}/data/storage/mongo/setup_cgr_db.sh'
     args:
       chdir: '{{ cgrates_dir }}/data/storage/mongo/'
+
+  - name:  set versions
+    command: 'cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql'
+    environment:
+      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"

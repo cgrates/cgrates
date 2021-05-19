@@ -1,0 +1,303 @@
+---
+- name: Check and set python version on APT server
+  hosts: ci
+  remote_user: '{{ user }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python; 
+        fi
+      become: true
+
+- hosts: ci
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.16.3'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ user }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+
+    #################################################################
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    #################################################################
+    drone_dir: "/home/{{ user }}/go/src/github.com/drone/drone"
+
+    drone_server_host: ci.cgrates.net
+    drone_validate_plugin_endpoint: 127.0.0.1:3001
+    docker_runner_capacity: 20
+
+    drone_user_create: cgrates
+    drone_user_filter: 
+      - cgrates
+      - danbogos
+      - TeoV
+      - Trial97
+      - porosnicuadrian
+      - andronache98
+    ###############################################################
+    # CGRateS vars
+    dependencies:
+      - build-essential
+      - git
+      - apt-transport-https
+      - ca-certificates
+      - openssl
+      - gnupg-agent 
+      - software-properties-common
+      - python3
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+    rootUser : root
+        
+  remote_user: '{{ user }}'
+  tasks:
+###########################################################################################################################
+###########################################################################################################################
+# install dependencies
+    - name: Install dependencies
+      become: yes
+      apt: name={{ dependencies }} state=present
+        
+    - name: Configure docker 
+      include: docker.yaml
+###########################################################################################################################
+###########################################################################################################################
+# Install Golang
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
+
+    - name: Install golang
+      include: go.yaml
+
+###########################################################################################################################
+###########################################################################################################################
+    - name: clean go cache
+      become: yes
+      shell: "go clean --cache"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: clean go modcache
+      become: yes
+      shell: "go clean --modcache"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: create mailer directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        dest: '{{ golang_gopath }}/src/github.com/Trial97/drone-email'
+      become_user: "{{ user }}"
+
+    - name: git clone mailer
+      git:
+        repo: https://github.com/Trial97/drone-email.git
+        dest: '{{ golang_gopath }}/src/github.com/Trial97/drone-email'
+        update: yes
+        force: yes
+        version: "master"
+      become: yes
+      become_user: "{{ user }}"
+
+    - name: build Docker image for mail plugin
+      become: yes
+      shell: docker build -t trial97/drone-email {{ golang_gopath }}/src/github.com/Trial97/drone-email
+      args:
+        chdir: '{{ golang_gopath }}/src/github.com/Trial97/drone-email'
+
+
+    - name: create drone-cli directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        dest: '{{ golang_gopath }}/src/github.com/drone/drone-cli'
+      become_user: "{{ user }}"
+
+    - name: git clone mailer
+      git:
+        repo: https://github.com/drone/drone-cli.git
+        dest: '{{ golang_gopath }}/src/github.com/drone/drone-cli'
+        update: yes
+        force: yes
+        version: "master"
+      become: yes
+      become_user: "{{ user }}"
+
+    - name: build drone-cli
+      shell: go build -o {{ golang_gopath }}/bin/drone-cli ./main.go
+      args:
+        chdir: '{{ golang_gopath }}/src/github.com/drone/drone-cli/drone'
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: create cgrates directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        dest: '{{ cgrates_dir }}'
+      become_user: "{{ user }}"
+
+    - name: git clone cgrates
+      git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: '{{ cgrates_dir }}'
+        update: yes
+        force: yes
+        version: "master"
+      become: yes
+      become_user: "{{ user }}"
+
+    - name: copy storage scripts
+      shell:
+        mkdir -p postgres;
+        cp {{ cgrates_dir }}/data/storage/postgres/create_cdrs_tables.sql ./postgres/create_cdrs_tables.sql;
+        cp {{ cgrates_dir }}/data/storage/postgres/create_tariffplan_tables.sql ./postgres/create_tariffplan_tables.sql;
+        cp {{ cgrates_dir }}/data/storage/mysql/create_cdrs_tables.sql ./mysql/create_cdrs_tables.sql;
+        cp {{ cgrates_dir }}/data/storage/mysql/create_db_with_users.sql ./mysql/create_db_with_users.sql;
+        cp {{ cgrates_dir }}/data/storage/mysql/create_tariffplan_tables.sql ./mysql/create_tariffplan_tables.sql;
+        cp {{ cgrates_dir }}/data/storage/mongo/create_user.js ./create_user.js;
+      args:
+        warn: false
+        chdir: '{{ cgrates_dir }}/data/docker/integration/scripts'
+
+    - name: build Docker image for integration
+      become: yes
+      shell: docker build -t cgrates-integration {{ cgrates_dir }}/data/docker/integration/
+      args:
+        chdir: '{{ cgrates_dir }}/data/docker/integration'
+
+    - name: create drone directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        dest: '{{ drone_dir }}'
+      become_user: "{{ user }}"
+
+    - name: git clone drone
+      git:
+        repo: https://github.com/drone/drone.git
+        dest: '{{ drone_dir }}'
+        update: yes
+        force: yes
+      become: yes
+      become_user: "{{ user }}"
+
+    - name: build drone
+      shell: "go install github.com/drone/drone/cmd/drone-server"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ drone_dir }}'
+
+    - name: install validate plugin
+      shell: "go get github.com/Trial97/droneAuth"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: export users
+      template:
+        src: users.json.j2
+        dest: /home/{{ user }}/users.json
+
+    - name:  generate RPCSecret
+      shell: "openssl rand -hex 16"
+      register: drone_secret
+
+
+    - name:  generate token
+      shell: "openssl rand -hex 16"
+      register: drone_token
+
+    - name: export server config
+      template:
+        src: .env.j2
+        dest: /home/{{ user }}/.env
+    
+    - name: start validate plugin
+      shell: "droneAuth -secret={{ drone_secret.stdout }} -cfg=/home/{{ user }}/users.json -endpoint={{ drone_validate_plugin_endpoint }}>/dev/null 2>&1 &"
+      async: 10
+      poll: 0
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+    
+    - name: start drone
+      become: yes
+      shell: "drone-server --env-file=/home/{{ user }}/.env >/home/{{ user }}/drone.log 2>&1 &"
+      async: 10
+      poll: 0
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+    
+    - name: Check if drone-runner is running
+      become: yes
+      shell: docker container ls -q -f="name=drone-runner"
+      register: continerList2
+
+    - name:  Start drone-runner
+      become: yes
+      shell: docker run -d -v /var/run/docker.sock:/var/run/docker.sock -e DRONE_RPC_PROTO="https" -e DRONE_RPC_HOST="{{ drone_server_host }}" -e DRONE_RPC_SECRET="{{ drone_secret.stdout }}" -e DRONE_RUNNER_CAPACITY={{ docker_runner_capacity }} -e DRONE_RUNNER_NAME=cgrates -p 3000:3000 --restart always --name runner drone/drone-runner-docker:1
+      when: continerList2.stdout_lines|length == 0
+
+    - name: Creating credentials file
+      copy:
+        dest: "/home/{{ user }}/credentials.json"
+        content: "{{ gapi_credentials }}"
+    
+    - name: Creating token file 
+      copy:
+        dest: "/home/{{ user }}/token.json"
+        content: "{{ gapi_token }}"
+
+    - name:  add secrets
+      become: yes
+      shell: |
+        drone-cli orgsecret add {{ item }} credentials @/home/{{ user }}/credentials.json --allow-pull-request;
+        drone-cli orgsecret add {{ item }} token @/home/{{ user }}/token.json --allow-pull-request;
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+        DRONE_SERVER: "https://{{ drone_server_host }}"
+        DRONE_TOKEN: "{{ drone_token.stdout }}"
+      with_items: '{{ drone_user_filter }}'
+
+    - name: Removeing credentials file
+      file:
+        path: "/home/{{ user }}/credentials.json"
+        state: absent
+    
+    - name: Removeing token file 
+      file:
+        path: "/home/{{ user }}/token.json"
+        state: absent
