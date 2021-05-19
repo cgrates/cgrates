@@ -181,7 +181,6 @@ func TestKafkaERProcessMessage(t *testing.T) {
 	select {
 	case data := <-rdr.rdrEvents:
 		expEvent.ID = data.cgrEvent.ID
-		expEvent.Time = data.cgrEvent.Time
 		if !reflect.DeepEqual(data.cgrEvent, expEvent) {
 			t.Errorf("Expected %v but received %v", utils.ToJSON(expEvent), utils.ToJSON(data.cgrEvent))
 		}

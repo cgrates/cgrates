@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -77,7 +76,6 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 		cgrEv = &utils.CGREvent{
 			Tenant:  cgrEvs[0].Tenant,
 			ID:      utils.UUIDSha1Prefix(),
-			Time:    utils.TimePointer(time.Now()),
 			Event:   make(map[string]interface{}),
 			APIOpts: make(map[string]interface{}),
 		}
