@@ -203,7 +203,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 // costForEvent will compute cost out of accounts and rating plans for event
 // returns map[string]interface{} with cost and relevant matching information inside
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
-	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
+	acntIDs, rpIDs []string, argDsp *utils.ArgDispatcher) (costData map[string]interface{}, err error) {
 	costData = make(map[string]interface{})
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
 		utils.Destination, utils.SetupTime}); err != nil {
@@ -241,12 +241,13 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if len(acntIDs) != 0 {
 		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().RALsConns, nil, utils.ResponderGetMaxSessionTimeOnAccounts,
 			&utils.GetMaxSessionTimeOnAccountsArgs{
-				Tenant:      ev.Tenant,
-				Subject:     subj,
-				Destination: dst,
-				SetupTime:   sTime,
-				Usage:       usage,
-				AccountIDs:  acntIDs,
+				Tenant:        ev.Tenant,
+				Subject:       subj,
+				Destination:   dst,
+				SetupTime:     sTime,
+				Usage:         usage,
+				AccountIDs:    acntIDs,
+				ArgDispatcher: argDsp,
 			}, &acntCost); err != nil {
 			return nil, err
 		}
@@ -281,6 +282,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 				SetupTime:     sTime,
 				Usage:         usage,
 				RatingPlanIDs: rpIDs,
+				ArgDispatcher: argDsp,
 			}, &rpCost); err != nil {
 			return nil, err
 		}
@@ -388,7 +390,7 @@ func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsag
 }
 
 func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier,
-	extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
+	extraOpts *optsGetSuppliers, argDsp *utils.ArgDispatcher) (srtSpl *SortedSupplier, pass bool, err error) {
 	sortedSpl := &SortedSupplier{
 		SupplierID: spl.ID,
 		SortingData: map[string]interface{}{
@@ -398,7 +400,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	}
 	//calculate costData if we have fields
 	if len(spl.AccountIDs) != 0 || len(spl.RatingPlanIDs) != 0 {
-		costData, err := spS.costForEvent(ev, spl.AccountIDs, spl.RatingPlanIDs)
+		costData, err := spS.costForEvent(ev, spl.AccountIDs, spl.RatingPlanIDs, argDsp)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -520,7 +522,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStragety = splPrfl.Sorting             // populate sortinStrategy in extraOpts
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
-		splPrfl.Suppliers, args.CGREvent, extraOpts)
+		splPrfl.Suppliers, args.CGREvent, extraOpts, args.ArgDispatcher)
 	if err != nil {
 		return nil, err
 	}

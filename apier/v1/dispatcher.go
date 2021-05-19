@@ -535,6 +535,13 @@ func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithArgDispatcher, rep
 	return dS.dS.ResponderShutdown(args, reply)
 }
 
+func (dS *DispatcherResponder) GetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
+	return dS.dS.ResponderGetCostOnRatingPlans(arg, reply)
+}
+func (dS *DispatcherResponder) GetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
+	return dS.dS.ResponderGetMaxSessionTimeOnAccounts(arg, reply)
+}
+
 // Ping used to determinate if component is active
 func (dS *DispatcherResponder) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.ResponderPing(args, reply)

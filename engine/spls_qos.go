@@ -34,12 +34,12 @@ type QOSSupplierSorter struct {
 }
 
 func (qos *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
-	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	ev *utils.CGREvent, extraOpts *optsGetSuppliers, argDsp *utils.ArgDispatcher) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         qos.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		if srtSpl, pass, err := qos.spS.populateSortingData(ev, s, extraOpts); err != nil {
+		if srtSpl, pass, err := qos.spS.populateSortingData(ev, s, extraOpts, argDsp); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
