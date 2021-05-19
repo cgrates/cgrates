@@ -848,7 +848,7 @@ func TestApisRateSetRemoveRateProfileError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRemoveRateProfileError2(t *testing.T) {
+func TestApisRateSetRateProfileError2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -886,3 +886,61 @@ func TestApisRateSetRemoveRateProfileError2(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
+
+/*
+func TestApisRateRemoveRateProfileError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+			ID:     "2",
+		},
+	}
+
+	reply := utils.StringPointer("")
+	err = admS.RemoveRateProfile(context.Background(), arg, reply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(reply), utils.ToJSON("OK")) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON("OK"), utils.ToJSON(reply))
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+			ID:     "2",
+		},
+	}
+	var result utils.RateProfile
+	err = admS.GetRateProfile(context.Background(), args, &result)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	}
+	engine.Cache = cacheInit
+}
+*/
