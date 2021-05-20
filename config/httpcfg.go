@@ -142,7 +142,7 @@ func diffHTTPJsonCfg(d *HTTPJsonCfg, v1, v2 *HTTPCfg) *HTTPJsonCfg {
 	if v1.UseBasicAuth != v2.UseBasicAuth {
 		d.Use_basic_auth = utils.BoolPointer(v2.UseBasicAuth)
 	}
-	if utils.MapStringStringEqual(v1.AuthUsers, v2.AuthUsers) {
+	if !utils.MapStringStringEqual(v1.AuthUsers, v2.AuthUsers) {
 		d.Auth_users = &v2.AuthUsers
 	}
 	d.Client_opts = diffMap(d.Client_opts, v1.ClientOpts, v2.ClientOpts)

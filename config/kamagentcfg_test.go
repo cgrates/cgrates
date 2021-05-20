@@ -147,3 +147,134 @@ func TestKamAgentCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffKamConnJsonCfg(t *testing.T) {
+	v1 := &KamConnCfg{
+		Alias:      "KAM",
+		Address:    "localhost:8080",
+		Reconnects: 2,
+	}
+
+	v2 := &KamConnCfg{
+		Alias:      "KAM_2",
+		Address:    "localhost:8037",
+		Reconnects: 5,
+	}
+
+	expected := &KamConnJsonCfg{
+		Alias:      utils.StringPointer("KAM_2"),
+		Address:    utils.StringPointer("localhost:8037"),
+		Reconnects: utils.IntPointer(5),
+	}
+
+	rcv := diffKamConnJsonCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &KamConnJsonCfg{}
+
+	rcv = diffKamConnJsonCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestEqualsKamConnsCfg(t *testing.T) {
+	v1 := []*KamConnCfg{
+		{
+			Alias:      "KAM",
+			Address:    "localhost:8080",
+			Reconnects: 2,
+		},
+	}
+
+	v2 := []*KamConnCfg{
+		{
+			Alias:      "KAM_2",
+			Address:    "localhost:8037",
+			Reconnects: 5,
+		},
+	}
+
+	if equalsKamConnsCfg(v1, v2) {
+		t.Error("Conns should not match")
+	}
+
+	v2 = []*KamConnCfg{
+		{
+			Alias:      "KAM",
+			Address:    "localhost:8080",
+			Reconnects: 2,
+		},
+	}
+
+	if !equalsKamConnsCfg(v1, v2) {
+		t.Error("Conns should match")
+	}
+
+	v2 = []*KamConnCfg{}
+	if equalsKamConnsCfg(v1, v2) {
+		t.Error("Conns should not match")
+	}
+}
+
+func TestDiffKamAgentJsonCfg(t *testing.T) {
+	var d *KamAgentJsonCfg
+
+	v1 := &KamAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{"*localhost"},
+		CreateCdr:     false,
+		EvapiConns: []*KamConnCfg{
+			{
+				Alias:      "KAM_2",
+				Address:    "localhost:8037",
+				Reconnects: 5,
+			},
+		},
+		Timezone: "UTC",
+	}
+
+	v2 := &KamAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*birpc"},
+		CreateCdr:     true,
+		EvapiConns: []*KamConnCfg{
+			{
+				Alias:      "KAM_1",
+				Address:    "localhost:8080",
+				Reconnects: 2,
+			},
+		},
+		Timezone: "EEST",
+	}
+
+	expected := &KamAgentJsonCfg{
+		Enabled:        utils.BoolPointer(true),
+		Sessions_conns: &[]string{"*birpc"},
+		Create_cdr:     utils.BoolPointer(true),
+		Evapi_conns: &[]*KamConnJsonCfg{
+			{
+				Alias:      utils.StringPointer("KAM_1"),
+				Address:    utils.StringPointer("localhost:8080"),
+				Reconnects: utils.IntPointer(2),
+			},
+		},
+		Timezone: utils.StringPointer("EEST"),
+	}
+
+	rcv := diffKamAgentJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &KamAgentJsonCfg{}
+
+	rcv = diffKamAgentJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
