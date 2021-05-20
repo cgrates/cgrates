@@ -594,7 +594,6 @@ func TestApisRateCostForEvent(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant:  "tenant",
 			ID:      "ID",
-			Time:    nil,
 			Event:   nil,
 			APIOpts: nil,
 		},
