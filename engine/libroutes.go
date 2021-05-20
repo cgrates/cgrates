@@ -105,23 +105,25 @@ func (sRoutes *SortedRoutes) SortQOS(params []string) {
 	//sort routes
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
 		for _, param := range params {
+			param1 := sRoutes.Routes[i].SortingData[param].(float64)
+			param2 := sRoutes.Routes[j].SortingData[param].(float64)
+
 			//in case we have the same value for the current param we skip to the next one
-			if sRoutes.Routes[i].SortingData[param].(float64) == sRoutes.Routes[j].SortingData[param].(float64) {
+			if param1 == param2 {
 				continue
 			}
 			switch param {
 			default:
-				if sRoutes.Routes[i].SortingData[param].(float64) > sRoutes.Routes[j].SortingData[param].(float64) {
+				if param1 > param2 {
 					return true
 				}
 				return false
 			case utils.MetaPDD: //in case of pdd the smallest value if the best
-				if sRoutes.Routes[i].SortingData[param].(float64) < sRoutes.Routes[j].SortingData[param].(float64) {
+				if param1 < param2 {
 					return true
 				}
 				return false
 			}
-
 		}
 		//in case that we have the same value for all params we sort base on weight
 		if sRoutes.Routes[i].SortingData[utils.Weight].(float64) == sRoutes.Routes[j].SortingData[utils.Weight].(float64) {

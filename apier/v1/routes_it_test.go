@@ -406,7 +406,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCostNotFound(t *testing.T) {
 
 func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
-		MaxCost: utils.MetaEventCost,
+		MaxCost: utils.MetaEventCost, //0.1054
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1RouteGetLeastCostRoutes",

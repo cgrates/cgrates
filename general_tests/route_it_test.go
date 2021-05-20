@@ -47,18 +47,18 @@ var (
 		testV1SplSStartEngine,
 		testV1SplSRpcConn,
 		testV1SplSFromFolder,
-		testV1SplSSetSupplierProfilesWithoutRatingPlanIDs,
+		testV1SplSSetRouteProfilesWithoutRatingPlanIDs,
 		//tests for *reas sorting strategy
-		testV1SplSAddNewSplPrf,
+		testV1SplSAddNewRoutePrf,
 		testV1SplSAddNewResPrf,
 		testV1SplSPopulateResUsage,
-		testV1SplSGetSortedSuppliers,
+		testV1SplSGetSortedRoutes,
 		//tests for *reds sorting strategy
-		testV1SplSAddNewSplPrf2,
-		testV1SplSGetSortedSuppliers2,
+		testV1SplSAddNewRoutePrf2,
+		testV1SplSGetSortedRoutes2,
 		//tests for *load sorting strategy
 		testV1SplSPopulateStats,
-		testV1SplSGetSoredSuppliersWithLoad,
+		testV1SplSGetSoredRoutesWithLoad,
 		testV1SplSStopEngine,
 	}
 )
@@ -126,7 +126,7 @@ func testV1SplSFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
+func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
@@ -189,7 +189,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	}
 }
 
-func testV1SplSAddNewSplPrf(t *testing.T) {
+func testV1SplSAddNewRoutePrf(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err == nil ||
@@ -434,7 +434,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 }
 
-func testV1SplSGetSortedSuppliers(t *testing.T) {
+func testV1SplSGetSortedRoutes(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -465,7 +465,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 	}
 }
 
-func testV1SplSAddNewSplPrf2(t *testing.T) {
+func testV1SplSAddNewRoutePrf2(t *testing.T) {
 	var reply *engine.RouteProfile
 	if err := splSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err == nil ||
@@ -518,7 +518,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 	}
 }
 
-func testV1SplSGetSortedSuppliers2(t *testing.T) {
+func testV1SplSGetSortedRoutes2(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -705,7 +705,7 @@ func testV1SplSPopulateStats(t *testing.T) {
 	}
 }
 
-func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
+func testV1SplSGetSoredRoutesWithLoad(t *testing.T) {
 	ev := &engine.ArgsGetRoutes{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
