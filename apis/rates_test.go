@@ -22,9 +22,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/rates"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -886,18 +886,17 @@ func TestApisRateSetRateProfileError2(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-/*
-func TestApisRateRemoveRateProfileError(t *testing.T) {
+func TestApisRateSetRateProfileRates(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
-	dataDB := &engine.DataDBMock{}
+	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	admS := NewAdminSv1(cfg, dm, connMgr)
-	ext := &utils.APIRateProfile{
+	ext1 := &utils.APIRateProfile{
 		ID:        "2",
 		Tenant:    "tenant",
 		FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -909,25 +908,28 @@ func TestApisRateRemoveRateProfileError(t *testing.T) {
 		},
 	}
 	var rtRply string
-	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
+	err := admS.SetRateProfile(context.Background(), ext1, &rtRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-
-	arg := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "tenant",
-			ID:     "2",
+	ext2 := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
 		},
 	}
-
-	reply := utils.StringPointer("")
-	err = admS.RemoveRateProfile(context.Background(), arg, reply)
+	expected := "OK"
+	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	if !reflect.DeepEqual(utils.ToJSON(reply), utils.ToJSON("OK")) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON("OK"), utils.ToJSON(reply))
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
 	}
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -937,9 +939,412 @@ func TestApisRateRemoveRateProfileError(t *testing.T) {
 	}
 	var result utils.RateProfile
 	err = admS.GetRateProfile(context.Background(), args, &result)
-	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected2 := &utils.RateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(&result)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(&result))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateSetRateProfileRatesNoTenant(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext1 := &utils.APIRateProfile{
+		ID:        "2",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	err := admS.SetRateProfile(context.Background(), ext1, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	ext2 := &utils.APIRateProfile{
+		ID:        "2",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	expected := "OK"
+	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "2",
+		},
+	}
+	var result utils.RateProfile
+	err = admS.GetRateProfile(context.Background(), args, &result)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expected2 := &utils.RateProfile{
+		ID:        "2",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(&result)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(&result))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateSetRateProfileRatesMissingField(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext2 := &utils.APIRateProfile{
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	expected := ""
+	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateSetRateProfileRatesErr(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext2 := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	expected := ""
+	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateSetRateProfileRatesErr2(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext2 := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.APIIntervalRate{
+					{
+						IntervalStart: "error",
+						FixedFee:      nil,
+						RecurrentFee:  nil,
+						Unit:          nil,
+						Increment:     nil,
+					},
+				},
+			},
+		},
+	}
+	var rtRply string
+	expected := ""
+	err := admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	if err == nil || err.Error() != "strconv.ParseInt: parsing \"error\": invalid syntax" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateRemoveRateProfileRate(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext1 := &utils.APIRateProfile{
+		ID:        "2",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	err := admS.SetRateProfile(context.Background(), ext1, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	ext2 := &utils.APIRateProfile{
+		ID:        "2",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	expected := "OK"
+	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+	args1 := &utils.RemoveRPrfRates{
+		Tenant:  "cgrates.org",
+		ID:      "2",
+		RateIDs: []string{"RT_WEEK"},
+		APIOpts: nil,
+	}
+	err = admS.RemoveRateProfileRates(context.Background(), args1, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+
+	args2 := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "2",
+		},
+	}
+	var result utils.RateProfile
+	err = admS.GetRateProfile(context.Background(), args2, &result)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+	expected2 := &utils.RateProfile{
+		ID:        "2",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates:     map[string]*utils.Rate{},
+	}
+	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(&result)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(&result))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateRemoveRateProfileRateEmptyTenant(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext1 := &utils.APIRateProfile{
+		ID:        "2",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	err := admS.SetRateProfile(context.Background(), ext1, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	ext2 := &utils.APIRateProfile{
+		ID:        "2",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	expected := "OK"
+	err = admS.SetRateProfileRates(context.Background(), ext2, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+	args1 := &utils.RemoveRPrfRates{
+		ID:      "2",
+		RateIDs: []string{"RT_WEEK"},
+		APIOpts: nil,
+	}
+	err = admS.RemoveRateProfileRates(context.Background(), args1, &rtRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(rtRply), utils.ToJSON(expected)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rtRply))
+	}
+
+	args2 := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "2",
+		},
+	}
+	var result utils.RateProfile
+	err = admS.GetRateProfile(context.Background(), args2, &result)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+	expected2 := &utils.RateProfile{
+		ID:        "2",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates:     map[string]*utils.Rate{},
+	}
+	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(&result)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected2), utils.ToJSON(&result))
+	}
+
+	engine.Cache = cacheInit
+}
+
+func TestApisRateRemoveRateProfileRateError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var rtRply string
+	args1 := &utils.RemoveRPrfRates{
+		ID:      "2",
+		RateIDs: []string{"RT_WEEK"},
+		APIOpts: nil,
+	}
+	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
+	err := admS.RemoveRateProfileRates(context.Background(), args1, &rtRply)
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	engine.Cache = cacheInit
 }
-*/
+
+func TestApisRateRemoveRateProfileRateErrorMissingField(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var rtRply string
+	args1 := &utils.RemoveRPrfRates{
+
+		RateIDs: []string{"RT_WEEK"},
+		APIOpts: nil,
+	}
+	expected := "MANDATORY_IE_MISSING: [ID]"
+	err := admS.RemoveRateProfileRates(context.Background(), args1, &rtRply)
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	engine.Cache = cacheInit
+}
