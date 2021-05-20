@@ -844,7 +844,7 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	var cnt int
 
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 			if cnt == 0 {
 				cnt++
 				return map[string]utils.StringSet{

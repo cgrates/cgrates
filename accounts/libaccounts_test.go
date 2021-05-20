@@ -546,7 +546,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 }
 
 type dataDBMockError struct {
-	*engine.DataDBMock
+	engine.DataDBMock
 }
 
 func TestRestoreAccount2(t *testing.T) { //coverage purpose
