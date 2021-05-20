@@ -18,77 +18,88 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package apis
 
-// func TestCallCacheForFilter(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
-// 	tnt := "cgrates.org"
-// 	flt := &engine.Filter{
-// 		Tenant: tnt,
-// 		ID:     "FLTR1",
-// 		Rules: []*engine.FilterRule{{
-// 			Type:    utils.MetaString,
-// 			Element: "~*req.Account",
-// 			Values:  []string{"1001"},
-// 		}},
-// 	}
-// 	if err := flt.Compile(); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if err := dm.SetFilter(context.TODO(), flt, true); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	th := &engine.ThresholdProfile{
-// 		Tenant:    tnt,
-// 		ID:        "TH1",
-// 		FilterIDs: []string{flt.ID},
-// 	}
-// 	if err := dm.SetThresholdProfile(th, true); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	attr := &engine.AttributeProfile{
-// 		Tenant:    tnt,
-// 		ID:        "Attr1",
-// 		FilterIDs: []string{flt.ID},
-// 	}
-// 	if err := dm.SetAttributeProfile(context.TODO(), attr, true); err != nil {
-// 		t.Fatal(err)
-// 	}
+import (
+	"reflect"
+	"testing"
 
-// 	exp := map[string][]string{
-// 		utils.FilterIDs:               {"cgrates.org:FLTR1"},
-// 		utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001"},
-// 		utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001"},
-// 	}
-// 	rpl, err := composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), map[string][]string{utils.FilterIDs: {"cgrates.org:FLTR1"}})
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	} else if !reflect.DeepEqual(rpl, exp) {
-// 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
-// 	}
-// 	flt = &engine.Filter{
-// 		Tenant: tnt,
-// 		ID:     "FLTR1",
-// 		Rules: []*engine.FilterRule{{
-// 			Type:    utils.MetaString,
-// 			Element: "~*req.Account",
-// 			Values:  []string{"1002"},
-// 		}},
-// 	}
-// 	if err := flt.Compile(); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if err := dm.SetFilter(context.TODO(), flt, true); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	exp = map[string][]string{
-// 		utils.FilterIDs:               {"cgrates.org:FLTR1"},
-// 		utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
-// 		utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-// 	}
-// 	rpl, err = composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), rpl)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	} else if !reflect.DeepEqual(rpl, exp) {
-// 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
-// 	}
-// }
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
+func TestCallCacheForFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	tnt := "cgrates.org"
+	flt := &engine.Filter{
+		Tenant: tnt,
+		ID:     "FLTR1",
+		Rules: []*engine.FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1001"},
+		}},
+	}
+	if err := flt.Compile(); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetFilter(context.TODO(), flt, true); err != nil {
+		t.Fatal(err)
+	}
+	th := &engine.ThresholdProfile{
+		Tenant:    tnt,
+		ID:        "TH1",
+		FilterIDs: []string{flt.ID},
+	}
+	if err := dm.SetThresholdProfile(th, true); err != nil {
+		t.Fatal(err)
+	}
+	dsp := &engine.DispatcherProfile{
+		Tenant:     tnt,
+		Subsystems: []string{utils.MetaAny},
+		ID:         "Dsp1",
+		FilterIDs:  []string{flt.ID},
+	}
+	if err := dm.SetDispatcherProfile(context.TODO(), dsp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := map[string][]string{
+		utils.FilterIDs:                {"cgrates.org:FLTR1"},
+		utils.DispatcherFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001"},
+		utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001"},
+	}
+	rpl, err := composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), map[string][]string{utils.FilterIDs: {"cgrates.org:FLTR1"}})
+	if err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rpl, exp) {
+		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+	flt = &engine.Filter{
+		Tenant: tnt,
+		ID:     "FLTR1",
+		Rules: []*engine.FilterRule{{
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1002"},
+		}},
+	}
+	if err := flt.Compile(); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetFilter(context.TODO(), flt, true); err != nil {
+		t.Fatal(err)
+	}
+	exp = map[string][]string{
+		utils.FilterIDs:                {"cgrates.org:FLTR1"},
+		utils.DispatcherFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+		utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+	}
+	rpl, err = composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), rpl)
+	if err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rpl, exp) {
+		t.Errorf("Expected %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rpl))
+	}
+}
