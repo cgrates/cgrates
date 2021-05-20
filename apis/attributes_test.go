@@ -100,30 +100,6 @@ func TestSetGetAttributeProfile(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-type dataDBKeys struct {
-	*engine.DataDBMock
-}
-
-func (dbM *dataDBKeys) GetAttributeProfileDrv(*context.Context, string, string) (*engine.AttributeProfile, error) {
-	attrPRf := &engine.AttributeProfile{
-		Tenant: "cgrates.org",
-		ID:     "TEST",
-	}
-	return attrPRf, nil
-}
-
-func (dbM *dataDBKeys) SetAttributeProfileDrv(*context.Context, *engine.AttributeProfile) error {
-	return nil
-}
-
-func (dbM *dataDBKeys) GetKeysForPrefix(ctx *context.Context, prf string) ([]string, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *dataDBKeys) RemoveAttributeProfileDrv(*context.Context, string, string) error {
-	return nil
-}
-
 func TestSetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -178,7 +154,25 @@ func TestSetAttributeProfileCheckErrors(t *testing.T) {
 	}
 	cancel()
 
-	dbMock := new(dataDBKeys)
+	dbMock := &engine.DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
+			attrPRf := &engine.AttributeProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return attrPRf, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return nil, utils.ErrNotImplemented
+		},
+		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+	}
+
 	admS.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	expected = "SERVER_ERROR: NOT_IMPLEMENTED"
 	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil || err.Error() != expected {
@@ -298,7 +292,25 @@ func TestRemoveAttributeProfileCheckErrors(t *testing.T) {
 func TestRemoveAttributeProfileMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dbMock := new(dataDBKeys)
+	dbMock := &engine.DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
+			attrPRf := &engine.AttributeProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return attrPRf, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return nil, utils.ErrNotImplemented
+		},
+		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+	}
+
 	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -321,7 +333,24 @@ func TestRemoveAttributeProfileMockErr(t *testing.T) {
 func TestGetAttributeProfileIDsMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dbMock := new(dataDBKeys)
+	dbMock := &engine.DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
+			attrPRf := &engine.AttributeProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return attrPRf, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return nil, utils.ErrNotImplemented
+		},
+		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+	}
 	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -339,18 +368,14 @@ func TestGetAttributeProfileIDsMockErr(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-type dataDBKeysFill struct {
-	*engine.DataDBMock
-}
-
-func (dbM *dataDBKeysFill) GetKeysForPrefix(_ *context.Context, _ string) ([]string, error) {
-	return []string{}, nil
-}
-
 func TestGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dbMock := new(dataDBKeysFill)
+	dbMock := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
 	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -371,7 +396,24 @@ func TestGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 func TestGetAttributeProfileIDscOUNTMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dbMock := new(dataDBKeys)
+	dbMock := &engine.DataDBMock{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
+			attrPRf := &engine.AttributeProfile{
+				Tenant: "cgrates.org",
+				ID:     "TEST",
+			}
+			return attrPRf, nil
+		},
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+			return nil
+		},
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return nil, utils.ErrNotImplemented
+		},
+		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+	}
 	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	admS := &AdminSv1{
 		cfg: cfg,
@@ -387,7 +429,11 @@ func TestGetAttributeProfileIDscOUNTMockErr(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	dbMockNew := new(dataDBKeysFill)
+	dbMockNew := &engine.DataDBMock{
+		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
 	expected = "NOT_FOUND"
 	admS.dm = engine.NewDataManager(dbMockNew, cfg.CacheCfg(), nil)
 	if err := admS.GetAttributeProfileIDsCount(context.Background(),

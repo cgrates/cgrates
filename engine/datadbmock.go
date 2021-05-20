@@ -24,12 +24,14 @@ import (
 )
 
 type DataDBMock struct {
-	SetRateProfileDrvF    func(*context.Context, *utils.RateProfile) error
-	GetRateProfileDrvF    func(*context.Context, string, string) (*utils.RateProfile, error)
-	GetKeysForPrefixF     func(*context.Context, string) ([]string, error)
-	GetChargerProfileDrvF func(string, string) (*ChargerProfile, error)
-	GetFilterDrvF         func(string, string) (*Filter, error)
-	GetIndexesDrvF        func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	SetRateProfileDrvF         func(*context.Context, *utils.RateProfile) error
+	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
+	GetKeysForPrefixF          func(*context.Context, string) ([]string, error)
+	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
+	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error)
+	SetAttributeProfileDrvF    func(ctx *context.Context, attr *AttributeProfile) error
+	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
 }
 
 //Storage methods
@@ -124,11 +126,17 @@ func (dbM *DataDBMock) AddLoadHistory(*utils.LoadInstance, int, string) error {
 }
 
 func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+	if dbM.GetIndexesDrvF != nil {
+		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, idxKey)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	if dbM.SetIndexesDrvF != nil {
+		return dbM.SetIndexesDrvF(ctx, idxItmType, tntCtx, indexes, commit, transactionID)
+	}
 	return utils.ErrNotImplemented
 }
 
@@ -208,15 +216,24 @@ func (dbM *DataDBMock) RemoveRouteProfileDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAttributeProfileDrv(*context.Context, string, string) (*AttributeProfile, error) {
+func (dbM *DataDBMock) GetAttributeProfileDrv(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error) {
+	if dbM.GetAttributeProfileDrvF != nil {
+		return dbM.GetAttributeProfileDrvF(ctx, str1, str2)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAttributeProfileDrv(*context.Context, *AttributeProfile) error {
+func (dbM *DataDBMock) SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error {
+	if dbM.SetAttributeProfileDrvF != nil {
+		return dbM.SetAttributeProfileDrvF(ctx, attr)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAttributeProfileDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveAttributeProfileDrv(ctx *context.Context, str1 string, str2 string) error {
+	if dbM.RemoveAttributeProfileDrvF != nil {
+		return dbM.RemoveAttributeProfileDrvF(ctx, str1, str2)
+	}
 	return utils.ErrNotImplemented
 }
 
