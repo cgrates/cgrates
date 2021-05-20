@@ -72,7 +72,7 @@ func TestShutDownCoverage(t *testing.T) {
 }
 
 type dataDBMockErrorNotFound struct {
-	*engine.DataDBMock
+	engine.DataDBMock
 }
 
 func (dB *dataDBMockErrorNotFound) GetAccountDrv(*context.Context, string, string) (*utils.Account, error) {

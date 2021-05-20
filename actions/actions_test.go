@@ -496,7 +496,7 @@ func TestActionShutDown(t *testing.T) {
 }
 
 type dataDBMockError struct {
-	*engine.DataDBMock
+	engine.DataDBMock
 }
 
 func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string) (*engine.ActionProfile, error) {
