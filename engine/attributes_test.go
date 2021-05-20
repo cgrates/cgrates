@@ -27,6 +27,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -524,4 +525,198 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 
+}
+
+func TestAttributesattributeProfileForEvent(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
+	alS.cgrcfg.AttributeSCfg().AnyContext = false
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, ap2) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap2, rcv)
+	}
+
+	lastID = "ATTR_2"
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+	Cache.Clear(nil)
+	ap1.FilterIDs = []string{"*string:~*req.Account:1001"}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, ap1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
+	}
+
+	Cache.Clear(nil)
+	alS.cgrcfg.AttributeSCfg().AnyContext = true
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, ap1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
+	}
+
+	dbm := &DataDBMock{
+		GetKeysForPrefixF: func(s string) ([]string, error) {
+			return nil, utils.ErrExists
+		},
+	}
+	alS.cgrcfg.AttributeSCfg().IndexedSelects = false
+	alS.dm = NewDataManager(dbm, cfg.CacheCfg(), nil)
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err == nil || err != utils.ErrExists {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrExists, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+	alS.cgrcfg.AttributeSCfg().IndexedSelects = true
+	alS.dm = nil
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_3"}, nil, evNm,
+		lastID); err == nil || err != utils.ErrNoDatabaseConn {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNoDatabaseConn, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+	apNil := &AttributeProfile{}
+	tnt = ""
+	alS.dm = dm
+	err = alS.dm.SetAttributeProfile(apNil, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_3"}, nil, evNm,
+		lastID); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+	Cache.Clear(nil)
+	ap1.ActivationInterval = &utils.ActivationInterval{
+		ExpiryTime: time.Date(2021, 5, 14, 15, 0, 0, 0, time.UTC),
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+	actTime := utils.TimePointer(time.Date(2021, 5, 14, 16, 0, 0, 0, time.UTC))
+	tnt = "cgrates.org"
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, actTime, evNm,
+		lastID); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+	Cache.Clear(nil)
+	ap1.ActivationInterval = nil
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+	evNm = utils.MapStorage{
+		utils.MetaReq: 1,
+	}
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_1"}, nil, evNm,
+		lastID); err == nil || err != utils.ErrWrongPath {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrWrongPath, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
 }
