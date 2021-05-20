@@ -983,13 +983,14 @@ func testV1RsRemResourceProfileWithoutTenant(t *testing.T) {
 func testV1RsSetResourceProfileWithOpts(t *testing.T) {
 	rlsCfg := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TEST_WITH_OPTS",
-			FilterIDs: []string{"*string:~*opts.CustomField:1007"},
-			UsageTTL:  time.Duration(1) * time.Nanosecond,
-			Limit:     10,
-			Blocker:   true,
-			Weight:    20,
+			Tenant:       "cgrates.org",
+			ID:           "TEST_WITH_OPTS",
+			FilterIDs:    []string{"*string:~*opts.CustomField:1007"},
+			UsageTTL:     time.Duration(1) * time.Nanosecond,
+			Limit:        10,
+			Blocker:      true,
+			Weight:       20,
+			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
 	var reply string
