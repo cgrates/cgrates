@@ -701,19 +701,18 @@ func (rS *ResourceService) V1AllocateResources(args utils.ArgRSv1ResourceUsage, 
 
 	// index it for storing
 	for _, r := range mtcRLs {
-		if rS.cgrcfg.ResourceSCfg().StoreInterval == 0 || r.dirty == nil {
-			continue
-		}
-		if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
-			*r.dirty = true
-			if err = rS.StoreResource(r); err != nil {
-				return
+		if rS.cgrcfg.ResourceSCfg().StoreInterval != 0 && r.dirty != nil {
+			if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
+				*r.dirty = true
+				if err = rS.StoreResource(r); err != nil {
+					return
+				}
+			} else {
+				*r.dirty = true // mark it to be saved
+				rS.srMux.Lock()
+				rS.storedResources.Add(r.TenantID())
+				rS.srMux.Unlock()
 			}
-		} else {
-			*r.dirty = true // mark it to be saved
-			rS.srMux.Lock()
-			rS.storedResources.Add(r.TenantID())
-			rS.srMux.Unlock()
 		}
 		if err = rS.processThresholds(r, args.APIOpts); err != nil {
 			return
