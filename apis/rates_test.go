@@ -1401,7 +1401,12 @@ func TestApisRateSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg, nil)
 	dataDB := &engine.DataDBMock{
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
-			return nil, utils.ErrNotFound
+			return &utils.RateProfile{
+				ID:        "2",
+				Tenant:    "cgrates.org",
+				FilterIDs: []string{"*string:~*req.Subject:1001"},
+				Rates:     map[string]*utils.Rate{},
+			}, nil
 		},
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
 			return nil
@@ -1429,9 +1434,9 @@ func TestApisRateSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	var rtRply string
-	expected := utils.ErrNotFound
+	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
 	err := admS.SetRateProfileRates(context.Background(), ext, &rtRply)
-	if err == nil || err != expected {
+	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	dm.DataDB().Flush(utils.EmptyString)
@@ -1444,8 +1449,13 @@ func TestApisRateRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
 	dataDB := &engine.DataDBMock{
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
 		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
-			return nil, utils.ErrNotFound
+			return &utils.RateProfile{
+				Tenant: "tenant",
+			}, nil
 		},
 		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
 			return nil
@@ -1467,9 +1477,53 @@ func TestApisRateRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 		RateIDs: []string{"RT_WEEK"},
 	}
 	var rtRply string
-	expected := utils.ErrNotFound
+	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
 	err := admS.RemoveRateProfileRates(context.Background(), ext, &rtRply)
-	if err == nil || err != expected {
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	dm.DataDB().Flush(utils.EmptyString)
+	engine.Cache = cacheInit
+}
+
+func TestApisRateRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+			return &utils.RateProfile{
+				Tenant: "tenant",
+			}, nil
+		},
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "tenant",
+			ID:     "2",
+		},
+	}
+	var rtRply string
+	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
+	err := admS.RemoveRateProfile(context.Background(), ext, &rtRply)
+	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 	dm.DataDB().Flush(utils.EmptyString)
