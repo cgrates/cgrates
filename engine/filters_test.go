@@ -291,6 +291,18 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
+
+	rf, err = NewFilterRule(utils.MetaRegex, "~MetaRegex", []string{"Regex"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &FilterRule{Type: utils.MetaRegex, Element: "~MetaRegex", Values: []string{"Regex"}, negative: utils.BoolPointer(false)}
+	if err = erf.CompileValues(); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
 }
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
@@ -476,6 +488,42 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", true, pass)
+	}
+
+	failEvent = map[string]interface{}{
+		"Account": "1001",
+	}
+	passEvent = map[string]interface{}{
+		"Account": "1007",
+	}
+	fEv = utils.MapStorage{}
+	fEv.Set([]string{utils.MetaReq}, failEvent)
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*regex:~*req.Account:^1007:error"}, fEv); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*regex:~*req.Account:\\d{3}7"}, fEv); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	pEv = utils.MapStorage{}
+	pEv.Set([]string{utils.MetaReq}, passEvent)
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*regex:~*req.Account:\\d{3}7"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	//not
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*notregex:~*req.Account:\\d{3}7"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 }
 
