@@ -1346,5 +1346,132 @@ func TestApisRateRemoveRateProfileRateErrorMissingField(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
+	dm.DataDB().Flush(utils.EmptyString)
+	engine.Cache = cacheInit
+}
+
+func TestApisRateSetRateProfileErrorSetLoadIDs(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+			return nil, utils.ErrNotFound
+		},
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	expected := "SERVER_ERROR: NOT_IMPLEMENTED"
+	err := admS.SetRateProfile(context.Background(), ext, &rtRply)
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	dm.DataDB().Flush(utils.EmptyString)
+	engine.Cache = cacheInit
+}
+
+func TestApisRateSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+			return nil, utils.ErrNotFound
+		},
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext := &utils.APIRateProfile{
+		ID:        "2",
+		Tenant:    "tenant",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.APIRate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	var rtRply string
+	expected := utils.ErrNotFound
+	err := admS.SetRateProfileRates(context.Background(), ext, &rtRply)
+	if err == nil || err != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	dm.DataDB().Flush(utils.EmptyString)
+	engine.Cache = cacheInit
+}
+
+func TestApisRateRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+			return nil, utils.ErrNotFound
+		},
+		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile) error {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	ext := &utils.RemoveRPrfRates{
+		ID:      "2",
+		Tenant:  "tenant",
+		RateIDs: []string{"RT_WEEK"},
+	}
+	var rtRply string
+	expected := utils.ErrNotFound
+	err := admS.RemoveRateProfileRates(context.Background(), ext, &rtRply)
+	if err == nil || err != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+	dm.DataDB().Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
