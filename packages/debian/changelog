@@ -163,6 +163,7 @@ cgrates (0.11.0~dev) UNRELEASED; urgency=medium
   * [AttributeS] Added any_context config to control the matching attributes
   * [DispatcherS] Added any_subsyste config to control the matching dispatchers
   * [StatS] AverageCallCost and TotalCallCost now returns error for negative Cost field
+  * [SessionS] The sessions are no longer terminated on shutdown if the replication_conns are set
 
  -- DanB <danb@cgrates.org>  Wed, 19 Feb 2020 13:25:52 +0200
 
