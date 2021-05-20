@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -216,19 +217,20 @@ var supportedFiltersType utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
 	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
-	utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
-	utils.MetaActivationInterval})
+	utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
+	utils.MetaRegex})
 var needsFieldName utils.StringSet = utils.NewStringSet([]string{
 	utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
 	utils.MetaCronExp, utils.MetaRSR, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
-	utils.MetaActivationInterval})
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan,
+	utils.MetaActivationInterval,
+	utils.MetaRegex})
 var needsValues utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaCronExp, utils.MetaRSR,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-	utils.MetaEqual, utils.MetaNotEqual, utils.MetaIPNet, utils.MetaAPIBan,
-	utils.MetaActivationInterval})
+	utils.MetaEqual, utils.MetaIPNet, utils.MetaAPIBan, utils.MetaActivationInterval,
+	utils.MetaRegex})
 
 // NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
@@ -262,55 +264,47 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 // FilterRule filters requests coming into various places
 // Pass rule: default negative, one matching rule should pass the filter
 type FilterRule struct {
-	Type       string            // Filter type (*string, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	Element    string            // Name of the field providing us the Values to check (used in case of some )
-	Values     []string          // Filter definition
-	rsrValues  config.RSRParsers // Cache here the
-	rsrElement *config.RSRParser // Cache here the
-	rsrFilters utils.RSRFilters  // Cache here the RSRFilter Values
-	negative   *bool
+	Type        string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	Element     string            // Name of the field providing us the Values to check (used in case of some )
+	Values      []string          // Filter definition
+	rsrValues   config.RSRParsers // Cache here the
+	rsrElement  *config.RSRParser // Cache here the
+	rsrFilters  utils.RSRFilters  // Cache here the RSRFilter Values
+	regexValues []*regexp.Regexp
+	negative    *bool
 }
 
 // CompileValues compiles RSR fields
 func (fltr *FilterRule) CompileValues() (err error) {
 	switch fltr.Type {
+	case utils.MetaRegex, utils.MetaNotRegex:
+		fltr.regexValues = make([]*regexp.Regexp, len(fltr.Values))
+		for i, val := range fltr.Values {
+			if fltr.regexValues[i], err = regexp.Compile(val); err != nil {
+				return
+			}
+		}
 	case utils.MetaRSR, utils.MetaNotRSR:
 		if fltr.rsrFilters, err = utils.ParseRSRFiltersFromSlice(fltr.Values); err != nil {
 			return
 		}
-		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
-			return
-		} else if fltr.rsrElement == nil {
-			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
-		}
 	case utils.MetaExists, utils.MetaNotExists, utils.MetaEmpty, utils.MetaNotEmpty: // only the element is builded
-		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
-			return
-		} else if fltr.rsrElement == nil {
-			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
-		}
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
-		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
-			return
-		} else if fltr.rsrElement == nil {
-			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
-		}
-		for _, strVal := range fltr.Values {
-			rsrPrsr, err := config.NewRSRParser(strVal)
-			if err != nil {
-				return err
+		fltr.rsrValues = make(config.RSRParsers, len(fltr.Values))
+		for i, strVal := range fltr.Values {
+			if fltr.rsrValues[i], err = config.NewRSRParser(strVal); err != nil {
+				return
 			}
-			fltr.rsrValues = append(fltr.rsrValues, rsrPrsr)
 		}
 	default:
 		if fltr.rsrValues, err = config.NewRSRParsersFromSlice(fltr.Values); err != nil {
 			return
 		}
-		if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
-			return
-		} else if fltr.rsrElement == nil {
-			return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
-		}
+	}
+	if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
+		return
+	} else if fltr.rsrElement == nil {
+		return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
 	}
 	return
 }
@@ -346,6 +340,8 @@ func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (resu
 		result, err = fltr.passAPIBan(ctx, dDP)
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
 		result, err = fltr.passActivationInterval(dDP)
+	case utils.MetaRegex, utils.MetaNotRegex:
+		result, err = fltr.passRegex(dDP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -676,4 +672,20 @@ func verifyInlineFilterS(fltrs []string) (err error) {
 		}
 	}
 	return
+}
+
+func (fltr *FilterRule) passRegex(dDP utils.DataProvider) (bool, error) {
+	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	for _, val := range fltr.regexValues {
+		if val.MatchString(strVal) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
