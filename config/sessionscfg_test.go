@@ -1037,6 +1037,157 @@ func TestFsAgentCfgClone(t *testing.T) {
 	}
 }
 
+func TestDiffFsConnJsonCfg(t *testing.T) {
+	v1 := &FsConnCfg{
+		Address:    "localhost:8080",
+		Password:   "FsPassword",
+		Reconnects: 3,
+		Alias:      "FS",
+	}
+
+	v2 := &FsConnCfg{
+		Address:    "localhost:8037",
+		Password:   "AnotherFsPassword",
+		Reconnects: 1,
+		Alias:      "FS_AGENT",
+	}
+
+	expected := &FsConnJsonCfg{
+		Address:    utils.StringPointer("localhost:8037"),
+		Password:   utils.StringPointer("AnotherFsPassword"),
+		Reconnects: utils.IntPointer(1),
+		Alias:      utils.StringPointer("FS_AGENT"),
+	}
+
+	rcv := diffFsConnJsonCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &FsConnJsonCfg{}
+
+	rcv = diffFsConnJsonCfg(v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestEqualsFsConnsJsonCfg(t *testing.T) {
+	v1 := []*FsConnCfg{
+		{
+			Address:    "localhost:8080",
+			Password:   "FsPassword",
+			Reconnects: 3,
+			Alias:      "FS",
+		},
+	}
+
+	v2 := []*FsConnCfg{
+		{
+			Address:    "localhost:8037",
+			Password:   "AnotherFsPassword",
+			Reconnects: 1,
+			Alias:      "FS_AGENT",
+		},
+	}
+
+	if equalsFsConnsJsonCfg(v1, v2) {
+		t.Error("Conns should not match")
+	}
+
+	v2 = []*FsConnCfg{
+		{
+			Address:    "localhost:8080",
+			Password:   "FsPassword",
+			Reconnects: 3,
+			Alias:      "FS",
+		},
+	}
+
+	if !equalsFsConnsJsonCfg(v1, v2) {
+		t.Error("Conns should match")
+	}
+}
+
+func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
+	var d *FreeswitchAgentJsonCfg
+
+	v1 := &FsAgentCfg{
+		Enabled:       false,
+		SessionSConns: []string{},
+		SubscribePark: false,
+		CreateCdr:     false,
+		ExtraFields: RSRParsers{
+			{
+				Rules: "ExtraField",
+			},
+		},
+		LowBalanceAnnFile:   "LBAF",
+		EmptyBalanceContext: "EBC",
+		EmptyBalanceAnnFile: "EBAF",
+		MaxWaitConnection:   5 * time.Second,
+		EventSocketConns:    []*FsConnCfg{},
+	}
+
+	v2 := &FsAgentCfg{
+		Enabled:       true,
+		SessionSConns: []string{"*localhost"},
+		SubscribePark: true,
+		CreateCdr:     true,
+		ExtraFields: RSRParsers{
+			{
+				Rules: "ExtraField2",
+			},
+		},
+		LowBalanceAnnFile:   "LBAF2",
+		EmptyBalanceContext: "EBC2",
+		EmptyBalanceAnnFile: "EBAF2",
+		MaxWaitConnection:   3 * time.Second,
+		EventSocketConns: []*FsConnCfg{
+			{
+				Address:    "localhost:8080",
+				Password:   "FsPassword",
+				Reconnects: 3,
+				Alias:      "FS",
+			},
+		},
+	}
+
+	expected := &FreeswitchAgentJsonCfg{
+		Enabled:                utils.BoolPointer(true),
+		Sessions_conns:         &[]string{"*localhost"},
+		Subscribe_park:         utils.BoolPointer(true),
+		Create_cdr:             utils.BoolPointer(true),
+		Extra_fields:           &[]string{"ExtraField2"},
+		Low_balance_ann_file:   utils.StringPointer("LBAF2"),
+		Empty_balance_context:  utils.StringPointer("EBC2"),
+		Empty_balance_ann_file: utils.StringPointer("EBAF2"),
+		Max_wait_connection:    utils.StringPointer("3s"),
+		Event_socket_conns: &[]*FsConnJsonCfg{
+			{
+				Address:    utils.StringPointer("localhost:8080"),
+				Password:   utils.StringPointer("FsPassword"),
+				Reconnects: utils.IntPointer(3),
+				Alias:      utils.StringPointer("FS"),
+			},
+		},
+	}
+
+	rcv := diffFreeswitchAgentJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &FreeswitchAgentJsonCfg{}
+
+	rcv = diffFreeswitchAgentJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
 func TestSessionSCfgClone(t *testing.T) {
 	ban := &SessionSCfg{
 		Enabled:             true,

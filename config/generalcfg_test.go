@@ -250,3 +250,97 @@ func TestGeneralCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffGeneralJsonCfg(t *testing.T) {
+	var d *GeneralJsonCfg
+
+	v1 := &GeneralCfg{
+		NodeID:           "randomID2",
+		Logger:           utils.LoggerCfg,
+		LogLevel:         7,
+		RoundingDecimals: 1,
+		DBDataEncoding:   "msgpack2",
+		TpExportPath:     "/var/spool/cgrates/tpe/test",
+		PosterAttempts:   5,
+		FailedPostsDir:   "/var/spool/cgrates/failed_posts/test",
+		DefaultReqType:   utils.MetaPrepaid,
+		DefaultCategory:  utils.ForcedDisconnectCfg,
+		DefaultTenant:    "itsyscom.com",
+		DefaultTimezone:  "UTC",
+		ConnectAttempts:  5,
+		Reconnects:       2,
+		ConnectTimeout:   5 * time.Second,
+		ReplyTimeout:     1 * time.Second,
+		DigestSeparator:  "",
+		DigestEqual:      "",
+		MaxParallelConns: 50,
+		RSRSep:           "",
+		DefaultCaching:   utils.MetaClear,
+		FailedPostsTTL:   5,
+	}
+
+	v2 := &GeneralCfg{
+		NodeID:           "randomID",
+		Logger:           utils.MetaSysLog,
+		LogLevel:         6,
+		RoundingDecimals: 5,
+		DBDataEncoding:   "msgpack",
+		TpExportPath:     "/var/spool/cgrates/tpe",
+		PosterAttempts:   3,
+		FailedPostsDir:   "/var/spool/cgrates/failed_posts",
+		DefaultReqType:   utils.MetaRated,
+		DefaultCategory:  utils.Call,
+		DefaultTenant:    "cgrates.org",
+		DefaultTimezone:  "Local",
+		ConnectAttempts:  3,
+		Reconnects:       -1,
+		ConnectTimeout:   time.Second,
+		ReplyTimeout:     2 * time.Second,
+		DigestSeparator:  ",",
+		DigestEqual:      ":",
+		MaxParallelConns: 100,
+		RSRSep:           ";",
+		DefaultCaching:   utils.MetaReload,
+		LockingTimeout:   2 * time.Second,
+		FailedPostsTTL:   2,
+	}
+
+	expected := &GeneralJsonCfg{
+		Node_id:              utils.StringPointer("randomID"),
+		Logger:               utils.StringPointer(utils.MetaSysLog),
+		Log_level:            utils.IntPointer(6),
+		Rounding_decimals:    utils.IntPointer(5),
+		Dbdata_encoding:      utils.StringPointer("msgpack"),
+		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
+		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
+		Poster_attempts:      utils.IntPointer(3),
+		Default_request_type: utils.StringPointer(utils.MetaRated),
+		Default_category:     utils.StringPointer(utils.Call),
+		Default_tenant:       utils.StringPointer("cgrates.org"),
+		Default_timezone:     utils.StringPointer("Local"),
+		Default_caching:      utils.StringPointer(utils.MetaReload),
+		Connect_attempts:     utils.IntPointer(3),
+		Reconnects:           utils.IntPointer(-1),
+		Connect_timeout:      utils.StringPointer("1s"),
+		Reply_timeout:        utils.StringPointer("2s"),
+		Locking_timeout:      utils.StringPointer("2s"),
+		Digest_separator:     utils.StringPointer(","),
+		Rsr_separator:        utils.StringPointer(";"),
+		Digest_equal:         utils.StringPointer(":"),
+		Failed_posts_ttl:     utils.StringPointer("2ns"),
+		Max_parallel_conns:   utils.IntPointer(100),
+	}
+
+	rcv := diffGeneralJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &GeneralJsonCfg{}
+
+	rcv = diffGeneralJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

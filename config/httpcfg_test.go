@@ -173,3 +173,56 @@ func TestHTTPCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffHTTPJsonCfg(t *testing.T) {
+	var d *HTTPJsonCfg
+
+	v1 := &HTTPCfg{
+		JsonRPCURL:        "JsonRpcUrl",
+		RegistrarSURL:     "RegistrarSUrl",
+		WSURL:             "WSUrl",
+		FreeswitchCDRsURL: "FsCdrsUrl",
+		CDRsURL:           "CdrsUrl",
+		UseBasicAuth:      true,
+		AuthUsers: map[string]string{
+			"User1": "passUser1",
+		},
+		ClientOpts: map[string]interface{}{},
+	}
+
+	v2 := &HTTPCfg{
+		JsonRPCURL:        "JsonRpcUrl2",
+		RegistrarSURL:     "RegistrarSUrl2",
+		WSURL:             "WsUrl2",
+		FreeswitchCDRsURL: "FsCdrsUrl2",
+		CDRsURL:           "CdrsUrl2",
+		UseBasicAuth:      false,
+		AuthUsers: map[string]string{
+			"User2": "passUser2",
+		},
+		ClientOpts: map[string]interface{}{
+			"C_OPT1": "opt",
+		},
+	}
+
+	expected := &HTTPJsonCfg{
+		Json_rpc_url:        utils.StringPointer("JsonRpcUrl2"),
+		Registrars_url:      utils.StringPointer("RegistrarSUrl2"),
+		Ws_url:              utils.StringPointer("WsUrl2"),
+		Freeswitch_cdrs_url: utils.StringPointer("FsCdrsUrl2"),
+		Http_Cdrs:           utils.StringPointer("CdrsUrl2"),
+		Use_basic_auth:      utils.BoolPointer(false),
+		Auth_users: &map[string]string{
+			"User2": "passUser2",
+		},
+		Client_opts: map[string]interface{}{
+			"C_OPT1": "opt",
+		},
+	}
+
+	rcv := diffHTTPJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+}

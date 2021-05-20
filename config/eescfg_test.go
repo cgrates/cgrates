@@ -738,7 +738,6 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		AttributeSCtx: "*sessions",
 		Synchronous:   false,
 		Attempts:      2,
-		//FieldSep:      "",
 		Fields: []*FCTemplate{
 			{
 				Type: "*string",
@@ -785,7 +784,6 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		AttributeSCtx: "*actions",
 		Synchronous:   true,
 		Attempts:      3,
-		//FieldSep:      ";",
 		Fields: []*FCTemplate{
 			{
 				Type: "*prefix",
@@ -823,7 +821,6 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Attribute_context: utils.StringPointer("*actions"),
 		Synchronous:       utils.BoolPointer(true),
 		Attempts:          utils.IntPointer(3),
-		//Field_separator:   utils.StringPointer(";"),
 		Fields: &[]*FcTemplateJsonCfg{
 			{
 				Type:   utils.StringPointer("*prefix"),
@@ -923,7 +920,6 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			AttributeSCtx: "*sessions",
 			Synchronous:   false,
 			Attempts:      2,
-			//FieldSep:      "",
 			Fields: []*FCTemplate{
 				{
 					Type: "*string",
@@ -972,7 +968,6 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			AttributeSCtx: "*actions",
 			Synchronous:   true,
 			Attempts:      3,
-			//FieldSep:      ";",
 			Fields: []*FCTemplate{
 				{
 					Type: "*prefix",
@@ -1012,7 +1007,6 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			Attribute_context: utils.StringPointer("*actions"),
 			Synchronous:       utils.BoolPointer(true),
 			Attempts:          utils.IntPointer(3),
-			//Field_separator:   utils.StringPointer(";"),
 			Fields: &[]*FcTemplateJsonCfg{
 				{
 					Type:   utils.StringPointer("*prefix"),

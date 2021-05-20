@@ -291,24 +291,26 @@ func (sCft FCTemplates) Clone() (cln FCTemplates) {
 func (fc *FCTemplate) Equals(fc2 *FCTemplate) bool {
 	return (fc == nil && fc2 == nil) ||
 		(fc != nil && fc2 != nil &&
-			fc.Tag != fc2.Tag &&
-			fc.Type != fc2.Type &&
-			fc.Path != fc2.Path &&
+			fc.Tag == fc2.Tag &&
+			fc.Type == fc2.Type &&
+			fc.Path == fc2.Path &&
 			utils.SliceStringEqual(fc.Filters, fc2.Filters) &&
 			utils.SliceStringEqual(fc.Value.AsStringSlice(), fc2.Value.AsStringSlice()) &&
-			fc.Width != fc2.Width &&
-			fc.Strip != fc2.Strip &&
-			fc.Padding != fc2.Padding &&
-			fc.Mandatory != fc2.Mandatory &&
-			fc.AttributeID != fc2.AttributeID &&
-			fc.NewBranch != fc2.NewBranch &&
-			fc.Timezone != fc2.Timezone &&
-			fc.Blocker != fc2.Blocker &&
-			fc.Layout != fc2.Layout &&
-			fc.CostShiftDigits != fc2.CostShiftDigits &&
-			fc.RoundingDecimals != fc2.RoundingDecimals &&
-			fc.MaskDestID != fc2.MaskDestID &&
-			fc.MaskLen != fc2.MaskLen)
+			fc.Width == fc2.Width &&
+			fc.Strip == fc2.Strip &&
+			fc.Padding == fc2.Padding &&
+			fc.Mandatory == fc2.Mandatory &&
+			fc.AttributeID == fc2.AttributeID &&
+			fc.NewBranch == fc2.NewBranch &&
+			fc.Timezone == fc2.Timezone &&
+			fc.Blocker == fc2.Blocker &&
+			fc.Layout == fc2.Layout &&
+			fc.CostShiftDigits == fc2.CostShiftDigits &&
+			fc.MaskDestID == fc2.MaskDestID &&
+			fc.MaskLen == fc2.MaskLen &&
+			((fc.RoundingDecimals == nil && fc2.RoundingDecimals == nil) ||
+				(fc.RoundingDecimals != nil && fc2.RoundingDecimals != nil &&
+					*fc.RoundingDecimals == *fc2.RoundingDecimals)))
 }
 
 type FcTemplatesJsonCfg map[string][]*FcTemplateJsonCfg

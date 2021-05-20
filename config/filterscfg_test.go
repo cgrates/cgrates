@@ -99,3 +99,38 @@ func TestFilterSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffFilterSJsonCfg(t *testing.T) {
+	var d *FilterSJsonCfg
+
+	v1 := &FilterSCfg{
+		StatSConns:     []string{},
+		ResourceSConns: []string{},
+		AdminSConns:    []string{},
+	}
+
+	v2 := &FilterSCfg{
+		StatSConns:     []string{"*localhost"},
+		ResourceSConns: []string{"*localhost"},
+		AdminSConns:    []string{"*localhost"},
+	}
+
+	expected := &FilterSJsonCfg{
+		Stats_conns:     &[]string{"*localhost"},
+		Resources_conns: &[]string{"*localhost"},
+		Admins_conns:    &[]string{"*localhost"},
+	}
+
+	rcv := diffFilterSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected2 := &FilterSJsonCfg{}
+
+	rcv = diffFilterSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected2) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
+	}
+}

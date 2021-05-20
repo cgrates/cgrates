@@ -110,3 +110,47 @@ func TestListenCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffListenJsonCfg(t *testing.T) {
+	var d *ListenJsonCfg
+
+	v1 := &ListenCfg{
+		RPCJSONListen:    "localhost:8080",
+		RPCGOBListen:     "localhost:8081",
+		HTTPListen:       "localhost:8082",
+		RPCJSONTLSListen: "localhost:8083",
+		RPCGOBTLSListen:  "localhost:8084",
+		HTTPTLSListen:    "localhost:8085",
+	}
+
+	v2 := &ListenCfg{
+		RPCJSONListen:    "localhost:7080",
+		RPCGOBListen:     "localhost:7081",
+		HTTPListen:       "localhost:7082",
+		RPCJSONTLSListen: "localhost:7083",
+		RPCGOBTLSListen:  "localhost:7084",
+		HTTPTLSListen:    "localhost:7085",
+	}
+
+	expected := &ListenJsonCfg{
+		Rpc_json:     utils.StringPointer("localhost:7080"),
+		Rpc_gob:      utils.StringPointer("localhost:7081"),
+		Http:         utils.StringPointer("localhost:7082"),
+		Rpc_json_tls: utils.StringPointer("localhost:7083"),
+		Rpc_gob_tls:  utils.StringPointer("localhost:7084"),
+		Http_tls:     utils.StringPointer("localhost:7085"),
+	}
+
+	rcv := diffListenJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &ListenJsonCfg{}
+
+	rcv = diffListenJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
