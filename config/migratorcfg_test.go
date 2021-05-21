@@ -264,3 +264,89 @@ func TestMigratorCgrCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffMigratorCfgJson(t *testing.T) {
+	var d *MigratorCfgJson
+
+	v1 := &MigratorCgrCfg{
+		OutDataDBType:     "postgres",
+		OutDataDBHost:     "127.0.0.1",
+		OutDataDBPort:     "8080",
+		OutDataDBName:     "cgrates",
+		OutDataDBUser:     "cgrates_user",
+		OutDataDBPassword: "CGRateS.org",
+		OutDataDBEncoding: "utf-8",
+		OutStorDBType:     "redis",
+		OutStorDBHost:     "127.0.0.1",
+		OutStorDBPort:     "4037",
+		OutStorDBName:     "cgrates_redis",
+		OutStorDBUser:     "cgrates_redis_user",
+		OutStorDBPassword: "CGRateS.org_redis",
+		OutDataDBOpts:     map[string]interface{}{},
+		OutStorDBOpts:     map[string]interface{}{},
+		UsersFilters:      []string{},
+	}
+
+	v2 := &MigratorCgrCfg{
+		OutStorDBType:     "postgres",
+		OutStorDBHost:     "0.0.0.0",
+		OutStorDBPort:     "8080",
+		OutStorDBName:     "cgrates",
+		OutStorDBUser:     "cgrates_user",
+		OutStorDBPassword: "CGRateS.org",
+		OutDataDBEncoding: "utf-16",
+		OutDataDBType:     "redis",
+		OutDataDBHost:     "0.0.0.0",
+		OutDataDBPort:     "4037",
+		OutDataDBName:     "cgrates_redis",
+		OutDataDBUser:     "cgrates_redis_user",
+		OutDataDBPassword: "CGRateS.org_redis",
+		OutDataDBOpts: map[string]interface{}{
+			utils.RedisSentinelNameCfg: utils.EmptyString,
+			utils.RedisClusterCfg:      true,
+		},
+		OutStorDBOpts: map[string]interface{}{
+			utils.RedisSentinelNameCfg: utils.EmptyString,
+		},
+		UsersFilters: []string{"cgrates_redis_user"},
+	}
+
+	expected := &MigratorCfgJson{
+		Out_storDB_type:     utils.StringPointer("postgres"),
+		Out_storDB_host:     utils.StringPointer("0.0.0.0"),
+		Out_storDB_port:     utils.StringPointer("8080"),
+		Out_storDB_name:     utils.StringPointer("cgrates"),
+		Out_storDB_user:     utils.StringPointer("cgrates_user"),
+		Out_storDB_password: utils.StringPointer("CGRateS.org"),
+		Out_dataDB_encoding: utils.StringPointer("utf-16"),
+		Out_dataDB_type:     utils.StringPointer("redis"),
+		Out_dataDB_host:     utils.StringPointer("0.0.0.0"),
+		Out_dataDB_port:     utils.StringPointer("4037"),
+		Out_dataDB_name:     utils.StringPointer("cgrates_redis"),
+		Out_dataDB_user:     utils.StringPointer("cgrates_redis_user"),
+		Out_dataDB_password: utils.StringPointer("CGRateS.org_redis"),
+		Out_dataDB_opts: map[string]interface{}{
+			utils.RedisSentinelNameCfg: utils.EmptyString,
+			utils.RedisClusterCfg:      true,
+		},
+		Out_storDB_opts: map[string]interface{}{
+			utils.RedisSentinelNameCfg: utils.EmptyString,
+		},
+		Users_filters: &[]string{"cgrates_redis_user"},
+	}
+
+	rcv := diffMigratorCfgJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &MigratorCfgJson{
+		Out_dataDB_opts: map[string]interface{}{},
+		Out_storDB_opts: map[string]interface{}{},
+	}
+	rcv = diffMigratorCfgJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

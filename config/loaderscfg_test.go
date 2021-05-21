@@ -659,3 +659,104 @@ func TestEqualsLoadersJsonCfg(t *testing.T) {
 		t.Error("Loaders shouldn't match")
 	}
 }
+
+func TestDiffLoadersJsonCfg(t *testing.T) {
+	var d []*LoaderJsonCfg
+
+	v1 := LoaderSCfgs{
+		{
+			ID:      "LoaderID",
+			Enabled: false,
+			Tenant: RSRParsers{
+				{
+					Rules: "cgrates.org",
+				},
+			},
+			DryRun:         false,
+			RunDelay:       1 * time.Millisecond,
+			LockFileName:   "lockFileName",
+			CacheSConns:    []string{"*localhost"},
+			FieldSeparator: ";",
+			TpInDir:        "/tp/in/dir",
+			TpOutDir:       "/tp/out/dir",
+			Data:           nil,
+		},
+	}
+
+	v2 := LoaderSCfgs{
+		{
+			ID:      "LoaderID2",
+			Enabled: true,
+			Tenant: RSRParsers{
+				{
+					Rules: "itsyscom.com",
+				},
+			},
+			DryRun:         true,
+			RunDelay:       2 * time.Millisecond,
+			LockFileName:   "lockFileName2",
+			CacheSConns:    []string{"*birpc"},
+			FieldSeparator: ":",
+			TpInDir:        "/tp/in/dir/2",
+			TpOutDir:       "/tp/out/dir/2",
+			Data: []*LoaderDataType{
+				{
+					Type:     "*xml",
+					Filename: "file.xml",
+					Flags: utils.FlagsWithParams{
+						"FLAG_2": {
+							"PARAM_2": []string{"param2"},
+						},
+					},
+					Fields: []*FCTemplate{
+						{
+							Type: "Type2",
+							Tag:  "Tag2",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	expected := []*LoaderJsonCfg{
+		{
+			ID:              utils.StringPointer("LoaderID2"),
+			Enabled:         utils.BoolPointer(true),
+			Tenant:          utils.StringPointer("itsyscom.com"),
+			Dry_run:         utils.BoolPointer(true),
+			Run_delay:       utils.StringPointer("2ms"),
+			Lock_filename:   utils.StringPointer("lockFileName2"),
+			Caches_conns:    &[]string{"*birpc"},
+			Field_separator: utils.StringPointer(":"),
+			Tp_in_dir:       utils.StringPointer("/tp/in/dir/2"),
+			Tp_out_dir:      utils.StringPointer("/tp/out/dir/2"),
+			Data: &[]*LoaderJsonDataType{
+				{
+					Type:      utils.StringPointer("*xml"),
+					File_name: utils.StringPointer("file.xml"),
+					Flags:     &[]string{"FLAG_2:PARAM_2:param2"},
+					Fields: &[]*FcTemplateJsonCfg{
+						{
+							Type:   utils.StringPointer("Type2"),
+							Tag:    utils.StringPointer("Tag2"),
+							Layout: utils.StringPointer(""),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	rcv := diffLoadersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = nil
+	rcv = diffLoadersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

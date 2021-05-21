@@ -21,6 +21,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -330,5 +331,186 @@ func TestDispatcherHCfgClone(t *testing.T) {
 	}
 	if rcv.Hosts[utils.MetaDefault][0].ID = ""; ban.Hosts[utils.MetaDefault][0].ID != "Host1" {
 		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
+
+func TestDiffRegistrarCJsonCfg(t *testing.T) {
+	var d *RegistrarCJsonCfg
+
+	v1 := &RegistrarCCfg{
+		Enabled:         false,
+		RegistrarSConns: []string{"*localhost"},
+		Hosts: map[string][]*RemoteHost{
+			"HOST_1": {
+				{
+					ID:          "host1_ID",
+					Address:     "127.0.0.1:8080",
+					Transport:   "tcp",
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+		RefreshInterval: 2 * time.Second,
+	}
+
+	v2 := &RegistrarCCfg{
+		Enabled:         true,
+		RegistrarSConns: []string{"*birpc"},
+		Hosts: map[string][]*RemoteHost{
+			"HOST_1": {
+				{
+					ID:          "host2_ID",
+					Address:     "0.0.0.0:8080",
+					Transport:   "udp",
+					Synchronous: true,
+					TLS:         true,
+				},
+			},
+		},
+		RefreshInterval: 4 * time.Second,
+	}
+
+	expected := &RegistrarCJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Registrars_conns: &[]string{"*birpc"},
+		Hosts: map[string][]*RemoteHostJson{
+			"HOST_1": {
+				{
+					Id:          utils.StringPointer("host2_ID"),
+					Address:     utils.StringPointer("0.0.0.0:8080"),
+					Transport:   utils.StringPointer("udp"),
+					Synchronous: utils.BoolPointer(true),
+					Tls:         utils.BoolPointer(true),
+				},
+			},
+		},
+		Refresh_interval: utils.StringPointer("4s"),
+	}
+
+	rcv := diffRegistrarCJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	// v1 = v2
+	// expected = &RegistrarCJsonCfg{}
+	// rcv = diffRegistrarCJsonCfg(d, v1, v2)
+	// if !reflect.DeepEqual(rcv, expected) {
+	// 	t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	// }
+}
+
+func TestDiffRegistrarCJsonCfgs(t *testing.T) {
+	var d *RegistrarCJsonCfgs
+
+	v1 := &RegistrarCCfgs{
+		RPC: &RegistrarCCfg{
+			Enabled:         false,
+			RegistrarSConns: []string{"*localhost"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:          "host1_ID",
+						Address:     "127.0.0.1:8080",
+						Transport:   "tcp",
+						Synchronous: false,
+						TLS:         false,
+					},
+				},
+			},
+			RefreshInterval: 2 * time.Second,
+		},
+		Dispatcher: &RegistrarCCfg{
+			Enabled:         false,
+			RegistrarSConns: []string{"*localhost"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:          "host1_ID",
+						Address:     "127.0.0.1:8080",
+						Transport:   "tcp",
+						Synchronous: false,
+						TLS:         false,
+					},
+				},
+			},
+			RefreshInterval: 2 * time.Second,
+		},
+	}
+
+	v2 := &RegistrarCCfgs{
+		RPC: &RegistrarCCfg{
+			Enabled:         true,
+			RegistrarSConns: []string{"*birpc"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:          "host2_ID",
+						Address:     "0.0.0.0:8080",
+						Transport:   "udp",
+						Synchronous: true,
+						TLS:         true,
+					},
+				},
+			},
+			RefreshInterval: 4 * time.Second,
+		},
+		Dispatcher: &RegistrarCCfg{
+			Enabled:         true,
+			RegistrarSConns: []string{"*birpc"},
+			Hosts: map[string][]*RemoteHost{
+				"HOST_1": {
+					{
+						ID:          "host2_ID",
+						Address:     "0.0.0.0:8080",
+						Transport:   "udp",
+						Synchronous: true,
+						TLS:         true,
+					},
+				},
+			},
+			RefreshInterval: 4 * time.Second,
+		},
+	}
+
+	expected := &RegistrarCJsonCfgs{
+		RPC: &RegistrarCJsonCfg{
+			Enabled:          utils.BoolPointer(true),
+			Registrars_conns: &[]string{"*birpc"},
+			Hosts: map[string][]*RemoteHostJson{
+				"HOST_1": {
+					{
+						Id:          utils.StringPointer("host2_ID"),
+						Address:     utils.StringPointer("0.0.0.0:8080"),
+						Transport:   utils.StringPointer("udp"),
+						Synchronous: utils.BoolPointer(true),
+						Tls:         utils.BoolPointer(true),
+					},
+				},
+			},
+			Refresh_interval: utils.StringPointer("4s"),
+		},
+		Dispatcher: &RegistrarCJsonCfg{
+			Enabled:          utils.BoolPointer(true),
+			Registrars_conns: &[]string{"*birpc"},
+			Hosts: map[string][]*RemoteHostJson{
+				"HOST_1": {
+					{
+						Id:          utils.StringPointer("host2_ID"),
+						Address:     utils.StringPointer("0.0.0.0:8080"),
+						Transport:   utils.StringPointer("udp"),
+						Synchronous: utils.BoolPointer(true),
+						Tls:         utils.BoolPointer(true),
+					},
+				},
+			},
+			Refresh_interval: utils.StringPointer("4s"),
+		},
+	}
+
+	rcv := diffRegistrarCJsonCfgs(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }

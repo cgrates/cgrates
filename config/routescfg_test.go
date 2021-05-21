@@ -150,3 +150,58 @@ func TestRouteSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffRouteSJsonCfg(t *testing.T) {
+	var d *RouteSJsonCfg
+
+	v1 := &RouteSCfg{
+		Enabled:             false,
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index3"},
+		NestedFields:        false,
+		AttributeSConns:     []string{"*localhost"},
+		ResourceSConns:      []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		DefaultRatio:        2,
+	}
+
+	v2 := &RouteSCfg{
+		Enabled:             true,
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"*req.index11"},
+		PrefixIndexedFields: &[]string{"*req.index22"},
+		SuffixIndexedFields: &[]string{"*req.index33"},
+		NestedFields:        true,
+		AttributeSConns:     []string{"*birpc"},
+		ResourceSConns:      []string{"*birpc"},
+		StatSConns:          []string{"*birpc"},
+		DefaultRatio:        3,
+	}
+
+	expected := &RouteSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: &[]string{"*req.index11"},
+		Prefix_indexed_fields: &[]string{"*req.index22"},
+		Suffix_indexed_fields: &[]string{"*req.index33"},
+		Nested_fields:         utils.BoolPointer(true),
+		Attributes_conns:      &[]string{"*birpc"},
+		Resources_conns:       &[]string{"*birpc"},
+		Stats_conns:           &[]string{"*birpc"},
+		Default_ratio:         utils.IntPointer(3),
+	}
+
+	rcv := diffRouteSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &RouteSJsonCfg{}
+	rcv = diffRouteSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

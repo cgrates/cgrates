@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -145,5 +146,57 @@ func TestStatSCfgClone(t *testing.T) {
 	}
 	if (*rcv.SuffixIndexedFields)[0] = ""; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
 		t.Errorf("Expected clone to not modify the cloned")
+	}
+}
+
+func TestDiffStatServJsonCfg(t *testing.T) {
+	var d *StatServJsonCfg
+
+	v1 := &StatSCfg{
+		Enabled:                false,
+		IndexedSelects:         false,
+		StoreInterval:          1 * time.Second,
+		StoreUncompressedLimit: 2,
+		ThresholdSConns:        []string{"*localhost"},
+		StringIndexedFields:    &[]string{"*req.index1"},
+		PrefixIndexedFields:    &[]string{"*req.index2"},
+		SuffixIndexedFields:    &[]string{"*req.index3"},
+		NestedFields:           false,
+	}
+
+	v2 := &StatSCfg{
+		Enabled:                true,
+		IndexedSelects:         true,
+		StoreInterval:          2 * time.Second,
+		StoreUncompressedLimit: 3,
+		ThresholdSConns:        []string{"*birpc"},
+		StringIndexedFields:    &[]string{"*req.index11"},
+		PrefixIndexedFields:    &[]string{"*req.index22"},
+		SuffixIndexedFields:    &[]string{"*req.index33"},
+		NestedFields:           true,
+	}
+
+	expected := &StatServJsonCfg{
+		Enabled:                  utils.BoolPointer(true),
+		Indexed_selects:          utils.BoolPointer(true),
+		Store_interval:           utils.StringPointer("2s"),
+		Store_uncompressed_limit: utils.IntPointer(3),
+		Thresholds_conns:         &[]string{"*birpc"},
+		String_indexed_fields:    &[]string{"*req.index11"},
+		Prefix_indexed_fields:    &[]string{"*req.index22"},
+		Suffix_indexed_fields:    &[]string{"*req.index33"},
+		Nested_fields:            utils.BoolPointer(true),
+	}
+
+	rcv := diffStatServJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &StatServJsonCfg{}
+	rcv = diffStatServJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }

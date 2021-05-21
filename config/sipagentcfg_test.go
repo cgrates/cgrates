@@ -326,3 +326,55 @@ func TestSIPAgentCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffSIPAgentJsonCfg(t *testing.T) {
+	var d *SIPAgentJsonCfg
+
+	v1 := &SIPAgentCfg{
+		Enabled:             false,
+		Listen:              "localhost:8080",
+		ListenNet:           "tcp",
+		SessionSConns:       []string{"*localhost"},
+		Timezone:            "UTC",
+		RetransmissionTimer: 1 * time.Second,
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "reqID",
+			},
+		},
+	}
+
+	v2 := &SIPAgentCfg{
+		Enabled:             true,
+		Listen:              "localhost:8037",
+		ListenNet:           "udp",
+		SessionSConns:       []string{"*birpc"},
+		Timezone:            "EEST",
+		RetransmissionTimer: 2 * time.Second,
+		RequestProcessors:   []*RequestProcessor{},
+	}
+
+	expected := &SIPAgentJsonCfg{
+		Enabled:              utils.BoolPointer(true),
+		Listen:               utils.StringPointer("localhost:8037"),
+		Listen_net:           utils.StringPointer("udp"),
+		Sessions_conns:       &[]string{"*birpc"},
+		Timezone:             utils.StringPointer("EEST"),
+		Retransmission_timer: utils.StringPointer("2s"),
+		Request_processors:   &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv := diffSIPAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &SIPAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+	rcv = diffSIPAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
