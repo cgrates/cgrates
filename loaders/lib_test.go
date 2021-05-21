@@ -933,7 +933,6 @@ cgrates.org,MOCK_RELOAD_3
 	}
 }
 
-//mocking in order to fail RemoveThreshold method for coverage
 type dataDBMockError struct {
 	*engine.DataDBMock
 }
@@ -972,27 +971,6 @@ func (dbM *dataDBMockError) SetStatQueueProfileDrv(ctx *context.Context, sq *eng
 	return nil
 }
 
-//For Resources
-func (dbM *dataDBMockError) GetResourceProfileDrv(*context.Context, string, string) (*engine.ResourceProfile, error) {
-	return nil, nil
-}
-
-func (dbM *dataDBMockError) RemoveResourceProfileDrv(*context.Context, string, string) error {
-	return nil
-}
-
-func (dbM *dataDBMockError) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
-	return utils.ErrNoDatabaseConn
-}
-
 func (dbM *dataDBMockError) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
 	return nil, nil
-}
-
-func (dbM *dataDBMockError) SetResourceProfileDrv(*context.Context, *engine.ResourceProfile) error {
-	return nil
-}
-
-func (dbM *dataDBMockError) SetResourceDrv(*context.Context, *engine.Resource) error {
-	return utils.ErrNoDatabaseConn
 }

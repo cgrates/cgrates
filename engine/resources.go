@@ -357,7 +357,7 @@ func (rS *ResourceService) StoreResource(ctx *context.Context, r *Resource) (err
 	if r.dirty == nil || !*r.dirty {
 		return
 	}
-	if err = rS.dm.SetResource(ctx, r, nil, 0, true); err != nil {
+	if err = rS.dm.SetResource(ctx, r); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.ID, err.Error()))
