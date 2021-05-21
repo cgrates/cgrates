@@ -1413,16 +1413,6 @@ func TestLoadDispatcherHosts(t *testing.T) {
 	}
 }
 
-func TestLoadResource(t *testing.T) {
-	eResources := []*utils.TenantID{
-		{Tenant: "cgrates.org", ID: "ResGroup21"},
-		{Tenant: "cgrates.org", ID: "ResGroup22"},
-	}
-	if len(csvr.resources) != len(eResources) {
-		t.Errorf("Failed to load resources expecting 2 but received : %+v", len(csvr.resources))
-	}
-}
-
 func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
 		{Tenant: "cgrates.org", ID: "TestStats"},
