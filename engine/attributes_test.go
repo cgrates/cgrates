@@ -527,7 +527,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 
 }
 
-func TestAttributesattributeProfileForEvent(t *testing.T) {
+func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 	tmp := Cache
 	defer func() {
 		Cache = tmp
@@ -542,6 +542,7 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 		dm:      dm,
 		filterS: NewFilterS(cfg, nil, dm),
 	}
+	alS.cgrcfg.AttributeSCfg().AnyContext = false
 
 	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
 	if err != nil {
@@ -593,7 +594,6 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 		},
 	}
 	lastID := ""
-	alS.cgrcfg.AttributeSCfg().AnyContext = false
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
 		lastID); err != nil {
@@ -610,17 +610,150 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
+}
 
-	Cache.Clear(nil)
-	ap1.FilterIDs = []string{"*string:~*req.Account:1001"}
+func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+	alS.cgrcfg.AttributeSCfg().AnyContext = false
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
 	err = alS.dm.SetAttributeProfile(ap1, true)
 	if err != nil {
 		t.Error(err)
+	}
+
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
 	}
 	err = alS.dm.SetAttributeProfile(ap2, true)
 	if err != nil {
 		t.Error(err)
 	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, ap1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
+	}
+}
+
+func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
 		lastID); err != nil {
@@ -629,12 +762,7 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
 	}
 
-	Cache.Clear(nil)
-	alS.cgrcfg.AttributeSCfg().AnyContext = true
-	err = alS.dm.SetAttributeProfile(ap1, true)
-	if err != nil {
-		t.Error(err)
-	}
+	ap2.Weight = 30
 	err = alS.dm.SetAttributeProfile(ap2, true)
 	if err != nil {
 		t.Error(err)
@@ -643,9 +771,77 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
 		lastID); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	} else if !reflect.DeepEqual(rcv, ap1) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap1, rcv)
+	} else if !reflect.DeepEqual(rcv, ap2) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap2, rcv)
 	}
+}
+
+func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
 
 	dbm := &DataDBMock{
 		GetKeysForPrefixF: func(s string) ([]string, error) {
@@ -661,8 +857,149 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
+}
 
-	alS.cgrcfg.AttributeSCfg().IndexedSelects = true
+func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
+
+	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
+		lastID); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap1 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ap2 := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaAny},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 10,
+	}
+	err = alS.dm.SetAttributeProfile(ap2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
 	alS.dm = nil
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_3"}, nil, evNm,
@@ -671,44 +1008,156 @@ func TestAttributesattributeProfileForEvent(t *testing.T) {
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
+}
+
+func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
 
 	apNil := &AttributeProfile{}
-	tnt = ""
-	alS.dm = dm
 	err = alS.dm.SetAttributeProfile(apNil, true)
 	if err != nil {
 		t.Error(err)
 	}
+
+	tnt := ""
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
+
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_3"}, nil, evNm,
 		lastID); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
+}
 
-	Cache.Clear(nil)
-	ap1.ActivationInterval = &utils.ActivationInterval{
+func TestAttributesattributeProfileForEventNotActive(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
+	if err != nil {
+		t.Error(err)
+	}
+	ap := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
+
+	ap.ActivationInterval = &utils.ActivationInterval{
 		ExpiryTime: time.Date(2021, 5, 14, 15, 0, 0, 0, time.UTC),
 	}
-	err = alS.dm.SetAttributeProfile(ap1, true)
+	err = alS.dm.SetAttributeProfile(ap, true)
 	if err != nil {
 		t.Error(err)
 	}
 	actTime := utils.TimePointer(time.Date(2021, 5, 14, 16, 0, 0, 0, time.UTC))
-	tnt = "cgrates.org"
+	tnt := "cgrates.org"
+
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, actTime, evNm,
 		lastID); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
+}
 
-	Cache.Clear(nil)
-	ap1.ActivationInterval = nil
-	err = alS.dm.SetAttributeProfile(ap1, true)
+func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	alS := &AttributeService{
+		cgrcfg:  cfg,
+		dm:      dm,
+		filterS: NewFilterS(cfg, nil, dm),
+	}
+
+	postpaid, err := config.NewRSRParsers(utils.MetaPostpaid, utils.InfieldSep)
 	if err != nil {
 		t.Error(err)
 	}
+	ap := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Contexts:  []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  "*req.RequestType",
+				Type:  utils.MetaConstant,
+				Value: postpaid,
+			},
+		},
+		Weight: 20,
+	}
+	err = alS.dm.SetAttributeProfile(ap, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ctx := utils.StringPointer(utils.MetaSessionS)
+	evNm := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			utils.AccountField: "1001",
+		},
+	}
+	lastID := ""
+
 	evNm = utils.MapStorage{
 		utils.MetaReq: 1,
 	}
