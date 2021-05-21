@@ -30,31 +30,6 @@ import (
 
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
-	//Thresholds
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdPrefix)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdPrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating thresholds", id)
-		}
-		ths, err := m.dmIN.DataManager().GetThreshold(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if ths == nil || m.dryRun {
-			continue
-		}
-		if err := m.dmOut.DataManager().SetThreshold(context.TODO(), ths, 0, true); err != nil {
-			return err
-		}
-		if err := m.dmIN.DataManager().RemoveThreshold(context.TODO(), tntID[0], tntID[1], utils.NonTransactional); err != nil {
-			return err
-		}
-		m.stats[utils.Thresholds]++
-	}
 	//ThresholdProfiles
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
@@ -65,19 +40,31 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating threshold profiles", id)
 		}
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		thps, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
-		if ths == nil || m.dryRun {
+		ths, err := m.dmIN.DataManager().GetThreshold(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if thps == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), ths, true); err != nil {
+		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), thps, true); err != nil {
+			return err
+		}
+		// update the threshold in the new DB
+		if ths == nil {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetThreshold(context.TODO(), ths); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveThresholdProfile(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
+		m.stats[utils.Thresholds]++
 	}
 	return
 }
@@ -167,14 +154,15 @@ func (m *Migrator) migrateThresholds() (err error) {
 				if err = m.dmOut.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
 					return
 				}
-				if err = m.dmOut.DataManager().SetThreshold(context.TODO(), th, 0, true); err != nil {
-					return
-				}
 			}
 			if err = m.dmOut.DataManager().SetThresholdProfile(context.TODO(), v4, true); err != nil {
 				return
 			}
-
+			if migratedFrom == 1 { // do it after SetThresholdProfile to overwrite the created threshold
+				if err = m.dmOut.DataManager().SetThreshold(context.TODO(), th); err != nil {
+					return
+				}
+			}
 		}
 		m.stats[utils.Thresholds]++
 	}

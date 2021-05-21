@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -698,14 +699,14 @@ func TestERsProcessEvent10(t *testing.T) {
 }
 
 type testMockClients struct {
-	calls map[string]func(args interface{}, reply interface{}) error
+	calls map[string]func(ctx *context.Context, args, reply interface{}) error
 }
 
-func (sT *testMockClients) Call(method string, arg interface{}, rply interface{}) error {
+func (sT *testMockClients) Call(ctx *context.Context, method string, arg interface{}, rply interface{}) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
-		return call(arg, rply)
+		return call(ctx, arg, rply)
 	}
 }
 
@@ -720,8 +721,8 @@ func TestERsProcessEvent11(t *testing.T) {
 	cfg.ERsCfg().SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
 	fltrS := &engine.FilterS{}
 	testMockClient := &testMockClients{
-		calls: map[string]func(args interface{}, reply interface{}) error{
-			utils.SessionSv1ProcessMessage: func(args interface{}, reply interface{}) error {
+		calls: map[string]func(ctx *context.Context, args, reply interface{}) error{
+			utils.SessionSv1ProcessMessage: func(ctx *context.Context, args, reply interface{}) error {
 				return errors.New("RALS_ERROR")
 			},
 		},

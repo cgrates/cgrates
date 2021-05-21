@@ -204,7 +204,7 @@ func (tS *ThresholdService) StoreThreshold(ctx *context.Context, t *Threshold) (
 	if t.dirty == nil || !*t.dirty {
 		return
 	}
-	if err = tS.dm.SetThreshold(ctx, t, 0, true); err != nil {
+	if err = tS.dm.SetThreshold(ctx, t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
 				t.Tenant, t.ID, err.Error()))

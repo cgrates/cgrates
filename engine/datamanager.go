@@ -621,27 +621,9 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetThreshold(ctx *context.Context, th *Threshold, snooze time.Duration, simpleSet bool) (err error) {
+func (dm *DataManager) SetThreshold(ctx *context.Context, th *Threshold) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
-	}
-	if !simpleSet {
-		tnt := th.Tenant // save the tenant
-		id := th.ID      // save the ID from the initial Threshold
-		th, err = dm.GetThreshold(ctx, tnt, id, true, false, utils.NonTransactional)
-		if err != nil && err != utils.ErrNotFound {
-			return
-		}
-		if err == utils.ErrNotFound {
-			th = &Threshold{Tenant: tnt, ID: id, Hits: 0}
-		} else {
-			if th.tPrfl == nil {
-				if th.tPrfl, err = dm.GetThresholdProfile(ctx, th.Tenant, th.ID, true, false, utils.NonTransactional); err != nil {
-					return
-				}
-			}
-			th.Snooze = th.Snooze.Add(-th.tPrfl.MinSleep).Add(snooze)
-		}
 	}
 	if err = dm.DataDB().SetThresholdDrv(ctx, th); err != nil {
 		return
@@ -758,14 +740,36 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
-		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		if err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdProfilePrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThresholdProfile,
 			&ThresholdProfileWithAPIOpts{
 				ThresholdProfile: th,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
+			return
+		}
+	}
+
+	if oldTh == nil || // create the threshold if it didn't exit before
+		oldTh.MaxHits != th.MaxHits ||
+		oldTh.MinHits != th.MinHits ||
+		oldTh.MinSleep != th.MinSleep { // reset the threshold if the profile changed this fields
+		err = dm.SetThreshold(ctx, &Threshold{
+			Tenant: th.Tenant,
+			ID:     th.ID,
+			Hits:   0,
+			tPrfl:  th,
+		})
+	} else if _, errTh := dm.GetThreshold(ctx, th.Tenant, th.ID, // do not try to get the threshold if the configuration changed
+		true, false, utils.NonTransactional); errTh == utils.ErrNotFound { // the threshold does not exist
+		err = dm.SetThreshold(ctx, &Threshold{
+			Tenant: th.Tenant,
+			ID:     th.ID,
+			Hits:   0,
+			tPrfl:  th,
+		})
 	}
 	return
 }
@@ -804,7 +808,7 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return
+	return dm.RemoveThreshold(ctx, tenant, id, transactionID) // remove the thrshold
 }
 
 func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,

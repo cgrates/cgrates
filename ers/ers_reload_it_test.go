@@ -141,7 +141,7 @@ func testReloadReloadConfigFromPath(t *testing.T) {
 func testReloadVerifyFirstReload(t *testing.T) {
 	var reply map[string]interface{}
 	if err := reloadRPC.Call(utils.ConfigSv1GetConfig, &config.SectionWithAPIOpts{
-		Section: config.ERsJSON,
+		Sections: []string{config.ERsJSON},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if mp, can := reply[config.ERsJSON].(map[string]interface{}); !can {

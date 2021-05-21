@@ -168,7 +168,7 @@ func TestThresholdsCache(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(context.TODO(), th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(context.TODO(), th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -341,7 +341,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(context.TODO(), th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(context.TODO(), th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -552,7 +552,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -753,7 +753,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -975,7 +975,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -1020,7 +1020,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	} else if !reflect.DeepEqual(thPrf, temptTh) {
 		t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
 	}
-	if err = dmTH.SetThreshold(th, 0, true); err != nil {
+	if err = dmTH.SetThreshold(th); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if temptTh, err := dmTH.GetThreshold(th.Tenant,

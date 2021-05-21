@@ -29,6 +29,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -131,13 +132,13 @@ cgrates.org,NewRes1
 	var reply string
 	expected := "ANOTHER_LOADER_RUNNING"
 	//cannot load when there is another loader running
-	if err := ldrs.V1Load(&ArgsProcessFolder{
+	if err := ldrs.V1Load(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1LoadResource",
 		ForceLock: false}, &reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", expected, utils.EmptyString, err, reply)
 	}
 
-	if err := ldrs.V1Load(&ArgsProcessFolder{
+	if err := ldrs.V1Load(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1LoadResource",
 		ForceLock: true}, &reply); err != nil && reply != utils.OK {
 		t.Error(err)
@@ -150,7 +151,7 @@ cgrates.org,NewRes1
 		ThresholdIDs: make([]string, 0),
 	}
 
-	if rcv, err := ldrs.ldrs["testV1LoadResource"].dm.GetResourceProfile(expRes.Tenant, expRes.ID,
+	if rcv, err := ldrs.ldrs["testV1LoadResource"].dm.GetResourceProfile(context.TODO(), expRes.Tenant, expRes.ID,
 		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expRes) {
@@ -192,7 +193,7 @@ cgrates.org,NewRes1
 
 	var reply string
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
-	if err := ldrs.V1Load(&ArgsProcessFolder{
+	if err := ldrs.V1Load(context.TODO(), &ArgsProcessFolder{
 		LoaderID: utils.EmptyString}, &reply); err == nil && reply != utils.EmptyString && err.Error() != utils.EmptyString {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", utils.EmptyString, utils.EmptyString, err, reply)
 	}
@@ -229,7 +230,7 @@ func testV1LoadUnableToDeleteFile(t *testing.T) {
 	var reply string
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
 	expected := "SERVER_ERROR: stat /\x00/Resources.csv: invalid argument"
-	if err := ldrs.V1Load(&ArgsProcessFolder{
+	if err := ldrs.V1Load(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1LoadUnableToDeleteFile",
 		ForceLock: true}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", utils.EmptyString, utils.EmptyString, err, reply)
@@ -298,7 +299,7 @@ NOT_UINT
 	var reply string
 	expected := "SERVER_ERROR: open testV1LoadProcessFolderError/not_a_file: no such file or directory"
 	//try to load by changing the caching method
-	if err := ldrs.V1Load(&ArgsProcessFolder{
+	if err := ldrs.V1Load(context.TODO(), &ArgsProcessFolder{
 		LoaderID:    "testV1LoadResource",
 		ForceLock:   true,
 		Caching:     utils.StringPointer("not_a_chaching_method"),
@@ -376,28 +377,28 @@ cgrates.org,NewRes1
 		ID:     "NewRes1",
 	}
 	//To remove a resource, we need to set it first
-	if err := ldrs.ldrs["testV1RemoveResource"].dm.SetResourceProfile(expRes, true); err != nil {
+	if err := ldrs.ldrs["testV1RemoveResource"].dm.SetResourceProfile(context.TODO(), expRes, true); err != nil {
 		t.Error(expRes)
 	}
 
 	var reply string
 	expected := "ANOTHER_LOADER_RUNNING"
 	//cannot load when there is another loader running
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
+	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1RemoveResource",
 		ForceLock: false}, &reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", expected, utils.EmptyString, err, reply)
 	}
 
 	ldrs.ldrs["testV1RemoveResource"].lockFilename = "invalidFile"
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
+	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1RemoveResource",
 		ForceLock: true}, &reply); err != nil && reply != utils.OK {
 		t.Error(err)
 	}
 
 	//nothing to get from dataBase
-	if _, err := ldrs.ldrs["testV1RemoveResource"].dm.GetResourceProfile(expRes.Tenant, expRes.ID,
+	if _, err := ldrs.ldrs["testV1RemoveResource"].dm.GetResourceProfile(context.TODO(), expRes.Tenant, expRes.ID,
 		true, true, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -439,7 +440,7 @@ cgrates.org,NewRes1
 	var reply string
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
 	expected := "UNKNOWN_LOADER: *default"
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
+	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID: utils.EmptyString}, &reply); err == nil || reply != utils.EmptyString || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", expected, utils.EmptyString, err, reply)
 	}
@@ -476,7 +477,7 @@ func testV1RemoveUnableToDeleteFile(t *testing.T) {
 	var reply string
 	ldrs := NewLoaderService(dm, cfgLdr, "UTC", nil, nil)
 	expected := "SERVER_ERROR: stat /\x00/Resources.csv: invalid argument"
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
+	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID:  "testV1RemoveUnableToDeleteFile",
 		ForceLock: true}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v and %+v \n, received %+v and %+v", utils.EmptyString, utils.EmptyString, err, reply)
@@ -523,7 +524,7 @@ func testV1LoadAndRemoveProcessRemoveFolderError(t *testing.T) {
 	var reply string
 	expected := "SERVER_ERROR: remove /tmp/testV1RemoveProcessFolderError: directory not empty"
 	//try to load by changing the caching method, but there is not a lockFileName
-	if err := ldrs.V1Load(&ArgsProcessFolder{
+	if err := ldrs.V1Load(context.TODO(), &ArgsProcessFolder{
 		LoaderID:    "testV1RemoveProcessFolderError",
 		ForceLock:   true,
 		Caching:     utils.StringPointer("not_a_chaching_method"),
@@ -532,7 +533,7 @@ func testV1LoadAndRemoveProcessRemoveFolderError(t *testing.T) {
 	}
 
 	//try to remove by changing the caching method
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
+	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID:    "testV1RemoveProcessFolderError",
 		ForceLock:   true,
 		Caching:     utils.StringPointer("not_a_chaching_method"),
@@ -581,7 +582,7 @@ func testV1RemoveProcessFolderError(t *testing.T) {
 	var reply string
 	expected := "SERVER_ERROR: open testV1RemoveProcessFolderError/not_a_file2: no such file or directory"
 	//try to load by changing the caching method
-	if err := ldrs.V1Remove(&ArgsProcessFolder{
+	if err := ldrs.V1Remove(context.TODO(), &ArgsProcessFolder{
 		LoaderID:    "testV1RemoveProcessFolderError",
 		ForceLock:   true,
 		Caching:     utils.StringPointer("not_a_chaching_method"),

@@ -137,15 +137,15 @@ func testOnStorITResourceProfile(t *testing.T) {
 		ThresholdIDs: []string{"TEST_ACTIONS"},
 		UsageTTL:     3 * time.Nanosecond,
 	}
-	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
+	if _, rcvErr := onStor.GetResourceProfile(context.TODO(), rL.Tenant, rL.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResourceProfile(rL, false); err != nil {
+	if err := onStor.SetResourceProfile(context.TODO(), rL, false); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
+	if rcv, err := onStor.GetResourceProfile(context.TODO(), rL.Tenant, rL.ID,
 		false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
@@ -159,24 +159,24 @@ func testOnStorITResourceProfile(t *testing.T) {
 	}
 	//update
 	rL.ThresholdIDs = []string{"TH1", "TH2"}
-	if err := onStor.SetResourceProfile(rL, false); err != nil {
+	if err := onStor.SetResourceProfile(context.TODO(), rL, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
+	if rcv, err := onStor.GetResourceProfile(context.TODO(), rL.Tenant, rL.ID,
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
 	}
 
-	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID,
+	if err := onStor.RemoveResourceProfile(context.TODO(), rL.Tenant, rL.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
+	if _, rcvErr := onStor.GetResourceProfile(context.TODO(), rL.Tenant, rL.ID,
 		false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -195,15 +195,15 @@ func testOnStorITResource(t *testing.T) {
 		},
 		TTLIdx: []string{"RU1"},
 	}
-	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
+	if _, rcvErr := onStor.GetResource(context.TODO(), res.Tenant, res.ID,
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetResource(res, nil, 0, true); err != nil {
+	if err := onStor.SetResource(context.TODO(), res, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
+	if rcv, err := onStor.GetResource(context.TODO(), "cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
@@ -217,23 +217,23 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//update
 	res.TTLIdx = []string{"RU1", "RU2"}
-	if err := onStor.SetResource(res, nil, 0, true); err != nil {
+	if err := onStor.SetResource(context.TODO(), res, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
+	if rcv, err := onStor.GetResource(context.TODO(), "cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
 	}
 
-	if err := onStor.RemoveResource(res.Tenant, res.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResource(context.TODO(), res.Tenant, res.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
+	if _, rcvErr := onStor.GetResource(context.TODO(), res.Tenant, res.ID,
 		false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -329,15 +329,15 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		Stored:       true,
 		ThresholdIDs: []string{"Thresh1"},
 	}
-	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID,
+	if _, rcvErr := onStor.GetStatQueueProfile(context.TODO(), sq.Tenant, sq.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
+	if err := onStor.SetStatQueueProfile(context.TODO(), sq, false); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
+	if rcv, err := onStor.GetStatQueueProfile(context.TODO(), sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
@@ -351,23 +351,23 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	}
 	//update
 	sq.ThresholdIDs = []string{"TH1", "TH2"}
-	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
+	if err := onStor.SetStatQueueProfile(context.TODO(), sq, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
+	if rcv, err := onStor.GetStatQueueProfile(context.TODO(), sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
-	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID,
+	if err := onStor.RemoveStatQueueProfile(context.TODO(), sq.Tenant, sq.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant,
+	if _, rcvErr := onStor.GetStatQueueProfile(context.TODO(), sq.Tenant,
 		sq.ID, true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -395,15 +395,15 @@ func testOnStorITStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.GetStatQueue(sq.Tenant, sq.ID,
+	if _, rcvErr := onStor.GetStatQueue(context.TODO(), sq.Tenant, sq.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err := onStor.SetStatQueue(context.TODO(), sq, nil, 0, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetStatQueue(sq.Tenant,
+	if rcv, err := onStor.GetStatQueue(context.TODO(), sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
@@ -427,23 +427,23 @@ func testOnStorITStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err := onStor.SetStatQueue(context.TODO(), sq, nil, 0, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetStatQueue(sq.Tenant,
+	if rcv, err := onStor.GetStatQueue(context.TODO(), sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
-	if err := onStor.RemoveStatQueue(sq.Tenant, sq.ID,
+	if err := onStor.RemoveStatQueue(context.TODO(), sq.Tenant, sq.ID,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetStatQueue(sq.Tenant,
+	if _, rcvErr := onStor.GetStatQueue(context.TODO(), sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -474,15 +474,15 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if err := onStor.SetFilter(context.TODO(), fp, true); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant, th.ID,
+	if _, rcvErr := onStor.GetThresholdProfile(context.TODO(), th.Tenant, th.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
+	if err := onStor.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
+	if rcv, err := onStor.GetThresholdProfile(context.TODO(), th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
@@ -496,23 +496,23 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	}
 	//update
 	th.ActionIDs = []string{"Action1", "Action2"}
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
+	if err := onStor.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
+	if rcv, err := onStor.GetThresholdProfile(context.TODO(), th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
-	if err := onStor.RemoveThresholdProfile(th.Tenant,
+	if err := onStor.RemoveThresholdProfile(context.TODO(), th.Tenant,
 		th.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant,
+	if _, rcvErr := onStor.GetThresholdProfile(context.TODO(), th.Tenant,
 		th.ID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -525,15 +525,15 @@ func testOnStorITThreshold(t *testing.T) {
 		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC),
 		Hits:   10,
 	}
-	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1",
+	if _, rcvErr := onStor.GetThreshold(context.TODO(), "cgrates.org", "TH1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetThreshold(th, 0, true); err != nil {
+	if err := onStor.SetThreshold(context.TODO(), th); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
+	if rcv, err := onStor.GetThreshold(context.TODO(), "cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(th, rcv)) {
@@ -547,22 +547,22 @@ func testOnStorITThreshold(t *testing.T) {
 	}
 	//update
 	th.Hits = 20
-	if err := onStor.SetThreshold(th, 0, true); err != nil {
+	if err := onStor.SetThreshold(context.TODO(), th); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
+	if rcv, err := onStor.GetThreshold(context.TODO(), "cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(th, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
-	if err := onStor.RemoveThreshold(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveThreshold(context.TODO(), th.Tenant, th.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetThreshold(th.Tenant, th.ID,
+	if _, rcvErr := onStor.GetThreshold(context.TODO(), th.Tenant, th.ID,
 		false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}

@@ -938,34 +938,9 @@ type dataDBMockError struct {
 	*engine.DataDBMock
 }
 
-//For Threshold
-func (dbM *dataDBMockError) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return
-}
-
 func (dbM *dataDBMockError) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	return
-}
-
-func (dbM *dataDBMockError) RemoveThresholdDrv(*context.Context, string, string) error {
-	return utils.ErrNoDatabaseConn
-}
-
-func (dbM *dataDBMockError) GetThresholdProfileDrv(ctx *context.Context, tenant string, ID string) (tp *engine.ThresholdProfile, err error) {
-	expThresholdPrf := &engine.ThresholdProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_THRESHOLDS_1",
-	}
-	return expThresholdPrf, nil
-}
-
-func (dbM *dataDBMockError) SetThresholdProfileDrv(ctx *context.Context, tp *engine.ThresholdProfile) (err error) {
-	return
-}
-
-func (dbM *dataDBMockError) GetThresholdDrv(*context.Context, string, string) (*engine.Threshold, error) {
-	return nil, utils.ErrNoDatabaseConn
 }
 
 func (dbM *dataDBMockError) HasDataDrv(*context.Context, string, string, string) (bool, error) {

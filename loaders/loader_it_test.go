@@ -468,7 +468,7 @@ cgrates.org,SET_ACTPROFILE_3
 			},
 		},
 	}
-	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaStore, true); err != nil {
+	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err != nil {
 		t.Error(err)
 	}
 	expACtPrf := &engine.ActionProfile{
@@ -501,7 +501,7 @@ cgrates.org,SET_ACTPROFILE_3
 		},
 	}
 	expected := "UNSUPPORTED_SERVICE_METHOD"
-	if err := ldr.ProcessFolder(utils.MetaReload, utils.MetaStore, true); err == nil || err.Error() != expected {
+	if err := ldr.ProcessFolder(context.TODO(), utils.MetaReload, utils.MetaStore, true); err == nil || err.Error() != expected {
 		t.Error(err)
 	}
 
@@ -527,12 +527,12 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 		},
 	}
 	expectedErr := "open /tmp/testLoadFromFilesCsvActionProfileOpenError/ActionProfiles.csv: not a directory"
-	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
+	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	//if stopOnError is on true, the error is avoided,but instead will get a logger.warning message
-	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaStore, false); err != nil {
+	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, false); err != nil {
 		t.Error(err)
 	}
 }
@@ -604,7 +604,7 @@ cgrates.org,SET_ACTPROFILE_3
 	if err := ldr.dm.SetActionProfile(context.TODO(), expACtPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaRemove, true); err != nil {
+	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaRemove, true); err != nil {
 		t.Error(err)
 	}
 	//nothing to get from database
@@ -630,7 +630,7 @@ cgrates.org,SET_ACTPROFILE_3
 	if err := ldr.dm.SetActionProfile(context.TODO(), expACtPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := ldr.ProcessFolder(utils.MetaReload, utils.MetaRemove, true); err != utils.ErrNotFound {
+	if err := ldr.ProcessFolder(context.TODO(), utils.MetaReload, utils.MetaRemove, true); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -651,7 +651,7 @@ func testLoadFromFilesCsvActionProfileLockFolderError(t *testing.T) {
 		},
 	}
 	expectedErr := "open : no such file or directory"
-	if err := ldr.ProcessFolder(utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
+	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -808,13 +808,13 @@ cgrates.org,NewRes1
 	}
 
 	//get ResourceProfile and compare
-	if rcv, err := ldr.dm.GetResourceProfile(expRes.Tenant, expRes.ID, true, true, utils.NonTransactional); err != nil {
+	if rcv, err := ldr.dm.GetResourceProfile(context.TODO(), expRes.Tenant, expRes.ID, true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expRes) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRes), utils.ToJSON(rcv))
 	}
 
-	if err := ldr.dm.RemoveResourceProfile(expRes.Tenant, expRes.ID, utils.NonTransactional, true); err != nil {
+	if err := ldr.dm.RemoveResourceProfile(context.TODO(), expRes.Tenant, expRes.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 

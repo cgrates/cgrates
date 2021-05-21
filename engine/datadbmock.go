@@ -38,6 +38,11 @@ type DataDBMock struct {
 	GetResourceProfileDrvF     func(*context.Context, string, string) (*ResourceProfile, error)
 	SetResourceProfileDrvF     func(*context.Context, *ResourceProfile) error
 	RemoveResourceProfileDrvF  func(*context.Context, string, string) error
+	GetChargerProfileDrvF      func(*context.Context, string, string) (*ChargerProfile, error)
+	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
+	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
+	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
+	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*Threshold, error)
 }
 
 //Storage methods
@@ -167,19 +172,31 @@ func (dbM *DataDBMock) RemStatQueueDrv(ctx *context.Context, tenant, id string) 
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdProfileDrv(ctx *context.Context, tenant string, ID string) (tp *ThresholdProfile, err error) {
+func (dbM *DataDBMock) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
+	if dbM.GetThresholdProfileDrvF != nil {
+		return dbM.GetThresholdProfileDrvF(ctx, tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
+	if dbM.SetThresholdProfileDrvF != nil {
+		return dbM.SetThresholdProfileDrvF(ctx, tp)
+	}
 	return utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	if dbM.RemThresholdProfileDrvF != nil {
+		return dbM.RemThresholdProfileDrvF(ctx, tenant, id)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdDrv(*context.Context, string, string) (*Threshold, error) {
+func (dbM *DataDBMock) GetThresholdDrv(ctx *context.Context, tenant, id string) (*Threshold, error) {
+	if dbM.GetThresholdDrvF != nil {
+		return dbM.GetThresholdDrvF(ctx, tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 

@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -111,19 +112,19 @@ func testDMitCRUDStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(context.TODO(), sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if err := dm2.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err := dm2.SetStatQueue(context.TODO(), sq, nil, 0, nil, 0, true); err != nil {
 		t.Error(err)
 	}
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, true, true, utils.EmptyString); err != nil {
+	if rcv, err := dm2.GetStatQueue(context.TODO(), sq.Tenant, sq.ID, true, true, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("expecting: %v, received: %v", sq, rcv)
@@ -131,14 +132,14 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != true {
 		t.Error("should be in cache")
 	}
-	if err := dm2.RemoveStatQueue(sq.Tenant, sq.ID, utils.EmptyString); err != nil {
+	if err := dm2.RemoveStatQueue(context.TODO(), sq.Tenant, sq.ID, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(context.TODO(), sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
