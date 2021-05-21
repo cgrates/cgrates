@@ -287,40 +287,40 @@ func testStsITFlush(t *testing.T) {
 // 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
 // 		}
 
-// 	case utils.Move:
-// 		if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
-// 			t.Error("Error when setting Stats ", err.Error())
-// 		}
-// 		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
-// 			t.Error("Error when setting Stats ", err.Error())
-// 		}
-// 		if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {
-// 			t.Error("Error when setting Filter ", err.Error())
-// 		}
-// 		currentVersion := engine.CurrentDataDBVersions()
-// 		err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
-// 		if err != nil {
-// 			t.Error("Error when setting version for stats ", err.Error())
-// 		}
-// 		err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
-// 		if err != nil {
-// 			t.Error("Error when migrating Stats ", err.Error())
-// 		}
-// 		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
-// 		if err != nil {
-// 			t.Error("Error when getting Stats ", err.Error())
-// 		}
-// 		result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
-// 		if err != nil {
-// 			t.Error("Error when getting Stats ", err.Error())
-// 		}
-// 		if !reflect.DeepEqual(sqp, result) {
-// 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
-// 		}
-// 		if !reflect.DeepEqual(sq.ID, result1.ID) {
-// 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result1.ID)
-// 		}
+// case utils.Move:
+// 	if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
+// 		t.Error("Error when setting Stats ", err.Error())
 // 	}
+// 	if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq); err != nil {
+// 		t.Error("Error when setting Stats ", err.Error())
+// 	}
+// 	if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {
+// 		t.Error("Error when setting Filter ", err.Error())
+// 	}
+// 	currentVersion := engine.CurrentDataDBVersions()
+// 	err := stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+// 	if err != nil {
+// 		t.Error("Error when setting version for stats ", err.Error())
+// 	}
+// 	err, _ = stsMigrator.Migrate([]string{utils.MetaStats})
+// 	if err != nil {
+// 		t.Error("Error when migrating Stats ", err.Error())
+// 	}
+// 	result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
+// 	if err != nil {
+// 		t.Error("Error when getting Stats ", err.Error())
+// 	}
+// 	result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
+// 	if err != nil {
+// 		t.Error("Error when getting Stats ", err.Error())
+// 	}
+// 	if !reflect.DeepEqual(sqp, result) {
+// 		t.Errorf("Expecting: %+v, received: %+v", sqp, result)
+// 	}
+// 	if !reflect.DeepEqual(sq.ID, result1.ID) {
+// 		t.Errorf("Expecting: %+v, received: %+v", sq.ID, result1.ID)
+// 	}
+// }
 
 // }
 
@@ -430,7 +430,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 			MetricID: "*acc",
 		},
 	}
-	if statQueueProfile, err := stsMigrator.dmOut.DataManager().GetStatQueueProfile("cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
+	if statQueueProfile, err := stsMigrator.dmOut.DataManager().GetStatQueueProfile(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if statQueueProfile.ThresholdIDs[0] != "Test" {
 		t.Errorf("Expecting: 'Test', received: %+v", statQueueProfile.ThresholdIDs[0])
@@ -456,7 +456,7 @@ func testStsITMigrateFromv1(t *testing.T) {
 
 	//from V2 to V3
 	var statQueue *engine.StatQueue
-	if statQueue, err = stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
+	if statQueue, err = stsMigrator.dmOut.DataManager().GetStatQueue(context.TODO(), "cgrates.org", "test", false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if statQueue.ID != "test" {
 		t.Errorf("Expecting: 'test', received: %+v", statQueue.ID)

@@ -18,7 +18,6 @@ package engine
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/baningo"
 	"github.com/cgrates/birpc/context"
@@ -274,171 +273,6 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 				return
 			}
 		}
-	}
-	return
-}
-
-// GetStatQueue retrieves a StatQueue from dataDB
-// handles caching and deserialization of metrics
-func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
-	cacheRead, cacheWrite bool, transactionID string) (sq *StatQueue, err error) {
-	tntID := utils.ConcatenatedKey(tenant, id)
-	if cacheRead {
-		if x, ok := Cache.Get(utils.CacheStatQueues, tntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*StatQueue), nil
-		}
-	}
-	if dm == nil {
-		err = utils.ErrNoDatabaseConn
-		return
-	}
-	sq, err = dm.dataDB.GetStatQueueDrv(ctx, tenant, id)
-	if err != nil {
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetStatQueue,
-				&utils.TenantIDWithAPIOpts{
-					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-							config.CgrConfig().GeneralCfg().NodeID)),
-				}, &sq); err == nil {
-				var ssq *StoredStatQueue
-				if dm.dataDB.GetStorageType() != utils.MetaInternal {
-					// in case of internal we don't marshal
-					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
-						return nil, err
-					}
-				}
-				err = dm.dataDB.SetStatQueueDrv(ctx, ssq, sq)
-			}
-		}
-		if err != nil {
-			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return nil, errCh
-				}
-
-			}
-			return nil, err
-		}
-	}
-	if cacheWrite {
-		if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
-		}
-	}
-	return
-}
-
-// SetStatQueue converts to StoredStatQueue and stores the result in dataDB
-func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *StatQueue, metrics []*MetricWithFilters,
-	minItems int, ttl *time.Duration, queueLength int, simpleSet bool) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if !simpleSet {
-		tnt := sq.Tenant // save the tenant
-		id := sq.ID      // save the ID from the initial StatQueue
-		// handle metrics for statsQueue
-		sq, err = dm.GetStatQueue(ctx, tnt, id, true, false, utils.NonTransactional)
-		if err != nil && err != utils.ErrNotFound {
-			return
-		}
-		if err == utils.ErrNotFound {
-			// if the statQueue didn't exists simply initiate all the metrics
-			if sq, err = NewStatQueue(tnt, id, metrics, minItems); err != nil {
-				return
-			}
-		} else {
-			for sqMetricID := range sq.SQMetrics {
-				// we consider that the metric needs to be removed
-				needsRemove := true
-				for _, metric := range metrics {
-					// in case we found the metric in the metrics define by the user we leave it
-					if sqMetricID == metric.MetricID {
-						needsRemove = false
-						break
-					}
-				}
-				if needsRemove {
-					delete(sq.SQMetrics, sqMetricID)
-				}
-			}
-
-			for _, metric := range metrics {
-				if _, has := sq.SQMetrics[metric.MetricID]; !has {
-					var stsMetric StatMetric
-					if stsMetric, err = NewStatMetric(metric.MetricID,
-						minItems,
-						metric.FilterIDs); err != nil {
-						return
-					}
-					sq.SQMetrics[metric.MetricID] = stsMetric
-				}
-			}
-
-			// if the user define a statQueue with an existing metric check if we need to update it based on queue length
-			sq.ttl = ttl
-			if _, err = sq.remExpired(); err != nil {
-				return
-			}
-			if len(sq.SQItems) > queueLength {
-				for i := 0; i < queueLength-len(sq.SQItems); i++ {
-					item := sq.SQItems[0]
-					if err = sq.remEventWithID(item.EventID); err != nil {
-						return
-					}
-					sq.SQItems = sq.SQItems[1:]
-				}
-			}
-		}
-	}
-
-	var ssq *StoredStatQueue
-	if dm.dataDB.GetStorageType() != utils.MetaInternal {
-		// in case of internal we don't marshal
-		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
-			return
-		}
-	}
-	if err = dm.dataDB.SetStatQueueDrv(ctx, ssq, sq); err != nil {
-		return
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
-		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1SetStatQueue,
-			&StatQueueWithAPIOpts{
-				StatQueue: sq,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
-	}
-	return
-}
-
-// RemoveStatQueue removes the StoredStatQueue
-func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string, transactionID string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	if err = dm.dataDB.RemStatQueueDrv(ctx, tenant, id); err != nil {
-		return
-	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
-		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.StatQueuePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveStatQueue,
-			&utils.TenantIDWithAPIOpts{
-				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return
 }
@@ -760,7 +594,6 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 			Tenant: th.Tenant,
 			ID:     th.ID,
 			Hits:   0,
-			tPrfl:  th,
 		})
 	} else if _, errTh := dm.GetThreshold(ctx, th.Tenant, th.ID, // do not try to get the threshold if the configuration changed
 		true, false, utils.NonTransactional); errTh == utils.ErrNotFound { // the threshold does not exist
@@ -768,7 +601,6 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 			Tenant: th.Tenant,
 			ID:     th.ID,
 			Hits:   0,
-			tPrfl:  th,
 		})
 	}
 	return
@@ -809,6 +641,112 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	return dm.RemoveThreshold(ctx, tenant, id, transactionID) // remove the thrshold
+}
+
+// GetStatQueue retrieves a StatQueue from dataDB
+// handles caching and deserialization of metrics
+func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
+	cacheRead, cacheWrite bool, transactionID string) (sq *StatQueue, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheStatQueues, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*StatQueue), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	sq, err = dm.dataDB.GetStatQueueDrv(ctx, tenant, id)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetStatQueue,
+				&utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &sq); err == nil {
+				var ssq *StoredStatQueue
+				if dm.dataDB.GetStorageType() != utils.MetaInternal {
+					// in case of internal we don't marshal
+					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
+						return nil, err
+					}
+				}
+				err = dm.dataDB.SetStatQueueDrv(ctx, ssq, sq)
+			}
+		}
+		if err != nil {
+			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
+				if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+
+			}
+			return nil, err
+		}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
+			cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
+		}
+	}
+	return
+}
+
+// SetStatQueue converts to StoredStatQueue and stores the result in dataDB
+func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *StatQueue) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	var ssq *StoredStatQueue
+	if dm.dataDB.GetStorageType() != utils.MetaInternal {
+		// in case of internal we don't marshal
+		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
+			return
+		}
+	}
+	if err = dm.dataDB.SetStatQueueDrv(ctx, ssq, sq); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetStatQueue,
+			&StatQueueWithAPIOpts{
+				StatQueue: sq,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+
+// RemoveStatQueue removes the StoredStatQueue
+func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string, transactionID string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.dataDB.RemStatQueueDrv(ctx, tenant, id); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.StatQueuePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveStatQueue,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
 }
 
 func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
@@ -890,14 +828,53 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
-		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		if err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueueProfilePrefix, sqp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueueProfile,
 			&StatQueueProfileWithAPIOpts{
 				StatQueueProfile: sqp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
+			return
+		}
+	}
+	if oldSts == nil || // create the stats queue if it didn't exist before
+		oldSts.QueueLength != sqp.QueueLength ||
+		oldSts.TTL != sqp.TTL ||
+		oldSts.MinItems != sqp.MinItems ||
+		(oldSts.Stored != sqp.Stored && oldSts.Stored) { // reset the stats queue if the profile changed this fields
+		var sq *StatQueue
+		if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
+			sqp.MinItems); err != nil {
+			return
+		}
+		err = dm.SetStatQueue(ctx, sq)
+	} else if oSq, errRs := dm.GetStatQueue(ctx, sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
+		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the stats queue does not exist
+		var sq *StatQueue
+		if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
+			sqp.MinItems); err != nil {
+			return
+		}
+		err = dm.SetStatQueue(ctx, sq)
+	} else { // update the metrics if needed
+		cMetricIDs := utils.StringSet{}
+		for _, metric := range sqp.Metrics { // add missing metrics and recreate the old metrics that changed
+			cMetricIDs.Add(metric.MetricID)
+			if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
+				!utils.SliceStringEqual(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
+				if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
+					sqp.MinItems, metric.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
+		for sqMetricID := range oSq.SQMetrics { // remove the old metrics
+			if !cMetricIDs.Has(sqMetricID) {
+				delete(oSq.SQMetrics, sqMetricID)
+			}
+		}
 	}
 	return
 }
@@ -936,7 +913,7 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return
+	return dm.RemoveStatQueue(ctx, tenant, id, transactionID)
 }
 
 func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
@@ -1122,30 +1099,18 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProf
 	if oldRes == nil || // create the resource if it didn't exist before
 		oldRes.UsageTTL != rp.UsageTTL ||
 		oldRes.Limit != rp.Limit ||
-		oldRes.Stored != rp.Stored { // reset the resource if the profile changed this fields
-		var ttl *time.Duration
-		if rp.UsageTTL > 0 {
-			ttl = &rp.UsageTTL
-		}
+		(oldRes.Stored != rp.Stored && oldRes.Stored) { // reset the resource if the profile changed this fields
 		err = dm.SetResource(ctx, &Resource{
 			Tenant: rp.Tenant,
 			ID:     rp.ID,
 			Usages: make(map[string]*ResourceUsage),
-			ttl:    ttl,
-			rPrf:   rp,
 		})
 	} else if _, errRs := dm.GetResource(ctx, rp.Tenant, rp.ID, // do not try to get the resource if the configuration changed
 		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the resource does not exist
-		var ttl *time.Duration
-		if rp.UsageTTL > 0 {
-			ttl = &rp.UsageTTL
-		}
 		err = dm.SetResource(ctx, &Resource{
 			Tenant: rp.Tenant,
 			ID:     rp.ID,
 			Usages: make(map[string]*ResourceUsage),
-			ttl:    ttl,
-			rPrf:   rp,
 		})
 	}
 	return

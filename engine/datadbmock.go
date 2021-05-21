@@ -43,6 +43,9 @@ type DataDBMock struct {
 	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*ResourceProfile, error)
 	SetResourceProfileDrvF     func(ctx *context.Context, rp *ResourceProfile) error
 	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
+	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
+	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
+	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 }
 
 //Storage methods
@@ -148,15 +151,24 @@ func (dbM *DataDBMock) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx *context.Context, tenant string, ID string) (sq *StatQueueProfile, err error) {
+func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error) {
+	if dbM.GetStatQueueProfileDrvF != nil {
+		return dbM.GetStatQueueProfileDrvF(ctx, tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
+	if dbM.SetStatQueueProfileDrvF != nil {
+		return dbM.SetStatQueueProfileDrvF(ctx, sq)
+	}
 	return utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	if dbM.RemStatQueueProfileDrvF != nil {
+		return dbM.RemStatQueueProfileDrvF(ctx, tenant, id)
+	}
 	return utils.ErrNotImplemented
 }
 

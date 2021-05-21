@@ -27,6 +27,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -190,7 +191,7 @@ func testResITMigrateAndMove(t *testing.T) {
 	switch resAction {
 	case utils.Migrate: // for the momment only one version of rating plans exists
 	case utils.Move:
-		if err := resMigrator.dmIN.DataManager().SetResourceProfile(resPrfl, true); err != nil {
+		if err := resMigrator.dmIN.DataManager().SetResourceProfile(context.TODO(), resPrfl, true); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -199,7 +200,7 @@ func testResITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Resource ", err.Error())
 		}
 
-		_, err = resMigrator.dmOut.DataManager().GetResourceProfile("cgrates.org", "RES1", false, false, utils.NonTransactional)
+		_, err = resMigrator.dmOut.DataManager().GetResourceProfile(context.TODO(), "cgrates.org", "RES1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -208,14 +209,14 @@ func testResITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Resource ", err.Error())
 		}
-		result, err := resMigrator.dmOut.DataManager().GetResourceProfile("cgrates.org", "RES1", false, false, utils.NonTransactional)
+		result, err := resMigrator.dmOut.DataManager().GetResourceProfile(context.TODO(), "cgrates.org", "RES1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(result, resPrfl) {
 			t.Errorf("Expecting: %+v, received: %+v", resPrfl, result)
 		}
-		result, err = resMigrator.dmIN.DataManager().GetResourceProfile("cgrates.org", "RES1", false, false, utils.NonTransactional)
+		result, err = resMigrator.dmIN.DataManager().GetResourceProfile(context.TODO(), "cgrates.org", "RES1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if resMigrator.stats[utils.Resource] != 1 {

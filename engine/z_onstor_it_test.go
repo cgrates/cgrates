@@ -399,7 +399,7 @@ func testOnStorITStatQueue(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetStatQueue(context.TODO(), sq, nil, 0, nil, 0, true); err != nil {
+	if err := onStor.SetStatQueue(context.TODO(), sq); err != nil {
 		t.Error(err)
 	}
 	//get from database
@@ -427,7 +427,7 @@ func testOnStorITStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetStatQueue(context.TODO(), sq, nil, 0, nil, 0, true); err != nil {
+	if err := onStor.SetStatQueue(context.TODO(), sq); err != nil {
 		t.Error(err)
 	}
 

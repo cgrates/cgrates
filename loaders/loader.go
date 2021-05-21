@@ -392,22 +392,6 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				if err := ldr.dm.SetStatQueueProfile(ctx, stsPrf, true); err != nil {
 					return err
 				}
-				var sq *engine.StatQueue
-				if sq, err = engine.NewStatQueue(stsPrf.Tenant, stsPrf.ID, stsPrf.Metrics,
-					stsPrf.MinItems); err != nil {
-					return utils.APIErrorHandler(err)
-				}
-				var ttl *time.Duration
-				if stsPrf.TTL > 0 {
-					ttl = &stsPrf.TTL
-				}
-
-				// for non stored we do not save the metrics
-				if err := ldr.dm.SetStatQueue(ctx, sq, stsPrf.Metrics,
-					stsPrf.MinItems, ttl, stsPrf.QueueLength,
-					!stsPrf.Stored); err != nil {
-					return err
-				}
 				cacheArgs[utils.StatsQueueProfileIDs] = ids
 				cacheArgs[utils.StatsQueueIDs] = ids
 			}
@@ -803,9 +787,6 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveStatQueueProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
-					return err
-				}
-				if err := ldr.dm.RemoveStatQueue(ctx, tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
 				cacheArgs[utils.StatsQueueProfileIDs] = ids
