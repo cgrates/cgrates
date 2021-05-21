@@ -86,6 +86,17 @@ var (
 		testResourceSCacheReload,
 		testResourceSCacheTestGetFound,
 		testV1RsStopEngine,
+		//allocate/release test
+		testV1RsLoadConfig,
+		testV1RsInitDataDb,
+		testV1RsResetStorDb,
+		testV1RsStartEngine,
+		testV1RsRpcConn,
+		testResourceSSetThresholdProfile,
+		testResourceSSetResourceProfile,
+		testResourceSCheckThresholdAfterResourceAllocate,
+		testResourceSCheckThresholdAfterResourceRelease,
+		testV1RsStopEngine,
 	}
 )
 
@@ -94,7 +105,7 @@ func TestRsV1IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		rlsV1ConfDIR = "tutinternal"
-		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-14]
+		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-24]
 	case utils.MetaMySQL:
 		rlsV1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -1126,5 +1137,126 @@ func testResourceSCacheReload(t *testing.T) {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
+	}
+}
+
+func testResourceSSetThresholdProfile(t *testing.T) {
+	ThdPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*opts.*eventType:ResourceUpdate"},
+			ID:        "THD_1",
+			MaxHits:   -1,
+		},
+	}
+	var reply string
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetThresholdProfile, ThdPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_1",
+	}
+	var result *engine.ThresholdProfile
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetThresholdProfile, args,
+		&result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, ThdPrf.ThresholdProfile) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(ThdPrf.ThresholdProfile), utils.ToJSON(result))
+	}
+}
+
+func testResourceSSetResourceProfile(t *testing.T) {
+	ResPrf := &engine.ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES_1",
+		AllocationMessage: "Approved",
+		Limit:             10,
+		ThresholdIDs:      []string{"THD_1"},
+	}
+	var reply string
+	if err := rlsV1Rpc.Call(utils.APIerSv1SetResourceProfile, ResPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var result *engine.ResourceProfile
+	if err := rlsV1Rpc.Call(utils.APIerSv1GetResourceProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: ResPrf.ID}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, ResPrf) {
+		t.Errorf("expected: %+v, received: %+v",
+			utils.ToJSON(ResPrf), utils.ToJSON(result))
+	}
+}
+
+func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
+	var reply string
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "RU_1",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EV_1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+
+		Units: 5,
+	}
+	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_1",
+	}
+	var result *engine.Threshold
+	if err := rlsV1Rpc.Call(utils.ThresholdSv1GetThreshold, args,
+		&result); err != nil {
+		t.Error(err)
+	} else if result.Hits != 1 {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 1, result.Hits)
+	}
+}
+
+func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
+	argsRU := &utils.ArgRSv1ResourceUsage{
+		UsageID: "RU_1",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EV_1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	var reply string
+	if err := rlsV1Rpc.Call(utils.ResourceSv1ReleaseResources, argsRU,
+		&reply); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_1",
+	}
+	var result *engine.Threshold
+	if err := rlsV1Rpc.Call(utils.ThresholdSv1GetThreshold, args,
+		&result); err != nil {
+		t.Error(err)
+	} else if result.Hits != 2 {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 2, result.Hits)
 	}
 }
