@@ -125,7 +125,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithAPIOpts,
 func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnRatingPlansArgs, reply *map[string]interface{}) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ResponderShutdown, tnt,
+		if err = dS.authorize(utils.ResponderGetCostOnRatingPlans, tnt,
 			utils.IfaceAsString(arg.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -139,7 +139,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(arg *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
 	tnt := utils.FirstNonEmpty(arg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ResponderShutdown, tnt,
+		if err = dS.authorize(utils.ResponderGetMaxSessionTimeOnAccounts, tnt,
 			utils.IfaceAsString(arg.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
 			return
 		}
