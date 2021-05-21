@@ -1426,6 +1426,11 @@ const (
 const (
 	AdminSv1SetRateProfile         = "AdminSv1.SetRateProfile"
 	AdminSv1GetRateProfile         = "AdminSv1.GetRateProfile"
+	AdminSv1GetRateProfileIDs      = "AdminSv1.GetRateProfileIDs"
+	AdminSv1GetRateProfileIDsCount = "AdminSv1.GetRateProfileIDsCount"
+	AdminSv1SetRateProfileRates    = "AdminSv1.SetRateProfileRates"
+	AdminSv1RemoveRateProfile      = "AdminSv1.RemoveRateProfile"
+	AdminSv1RemoveRateProfileRates = "AdminSv1.RemoveRateProfileRates"
 	APIerSv1GetRateProfileIDs      = "APIerSv1.GetRateProfileIDs"
 	APIerSv1GetRateProfileIDsCount = "APIerSv1.GetRateProfileIDsCount"
 	APIerSv1RemoveRateProfile      = "APIerSv1.RemoveRateProfile"

@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package apis
 
+/*
 import (
 	"path"
 	"reflect"
@@ -1066,3 +1067,4 @@ func testAttributeSKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
