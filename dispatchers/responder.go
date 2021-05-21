@@ -193,7 +193,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 		if arg.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResponderShutdown, tnt,
+		if err = dS.authorize(utils.ResponderGetCostOnRatingPlans, tnt,
 			arg.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -203,7 +203,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 		routeID = arg.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
-		routeID, utils.ResponderShutdown, arg, reply)
+		routeID, utils.ResponderGetCostOnRatingPlans, arg, reply)
 }
 func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(args *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
@@ -211,7 +211,7 @@ func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(args *utils.Ge
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResponderShutdown, tnt,
+		if err = dS.authorize(utils.ResponderGetMaxSessionTimeOnAccounts, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -221,5 +221,5 @@ func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(args *utils.Ge
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
-		routeID, utils.ResponderShutdown, args, reply)
+		routeID, utils.ResponderGetMaxSessionTimeOnAccounts, args, reply)
 }
