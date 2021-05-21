@@ -23,10 +23,14 @@ import (
 )
 
 type DataDBMock struct {
-	GetKeysForPrefixF     func(string) ([]string, error)
-	GetChargerProfileDrvF func(string, string) (*ChargerProfile, error)
-	GetFilterDrvF         func(string, string) (*Filter, error)
-	GetIndexesDrvF        func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetKeysForPrefixF       func(string) ([]string, error)
+	GetChargerProfileDrvF   func(string, string) (*ChargerProfile, error)
+	GetFilterDrvF           func(string, string) (*Filter, error)
+	GetIndexesDrvF          func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetThresholdProfileDrvF func(tenant, id string) (tp *ThresholdProfile, err error)
+	SetThresholdProfileDrvF func(tp *ThresholdProfile) (err error)
+	RemThresholdProfileDrvF func(tenant, id string) (err error)
+	GetThresholdDrvF        func(tenant, id string) (*Threshold, error)
 }
 
 //Storage methods
@@ -285,19 +289,31 @@ func (dbM *DataDBMock) RemStatQueueDrv(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error) {
+func (dbM *DataDBMock) GetThresholdProfileDrv(tenant, id string) (tp *ThresholdProfile, err error) {
+	if dbM.GetThresholdProfileDrvF != nil {
+		return dbM.GetThresholdProfileDrvF(tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
+	if dbM.SetThresholdProfileDrvF != nil {
+		return dbM.SetThresholdProfileDrvF(tp)
+	}
 	return utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) RemThresholdProfileDrv(tenant, id string) (err error) {
+	if dbM.RemThresholdProfileDrvF != nil {
+		return dbM.RemThresholdProfileDrvF(tenant, id)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdDrv(string, string) (*Threshold, error) {
+func (dbM *DataDBMock) GetThresholdDrv(tenant, id string) (*Threshold, error) {
+	if dbM.GetThresholdDrvF != nil {
+		return dbM.GetThresholdDrvF(tenant, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 

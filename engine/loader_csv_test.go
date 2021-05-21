@@ -1432,12 +1432,3 @@ func TestLoadstatQueues(t *testing.T) {
 		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
 	}
 }
-
-func TestLoadThresholds(t *testing.T) {
-	eThresholds := []*utils.TenantID{
-		{Tenant: "cgrates.org", ID: "Threshold1"},
-	}
-	if len(csvr.thresholds) != len(eThresholds) {
-		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
-	}
-}
