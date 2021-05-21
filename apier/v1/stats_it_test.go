@@ -1162,7 +1162,7 @@ func testV1STSOverWriteStats(t *testing.T) {
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "InitStat"}}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
+		t.Errorf("expecting: %+v, received reply: %s", utils.ToJSON(expectedMetrics2), utils.ToJSON(metrics2))
 	}
 }
 
