@@ -457,29 +457,6 @@ func TestGetLoadedIdsStatQueues(t *testing.T) {
 	}
 }
 
-func TestGetLoadedIdsThresholds(t *testing.T) {
-	tpr := &TpReader{
-		thresholds: []*utils.TenantID{
-			{
-				Tenant: "cgrates.org",
-				ID:     "thresholdsID",
-			},
-			{
-				Tenant: "tenant.com",
-				ID:     "mytenantID",
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.ThresholdPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	expRcv := []string{"cgrates.org:thresholdsID", "tenant.com:mytenantID"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
-
 func TestGetLoadedIdsResourceProfiles(t *testing.T) {
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
@@ -728,7 +705,7 @@ func TestReloadCache(t *testing.T) {
 			"DispatcherHostIDs":    {"cgrates.org:dispatcherHostsID"},
 			"ResourceIDs":          {"cgrates.org:resourcesID"},
 			"StatsQueueIDs":        {"cgrates.org:statQueuesID"},
-			"ThresholdIDs":         {"cgrates.org:thresholdsID"},
+			"ThresholdIDs":         {"cgrates.org:thresholdProfilesID"},
 		},
 	}
 	cM := &ccMock{
@@ -788,15 +765,6 @@ func TestReloadCache(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "statQueuesID",
 			},
-		},
-		thresholds: []*utils.TenantID{
-			{
-				Tenant: "cgrates.org",
-				ID:     "thresholdsID",
-			},
-		},
-		acntActionPlans: map[string][]string{
-			"AccountActionPlansID": {},
 		},
 		dm: NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
 	}

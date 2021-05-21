@@ -4500,26 +4500,23 @@ func TestRemoveThresholdsMockError(t *testing.T) {
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaThresholds: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
+		dataTpls: map[string][]*config.FCTemplate{
+			utils.MetaThresholds: {
+				{Tag: "TenantID",
+					Path:      "Tenant",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+					Mandatory: true},
+				{Tag: "ID",
+					Path:      "ID",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+					Mandatory: true},
+			},
 		},
 	}
-	thresholdsCsv := `
-#Tenant[0],ID[1]
-cgrates.org,REM_THRESHOLDS_1,
-`
-	rdr := io.NopCloser(strings.NewReader(thresholdsCsv))
+	rdr := io.NopCloser(strings.NewReader(`#Tenant[0],ID[1]
+	cgrates.org,REM_THRESHOLDS_1,`))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4532,24 +4529,22 @@ cgrates.org,REM_THRESHOLDS_1,
 		},
 	}
 
-	expThresholdPrf := &engine.ThresholdProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_THRESHOLDS_1",
-	}
-
-	if err := ldr.dm.SetThresholdProfile(context.TODO(), expThresholdPrf, true); err != nil {
-		t.Error(err)
-	}
-
-	newData := &dataDBMockError{}
-	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := utils.ErrNoDatabaseConn
+	ldr.dm = engine.NewDataManager(&engine.DataDBMock{
+		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *engine.ThresholdProfile, err error) {
+			return &engine.ThresholdProfile{
+				Tenant: "cgrates.org",
+				ID:     "REM_THRESHOLDS_1",
+			}, nil
+		},
+		SetThresholdProfileDrvF: func(ctx *context.Context, tp *engine.ThresholdProfile) (err error) { return expected },
+		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return expected },
+	}, config.CgrConfig().CacheCfg(), nil)
 	if err := ldr.processContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	} else if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-
 }
 
 func TestRemoveStatQueueMockError(t *testing.T) {

@@ -697,15 +697,6 @@ func TestLoadstatQueues(t *testing.T) {
 	}
 }
 
-func TestLoadThresholds(t *testing.T) {
-	eThresholds := []*utils.TenantID{
-		{Tenant: "cgrates.org", ID: "Threshold1"},
-	}
-	if len(csvr.thresholds) != len(eThresholds) {
-		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
-	}
-}
-
 func TestLoadAccount(t *testing.T) {
 	expected := &utils.TPAccount{
 		TPid:    testTPID,

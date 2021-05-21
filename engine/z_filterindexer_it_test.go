@@ -293,10 +293,10 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		Weight:    1.4,
 		ActionIDs: []string{},
 	}
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -335,7 +335,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	cloneTh1 := new(ThresholdProfile)
 	*cloneTh1 = *th
 	cloneTh1.FilterIDs = []string{"Filter2"}
-	if err := dataManager.SetThresholdProfile(cloneTh1, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), cloneTh1, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -378,7 +378,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	clone2Th1 := new(ThresholdProfile)
 	*clone2Th1 = *th
 	clone2Th1.FilterIDs = []string{"Filter1", "Filter3"}
-	if err := dataManager.SetThresholdProfile(clone2Th1, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), clone2Th1, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -459,11 +459,11 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 
 	//remove thresholds
-	if err := dataManager.RemoveThresholdProfile(th.Tenant,
+	if err := dataManager.RemoveThresholdProfile(context.TODO(), th.Tenant,
 		th.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.RemoveThresholdProfile(th2.Tenant,
+	if err := dataManager.RemoveThresholdProfile(context.TODO(), th2.Tenant,
 		th2.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
@@ -763,7 +763,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		ActionIDs: []string{},
 	}
 
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -792,7 +792,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		Weight:    1.4,
 		ActionIDs: []string{},
 	}
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringSet{
@@ -814,7 +814,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 	//remove threshold
-	if err := dataManager.RemoveThresholdProfile(th.Tenant,
+	if err := dataManager.RemoveThresholdProfile(context.TODO(), th.Tenant,
 		th.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
@@ -1133,15 +1133,15 @@ func testITResourceProfileIndexes(t *testing.T) {
 	}
 
 	expected := "broken reference to filter: FIRST for item with ID: cgrates.org:RES_PRF1"
-	if err := dataManager.SetResourceProfile(resPref1, true); err == nil || err.Error() != expected {
+	if err := dataManager.SetResourceProfile(context.TODO(), resPref1, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	resPref1.FilterIDs = []string{"RES_FLTR1", "*string:~*req.Account:DAN"}
-	if err := dataManager.SetResourceProfile(resPref1, true); err != nil {
+	if err := dataManager.SetResourceProfile(context.TODO(), resPref1, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetResourceProfile(resPref2, true); err != nil {
+	if err := dataManager.SetResourceProfile(context.TODO(), resPref2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1182,10 +1182,10 @@ func testITResourceProfileIndexes(t *testing.T) {
 	}
 	resPref1.ID = "RES_PRF_CHANGED1"
 	resPref2.ID = "RES_PRF_CHANGED2"
-	if err := dataManager.SetResourceProfile(resPref1, true); err != nil {
+	if err := dataManager.SetResourceProfile(context.TODO(), resPref1, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetResourceProfile(resPref2, true); err != nil {
+	if err := dataManager.SetResourceProfile(context.TODO(), resPref2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1267,11 +1267,11 @@ func testITStatQueueProfileIndexes(t *testing.T) {
 		FilterIDs: []string{"SQUEUE2", "SQUEUE1", "*string:~*opts.ToR:~*req.Usage"},
 		TTL:       time.Minute,
 	}
-	if err := dataManager.SetStatQueueProfile(statQueue1, true); err != nil {
+	if err := dataManager.SetStatQueueProfile(context.TODO(), statQueue1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetStatQueueProfile(statQueue2, true); err != nil {
+	} else if err := dataManager.SetStatQueueProfile(context.TODO(), statQueue2, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetStatQueueProfile(statQueue3, true); err != nil {
+	} else if err := dataManager.SetStatQueueProfile(context.TODO(), statQueue3, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -1760,10 +1760,10 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		ActionIDs: []string{},
 	}
 
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -1976,13 +1976,13 @@ func testITTestIndexingThresholds(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1002", "*lt:~*req.Balance:1000"},
 		ActionIDs: []string{},
 	}
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th2, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th3, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th3, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -2038,13 +2038,13 @@ func testITTestIndexingMetaNot(t *testing.T) {
 		FilterIDs: []string{"*notstring:~*req.Account:1002", "*notstring:~*req.Balance:1000"},
 		ActionIDs: []string{},
 	}
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th2, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th3, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th3, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -2478,13 +2478,13 @@ func testITTestIndexingMetaSuffix(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Destination:1002", "*prefix:~*req.Account:100", "*suffix:~*req.Random:Prfx"},
 		ActionIDs: []string{},
 	}
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th2, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetThresholdProfile(th3, true); err != nil {
+	if err := dataManager.SetThresholdProfile(context.TODO(), th3, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{

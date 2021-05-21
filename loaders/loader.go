@@ -451,9 +451,6 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				if err := ldr.dm.SetThresholdProfile(ctx, thPrf, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.SetThreshold(ctx, &engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}, thPrf.MinSleep, false); err != nil {
-					return err
-				}
 				cacheArgs[utils.ThresholdProfileIDs] = ids
 				cacheArgs[utils.ThresholdIDs] = ids
 			}
@@ -844,9 +841,6 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveThresholdProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
-					return err
-				}
-				if err := ldr.dm.RemoveThreshold(ctx, tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
 				cacheArgs[utils.ThresholdProfileIDs] = ids

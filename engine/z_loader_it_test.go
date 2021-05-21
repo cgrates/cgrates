@@ -249,7 +249,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenantid, rl := range loader.resProfiles {
-		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetResourceProfile(context.TODO(), tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetResourceProfile: ", err.Error())
 		}
@@ -262,7 +262,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 	for tenantid, st := range loader.sqProfiles {
-		rcv, err := loader.dm.GetStatQueueProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetStatQueueProfile(context.TODO(), tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", tenantid.Tenant, tenantid.ID, err.Error())
 		}
@@ -276,7 +276,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, th := range loader.thProfiles {
-		rcv, err := loader.dm.GetThresholdProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetThresholdProfile(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetThresholdProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 		}

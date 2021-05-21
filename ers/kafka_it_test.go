@@ -101,7 +101,6 @@ func TestKafkaER(t *testing.T) {
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     ev.cgrEvent.ID,
-			Time:   ev.cgrEvent.Time,
 			Event: map[string]interface{}{
 				"CGRID": randomCGRID,
 			},
