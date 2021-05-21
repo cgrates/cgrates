@@ -58,7 +58,7 @@ type v1Stat struct {
 	Triggers        engine.ActionTriggers
 }
 
-func (m *Migrator) moveStatQueueProfile() (err error) {
+func (m *Migrator) migrateCurrentStats() (err error) {
 	//StatQueueProfile
 	var ids []string
 	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
@@ -69,52 +69,32 @@ func (m *Migrator) moveStatQueueProfile() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating stat queue profiles", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sqp, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
-		}
-		if sgs == nil || m.dryRun {
-			continue
-		}
-		if err := m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
-			return err
-		}
-		if err := m.dmIN.DataManager().RemoveStatQueueProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
-			return err
-		}
-	}
-	return
-}
-
-func (m *Migrator) migrateCurrentStats() (err error) {
-	var ids []string
-	//StatQueue
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
-		return err
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.StatQueuePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating stat queues", id)
 		}
 		sgs, err := m.dmIN.DataManager().GetStatQueue(tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 
 			return err
 		}
-		if sgs == nil || m.dryRun {
+		if sqp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetStatQueue(sgs, nil, 0, nil, 0, true); err != nil {
+		if err := m.dmOut.DataManager().SetStatQueueProfile(sqp, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
+		if sgs != nil {
+			if err := m.dmOut.DataManager().SetStatQueue(sgs); err != nil {
+				return err
+			}
+		}
+		if err := m.dmIN.DataManager().RemoveStatQueueProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.StatS]++
 	}
-
-	return m.moveStatQueueProfile()
+	return
 }
 
 func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.StatQueue, sts *engine.StatQueueProfile, err error) {
@@ -232,8 +212,10 @@ func (m *Migrator) migrateStats() (err error) {
 			if err = m.dmOut.DataManager().SetStatQueueProfile(v4sts, true); err != nil {
 				return
 			}
-			if err = m.dmOut.DataManager().SetStatQueue(v3Stats, nil, 0, nil, 0, true); err != nil {
-				return
+			if v3Stats != nil {
+				if err = m.dmOut.DataManager().SetStatQueue(v3Stats); err != nil {
+					return
+				}
 			}
 		}
 		m.stats[utils.StatS]++

@@ -80,11 +80,10 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 			return err
 		}
 		// update the threshold in the new DB
-		if ths == nil {
-			continue
-		}
-		if err := m.dmOut.DataManager().SetThreshold(ths); err != nil {
-			return err
+		if ths != nil {
+			if err := m.dmOut.DataManager().SetThreshold(ths); err != nil {
+				return err
+			}
 		}
 		if err := m.dmIN.DataManager().RemoveThresholdProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err

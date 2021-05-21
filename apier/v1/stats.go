@@ -87,32 +87,6 @@ func (apierSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueProfileWithAP
 		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	var ttl *time.Duration
-	if arg.TTL > 0 {
-		ttl = &arg.TTL
-	}
-	sq := &engine.StatQueue{
-		Tenant: arg.Tenant,
-		ID:     arg.ID,
-	}
-	if !arg.Stored { // for not stored queues create the metrics
-		if sq, err = engine.NewStatQueue(arg.Tenant, arg.ID, arg.Metrics,
-			arg.MinItems); err != nil {
-			return err
-		}
-	}
-	// for non stored we do not save the metrics
-	if err = apierSv1.DataManager.SetStatQueue(sq,
-		arg.Metrics, arg.MinItems, ttl, arg.QueueLength,
-		!arg.Stored); err != nil {
-		return err
-	}
-	//handle caching for StatQueues
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheStatQueues,
-		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-
 	*reply = utils.OK
 	return nil
 }
@@ -134,18 +108,10 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.DataManager.RemoveStatQueue(tnt, args.ID, utils.NonTransactional); err != nil {
-		return utils.APIErrorHandler(err)
-	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
 	loadID := time.Now().UnixNano()
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	//handle caching for StatQueues
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheStatQueues,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -294,7 +294,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 		if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
-		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
 		if err := stsMigrator.dmOut.DataManager().SetFilter(filter, true); err != nil {

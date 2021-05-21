@@ -118,9 +118,9 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		},
 	}
 	stqs := []*StatQueue{
-		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2], SQMetrics: make(map[string]StatMetric)},
 	}
 	statsEvs := []*StatsArgsProcessEvent{
 		{
@@ -243,7 +243,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -358,9 +358,9 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 		},
 	}
 	stqs := []*StatQueue{
-		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2], SQMetrics: make(map[string]StatMetric)},
 	}
 	statsEvs := []*StatsArgsProcessEvent{
 		{
@@ -483,7 +483,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -599,9 +599,9 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		},
 	}
 	stqs := []*StatQueue{
-		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2], SQMetrics: make(map[string]StatMetric)},
 	}
 	statsEvs := []*StatsArgsProcessEvent{
 		{
@@ -724,7 +724,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -840,9 +840,9 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		},
 	}
 	stqs := []*StatQueue{
-		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
-		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1], SQMetrics: make(map[string]StatMetric)},
+		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2], SQMetrics: make(map[string]StatMetric)},
 	}
 	statsEvs := []*StatsArgsProcessEvent{
 		{
@@ -965,7 +965,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		dmSTS.SetStatQueueProfile(statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -999,7 +999,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	if err := dmSTS.SetStatQueueProfile(sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dmSTS.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err := dmSTS.SetStatQueue(sq); err != nil {
 		t.Error(err)
 	}
 	if tempStat, err := dmSTS.GetStatQueueProfile(sqPrf.Tenant,

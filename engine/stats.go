@@ -120,7 +120,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 	if sq.dirty == nil || !*sq.dirty {
 		return
 	}
-	if err = sS.dm.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err = sS.dm.SetStatQueue(sq); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed saving StatQueue with ID: %s, error: %s",
 				sq.TenantID(), err.Error()))
