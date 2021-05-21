@@ -23,14 +23,17 @@ import (
 )
 
 type DataDBMock struct {
-	GetKeysForPrefixF       func(string) ([]string, error)
-	GetChargerProfileDrvF   func(string, string) (*ChargerProfile, error)
-	GetFilterDrvF           func(string, string) (*Filter, error)
-	GetIndexesDrvF          func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
-	GetThresholdProfileDrvF func(tenant, id string) (tp *ThresholdProfile, err error)
-	SetThresholdProfileDrvF func(tp *ThresholdProfile) (err error)
-	RemThresholdProfileDrvF func(tenant, id string) (err error)
-	GetThresholdDrvF        func(tenant, id string) (*Threshold, error)
+	GetKeysForPrefixF         func(string) ([]string, error)
+	GetChargerProfileDrvF     func(string, string) (*ChargerProfile, error)
+	GetFilterDrvF             func(string, string) (*Filter, error)
+	GetIndexesDrvF            func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetThresholdProfileDrvF   func(tenant, id string) (tp *ThresholdProfile, err error)
+	SetThresholdProfileDrvF   func(tp *ThresholdProfile) (err error)
+	RemThresholdProfileDrvF   func(tenant, id string) (err error)
+	GetThresholdDrvF          func(tenant, id string) (*Threshold, error)
+	GetResourceProfileDrvF    func(tnt, id string) (*ResourceProfile, error)
+	SetResourceProfileDrvF    func(rp *ResourceProfile) error
+	RemoveResourceProfileDrvF func(tnt, id string) error
 }
 
 //Storage methods
@@ -205,15 +208,24 @@ func (dbM *DataDBMock) RemoveAccountDrv(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceProfileDrv(string, string) (*ResourceProfile, error) {
+func (dbM *DataDBMock) GetResourceProfileDrv(tnt, id string) (*ResourceProfile, error) {
+	if dbM.GetResourceProfileDrvF != nil {
+		return dbM.GetResourceProfileDrvF(tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceProfileDrv(*ResourceProfile) error {
+func (dbM *DataDBMock) SetResourceProfileDrv(rp *ResourceProfile) error {
+	if dbM.SetResourceProfileDrvF != nil {
+		return dbM.SetResourceProfileDrvF(rp)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveResourceProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveResourceProfileDrv(tnt, id string) error {
+	if dbM.RemoveResourceProfileDrvF != nil {
+		return dbM.RemoveResourceProfileDrvF(tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 

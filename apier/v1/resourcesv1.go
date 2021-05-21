@@ -131,24 +131,6 @@ func (apierSv1 *APIerSv1) SetResourceProfile(arg *engine.ResourceProfileWithAPIO
 		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	var ttl *time.Duration
-	if arg.UsageTTL > 0 {
-		ttl = &arg.UsageTTL
-	}
-	// for non stored we do not save the metrics
-	if err = apierSv1.DataManager.SetResource(&engine.Resource{
-		Tenant: arg.Tenant,
-		ID:     arg.ID,
-		Usages: make(map[string]*engine.ResourceUsage),
-	}, ttl, arg.Limit, !arg.Stored); err != nil {
-		return
-	}
-	//handle caching for Resource
-	if err = apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResources,
-		arg.TenantID(), nil, nil, arg.APIOpts); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-
 	*reply = utils.OK
 	return nil
 }
@@ -170,18 +152,10 @@ func (apierSv1 *APIerSv1) RemoveResourceProfile(arg *utils.TenantIDWithAPIOpts, 
 		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.DataManager.RemoveResource(tnt, arg.ID, utils.NonTransactional); err != nil {
-		return utils.APIErrorHandler(err)
-	}
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	//handle caching for Resource
-	if err := apierSv1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResources,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

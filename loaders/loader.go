@@ -330,19 +330,6 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetResourceProfile(res, true); err != nil {
 					return err
 				}
-				var ttl *time.Duration
-				if res.UsageTTL > 0 {
-					ttl = &res.UsageTTL
-				}
-				// for non stored we do not save the resource
-				if err := ldr.dm.SetResource(
-					&engine.Resource{
-						Tenant: res.Tenant,
-						ID:     res.ID,
-						Usages: make(map[string]*engine.ResourceUsage),
-					}, ttl, res.Limit, !res.Stored); err != nil {
-					return err
-				}
 				cacheArgs[utils.ResourceProfileIDs] = ids
 				cacheArgs[utils.ResourceIDs] = ids
 			}
@@ -681,9 +668,6 @@ func (ldr *Loader) removeLoadedData(loaderType string, lds map[string][]LoaderDa
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveResourceProfile(tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
-					return err
-				}
-				if err := ldr.dm.RemoveResource(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
 				cacheArgs[utils.ResourceProfileIDs] = ids

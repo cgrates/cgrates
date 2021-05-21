@@ -1094,7 +1094,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 		dmRES.SetResourceProfile(resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(res)
 	}
 	//Test each resourceProfile from cache
 	for _, resPrf := range resprf {
@@ -1290,7 +1290,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 		dmRES.SetResourceProfile(resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(res)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
 		"TestResourceMatchingResourcesForEvent1", &timeDurationExample)
@@ -1520,7 +1520,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(resourceTest[0]); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
@@ -1725,7 +1725,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(resourceTest[0]); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
@@ -1930,7 +1930,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(resourceTest[0]); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
@@ -2136,7 +2136,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(resourceTest[0]); err != nil {
 		t.Error(err)
 	}
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
@@ -2562,7 +2562,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 		dmRES.SetResourceProfile(resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(res)
 	}
 	resService.cgrcfg.ResourceSCfg().IndexedSelects = false
 	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
@@ -2754,7 +2754,7 @@ func TestResourceCaching(t *testing.T) {
 		dmRES.SetResourceProfile(resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(res)
 	}
 	//clear the cache
 	Cache.Clear(nil)
@@ -3257,7 +3257,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 			},
 		},
 		TTLIdx: []string{"RU1"},
-	}, nil, 2, true); err != nil { // simulate how the resource is stored in redis or mongo(non-exported fields are not populated)
+	}); err != nil { // simulate how the resource is stored in redis or mongo(non-exported fields are not populated)
 		t.Fatal(err)
 	}
 	var reply string
