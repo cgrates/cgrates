@@ -275,3 +275,69 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffRadiusAgentJsonCfg(t *testing.T) {
+	var d *RadiusAgentJsonCfg
+
+	v1 := &RadiusAgentCfg{
+		Enabled:            false,
+		ListenNet:          "tcp",
+		ListenAuth:         "radius_auth",
+		ListenAcct:         "radius_account",
+		ClientSecrets:      map[string]string{},
+		ClientDictionaries: map[string]string{},
+		SessionSConns:      []string{"*localhost"},
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID:      "REQ_PROC1",
+				Filters: []string{"filter1"},
+			},
+		},
+	}
+
+	v2 := &RadiusAgentCfg{
+		Enabled:    true,
+		ListenNet:  "udp",
+		ListenAuth: "radius_auth2",
+		ListenAcct: "radius_account2",
+		ClientSecrets: map[string]string{
+			"radius_user": "radius_pass",
+		},
+		ClientDictionaries: map[string]string{
+			"radius_dict1": "radius_val1",
+		},
+		SessionSConns:     []string{"*birpc"},
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	expected := &RadiusAgentJsonCfg{
+		Enabled:     utils.BoolPointer(true),
+		Listen_net:  utils.StringPointer("udp"),
+		Listen_auth: utils.StringPointer("radius_auth2"),
+		Listen_acct: utils.StringPointer("radius_account2"),
+		Client_secrets: map[string]string{
+			"radius_user": "radius_pass",
+		},
+		Client_dictionaries: map[string]string{
+			"radius_dict1": "radius_val1",
+		},
+		Sessions_conns:     &[]string{"*birpc"},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv := diffRadiusAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &RadiusAgentJsonCfg{
+		Client_secrets:      map[string]string{},
+		Client_dictionaries: map[string]string{},
+		Request_processors:  &[]*ReqProcessorJsnCfg{},
+	}
+	rcv = diffRadiusAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

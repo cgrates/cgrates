@@ -1262,3 +1262,177 @@ func TestSessionSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffSTIRJsonCfg(t *testing.T) {
+	var d *STIRJsonCfg
+
+	v1 := &STIRcfg{
+		AllowedAttest: utils.StringSet{
+			"A_TEST1": {},
+		},
+		PayloadMaxduration: 2 * time.Second,
+		DefaultAttest:      "default_attest",
+		PublicKeyPath:      "/public/key/path",
+		PrivateKeyPath:     "/private/key/path",
+	}
+
+	v2 := &STIRcfg{
+		AllowedAttest:      nil,
+		PayloadMaxduration: 4 * time.Second,
+		DefaultAttest:      "default_attest2",
+		PublicKeyPath:      "/public/key/path/2",
+		PrivateKeyPath:     "/private/key/path/2",
+	}
+
+	expected := &STIRJsonCfg{
+		Allowed_attest:      nil,
+		Payload_maxduration: utils.StringPointer("4s"),
+		Default_attest:      utils.StringPointer("default_attest2"),
+		Publickey_path:      utils.StringPointer("/public/key/path/2"),
+		Privatekey_path:     utils.StringPointer("/private/key/path/2"),
+	}
+
+	rcv := diffSTIRJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffSessionSJsonCfg(t *testing.T) {
+	var d *SessionSJsonCfg
+
+	v1 := &SessionSCfg{
+		Enabled:             false,
+		ListenBijson:        "*bijson_rpc",
+		ListenBigob:         "*bigob_rpc",
+		ChargerSConns:       []string{"*localhost"},
+		ResSConns:           []string{"*localhost"},
+		ThreshSConns:        []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		RouteSConns:         []string{"*localhost"},
+		CDRsConns:           []string{"*localhost"},
+		ReplicationConns:    []string{"*localhost"},
+		AttrSConns:          []string{"*localhost"},
+		DebitInterval:       1 * time.Second,
+		StoreSCosts:         false,
+		SessionTTL:          1 * time.Second,
+		SessionTTLMaxDelay:  utils.DurationPointer(1 * time.Second),
+		SessionTTLLastUsed:  utils.DurationPointer(1 * time.Second),
+		SessionTTLLastUsage: utils.DurationPointer(1 * time.Second),
+		SessionIndexes:      utils.StringSet{},
+		ClientProtocol:      12.2,
+		ChannelSyncInterval: 1 * time.Second,
+		TerminateAttempts:   3,
+		AlterableFields:     utils.StringSet{},
+		MinDurLowBalance:    1 * time.Second,
+		ActionSConns:        []string{"*localhost"},
+		DefaultUsage: map[string]time.Duration{
+			"DFLT_1": 1 * time.Second,
+		},
+		STIRCfg: &STIRcfg{
+			AllowedAttest: utils.StringSet{
+				"A_TEST1": {},
+			},
+			PayloadMaxduration: 2 * time.Second,
+			DefaultAttest:      "default_attest",
+			PublicKeyPath:      "/public/key/path",
+			PrivateKeyPath:     "/private/key/path",
+		},
+	}
+
+	v2 := &SessionSCfg{
+		Enabled:             true,
+		ListenBijson:        "*bijson",
+		ListenBigob:         "*bigob",
+		ChargerSConns:       []string{"*birpc"},
+		ResSConns:           []string{"*birpc"},
+		ThreshSConns:        []string{"*birpc"},
+		StatSConns:          []string{"*birpc"},
+		RouteSConns:         []string{"*birpc"},
+		CDRsConns:           []string{"*birpc"},
+		ReplicationConns:    []string{"*birpc"},
+		AttrSConns:          []string{"*birpc"},
+		DebitInterval:       2 * time.Second,
+		StoreSCosts:         true,
+		SessionTTL:          2 * time.Second,
+		SessionTTLMaxDelay:  utils.DurationPointer(2 * time.Second),
+		SessionTTLLastUsed:  utils.DurationPointer(2 * time.Second),
+		SessionTTLLastUsage: utils.DurationPointer(2 * time.Second),
+		SessionTTLUsage:     utils.DurationPointer(2 * time.Second),
+		SessionIndexes:      nil,
+		ClientProtocol:      13.2,
+		ChannelSyncInterval: 2 * time.Second,
+		TerminateAttempts:   5,
+		AlterableFields:     nil,
+		MinDurLowBalance:    2 * time.Second,
+		ActionSConns:        []string{"*birpc"},
+		DefaultUsage: map[string]time.Duration{
+			"DFLT_1": 2 * time.Second,
+		},
+		STIRCfg: &STIRcfg{
+			AllowedAttest:      nil,
+			PayloadMaxduration: 4 * time.Second,
+			DefaultAttest:      "default_attest2",
+			PublicKeyPath:      "/public/key/path/2",
+			PrivateKeyPath:     "/private/key/path/2",
+		},
+	}
+
+	expected := &SessionSJsonCfg{
+		Enabled:                utils.BoolPointer(true),
+		Listen_bijson:          utils.StringPointer("*bijson"),
+		Listen_bigob:           utils.StringPointer("*bigob"),
+		Chargers_conns:         &[]string{"*birpc"},
+		Resources_conns:        &[]string{"*birpc"},
+		Thresholds_conns:       &[]string{"*birpc"},
+		Stats_conns:            &[]string{"*birpc"},
+		Routes_conns:           &[]string{"*birpc"},
+		Cdrs_conns:             &[]string{"*birpc"},
+		Replication_conns:      &[]string{"*birpc"},
+		Attributes_conns:       &[]string{"*birpc"},
+		Debit_interval:         utils.StringPointer("2s"),
+		Store_session_costs:    utils.BoolPointer(true),
+		Session_ttl:            utils.StringPointer("2s"),
+		Session_ttl_max_delay:  utils.StringPointer("2s"),
+		Session_ttl_last_used:  utils.StringPointer("2s"),
+		Session_ttl_last_usage: utils.StringPointer("2s"),
+		Session_ttl_usage:      utils.StringPointer("2s"),
+		Session_indexes:        nil,
+		Client_protocol:        utils.Float64Pointer(13.2),
+		Channel_sync_interval:  utils.StringPointer("2s"),
+		Terminate_attempts:     utils.IntPointer(5),
+		Alterable_fields:       nil,
+		Min_dur_low_balance:    utils.StringPointer("2s"),
+		Actions_conns:          &[]string{"*birpc"},
+		Default_usage: map[string]string{
+			"DFLT_1": "2s",
+		},
+		Stir: &STIRJsonCfg{
+			Allowed_attest:      nil,
+			Payload_maxduration: utils.StringPointer("4s"),
+			Default_attest:      utils.StringPointer("default_attest2"),
+			Publickey_path:      utils.StringPointer("/public/key/path/2"),
+			Privatekey_path:     utils.StringPointer("/private/key/path/2"),
+		},
+	}
+
+	rcv := diffSessionSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v2.SessionTTLMaxDelay = nil
+	v2.SessionTTLLastUsed = nil
+	v2.SessionTTLLastUsage = nil
+	v2.SessionTTLUsage = nil
+
+	expected.Session_ttl_max_delay = nil
+	expected.Session_ttl_last_used = nil
+	expected.Session_ttl_last_usage = nil
+	expected.Session_ttl_usage = nil
+
+	rcv = diffSessionSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

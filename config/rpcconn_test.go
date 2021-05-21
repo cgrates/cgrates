@@ -416,3 +416,199 @@ func TestRemoveRPCCons(t *testing.T) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(expectedRPCCons), utils.ToJSON(rpc))
 	}
 }
+
+func TestDiffRPCConnJson(t *testing.T) {
+	var d *RPCConnJson
+
+	v1 := &RPCConn{
+		Strategy: utils.MetaTopUpReset,
+		PoolSize: 2,
+		Conns: []*RemoteHost{
+			{
+				ID:          "host1_ID",
+				Address:     "127.0.0.1:8080",
+				Transport:   "tcp",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+
+	v2 := &RPCConn{
+		Strategy: "*disconnect",
+		PoolSize: 3,
+		Conns: []*RemoteHost{
+			{
+				ID:          "host2_ID",
+				Address:     "0.0.0.0:8080",
+				Transport:   "udp",
+				Synchronous: true,
+				TLS:         true,
+			},
+		},
+	}
+
+	expected := &RPCConnJson{
+		Strategy: utils.StringPointer("*disconnect"),
+		PoolSize: utils.IntPointer(3),
+		Conns: &[]*RemoteHostJson{
+			{
+				Id:          utils.StringPointer("host2_ID"),
+				Address:     utils.StringPointer("0.0.0.0:8080"),
+				Transport:   utils.StringPointer("udp"),
+				Synchronous: utils.BoolPointer(true),
+				Tls:         utils.BoolPointer(true),
+			},
+		},
+	}
+
+	rcv := diffRPCConnJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestEqualsRemoteHosts(t *testing.T) {
+	v1 := []*RemoteHost{
+		{
+			ID:          "host1_ID",
+			Address:     "127.0.0.1:8080",
+			Transport:   "tcp",
+			Synchronous: false,
+			TLS:         false,
+		},
+	}
+
+	v2 := []*RemoteHost{
+		{
+			ID:          "host2_ID",
+			Address:     "0.0.0.0:8080",
+			Transport:   "udp",
+			Synchronous: true,
+			TLS:         true,
+		},
+	}
+
+	if equalsRemoteHosts(v1, v2) {
+		t.Error("Hosts should not match")
+	}
+
+	v1 = v2
+	if !equalsRemoteHosts(v1, v2) {
+		t.Error("Hosts should match")
+	}
+
+	v2 = []*RemoteHost{}
+	if equalsRemoteHosts(v1, v2) {
+		t.Error("Hosts should not match")
+	}
+}
+
+func TestEqualsRPCConn(t *testing.T) {
+	v1 := &RPCConn{
+		Strategy: utils.MetaTopUpReset,
+		PoolSize: 2,
+		Conns: []*RemoteHost{
+			{
+				ID:          "host1_ID",
+				Address:     "127.0.0.1:8080",
+				Transport:   "tcp",
+				Synchronous: false,
+				TLS:         false,
+			},
+		},
+	}
+
+	v2 := &RPCConn{
+		Strategy: "*disconnect",
+		PoolSize: 3,
+		Conns: []*RemoteHost{
+			{
+				ID:          "host2_ID",
+				Address:     "0.0.0.0:8080",
+				Transport:   "udp",
+				Synchronous: true,
+				TLS:         true,
+			},
+		},
+	}
+
+	if equalsRPCConn(v1, v2) {
+		t.Error("Conns should not match")
+	}
+
+	v1 = v2
+	if !equalsRPCConn(v1, v2) {
+		t.Error("Conns should match")
+	}
+
+	v2 = &RPCConn{}
+	if equalsRPCConn(v1, v2) {
+		t.Error("Conns should not match")
+	}
+}
+
+func TestDiffRPCConnsJson(t *testing.T) {
+	var d RPCConnsJson
+
+	v1 := RPCConns{
+		"CONN_1": {
+			Strategy: utils.MetaTopUpReset,
+			PoolSize: 2,
+			Conns: []*RemoteHost{
+				{
+					ID:          "host1_ID",
+					Address:     "127.0.0.1:8080",
+					Transport:   "tcp",
+					Synchronous: false,
+					TLS:         false,
+				},
+			},
+		},
+	}
+
+	v2 := RPCConns{
+		"CONN_1": {
+			Strategy: "*disconnect",
+			PoolSize: 3,
+			Conns: []*RemoteHost{
+				{
+					ID:          "host2_ID",
+					Address:     "0.0.0.0:8080",
+					Transport:   "udp",
+					Synchronous: true,
+					TLS:         true,
+				},
+			},
+		},
+	}
+
+	expected := RPCConnsJson{
+		"CONN_1": {
+			Strategy: utils.StringPointer("*disconnect"),
+			PoolSize: utils.IntPointer(3),
+			Conns: &[]*RemoteHostJson{
+				{
+					Id:          utils.StringPointer("host2_ID"),
+					Address:     utils.StringPointer("0.0.0.0:8080"),
+					Transport:   utils.StringPointer("udp"),
+					Synchronous: utils.BoolPointer(true),
+					Tls:         utils.BoolPointer(true),
+				},
+			},
+		},
+	}
+
+	rcv := diffRPCConnsJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestNewDfltRemoteHost(t *testing.T) {
+	dfltRemoteHost = nil
+	rcv := NewDfltRemoteHost()
+	if !reflect.DeepEqual(rcv, new(RemoteHost)) {
+		t.Errorf("Expected %v \n but received \n %v", new(RemoteHost), rcv)
+	}
+}

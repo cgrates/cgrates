@@ -143,3 +143,52 @@ func TestResourceSConfigClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffResourceSJsonCfg(t *testing.T) {
+	var d *ResourceSJsonCfg
+
+	v1 := &ResourceSConfig{
+		Enabled:             false,
+		IndexedSelects:      false,
+		ThresholdSConns:     []string{"*localhost"},
+		StoreInterval:       1 * time.Second,
+		StringIndexedFields: &[]string{"*req.index1"},
+		PrefixIndexedFields: &[]string{"*req.index2"},
+		SuffixIndexedFields: &[]string{"*req.index3"},
+		NestedFields:        false,
+	}
+
+	v2 := &ResourceSConfig{
+		Enabled:             true,
+		IndexedSelects:      true,
+		ThresholdSConns:     []string{"*birpc"},
+		StoreInterval:       2 * time.Second,
+		StringIndexedFields: &[]string{"*req.index11"},
+		PrefixIndexedFields: &[]string{"*req.index22"},
+		SuffixIndexedFields: &[]string{"*req.index33"},
+		NestedFields:        true,
+	}
+
+	expected := &ResourceSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Thresholds_conns:      &[]string{"*birpc"},
+		Store_interval:        utils.StringPointer("2s"),
+		String_indexed_fields: &[]string{"*req.index11"},
+		Prefix_indexed_fields: &[]string{"*req.index22"},
+		Suffix_indexed_fields: &[]string{"*req.index33"},
+		Nested_fields:         utils.BoolPointer(true),
+	}
+
+	rcv := diffResourceSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &ResourceSJsonCfg{}
+	rcv = diffResourceSJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

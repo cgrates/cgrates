@@ -304,3 +304,83 @@ func TestStorDbCfgClone(t *testing.T) {
 	}
 
 }
+
+func TestDiffStorDBJsonCfg(t *testing.T) {
+	var d *DbJsonCfg
+
+	v1 := &StorDbCfg{
+		Type:                "mysql",
+		Host:                "localhost",
+		Port:                "8080",
+		Name:                "cgrates",
+		User:                "cgrates_user",
+		Password:            "cgrates_password",
+		StringIndexedFields: []string{"*req.index1"},
+		PrefixIndexedFields: []string{"*req.index2"},
+		RmtConns:            []string{"*rmt_conn"},
+		RplConns:            []string{"*rpl_conns"},
+		Items: map[string]*ItemOpt{
+			"ITEM_1": {
+				Remote: false,
+			},
+		},
+		Opts: map[string]interface{}{},
+	}
+
+	v2 := &StorDbCfg{
+		Type:                "postgres",
+		Host:                "0.0.0.0",
+		Port:                "8037",
+		Name:                "itsyscom",
+		User:                "itsyscom_user",
+		Password:            "itsyscom_password",
+		StringIndexedFields: []string{"*req.index11"},
+		PrefixIndexedFields: []string{"*req.index22"},
+		RmtConns:            []string{"*rmt_conn2"},
+		RplConns:            []string{"*rpl_conn2"},
+		Items: map[string]*ItemOpt{
+			"ITEM_1": {
+				Remote: true,
+			},
+		},
+		Opts: map[string]interface{}{
+			"OPT_1": "opt1",
+		},
+	}
+
+	expected := &DbJsonCfg{
+		Db_type:               utils.StringPointer("postgres"),
+		Db_host:               utils.StringPointer("0.0.0.0"),
+		Db_port:               utils.IntPointer(8037),
+		Db_name:               utils.StringPointer("itsyscom"),
+		Db_user:               utils.StringPointer("itsyscom_user"),
+		String_indexed_fields: &[]string{"*req.index11"},
+		Prefix_indexed_fields: &[]string{"*req.index22"},
+		Db_password:           utils.StringPointer("itsyscom_password"),
+		Remote_conns:          &[]string{"*rmt_conn2"},
+		Replication_conns:     &[]string{"*rpl_conn2"},
+		Items: map[string]*ItemOptJson{
+			"ITEM_1": {
+				Remote: utils.BoolPointer(true),
+			},
+		},
+		Opts: map[string]interface{}{
+			"OPT_1": "opt1",
+		},
+	}
+
+	rcv := diffStorDBDbJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &DbJsonCfg{
+		Items: map[string]*ItemOptJson{},
+		Opts:  map[string]interface{}{},
+	}
+	rcv = diffStorDBDbJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
