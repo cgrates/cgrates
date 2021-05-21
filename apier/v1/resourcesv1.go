@@ -73,7 +73,7 @@ func (apierSv1 *APIerSv1) GetResourceProfile(arg *utils.TenantID, reply *engine.
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	tnt := utils.EmptyString
+	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
