@@ -58,11 +58,11 @@ type TpReader struct {
 	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
-	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	acntActionPlans    map[string][]string
-	cacheConns         []string
-	schedulerConns     []string
-	isInternalDB       bool // do not reload cache if we use intarnalDB
+	// thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
+	acntActionPlans map[string][]string
+	cacheConns      []string
+	schedulerConns  []string
+	isInternalDB    bool // do not reload cache if we use intarnalDB
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
@@ -1154,11 +1154,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
 	tpr.thProfiles = mapTHs
-	for tntID := range mapTHs {
-		tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-
-	}
-	return nil
+	return
 }
 
 func (tpr *TpReader) LoadThresholds() error {
@@ -1679,25 +1675,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	}
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
-	}
-	if verbose {
-		log.Print("Thresholds:")
-	}
-	for _, thd := range tpr.thresholds {
-		var minSleep time.Duration
-		if tpr.thProfiles[*thd].MinSleep != utils.EmptyString {
-			if minSleep, err = utils.ParseDurationWithNanosecs(tpr.thProfiles[*thd].MinSleep); err != nil {
-				return
-			}
-		}
-		if err = tpr.dm.SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}, minSleep, false); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", thd.TenantID())
-		}
-	}
-	if len(tpr.thresholds) != 0 {
 		loadIDs[utils.CacheThresholds] = loadID
 	}
 	if verbose {
@@ -1898,12 +1875,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.StatQueuePrefix:
 		keys := make([]string, len(tpr.statQueues))
 		for i, k := range tpr.statQueues {
-			keys[i] = k.TenantID()
-		}
-		return keys, nil
-	case utils.ThresholdPrefix:
-		keys := make([]string, len(tpr.thresholds))
-		for i, k := range tpr.thresholds {
 			keys[i] = k.TenantID()
 		}
 		return keys, nil
@@ -2209,18 +2180,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 	}
 	if verbose {
-		log.Print("Thresholds:")
-	}
-	for _, thd := range tpr.thresholds {
-		if err = tpr.dm.RemoveThreshold(thd.Tenant, thd.ID, utils.NonTransactional); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", thd.TenantID())
-		}
-	}
-
-	if verbose {
 		log.Print("RouteProfiles:")
 	}
 	for _, tpSpl := range tpr.routeProfiles {
@@ -2367,8 +2326,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
-	}
-	if len(tpr.thresholds) != 0 {
 		loadIDs[utils.CacheThresholds] = loadID
 	}
 	if len(tpr.routeProfiles) != 0 {
@@ -2414,7 +2371,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 	aatIDs, _ := tpr.GetLoadedIds(utils.ActionTriggerPrefix)
 	stqIDs, _ := tpr.GetLoadedIds(utils.StatQueuePrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
-	trsIDs, _ := tpr.GetLoadedIds(utils.ThresholdPrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
 	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
@@ -2440,7 +2396,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, opts map[string]i
 		utils.ActionTriggerIDs:      aatIDs,
 		utils.StatsQueueIDs:         stqIDs,
 		utils.StatsQueueProfileIDs:  stqpIDs,
-		utils.ThresholdIDs:          trsIDs,
+		utils.ThresholdIDs:          trspfIDs,
 		utils.ThresholdProfileIDs:   trspfIDs,
 		utils.FilterIDs:             flrIDs,
 		utils.RouteProfileIDs:       routeIDs,

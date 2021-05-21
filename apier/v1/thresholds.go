@@ -140,20 +140,11 @@ func (apierSv1 *APIerSv1) SetThresholdProfile(args *engine.ThresholdProfileWithA
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//handle caching for ThresholdProfile
+	//handle caching for ThresholdProfile and Threshold
 	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
 		args.TenantID(), &args.FilterIDs, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.DataManager.SetThreshold(&engine.Threshold{Tenant: args.Tenant, ID: args.ID}, args.MinSleep, false); err != nil {
-		return err
-	}
-	//handle caching for Threshold
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholds,
-		args.TenantID(), nil, nil, args.APIOpts); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-
 	*reply = utils.OK
 	return nil
 }
@@ -175,18 +166,10 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts
 		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierSv1.DataManager.RemoveThreshold(tnt, args.ID, utils.NonTransactional); err != nil {
-		return utils.APIErrorHandler(err)
-	}
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
 	//make 1 insert for both ThresholdProfile and Threshold instead of 2
 	loadID := time.Now().UnixNano()
 	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	//handle caching for Threshold
-	if err := apierSv1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheThresholds,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

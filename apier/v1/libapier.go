@@ -50,11 +50,19 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 			return
 		}
 	case utils.MetaClear:
-		cacheIDs := make([]string, 1, 2)
+		cacheIDs := make([]string, 1, 3)
 		cacheIDs[0] = cacheID
 		// do not send a EmptyString if the item doesn't have indexes
 		if cIdx, has := utils.CacheInstanceToCacheIndex[cacheID]; has {
 			cacheIDs = append(cacheIDs, cIdx)
+		}
+		switch cacheID { // add the items to the cache reload
+		case utils.CacheThresholdProfiles:
+			cacheIDs = append(cacheIDs, utils.CacheThresholds)
+		case utils.CacheResourceProfiles:
+			cacheIDs = append(cacheIDs, utils.CacheResources)
+		case utils.CacheStatQueueProfiles:
+			cacheIDs = append(cacheIDs, utils.CacheStatQueues)
 		}
 		method = utils.CacheSv1Clear
 		args = &utils.AttrCacheIDsWithAPIOpts{
@@ -77,6 +85,14 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 			utils.CacheInstanceToArg[cacheID]: {itemID},
 		},
 		APIOpts: opts,
+	}
+	switch cacheID { // add the items to the cache reload
+	case utils.CacheThresholdProfiles:
+		rpl.ArgsCache[utils.ThresholdIDs] = []string{itemID}
+	case utils.CacheResourceProfiles:
+		rpl.ArgsCache[utils.ResourceIDs] = []string{itemID}
+	case utils.CacheStatQueueProfiles:
+		rpl.ArgsCache[utils.StatsQueueIDs] = []string{itemID}
 	}
 	if filterIDs == nil { // in case we remove a profile we do not need to reload the indexes
 		return

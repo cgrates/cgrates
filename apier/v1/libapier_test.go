@@ -71,6 +71,7 @@ func TestComposeArgsReload(t *testing.T) {
 		Tenant:  "cgrates.org",
 		ArgsCache: map[string][]string{
 			utils.StatsQueueProfileIDs: {"cgrates.org:Stat2"},
+			utils.StatsQueueIDs:        {"cgrates.org:Stat2"},
 			utils.StatFilterIndexIDs: {
 				"cgrates.org:*string:*req.Account:1001",
 				"cgrates.org:*prefix:*req.Destination:1001",
@@ -134,7 +135,7 @@ func TestCallCache(t *testing.T) {
 		Method: utils.CacheSv1Clear,
 		Params: &utils.AttrCacheIDsWithAPIOpts{
 			Tenant:   "cgrates.org",
-			CacheIDs: []string{utils.CacheStatQueueProfiles, utils.CacheStatFilterIndexes},
+			CacheIDs: []string{utils.CacheStatQueueProfiles, utils.CacheStatFilterIndexes, utils.CacheStatQueues},
 			APIOpts:  make(map[string]interface{}),
 		},
 	}
@@ -153,6 +154,7 @@ func TestCallCache(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ArgsCache: map[string][]string{
 				utils.StatsQueueProfileIDs: {"cgrates.org:Stat2"},
+				utils.StatsQueueIDs:        {"cgrates.org:Stat2"},
 				utils.StatFilterIndexIDs: {
 					"cgrates.org:*string:*req.Account:1001",
 					"cgrates.org:*prefix:*req.Destination:1001",
