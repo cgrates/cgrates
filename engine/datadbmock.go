@@ -33,6 +33,8 @@ type DataDBMock struct {
 	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error)
 	SetAttributeProfileDrvF    func(ctx *context.Context, attr *AttributeProfile) error
 	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
+	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
+	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
 }
 
 //Storage methods
@@ -193,7 +195,10 @@ func (dbM *DataDBMock) RemoveThresholdDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetFilterDrv(*context.Context, string, string) (*Filter, error) {
+func (dbM *DataDBMock) GetFilterDrv(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+	if dbM.GetFilterDrvF != nil {
+		return dbM.GetFilterDrvF(ctx, str1, str2)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
@@ -267,6 +272,9 @@ func (dbM *DataDBMock) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 }
 
 func (dbM *DataDBMock) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
+	if dbM.SetLoadIDsDrvF != nil {
+		return dbM.SetLoadIDsDrvF(ctx, loadIDs)
+	}
 	return utils.ErrNotImplemented
 }
 
