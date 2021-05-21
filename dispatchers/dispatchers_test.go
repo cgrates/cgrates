@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -1037,4 +1038,314 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (error, interface{}) {
 	*reply = utils.Pong
 	return nil, nil
+}
+
+func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.T) {
+	tmp := engine.Cache
+	defer func() {
+		engine.Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+
+	dS := &DispatcherService{
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: engine.NewFilterS(cfg, nil, dm),
+	}
+	dS.cfg.DispatcherSCfg().AnySubsystem = false
+
+	dsp1 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1002"},
+		Subsystems: []string{utils.MetaSessionS},
+		ID:         "DSP_1",
+		Strategy:   "*weight",
+		Weight:     10,
+	}
+	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsp2 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
+		Subsystems: []string{utils.MetaAny},
+		ID:         "DSP_2",
+		Strategy:   "*weight",
+		Weight:     20,
+	}
+	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ev := &utils.CGREvent{
+		Tenant: tnt,
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+	subsys := utils.MetaSessionS
+
+	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, dsp2) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp2, rcv)
+	}
+}
+
+func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
+	tmp := engine.Cache
+	defer func() {
+		engine.Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+
+	dS := &DispatcherService{
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: engine.NewFilterS(cfg, nil, dm),
+	}
+	dS.cfg.DispatcherSCfg().AnySubsystem = false
+
+	dsp1 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
+		Subsystems: []string{utils.MetaSessionS},
+		ID:         "DSP_1",
+		Strategy:   "*weight",
+		Weight:     20,
+	}
+	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsp2 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
+		Subsystems: []string{utils.MetaAny},
+		ID:         "DSP_2",
+		Strategy:   "*weight",
+		Weight:     10,
+	}
+	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ev := &utils.CGREvent{
+		Tenant: tnt,
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+	subsys := utils.MetaSessionS
+
+	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, dsp1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp1, rcv)
+	}
+}
+
+func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
+	tmp := engine.Cache
+	defer func() {
+		engine.Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+
+	dS := &DispatcherService{
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: engine.NewFilterS(cfg, nil, dm),
+	}
+	dS.cfg.DispatcherSCfg().AnySubsystem = false
+
+	dsp1 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1002"},
+		Subsystems: []string{utils.MetaSessionS},
+		ID:         "DSP_1",
+		Strategy:   "*weight",
+		Weight:     20,
+	}
+	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsp2 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1002"},
+		Subsystems: []string{utils.MetaAny},
+		ID:         "DSP_2",
+		Strategy:   "*weight",
+		Weight:     10,
+	}
+	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ev := &utils.CGREvent{
+		Tenant: tnt,
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+	subsys := utils.MetaSessionS
+
+	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
+	tmp := engine.Cache
+	defer func() {
+		engine.Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+
+	dS := &DispatcherService{
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: engine.NewFilterS(cfg, nil, dm),
+	}
+
+	dsp1 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1002"},
+		Subsystems: []string{utils.MetaSessionS},
+		ID:         "DSP_1",
+		Strategy:   "*weight",
+		Weight:     20,
+	}
+	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsp2 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1002"},
+		Subsystems: []string{utils.MetaAny},
+		ID:         "DSP_2",
+		Strategy:   "*weight",
+		Weight:     10,
+	}
+	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ev := &utils.CGREvent{
+		Tenant: tnt,
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+	subsys := utils.MetaSessionS
+
+	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	} else if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
+	tmp := engine.Cache
+	defer func() {
+		engine.Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
+
+	dS := &DispatcherService{
+		cfg:   cfg,
+		dm:    dm,
+		fltrS: engine.NewFilterS(cfg, nil, dm),
+	}
+
+	dsp1 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
+		Subsystems: []string{utils.MetaSessionS},
+		ID:         "DSP_1",
+		Strategy:   "*weight",
+		Weight:     10,
+	}
+	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dsp2 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
+		Subsystems: []string{utils.MetaAny},
+		ID:         "DSP_2",
+		Strategy:   "*weight",
+		Weight:     20,
+	}
+	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tnt := "cgrates.org"
+	ev := &utils.CGREvent{
+		Tenant: tnt,
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+	subsys := utils.MetaSessionS
+
+	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, dsp2) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp2, rcv)
+	}
+
+	dsp1.Weight = 30
+	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if !reflect.DeepEqual(rcv, dsp1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp1, rcv)
+	}
 }
