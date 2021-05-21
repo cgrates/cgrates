@@ -46,11 +46,7 @@ type TpReader struct {
 	rateProfiles       map[utils.TenantID]*utils.TPRateProfile
 	actionProfiles     map[utils.TenantID]*utils.TPActionProfile
 	accounts           map[utils.TenantID]*utils.TPAccount
-	// resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
-	statQueues []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
-	// thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	// acntActionPlans    map[string][]string
-	cacheConns []string
+	cacheConns         []string
 	//schedulerConns     []string
 	isInternalDB bool // do not reload cache if we use internalDB
 }
@@ -118,7 +114,6 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 			return
 		}
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
-		tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: st.Tenant, ID: st.ID})
 	}
 	tpr.sqProfiles = mapSTs
 	return nil
@@ -429,52 +424,8 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		}
 	}
 	if len(tpr.sqProfiles) != 0 {
-		loadIDs[utils.CacheStatQueueProfiles] = loadID
-	}
-	if verbose {
-		log.Print("StatQueues:")
-	}
-	for _, sqTntID := range tpr.statQueues {
-		var ttl *time.Duration
-		if tpr.sqProfiles[*sqTntID].TTL != utils.EmptyString {
-			ttl = new(time.Duration)
-			if *ttl, err = utils.ParseDurationWithNanosecs(tpr.sqProfiles[*sqTntID].TTL); err != nil {
-				return
-			}
-			if *ttl <= 0 {
-				ttl = nil
-			}
-		}
-		metrics := make([]*MetricWithFilters, len(tpr.sqProfiles[*sqTntID].Metrics))
-		for i, metric := range tpr.sqProfiles[*sqTntID].Metrics {
-			metrics[i] = &MetricWithFilters{
-				MetricID:  metric.MetricID,
-				FilterIDs: metric.FilterIDs,
-			}
-		}
-		sq := &StatQueue{
-			Tenant: sqTntID.Tenant,
-			ID:     sqTntID.ID,
-		}
-		if !tpr.sqProfiles[*sqTntID].Stored { //for not stored queues create the metrics
-			if sq, err = NewStatQueue(sqTntID.Tenant, sqTntID.ID, metrics,
-				tpr.sqProfiles[*sqTntID].MinItems); err != nil {
-				return
-			}
-		}
-		// for non stored we do not save the metrics
-		if err = tpr.dm.SetStatQueue(context.TODO(), sq, metrics,
-			tpr.sqProfiles[*sqTntID].MinItems,
-			ttl, tpr.sqProfiles[*sqTntID].QueueLength,
-			!tpr.sqProfiles[*sqTntID].Stored); err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", sqTntID.TenantID())
-		}
-	}
-	if len(tpr.statQueues) != 0 {
 		loadIDs[utils.CacheStatQueues] = loadID
+		loadIDs[utils.CacheStatQueueProfiles] = loadID
 	}
 	if verbose {
 		log.Print("ThresholdProfiles:")
@@ -671,12 +622,6 @@ func (tpr *TpReader) ShowStatistics() {
 // GetLoadedIds returns the identities loaded for a specific category, useful for cache reloads
 func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
-	case utils.StatQueuePrefix:
-		keys := make([]string, len(tpr.statQueues))
-		for i, k := range tpr.statQueues {
-			keys[i] = k.TenantID()
-		}
-		return keys, nil
 	case utils.ResourceProfilesPrefix:
 		keys := make([]string, len(tpr.resProfiles))
 		i := 0
@@ -795,17 +740,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		}
 		if verbose {
 			log.Print("\t", utils.ConcatenatedKey(tpST.Tenant, tpST.ID))
-		}
-	}
-	if verbose {
-		log.Print("StatQueues:")
-	}
-	for _, sqTntID := range tpr.statQueues {
-		if err = tpr.dm.RemoveStatQueue(context.TODO(), sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", sqTntID.TenantID())
 		}
 	}
 	if verbose {
@@ -943,8 +877,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	if len(tpr.sqProfiles) != 0 {
 		loadIDs[utils.CacheStatQueueProfiles] = loadID
-	}
-	if len(tpr.statQueues) != 0 {
 		loadIDs[utils.CacheStatQueues] = loadID
 	}
 	if len(tpr.thProfiles) != 0 {
@@ -988,7 +920,6 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 	}
 	// take IDs for each type
 	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
-	stqIDs, _ := tpr.GetLoadedIds(utils.StatQueuePrefix)
 	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
 	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
 	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
@@ -1005,7 +936,7 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 	cacheArgs := map[string][]string{
 		utils.ResourceProfileIDs:   rspIDs,
 		utils.ResourceIDs:          rspIDs,
-		utils.StatsQueueIDs:        stqIDs,
+		utils.StatsQueueIDs:        stqpIDs,
 		utils.StatsQueueProfileIDs: stqpIDs,
 		utils.ThresholdIDs:         trspfIDs,
 		utils.ThresholdProfileIDs:  trspfIDs,

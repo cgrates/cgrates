@@ -721,24 +721,21 @@ func TestLoaderProcessStatsWrongMetrics(t *testing.T) {
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: {
-			{Tag: "MetricIDs",
-				Path:  "MetricIDs",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
-			{Tag: "Stored",
-				Path:  "Stored",
-				Type:  utils.MetaComposed,
-				Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
+		dataTpls: map[string][]*config.FCTemplate{
+			utils.MetaStats: {
+				{Tag: "MetricIDs",
+					Path:  "MetricIDs",
+					Type:  utils.MetaComposed,
+					Value: config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep)},
+				{Tag: "Stored",
+					Path:  "Stored",
+					Type:  utils.MetaComposed,
+					Value: config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep)},
+			},
 		},
 	}
-	statsCsv := `
-#Metrics[0],Stored[1]
-not_a_valid_metric_type,true,
-`
-	rdr := io.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(`#Metrics[0],Stored[1]
+not_a_valid_metric_type,true,`))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -746,7 +743,7 @@ not_a_valid_metric_type,true,
 			utils.StatsCsv: &openedCSVFile{fileName: utils.StatsCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	expected := "SERVER_ERROR: unsupported metric type <not_a_valid_metric_type>"
+	expected := "unsupported metric type <not_a_valid_metric_type>"
 	if err := ldr.processContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -755,11 +752,8 @@ not_a_valid_metric_type,true,
 	}
 
 	//initialize again but with a valid metric and false stored field
-	statsCsv = `
-#Metrics[0],Stored[1]
-*sum#~*req.Value,false
-`
-	rdr = io.NopCloser(strings.NewReader(statsCsv))
+	rdr = io.NopCloser(strings.NewReader(`#Metrics[0],Stored[1]
+*sum#~*req.Value,false`))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4554,26 +4548,23 @@ func TestRemoveStatQueueMockError(t *testing.T) {
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaStats: {
-			{Tag: "TenantID",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ProfileID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
+		dataTpls: map[string][]*config.FCTemplate{
+			utils.MetaStats: {
+				{Tag: "TenantID",
+					Path:      "Tenant",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+					Mandatory: true},
+				{Tag: "ProfileID",
+					Path:      "ID",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+					Mandatory: true},
+			},
 		},
 	}
-	statsCsv := `
-#Tenant[0],ProfileID[1]
-cgrates.org,REM_STATS_1
-`
-	rdr := io.NopCloser(strings.NewReader(statsCsv))
+	rdr := io.NopCloser(strings.NewReader(`#Tenant[0],ProfileID[1]
+cgrates.org,REM_STATS_1`))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4585,18 +4576,15 @@ cgrates.org,REM_STATS_1
 			},
 		},
 	}
-	expStats := &engine.StatQueueProfile{
-		Tenant: "cgrates.org",
-		ID:     "REM_STATS_1",
-	}
 
-	if err := ldr.dm.SetStatQueueProfile(context.TODO(), expStats, true); err != nil {
-		t.Error(err)
-	}
-
-	newData := &dataDBMockError{}
-	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := utils.ErrNoDatabaseConn
+	ldr.dm = engine.NewDataManager(&engine.DataDBMock{
+		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *engine.StatQueueProfile, err error) {
+			return nil, nil
+		},
+		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *engine.StatQueueProfile) (err error) { return expected },
+		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return expected },
+	}, config.CgrConfig().CacheCfg(), nil)
 
 	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
