@@ -1412,13 +1412,3 @@ func TestLoadDispatcherHosts(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherHosts), utils.ToJSON(csvr.dispatcherHosts[dphKey]))
 	}
 }
-
-func TestLoadstatQueues(t *testing.T) {
-	eStatQueues := []*utils.TenantID{
-		{Tenant: "cgrates.org", ID: "TestStats"},
-		{Tenant: "cgrates.org", ID: "TestStats2"},
-	}
-	if len(csvr.statQueues) != len(eStatQueues) {
-		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
-	}
-}
