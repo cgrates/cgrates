@@ -112,7 +112,9 @@
 },
 
 
-"filters": {								
+"filters": {
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*internal"],
 	"apiers_conns": ["*internal"],
 },
 
