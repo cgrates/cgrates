@@ -21,6 +21,7 @@ import (
 
 	"github.com/cgrates/baningo"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -136,10 +137,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		}
 	}
 	for _, dataID := range ids {
-		if mustBeCached {
-			if _, hasIt := Cache.Get(utils.CachePrefixToInstance[prfx], dataID); !hasIt { // only cache if previously there
-				continue
-			}
+		if mustBeCached &&
+			!Cache.HasItem(utils.CachePrefixToInstance[prfx], dataID) { // only cache if previously there
+			continue
 		}
 		switch prfx {
 		case utils.DestinationPrefix:
@@ -171,7 +171,10 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
+			// guardian.Guardian.Guard(func() (_ interface{}, _ error) { // lock the get
 			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			// return
+			// }, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+dataID)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
@@ -1173,37 +1176,50 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		oldSts.TTL != sqp.TTL ||
 		oldSts.MinItems != sqp.MinItems ||
 		(oldSts.Stored != sqp.Stored && oldSts.Stored) { // reset the stats queue if the profile changed this fields
-		var sq *StatQueue
-		if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
-			sqp.MinItems); err != nil {
+		guardian.Guardian.Guard(func() (_ interface{}, _ error) { // we change the queue so lock it
+			var sq *StatQueue
+			if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
+				sqp.MinItems); err != nil {
+				return
+			}
+			err = dm.SetStatQueue(sq)
 			return
-		}
-		err = dm.SetStatQueue(sq)
-	} else if oSq, errRs := dm.GetStatQueue(sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
-		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the stats queue does not exist
-		var sq *StatQueue
-		if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
-			sqp.MinItems); err != nil {
-			return
-		}
-		err = dm.SetStatQueue(sq)
-	} else { // update the metrics if needed
-		cMetricIDs := utils.StringSet{}
-		for _, metric := range sqp.Metrics { // add missing metrics and recreate the old metrics that changed
-			cMetricIDs.Add(metric.MetricID)
-			if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
-				!utils.SliceStringEqual(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
-				if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
-					sqp.MinItems, metric.FilterIDs); err != nil {
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqp.TenantID())
+	} else {
+		guardian.Guardian.Guard(func() (_ interface{}, _ error) { // we change the queue so lock it
+			oSq, errRs := dm.GetStatQueue(sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
+				true, false, utils.NonTransactional)
+			if errRs == utils.ErrNotFound { // the stats queue does not exist
+				var sq *StatQueue
+				if sq, err = NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
+					sqp.MinItems); err != nil {
 					return
 				}
+				err = dm.SetStatQueue(sq)
+				return
 			}
-		}
-		for sqMetricID := range oSq.SQMetrics { // remove the old metrics
-			if !cMetricIDs.Has(sqMetricID) {
-				delete(oSq.SQMetrics, sqMetricID)
+			// update the metrics if needed
+			cMetricIDs := utils.StringSet{}
+			for _, metric := range sqp.Metrics { // add missing metrics and recreate the old metrics that changed
+				cMetricIDs.Add(metric.MetricID)
+				if oSqMetric, has := oSq.SQMetrics[metric.MetricID]; !has ||
+					!utils.SliceStringEqual(oSqMetric.GetFilterIDs(), metric.FilterIDs) { // recreate it if the filter changed
+					if oSq.SQMetrics[metric.MetricID], err = NewStatMetric(metric.MetricID,
+						sqp.MinItems, metric.FilterIDs); err != nil {
+						return
+					}
+				}
 			}
-		}
+			for sqMetricID := range oSq.SQMetrics { // remove the old metrics
+				if !cMetricIDs.Has(sqMetricID) {
+					delete(oSq.SQMetrics, sqMetricID)
+				}
+			}
+			if sqp.Stored { // already changed the value in cache
+				err = dm.SetStatQueue(oSq) // only set it in DB if Stored is true
+			}
+			return
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqp.TenantID())
 	}
 	return
 }

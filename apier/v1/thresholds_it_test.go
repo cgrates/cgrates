@@ -754,13 +754,12 @@ func testV1TSUpdateSnooze(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
+	eTd = engine.Threshold{Tenant: "cgrates.org", ID: "TH4"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH4"}}, &td); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+	} else if !reflect.DeepEqual(eTd, td) { // the threshold was reseted because the configuration chaged
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
-	} else if !(td.Snooze.After(tNow.Add(4*time.Minute)) && td.Snooze.Before(tNow.Add(6*time.Minute))) { // Snooze time should be between time.Now + 9 min and time.Now + 11 min
-		t.Errorf("expecting: %+v, received: %+v", tNow.Add(10*time.Minute), td.Snooze)
 	}
 
 }

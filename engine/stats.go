@@ -173,11 +173,10 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 			continue
 		}
 		var sq *StatQueue
-		lkID := utils.StatQueuePrefix + utils.ConcatenatedKey(sqPrfl.Tenant, sqPrfl.ID)
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
 			sq, err = sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
-		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
+		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sqPrfl.TenantID())
 		if err != nil {
 			return nil, err
 		}
@@ -246,15 +245,14 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 }
 
 func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
-	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
-		return
-	}
-	lkID := utils.StatQueuePrefix + sq.TenantID()
 	var removed int
-	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+		if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
+			return
+		}
 		removed, err = sq.remExpired()
 		return
-	}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
+	}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+utils.ConcatenatedKey(tnt, id))
 	if err != nil || removed == 0 {
 		return
 	}
@@ -298,11 +296,10 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 	var withErrors bool
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
-		lkID := utils.StatQueuePrefix + sq.TenantID()
 		guardian.Guardian.Guard(func() (_ interface{}, _ error) {
 			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
-		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
+		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
@@ -508,24 +505,30 @@ func (sS *StatService) StartLoop() {
 // V1ResetStatQueue resets the stat queue
 func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (err error) {
 	var sq *StatQueue
-	if sq, err = sS.dm.GetStatQueue(tntID.Tenant, tntID.ID,
-		true, true, utils.NonTransactional); err != nil {
-		return
-	}
-	sq.Lock()
-	defer sq.Unlock()
-	sq.SQItems = make([]SQItem, 0)
-	metrics := sq.SQMetrics
-	sq.SQMetrics = make(map[string]StatMetric)
-	for id, m := range metrics {
-		var metric StatMetric
-		if metric, err = NewStatMetric(id,
-			m.GetMinItems(), m.GetFilterIDs()); err != nil {
+	guardian.Guardian.Guard(func() (_ interface{}, _ error) {
+		if sq, err = sS.dm.GetStatQueue(tntID.Tenant, tntID.ID,
+			true, true, utils.NonTransactional); err != nil {
 			return
 		}
-		sq.SQMetrics[id] = metric
+		sq.Lock()
+		defer sq.Unlock()
+		sq.SQItems = make([]SQItem, 0)
+		metrics := sq.SQMetrics
+		sq.SQMetrics = make(map[string]StatMetric)
+		for id, m := range metrics {
+			var metric StatMetric
+			if metric, err = NewStatMetric(id,
+				m.GetMinItems(), m.GetFilterIDs()); err != nil {
+				return
+			}
+			sq.SQMetrics[id] = metric
+		}
+		sq.dirty = utils.BoolPointer(true)
+		return
+	}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+tntID.TenantID())
+	if err != nil {
+		return
 	}
-	sq.dirty = utils.BoolPointer(true)
 	sS.storeStatQueue(sq)
 	*rply = utils.OK
 	return
