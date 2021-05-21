@@ -752,7 +752,7 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 		}
 	}
 
-	if oldTh == nil || // create the threshold if it didn't exit before
+	if oldTh == nil || // create the threshold if it didn't exist before
 		oldTh.MaxHits != th.MaxHits ||
 		oldTh.MinHits != th.MinHits ||
 		oldTh.MinSleep != th.MinSleep { // reset the threshold if the profile changed this fields
@@ -989,35 +989,9 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 	return
 }
 
-func (dm *DataManager) SetResource(ctx *context.Context, rs *Resource, ttl *time.Duration, usageLimit float64, simpleSet bool) (err error) {
+func (dm *DataManager) SetResource(ctx *context.Context, rs *Resource) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
-	}
-	if !simpleSet {
-		// do stuff
-		tnt := rs.Tenant // save the tenant
-		id := rs.ID      // save the ID from the initial StatQueue
-		// handle metrics for statsQueue
-		rs, err = dm.GetResource(ctx, tnt, id, true, false, utils.NonTransactional)
-		if err != nil && err != utils.ErrNotFound {
-			return
-		}
-		if err == utils.ErrNotFound {
-			rs = &Resource{Tenant: tnt, ID: id, Usages: make(map[string]*ResourceUsage)}
-			// if the resource didn't exists simply initiate the Usages
-		} else {
-			rs.ttl = ttl
-			rs.removeExpiredUnits()
-			for rsUsage := range rs.Usages {
-				if rs.totalUsage() > usageLimit {
-					if err = rs.clearUsage(rsUsage); err != nil {
-						return
-					}
-				} else {
-					break
-				}
-			}
-		}
 	}
 	if err = dm.DataDB().SetResourceDrv(ctx, rs); err != nil {
 		return
@@ -1134,14 +1108,45 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProf
 		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
-		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		if err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourceProfilesPrefix, rp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResourceProfile,
 			&ResourceProfileWithAPIOpts{
 				ResourceProfile: rp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
+			return
+		}
+	}
+	if oldRes == nil || // create the resource if it didn't exist before
+		oldRes.UsageTTL != rp.UsageTTL ||
+		oldRes.Limit != rp.Limit ||
+		oldRes.Stored != rp.Stored { // reset the resource if the profile changed this fields
+		var ttl *time.Duration
+		if rp.UsageTTL > 0 {
+			ttl = &rp.UsageTTL
+		}
+		err = dm.SetResource(ctx, &Resource{
+			Tenant: rp.Tenant,
+			ID:     rp.ID,
+			Usages: make(map[string]*ResourceUsage),
+			ttl:    ttl,
+			rPrf:   rp,
+		})
+	} else if _, errRs := dm.GetResource(ctx, rp.Tenant, rp.ID, // do not try to get the resource if the configuration changed
+		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the resource does not exist
+		var ttl *time.Duration
+		if rp.UsageTTL > 0 {
+			ttl = &rp.UsageTTL
+		}
+		err = dm.SetResource(ctx, &Resource{
+			Tenant: rp.Tenant,
+			ID:     rp.ID,
+			Usages: make(map[string]*ResourceUsage),
+			ttl:    ttl,
+			rPrf:   rp,
+		})
 	}
 	return
 }
@@ -1179,7 +1184,7 @@ func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id, t
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return
+	return dm.RemoveResource(ctx, tenant, id, transactionID)
 }
 
 func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err error) {

@@ -35,14 +35,14 @@ type DataDBMock struct {
 	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
 	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
 	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
-	GetResourceProfileDrvF     func(*context.Context, string, string) (*ResourceProfile, error)
-	SetResourceProfileDrvF     func(*context.Context, *ResourceProfile) error
-	RemoveResourceProfileDrvF  func(*context.Context, string, string) error
 	GetChargerProfileDrvF      func(*context.Context, string, string) (*ChargerProfile, error)
 	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*Threshold, error)
+	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*ResourceProfile, error)
+	SetResourceProfileDrvF     func(ctx *context.Context, rp *ResourceProfile) error
+	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
 }
 
 //Storage methods
@@ -88,7 +88,7 @@ func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (boo
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceProfileDrv(ctx *context.Context, tnt string, id string) (*ResourceProfile, error) {
+func (dbM *DataDBMock) GetResourceProfileDrv(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
 	if dbM.GetResourceProfileDrvF != nil {
 		return dbM.GetResourceProfileDrvF(ctx, tnt, id)
 	}

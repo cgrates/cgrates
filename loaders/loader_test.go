@@ -4612,26 +4612,23 @@ func TestRemoveResourcesMockError(t *testing.T) {
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
-	}
-	ldr.dataTpls = map[string][]*config.FCTemplate{
-		utils.MetaResources: {
-			{Tag: "Tenant",
-				Path:      "Tenant",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
-				Mandatory: true},
-			{Tag: "ID",
-				Path:      "ID",
-				Type:      utils.MetaComposed,
-				Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
-				Mandatory: true},
+		dataTpls: map[string][]*config.FCTemplate{
+			utils.MetaResources: {
+				{Tag: "Tenant",
+					Path:      "Tenant",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+					Mandatory: true},
+				{Tag: "ID",
+					Path:      "ID",
+					Type:      utils.MetaComposed,
+					Value:     config.NewRSRParsersMustCompile("~*req.1", utils.InfieldSep),
+					Mandatory: true},
+			},
 		},
 	}
-	resourcesCSV := `
-#Tenant[0],ID[1]
-cgrates.org,NewRes1
-`
-	rdr := io.NopCloser(strings.NewReader(resourcesCSV))
+	rdr := io.NopCloser(strings.NewReader(`	#Tenant[0],ID[1]
+	cgrates.org,NewRes1`))
 	rdrCsv := csv.NewReader(rdr)
 	rdrCsv.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -4640,18 +4637,12 @@ cgrates.org,NewRes1
 				rdr: rdr, csvRdr: rdrCsv}},
 	}
 
-	resPrf := &engine.ResourceProfile{
-		Tenant: "cgrates.org",
-		ID:     "NewRes1",
-	}
-
-	if err := ldr.dm.SetResourceProfile(context.TODO(), resPrf, true); err != nil {
-		t.Error(err)
-	}
-
-	newData := &dataDBMockError{}
-	ldr.dm = engine.NewDataManager(newData, config.CgrConfig().CacheCfg(), nil)
 	expected := utils.ErrNoDatabaseConn
+	ldr.dm = engine.NewDataManager(&engine.DataDBMock{
+		GetResourceProfileDrvF:    func(ctx *context.Context, tnt, id string) (*engine.ResourceProfile, error) { return nil, nil },
+		SetResourceProfileDrvF:    func(ctx *context.Context, rp *engine.ResourceProfile) error { return expected },
+		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error { return expected },
+	}, config.CgrConfig().CacheCfg(), nil)
 
 	if err := ldr.removeContent(context.Background(), utils.MetaResources, utils.EmptyString); err == nil || err != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
