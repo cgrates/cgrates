@@ -147,19 +147,19 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetResourceProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetResource(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetResource(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetStatQueueProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetStatQueue(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetThresholdProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetThreshold(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -280,7 +280,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 
 // GetStatQueue retrieves a StatQueue from dataDB
 // handles caching and deserialization of metrics
-func (dm *DataManager) GetStatQueue(tenant, id string,
+func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (sq *StatQueue, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -295,10 +295,10 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	sq, err = dm.dataDB.GetStatQueueDrv(tenant, id)
+	sq, err = dm.dataDB.GetStatQueueDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetStatQueue,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetStatQueue,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
@@ -312,12 +312,12 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 						return nil, err
 					}
 				}
-				err = dm.dataDB.SetStatQueueDrv(ssq, sq)
+				err = dm.dataDB.SetStatQueueDrv(ctx, ssq, sq)
 			}
 		}
 		if err != nil {
 			if err = utils.CastRPCErr(err); err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheStatQueues, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -327,7 +327,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheStatQueues, tntID, sq, nil,
+		if errCh := Cache.Set(ctx, utils.CacheStatQueues, tntID, sq, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -336,7 +336,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 }
 
 // SetStatQueue converts to StoredStatQueue and stores the result in dataDB
-func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
+func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *StatQueue, metrics []*MetricWithFilters,
 	minItems int, ttl *time.Duration, queueLength int, simpleSet bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
@@ -345,7 +345,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 		tnt := sq.Tenant // save the tenant
 		id := sq.ID      // save the ID from the initial StatQueue
 		// handle metrics for statsQueue
-		sq, err = dm.GetStatQueue(tnt, id, true, false, utils.NonTransactional)
+		sq, err = dm.GetStatQueue(ctx, tnt, id, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return
 		}
@@ -406,11 +406,11 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 			return
 		}
 	}
-	if err = dm.dataDB.SetStatQueueDrv(ssq, sq); err != nil {
+	if err = dm.dataDB.SetStatQueueDrv(ctx, ssq, sq); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
@@ -423,15 +423,15 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue, metrics []*MetricWithFilters,
 }
 
 // RemoveStatQueue removes the StoredStatQueue
-func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
+func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string, transactionID string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.dataDB.RemStatQueueDrv(tenant, id); err != nil {
+	if err = dm.dataDB.RemStatQueueDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueuePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveStatQueue,
@@ -822,7 +822,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	sqp, err = dm.dataDB.GetStatQueueProfileDrv(tenant, id)
+	sqp, err = dm.dataDB.GetStatQueueProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
@@ -833,7 +833,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &sqp); err == nil {
-				err = dm.dataDB.SetStatQueueProfileDrv(sqp)
+				err = dm.dataDB.SetStatQueueProfileDrv(ctx, sqp)
 			}
 		}
 		if err != nil {
@@ -872,7 +872,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
+	if err = dm.DataDB().SetStatQueueProfileDrv(ctx, sqp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -907,7 +907,7 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id,
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemStatQueueProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemStatQueueProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldSts == nil {

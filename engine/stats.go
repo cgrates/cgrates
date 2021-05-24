@@ -58,22 +58,22 @@ type StatService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (sS *StatService) Shutdown() {
+func (sS *StatService) Shutdown(ctx *context.Context) {
 	utils.Logger.Info("<StatS> service shutdown initialized")
 	close(sS.stopBackup)
-	sS.storeStats()
+	sS.storeStats(ctx)
 	utils.Logger.Info("<StatS> service shutdown complete")
 }
 
 // runBackup will regularly store resources changed to dataDB
-func (sS *StatService) runBackup() {
+func (sS *StatService) runBackup(ctx *context.Context) {
 	storeInterval := sS.cgrcfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
 		sS.loopStoped <- struct{}{}
 		return
 	}
 	for {
-		sS.storeStats()
+		sS.storeStats(ctx)
 		select {
 		case <-sS.stopBackup:
 			sS.loopStoped <- struct{}{}
@@ -84,7 +84,7 @@ func (sS *StatService) runBackup() {
 }
 
 // storeResources represents one task of complete backup
-func (sS *StatService) storeStats() {
+func (sS *StatService) storeStats(ctx *context.Context) {
 	var failedSqIDs []string
 	for { // don't stop untill we store all dirty statQueues
 		sS.ssqMux.Lock()
@@ -96,12 +96,12 @@ func (sS *StatService) storeStats() {
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
+		guardian.Guardian.Guard(ctx, func(_ *context.Context) (gRes interface{}, gErr error) {
 			if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
 						utils.StatService, sID))
-			} else if err := sS.StoreStatQueue(sqIf.(*StatQueue)); err != nil {
+			} else if err := sS.StoreStatQueue(ctx, sqIf.(*StatQueue)); err != nil {
 				failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 			}
 			return
@@ -117,18 +117,18 @@ func (sS *StatService) storeStats() {
 }
 
 // StoreStatQueue stores the statQueue in DB and corrects dirty flag
-func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
+func (sS *StatService) StoreStatQueue(ctx *context.Context, sq *StatQueue) (err error) {
 	if sq.dirty == nil || !*sq.dirty {
 		return
 	}
-	if err = sS.dm.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err = sS.dm.SetStatQueue(ctx, sq, nil, 0, nil, 0, true); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed saving StatQueue with ID: %s, error: %s",
 				sq.TenantID(), err.Error()))
 		return
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if err = sS.dm.CacheDataFromDB(context.TODO(), utils.StatQueuePrefix, []string{sq.TenantID()}, true); err != nil {
+	if err = sS.dm.CacheDataFromDB(ctx, utils.StatQueuePrefix, []string{sq.TenantID()}, true); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<StatS> failed caching StatQueue with ID: %s, error: %s",
 				sq.TenantID(), err.Error()))
@@ -139,10 +139,10 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
-func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string, evNm utils.MapStorage) (sqs StatQueues, err error) {
+func (sS *StatService) matchingStatQueuesForEvent(ctx *context.Context, tnt string, statsIDs []string, evNm utils.MapStorage) (sqs StatQueues, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
-		sqIDs, err = MatchingItemIDsForEvent(context.TODO(), evNm,
+		sqIDs, err = MatchingItemIDsForEvent(ctx, evNm,
 			sS.cgrcfg.StatSCfg().StringIndexedFields,
 			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
 			sS.cgrcfg.StatSCfg().SuffixIndexedFields,
@@ -156,14 +156,14 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 	}
 	sqs = make(StatQueues, 0, len(sqIDs))
 	for sqID := range sqIDs {
-		sqPrfl, err := sS.dm.GetStatQueueProfile(tnt, sqID, true, true, utils.NonTransactional)
+		sqPrfl, err := sS.dm.GetStatQueueProfile(ctx, tnt, sqID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if pass, err := sS.filterS.Pass(context.TODO(), tnt, sqPrfl.FilterIDs,
+		if pass, err := sS.filterS.Pass(ctx, tnt, sqPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -171,8 +171,8 @@ func (sS *StatService) matchingStatQueuesForEvent(tnt string, statsIDs []string,
 		}
 		var sq *StatQueue
 		lkID := utils.StatQueuePrefix + utils.ConcatenatedKey(sqPrfl.Tenant, sqPrfl.ID)
-		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
-			sq, err = sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
+		guardian.Guardian.Guard(ctx, func(_ *context.Context) (gRes interface{}, gErr error) {
+			sq, err = sS.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
 		if err != nil {
@@ -236,29 +236,29 @@ func (attr *StatsArgsProcessEvent) Clone() *StatsArgsProcessEvent {
 	}
 }
 
-func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
-	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
+func (sS *StatService) getStatQueue(ctx *context.Context, tnt, id string) (sq *StatQueue, err error) {
+	if sq, err = sS.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString); err != nil {
 		return
 	}
 	lkID := utils.StatQueuePrefix + sq.TenantID()
 	var removed int
-	guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (gRes interface{}, gErr error) {
+	guardian.Guardian.Guard(ctx, func(_ *context.Context) (gRes interface{}, gErr error) {
 		removed, err = sq.remExpired()
 		return
 	}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
 	if err != nil || removed == 0 {
 		return
 	}
-	sS.storeStatQueue(sq)
+	sS.storeStatQueue(ctx, sq)
 	return
 }
 
 // storeStatQueue will store the sq if needed
-func (sS *StatService) storeStatQueue(sq *StatQueue) {
+func (sS *StatService) storeStatQueue(ctx *context.Context, sq *StatQueue) {
 	if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
 		*sq.dirty = true // mark it to be saved
 		if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
-			sS.StoreStatQueue(sq)
+			sS.StoreStatQueue(ctx, sq)
 		} else {
 			sS.ssqMux.Lock()
 			sS.storedStatQueues.Add(sq.TenantID())
@@ -269,12 +269,12 @@ func (sS *StatService) storeStatQueue(sq *StatQueue) {
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
+func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *StatsArgsProcessEvent) (statQueueIDs []string, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	matchSQs, err := sS.matchingStatQueuesForEvent(tnt, args.StatIDs, evNm)
+	matchSQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, args.StatIDs, evNm)
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +290,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
-		guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) (_ interface{}, _ error) {
+		guardian.Guardian.Guard(ctx, func(_ *context.Context) (_ interface{}, _ error) {
 			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, lkID)
@@ -300,7 +300,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
 			withErrors = true
 		}
-		sS.storeStatQueue(sq)
+		sS.storeStatQueue(ctx, sq)
 		if len(sS.cgrcfg.StatSCfg().ThresholdSConns) != 0 {
 			var thIDs []string
 			if len(sq.sqPrfl.ThresholdIDs) != 0 {
@@ -325,7 +325,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 				thEv.Event[metricID] = metric.GetValue(sS.cgrcfg.GeneralCfg().RoundingDecimals)
 			}
 			var tIDs []string
-			if err := sS.connMgr.Call(context.TODO(), sS.cgrcfg.StatSCfg().ThresholdSConns,
+			if err := sS.connMgr.Call(ctx, sS.cgrcfg.StatSCfg().ThresholdSConns,
 				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -346,7 +346,7 @@ func (sS *StatService) processEvent(tnt string, args *StatsArgsProcessEvent) (st
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
+func (sS *StatService) V1ProcessEvent(ctx *context.Context, args *StatsArgsProcessEvent, reply *[]string) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -360,7 +360,7 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var ids []string
-	if ids, err = sS.processEvent(tnt, args); err != nil {
+	if ids, err = sS.processEvent(ctx, tnt, args); err != nil {
 		return
 	}
 	*reply = ids
@@ -368,7 +368,7 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
+func (sS *StatService) V1GetStatQueuesForEvent(ctx *context.Context, args *StatsArgsProcessEvent, reply *[]string) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -382,7 +382,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(tnt, args.StatIDs, utils.MapStorage{
+	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, args.StatIDs, utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}); err != nil {
@@ -397,7 +397,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *StatQueue) (err error) {
+func (sS *StatService) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *StatQueue) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -405,7 +405,7 @@ func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *St
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sq, err := sS.getStatQueue(tnt, args.ID)
+	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		return err
 	}
@@ -414,7 +414,7 @@ func (sS *StatService) V1GetStatQueue(args *utils.TenantIDWithAPIOpts, reply *St
 }
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
+func (sS *StatService) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -422,7 +422,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sq, err := sS.getStatQueue(tnt, args.ID)
+	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -440,7 +440,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 }
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
-func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
+func (sS *StatService) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantID, reply *map[string]float64) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -448,7 +448,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 	if tnt == utils.EmptyString {
 		tnt = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sq, err := sS.getStatQueue(tnt, args.ID)
+	sq, err := sS.getStatQueue(ctx, tnt, args.ID)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -466,12 +466,12 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 }
 
 // V1GetQueueIDs returns list of queueIDs registered for a tenant
-func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) {
+func (sS *StatService) V1GetQueueIDs(ctx *context.Context, tenant string, qIDs *[]string) (err error) {
 	if tenant == utils.EmptyString {
 		tenant = sS.cgrcfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := sS.dm.DataDB().GetKeysForPrefix(context.TODO(), prfx)
+	keys, err := sS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
 	if err != nil {
 		return err
 	}
@@ -484,22 +484,22 @@ func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) 
 }
 
 // Reload stops the backupLoop and restarts it
-func (sS *StatService) Reload() {
+func (sS *StatService) Reload(ctx *context.Context) {
 	close(sS.stopBackup)
 	<-sS.loopStoped // wait until the loop is done
 	sS.stopBackup = make(chan struct{})
-	go sS.runBackup()
+	go sS.runBackup(ctx)
 }
 
 // StartLoop starsS the gorutine with the backup loop
-func (sS *StatService) StartLoop() {
-	go sS.runBackup()
+func (sS *StatService) StartLoop(ctx *context.Context) {
+	go sS.runBackup(ctx)
 }
 
 // V1ResetStatQueue resets the stat queue
-func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (err error) {
+func (sS *StatService) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantID, rply *string) (err error) {
 	var sq *StatQueue
-	if sq, err = sS.dm.GetStatQueue(tntID.Tenant, tntID.ID,
+	if sq, err = sS.dm.GetStatQueue(ctx, tntID.Tenant, tntID.ID,
 		true, true, utils.NonTransactional); err != nil {
 		return
 	}
@@ -517,7 +517,7 @@ func (sS *StatService) V1ResetStatQueue(tntID *utils.TenantID, rply *string) (er
 		sq.SQMetrics[id] = metric
 	}
 	sq.dirty = utils.BoolPointer(true)
-	sS.storeStatQueue(sq)
+	sS.storeStatQueue(ctx, sq)
 	*rply = utils.OK
 	return
 }

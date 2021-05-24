@@ -229,7 +229,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.ThresholdFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheThresholdFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				th, e := adms.dm.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
+				th, e := adms.dm.GetThresholdProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
@@ -248,7 +248,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.StatFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheStatFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				sq, e := adms.dm.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
+				sq, e := adms.dm.GetStatQueueProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
@@ -439,7 +439,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//ThresholdProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheThresholdFilterIndexes,
 		&args.ThresholdIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			th, e := adms.dm.GetThresholdProfile(tnt, id, true, false, utils.NonTransactional)
+			th, e := adms.dm.GetThresholdProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
@@ -457,7 +457,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//StatQueueProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheStatFilterIndexes,
 		&args.StatIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			sq, e := adms.dm.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional)
+			sq, e := adms.dm.GetStatQueueProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
