@@ -3644,3 +3644,125 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 		t.Errorf("\nexpected nil, received: %+v", err)
 	}
 }
+
+func TestResourcesUpdateResource(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	Cache.Clear(nil)
+	res := &ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 0,
+		Limit:    10,
+		Stored:   true,
+	}
+	r := &Resource{
+		Tenant: res.Tenant,
+		ID:     res.ID,
+		Usages: map[string]*ResourceUsage{
+			"jkbdfgs": {
+				Tenant:     res.Tenant,
+				ID:         "jkbdfgs",
+				ExpiryTime: time.Now(),
+				Units:      5,
+			},
+		},
+		TTLIdx: []string{"jkbdfgs"},
+	}
+	expR := &Resource{
+		Tenant: res.Tenant,
+		ID:     res.ID,
+		Usages: make(map[string]*ResourceUsage),
+	}
+	if err := dm.SetResourceProfile(res, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if r, err := dm.GetResource(res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.RemoveResource(r.Tenant, r.ID, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetResourceProfile(res, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if r, err := dm.GetResource(res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.SetResource(r); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 0,
+		Limit:    5,
+		Stored:   true,
+	}
+	if err := dm.SetResourceProfile(res, true); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := dm.GetResource(res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.SetResource(r); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 10,
+		Limit:    5,
+		Stored:   true,
+	}
+	if err := dm.SetResourceProfile(res, true); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := dm.GetResource(res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.SetResource(r); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 10,
+		Limit:    5,
+		Stored:   false,
+	}
+	if err := dm.SetResourceProfile(res, true); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := dm.GetResource(res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.RemoveResourceProfile(res.Tenant, res.ID, utils.NonTransactional, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := dm.GetResource(res.Tenant, res.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+}

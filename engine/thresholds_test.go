@@ -1068,3 +1068,111 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		}
 	}
 }
+
+func TestThresholdsUpdateThreshold(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	thp := &ThresholdProfile{
+		Tenant: "cgrates.org",
+		ID:     "THUP1",
+	}
+	th := &Threshold{
+		Tenant: thp.Tenant,
+		ID:     thp.ID,
+		Hits:   5,
+		Snooze: time.Now(),
+	}
+	expTh := &Threshold{
+		Tenant: thp.Tenant,
+		ID:     thp.ID,
+	}
+
+	if err := dm.SetThresholdProfile(thp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.RemoveThreshold(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetThresholdProfile(thp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.SetThreshold(th); err != nil {
+		t.Fatal(err)
+	}
+	thp = &ThresholdProfile{
+		Tenant:  "cgrates.org",
+		ID:      "THUP1",
+		MaxHits: 1,
+	}
+
+	if err := dm.SetThresholdProfile(thp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.SetThreshold(th); err != nil {
+		t.Fatal(err)
+	}
+	thp = &ThresholdProfile{
+		Tenant:  "cgrates.org",
+		ID:      "THUP1",
+		MaxHits: 1,
+		MinHits: 1,
+	}
+
+	if err := dm.SetThresholdProfile(thp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.SetThreshold(th); err != nil {
+		t.Fatal(err)
+	}
+	thp = &ThresholdProfile{
+		Tenant:   "cgrates.org",
+		ID:       "THUP1",
+		MaxHits:  1,
+		MinHits:  1,
+		MinSleep: 1,
+	}
+
+	if err := dm.SetThresholdProfile(thp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+	if err := dm.RemoveThresholdProfile(thp.Tenant, thp.ID, utils.NonTransactional, true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+}
