@@ -372,7 +372,7 @@ func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for resourceProfile", id)
 		}
-		res, err := m.dmIN.DataManager().GetResourceProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		res, err := m.dmIN.DataManager().GetResourceProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -382,7 +382,7 @@ func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 		for i, fl := range res.FilterIDs {
 			res.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
+		if err := m.dmOut.DataManager().SetResourceProfile(context.TODO(), res, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -401,7 +401,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for statQueueProfile", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -411,7 +411,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 		for i, fl := range sgs.FilterIDs {
 			sgs.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+		if err = m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -430,7 +430,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for thresholdProfile", id)
 		}
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -440,7 +440,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 		for i, fl := range ths.FilterIDs {
 			ths.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
+		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), ths, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -582,7 +582,7 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for resourcerProfile", id)
 		}
-		res, err := m.dmIN.DataManager().GetResourceProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		res, err := m.dmIN.DataManager().GetResourceProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting resource profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -593,7 +593,7 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 		for i, fl := range res.FilterIDs {
 			res.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
+		if err := m.dmOut.DataManager().SetResourceProfile(context.TODO(), res, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting resource profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}
@@ -613,7 +613,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for statQueueProfile", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting statQueue profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -624,7 +624,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 		for i, fl := range sgs.FilterIDs {
 			sgs.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+		if err = m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting statQueue profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}
@@ -644,7 +644,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for thresholdProfile", id)
 		}
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting threshold profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -655,7 +655,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 		for i, fl := range ths.FilterIDs {
 			ths.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
+		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), ths, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting threshold profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}

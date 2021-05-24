@@ -409,7 +409,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if rsp, err = APItoResource(tpRsp, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetResourceProfile(rsp, true); err != nil {
+		if err = tpr.dm.SetResourceProfile(context.TODO(), rsp, true); err != nil {
 			return
 		}
 		if verbose {
@@ -440,7 +440,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 			}
 		}
 		// for non stored we do not save the resource
-		if err = tpr.dm.SetResource(
+		if err = tpr.dm.SetResource(context.TODO(),
 			&Resource{
 				Tenant: rTid.Tenant,
 				ID:     rTid.ID,
@@ -463,7 +463,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if st, err = APItoStats(tpST, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetStatQueueProfile(st, true); err != nil {
+		if err = tpr.dm.SetStatQueueProfile(context.TODO(), st, true); err != nil {
 			return
 		}
 		if verbose {
@@ -505,7 +505,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 			}
 		}
 		// for non stored we do not save the metrics
-		if err = tpr.dm.SetStatQueue(sq, metrics,
+		if err = tpr.dm.SetStatQueue(context.TODO(), sq, metrics,
 			tpr.sqProfiles[*sqTntID].MinItems,
 			ttl, tpr.sqProfiles[*sqTntID].QueueLength,
 			!tpr.sqProfiles[*sqTntID].Stored); err != nil {
@@ -526,7 +526,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoThresholdProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetThresholdProfile(th, true); err != nil {
+		if err = tpr.dm.SetThresholdProfile(context.TODO(), th, true); err != nil {
 			return
 		}
 		if verbose {
@@ -546,7 +546,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 				return
 			}
 		}
-		if err = tpr.dm.SetThreshold(&Threshold{Tenant: thd.Tenant, ID: thd.ID}, minSleep, false); err != nil {
+		if err = tpr.dm.SetThreshold(context.TODO(), &Threshold{Tenant: thd.Tenant, ID: thd.ID}, minSleep, false); err != nil {
 			return
 		}
 		if verbose {
@@ -852,7 +852,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ResourceProfiles:")
 	}
 	for _, tpRsp := range tpr.resProfiles {
-		if err = tpr.dm.RemoveResourceProfile(tpRsp.Tenant, tpRsp.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveResourceProfile(context.TODO(), tpRsp.Tenant, tpRsp.ID, utils.NonTransactional, true); err != nil {
 			return
 		}
 		if verbose {
@@ -863,7 +863,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("Resources:")
 	}
 	for _, rTid := range tpr.resources {
-		if err = tpr.dm.RemoveResource(rTid.Tenant, rTid.ID, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveResource(context.TODO(), rTid.Tenant, rTid.ID, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {
@@ -874,7 +874,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("StatQueueProfiles:")
 	}
 	for _, tpST := range tpr.sqProfiles {
-		if err = tpr.dm.RemoveStatQueueProfile(tpST.Tenant, tpST.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveStatQueueProfile(context.TODO(), tpST.Tenant, tpST.ID, utils.NonTransactional, true); err != nil {
 			return
 		}
 		if verbose {
@@ -885,7 +885,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("StatQueues:")
 	}
 	for _, sqTntID := range tpr.statQueues {
-		if err = tpr.dm.RemoveStatQueue(sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveStatQueue(context.TODO(), sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {
@@ -896,7 +896,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ThresholdProfiles:")
 	}
 	for _, tpTH := range tpr.thProfiles {
-		if err = tpr.dm.RemoveThresholdProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveThresholdProfile(context.TODO(), tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
 			return
 		}
 		if verbose {
@@ -907,7 +907,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("Thresholds:")
 	}
 	for _, thd := range tpr.thresholds {
-		if err = tpr.dm.RemoveThreshold(thd.Tenant, thd.ID, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveThreshold(context.TODO(), thd.Tenant, thd.ID, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {

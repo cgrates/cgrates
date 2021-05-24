@@ -40,17 +40,17 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating thresholds", id)
 		}
-		ths, err := m.dmIN.DataManager().GetThreshold(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThreshold(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if ths == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetThreshold(ths, 0, true); err != nil {
+		if err := m.dmOut.DataManager().SetThreshold(context.TODO(), ths, 0, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveThreshold(tntID[0], tntID[1], utils.NonTransactional); err != nil {
+		if err := m.dmIN.DataManager().RemoveThreshold(context.TODO(), tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
 		m.stats[utils.Thresholds]++
@@ -65,17 +65,17 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating threshold profiles", id)
 		}
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if ths == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
+		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), ths, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveThresholdProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveThresholdProfile(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 	}
@@ -167,11 +167,11 @@ func (m *Migrator) migrateThresholds() (err error) {
 				if err = m.dmOut.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
 					return
 				}
-				if err = m.dmOut.DataManager().SetThreshold(th, 0, true); err != nil {
+				if err = m.dmOut.DataManager().SetThreshold(context.TODO(), th, 0, true); err != nil {
 					return
 				}
 			}
-			if err = m.dmOut.DataManager().SetThresholdProfile(v4, true); err != nil {
+			if err = m.dmOut.DataManager().SetThresholdProfile(context.TODO(), v4, true); err != nil {
 				return
 			}
 

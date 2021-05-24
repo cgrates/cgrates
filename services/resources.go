@@ -23,6 +23,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -58,8 +60,8 @@ type ResourceService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	reS *engine.ResourceService
-	// rpc      *v1.ResourceSv1
+	reS      *engine.ResourceService
+	rpc      *apis.ResourceSv1
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	anz      *AnalyzerService
@@ -86,19 +88,20 @@ func (reS *ResourceService) Start() (err error) {
 	defer reS.Unlock()
 	reS.reS = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
-	reS.reS.StartLoop()
-	// reS.rpc = v1.NewResourceSv1(reS.reS)
-	// if !reS.cfg.DispatcherSCfg().Enabled {
-	// 	reS.server.RpcRegister(reS.rpc)
-	// }
-	// reS.connChan <- reS.anz.GetInternalCodec(reS.rpc, utils.ResourceS)
+	reS.reS.StartLoop(context.TODO())
+	reS.rpc = apis.NewResourceSv1(reS.reS)
+	srv, _ := birpc.NewService(reS.rpc, "", false)
+	if !reS.cfg.DispatcherSCfg().Enabled {
+		reS.server.RpcRegister(srv)
+	}
+	reS.connChan <- reS.anz.GetInternalCodec(srv, utils.ResourceS)
 	return
 }
 
 // Reload handles the change of config
 func (reS *ResourceService) Reload() (err error) {
 	reS.Lock()
-	reS.reS.Reload()
+	reS.reS.Reload(context.TODO())
 	reS.Unlock()
 	return
 }
@@ -108,10 +111,10 @@ func (reS *ResourceService) Shutdown() (err error) {
 	defer reS.srvDep[utils.DataDB].Done()
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS.Shutdown() //we don't verify the error because shutdown never returns an error
+	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
-	// reS.rpc = nil
-	//<-reS.connChan
+	reS.rpc = nil
+	<-reS.connChan
 	return
 }
 

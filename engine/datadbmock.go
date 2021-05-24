@@ -80,43 +80,27 @@ func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (boo
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveDestinationDrv(string, string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveReverseDestinationDrv(string, string, string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetReverseDestinationDrv(string, []string, string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetReverseDestinationDrv(string, string) ([]string, error) {
+func (dbM *DataDBMock) GetResourceProfileDrv(*context.Context, string, string) (*ResourceProfile, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceProfileDrv(string, string) (*ResourceProfile, error) {
+func (dbM *DataDBMock) SetResourceProfileDrv(*context.Context, *ResourceProfile) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveResourceProfileDrv(*context.Context, string, string) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetResourceDrv(*context.Context, string, string) (*Resource, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceProfileDrv(*ResourceProfile) error {
+func (dbM *DataDBMock) SetResourceDrv(*context.Context, *Resource) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveResourceProfileDrv(string, string) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) GetResourceDrv(string, string) (*Resource, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) SetResourceDrv(*Resource) error {
-	return utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) RemoveResourceDrv(string, string) error {
+func (dbM *DataDBMock) RemoveResourceDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 
@@ -147,51 +131,51 @@ func (dbM *DataDBMock) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err 
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error) {
+func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx *context.Context, tenant string, ID string) (sq *StatQueueProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
+func (dbM *DataDBMock) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemStatQueueProfileDrv(tenant, id string) (err error) {
+func (dbM *DataDBMock) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
+func (dbM *DataDBMock) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemStatQueueDrv(tenant, id string) (err error) {
+func (dbM *DataDBMock) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error) {
+func (dbM *DataDBMock) GetThresholdProfileDrv(ctx *context.Context, tenant string, ID string) (tp *ThresholdProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
+func (dbM *DataDBMock) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemThresholdProfileDrv(tenant, id string) (err error) {
+func (dbM *DataDBMock) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdDrv(string, string) (*Threshold, error) {
+func (dbM *DataDBMock) GetThresholdDrv(*context.Context, string, string) (*Threshold, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetThresholdDrv(*Threshold) error {
+func (dbM *DataDBMock) SetThresholdDrv(*context.Context, *Threshold) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveThresholdDrv(string, string) error {
+func (dbM *DataDBMock) RemoveThresholdDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

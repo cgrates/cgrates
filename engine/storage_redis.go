@@ -333,7 +333,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	return
 }
 
-func (rs *RedisStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourceProfile, err error) {
+func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *ResourceProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -345,7 +345,7 @@ func (rs *RedisStorage) GetResourceProfileDrv(tenant, id string) (rsp *ResourceP
 	return
 }
 
-func (rs *RedisStorage) SetResourceProfileDrv(rsp *ResourceProfile) (err error) {
+func (rs *RedisStorage) SetResourceProfileDrv(ctx *context.Context, rsp *ResourceProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rsp); err != nil {
 		return
@@ -353,11 +353,11 @@ func (rs *RedisStorage) SetResourceProfileDrv(rsp *ResourceProfile) (err error) 
 	return rs.Cmd(nil, redisSET, utils.ResourceProfilesPrefix+rsp.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveResourceProfileDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetResourceDrv(tenant, id string) (r *Resource, err error) {
+func (rs *RedisStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *Resource, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -369,7 +369,7 @@ func (rs *RedisStorage) GetResourceDrv(tenant, id string) (r *Resource, err erro
 	return
 }
 
-func (rs *RedisStorage) SetResourceDrv(r *Resource) (err error) {
+func (rs *RedisStorage) SetResourceDrv(ctx *context.Context, r *Resource) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -377,7 +377,7 @@ func (rs *RedisStorage) SetResourceDrv(r *Resource) (err error) {
 	return rs.Cmd(nil, redisSET, utils.ResourcesPrefix+r.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveResourceDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -428,7 +428,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
-func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
+func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -441,7 +441,7 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 }
 
 // SetStatQueueProfileDrv stores a StatsQueue into DataDB
-func (rs *RedisStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
+func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sq); err != nil {
 		return
@@ -450,12 +450,12 @@ func (rs *RedisStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 }
 
 // RemStatQueueProfileDrv removes a StatsQueue from dataDB
-func (rs *RedisStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetStatQueueDrv retrieves the stored metrics for a StatsQueue
-func (rs *RedisStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
+func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -472,7 +472,7 @@ func (rs *RedisStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err e
 }
 
 // SetStatQueueDrv stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
 	if ssq == nil {
 		if ssq, err = NewStoredStatQueue(sq, rs.ms); err != nil {
 			return
@@ -486,12 +486,12 @@ func (rs *RedisStorage) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (er
 }
 
 // RemStatQueueDrv removes a StatsQueue
-func (rs *RedisStorage) RemStatQueueDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
-func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
+func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *ThresholdProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, ID)); err != nil {
 		return
@@ -504,7 +504,7 @@ func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 }
 
 // SetThresholdProfileDrv stores a ThresholdProfile into DataDB
-func (rs *RedisStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
+func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(tp); err != nil {
 		return
@@ -513,11 +513,11 @@ func (rs *RedisStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 }
 
 // RemThresholdProfileDrv removes a ThresholdProfile from dataDB/cache
-func (rs *RedisStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err error) {
+func (rs *RedisStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (r *Threshold, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -529,7 +529,7 @@ func (rs *RedisStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err er
 	return
 }
 
-func (rs *RedisStorage) SetThresholdDrv(r *Threshold) (err error) {
+func (rs *RedisStorage) SetThresholdDrv(ctx *context.Context, r *Threshold) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -537,7 +537,7 @@ func (rs *RedisStorage) SetThresholdDrv(r *Threshold) (err error) {
 	return rs.Cmd(nil, redisSET, utils.ThresholdPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveThresholdDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id))
 }
 

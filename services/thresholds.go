@@ -23,6 +23,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -56,8 +58,8 @@ type ThresholdService struct {
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
 
-	thrs *engine.ThresholdService
-	// rpc      *v1.ThresholdSv1
+	thrs     *engine.ThresholdService
+	rpc      *apis.ThresholdSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -85,19 +87,20 @@ func (thrs *ThresholdService) Start() (err error) {
 	thrs.thrs = engine.NewThresholdService(datadb, thrs.cfg, filterS)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
-	thrs.thrs.StartLoop()
-	// thrs.rpc = v1.NewThresholdSv1(thrs.thrs)
-	// if !thrs.cfg.DispatcherSCfg().Enabled {
-	// thrs.server.RpcRegister(thrs.rpc)
-	// }
-	// thrs.connChan <- thrs.anz.GetInternalCodec(thrs.rpc, utils.ThresholdS)
+	thrs.thrs.StartLoop(context.TODO())
+	thrs.rpc = apis.NewThresholdSv1(thrs.thrs)
+	srv, _ := birpc.NewService(thrs.rpc, "", false)
+	if !thrs.cfg.DispatcherSCfg().Enabled {
+		thrs.server.RpcRegister(srv)
+	}
+	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
 	return
 }
 
 // Reload handles the change of config
 func (thrs *ThresholdService) Reload() (err error) {
 	thrs.Lock()
-	thrs.thrs.Reload()
+	thrs.thrs.Reload(context.TODO())
 	thrs.Unlock()
 	return
 }
@@ -107,10 +110,10 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	defer thrs.srvDep[utils.DataDB].Done()
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs.Shutdown()
+	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
-	// thrs.rpc = nil
-	//<-thrs.connChan
+	thrs.rpc = nil
+	<-thrs.connChan
 	return
 }
 

@@ -155,18 +155,18 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		// 	internalCdrSChan <- cdrs
 		// case smg := <-internalSMGChan:
 		// 	internalSMGChan <- smg
-		// case rls := <-internalRsChan:
-		// internalRsChan <- rls
-		// case statS := <-internalStatSChan:
-		// 	internalStatSChan <- statS
+		case rls := <-internalRsChan:
+			internalRsChan <- rls
+		case statS := <-internalStatSChan:
+			internalStatSChan <- statS
 		case admS := <-internalAdminSChan:
 			internalAdminSChan <- admS
 		case attrS := <-internalAttrSChan:
 			internalAttrSChan <- attrS
 		// case chrgS := <-internalChargerSChan:
 		// 	internalChargerSChan <- chrgS
-		// case thS := <-internalThdSChan:
-		// 	internalThdSChan <- thS
+		case thS := <-internalThdSChan:
+			internalThdSChan <- thS
 		// case splS := <-internalSuplSChan:
 		// 	internalSuplSChan <- splS
 		// case analyzerS := <-internalAnalyzerSChan:

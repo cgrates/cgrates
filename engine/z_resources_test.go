@@ -793,19 +793,19 @@ func TestResourceAllocateResource(t *testing.T) {
 	rs.clearUsage(ru2.ID)
 	ru1.ExpiryTime = time.Now().Add(time.Second)
 	ru2.ExpiryTime = time.Now().Add(time.Second)
-	if alcMessage, err := rs.allocateResource(ru1, false); err != nil {
+	if alcMessage, err := rs.allocateResource(context.TODO(), ru1, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "ALLOC" {
 			t.Errorf("Wrong allocation message: %v", alcMessage)
 		}
 	}
-	if _, err := rs.allocateResource(ru2, false); err != utils.ErrResourceUnavailable {
+	if _, err := rs.allocateResource(context.TODO(), ru2, false); err != utils.ErrResourceUnavailable {
 		t.Error("Did not receive " + utils.ErrResourceUnavailable.Error() + " error")
 	}
 	rs[0].rPrf.Limit = 1
 	rs[1].rPrf.Limit = 4
-	if alcMessage, err := rs.allocateResource(ru1, false); err != nil {
+	if alcMessage, err := rs.allocateResource(context.TODO(), ru1, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "ALLOC" {
@@ -813,7 +813,7 @@ func TestResourceAllocateResource(t *testing.T) {
 		}
 	}
 
-	if alcMessage, err := rs.allocateResource(ru2, false); err != nil {
+	if alcMessage, err := rs.allocateResource(context.TODO(), ru2, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "RL2" {
@@ -822,7 +822,7 @@ func TestResourceAllocateResource(t *testing.T) {
 	}
 
 	ru2.Units = 0
-	if _, err := rs.allocateResource(ru2, false); err != nil {
+	if _, err := rs.allocateResource(context.TODO(), ru2, false); err != nil {
 		t.Error(err)
 	}
 }
@@ -891,10 +891,10 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 		},
 		Units: 20,
 	}
-	if err := resService.V1AuthorizeResources(argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+	if err := resService.V1AuthorizeResources(context.TODO(), argsMissingTenant, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
 	}
-	if err := resService.V1AuthorizeResources(argsMissingUsageID, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
+	if err := resService.V1AuthorizeResources(context.TODO(), argsMissingUsageID, reply); err != nil && err.Error() != "MANDATORY_IE_MISSING: [Event]" {
 		t.Error(err.Error())
 	}
 }
@@ -1029,14 +1029,14 @@ func TestResourceAddResourceProfile(t *testing.T) {
 		},
 	}
 	for _, resProfile := range resprf {
-		dmRES.SetResourceProfile(resProfile, true)
+		dmRES.SetResourceProfile(context.TODO(), resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(context.TODO(), res, nil, 0, true)
 	}
 	//Test each resourceProfile from cache
 	for _, resPrf := range resprf {
-		if tempRes, err := dmRES.GetResourceProfile(resPrf.Tenant,
+		if tempRes, err := dmRES.GetResourceProfile(context.TODO(), resPrf.Tenant,
 			resPrf.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(resPrf, tempRes) {
@@ -1213,12 +1213,12 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	}
 	timeDurationExample := 10 * time.Second
 	for _, resProfile := range resprf {
-		dmRES.SetResourceProfile(resProfile, true)
+		dmRES.SetResourceProfile(context.TODO(), resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(context.TODO(), res, nil, 0, true)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceMatchingResourcesForEvent1", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1231,7 +1231,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[1].Tenant, resEvs[1],
+	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[1].Tenant, resEvs[1],
 		"TestResourceMatchingResourcesForEvent2", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1244,7 +1244,7 @@ func TestResourceMatchingResourcesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[2].Tenant, resEvs[2],
+	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[2].Tenant, resEvs[2],
 		"TestResourceMatchingResourcesForEvent3", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1431,13 +1431,13 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
-	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
+	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(context.TODO(), resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase1", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1624,13 +1624,13 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &resprf[0].UsageTTL
-	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
+	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(context.TODO(), resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase2", nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1817,13 +1817,13 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	resprf[0].UsageTTL = 0
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = nil
-	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
+	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(context.TODO(), resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase3", utils.DurationPointer(0))
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2011,13 +2011,13 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 	resprf[0].UsageTTL = 5
 	resourceTest[0].rPrf = resprf[0]
 	resourceTest[0].ttl = &timeDurationExample
-	if err := dmRES.SetResourceProfile(resprf[0], true); err != nil {
+	if err := dmRES.SetResourceProfile(context.TODO(), resprf[0], true); err != nil {
 		t.Error(err)
 	}
-	if err := dmRES.SetResource(resourceTest[0], nil, 0, true); err != nil {
+	if err := dmRES.SetResource(context.TODO(), resourceTest[0], nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceUsageTTLCase4", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2398,13 +2398,13 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 	}
 	timeDurationExample := 10 * time.Second
 	for _, resProfile := range resprf {
-		dmRES.SetResourceProfile(resProfile, true)
+		dmRES.SetResourceProfile(context.TODO(), resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(context.TODO(), res, nil, 0, true)
 	}
 	resService.cgrcfg.ResourceSCfg().IndexedSelects = false
-	mres, err := resService.matchingResourcesForEvent(resEvs[0].Tenant, resEvs[0],
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), resEvs[0].Tenant, resEvs[0],
 		"TestResourceMatchWithIndexFalse1", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2418,7 +2418,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[1].Tenant, resEvs[1],
+	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[1].Tenant, resEvs[1],
 		"TestResourceMatchWithIndexFalse2", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2431,7 +2431,7 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
 	}
 
-	mres, err = resService.matchingResourcesForEvent(resEvs[2].Tenant, resEvs[2],
+	mres, err = resService.matchingResourcesForEvent(context.TODO(), resEvs[2].Tenant, resEvs[2],
 		"TestResourceMatchWithIndexFalse3", &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2576,10 +2576,10 @@ func TestResourceCaching(t *testing.T) {
 	}
 
 	for _, resProfile := range resprf {
-		dmRES.SetResourceProfile(resProfile, true)
+		dmRES.SetResourceProfile(context.TODO(), resProfile, true)
 	}
 	for _, res := range resourceTest {
-		dmRES.SetResource(res, nil, 0, true)
+		dmRES.SetResource(context.TODO(), res, nil, 0, true)
 	}
 	//clear the cache
 	Cache.Clear(nil)
@@ -2631,7 +2631,7 @@ func TestResourceCaching(t *testing.T) {
 			"Destination": "3002"},
 	}
 
-	mres, err := resService.matchingResourcesForEvent(ev.Tenant, ev,
+	mres, err := resService.matchingResourcesForEvent(context.TODO(), ev.Tenant, ev,
 		"TestResourceCaching", nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -2922,10 +2922,10 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
 	fltS := NewFilterS(cfg, nil, dm)
 	rs := NewResourceService(dm, cfg, fltS, nil)
-	if err := dm.SetResourceProfile(rProf, true); err != nil {
+	if err := dm.SetResourceProfile(context.TODO(), rProf, true); err != nil {
 		t.Fatal(err)
 	}
-	if err := dm.SetResource(&Resource{
+	if err := dm.SetResource(context.TODO(), &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL_DB",
 		Usages: map[string]*ResourceUsage{
@@ -2942,7 +2942,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	}
 	var reply string
 	exp := rProf.ID
-	if err := rs.V1AllocateResources(utils.ArgRSv1ResourceUsage{
+	if err := rs.V1AllocateResources(context.TODO(), utils.ArgRSv1ResourceUsage{
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "ef0f554",
@@ -3008,7 +3008,7 @@ func TestResourcesAllocateResourceErrRsUnavailable(t *testing.T) {
 	ru := &ResourceUsage{}
 
 	experr := utils.ErrResourceUnavailable
-	rcv, err := rs.allocateResource(ru, false)
+	rcv, err := rs.allocateResource(context.TODO(), ru, false)
 
 	if err == nil || !errors.Is(err, experr) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -3045,7 +3045,7 @@ func TestResourcesAllocateResourceEmptyConfiguration(t *testing.T) {
 	}
 
 	experr := fmt.Sprintf("empty configuration for resourceID: %s", rs[0].TenantID())
-	rcv, err := rs.allocateResource(ru, false)
+	rcv, err := rs.allocateResource(context.TODO(), ru, false)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -3086,7 +3086,7 @@ func TestResourcesAllocateResourceDryRun(t *testing.T) {
 	}
 
 	exp := "ResGroup1"
-	rcv, err := rs.allocateResource(ru, true)
+	rcv, err := rs.allocateResource(context.TODO(), ru, true)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, got %+v", err)
@@ -3123,7 +3123,7 @@ func TestResourcesShutdown(t *testing.T) {
 			utils.ResourceS),
 	}
 	exp := utils.StringSet{}
-	rS.Shutdown()
+	rS.Shutdown(context.TODO())
 
 	if !reflect.DeepEqual(rS.storedResources, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
@@ -3184,7 +3184,7 @@ func TestResourcesStoreResources(t *testing.T) {
 			"Res1": struct{}{},
 		},
 	}
-	rS.storeResources()
+	rS.storeResources(context.TODO())
 
 	if !reflect.DeepEqual(rS, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rS)
@@ -3203,7 +3203,7 @@ func TestResourcesStoreResourceNotDirty(t *testing.T) {
 		dirty: utils.BoolPointer(false),
 	}
 
-	err := rS.StoreResource(r)
+	err := rS.StoreResource(context.TODO(), r)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3219,7 +3219,7 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 		dirty: utils.BoolPointer(true),
 	}
 
-	err := rS.StoreResource(r)
+	err := rS.StoreResource(context.TODO(), r)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3272,7 +3272,7 @@ func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 
 	ru := &ResourceUsage{}
 	exp := "allocation msg"
-	rcv, err := rs.allocateResource(ru, false)
+	rcv, err := rs.allocateResource(context.TODO(), ru, false)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3294,7 +3294,7 @@ func TestResourcesProcessThresholdsNoConns(t *testing.T) {
 	}
 	opts := map[string]interface{}{}
 
-	err := rS.processThresholds(r, opts)
+	err := rS.processThresholds(context.TODO(), r, opts)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3355,7 +3355,7 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 		},
 	}
 
-	err := rS.processThresholds(r, nil)
+	err := rS.processThresholds(context.TODO(), r, nil)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received %+v", err)
@@ -3430,7 +3430,7 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	}
 
 	experr := utils.ErrExists
-	err := rS.processThresholds(r, nil)
+	err := rS.processThresholds(context.TODO(), r, nil)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -3456,7 +3456,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 	}
 	opts := map[string]interface{}{}
 
-	err := rS.processThresholds(r, opts)
+	err := rS.processThresholds(context.TODO(), r, opts)
 
 	if err != nil {
 		t.Errorf("\nexpected nil, received: %+v", err)

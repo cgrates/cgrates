@@ -330,7 +330,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, res.TenantID())
-				if err := ldr.dm.SetResourceProfile(res, true); err != nil {
+				if err := ldr.dm.SetResourceProfile(ctx, res, true); err != nil {
 					return err
 				}
 				var ttl *time.Duration
@@ -338,7 +338,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 					ttl = &res.UsageTTL
 				}
 				// for non stored we do not save the resource
-				if err := ldr.dm.SetResource(
+				if err := ldr.dm.SetResource(ctx,
 					&engine.Resource{
 						Tenant: res.Tenant,
 						ID:     res.ID,
@@ -402,7 +402,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, stsPrf.TenantID())
-				if err := ldr.dm.SetStatQueueProfile(stsPrf, true); err != nil {
+				if err := ldr.dm.SetStatQueueProfile(ctx, stsPrf, true); err != nil {
 					return err
 				}
 				var sq *engine.StatQueue
@@ -416,7 +416,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				}
 
 				// for non stored we do not save the metrics
-				if err := ldr.dm.SetStatQueue(sq, stsPrf.Metrics,
+				if err := ldr.dm.SetStatQueue(ctx, sq, stsPrf.Metrics,
 					stsPrf.MinItems, ttl, stsPrf.QueueLength,
 					!stsPrf.Stored); err != nil {
 					return err
@@ -448,10 +448,10 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, thPrf.TenantID())
-				if err := ldr.dm.SetThresholdProfile(thPrf, true); err != nil {
+				if err := ldr.dm.SetThresholdProfile(ctx, thPrf, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.SetThreshold(&engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}, thPrf.MinSleep, false); err != nil {
+				if err := ldr.dm.SetThreshold(ctx, &engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}, thPrf.MinSleep, false); err != nil {
 					return err
 				}
 				cacheArgs[utils.ThresholdProfileIDs] = ids
@@ -781,11 +781,11 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveResourceProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveResourceProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.RemoveResource(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
+				if err := ldr.dm.RemoveResource(ctx, tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
 				cacheArgs[utils.ResourceProfileIDs] = ids
@@ -820,11 +820,11 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveStatQueueProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveStatQueueProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.RemoveStatQueue(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
+				if err := ldr.dm.RemoveStatQueue(ctx, tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
 				cacheArgs[utils.StatsQueueProfileIDs] = ids
@@ -842,11 +842,11 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveThresholdProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveThresholdProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 					return err
 				}
-				if err := ldr.dm.RemoveThreshold(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
+				if err := ldr.dm.RemoveThreshold(ctx, tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
 					return err
 				}
 				cacheArgs[utils.ThresholdProfileIDs] = ids

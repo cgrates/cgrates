@@ -154,13 +154,13 @@ func TestThresholdsCache(t *testing.T) {
 	}
 	dmTH.SetFilter(context.Background(), fltrTh3, true)
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+		if err = dmTH.SetThresholdProfile(context.TODO(), th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range tPrfls {
-		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+		if temptTh, err := dmTH.GetThresholdProfile(context.TODO(), th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -168,13 +168,13 @@ func TestThresholdsCache(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(context.TODO(), th, 0, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range ths {
-		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+		if temptTh, err := dmTH.GetThreshold(context.TODO(), th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -327,13 +327,13 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	dmTH.SetFilter(context.TODO(), fltrTh2, true)
 	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+		if err = dmTH.SetThresholdProfile(context.TODO(), th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range tPrfls {
-		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+		if temptTh, err := dmTH.GetThresholdProfile(context.TODO(), th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -341,20 +341,20 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th, 0, true); err != nil {
+		if err = dmTH.SetThreshold(context.TODO(), th, 0, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range ths {
-		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+		if temptTh, err := dmTH.GetThreshold(context.TODO(), th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
 			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
 		}
 	}
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(context.TODO(), argsGetThresholds[0].Tenant, argsGetThresholds[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Tenant)
@@ -364,7 +364,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Hits, thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(context.TODO(), argsGetThresholds[1].Tenant, argsGetThresholds[1]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Tenant)
@@ -374,7 +374,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Hits, thMatched[0].Hits)
 	}
 
-	if thMatched, err := thServ.matchingThresholdsForEvent(argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != nil {
+	if thMatched, err := thServ.matchingThresholdsForEvent(context.TODO(), argsGetThresholds[2].Tenant, argsGetThresholds[2]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Tenant)

@@ -23,6 +23,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -59,8 +61,8 @@ type StatService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	sts *engine.StatService
-	// rpc      *v1.StatSv1
+	sts      *engine.StatService
+	rpc      *apis.StatSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -89,19 +91,20 @@ func (sts *StatService) Start() (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))
-	sts.sts.StartLoop()
-	// sts.rpc = v1.NewStatSv1(sts.sts)
-	// if !sts.cfg.DispatcherSCfg().Enabled {
-	// sts.server.RpcRegister(sts.rpc)
-	// }
-	// sts.connChan <- sts.anz.GetInternalCodec(sts.rpc, utils.StatS)
+	sts.sts.StartLoop(context.TODO())
+	sts.rpc = apis.NewStatSv1(sts.sts)
+	srv, _ := birpc.NewService(sts.rpc, "", false)
+	if !sts.cfg.DispatcherSCfg().Enabled {
+		sts.server.RpcRegister(srv)
+	}
+	sts.connChan <- sts.anz.GetInternalCodec(srv, utils.StatS)
 	return
 }
 
 // Reload handles the change of config
 func (sts *StatService) Reload() (err error) {
 	sts.Lock()
-	sts.sts.Reload()
+	sts.sts.Reload(context.TODO())
 	sts.Unlock()
 	return
 }
@@ -111,10 +114,10 @@ func (sts *StatService) Shutdown() (err error) {
 	defer sts.srvDep[utils.DataDB].Done()
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts.Shutdown()
+	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
-	// sts.rpc = nil
-	//<-sts.connChan
+	sts.rpc = nil
+	<-sts.connChan
 	return
 }
 
