@@ -660,7 +660,7 @@ func prepareSectionFromMap(section string, mp interface{}) (cfgSec interface{}, 
 	case GeneralJSON:
 		cfgSec = new(GeneralJsonCfg)
 	case RPCConnsJSON:
-		cfgSec = make(RPCConnsJson)
+		cfgSec = &RPCConnsJson{}
 	case CacheJSON:
 		cfgSec = new(CacheJsonCfg)
 	case ListenJSON:
@@ -730,7 +730,7 @@ func prepareSectionFromMap(section string, mp interface{}) (cfgSec interface{}, 
 	case SIPAgentJSON:
 		cfgSec = new(SIPAgentJsonCfg)
 	case TemplatesJSON:
-		cfgSec = make(FcTemplatesJsonCfg)
+		cfgSec = &FcTemplatesJsonCfg{}
 	case ConfigSJSON:
 		cfgSec = new(ConfigSCfgJson)
 	case APIBanJSON:
