@@ -710,7 +710,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 	}
 
 	var startIdx, noSrtRoutes int
-	if args.Paginator.Offset != nil { // save the offset in a varible to not duble check if we have offset and is still not 0
+	if args.Paginator.Offset != nil { // save the offset in a variable to not double check if we have offset and is still not 0
 		startIdx = *args.Paginator.Offset
 	}
 	sortedRoutes = make(SortedRoutesList, 0, prfCount)
@@ -725,13 +725,13 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 				prfPag.Limit = &limit                        // add the limit to the paginator
 			}
 		}
-		if startIdx > 0 { // we have offest
+		if startIdx > 0 { // we have offset
 			if idx := startIdx - len(rPrfl.Routes); idx >= 0 { // we still have offset so try the next profile
 				startIdx = idx
 				continue
 			}
 			// we have offset but is in the range of this profile
-			offset := startIdx // store in a seoarate var so when startIdx is updated the prfPag.Offset remains the same
+			offset := startIdx // store in a separate var so when startIdx is updated the prfPag.Offset remains the same
 			startIdx = 0       // set it to 0 for the following loop
 			prfPag.Offset = &offset
 		}
