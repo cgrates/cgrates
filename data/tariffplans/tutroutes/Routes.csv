@@ -18,9 +18,10 @@ cgrates.org,ROUTE_ACNT_1004,*string:~*req.Account:1004,,*reas,,vendor1,,,,RES_GR
 cgrates.org,ROUTE_ACNT_1004,,,,,vendor2,,,,RES_GRP2,,0,,,
 cgrates.org,ROUTE_ACNT_1004,,,,,vendor3,*gte:~*resources.RES_GRP1.TotalUsage:9,,,RES_GRP2,,10,,,
 
-cgrates.org,ROUTE_ACNT_1005,*string:~*req.Account:1005,,*load,vendor1:3;vendor2:1;*default:2,vendor1,,,,,STATS_VENDOR_1:*sum#1,,,,
-cgrates.org,ROUTE_ACNT_1005,,,,,vendor2,,,,,STATS_VENDOR_2:*sum#1,,,,
+cgrates.org,ROUTE_ACNT_1005,*string:~*req.Account:1005,,*load,vendor1:3;*default:2,vendor1,,,,,STATS_VENDOR_1:*sum#1,,,,
+cgrates.org,ROUTE_ACNT_1005,,,,,vendor2,,,,,STATS_VENDOR_2:*sum#1,10,,,
+cgrates.org,ROUTE_ACNT_1005,,,,,vendor3,,,,,STATS_VENDOR_2:*distinct#~*req.Usage,,,,
 
-cgrates.org,ROUTE_STATS1,Fltr_tcc,,*qos,*tcc,route1,*string:~*req.Account:1001,,,,STATS_TCC1,10,,,
-cgrates.org,ROUTE_STATS1,,,,,route2,*string:~*req.Account:1002,,RP_VENDOR1,,STATS_TCC1,10,,,
-cgrates.org,ROUTE_STATS1,,,,,route3,,,RP_VENDOR1,,STATS_TCC2,20,,,
+cgrates.org,ROUTE_HC1,Fltr_tcc,,*hc,,route1,*gte:~*resources.RES_GRP2.Available:6,,RP_VENDOR2,RES_GRP2,,20,,,
+cgrates.org,ROUTE_HC1,,,,,route2,*gte:~*resources.RES_GRP1.TotalUsage:9,,RP_VENDOR1,RES_GRP1,,20,,,
+cgrates.org,ROUTE_HC1,,,,,route3,,,RP_VENDOR1,RES_GRP2,,10,,,
