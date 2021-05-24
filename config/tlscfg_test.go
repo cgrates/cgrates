@@ -117,3 +117,49 @@ func TestTLSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffTlsJsonCfg(t *testing.T) {
+	var d *TlsJsonCfg
+
+	v1 := &TLSCfg{
+		ServerCerificate: "server_certificate",
+		ServerKey:        "server_key",
+		ServerPolicy:     1,
+		ServerName:       "server_name",
+		ClientCerificate: "client_certificate",
+		ClientKey:        "client_key",
+		CaCertificate:    "ca_certificate",
+	}
+
+	v2 := &TLSCfg{
+		ServerCerificate: "server_certificate2",
+		ServerKey:        "server_key2",
+		ServerPolicy:     2,
+		ServerName:       "server_name2",
+		ClientCerificate: "client_certificate2",
+		ClientKey:        "client_key2",
+		CaCertificate:    "ca_certificate2",
+	}
+
+	expected := &TlsJsonCfg{
+		Server_certificate: utils.StringPointer("server_certificate2"),
+		Server_key:         utils.StringPointer("server_key2"),
+		Server_policy:      utils.IntPointer(2),
+		Server_name:        utils.StringPointer("server_name2"),
+		Client_certificate: utils.StringPointer("client_certificate2"),
+		Client_key:         utils.StringPointer("client_key2"),
+		Ca_certificate:     utils.StringPointer("ca_certificate2"),
+	}
+
+	rcv := diffTlsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &TlsJsonCfg{}
+	rcv = diffTlsJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

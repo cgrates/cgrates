@@ -833,6 +833,19 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+
+	d = &EventExporterJsonCfg{
+		Fields: &[]*FcTemplateJsonCfg{
+			{
+				Type: utils.StringPointer("*prefix"),
+			},
+		},
+	}
+
+	rcv = diffEventExporterJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }
 
 func TestGetEventExporterJsonCfg(t *testing.T) {
@@ -1017,6 +1030,17 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 	}
 
 	rcv := diffEventExportersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	d = &[]*EventExporterJsonCfg{
+		{
+			Id: utils.StringPointer("EES_ID2"),
+		},
+	}
+
+	rcv = diffEventExportersJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

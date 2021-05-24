@@ -630,3 +630,109 @@ func TestGetHttpAgentCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
 	}
 }
+
+func TestDiffHttpAgentJson(t *testing.T) {
+	var d *HttpAgentJsonCfg
+
+	v1 := &HTTPAgentCfg{
+		ID:             "http_agent",
+		URL:            "http_url",
+		SessionSConns:  []string{"*localhost"},
+		RequestPayload: "request_payload",
+		ReplyPayload:   "reply_payload",
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "req_processors",
+			},
+		},
+	}
+
+	v2 := &HTTPAgentCfg{
+		ID:                "http_agent2",
+		URL:               "http_url2",
+		SessionSConns:     []string{"*birpc"},
+		RequestPayload:    "request_payload2",
+		ReplyPayload:      "reply_payload2",
+		RequestProcessors: []*RequestProcessor{},
+	}
+
+	expected := &HttpAgentJsonCfg{
+		Id:                 utils.StringPointer("http_agent2"),
+		Url:                utils.StringPointer("http_url2"),
+		Sessions_conns:     &[]string{"*birpc"},
+		Request_payload:    utils.StringPointer("request_payload2"),
+		Reply_payload:      utils.StringPointer("reply_payload2"),
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+
+	rcv := diffHttpAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = &HttpAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+	rcv = diffHttpAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestDiffHttpAgentsJsonCfg(t *testing.T) {
+	var d *[]*HttpAgentJsonCfg
+
+	v1 := HTTPAgentCfgs{
+		{
+			ID:             "http_agent",
+			URL:            "http_url",
+			SessionSConns:  []string{"*localhost"},
+			RequestPayload: "request_payload",
+			ReplyPayload:   "reply_payload",
+			RequestProcessors: []*RequestProcessor{
+				{
+					ID: "req_processors",
+				},
+			},
+		},
+	}
+
+	v2 := HTTPAgentCfgs{
+		{
+			ID:                "http_agent2",
+			URL:               "http_url2",
+			SessionSConns:     []string{"*birpc"},
+			RequestPayload:    "request_payload2",
+			ReplyPayload:      "reply_payload2",
+			RequestProcessors: []*RequestProcessor{},
+		},
+	}
+
+	expected := &[]*HttpAgentJsonCfg{
+		{
+			Id:                 utils.StringPointer("http_agent2"),
+			Url:                utils.StringPointer("http_url2"),
+			Sessions_conns:     &[]string{"*birpc"},
+			Request_payload:    utils.StringPointer("request_payload2"),
+			Reply_payload:      utils.StringPointer("reply_payload2"),
+			Request_processors: &[]*ReqProcessorJsnCfg{},
+		},
+	}
+
+	rcv := diffHttpAgentsJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	d = &[]*HttpAgentJsonCfg{
+		{
+			Id: utils.StringPointer("http_agent2"),
+		},
+	}
+
+	rcv = diffHttpAgentsJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
