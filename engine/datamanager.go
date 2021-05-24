@@ -621,14 +621,14 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleSet bool) (err error) {
+func (dm *DataManager) SetThreshold(ctx *context.Context, th *Threshold, snooze time.Duration, simpleSet bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if !simpleSet {
 		tnt := th.Tenant // save the tenant
 		id := th.ID      // save the ID from the initial Threshold
-		th, err = dm.GetThreshold(tnt, id, true, false, utils.NonTransactional)
+		th, err = dm.GetThreshold(ctx, tnt, id, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return
 		}
@@ -636,18 +636,18 @@ func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleS
 			th = &Threshold{Tenant: tnt, ID: id, Hits: 0}
 		} else {
 			if th.tPrfl == nil {
-				if th.tPrfl, err = dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional); err != nil {
+				if th.tPrfl, err = dm.GetThresholdProfile(ctx, th.Tenant, th.ID, true, false, utils.NonTransactional); err != nil {
 					return
 				}
 			}
 			th.Snooze = th.Snooze.Add(-th.tPrfl.MinSleep).Add(snooze)
 		}
 	}
-	if err = dm.DataDB().SetThresholdDrv(th); err != nil {
+	if err = dm.DataDB().SetThresholdDrv(ctx, th); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdPrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThreshold,

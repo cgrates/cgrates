@@ -146,22 +146,22 @@ type ThresholdService struct {
 }
 
 // Shutdown is called to shutdown the service
-func (tS *ThresholdService) Shutdown() {
+func (tS *ThresholdService) Shutdown(ctx *context.Context) {
 	utils.Logger.Info("<ThresholdS> shutdown initialized")
 	close(tS.stopBackup)
-	tS.storeThresholds()
+	tS.storeThresholds(ctx)
 	utils.Logger.Info("<ThresholdS> shutdown complete")
 }
 
 // backup will regularly store resources changed to dataDB
-func (tS *ThresholdService) runBackup() {
+func (tS *ThresholdService) runBackup(ctx *context.Context) {
 	storeInterval := tS.cgrcfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
 		tS.loopStoped <- struct{}{}
 		return
 	}
 	for {
-		tS.storeThresholds()
+		tS.storeThresholds(ctx)
 		select {
 		case <-tS.stopBackup:
 			tS.loopStoped <- struct{}{}
@@ -172,7 +172,7 @@ func (tS *ThresholdService) runBackup() {
 }
 
 // storeThresholds represents one task of complete backup
-func (tS *ThresholdService) storeThresholds() {
+func (tS *ThresholdService) storeThresholds(ctx *context.Context) {
 	var failedTdIDs []string
 	for { // don't stop until we store all dirty resources
 		tS.stMux.Lock()
@@ -186,7 +186,7 @@ func (tS *ThresholdService) storeThresholds() {
 		}
 		if tIf, ok := Cache.Get(utils.CacheThresholds, tID); !ok || tIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache treshold with ID: %s", tID))
-		} else if err := tS.StoreThreshold(tIf.(*Threshold)); err != nil {
+		} else if err := tS.StoreThreshold(ctx, tIf.(*Threshold)); err != nil {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
 		}
 		// randomize the CPU load and give up thread control
@@ -200,11 +200,11 @@ func (tS *ThresholdService) storeThresholds() {
 }
 
 // StoreThreshold stores the threshold in DB and corrects dirty flag
-func (tS *ThresholdService) StoreThreshold(t *Threshold) (err error) {
+func (tS *ThresholdService) StoreThreshold(ctx *context.Context, t *Threshold) (err error) {
 	if t.dirty == nil || !*t.dirty {
 		return
 	}
-	if err = tS.dm.SetThreshold(t, 0, true); err != nil {
+	if err = tS.dm.SetThreshold(ctx, t, 0, true); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ThresholdS> failed saving Threshold with tenant: %s and ID: %s, error: %s",
 				t.Tenant, t.ID, err.Error()))
@@ -350,7 +350,7 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 		// recurrent threshold
 		*t.dirty = true // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
-			tS.StoreThreshold(t)
+			tS.StoreThreshold(ctx, t)
 		} else {
 			tS.stMux.Lock()
 			tS.storedTdIDs.Add(t.TenantID())
@@ -443,16 +443,16 @@ func (tS *ThresholdService) V1GetThreshold(ctx *context.Context, tntID *utils.Te
 }
 
 // Reload stops the backupLoop and restarts it
-func (tS *ThresholdService) Reload() {
+func (tS *ThresholdService) Reload(ctx *context.Context) {
 	close(tS.stopBackup)
 	<-tS.loopStoped // wait until the loop is done
 	tS.stopBackup = make(chan struct{})
-	go tS.runBackup()
+	go tS.runBackup(ctx)
 }
 
 // StartLoop starts the gorutine with the backup loop
-func (tS *ThresholdService) StartLoop() {
-	go tS.runBackup()
+func (tS *ThresholdService) StartLoop(ctx *context.Context) {
+	go tS.runBackup(ctx)
 }
 
 // V1ResetThreshold resets the threshold hits
@@ -470,7 +470,7 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 		thd.Snooze = time.Time{}
 		thd.dirty = utils.BoolPointer(true) // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
-			if err = tS.StoreThreshold(thd); err != nil {
+			if err = tS.StoreThreshold(ctx, thd); err != nil {
 				return
 			}
 		} else {
