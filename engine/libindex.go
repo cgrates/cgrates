@@ -645,7 +645,7 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 			idxSlice := indx.AsSlice()
 			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					rs, e := dm.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
+					rs, e := dm.GetResourceProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}

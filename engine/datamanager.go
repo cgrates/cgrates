@@ -144,7 +144,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		switch prfx {
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetResourceProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResource(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -807,7 +807,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	return
 }
 
-func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (sqp *StatQueueProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -825,7 +825,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 	sqp, err = dm.dataDB.GetStatQueueProfileDrv(tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetStatQueueProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -839,7 +839,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheStatQueueProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -849,7 +849,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheStatQueueProfiles, tntID, sqp, nil,
+		if errCh := Cache.Set(ctx, utils.CacheStatQueueProfiles, tntID, sqp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -857,18 +857,18 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 	return
 }
 
-func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), sqp.Tenant, sqp.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, sqp.Tenant, sqp.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, sqp.TenantID())
 		}
 	}
-	oldSts, err := dm.GetStatQueueProfile(sqp.Tenant, sqp.ID, true, false, utils.NonTransactional)
+	oldSts, err := dm.GetStatQueueProfile(ctx, sqp.Tenant, sqp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -880,13 +880,13 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		if oldSts != nil {
 			oldFiltersIDs = &oldSts.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheStatFilterIndexes, sqp.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheStatFilterIndexes, sqp.Tenant,
 			utils.EmptyString, sqp.ID, oldFiltersIDs, sqp.FilterIDs, false); err != nil {
 			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueueProfilePrefix, sqp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueueProfile,
@@ -898,12 +898,12 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	return
 }
 
-func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
+func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldSts, err := dm.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
+	oldSts, err := dm.GetStatQueueProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -914,16 +914,16 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheStatFilterIndexes, tenant, id, oldSts.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheStatFilterIndexes, tenant, id, oldSts.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheStatFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheStatFilterIndexes,
 			tenant, utils.EmptyString, id, oldSts.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueueProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveStatQueueProfile,
@@ -935,7 +935,7 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	return
 }
 
-func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rs *Resource, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -950,10 +950,10 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	rs, err = dm.dataDB.GetResourceDrv(tenant, id)
+	rs, err = dm.dataDB.GetResourceDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetResource,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -961,13 +961,13 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &rs); err == nil {
-				err = dm.dataDB.SetResourceDrv(rs)
+				err = dm.dataDB.SetResourceDrv(ctx, rs)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheResources, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheResources, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -977,7 +977,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheResources, tntID, rs, nil,
+		if errCh := Cache.Set(ctx, utils.CacheResources, tntID, rs, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -985,7 +985,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 	return
 }
 
-func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit float64, simpleSet bool) (err error) {
+func (dm *DataManager) SetResource(ctx *context.Context, rs *Resource, ttl *time.Duration, usageLimit float64, simpleSet bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -994,7 +994,7 @@ func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit 
 		tnt := rs.Tenant // save the tenant
 		id := rs.ID      // save the ID from the initial StatQueue
 		// handle metrics for statsQueue
-		rs, err = dm.GetResource(tnt, id, true, false, utils.NonTransactional)
+		rs, err = dm.GetResource(ctx, tnt, id, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return
 		}
@@ -1015,11 +1015,11 @@ func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit 
 			}
 		}
 	}
-	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
+	if err = dm.DataDB().SetResourceDrv(ctx, rs); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourcesPrefix, rs.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResource,
@@ -1031,15 +1031,15 @@ func (dm *DataManager) SetResource(rs *Resource, ttl *time.Duration, usageLimit 
 	return
 }
 
-func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveResource(ctx *context.Context, tenant, id, transactionID string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().RemoveResourceDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveResourceDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourcesPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveResource,
@@ -1051,7 +1051,7 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 	return
 }
 
-func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rp *ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -1066,23 +1066,23 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	rp, err = dm.dataDB.GetResourceProfileDrv(tenant, id)
+	rp, err = dm.dataDB.GetResourceProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetResourceProfile, &utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &rp); err == nil {
-				err = dm.dataDB.SetResourceProfileDrv(rp)
+				err = dm.dataDB.SetResourceProfileDrv(ctx, rp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheResourceProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheResourceProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1092,7 +1092,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheResourceProfiles, tntID, rp, nil,
+		if errCh := Cache.Set(ctx, utils.CacheResourceProfiles, tntID, rp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1100,22 +1100,22 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 	return
 }
 
-func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), rp.Tenant, rp.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, rp.Tenant, rp.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, rp.TenantID())
 		}
 	}
-	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, true, false, utils.NonTransactional)
+	oldRes, err := dm.GetResourceProfile(ctx, rp.Tenant, rp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
+	if err = dm.DataDB().SetResourceProfileDrv(ctx, rp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -1123,14 +1123,14 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		if oldRes != nil {
 			oldFiltersIDs = &oldRes.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheResourceFilterIndexes, rp.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheResourceFilterIndexes, rp.Tenant,
 			utils.EmptyString, rp.ID, oldFiltersIDs, rp.FilterIDs, false); err != nil {
 			return err
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourceProfilesPrefix, rp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResourceProfile,
@@ -1142,31 +1142,31 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	return
 }
 
-func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id, transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRes, err := dm.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
+	oldRes, err := dm.GetResourceProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveResourceProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveResourceProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRes == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheResourceFilterIndexes, tenant, id, oldRes.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheResourceFilterIndexes, tenant, id, oldRes.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheResourceFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheResourceFilterIndexes,
 			tenant, utils.EmptyString, id, oldRes.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourceProfilesPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveResourceProfile,

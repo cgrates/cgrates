@@ -860,8 +860,8 @@ func (ms *MongoStorage) SetResourceDrv(r *Resource) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveResourceDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColRes).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
