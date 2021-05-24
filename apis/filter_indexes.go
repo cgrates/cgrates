@@ -267,7 +267,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.ResourceFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheResourceFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				rp, e := adms.dm.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
+				rp, e := adms.dm.GetResourceProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
@@ -476,7 +476,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//ResourceProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheResourceFilterIndexes,
 		&args.ResourceIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			rp, e := adms.dm.GetResourceProfile(tnt, id, true, false, utils.NonTransactional)
+			rp, e := adms.dm.GetResourceProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
