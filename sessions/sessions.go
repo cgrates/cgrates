@@ -459,7 +459,11 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				dscReason = err.Error()
 			}
 			// try to disconect the session n times before we force terminate it on our side
+			fib := utils.Fib()
 			for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
+				if i != 0 { // not the first iteration
+					time.Sleep(time.Duration(fib()) * time.Millisecond)
+				}
 				if err = sS.disconnectSession(s, dscReason); err == nil {
 					s.Unlock()
 					return
@@ -494,10 +498,17 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				s.Lock()
 				defer s.Unlock()
 				// try to disconect the session n times before we force terminate it on our side
+				fib := utils.Fib()
 				for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
+					if i != 0 { // not the first iteration
+						time.Sleep(time.Duration(fib()) * time.Millisecond)
+					}
 					if err = sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err == nil {
 						return
 					}
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
+							utils.SessionS, s.cgrID(), err.Error()))
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: <%s>, error: <%s>",
