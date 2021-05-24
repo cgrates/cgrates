@@ -66,6 +66,10 @@ var (
 		testV1RtsCasesSortingRoutesAllocateResources,
 		testV1RtsCasesSortingRoutesReasNotAllRoutes,
 		testV1RtsCasesSortingRoutesReasAllRoutes,
+		testV1RtsCasesRoutesProcessStatsForLoadRtsSorting,
+		testV1RtsCasesRoutesLoadRtsSorting,
+		testV1RtsCasesSortRoutesHigherCostV2V3,
+		//testV1RtsCasesSortRoutesHigherCostV1V3,
 		testV1RtsCaseStopEngine,
 	}
 )
@@ -310,7 +314,7 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 		Tenant:            "cgrates.org",
 		FilterIDs:         []string{"*string:~*req.Account:1005"},
 		Sorting:           "*load",
-		SortingParameters: []string{"vendor1:3", "vendor2:1", "*default:2"},
+		SortingParameters: []string{"vendor1:3", "*default:2"},
 		Routes: []*engine.Route{
 			{
 				ID:      "vendor1",
@@ -319,6 +323,11 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 			{
 				ID:      "vendor2",
 				StatIDs: []string{"STATS_VENDOR_2:*sum#1"},
+				Weight:  10,
+			},
+			{
+				ID:      "vendor3",
+				StatIDs: []string{"STATS_VENDOR_2:*distinct#~*req.Usage"},
 			},
 		},
 	}
@@ -339,35 +348,36 @@ func testV1RtsCaseGetRoutesAfterLoading(t *testing.T) {
 
 	// ROUTE_STATS1
 	expRt6 := &engine.RouteProfile{
-		ID:                "ROUTE_STATS1",
+		ID:                "ROUTE_HC1",
 		Tenant:            "cgrates.org",
 		FilterIDs:         []string{"Fltr_tcc"},
-		Sorting:           "*qos",
-		SortingParameters: []string{"*tcc"},
+		Sorting:           "*hc",
+		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID:        "route1",
-				FilterIDs: []string{"*string:~*req.Account:1001"},
-				StatIDs:   []string{"STATS_TCC1"},
-				Weight:    10,
+				ID:            "route1",
+				FilterIDs:     []string{"*gte:~*resources.RES_GRP2.Available:6"},
+				RatingPlanIDs: []string{"RP_VENDOR2"},
+				ResourceIDs:   []string{"RES_GRP2"},
+				Weight:        20,
 			},
 			{
 				ID:            "route2",
-				FilterIDs:     []string{"*string:~*req.Account:1002"},
+				FilterIDs:     []string{"*gte:~*resources.RES_GRP1.TotalUsage:9"},
 				RatingPlanIDs: []string{"RP_VENDOR1"},
-				StatIDs:       []string{"STATS_TCC1"},
-				Weight:        10,
+				ResourceIDs:   []string{"RES_GRP1"},
+				Weight:        20,
 			},
 			{
 				ID:            "route3",
 				RatingPlanIDs: []string{"RP_VENDOR1"},
-				StatIDs:       []string{"STATS_TCC2"},
-				Weight:        20,
+				ResourceIDs:   []string{"RES_GRP2"},
+				Weight:        10,
 			},
 		},
 	}
 	if err := rtsCaseSv1Rpc.Call(utils.APIerSv1GetRouteProfile,
-		&utils.TenantID{ID: "ROUTE_STATS1", Tenant: "cgrates.org"},
+		&utils.TenantID{ID: "ROUTE_HC1", Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
 	} else {
@@ -668,10 +678,9 @@ func testV1RtsCasesSortingRoutesLCSetStatsAndResForMatching(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.AccountField: "1004",
 				utils.Category:     "vendor2",
-				//utils.ACD:          "1m1s",
-				utils.Usage:      "2m30s",
-				utils.AnswerTime: "2013-06-01T05:00:00Z",
-				utils.Cost:       1.0,
+				utils.Usage:        "2m30s",
+				utils.AnswerTime:   "2013-06-01T05:00:00Z",
+				utils.Cost:         1.0,
 			},
 		},
 	}
@@ -1007,12 +1016,13 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.MetaACC: 1.,
-						utils.MetaACD: 150.,
-						"*sum#1":      3.,
-						utils.MetaTCC: 3.,
-						utils.MetaTCD: 450.,
-						utils.Weight:  0.,
+						utils.MetaACC:           1.,
+						utils.MetaACD:           150.,
+						"*sum#1":                3.,
+						"*distinct#~*req.Usage": 1.,
+						utils.MetaTCC:           3.,
+						utils.MetaTCD:           450.,
+						utils.Weight:            0.,
 					},
 				},
 				{
@@ -1102,12 +1112,13 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
-						utils.MetaACC: 1.,
-						utils.MetaACD: 150.,
-						"*sum#1":      3.,
-						utils.MetaTCC: 3.,
-						utils.MetaTCD: 450.,
-						utils.Weight:  0.,
+						utils.MetaACC:           1.,
+						utils.MetaACD:           150.,
+						"*sum#1":                3.,
+						"*distinct#~*req.Usage": 1.,
+						utils.MetaTCC:           3.,
+						utils.MetaTCD:           450.,
+						utils.Weight:            0.,
 					},
 				},
 			},
@@ -1275,6 +1286,271 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 					SortingData: map[string]interface{}{
 						utils.ResourceUsage: 9.0,
 						utils.Weight:        0.,
+					},
+				},
+			},
+		},
+	}
+	var reply *engine.SortedRoutesList
+	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
+		t.Errorf("Expecting: %+v \n, received: %+v", utils.ToJSON(expSrtdRoutes), utils.ToJSON(reply))
+	}
+}
+
+func testV1RtsCasesRoutesProcessStatsForLoadRtsSorting(t *testing.T) {
+	// "STATS_VENDOR_1"
+	var reply []string
+	expected := []string{"STATS_VENDOR_1", "STATS_TCC1"}
+	ev1 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				//utils.AccountField: "1004",
+				utils.Category:   "vendor1",
+				utils.Usage:      "1m20s",
+				utils.AnswerTime: "2013-06-01T05:00:00Z",
+				utils.Cost:       1.8,
+			},
+		},
+	}
+	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expected)
+		sort.Strings(reply)
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+		}
+	}
+	// different usage for *distinct metric
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				//utils.AccountField: "1004",
+				utils.Category:   "vendor1",
+				utils.Usage:      "20s",
+				utils.AnswerTime: "2013-06-01T05:00:00Z",
+				utils.Cost:       1.8,
+			},
+		},
+	}
+	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expected)
+		sort.Strings(reply)
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+		}
+	}
+
+	// "STATS_VENDOR_2"
+	expected = []string{"STATS_VENDOR_2", "STATS_TCC1"}
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				//utils.AccountField: "1004",
+				utils.Category:   "vendor2",
+				utils.Usage:      "30s",
+				utils.AnswerTime: "2013-06-01T05:00:00Z",
+				utils.Cost:       0.77,
+			},
+		},
+	}
+	if err := rtsCaseSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expected)
+		sort.Strings(reply)
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+		}
+	}
+}
+
+func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
+	ev := &engine.ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			ID:     "LC_SORT",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1005",
+				//utils.Destination:  "1007",
+			},
+		},
+	}
+	expSrtdRoutes := &engine.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_ACNT_1005",
+			Sorting:   "*load",
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID: "vendor3",
+					SortingData: map[string]interface{}{
+						utils.Load:   2.,
+						utils.Ratio:  2.,
+						utils.Weight: 0.,
+					},
+				},
+				{
+					RouteID: "vendor2",
+					SortingData: map[string]interface{}{
+						utils.Load:   4.,
+						utils.Ratio:  2.,
+						utils.Weight: 10.,
+					},
+				},
+				{
+					RouteID: "vendor1",
+					SortingData: map[string]interface{}{
+						utils.Load:   7.,
+						utils.Ratio:  3.,
+						utils.Weight: 0.,
+					},
+				},
+			},
+		},
+	}
+	var reply *engine.SortedRoutesList
+	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
+		t.Errorf("Expecting: %+v \n, received: %+v", utils.ToJSON(expSrtdRoutes), utils.ToJSON(reply))
+	}
+}
+
+func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
+	ev := &engine.ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			ID:     "LC_SORT",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1008",
+				utils.Destination:  "1007",
+				utils.SetupTime:    "2013-06-01T00:00:00Z",
+				utils.Usage:        "3m25s",
+			},
+		},
+	}
+	expSrtdRoutes := &engine.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_HC1",
+			Sorting:   "*hc",
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID: "route2",
+					SortingData: map[string]interface{}{
+						utils.Cost:          0.34235,
+						utils.RatingPlanID:  "RP_VENDOR1",
+						utils.ResourceUsage: 9.,
+						utils.Weight:        20.,
+					},
+				},
+				{
+					RouteID: "route3",
+					SortingData: map[string]interface{}{
+						utils.Cost:          0.34235,
+						utils.RatingPlanID:  "RP_VENDOR1",
+						utils.ResourceUsage: 7.,
+						utils.Weight:        10.,
+					},
+				},
+			},
+		},
+	}
+	var reply *engine.SortedRoutesList
+	if err := rtsCaseSv1Rpc.Call(utils.RouteSv1GetRoutes,
+		ev, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expSrtdRoutes) {
+		t.Errorf("Expecting: %+v \n, received: %+v", utils.ToJSON(expSrtdRoutes), utils.ToJSON(reply))
+	}
+}
+
+func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
+	//to match route 1, RES_GRP2 must have *gte available 6 resources\
+	var result string
+	evRs := &utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account": "1004"},
+		},
+		Units: 4,
+	}
+	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+		evRs, &result); err != nil {
+		t.Error(err)
+	} else if result != "RES_GRP2" {
+		t.Errorf("Unexpected result returned: %s", result)
+	}
+
+	// also, to not match route2, totalUsage of RES_GRP1 must be lower than 9
+	evRs = &utils.ArgRSv1ResourceUsage{
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]interface{}{
+				"Account": "1002"},
+		},
+		Units: 4,
+	}
+	if err := rtsCaseSv1Rpc.Call(utils.ResourceSv1AllocateResources,
+		evRs, &result); err != nil {
+		t.Error(err)
+	} else if result != "RES_GRP1" {
+		t.Errorf("Unexpected result returned: %s", result)
+	}
+
+	ev := &engine.ArgsGetRoutes{
+		CGREvent: &utils.CGREvent{
+			ID:     "LC_SORT",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1008",
+				utils.Destination:  "1007",
+				utils.SetupTime:    "2013-06-01T00:00:00Z",
+				utils.Usage:        "3m25s",
+			},
+		},
+	}
+	expSrtdRoutes := &engine.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_HC1",
+			Sorting:   "*hc",
+			Routes: []*engine.SortedRoute{
+				{
+					RouteID: "route2",
+					SortingData: map[string]interface{}{
+						utils.Cost:          0.34235,
+						utils.RatingPlanID:  "RP_VENDOR1",
+						utils.ResourceUsage: 9.,
+						utils.Weight:        20.,
+					},
+				},
+				{
+					RouteID: "route3",
+					SortingData: map[string]interface{}{
+						utils.Cost:          0.34235,
+						utils.RatingPlanID:  "RP_VENDOR1",
+						utils.ResourceUsage: 7.,
+						utils.Weight:        10.,
 					},
 				},
 			},
