@@ -573,7 +573,7 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id, transactio
 	return
 }
 
-func (dm *DataManager) GetThreshold(tenant, id string,
+func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (th *Threshold, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -588,23 +588,23 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	th, err = dm.dataDB.GetThresholdDrv(tenant, id)
+	th, err = dm.dataDB.GetThresholdDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetThreshold, &utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &th); err == nil {
-				err = dm.dataDB.SetThresholdDrv(th)
+				err = dm.dataDB.SetThresholdDrv(ctx, th)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheThresholds, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheThresholds, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -613,7 +613,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheThresholds, tntID, th, nil,
+		if errCh := Cache.Set(ctx, utils.CacheThresholds, tntID, th, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -659,15 +659,15 @@ func (dm *DataManager) SetThreshold(th *Threshold, snooze time.Duration, simpleS
 	return
 }
 
-func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveThreshold(ctx *context.Context, tenant, id, transactionID string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveThresholdDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveThreshold,
@@ -679,7 +679,7 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 	return
 }
 
-func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (th *ThresholdProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -694,10 +694,10 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	th, err = dm.dataDB.GetThresholdProfileDrv(tenant, id)
+	th, err = dm.dataDB.GetThresholdProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetThresholdProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -705,13 +705,13 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &th); err == nil {
-				err = dm.dataDB.SetThresholdProfileDrv(th)
+				err = dm.dataDB.SetThresholdProfileDrv(ctx, th)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheThresholdProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheThresholdProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -721,7 +721,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheThresholdProfiles, tntID, th, nil,
+		if errCh := Cache.Set(ctx, utils.CacheThresholdProfiles, tntID, th, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -729,22 +729,22 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 	return
 }
 
-func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), th.Tenant, th.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, th.Tenant, th.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, th.TenantID())
 		}
 	}
-	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional)
+	oldTh, err := dm.GetThresholdProfile(ctx, th.Tenant, th.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
+	if err = dm.DataDB().SetThresholdProfileDrv(ctx, th); err != nil {
 		return err
 	}
 	if withIndex {
@@ -752,13 +752,13 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		if oldTh != nil {
 			oldFiltersIDs = &oldTh.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheThresholdFilterIndexes, th.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheThresholdFilterIndexes, th.Tenant,
 			utils.EmptyString, th.ID, oldFiltersIDs, th.FilterIDs, false); err != nil {
 			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdProfilePrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThresholdProfile,
@@ -770,32 +770,32 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	return
 }
 
-func (dm *DataManager) RemoveThresholdProfile(tenant, id,
+func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id,
 	transactionID string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldTh, err := dm.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
+	oldTh, err := dm.GetThresholdProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemThresholdProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemThresholdProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldTh == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheThresholdFilterIndexes, tenant, id, oldTh.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheThresholdFilterIndexes, tenant, id, oldTh.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheThresholdFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheThresholdFilterIndexes,
 			tenant, utils.EmptyString, id, oldTh.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ThresholdProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveThresholdProfile,
