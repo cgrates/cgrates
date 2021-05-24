@@ -1,0 +1,36 @@
+{
+	// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+	// Copyright (C) ITsysCOM GmbH
+	"general": {
+		"log_level": 7,
+		"node_id":"MasterReplication",
+	},
+
+	"listen": {
+		"rpc_json": "127.0.0.1:22012",
+		"rpc_gob": "127.0.0.1:22013",
+		"http": "127.0.0.1:22080",
+	},
+
+
+	"stor_db": {								// database used to store offline tariff plans and CDRs
+		"db_password": "CGRateS.org",			// password to use when connecting to stordb
+	},
+
+
+	"chargers": {
+		"enabled": true,
+	},
+
+	"sessions": {
+		"enabled": true,
+		"listen_bijson": "127.0.0.1:22014",
+		"chargers_conns": ["*internal"],
+	},
+
+	"apiers": {
+		"enabled": true,
+	},
+
+
+}
