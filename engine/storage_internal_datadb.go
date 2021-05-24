@@ -179,39 +179,39 @@ func (iDB *InternalDB) HasDataDrv(ctx *context.Context, category, subject, tenan
 	return false, errors.New("Unsupported HasData category")
 }
 
-func (iDB *InternalDB) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {
+func (iDB *InternalDB) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rp *ResourceProfile, err error) {
 	if x, ok := Cache.Get(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*ResourceProfile), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetResourceProfileDrv(rp *ResourceProfile) (err error) {
+func (iDB *InternalDB) SetResourceProfileDrv(ctx *context.Context, rp *ResourceProfile) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheResourceProfiles, rp.TenantID(), rp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveResourceProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetResourceDrv(tenant, id string) (r *Resource, err error) {
+func (iDB *InternalDB) GetResourceDrv(ctx *context.Context, tenant, id string) (r *Resource, err error) {
 	if x, ok := Cache.Get(utils.CacheResources, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*Resource), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetResourceDrv(r *Resource) (err error) {
+func (iDB *InternalDB) SetResourceDrv(ctx *context.Context, r *Resource) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheResources, r.TenantID(), r, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveResourceDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheResources, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
@@ -225,7 +225,7 @@ func (iDB *InternalDB) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return nil
 }
 
-func (iDB *InternalDB) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
+func (iDB *InternalDB) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
 	x, ok := Cache.Get(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -233,26 +233,26 @@ func (iDB *InternalDB) GetStatQueueProfileDrv(tenant string, id string) (sq *Sta
 	return x.(*StatQueueProfile), nil
 
 }
-func (iDB *InternalDB) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
+func (iDB *InternalDB) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheStatQueueProfiles, sq.TenantID(), sq, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemStatQueueProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
+func (iDB *InternalDB) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
 	x, ok := Cache.Get(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
 	return x.(*StatQueue), nil
 }
-func (iDB *InternalDB) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
+func (iDB *InternalDB) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
 	if sq == nil {
 		sq, err = ssq.AsStatQueue(iDB.ms)
 		if err != nil {
@@ -263,13 +263,13 @@ func (iDB *InternalDB) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) RemStatQueueDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetThresholdProfileDrv(tenant, id string) (tp *ThresholdProfile, err error) {
+func (iDB *InternalDB) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) {
 	x, ok := Cache.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -277,19 +277,19 @@ func (iDB *InternalDB) GetThresholdProfileDrv(tenant, id string) (tp *ThresholdP
 	return x.(*ThresholdProfile), nil
 }
 
-func (iDB *InternalDB) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
+func (iDB *InternalDB) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheThresholdProfiles, tp.TenantID(), tp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemThresholdProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetThresholdDrv(tenant, id string) (th *Threshold, err error) {
+func (iDB *InternalDB) GetThresholdDrv(ctx *context.Context, tenant, id string) (th *Threshold, err error) {
 	x, ok := Cache.Get(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -297,13 +297,13 @@ func (iDB *InternalDB) GetThresholdDrv(tenant, id string) (th *Threshold, err er
 	return x.(*Threshold), nil
 }
 
-func (iDB *InternalDB) SetThresholdDrv(th *Threshold) (err error) {
+func (iDB *InternalDB) SetThresholdDrv(ctx *context.Context, th *Threshold) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheThresholds, th.TenantID(), th, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveThresholdDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

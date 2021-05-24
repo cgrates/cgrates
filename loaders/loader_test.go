@@ -331,14 +331,14 @@ func TestLoaderProcessResource(t *testing.T) {
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
-	if resPrf, err := ldr.dm.GetResourceProfile("cgrates.org", "ResGroup21",
+	if resPrf, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "ResGroup21",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResPrf1, resPrf) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eResPrf1), utils.ToJSON(resPrf))
 	}
-	if resPrf, err := ldr.dm.GetResourceProfile("cgrates.org", "ResGroup22",
+	if resPrf, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "ResGroup22",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResPrf2, resPrf) {
@@ -560,7 +560,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 		ActionIDs: []string{"THRESH1"},
 		Async:     true,
 	}
-	aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "Threshold1",
+	aps, err := ldr.dm.GetThresholdProfile(context.TODO(), "cgrates.org", "Threshold1",
 		true, false, utils.NonTransactional)
 	sort.Strings(eTh1.FilterIDs)
 	sort.Strings(aps.FilterIDs)
@@ -686,7 +686,7 @@ func TestLoaderProcessStats(t *testing.T) {
 		MinItems:     2,
 	}
 
-	aps, err := ldr.dm.GetStatQueueProfile("cgrates.org", "TestStats",
+	aps, err := ldr.dm.GetStatQueueProfile(context.TODO(), "cgrates.org", "TestStats",
 		true, false, utils.NonTransactional)
 	//sort the slices of Metrics
 	sort.Slice(eSt1.Metrics, func(i, j int) bool { return eSt1.Metrics[i].MetricID < eSt1.Metrics[j].MetricID })
@@ -3242,7 +3242,7 @@ cgrates.org,NewRes1
 				rdr: rdr, csvRdr: rdrCsv}},
 	}
 	//empty database
-	if _, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
+	if _, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3269,7 +3269,7 @@ cgrates.org,NewRes1
 		ThresholdIDs: []string{},
 	}
 	//NOT_FOUND because is resourceProfile is not set
-	if _, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
+	if _, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3277,7 +3277,7 @@ cgrates.org,NewRes1
 		t.Error(err)
 	}
 
-	rcv, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional)
+	rcv, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(resPrf, rcv) {
@@ -3315,7 +3315,7 @@ cgrates.org,NewRes1
 	}
 
 	//nothing in database
-	if _, err := ldr.dm.GetResourceProfile("cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
+	if _, err := ldr.dm.GetResourceProfile(context.TODO(), "cgrates.org", "NewRes1", false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -3475,7 +3475,7 @@ cgrates.org,REM_STATS_1
 		Tenant: "cgrates.org",
 		ID:     "REM_STATS_1",
 	}
-	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
+	if err := ldr.dm.SetStatQueueProfile(context.TODO(), expStats, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(context.Background(), utils.MetaStats, utils.EmptyString); err != nil {
@@ -3568,7 +3568,7 @@ cgrates.org,REM_THRESHOLDS_1,
 		Tenant: "cgrates.org",
 		ID:     "REM_THRESHOLDS_1",
 	}
-	if err := ldr.dm.SetThresholdProfile(expThresholdPrf, true); err != nil {
+	if err := ldr.dm.SetThresholdProfile(context.TODO(), expThresholdPrf, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(context.Background(), utils.MetaThresholds, utils.EmptyString); err != nil {
@@ -4537,7 +4537,7 @@ cgrates.org,REM_THRESHOLDS_1,
 		ID:     "REM_THRESHOLDS_1",
 	}
 
-	if err := ldr.dm.SetThresholdProfile(expThresholdPrf, true); err != nil {
+	if err := ldr.dm.SetThresholdProfile(context.TODO(), expThresholdPrf, true); err != nil {
 		t.Error(err)
 	}
 
@@ -4595,7 +4595,7 @@ cgrates.org,REM_STATS_1
 		ID:     "REM_STATS_1",
 	}
 
-	if err := ldr.dm.SetStatQueueProfile(expStats, true); err != nil {
+	if err := ldr.dm.SetStatQueueProfile(context.TODO(), expStats, true); err != nil {
 		t.Error(err)
 	}
 
@@ -4650,7 +4650,7 @@ cgrates.org,NewRes1
 		ID:     "NewRes1",
 	}
 
-	if err := ldr.dm.SetResourceProfile(resPrf, true); err != nil {
+	if err := ldr.dm.SetResourceProfile(context.TODO(), resPrf, true); err != nil {
 		t.Error(err)
 	}
 

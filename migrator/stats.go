@@ -71,17 +71,17 @@ func (m *Migrator) moveStatQueueProfile() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating stat queue profiles", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if sgs == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+		if err := m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveStatQueueProfile(tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveStatQueueProfile(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
 			return err
 		}
 	}
@@ -99,7 +99,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating stat queues", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueue(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueue(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 
 			return err
@@ -107,10 +107,10 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if sgs == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetStatQueue(sgs, nil, 0, nil, 0, true); err != nil {
+		if err := m.dmOut.DataManager().SetStatQueue(context.TODO(), sgs, nil, 0, nil, 0, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveStatQueue(tntID[0], tntID[1], utils.NonTransactional); err != nil {
+		if err := m.dmIN.DataManager().RemoveStatQueue(context.TODO(), tntID[0], tntID[1], utils.NonTransactional); err != nil {
 			return err
 		}
 		m.stats[utils.StatS]++
@@ -223,10 +223,10 @@ func (m *Migrator) migrateStats() (err error) {
 				}
 			}
 			// Set the fresh-migrated Stats into DB
-			if err = m.dmOut.DataManager().SetStatQueueProfile(v4sts, true); err != nil {
+			if err = m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), v4sts, true); err != nil {
 				return
 			}
-			if err = m.dmOut.DataManager().SetStatQueue(v3Stats, nil, 0, nil, 0, true); err != nil {
+			if err = m.dmOut.DataManager().SetStatQueue(context.TODO(), v3Stats, nil, 0, nil, 0, true); err != nil {
 				return
 			}
 		}

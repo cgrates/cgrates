@@ -232,21 +232,21 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	}
 	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
-		dmSTS.SetStatQueueProfile(statQueueProfile, true)
+		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(context.TODO(), statQueue, nil, 0, nil, 0, true)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
-		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
+		if tempStat, err := dmSTS.GetStatQueueProfile(context.TODO(), sqp.Tenant,
 			sqp.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(sqp, tempStat) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, tempStat)
 		}
 	}
-	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0].Tenant, statsEvs[0].StatIDs,
+	msq, err := statService.matchingStatQueuesForEvent(context.TODO(), statsEvs[0].Tenant, statsEvs[0].StatIDs,
 		utils.MapStorage{utils.MetaReq: statsEvs[0].Event, utils.MetaOpts: statsEvs[0].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -258,7 +258,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1].Tenant, statsEvs[1].StatIDs,
+	msq, err = statService.matchingStatQueuesForEvent(context.TODO(), statsEvs[1].Tenant, statsEvs[1].StatIDs,
 		utils.MapStorage{utils.MetaReq: statsEvs[1].Event, utils.MetaOpts: statsEvs[1].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -270,7 +270,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2].Tenant, statsEvs[2].StatIDs,
+	msq, err = statService.matchingStatQueuesForEvent(context.TODO(), statsEvs[2].Tenant, statsEvs[2].StatIDs,
 		utils.MapStorage{utils.MetaReq: statsEvs[2].Event, utils.MetaOpts: statsEvs[2].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -463,14 +463,14 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	}
 	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
-		dmSTS.SetStatQueueProfile(statQueueProfile, true)
+		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(context.TODO(), statQueue, nil, 0, nil, 0, true)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
-		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
+		if tempStat, err := dmSTS.GetStatQueueProfile(context.TODO(), sqp.Tenant,
 			sqp.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(sqp, tempStat) {
@@ -480,37 +480,37 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	stq := map[string]string{}
 	reply := []string{}
 	expected := []string{"StatQueueProfile1"}
-	err := statService.V1ProcessEvent(statsEvs[0], &reply)
+	err := statService.V1ProcessEvent(context.TODO(), statsEvs[0], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[0].Tenant, ID: stqs[0].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantID{Tenant: stqs[0].Tenant, ID: stqs[0].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 
 	expected = []string{"StatQueueProfile2"}
-	err = statService.V1ProcessEvent(statsEvs[1], &reply)
+	err = statService.V1ProcessEvent(context.TODO(), statsEvs[1], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[1].Tenant, ID: stqs[1].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantID{Tenant: stqs[1].Tenant, ID: stqs[1].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 
 	expected = []string{"StatQueueProfilePrefix"}
-	err = statService.V1ProcessEvent(statsEvs[2], &reply)
+	err = statService.V1ProcessEvent(context.TODO(), statsEvs[2], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[2].Tenant, ID: stqs[2].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(context.TODO(), &utils.TenantID{Tenant: stqs[2].Tenant, ID: stqs[2].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -695,14 +695,14 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	}
 	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
-		dmSTS.SetStatQueueProfile(statQueueProfile, true)
+		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(context.TODO(), statQueue, nil, 0, nil, 0, true)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
-		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
+		if tempStat, err := dmSTS.GetStatQueueProfile(context.TODO(), sqp.Tenant,
 			sqp.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(sqp, tempStat) {
@@ -710,7 +710,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		}
 	}
 	statService.cgrcfg.StatSCfg().IndexedSelects = false
-	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0].Tenant, statsEvs[0].StatIDs,
+	msq, err := statService.matchingStatQueuesForEvent(context.TODO(), statsEvs[0].Tenant, statsEvs[0].StatIDs,
 		utils.MapStorage{utils.MetaReq: statsEvs[0].Event, utils.MetaOpts: statsEvs[0].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -722,7 +722,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1].Tenant, statsEvs[1].StatIDs,
+	msq, err = statService.matchingStatQueuesForEvent(context.TODO(), statsEvs[1].Tenant, statsEvs[1].StatIDs,
 		utils.MapStorage{utils.MetaReq: statsEvs[1].Event, utils.MetaOpts: statsEvs[1].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -734,7 +734,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2].Tenant, statsEvs[2].StatIDs,
+	msq, err = statService.matchingStatQueuesForEvent(context.TODO(), statsEvs[2].Tenant, statsEvs[2].StatIDs,
 		utils.MapStorage{utils.MetaReq: statsEvs[2].Event, utils.MetaOpts: statsEvs[2].APIOpts})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -927,14 +927,14 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	}
 	dmSTS.SetFilter(context.Background(), fltrSts3, true)
 	for _, statQueueProfile := range sqps {
-		dmSTS.SetStatQueueProfile(statQueueProfile, true)
+		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(statQueue, nil, 0, nil, 0, true)
+		dmSTS.SetStatQueue(context.TODO(), statQueue, nil, 0, nil, 0, true)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
-		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
+		if tempStat, err := dmSTS.GetStatQueueProfile(context.TODO(), sqp.Tenant,
 			sqp.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(sqp, tempStat) {
@@ -958,13 +958,13 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		MinItems:     1,
 	}
 	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf}
-	if err := dmSTS.SetStatQueueProfile(sqPrf, true); err != nil {
+	if err := dmSTS.SetStatQueueProfile(context.TODO(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dmSTS.SetStatQueue(sq, nil, 0, nil, 0, true); err != nil {
+	if err := dmSTS.SetStatQueue(context.TODO(), sq, nil, 0, nil, 0, true); err != nil {
 		t.Error(err)
 	}
-	if tempStat, err := dmSTS.GetStatQueueProfile(sqPrf.Tenant,
+	if tempStat, err := dmSTS.GetStatQueueProfile(context.TODO(), sqPrf.Tenant,
 		sqPrf.ID, true, false, utils.NonTransactional); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(sqPrf, tempStat) {
@@ -977,7 +977,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	reply := []string{}
 	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}
 	expectedRev := []string{"StatQueueProfile3", "StatQueueProfile1"}
-	if err := statService.V1ProcessEvent(ev, &reply); err != nil {
+	if err := statService.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) && !reflect.DeepEqual(reply, expectedRev) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
