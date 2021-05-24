@@ -447,6 +447,97 @@ func TestFilterPassRSRFields(t *testing.T) {
 	}
 }
 
+func TestFilterPassGtOrLtPass(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaGreaterThan, "~Usage", []string{"70"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := utils.MapStorage{
+		"Usage": "77",
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+
+	rf, err = NewFilterRule(utils.MetaGreaterOrEqual, "~Usage", []string{"77"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+
+	rf, err = NewFilterRule(utils.MetaLessThan, "~Usage", []string{"80"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+
+	rf, err = NewFilterRule(utils.MetaLessOrEqual, "~Usage", []string{"77"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+}
+
+func TestFilterPassGtOrLtFail(t *testing.T) {
+	ev := utils.MapStorage{
+		"Usage": "77",
+	}
+
+	rf, err := NewFilterRule(utils.MetaGreaterThan, "~Usage", []string{"80"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
+	}
+
+	rf, err = NewFilterRule(utils.MetaGreaterOrEqual, "~Usage", []string{"80"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
+	}
+
+	rf, err = NewFilterRule(utils.MetaLessThan, "~Usage", []string{"70"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
+	}
+
+	rf, err = NewFilterRule(utils.MetaLessOrEqual, "~Usage", []string{"70"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
+	}
+}
+
 func TestFilterPassGreaterThan(t *testing.T) {
 	rf, err := NewFilterRule(utils.MetaLessThan, "~ASR", []string{"40"})
 	if err != nil {
