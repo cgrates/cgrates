@@ -63,12 +63,14 @@ var (
 func TestSessionSRplcGracefulShutdown(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_internal"
+		smgRplcCfgDIR2 = "rplcTestGracefulShutdown2_internal"
 	case utils.MetaMySQL:
 		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_mysql"
 		smgRplcCfgDIR2 = "rplcTestGracefulShutdown2_mysql"
 	case utils.MetaMongo:
-		t.SkipNow()
+		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_mongo"
+		smgRplcCfgDIR2 = "rplcTestGracefulShutdown2_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
