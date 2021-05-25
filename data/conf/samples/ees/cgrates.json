@@ -328,7 +328,7 @@
 		},
 		{
 			"id": "ElasticsearchExporter",
-			"type": "*elastic",
+			"type": "*els",
 			"export_path": "http://localhost:9200",
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -373,7 +373,7 @@
 		},		
 		{
 			"id": "ElasticExporterWithNoFields",
-			"type": "*elastic",
+			"type": "*els",
 			"export_path": "http://localhost:9200",
 			"tenant": "cgrates.org",
 			"attempts": 1,
