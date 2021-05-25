@@ -110,17 +110,17 @@ func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
 
 //LazyPass is almost the same as Pass except that it verify if the
 //Element of the Values from FilterRules has as prefix one of the pathPrfxs
-func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
+func (fS *FilterS) LazyPass(ctx *context.Context, tenant string, filterIDs []string,
 	ev utils.DataProvider, pathPrfxs []string) (pass bool, lazyCheckRules []*FilterRule, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil, nil
 	}
 	pass = true
-	dDP := newDynamicDP(context.TODO(), fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+	dDP := newDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
 		fS.cfg.FilterSCfg().AdminSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		var f *Filter
-		f, err = fS.dm.GetFilter(context.TODO(), tenant, fltrID,
+		f, err = fS.dm.GetFilter(ctx, tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -133,7 +133,7 @@ func (fS *FilterS) LazyPass(tenant string, filterIDs []string,
 				lazyCheckRules = append(lazyCheckRules, rule)
 				continue
 			}
-			if pass, err = rule.Pass(context.TODO(), dDP); err != nil || !pass {
+			if pass, err = rule.Pass(ctx, dDP); err != nil || !pass {
 				return
 			}
 		}

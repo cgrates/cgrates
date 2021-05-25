@@ -140,12 +140,12 @@ func (rpS *RouteService) Shutdown() {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
+func (rpS *RouteService) matchingRouteProfilesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
-	rPrfIDs, err := MatchingItemIDsForEvent(context.TODO(), evNm,
+	rPrfIDs, err := MatchingItemIDsForEvent(ctx, evNm,
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
 		rpS.cgrcfg.RouteSCfg().SuffixIndexedFields,
@@ -158,14 +158,14 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 	}
 	matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
 	for lpID := range rPrfIDs {
-		rPrf, err := rpS.dm.GetRouteProfile(tnt, lpID, true, true, utils.NonTransactional)
+		rPrf, err := rpS.dm.GetRouteProfile(ctx, tnt, lpID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if pass, err := rpS.filterS.Pass(context.TODO(), tnt, rPrf.FilterIDs,
+		if pass, err := rpS.filterS.Pass(ctx, tnt, rPrf.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -272,13 +272,13 @@ func (rpS *RouteService) costForEvent(ev *utils.CGREvent,
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
+func (rpS *RouteService) statMetrics(ctx *context.Context, statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
 	stsMetric = make(map[string]float64)
 	provStsMetrics := make(map[string][]float64)
 	if len(rpS.cgrcfg.RouteSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err = rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
+			if err = rpS.connMgr.Call(ctx, rpS.cgrcfg.RouteSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -302,14 +302,14 @@ func (rpS *RouteService) statMetrics(statIDs []string, tenant string) (stsMetric
 
 // statMetricsForLoadDistribution will query a list of statIDs and return the sum of metrics
 // first metric found is always returned
-func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant string) (result float64, err error) {
+func (rpS *RouteService) statMetricsForLoadDistribution(ctx *context.Context, statIDs []string, tenant string) (result float64, err error) {
 	provStsMetrics := make(map[string][]float64)
 	if len(rpS.cgrcfg.RouteSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
-			if err = rpS.connMgr.Call(context.TODO(),
+			if err = rpS.connMgr.Call(ctx,
 				rpS.cgrcfg.RouteSCfg().StatSConns,
 				utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithAPIOpts{
@@ -348,11 +348,11 @@ func (rpS *RouteService) statMetricsForLoadDistribution(statIDs []string, tenant
 }
 
 // resourceUsage returns sum of all resource usages out of list
-func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
+func (rpS *RouteService) resourceUsage(ctx *context.Context, resIDs []string, tenant string) (tUsage float64, err error) {
 	if len(rpS.cgrcfg.RouteSCfg().ResourceSConns) != 0 {
 		for _, resID := range resIDs {
 			var res Resource
-			if err = rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().ResourceSConns, utils.ResourceSv1GetResource,
+			if err = rpS.connMgr.Call(ctx, rpS.cgrcfg.RouteSCfg().ResourceSConns, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: resID}}, &res); err != nil && err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s getting resource for ID : %s", utils.RouteS, err.Error(), resID))
@@ -364,7 +364,7 @@ func (rpS *RouteService) resourceUsage(resIDs []string, tenant string) (tUsage f
 	return
 }
 
-func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
+func (rpS *RouteService) populateSortingData(ctx *context.Context, ev *utils.CGREvent, route *Route,
 	extraOpts *optsGetRoutes) (srtRoute *SortedRoute, pass bool, err error) {
 	sortedSpl := &SortedRoute{
 		RouteID: route.ID,
@@ -410,7 +410,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//in case we have *load strategy we use statMetricsForLoadDistribution function to calculate the result
 	if len(route.StatIDs) != 0 {
 		if extraOpts.sortingStragety == utils.MetaLoad {
-			metricSum, err := rpS.statMetricsForLoadDistribution(route.StatIDs, ev.Tenant) //create metric map for route
+			metricSum, err := rpS.statMetricsForLoadDistribution(ctx, route.StatIDs, ev.Tenant) //create metric map for route
 			if err != nil {
 				if extraOpts.ignoreErrors {
 					utils.Logger.Warning(
@@ -423,7 +423,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			sortedSpl.SortingData[utils.Load] = metricSum
 			sortedSpl.sortingDataF64[utils.Load] = metricSum
 		} else {
-			metricSupp, err := rpS.statMetrics(route.StatIDs, ev.Tenant) //create metric map for route
+			metricSupp, err := rpS.statMetrics(ctx, route.StatIDs, ev.Tenant) //create metric map for route
 			if err != nil {
 				if extraOpts.ignoreErrors {
 					utils.Logger.Warning(
@@ -457,7 +457,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	}
 	//calculate resourceUsage
 	if len(route.ResourceIDs) != 0 {
-		resTotalUsage, err := rpS.resourceUsage(route.ResourceIDs, ev.Tenant)
+		resTotalUsage, err := rpS.resourceUsage(ctx, route.ResourceIDs, ev.Tenant)
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -473,7 +473,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 	//filter the route
 	if len(route.lazyCheckRules) != 0 {
 		//construct the DP and pass it to filterS
-		dynDP := newDynamicDP(context.TODO(), rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
+		dynDP := newDynamicDP(ctx, rpS.cgrcfg.FilterSCfg().ResourceSConns, rpS.cgrcfg.FilterSCfg().StatSConns,
 			rpS.cgrcfg.FilterSCfg().AdminSConns,
 			ev.Tenant, utils.MapStorage{
 				utils.MetaReq:  ev.Event,
@@ -481,7 +481,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			})
 
 		for _, rule := range route.lazyCheckRules { // verify the rules remaining from PartialPass
-			if pass, err = rule.Pass(context.TODO(), dynDP); err != nil {
+			if pass, err = rule.Pass(ctx, dynDP); err != nil {
 				return nil, false, err
 			} else if !pass {
 				return nil, false, nil
@@ -558,7 +558,7 @@ type optsGetRoutes struct {
 }
 
 // V1GetRoutes returns the list of valid routes
-func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesList) (err error) {
+func (rpS *RouteService) V1GetRoutes(ctx *context.Context, args *ArgsGetRoutes, reply *SortedRoutesList) (err error) {
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -590,7 +590,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 			ProcessRuns: processRuns,
 		}
 		var rplyEv AttrSProcessEventReply
-		if err := rpS.connMgr.Call(context.TODO(), rpS.cgrcfg.RouteSCfg().AttributeSConns,
+		if err := rpS.connMgr.Call(ctx, rpS.cgrcfg.RouteSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
 			args.APIOpts = rplyEv.APIOpts
@@ -599,7 +599,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 		}
 	}
 	var sSps SortedRoutesList
-	if sSps, err = rpS.sortedRoutesForEvent(tnt, args); err != nil {
+	if sSps, err = rpS.sortedRoutesForEvent(ctx, tnt, args); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -610,7 +610,7 @@ func (rpS *RouteService) V1GetRoutes(args *ArgsGetRoutes, reply *SortedRoutesLis
 }
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles
-func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*RouteProfile) (err error) {
+func (rpS *RouteService) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*RouteProfile) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
@@ -620,7 +620,7 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply 
 	if tnt == utils.EmptyString {
 		tnt = rpS.cgrcfg.GeneralCfg().DefaultTenant
 	}
-	sPs, err := rpS.matchingRouteProfilesForEvent(tnt, args)
+	sPs, err := rpS.matchingRouteProfilesForEvent(ctx, tnt, args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -633,7 +633,7 @@ func (rpS *RouteService) V1GetRouteProfilesForEvent(args *utils.CGREvent, reply 
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile, ev *utils.CGREvent,
+func (rpS *RouteService) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrfl *RouteProfile, ev *utils.CGREvent,
 	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStragety = rPrfl.Sorting             // populate sortingStrategy in extraOpts
@@ -645,7 +645,7 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 	passedRoutes := make(map[string]*Route)
 	// apply filters for event
 	for _, route := range rPrfl.Routes {
-		pass, lazyCheckRules, err := rpS.filterS.LazyPass(tnt,
+		pass, lazyCheckRules, err := rpS.filterS.LazyPass(ctx, tnt,
 			route.FilterIDs, nM,
 			[]string{utils.DynamicDataPrefix + utils.MetaReq,
 				utils.DynamicDataPrefix + utils.MetaAccounts,
@@ -663,7 +663,7 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 		passedRoutes[route.ID] = route
 	}
 
-	if sortedRoutes, err = rpS.sorter.SortRoutes(rPrfl.ID, rPrfl.Sorting,
+	if sortedRoutes, err = rpS.sorter.SortRoutes(ctx, rPrfl.ID, rPrfl.Sorting,
 		passedRoutes, ev, extraOpts); err != nil {
 		return nil, err
 	}
@@ -682,12 +682,12 @@ func (rpS *RouteService) sortedRoutesForProfile(tnt string, rPrfl *RouteProfile,
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesList, err error) {
+func (rpS *RouteService) sortedRoutesForEvent(ctx *context.Context, tnt string, args *ArgsGetRoutes) (sortedRoutes SortedRoutesList, err error) {
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
 		args.CGREvent.Event[utils.Usage] = time.Minute // make sure we have default set for Usage
 	}
 	var rPrfs []*RouteProfile
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(tnt, args.CGREvent); err != nil {
+	if rPrfs, err = rpS.matchingRouteProfilesForEvent(ctx, tnt, args.CGREvent); err != nil {
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
@@ -730,7 +730,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 			prfPag.Offset = &offset
 		}
 		var sr *SortedRoutes
-		if sr, err = rpS.sortedRoutesForProfile(tnt, rPrfl, args.CGREvent, prfPag, extraOpts); err != nil {
+		if sr, err = rpS.sortedRoutesForProfile(ctx, tnt, rPrfl, args.CGREvent, prfPag, extraOpts); err != nil {
 			return
 		}
 		noSrtRoutes += len(sr.Routes)
@@ -743,9 +743,9 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 }
 
 // V1GetRoutesList returns the list of valid routes
-func (rpS *RouteService) V1GetRoutesList(args *ArgsGetRoutes, reply *[]string) (err error) {
+func (rpS *RouteService) V1GetRoutesList(ctx *context.Context, args *ArgsGetRoutes, reply *[]string) (err error) {
 	sR := new(SortedRoutesList)
-	if err = rpS.V1GetRoutes(args, sR); err != nil {
+	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
 		return
 	}
 	*reply = sR.RoutesWithParams()

@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +36,7 @@ type ResourceDescendentSorter struct {
 	rS      *RouteService
 }
 
-func (ws *ResourceDescendentSorter) SortRoutes(prflID string,
+func (ws *ResourceDescendentSorter) SortRoutes(ctx *context.Context, prflID string,
 	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: ws.sorting,
@@ -47,7 +48,7 @@ func (ws *ResourceDescendentSorter) SortRoutes(prflID string,
 					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("ResourceIDs")
 		}
-		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
+		if srtSpl, pass, err := ws.rS.populateSortingData(ctx, suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)

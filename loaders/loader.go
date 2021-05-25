@@ -450,7 +450,7 @@ func (ldr *Loader) storeLoadedData(ctx *context.Context, loaderType string,
 				}
 				// get IDs so we can reload in cache
 				ids = append(ids, spPrf.TenantID())
-				if err := ldr.dm.SetRouteProfile(spPrf, true); err != nil {
+				if err := ldr.dm.SetRouteProfile(ctx, spPrf, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.RouteProfileIDs] = ids

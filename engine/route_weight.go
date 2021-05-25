@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,13 +34,13 @@ type WeightSorter struct {
 	rS      *RouteService
 }
 
-func (ws *WeightSorter) SortRoutes(prflID string,
+func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
 	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: ws.sorting,
 		Routes:  make([]*SortedRoute, 0)}
 	for _, route := range routes {
-		if srtRoute, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
+		if srtRoute, pass, err := ws.rS.populateSortingData(ctx, suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtRoute != nil {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)

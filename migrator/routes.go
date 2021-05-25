@@ -87,7 +87,7 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 		if spp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetRouteProfile(convertSupplierToRoute(spp), true); err != nil {
+		if err := m.dmOut.DataManager().SetRouteProfile(context.TODO(), convertSupplierToRoute(spp), true); err != nil {
 			return err
 		}
 		m.stats[utils.Routes]++
@@ -120,14 +120,14 @@ func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("invalid key <%s> when migrating route profiles", id)
 		}
-		rPrf, err := m.dmIN.DataManager().GetRouteProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		rPrf, err := m.dmIN.DataManager().GetRouteProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if rPrf == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetRouteProfile(rPrf, true); err != nil {
+		if err := m.dmOut.DataManager().SetRouteProfile(context.TODO(), rPrf, true); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveRouteProfile(tntID[0], tntID[1], true); err != nil {
@@ -185,13 +185,13 @@ func (m *Migrator) migrateRouteProfiles() (err error) {
 			break
 		}
 		if !m.dryRun {
-			if err = m.dmIN.DataManager().SetRouteProfile(v2, true); err != nil {
+			if err = m.dmIN.DataManager().SetRouteProfile(context.TODO(), v2, true); err != nil {
 				return
 			}
 		}
 		m.stats[utils.Routes]++
 	}
-	// All done, update version wtih current one
+	// All done, update version with current one
 	if err = m.setVersions(utils.Routes); err != nil {
 		return
 	}

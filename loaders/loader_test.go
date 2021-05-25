@@ -904,7 +904,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 			eSp.Routes[j].ID+strings.Join(eSp.Routes[j].FilterIDs, utils.ConcatenatedKeySep)) < 0
 	})
 
-	aps, err := ldr.dm.GetRouteProfile("cgrates.org", "RoutePrf1",
+	aps, err := ldr.dm.GetRouteProfile(context.Background(), "cgrates.org", "RoutePrf1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
@@ -3655,7 +3655,7 @@ cgrates.org,ROUTES_REM_1
 		Tenant: "cgrates.org",
 		ID:     "ROUTES_REM_1",
 	}
-	if err := ldr.dm.SetRouteProfile(expRoutes, true); err != nil {
+	if err := ldr.dm.SetRouteProfile(context.Background(), expRoutes, true); err != nil {
 		t.Error(err)
 	}
 	if err := ldr.removeContent(context.Background(), utils.MetaRoutes, utils.EmptyString); err != nil {

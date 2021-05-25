@@ -167,7 +167,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetFilter(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.RouteProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetRouteProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetRouteProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetAttributeProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1174,7 +1174,7 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 	return dm.DataDB().HasDataDrv(context.TODO(), category, subject, tenant)
 }
 
-func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rpp *RouteProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -1189,23 +1189,23 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	rpp, err = dm.dataDB.GetRouteProfileDrv(tenant, id)
+	rpp, err = dm.dataDB.GetRouteProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetRouteProfile,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns, utils.ReplicatorSv1GetRouteProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &rpp); err == nil {
-				err = dm.dataDB.SetRouteProfileDrv(rpp)
+				err = dm.dataDB.SetRouteProfileDrv(ctx, rpp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheRouteProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheRouteProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1219,7 +1219,7 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 		return nil, err
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheRouteProfiles, tntID, rpp, nil,
+		if errCh := Cache.Set(ctx, utils.CacheRouteProfiles, tntID, rpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1227,22 +1227,22 @@ func (dm *DataManager) GetRouteProfile(tenant, id string, cacheRead, cacheWrite 
 	return
 }
 
-func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *RouteProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
+		if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
 				brokenReference, rpp.TenantID())
 		}
 	}
-	oldRpp, err := dm.GetRouteProfile(rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRouteProfile(ctx, rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetRouteProfileDrv(rpp); err != nil {
+	if err = dm.DataDB().SetRouteProfileDrv(ctx, rpp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -1250,13 +1250,13 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		if oldRpp != nil {
 			oldFiltersIDs = &oldRpp.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheRouteFilterIndexes, rpp.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheRouteFilterIndexes, rpp.Tenant,
 			utils.EmptyString, rpp.ID, oldFiltersIDs, rpp.FilterIDs, false); err != nil {
 			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RouteProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRouteProfile,
@@ -1272,27 +1272,27 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id string, withIndex bool) (er
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetRouteProfile(tenant, id, true, false, utils.NonTransactional)
+	oldRpp, err := dm.GetRouteProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveRouteProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveRouteProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldRpp == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheRouteFilterIndexes, tenant, id, oldRpp.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheRouteFilterIndexes, tenant, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheRouteFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRouteFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RouteProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRouteProfile,
@@ -1384,7 +1384,7 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 		if oldAP != nil {
 			oldFiltersIDs = &oldAP.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheAttributeFilterIndexes, ap.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheAttributeFilterIndexes, ap.Tenant,
 			utils.EmptyString, ap.ID, oldFiltersIDs, ap.FilterIDs, false); err != nil {
 			return err
 		}

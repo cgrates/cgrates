@@ -235,15 +235,15 @@ func (dbM *DataDBMock) RemoveFilterDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRouteProfileDrv(string, string) (*RouteProfile, error) {
+func (dbM *DataDBMock) GetRouteProfileDrv(*context.Context, string, string) (*RouteProfile, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRouteProfileDrv(*RouteProfile) error {
+func (dbM *DataDBMock) SetRouteProfileDrv(*context.Context, *RouteProfile) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveRouteProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveRouteProfileDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

@@ -1,0 +1,5 @@
+#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
+cgrates.org,Fltr_tcc,*gt,~*req.Usage,3m,
+cgrates.org,Fltr_tcc,*string,~*req.Destination,1007,
+cgrates.org,FLTR_DEST_1003,*string,~*req.Destination,1003,
+

@@ -565,7 +565,7 @@ func (rs *RedisStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.FilterPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetRouteProfileDrv(tenant, id string) (r *RouteProfile, err error) {
+func (rs *RedisStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (r *RouteProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RouteProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -577,7 +577,7 @@ func (rs *RedisStorage) GetRouteProfileDrv(tenant, id string) (r *RouteProfile, 
 	return
 }
 
-func (rs *RedisStorage) SetRouteProfileDrv(r *RouteProfile) (err error) {
+func (rs *RedisStorage) SetRouteProfileDrv(ctx *context.Context, r *RouteProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -585,7 +585,7 @@ func (rs *RedisStorage) SetRouteProfileDrv(r *RouteProfile) (err error) {
 	return rs.Cmd(nil, redisSET, utils.RouteProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveRouteProfileDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.RouteProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 

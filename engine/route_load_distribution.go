@@ -21,6 +21,8 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,7 +39,7 @@ type LoadDistributionSorter struct {
 }
 
 // SortRoutes .
-func (ws *LoadDistributionSorter) SortRoutes(prflID string,
+func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string,
 	routes map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{
 		ProfileID: prflID,
@@ -52,7 +54,7 @@ func (ws *LoadDistributionSorter) SortRoutes(prflID string,
 					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("StatIDs")
 		}
-		if srtSpl, pass, err := ws.rS.populateSortingData(suplEv, route, extraOpts); err != nil {
+		if srtSpl, pass, err := ws.rS.populateSortingData(ctx, suplEv, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			// Add the ratio in SortingData so we can used it later in SortLoadDistribution
