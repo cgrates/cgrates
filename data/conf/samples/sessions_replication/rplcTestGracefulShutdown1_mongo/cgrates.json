@@ -7,17 +7,9 @@
 },
 
 "listen": {
-	"rpc_json": "127.0.0.1:2012",
-	"rpc_gob": "127.0.0.1:2013",
-	"http": "127.0.0.1:2080",
-},
-
-
-"rpc_conns": {
-	"rplConn": {
-		"strategy": "*broadcast_sync",
-		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}],
-	},
+	"rpc_json": "127.0.0.1:22012",				// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:22013",					// RPC GOB listening address
+	"http": "127.0.0.1:22080",					// HTTP listening address
 },
 
 
@@ -34,40 +26,19 @@
 	"db_port": 27017,
 },
 
-"rals": {
-	"enabled": true,
-},
-
-"schedulers": {
-	"enabled": true,
-},
-
-"cdrs": {
-	"enabled": true,
-},
-
-"attributes": {
-	"enabled": true,
-},
-
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
 },
 
 "sessions": {
-	"enabled": true,
+	"enabled": true,						// starts SessionManager service: <true|false>
 	"debit_interval": "5ms",					// interval to perform debits on.
-	"replication_conns": ["rplConn"],
-	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
 },
 
 "apiers": {
 	"enabled": true,
-	"scheduler_conns": ["*internal"],
 },
 
 }
