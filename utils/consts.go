@@ -503,7 +503,7 @@ const (
 	CDRPoster                = "cdr"
 	MetaFileCSV              = "*file_csv"
 	MetaVirt                 = "*virt"
-	MetaElastic              = "*elastic"
+	MetaElastic              = "*els"
 	MetaFileFWV              = "*file_fwv"
 	MetaFile                 = "*file"
 	Accounts                 = "Accounts"
