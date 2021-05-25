@@ -799,7 +799,7 @@ func TestPassPartial(t *testing.T) {
 	fEv := utils.MapStorage{}
 	fEv.Set([]string{utils.MetaReq}, passEvent)
 	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
-	if pass, ruleList, err := filterS.LazyPass("cgrates.org",
+	if pass, ruleList, err := filterS.LazyPass(context.Background(), "cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, fEv, prefixes); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -808,7 +808,7 @@ func TestPassPartial(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", 0, len(ruleList))
 	}
 	// in PartialPass we verify the filters matching the prefixes
-	if pass, ruleList, err := filterS.LazyPass("cgrates.org",
+	if pass, ruleList, err := filterS.LazyPass(context.Background(), "cgrates.org",
 		[]string{"*string:~*req.Account:1007", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
@@ -816,7 +816,7 @@ func TestPassPartial(t *testing.T) {
 	} else if len(ruleList) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(ruleList))
 	}
-	if pass, ruleList, err := filterS.LazyPass("cgrates.org",
+	if pass, ruleList, err := filterS.LazyPass(context.Background(), "cgrates.org",
 		[]string{"*string:~*req.Account:1010", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {

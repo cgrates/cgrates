@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -59,8 +61,8 @@ type RouteService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	routeS *engine.RouteService
-	// rpc      *v1.RouteSv1
+	routeS   *engine.RouteService
+	rpc      *apis.RouteSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -86,11 +88,12 @@ func (routeS *RouteService) Start() (err error) {
 	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
-	// routeS.rpc = v1.NewRouteSv1(routeS.routeS)
-	// if !routeS.cfg.DispatcherSCfg().Enabled {
-	// routeS.server.RpcRegister(routeS.rpc)
-	// }
-	// routeS.connChan <- routeS.anz.GetInternalCodec(routeS.rpc, utils.RouteS)
+	routeS.rpc = apis.NewRouteSv1(routeS.routeS)
+	srv, _ := birpc.NewService(routeS.rpc, "", false)
+	if !routeS.cfg.DispatcherSCfg().Enabled {
+		routeS.server.RpcRegister(srv)
+	}
+	routeS.connChan <- routeS.anz.GetInternalCodec(srv, utils.RouteS)
 	return
 }
 
@@ -105,8 +108,8 @@ func (routeS *RouteService) Shutdown() (err error) {
 	defer routeS.Unlock()
 	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
-	// routeS.rpc = nil
-	//<-routeS.connChan
+	routeS.rpc = nil
+	<-routeS.connChan
 	return
 }
 

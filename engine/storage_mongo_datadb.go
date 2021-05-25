@@ -1012,9 +1012,9 @@ func (ms *MongoStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetRouteProfileDrv(tenant, id string) (r *RouteProfile, err error) {
+func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (r *RouteProfile, err error) {
 	r = new(RouteProfile)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColRts).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
 			r = nil
@@ -1028,8 +1028,8 @@ func (ms *MongoStorage) GetRouteProfileDrv(tenant, id string) (r *RouteProfile, 
 	return
 }
 
-func (ms *MongoStorage) SetRouteProfileDrv(r *RouteProfile) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetRouteProfileDrv(ctx *context.Context, r *RouteProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColRts).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
 			options.Update().SetUpsert(true),
@@ -1038,8 +1038,8 @@ func (ms *MongoStorage) SetRouteProfileDrv(r *RouteProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveRouteProfileDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColRts).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

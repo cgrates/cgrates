@@ -23,6 +23,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/cgrates/birpc/context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -216,7 +218,7 @@ func (sRoutes *SortedRoutes) AsNavigableMap() (nm *utils.DataNode) {
 
 // RoutesSorter is the interface which needs to be implemented by routes sorters
 type RoutesSorter interface {
-	SortRoutes(string, map[string]*Route, *utils.CGREvent, *optsGetRoutes) (*SortedRoutes, error)
+	SortRoutes(*context.Context, string, map[string]*Route, *utils.CGREvent, *optsGetRoutes) (*SortedRoutes, error)
 }
 
 // NewRouteSortDispatcher constructs RouteSortDispatcher
@@ -236,13 +238,13 @@ func NewRouteSortDispatcher(lcrS *RouteService) (rsd RouteSortDispatcher) {
 // and dispatch requests to them
 type RouteSortDispatcher map[string]RoutesSorter
 
-func (ssd RouteSortDispatcher) SortRoutes(prflID, strategy string,
+func (ssd RouteSortDispatcher) SortRoutes(ctx *context.Context, prflID, strategy string,
 	suppls map[string]*Route, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	if sortedRoutes, err = sd.SortRoutes(prflID, suppls, suplEv, extraOpts); err != nil {
+	if sortedRoutes, err = sd.SortRoutes(ctx, prflID, suppls, suplEv, extraOpts); err != nil {
 		return
 	}
 	if len(sortedRoutes.Routes) == 0 {

@@ -75,9 +75,9 @@ type DataDB interface {
 	GetFilterDrv(ctx *context.Context, tnt string, id string) (*Filter, error)
 	SetFilterDrv(ctx *context.Context, f *Filter) error
 	RemoveFilterDrv(string, string) error
-	GetRouteProfileDrv(string, string) (*RouteProfile, error)
-	SetRouteProfileDrv(*RouteProfile) error
-	RemoveRouteProfileDrv(string, string) error
+	GetRouteProfileDrv(*context.Context, string, string) (*RouteProfile, error)
+	SetRouteProfileDrv(*context.Context, *RouteProfile) error
+	RemoveRouteProfileDrv(*context.Context, string, string) error
 	GetAttributeProfileDrv(ctx *context.Context, tnt string, id string) (*AttributeProfile, error)
 	SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error
 	RemoveAttributeProfileDrv(*context.Context, string, string) error

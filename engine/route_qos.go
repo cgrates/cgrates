@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,13 +34,13 @@ type QOSRouteSorter struct {
 	rS      *RouteService
 }
 
-func (qos *QOSRouteSorter) SortRoutes(prflID string, routes map[string]*Route,
+func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*Route,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: qos.sorting,
 		Routes:  make([]*SortedRoute, 0)}
 	for _, route := range routes {
-		if srtSpl, pass, err := qos.rS.populateSortingData(ev, route, extraOpts); err != nil {
+		if srtSpl, pass, err := qos.rS.populateSortingData(ctx, ev, route, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)

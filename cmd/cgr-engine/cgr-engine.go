@@ -143,7 +143,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 
 func startRPC(server *cores.Server, internalAdminSChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
-	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
+	internalAttrSChan, internalChargerSChan, internalThdSChan, internalRouteSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalCacheSChan,
 	internalEEsChan, internalRateSChan, internalActionSChan,

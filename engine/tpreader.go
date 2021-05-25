@@ -454,7 +454,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoRouteProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetRouteProfile(th, true); err != nil {
+		if err = tpr.dm.SetRouteProfile(context.TODO(), th, true); err != nil {
 			return
 		}
 		if verbose {

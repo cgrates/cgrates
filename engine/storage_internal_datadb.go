@@ -333,7 +333,7 @@ func (iDB *InternalDB) RemoveFilterDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetRouteProfileDrv(tenant, id string) (spp *RouteProfile, err error) {
+func (iDB *InternalDB) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (spp *RouteProfile, err error) {
 	x, ok := Cache.Get(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -341,7 +341,7 @@ func (iDB *InternalDB) GetRouteProfileDrv(tenant, id string) (spp *RouteProfile,
 	return x.(*RouteProfile), nil
 }
 
-func (iDB *InternalDB) SetRouteProfileDrv(spp *RouteProfile) (err error) {
+func (iDB *InternalDB) SetRouteProfileDrv(ctx *context.Context, spp *RouteProfile) (err error) {
 	if err = spp.Compile(); err != nil {
 		return
 	}
@@ -350,7 +350,7 @@ func (iDB *InternalDB) SetRouteProfileDrv(spp *RouteProfile) (err error) {
 	return
 }
 
-func (iDB *InternalDB) RemoveRouteProfileDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

@@ -1,17 +1,27 @@
-#Tenant,ID,FilterIDs,Weight,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
 
-cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,,*weight,,vendor1,,,,,,10,,
-cgrates.org,ROUTE_ACNT_1001,,,,,vendor2,*gte:~*accounts.1001.BalanceMap.*monetary[0].Value:10,,,,,20,,
+cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,,*weight,,vendor1,FLTR_DEST_1003,,,,,10,,,
+cgrates.org,ROUTE_ACNT_1001,,,,,vendor2,*gte:~*accounts.1001.BalanceMap.*monetary[0].Value:10,,,,,20,,,
+cgrates.org,ROUTE_ACNT_1001,,,,,vendor3,FLTR_DEST_1003;*prefix:~*req.Account:10,,,,,40,,,
+cgrates.org,ROUTE_ACNT_1001,,,,,vendor4,,,,,,35,,,
 
-cgrates.org,ROUTE_ACNT_1002,*string:~*req.Account:1002,,*lc,,vendor1,*lte:~*resources.RES_GRP1.TotalUsage:5,,RP_VENDOR1,,,0,,
-cgrates.org,ROUTE_ACNT_1002,,,,,vendor2,*gte:~*stats.STATS_VENDOR_2.*acd:1m,,RP_VENDOR2,,,0,,
+cgrates.org,ROUTE_ACNT_1002,*string:~*req.Account:1002,,*lc,,vendor1,*lte:~*resources.RES_GRP1.TotalUsage:5,,RP_VENDOR1,,,0,,,
+cgrates.org,ROUTE_ACNT_1002,,,,,vendor2,*gte:~*stats.STATS_VENDOR_2.*acd:1m,,RP_VENDOR2,,,0,,,
+cgrates.org,ROUTE_ACNT_1002,,,,,vendor3,,,RP_VENDOR2,,,10,,,
+cgrates.org,ROUTE_ACNT_1002,,,,,vendor4,*ai:~*req.AnswerTime:2013-06-01T00:00:00Z|2013-06-01T10:00:00Z,,RP_STANDARD,,,30,,,
 
-cgrates.org,ROUTE_ACNT_1003,*string:~*req.Account:1003,,*qos,*acd,vendor1,,,,,STATS_VENDOR_1,0,,
-cgrates.org,ROUTE_ACNT_1003,,,,,vendor2,,,,,STATS_VENDOR_2,0,,
+cgrates.org,ROUTE_ACNT_1003,*string:~*req.Account:1003,,*qos,*acd;*tcc,vendor1,,,,,STATS_VENDOR_1,0,,,
+cgrates.org,ROUTE_ACNT_1003,,,,,vendor2,*prefix:~*req.Destination:10,,,,STATS_VENDOR_2,0,,,
+cgrates.org,ROUTE_ACNT_1003,,,,,vendor3,*gte:~*stats.STATS_VENDOR_1.*tcc:6,,,,STATS_VENDOR_1,20,,,
 
-cgrates.org,ROUTE_ACNT_1004,*string:~*req.Account:1004,,*reas,,vendor1,,,,RES_GRP1,,0,,
-cgrates.org,ROUTE_ACNT_1004,,,,,vendor2,,,,RES_GRP2,,0,,
+cgrates.org,ROUTE_ACNT_1004,*string:~*req.Account:1004,,*reas,,vendor1,,,,RES_GRP1,,0,,,
+cgrates.org,ROUTE_ACNT_1004,,,,,vendor2,,,,RES_GRP2,,0,,,
+cgrates.org,ROUTE_ACNT_1004,,,,,vendor3,*gte:~*resources.RES_GRP1.TotalUsage:9,,,RES_GRP2,,10,,,
 
+cgrates.org,ROUTE_ACNT_1005,*string:~*req.Account:1005,,*load,vendor1:3;*default:2,vendor1,,,,,STATS_VENDOR_1:*sum#1,,,,
+cgrates.org,ROUTE_ACNT_1005,,,,,vendor2,,,,,STATS_VENDOR_2:*sum#1,10,,,
+cgrates.org,ROUTE_ACNT_1005,,,,,vendor3,,,,,STATS_VENDOR_2:*distinct#~*req.Usage,,,,
 
-cgrates.org,ROUTE_ACNT_1005,*string:~*req.Account:1005,,*load,vendor1:3;vendor2:1;*default:2,vendor1,,,,,STATS_VENDOR_1:*sum#1,,,
-cgrates.org,ROUTE_ACNT_1005,,,,,vendor2,,,,,STATS_VENDOR_2:*sum#1,,,
+cgrates.org,ROUTE_HC1,Fltr_tcc,,*hc,,route1,*gte:~*resources.RES_GRP2.Available:6,,RP_VENDOR2,RES_GRP2,,20,,,
+cgrates.org,ROUTE_HC1,,,,,route2,*gte:~*resources.RES_GRP1.TotalUsage:9,,RP_VENDOR1,RES_GRP1,,20,,,
+cgrates.org,ROUTE_HC1,,,,,route3,,,RP_VENDOR1,RES_GRP2,,10,,,

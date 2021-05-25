@@ -21,6 +21,8 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/birpc/context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +37,7 @@ type LeastCostSorter struct {
 	rS      *RouteService
 }
 
-func (lcs *LeastCostSorter) SortRoutes(prflID string, routes map[string]*Route,
+func (lcs *LeastCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*Route,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
 	sortedRoutes = &SortedRoutes{ProfileID: prflID,
 		Sorting: lcs.sorting,
@@ -47,7 +49,7 @@ func (lcs *LeastCostSorter) SortRoutes(prflID string, routes map[string]*Route,
 					utils.RouteS, s.ID))
 			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs or AccountIDs")
 		}
-		if srtSpl, pass, err := lcs.rS.populateSortingData(ev, s, extraOpts); err != nil {
+		if srtSpl, pass, err := lcs.rS.populateSortingData(ctx, ev, s, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)

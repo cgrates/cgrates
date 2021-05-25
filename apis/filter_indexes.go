@@ -278,7 +278,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.RouteFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheRouteFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				rp, e := adms.dm.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
+				rp, e := adms.dm.GetRouteProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
@@ -487,7 +487,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//RouteProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheRouteFilterIndexes,
 		&args.RouteIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			rp, e := adms.dm.GetRouteProfile(tnt, id, true, false, utils.NonTransactional)
+			rp, e := adms.dm.GetRouteProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}

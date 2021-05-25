@@ -276,13 +276,13 @@ func TestRoutesCache(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -494,20 +494,20 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	}
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)
 		}
 	}
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
+	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -515,7 +515,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -523,7 +523,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -735,13 +735,13 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	}
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -764,7 +764,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0])
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[0].Tenant, argsGetRoutes[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -809,7 +809,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}}
 
-	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
+	sprf, err = routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -834,7 +834,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		},
 	}}
 
-	sprf, err = routeService.sortedRoutesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2])
+	sprf, err = routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[2].Tenant, argsGetRoutes[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1046,13 +1046,13 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -1089,7 +1089,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Limit: utils.IntPointer(2),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1301,13 +1301,13 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -1334,7 +1334,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 	argsGetRoutes[1].Paginator = utils.Paginator{
 		Offset: utils.IntPointer(2),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1546,13 +1546,13 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -1580,7 +1580,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		Limit:  utils.IntPointer(1),
 		Offset: utils.IntPointer(1),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1])
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1826,13 +1826,13 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -1841,7 +1841,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 	}
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
+	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1849,7 +1849,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1857,7 +1857,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2069,13 +2069,13 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	dmSPP.SetFilter(context.Background(), fltrSupp3, true)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each route profile from cache
 	for _, spp := range sppTest {
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -2084,7 +2084,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	}
 
 	routeService.cgrcfg.RouteSCfg().IndexedSelects = false
-	sprf, err := routeService.matchingRouteProfilesForEvent(argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
+	sprf, err := routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[0].Tenant, argsGetRoutes[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2092,7 +2092,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[1].Tenant, argsGetRoutes[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2100,7 +2100,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = routeService.matchingRouteProfilesForEvent(argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
+	sprf, err = routeService.matchingRouteProfilesForEvent(context.Background(), argsGetRoutes[2].Tenant, argsGetRoutes[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2193,10 +2193,10 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
 
 	for _, spp := range sppTest {
-		if err = dmSPP.SetRouteProfile(spp, true); err != nil {
+		if err = dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
-		if tempSpp, err := dmSPP.GetRouteProfile(spp.Tenant,
+		if tempSpp, err := dmSPP.GetRouteProfile(context.Background(), spp.Tenant,
 			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
@@ -2242,7 +2242,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		Limit:  utils.IntPointer(2),
 		Offset: utils.IntPointer(1),
 	}
-	sprf, err := routeService.sortedRoutesForEvent(argsGetRoutes.Tenant, argsGetRoutes)
+	sprf, err := routeService.sortedRoutesForEvent(context.Background(), argsGetRoutes.Tenant, argsGetRoutes)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
