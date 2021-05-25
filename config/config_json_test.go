@@ -2161,18 +2161,19 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 
 func TestDfActionSJsonCfg(t *testing.T) {
 	eCfg := &ActionSJsonCfg{
-		Enabled:               utils.BoolPointer(false),
-		Cdrs_conns:            &[]string{},
-		Ees_conns:             &[]string{},
-		Thresholds_conns:      &[]string{},
-		Stats_conns:           &[]string{},
-		Accounts_conns:        &[]string{},
-		Tenants:               &[]string{},
-		Indexed_selects:       utils.BoolPointer(true),
-		String_indexed_fields: nil,
-		Prefix_indexed_fields: &[]string{},
-		Suffix_indexed_fields: &[]string{},
-		Nested_fields:         utils.BoolPointer(false),
+		Enabled:                   utils.BoolPointer(false),
+		Cdrs_conns:                &[]string{},
+		Ees_conns:                 &[]string{},
+		Thresholds_conns:          &[]string{},
+		Stats_conns:               &[]string{},
+		Accounts_conns:            &[]string{},
+		Tenants:                   &[]string{},
+		Indexed_selects:           utils.BoolPointer(true),
+		String_indexed_fields:     nil,
+		Prefix_indexed_fields:     &[]string{},
+		Suffix_indexed_fields:     &[]string{},
+		Nested_fields:             utils.BoolPointer(false),
+		Dynaprepaid_actionprofile: &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

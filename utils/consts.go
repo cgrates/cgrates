@@ -967,9 +967,10 @@ const (
 	BalanceUnits           = "BalanceUnits"
 	ExtraParameters        = "ExtraParameters"
 
-	MetaAddBalance = "*add_balance"
-	MetaSetBalance = "*set_balance"
-	MetaRemBalance = "*rem_balance"
+	MetaAddBalance            = "*add_balance"
+	MetaSetBalance            = "*set_balance"
+	MetaRemBalance            = "*rem_balance"
+	DynaprepaidActionplansCfg = "dynaprepaid_actionprofile"
 )
 
 // Migrator Metas
