@@ -189,6 +189,6 @@ func (rdr *JSONFileER) processFile(fPath, fName string) (err error) {
 
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Events posted: %d, run duration: %s",
-			utils.ERs, absPath, evsPosted, time.Now().Sub(timeStart)))
+			utils.ERs, absPath, evsPosted, time.Since(timeStart)))
 	return
 }

@@ -394,9 +394,6 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
 			FilterIDs: []string{"FLTR_TH_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
@@ -407,9 +404,6 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_2",
 			FilterIDs: []string{"FLTR_TH_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -421,9 +415,6 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_3",
 			FilterIDs: []string{"FLTR_TH_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -507,7 +498,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh1, true)
+	dmTH.SetFilter(context.TODO(), fltrTh1, true)
 	fltrTh2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
@@ -524,7 +515,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh2, true)
+	dmTH.SetFilter(context.TODO(), fltrTh2, true)
 	fltrTh3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
@@ -536,7 +527,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh3, true)
+	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -595,9 +586,6 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
 			FilterIDs: []string{"FLTR_TH_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
@@ -608,9 +596,6 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_2",
 			FilterIDs: []string{"FLTR_TH_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -622,9 +607,6 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_3",
 			FilterIDs: []string{"FLTR_TH_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -708,7 +690,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh1, true)
+	dmTH.SetFilter(context.TODO(), fltrTh1, true)
 	fltrTh2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
@@ -725,7 +707,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh2, true)
+	dmTH.SetFilter(context.TODO(), fltrTh2, true)
 	fltrTh3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
@@ -737,7 +719,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh3, true)
+	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -815,9 +797,6 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_1",
 			FilterIDs: []string{"FLTR_TH_1"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
@@ -828,9 +807,6 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_2",
 			FilterIDs: []string{"FLTR_TH_2"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -842,9 +818,6 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "TH_3",
 			FilterIDs: []string{"FLTR_TH_3"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			},
 			MaxHits:   12,
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
@@ -929,7 +902,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh1, true)
+	dmTH.SetFilter(context.TODO(), fltrTh1, true)
 	fltrTh2 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
@@ -946,7 +919,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh2, true)
+	dmTH.SetFilter(context.TODO(), fltrTh2, true)
 	fltrTh3 := &Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
@@ -958,7 +931,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			},
 		},
 	}
-	dmTH.SetFilter(context.TODO(),fltrTh3, true)
+	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 
 	for _, th := range tPrfls {
 		if err = dmTH.SetThresholdProfile(th, true); err != nil {
@@ -993,9 +966,6 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "TH_4",
 		FilterIDs: []string{"FLTR_TH_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
 		MaxHits:   12,
 		Blocker:   false,
 		Weight:    20.0,
@@ -1052,7 +1022,6 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	}
 }
 */
-
 func TestThresholdsUpdateThreshold(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
