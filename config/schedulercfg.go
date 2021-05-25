@@ -24,11 +24,12 @@ import (
 
 // SchedulerCfg the condig section for scheduler
 type SchedulerCfg struct {
-	Enabled      bool
-	CDRsConns    []string
-	ThreshSConns []string
-	StatSConns   []string
-	Filters      []string
+	Enabled                bool
+	CDRsConns              []string
+	ThreshSConns           []string
+	StatSConns             []string
+	Filters                []string
+	DynaprepaidActionPlans []string
 }
 
 func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
@@ -74,14 +75,21 @@ func (schdcfg *SchedulerCfg) loadFromJSONCfg(jsnCfg *SchedulerJsonCfg) error {
 			}
 		}
 	}
+	if jsnCfg.Dynaprepaid_actionplans != nil {
+		schdcfg.DynaprepaidActionPlans = make([]string, len(*jsnCfg.Dynaprepaid_actionplans))
+		for i, val := range *jsnCfg.Dynaprepaid_actionplans {
+			schdcfg.DynaprepaidActionPlans[i] = val
+		}
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (schdcfg *SchedulerCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg: schdcfg.Enabled,
-		utils.FiltersCfg: schdcfg.Filters,
+		utils.EnabledCfg:                schdcfg.Enabled,
+		utils.FiltersCfg:                schdcfg.Filters,
+		utils.DynaprepaidActionplansCfg: schdcfg.DynaprepaidActionPlans,
 	}
 	if schdcfg.CDRsConns != nil {
 		cdrsConns := make([]string, len(schdcfg.CDRsConns))
@@ -146,5 +154,11 @@ func (schdcfg SchedulerCfg) Clone() (cln *SchedulerCfg) {
 		}
 	}
 
+	if schdcfg.DynaprepaidActionPlans != nil {
+		cln.DynaprepaidActionPlans = make([]string, len(schdcfg.DynaprepaidActionPlans))
+		for i, con := range schdcfg.DynaprepaidActionPlans {
+			cln.DynaprepaidActionPlans[i] = con
+		}
+	}
 	return
 }

@@ -382,11 +382,12 @@ func testCGRConfigReloadSchedulerS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SchedulerCfg{
-		Enabled:      true,
-		CDRsConns:    []string{utils.MetaLocalHost},
-		ThreshSConns: []string{},
-		StatSConns:   []string{},
-		Filters:      []string{},
+		Enabled:                true,
+		CDRsConns:              []string{utils.MetaLocalHost},
+		ThreshSConns:           []string{},
+		StatSConns:             []string{},
+		Filters:                []string{},
+		DynaprepaidActionPlans: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SchedulerCfg()))
@@ -456,7 +457,6 @@ func testCGRConfigReloadRALs(t *testing.T) {
 		ThresholdSConns:         []string{utils.MetaLocalHost},
 		StatSConns:              []string{utils.MetaLocalHost},
 		MaxIncrements:           1000000,
-		DynaprepaidActionPlans:  []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))

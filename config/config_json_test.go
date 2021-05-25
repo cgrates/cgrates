@@ -615,7 +615,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",
 		},
-		Dynaprepaid_actionplans: &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -630,11 +629,12 @@ func TestDfRalsJsonCfg(t *testing.T) {
 
 func TestDfSchedulerJsonCfg(t *testing.T) {
 	eCfg := &SchedulerJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Cdrs_conns:       &[]string{},
-		Thresholds_conns: &[]string{},
-		Stats_conns:      &[]string{},
-		Filters:          &[]string{},
+		Enabled:                 utils.BoolPointer(false),
+		Cdrs_conns:              &[]string{},
+		Thresholds_conns:        &[]string{},
+		Stats_conns:             &[]string{},
+		Filters:                 &[]string{},
+		Dynaprepaid_actionplans: &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
