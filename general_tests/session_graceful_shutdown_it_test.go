@@ -28,8 +28,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
-
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/engine"
@@ -96,10 +94,10 @@ func testSessionSRplcInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSRplcResetDB(t *testing.T) {
-	if err := engine.InitDataDb(smgRplCfg1); err != nil {
+	if err := engine.InitDataDB(smgRplCfg1); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitStorDb(smgRplCfg1); err != nil {
+	if err := engine.InitStorDB(smgRplCfg1); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -138,7 +136,7 @@ func testSessionSRplcApierGetActiveSessionsNotFound(t *testing.T) {
 }
 
 func testSessionSRplcApierSetChargerS(t *testing.T) {
-	chargerProfile1 := &v1.ChargerWithAPIOpts{
+	chargerProfile1 := &engine.ChargerProfileWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
@@ -154,7 +152,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		t.Error("Unexpected reply returned", result1)
 	}
 
-	chargerProfile2 := &v1.ChargerWithAPIOpts{
+	chargerProfile2 := &engine.ChargerProfileWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
