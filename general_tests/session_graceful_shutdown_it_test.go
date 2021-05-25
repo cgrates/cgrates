@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/engine"
@@ -136,7 +137,7 @@ func testSessionSRplcApierGetActiveSessionsNotFound(t *testing.T) {
 }
 
 func testSessionSRplcApierSetChargerS(t *testing.T) {
-	chargerProfile1 := &engine.ChargerProfileWithAPIOpts{
+	chargerProfile1 := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
@@ -152,7 +153,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		t.Error("Unexpected reply returned", result1)
 	}
 
-	chargerProfile2 := &engine.ChargerProfileWithAPIOpts{
+	chargerProfile2 := &v1.ChargerWithAPIOpts{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
