@@ -983,3 +983,206 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 }
+
+func TestStatQueuesUpdateStatQueue(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	sqp := &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "THUP1",
+		Stored:      true,
+		QueueLength: 1,
+		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
+	}
+	sqm, err := NewTCC(0, utils.EmptyString, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = sqm.AddEvent("ev1", utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.Cost: 10}}); err != nil {
+		t.Fatal(err)
+	}
+	sq := &StatQueue{
+		Tenant:    sqp.Tenant,
+		ID:        sqp.ID,
+		SQItems:   []SQItem{{EventID: "ev1"}},
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm, utils.MetaTCD: sqm},
+	}
+	sqm2, err := NewTCC(0, utils.EmptyString, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expTh := &StatQueue{
+		Tenant:    sqp.Tenant,
+		ID:        sqp.ID,
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm2},
+	}
+
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.RemoveStatQueue(sqp.Tenant, sqp.ID, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Fatal(err)
+	}
+
+	sqp = &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "THUP1",
+		Stored:      true,
+		QueueLength: 1,
+		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC, FilterIDs: []string{"*string:~*req.Account:1001"}}},
+	}
+
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	sqm3, err := NewTCC(0, utils.EmptyString, []string{"*string:~*req.Account:1001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	expTh = &StatQueue{
+		Tenant:    sqp.Tenant,
+		ID:        sqp.ID,
+		SQItems:   []SQItem{{EventID: "ev1"}},
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm3},
+	}
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Fatal(err)
+	}
+
+	sqm2, err = NewTCC(5, utils.EmptyString, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expTh = &StatQueue{
+		Tenant:    sqp.Tenant,
+		ID:        sqp.ID,
+		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm2},
+	}
+	delete(sq.SQMetrics, utils.MetaTCD)
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Fatal(err)
+	}
+
+	sqp = &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "THUP1",
+		Stored:      true,
+		QueueLength: 1,
+		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
+		MinItems:    5,
+	}
+
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Fatal(err)
+	}
+
+	sqp = &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "THUP1",
+		Stored:      true,
+		QueueLength: 1,
+		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
+		MinItems:    5,
+		TTL:         10,
+	}
+
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Fatal(err)
+	}
+
+	sqp = &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "THUP1",
+		Stored:      true,
+		QueueLength: 10,
+		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
+		TTL:         10,
+		MinItems:    5,
+	}
+
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.SetStatQueue(sq); err != nil {
+		t.Fatal(err)
+	}
+
+	sqp = &StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "THUP1",
+		Stored:      false,
+		QueueLength: 10,
+		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC}},
+		TTL:         10,
+		MinItems:    5,
+	}
+
+	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(expTh, th) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
+	}
+
+	if err := dm.RemoveStatQueueProfile(sqp.Tenant, sqp.ID, utils.NonTransactional, true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+}
