@@ -95,6 +95,7 @@
 	"routes_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"alterable_fields": ["Extra1"],
+	"terminate_attempts": 10,
 },
 
 

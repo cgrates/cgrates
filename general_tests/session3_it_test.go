@@ -328,7 +328,7 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(3 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
