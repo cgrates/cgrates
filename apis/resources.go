@@ -62,6 +62,25 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Pa
 	return nil
 }
 
+// GetResourceProfileIDsCount returns the total number of ResourceProfileIDs registered for a tenant
+// returns ErrNotFound in case of 0 ResourceProfileIDs
+func (admS *AdminSv1) GetResourceProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.ResourceProfilesPrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return
+}
+
 //SetResourceProfile adds a new resource configuration
 func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {

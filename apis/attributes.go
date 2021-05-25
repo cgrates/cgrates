@@ -77,8 +77,8 @@ func (admS *AdminSv1) GetAttributeProfileIDsCount(ctx *context.Context, args *ut
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.AttributeProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
