@@ -82,17 +82,17 @@
 "sessions": {
 	"enabled": true,
 	"session_ttl": "50ms",
-	"chargers_conns": ["*localhost"],
-	"rals_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"thresholds_conns": ["*internal"],
 	"stats_conns": ["*internal"],
 	"routes_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
-	"alterable_fields": ["Extra1"]
+	"alterable_fields": ["Extra1"],
+	"terminate_attempts": 10,
 },
-
 
 "apiers": {
 	"enabled": true,
