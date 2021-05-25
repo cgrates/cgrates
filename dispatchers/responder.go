@@ -32,8 +32,6 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 		args = utils.NewCGREventWithArgDispatcher()
 	} else if args.CGREvent == nil {
 		args.CGREvent = new(utils.CGREvent)
-	} else if args.ArgDispatcher == nil {
-		args.ArgDispatcher = new(utils.ArgDispatcher)
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
@@ -205,6 +203,7 @@ func (dS *DispatcherService) ResponderGetCostOnRatingPlans(arg *utils.GetCostOnR
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
 		routeID, utils.ResponderGetCostOnRatingPlans, arg, reply)
 }
+
 func (dS *DispatcherService) ResponderGetMaxSessionTimeOnAccounts(args *utils.GetMaxSessionTimeOnAccountsArgs, reply *map[string]interface{}) (err error) {
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

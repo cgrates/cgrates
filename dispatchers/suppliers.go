@@ -28,8 +28,6 @@ func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatch
 		args = utils.NewCGREventWithArgDispatcher()
 	} else if args.CGREvent == nil {
 		args.CGREvent = new(utils.CGREvent)
-	} else if args.ArgDispatcher == nil {
-		args.ArgDispatcher = new(utils.ArgDispatcher)
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {

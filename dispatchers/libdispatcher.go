@@ -114,7 +114,6 @@ func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	pfl.Hosts.Sort()
 	wd.hosts = pfl.Hosts.Clone() // avoid concurrency on profile
 	wd.Unlock()
-	return
 }
 
 func (wd *WeightDispatcher) HostIDs() (hostIDs []string) {
@@ -144,7 +143,6 @@ func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	d.Lock()
 	d.hosts = pfl.Hosts.Clone()
 	d.Unlock()
-	return
 }
 
 func (d *RandomDispatcher) HostIDs() (hostIDs []string) {
@@ -175,7 +173,6 @@ func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	d.Lock()
 	d.hosts = pfl.Hosts.Clone()
 	d.Unlock()
-	return
 }
 
 func (d *RoundRobinDispatcher) HostIDs() (hostIDs []string) {
@@ -210,7 +207,6 @@ func (d *BroadcastDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	pfl.Hosts.Sort()
 	d.hosts = pfl.Hosts.Clone()
 	d.Unlock()
-	return
 }
 
 func (d *BroadcastDispatcher) HostIDs() (hostIDs []string) {
@@ -228,7 +224,7 @@ func (d *BroadcastDispatcher) Dispatch(routeID *string, subsystem,
 
 type singleResultstrategyDispatcher struct{}
 
-func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string,
+func (*singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string,
 	hostIDs []string, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
 	if routeID != nil && *routeID != "" {
@@ -262,7 +258,7 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 
 type brodcastStrategyDispatcher struct{}
 
-func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
+func (*brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var hasErrors bool
 	for _, hostID := range hostIDs {
