@@ -371,6 +371,9 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 		SortingData: map[string]interface{}{
 			utils.Weight: route.Weight,
 		},
+		sortingDataF64: map[string]float64{
+			utils.Weight: route.Weight,
+		},
 		RouteParameters: route.RouteParameters,
 	}
 	//calculate costData if we have fields
@@ -399,6 +402,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			}
 			for k, v := range costData {
 				sortedSpl.SortingData[k] = v
+				sortedSpl.sortingDataF64[k], _ = v.(float64)
 			}
 		}
 	}
@@ -417,6 +421,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 				return nil, false, err
 			}
 			sortedSpl.SortingData[utils.Load] = metricSum
+			sortedSpl.sortingDataF64[utils.Load] = metricSum
 		} else {
 			metricSupp, err := rpS.statMetrics(route.StatIDs, ev.Tenant) //create metric map for route
 			if err != nil {
@@ -431,6 +436,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			//add metrics from statIDs in SortingData
 			for key, val := range metricSupp {
 				sortedSpl.SortingData[key] = val
+				sortedSpl.sortingDataF64[key] = val
 			}
 			//check if the route have the metric from sortingParameters
 			//in case that the metric don't exist
@@ -440,8 +446,10 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 					switch metric {
 					default:
 						sortedSpl.SortingData[metric] = -1.0
+						sortedSpl.sortingDataF64[metric] = -1.0
 					case utils.MetaPDD:
 						sortedSpl.SortingData[metric] = 10000000.0
+						sortedSpl.sortingDataF64[metric] = 10000000.0
 					}
 				}
 			}
@@ -460,6 +468,7 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 			return nil, false, err
 		}
 		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
+		sortedSpl.sortingDataF64[utils.ResourceUsage] = resTotalUsage
 	}
 	//filter the route
 	if len(route.lazyCheckRules) != 0 {

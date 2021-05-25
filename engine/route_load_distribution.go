@@ -63,6 +63,7 @@ func (ws *LoadDistributionSorter) SortRoutes(prflID string,
 						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
 			}
 			srtSpl.SortingData[utils.Ratio] = floatRatio
+			srtSpl.sortingDataF64[utils.Ratio] = floatRatio
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtSpl)
 		}
 	}
