@@ -31,6 +31,10 @@ func TestLibSuppliersSortCost(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -39,6 +43,10 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
@@ -47,6 +55,10 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
@@ -60,6 +72,10 @@ func TestLibSuppliersSortCost(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
@@ -68,6 +84,10 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 20.0,
@@ -76,6 +96,10 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -95,6 +119,9 @@ func TestLibRoutesSortWeight(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
 				},
@@ -102,6 +129,9 @@ func TestLibRoutesSortWeight(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
 				},
@@ -109,6 +139,9 @@ func TestLibRoutesSortWeight(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.5,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.5,
 				},
@@ -121,6 +154,9 @@ func TestLibRoutesSortWeight(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
 				},
@@ -128,6 +164,9 @@ func TestLibRoutesSortWeight(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.5,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.5,
 				},
@@ -135,6 +174,9 @@ func TestLibRoutesSortWeight(t *testing.T) {
 			},
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
 				},
@@ -155,15 +197,21 @@ func TestSortedRoutesDigest(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 20.0,
+					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
 			},
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 10.0,
+					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
 			},
@@ -183,15 +231,21 @@ func TestSortedRoutesDigest2(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 30.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 30.0,
+					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 20.0,
+					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
 			},
@@ -222,6 +276,10 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 15.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 15.0,
@@ -230,6 +288,10 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.2,
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.2,
 					utils.Weight: 20.0,
@@ -238,6 +300,10 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
@@ -251,6 +317,10 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.2,
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.2,
 					utils.Weight: 20.0,
@@ -259,6 +329,10 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 			},
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 15.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 15.0,
@@ -267,6 +341,10 @@ func TestLibRoutesSortHighestCost(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.05,
 					utils.Weight: 10.0,
@@ -288,6 +366,12 @@ func TestLibRoutesSortQOS(t *testing.T) {
 			{
 				//the average value for route1 for *acd is 0.5 , *tcd  1.1
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:    0.5,
+					utils.Weight:  10.0,
+					utils.MetaACD: 0.5,
+					utils.MetaTCD: 1.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:    0.5,
 					utils.Weight:  10.0,
@@ -298,6 +382,12 @@ func TestLibRoutesSortQOS(t *testing.T) {
 			{
 				//the average value for route2 for *acd is 0.5 , *tcd 4.1
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:    0.1,
+					utils.Weight:  15.0,
+					utils.MetaACD: 0.5,
+					utils.MetaTCD: 4.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:    0.1,
 					utils.Weight:  15.0,
@@ -308,6 +398,12 @@ func TestLibRoutesSortQOS(t *testing.T) {
 			{
 				//the average value for route3 for *acd is 0.4 , *tcd 5.1
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:    1.1,
+					utils.Weight:  17.8,
+					utils.MetaACD: 0.4,
+					utils.MetaTCD: 5.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:    1.1,
 					utils.Weight:  17.8,
@@ -339,6 +435,11 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 			{
 				//the average value for route1 for *acd is 0.5 , *tcd  1.1
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  10.0,
+					utils.MetaACD: 0.5,
+					utils.MetaTCD: 1.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  10.0,
 					utils.MetaACD: 0.5,
@@ -350,6 +451,11 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 				//route1 and route2 have the same value for *acd and *tcd
 				//will be sorted based on weight
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  17.0,
+					utils.MetaACD: 0.5,
+					utils.MetaTCD: 1.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  17.0,
 					utils.MetaACD: 0.5,
@@ -357,8 +463,13 @@ func TestLibRoutesSortQOS2(t *testing.T) {
 				},
 			},
 			{
-
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:    0.5,
+					utils.Weight:  10.0,
+					utils.MetaACD: 0.7,
+					utils.MetaTCD: 1.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:    0.5,
 					utils.Weight:  10.0,
@@ -390,6 +501,11 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 				//route1 and route3 have the same value for *pdd
 				//will be sorted based on weight
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  15.0,
+					utils.MetaPDD: 0.7,
+					utils.MetaTCD: 1.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  15.0,
 					utils.MetaPDD: 0.7,
@@ -399,6 +515,11 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 			{
 				//the worst value for route2 for *pdd is 1.2, *tcd  1.1
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  10.0,
+					utils.MetaPDD: 1.2,
+					utils.MetaTCD: 1.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  10.0,
 					utils.MetaPDD: 1.2,
@@ -408,6 +529,11 @@ func TestLibRoutesSortQOS3(t *testing.T) {
 			{
 				//the worst value for route3 for *pdd is 0.7, *tcd  10.1
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  10.0,
+					utils.MetaPDD: 0.7,
+					utils.MetaTCD: 10.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  10.0,
 					utils.MetaPDD: 0.7,
@@ -434,6 +560,11 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+					utils.MetaASR: 1.2,
+				},
 				SortingData: map[string]interface{}{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
@@ -442,6 +573,11 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+					utils.MetaASR: -1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
@@ -450,6 +586,11 @@ func TestLibRoutesSortQOS4(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+					utils.MetaASR: 1.2,
+				},
 				SortingData: map[string]interface{}{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
@@ -476,6 +617,12 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+					utils.MetaASR: -1.0,
+					utils.MetaTCC: 10.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
@@ -485,6 +632,12 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+					utils.MetaASR: 1.2,
+					utils.MetaTCC: 10.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
@@ -494,6 +647,12 @@ func TestLibRoutesSortQOS5(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+					utils.MetaASR: 1.2,
+					utils.MetaTCC: 10.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
@@ -521,6 +680,10 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  15.0,
+					utils.MetaACD: 0.2,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  15.0,
 					utils.MetaACD: 0.2,
@@ -528,6 +691,10 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  25.0,
+					utils.MetaACD: 0.2,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  25.0,
 					utils.MetaACD: 0.2,
@@ -535,6 +702,10 @@ func TestLibRoutesSortQOS6(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  20.0,
+					utils.MetaACD: 0.1,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  20.0,
 					utils.MetaACD: 0.1,
@@ -560,6 +731,10 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  15.0,
+					utils.MetaACD: -1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  15.0,
 					utils.MetaACD: -1.0,
@@ -567,6 +742,10 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  25.0,
+					utils.MetaACD: -1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  25.0,
 					utils.MetaACD: -1.0,
@@ -574,6 +753,10 @@ func TestLibRoutesSortQOS7(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  20.0,
+					utils.MetaACD: -1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  20.0,
 					utils.MetaACD: -1.0,
@@ -599,6 +782,10 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  15.0,
+					utils.MetaACD: -1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  15.0,
 					utils.MetaACD: -1.0,
@@ -606,6 +793,10 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  25.0,
+					utils.MetaACD: -1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  25.0,
 					utils.MetaACD: -1.0,
@@ -613,6 +804,10 @@ func TestLibRoutesSortQOS8(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight:  20.0,
+					utils.MetaACD: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight:  20.0,
 					utils.MetaACD: 10.0,
@@ -638,6 +833,11 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 25.0,
+					utils.Ratio:  4.0,
+					utils.Load:   3.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 25.0,
 					utils.Ratio:  4.0,
@@ -646,6 +846,11 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 15.0,
+					utils.Ratio:  10.0,
+					utils.Load:   5.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 15.0,
 					utils.Ratio:  10.0,
@@ -654,6 +859,11 @@ func TestLibRoutesSortLoadDistribution(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 25.0,
+					utils.Ratio:  1.0,
+					utils.Load:   1.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 25.0,
 					utils.Ratio:  1.0,
@@ -722,10 +932,17 @@ func TestLibRoutesResAscSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
-			utils.ResourceUsage: 5.0,
-			utils.Weight:        10.0,
-		}}
+		route := &SortedRoute{
+			RouteID: strconv.Itoa(i),
+			sortingDataF64: map[string]float64{
+				utils.ResourceUsage: 5.0,
+				utils.Weight:        10.0,
+			},
+			SortingData: map[string]interface{}{
+				utils.ResourceUsage: 5.0,
+				utils.Weight:        10.0,
+			},
+		}
 		sSpls.Routes = append(sSpls.Routes, route)
 		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
@@ -744,10 +961,17 @@ func TestLibRoutesResDescSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
-			utils.ResourceUsage: 5.0,
-			utils.Weight:        10.0,
-		}}
+		route := &SortedRoute{
+			RouteID: strconv.Itoa(i),
+			sortingDataF64: map[string]float64{
+				utils.ResourceUsage: 5.0,
+				utils.Weight:        10.0,
+			},
+			SortingData: map[string]interface{}{
+				utils.ResourceUsage: 5.0,
+				utils.Weight:        10.0,
+			},
+		}
 		sSpls.Routes = append(sSpls.Routes, route)
 		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
@@ -767,11 +991,19 @@ func TestLibRoutesLoadDistSameWeight(t *testing.T) {
 	sSpls := &SortedRoutes{}
 	sortedSlice := &SortedRoutes{}
 	for i := 0; i <= 10; i++ {
-		route := &SortedRoute{RouteID: strconv.Itoa(i), SortingData: map[string]interface{}{
-			utils.Ratio:  4.0,
-			utils.Load:   3.0,
-			utils.Weight: 10.0,
-		}}
+		route := &SortedRoute{
+			RouteID: strconv.Itoa(i),
+			sortingDataF64: map[string]float64{
+				utils.Ratio:  4.0,
+				utils.Load:   3.0,
+				utils.Weight: 10.0,
+			},
+			SortingData: map[string]interface{}{
+				utils.Ratio:  4.0,
+				utils.Load:   3.0,
+				utils.Weight: 10.0,
+			},
+		}
 		sSpls.Routes = append(sSpls.Routes, route)
 		sortedSlice.Routes = append(sortedSlice.Routes, route)
 	}
@@ -834,6 +1066,10 @@ func BenchmarkRouteSortCost(b *testing.B) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -842,6 +1078,10 @@ func BenchmarkRouteSortCost(b *testing.B) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -850,6 +1090,10 @@ func BenchmarkRouteSortCost(b *testing.B) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -869,6 +1113,10 @@ func TestRouteIDsGetIDs(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -877,6 +1125,10 @@ func TestRouteIDsGetIDs(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -885,6 +1137,10 @@ func TestRouteIDsGetIDs(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -907,6 +1163,10 @@ func TestSortHighestCost(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 11.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 11.0,
@@ -914,6 +1174,10 @@ func TestSortHighestCost(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Cost:   0.1,
 					utils.Weight: 10.0,
@@ -933,6 +1197,10 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 10.0,
+					utils.Weight:        10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.ResourceUsage: 10.0,
 					utils.Weight:        10.0,
@@ -940,6 +1208,10 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 			},
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 10.0,
+					utils.Weight:        11.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.ResourceUsage: 10.0,
 					utils.Weight:        11.0,
@@ -962,6 +1234,7 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 
 	//SortingResourceAscendent/Descendent while ResourceUsages are not equal
 	sSpls.Routes[0].SortingData[utils.ResourceUsage] = 11.0
+	sSpls.Routes[0].sortingDataF64[utils.ResourceUsage] = 11.0
 	expSRts = sSpls
 	sSpls.SortResourceAscendent()
 	if !reflect.DeepEqual(expSRts, sSpls) {
@@ -979,6 +1252,11 @@ func TestSortLoadDistribution(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "ROUTE1",
+				sortingDataF64: map[string]float64{
+					utils.Ratio:  6.0,
+					utils.Load:   10.0,
+					utils.Weight: 15.5,
+				},
 				SortingData: map[string]interface{}{
 					utils.Ratio:  6.0,
 					utils.Load:   10.0,
@@ -987,6 +1265,11 @@ func TestSortLoadDistribution(t *testing.T) {
 			},
 			{
 				RouteID: "ROUTE2",
+				sortingDataF64: map[string]float64{
+					utils.Ratio:  6.0,
+					utils.Load:   10.0,
+					utils.Weight: 14.5,
+				},
 				SortingData: map[string]interface{}{
 					utils.Ratio:  6.0,
 					utils.Load:   10.0,
@@ -1006,6 +1289,11 @@ func TestSortedRouteAsNavigableMap(t *testing.T) {
 	sSpls := &SortedRoute{
 		RouteID:         "ROUTE1",
 		RouteParameters: "SORTING_PARAMETER",
+		sortingDataF64: map[string]float64{
+			utils.Ratio:  6.0,
+			utils.Load:   10.0,
+			utils.Weight: 15.5,
+		},
 		SortingData: map[string]interface{}{
 			utils.Ratio:  6.0,
 			utils.Load:   10.0,
@@ -1040,6 +1328,11 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 			{
 				RouteID:         "ROUTE1",
 				RouteParameters: "SORTING_PARAMETER",
+				sortingDataF64: map[string]float64{
+					utils.Ratio:  6.0,
+					utils.Load:   10.0,
+					utils.Weight: 15.5,
+				},
 				SortingData: map[string]interface{}{
 					utils.Ratio:  6.0,
 					utils.Load:   10.0,
@@ -1049,6 +1342,10 @@ func TestSortedRoutesAsNavigableMap(t *testing.T) {
 			{
 				RouteID:         "ROUTE2",
 				RouteParameters: "SORTING_PARAMETER_SECOND",
+				sortingDataF64: map[string]float64{
+					utils.Ratio: 7.0,
+					utils.Load:  10.0,
+				},
 				SortingData: map[string]interface{}{
 					utils.Ratio: 7.0,
 					utils.Load:  10.0,
