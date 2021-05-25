@@ -22,18 +22,19 @@ import "github.com/cgrates/cgrates/utils"
 
 // ActionSCfg is the configuration of ActionS
 type ActionSCfg struct {
-	Enabled             bool
-	CDRsConns           []string
-	EEsConns            []string
-	ThresholdSConns     []string
-	StatSConns          []string
-	AccountSConns       []string
-	Tenants             *[]string
-	IndexedSelects      bool
-	StringIndexedFields *[]string
-	PrefixIndexedFields *[]string
-	SuffixIndexedFields *[]string
-	NestedFields        bool
+	Enabled                  bool
+	CDRsConns                []string
+	EEsConns                 []string
+	ThresholdSConns          []string
+	StatSConns               []string
+	AccountSConns            []string
+	Tenants                  *[]string
+	IndexedSelects           bool
+	StringIndexedFields      *[]string
+	PrefixIndexedFields      *[]string
+	SuffixIndexedFields      *[]string
+	NestedFields             bool
+	DynaprepaidActionProfile []string
 }
 
 func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
@@ -76,15 +77,22 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		acS.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Dynaprepaid_actionprofile != nil {
+		acS.DynaprepaidActionProfile = make([]string, len(*jsnCfg.Dynaprepaid_actionprofile))
+		for i, val := range *jsnCfg.Dynaprepaid_actionprofile {
+			acS.DynaprepaidActionProfile[i] = val
+		}
+	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (acS *ActionSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:        acS.Enabled,
-		utils.IndexedSelectsCfg: acS.IndexedSelects,
-		utils.NestedFieldsCfg:   acS.NestedFields,
+		utils.EnabledCfg:                acS.Enabled,
+		utils.IndexedSelectsCfg:         acS.IndexedSelects,
+		utils.NestedFieldsCfg:           acS.NestedFields,
+		utils.DynaprepaidActionplansCfg: acS.DynaprepaidActionProfile,
 	}
 	if acS.CDRsConns != nil {
 		initialMP[utils.CDRsConnsCfg] = getInternalJSONConns(acS.CDRsConns)
@@ -150,23 +158,30 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	if acS.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*acS.SuffixIndexedFields))
 	}
+	if acS.DynaprepaidActionProfile != nil {
+		cln.DynaprepaidActionProfile = make([]string, len(acS.DynaprepaidActionProfile))
+		for i, con := range acS.DynaprepaidActionProfile {
+			cln.DynaprepaidActionProfile[i] = con
+		}
+	}
 	return
 }
 
 // Action service config section
 type ActionSJsonCfg struct {
-	Enabled               *bool
-	Cdrs_conns            *[]string
-	Ees_conns             *[]string
-	Thresholds_conns      *[]string
-	Stats_conns           *[]string
-	Accounts_conns        *[]string
-	Tenants               *[]string
-	Indexed_selects       *bool
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
-	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	Enabled                   *bool
+	Cdrs_conns                *[]string
+	Ees_conns                 *[]string
+	Thresholds_conns          *[]string
+	Stats_conns               *[]string
+	Accounts_conns            *[]string
+	Tenants                   *[]string
+	Indexed_selects           *bool
+	String_indexed_fields     *[]string
+	Prefix_indexed_fields     *[]string
+	Suffix_indexed_fields     *[]string
+	Nested_fields             *bool // applies when indexed fields is not defined
+	Dynaprepaid_actionprofile *[]string
 }
 
 func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
