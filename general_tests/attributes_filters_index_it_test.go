@@ -130,8 +130,7 @@ func testAttributeSetFltr1(t *testing.T) {
 
 	var indexes []string
 	if err := attrFltrRPC.Call(utils.AdminSv1GetFilterIndexes, &apis.AttrGetFilterIndexes{
-		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
-		Context: utils.MetaSessionS},
+		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -143,7 +142,6 @@ func testAttributeSetProfile(t *testing.T) {
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
-			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_1"},
 			Attributes: []*engine.ExternalAttribute{{
 				Path:  "*req.FL1",
@@ -159,7 +157,6 @@ func testAttributeSetProfile(t *testing.T) {
 	}
 
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -179,8 +176,7 @@ func testAttributeSetProfile(t *testing.T) {
 		"*prefix:*req.Subject:48:ApierTest",
 	}
 	if err := attrFltrRPC.Call(utils.AdminSv1GetFilterIndexes, &apis.AttrGetFilterIndexes{
-		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
-		Context: utils.MetaSessionS},
+		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix},
 		&indexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(indexes, expIdx) {
@@ -210,7 +206,6 @@ func testAttributeSetFltr2(t *testing.T) {
 
 	//same event for process
 	ev := &engine.AttrArgsProcessEvent{
-		Context: utils.StringPointer(utils.MetaSessionS),
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -244,8 +239,7 @@ func testAttributeSetFltr2(t *testing.T) {
 		"*prefix:*req.Subject:44:ApierTest",
 	}
 	if err := attrFltrRPC.Call(utils.AdminSv1GetFilterIndexes, &apis.AttrGetFilterIndexes{
-		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
-		Context: utils.MetaSessionS},
+		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix},
 		&indexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(indexes, expIdx) {
@@ -272,8 +266,7 @@ func testAttributeRemoveFltr(t *testing.T) {
 
 	var indexes []string
 	if err := attrFltrRPC.Call(utils.AdminSv1GetFilterIndexes, &apis.AttrGetFilterIndexes{
-		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix,
-		Context: utils.MetaSessionS},
+		ItemType: utils.MetaAttributes, Tenant: "cgrates.org", FilterType: utils.MetaPrefix},
 		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

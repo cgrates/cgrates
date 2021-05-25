@@ -373,7 +373,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 	//remove all items
 	argsRemove := utils.AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
+			utils.AttributeProfileIDs: {"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
 		},
 	}
 	var replyRem string
@@ -394,7 +394,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 	var reply string
 	argsReload := &utils.AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
-			utils.AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
+			utils.AttributeProfileIDs: {"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
 		},
 	}
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1LoadCache,
@@ -511,14 +511,14 @@ func testCacheGetStatusMoreIDs(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expstats := engine.GetDefaultEmptyCacheStats()
 	expstats[utils.CacheAttributeProfiles].Items = 4
-	expstats[utils.CacheAttributeFilterIndexes].Groups = 2
-	expstats[utils.CacheAttributeFilterIndexes].Items = 4
+	expstats[utils.CacheAttributeFilterIndexes].Groups = 1
+	expstats[utils.CacheAttributeFilterIndexes].Items = 5
 	expstats[utils.CacheRateProfiles].Items = 1
 	expstats[utils.CacheRateProfilesFilterIndexes].Groups = 1
 	expstats[utils.CacheRateProfilesFilterIndexes].Items = 1
 	expstats[utils.CacheRateFilterIndexes].Groups = 1
 	expstats[utils.CacheRateFilterIndexes].Items = 1
-	expstats[utils.CacheFilters].Items = 5
+	expstats[utils.CacheFilters].Items = 6
 	expstats[utils.CacheRPCConnections].Items = 1
 	expstats[utils.CacheLoadIDs].Items = 23
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,

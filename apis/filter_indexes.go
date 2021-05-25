@@ -68,11 +68,7 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 		arg.ItemType = utils.CacheDispatcherFilterIndexes
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	case utils.MetaAttributes:
-		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
 		arg.ItemType = utils.CacheAttributeFilterIndexes
-		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	}
 	if err = adms.dm.RemoveIndexes(ctx, arg.ItemType, tntCtx, utils.EmptyString); err != nil {
 		return
@@ -120,11 +116,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		arg.ItemType = utils.CacheDispatcherFilterIndexes
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	case utils.MetaAttributes:
-		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
 		arg.ItemType = utils.CacheAttributeFilterIndexes
-		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	}
 	if indexes, err = adms.dm.GetIndexes(ctx,
 		arg.ItemType, tntCtx, utils.EmptyString, true, true); err != nil {

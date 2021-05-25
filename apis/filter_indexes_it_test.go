@@ -25,7 +25,6 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -194,19 +193,20 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	var replyIdx []string
 	expectedIDx := []string{"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS, ItemType: utils.MetaAttributes},
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(replyIdx)
 		sort.Strings(expectedIDx)
 		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
 	}
 
@@ -232,10 +232,10 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	// check the updated indexes
-	expectedIDx = []string{"*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
+	expectedIDx = []string{"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST", "*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.CGRID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS, ItemType: utils.MetaAttributes},
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err != nil {
 		t.Error(err)
 	} else {
@@ -244,13 +244,6 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 		if !reflect.DeepEqual(expectedIDx, replyIdx) {
 			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
 		}
-	}
-
-	// context changed, not gonna match any indexes
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers, ItemType: utils.MetaAttributes},
-		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
 	}
 
 	//back to our initial filter
@@ -363,10 +356,11 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS, ItemType: utils.MetaAttributes},
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err != nil {
 		t.Error(err)
 	} else {
@@ -379,44 +373,11 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 }
 
 func testV1FIdxAttributesRemoveIndexes(t *testing.T) {
-	//indexes will not be removed because of this different context
 	var reply string
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes},
-		&reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("UNexpected reply returned")
-	}
-
-	//these are not removed, so the indexes are not removed
 	var replyIdx []string
-	expectedIDx := []string{"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
-		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
-		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
-		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
-		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST"}
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS, ItemType: utils.MetaAttributes},
-		&replyIdx); err != nil {
-		t.Error(err)
-	} else {
-		sort.Strings(replyIdx)
-		sort.Strings(expectedIDx)
-		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
-		}
-	}
-
 	//indexes will be removed for this specific context
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes},
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -424,7 +385,7 @@ func testV1FIdxAttributesRemoveIndexes(t *testing.T) {
 	}
 
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS, ItemType: utils.MetaAttributes},
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
 	}
@@ -434,21 +395,13 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 	// compute our indexes
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
-		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, Subsystem: utils.MetaSessionS,
-			AttributeS: true}, &reply); err != nil {
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, AttributeS: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned")
 	}
 
-	// our indexes are sotred again, so we can get them
-	// firstly, not gonna get for a different context
 	var replyIdx []string
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
-	}
 
 	//matching for our context
 	expectedIDx := []string{"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
@@ -458,11 +411,11 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expectedIDx)
@@ -517,27 +470,14 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 		t.Error(err)
 	}
 
-	// now we will match indexes for *chargers
 	var replyIdx []string
 	expectedIDx := []string{"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
-		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr"}
-	//"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_TEST_ATTRIBUTE3",
-	//"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_TEST_ATTRIBUTE"}
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
-		t.Error(err)
-	} else {
-		sort.Strings(expectedIDx)
-		sort.Strings(replyIdx)
-		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
-		}
-	}
-
-	// now we will match indexes for *sessions
-	expectedIDx = []string{"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
@@ -549,14 +489,13 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expectedIDx)
 		sort.Strings(replyIdx)
 		if !reflect.DeepEqual(expectedIDx, replyIdx) {
-			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
 	}
 }
@@ -565,18 +504,16 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 	//indexes will ne removed for both contexts
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes},
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("UNexpected reply returned")
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
-		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes, APIOpts: map[string]interface{}{
-				utils.CacheOpt: utils.MetaClear,
-			}},
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes, APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaClear,
+		}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -586,45 +523,17 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 	//not found for both cases
 	var replyIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-
-	// now we will ComputeFilterIndexes by IDs for *chargers context
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Subsystem: utils.MetaChargers,
-			AttributeIDs: []string{"TEST_ATTRIBUTES_new_fltr"}}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned")
-	}
-
-	//able to get indexes with context *chargers
-	expIdx := []string{"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
-		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
-		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr"}
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
-		t.Error(err)
-	} else {
-		sort.Strings(expIdx)
-		sort.Strings(replyIdx)
-		if !reflect.DeepEqual(expIdx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", expIdx, replyIdx)
-		}
-	}
-
 	// now we will ComputeFilterIndexes by IDs for *sessions context(but just only 1 profile, not both)
+	var expIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Subsystem: utils.MetaSessionS,
-			AttributeIDs: []string{"TEST_ATTRIBUTE3"}}, &reply); err != nil {
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, AttributeIDs: []string{"TEST_ATTRIBUTES_new_fltr", "TEST_ATTRIBUTE3"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned")
@@ -632,50 +541,58 @@ func testV1FIdxAttributeSRemoveComputedIndexesIDs(t *testing.T) {
 
 	//able to get indexes with context *sessions
 	expIdx = []string{"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
-		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3"}
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expIdx)
 		sort.Strings(replyIdx)
 		if !reflect.DeepEqual(expIdx, replyIdx) {
-			t.Errorf("Expected %+v, received %+v", expIdx, replyIdx)
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
 		}
 	}
 
 	// compute for the last profile remain
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
-		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, Subsystem: utils.MetaSessionS,
-			AttributeIDs: []string{"TEST_ATTRIBUTES_IT_TEST"}}, &reply); err != nil {
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg, AttributeIDs: []string{"TEST_ATTRIBUTES_IT_TEST"}}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned")
 	}
 	expIdx = []string{"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTE3",
 		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:12:TEST_ATTRIBUTES_new_fltr",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTE3",
 		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_IT_TEST",
+		"*prefix:*req.AnswerTime:33:TEST_ATTRIBUTES_new_fltr",
 		"*prefix:*req.Destinations:+0775:TEST_ATTRIBUTES_IT_TEST",
 		"*prefix:*req.Destinations:+442:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*opts.*context:*chargers:TEST_ATTRIBUTES_new_fltr",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTE3",
+		"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*opts.Subsystems:*attributes:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:1004:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:22312:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.Subject:6774:TEST_ATTRIBUTES_IT_TEST",
-		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST"}
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.Usage:123s:TEST_ATTRIBUTES_new_fltr",
+	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err != nil {
 		t.Error(err)
 	} else {
 		sort.Strings(expIdx)
 		sort.Strings(replyIdx)
 		if !reflect.DeepEqual(expIdx, replyIdx) {
-			t.Errorf("Expected %+v \n, received %+v", expIdx, replyIdx)
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expIdx), utils.ToJSON(replyIdx))
 		}
 	}
-	time.Sleep(100)
 }
 
 func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
@@ -706,13 +623,11 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 	// Check indexes as we removed, not found for both indexes
 	var replyIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaSessionS,
-			ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, Context: utils.MetaChargers,
-			ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
