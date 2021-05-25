@@ -391,7 +391,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -404,7 +404,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -632,7 +632,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -645,7 +645,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -754,8 +754,11 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 10.0,
+					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
 			},
@@ -775,22 +778,31 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 30.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 30.0,
+					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 20.0,
+					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
 			},
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 10.0,
+					utils.Weight: 10.0,
 				},
 				RouteParameters: "param3",
 			},
@@ -811,8 +823,11 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 10.0,
+					utils.Weight: 10.0,
 				},
 				RouteParameters: "param1",
 			},
@@ -927,7 +942,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -940,7 +955,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1051,15 +1066,21 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 30.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 30.0,
+					utils.Weight: 30.0,
 				},
 				RouteParameters: "param1",
 			},
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 20.0,
+					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
 			},
@@ -1176,7 +1197,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1189,7 +1210,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1300,8 +1321,11 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 10.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 10.0,
+					utils.Weight: 10.0,
 				},
 				RouteParameters: "param3",
 			},
@@ -1418,7 +1442,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1431,7 +1455,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1542,8 +1566,11 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 		Routes: []*SortedRoute{
 			{
 				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Weight: 20.0,
+				},
 				SortingData: map[string]interface{}{
-					"Weight": 20.0,
+					utils.Weight: 20.0,
 				},
 				RouteParameters: "param2",
 			},
@@ -1695,7 +1722,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1708,7 +1735,7 @@ func TestRoutesAsOptsGetRoutesMaxCost(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1938,7 +1965,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -1951,7 +1978,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 					"UsageInterval":  "1s",
 					"PddInterval":    "1s",
-					"Weight":         "20.0",
+					utils.Weight:     "20.0",
 				},
 			},
 		},
@@ -2184,8 +2211,11 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*SortedRoute{
 				{
 					RouteID: "route2",
+					sortingDataF64: map[string]float64{
+						utils.Weight: 10.,
+					},
 					SortingData: map[string]interface{}{
-						"Weight": 10.,
+						utils.Weight: 10.,
 					},
 					RouteParameters: "param1",
 				},
@@ -2197,8 +2227,11 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Routes: []*SortedRoute{
 				{
 					RouteID: "route1",
+					sortingDataF64: map[string]float64{
+						utils.Weight: 30.,
+					},
 					SortingData: map[string]interface{}{
-						"Weight": 30.,
+						utils.Weight: 30.,
 					},
 					RouteParameters: "param1",
 				},
