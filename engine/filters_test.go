@@ -2246,14 +2246,42 @@ func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
 	flts := NewFilterS(cfg, nil, dm)
-	if passes, err := flts.Pass("cgrate.org", []string{"*rsr:~*req.23:dan|1001"}, ev); err != nil {
+	if passes, err := flts.Pass("cgrates.org", []string{"*rsr:~*req.23:dan|1001"}, ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	if passes, err := flts.Pass("cgrate.org", []string{"*rsr:~*req.23:dan"}, ev); err != nil {
+	if passes, err := flts.Pass("cgrates.org", []string{"*rsr:~*req.23:dan"}, ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
+	}
+}
+
+func TestFilterGreaterThanOnObjectDP(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+	mockConn := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ResourceSv1GetResourceWithConfig: func(args interface{}, reply interface{}) error {
+				*(reply.(*ResourceWithConfig)) = ResourceWithConfig{
+					Resource: &Resource{},
+				}
+				return nil
+			},
+		},
+	}
+	mockChan := make(chan rpcclient.ClientConnector, 1)
+	mockChan <- mockConn
+	connMgr := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): mockChan,
+	})
+	flts := NewFilterS(cfg, connMgr, dm)
+	ev := utils.MapStorage{}
+
+	if _, err := flts.Pass("cgrates.org", []string{"*gte:~*resources.RES1.Available2:2",
+		"*lt:~*resources.RES1.Available2:10"}, ev); err != nil {
+		t.Error(err)
 	}
 }
