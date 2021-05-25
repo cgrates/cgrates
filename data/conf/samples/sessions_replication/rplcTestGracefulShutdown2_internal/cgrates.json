@@ -1,51 +1,53 @@
 {
-// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
-// Copyright (C) ITsysCOM GmbH
+// CGRateS Configuration file
+//
+// Used for SessionSv1 integration tests
+
+
 "general": {
-	"log_level": 7,
-	"node_id":"MasterReplication",
+    "log_level": 7,
+	"node_id":"MasterReplication"
 },
+
 
 "listen": {
 	"rpc_json": "127.0.0.1:2012",
 	"rpc_gob": "127.0.0.1:2013",
-	"http": "127.0.0.1:2080",
+	"http": "127.0.0.1:2080"
 },
-
 
 "rpc_conns": {
 	"rplConn": {
 		"strategy": "*broadcast_sync",
 		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}],
-	},
+	}
 },
 
-
 "data_db": {
-	"db_type": "mongo",
-	"db_name": "10",
-	"db_port": 27017,
+	"db_type": "*internal",	
 },
 
 
 "stor_db": {
-	"db_type": "mongo",
-	"db_name": "cgrates",
-	"db_port": 27017,
+	"db_type": "*internal",	
 },
+
 
 "chargers": {
 	"enabled": true,
 },
 
+
 "sessions": {
 	"enabled": true,		// interval to perform debits on.
 	"replication_conns": ["rplConn"],
-	"chargers_conns": ["*internal"],
+	"chargers_conns": ["*internal"]
 },
+
 
 "apiers": {
 	"enabled": true,
 },
+
 
 }
