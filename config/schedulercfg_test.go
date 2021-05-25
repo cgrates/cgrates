@@ -26,18 +26,20 @@ import (
 
 func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONS := &SchedulerJsonCfg{
-		Enabled:          utils.BoolPointer(true),
-		Cdrs_conns:       &[]string{utils.MetaInternal, "*conn1"},
-		Thresholds_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Stats_conns:      &[]string{utils.MetaInternal, "*conn1"},
-		Filters:          &[]string{"randomFilter"},
+		Enabled:                 utils.BoolPointer(true),
+		Cdrs_conns:              &[]string{utils.MetaInternal, "*conn1"},
+		Thresholds_conns:        &[]string{utils.MetaInternal, "*conn1"},
+		Stats_conns:             &[]string{utils.MetaInternal, "*conn1"},
+		Filters:                 &[]string{"randomFilter"},
+		Dynaprepaid_actionplans: &[]string{"randomPlan"},
 	}
 	expected := &SchedulerCfg{
-		Enabled:      true,
-		CDRsConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-		ThreshSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		StatSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		Filters:      []string{"randomFilter"},
+		Enabled:                true,
+		CDRsConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
+		ThreshSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		StatSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		Filters:                []string{"randomFilter"},
+		DynaprepaidActionPlans: []string{"randomPlan"},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.schedulerCfg.loadFromJSONCfg(cfgJSONS); err != nil {
@@ -52,11 +54,12 @@ func TestSchedulerCfgAsMapInterface(t *testing.T) {
 	"schedulers": {},
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:      false,
-		utils.CDRsConnsCfg:    []string{},
-		utils.ThreshSConnsCfg: []string{},
-		utils.StatSConnsCfg:   []string{},
-		utils.FiltersCfg:      []string{},
+		utils.EnabledCfg:                false,
+		utils.CDRsConnsCfg:              []string{},
+		utils.ThreshSConnsCfg:           []string{},
+		utils.StatSConnsCfg:             []string{},
+		utils.FiltersCfg:                []string{},
+		utils.DynaprepaidActionplansCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -74,14 +77,16 @@ func TestSchedulerCfgAsMapInterface1(t *testing.T) {
 	   "thresholds_conns": ["*internal", "*conn1"],
 	   "stats_conns": ["*internal", "*conn1"],
        "filters": ["randomFilter"],
+		"dynaprepaid_actionplans":["randomPlan"],
     },
 }`
 	eMap := map[string]interface{}{
-		utils.EnabledCfg:      true,
-		utils.CDRsConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.ThreshSConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.StatSConnsCfg:   []string{utils.MetaInternal, "*conn1"},
-		utils.FiltersCfg:      []string{"randomFilter"},
+		utils.EnabledCfg:                true,
+		utils.CDRsConnsCfg:              []string{utils.MetaInternal, "*conn1"},
+		utils.ThreshSConnsCfg:           []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:             []string{utils.MetaInternal, "*conn1"},
+		utils.FiltersCfg:                []string{"randomFilter"},
+		utils.DynaprepaidActionplansCfg: []string{"randomPlan"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

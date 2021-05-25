@@ -36,7 +36,6 @@ type RalsCfg struct {
 	MaxComputedUsage        map[string]time.Duration
 	BalanceRatingSubject    map[string]string
 	MaxIncrements           int
-	DynaprepaidActionPlans  []string
 }
 
 // loadFromJSONCfg loads Rals config from JsonCfg
@@ -98,12 +97,6 @@ func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 			ralsCfg.BalanceRatingSubject[k] = v
 		}
 	}
-	if jsnRALsCfg.Dynaprepaid_actionplans != nil {
-		ralsCfg.DynaprepaidActionPlans = make([]string, len(*jsnRALsCfg.Dynaprepaid_actionplans))
-		for i, val := range *jsnRALsCfg.Dynaprepaid_actionplans {
-			ralsCfg.DynaprepaidActionPlans[i] = val
-		}
-	}
 
 	return nil
 }
@@ -115,7 +108,6 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxIncrementsCfg:           ralsCfg.MaxIncrements,
-		utils.DynaprepaidActionplansCfg:  ralsCfg.DynaprepaidActionPlans,
 	}
 	if ralsCfg.ThresholdSConns != nil {
 		threSholds := make([]string, len(ralsCfg.ThresholdSConns))
@@ -191,12 +183,6 @@ func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
 		cln.CacheSConns = make([]string, len(ralsCfg.CacheSConns))
 		for i, con := range ralsCfg.CacheSConns {
 			cln.CacheSConns[i] = con
-		}
-	}
-	if ralsCfg.DynaprepaidActionPlans != nil {
-		cln.DynaprepaidActionPlans = make([]string, len(ralsCfg.DynaprepaidActionPlans))
-		for i, con := range ralsCfg.DynaprepaidActionPlans {
-			cln.DynaprepaidActionPlans[i] = con
 		}
 	}
 

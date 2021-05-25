@@ -225,6 +225,7 @@ const CGRATES_CFG_JSON = `
 	"thresholds_conns": [],			// connections to ThresholdS for *reset_threshold action <""|*internal|$rpc_conns_id>
 	"stats_conns": [],				// connections to StatS for *reset_stat_queue action: <""|*internal|$rpc_conns_id>
 	"filters": [],					// only execute actions matching these filters
+	"dynaprepaid_actionplans": [],			// actionPlans to be executed in case of *dynaprepaid request type
 },
 
 
@@ -334,7 +335,7 @@ const CGRATES_CFG_JSON = `
 		"*any": "*zero1ns",
 		"*voice": "*zero1s"
 	},
-	"dynaprepaid_actionplans": [],			// actionPlans to be executed in case of *dynaprepaid request type
+
 },
 
 

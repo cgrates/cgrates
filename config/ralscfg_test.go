@@ -45,7 +45,6 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",
 		},
-		Dynaprepaid_actionplans: &[]string{"randomPlans"},
 	}
 	expected := &RalsCfg{
 		Enabled:                 true,
@@ -66,7 +65,6 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",
 		},
-		DynaprepaidActionPlans: []string{"randomPlans"},
 	}
 	cfg := NewDefaultCGRConfig()
 	if err = cfg.ralsCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -122,7 +120,6 @@ func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
-		utils.DynaprepaidActionplansCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -157,7 +154,6 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 			"*any":   "*zero1ns",
 			"*voice": "*zero1s",
 		},
-		utils.DynaprepaidActionplansCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -186,7 +182,6 @@ func TestRalsCfgClone(t *testing.T) {
 			utils.MetaAny:   "*zero1ns",
 			utils.MetaVoice: "*zero1s",
 		},
-		DynaprepaidActionPlans: []string{"randomPlans"},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {

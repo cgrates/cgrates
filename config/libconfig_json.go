@@ -126,16 +126,16 @@ type RalsJsonCfg struct {
 	Max_computed_usage         *map[string]string
 	Max_increments             *int
 	Balance_rating_subject     *map[string]string
-	Dynaprepaid_actionplans    *[]string
 }
 
 // Scheduler config section
 type SchedulerJsonCfg struct {
-	Enabled          *bool
-	Cdrs_conns       *[]string
-	Thresholds_conns *[]string
-	Stats_conns      *[]string
-	Filters          *[]string
+	Enabled                 *bool
+	Cdrs_conns              *[]string
+	Thresholds_conns        *[]string
+	Stats_conns             *[]string
+	Filters                 *[]string
+	Dynaprepaid_actionplans *[]string
 }
 
 // Cdrs config section

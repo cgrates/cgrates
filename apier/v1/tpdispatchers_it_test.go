@@ -125,7 +125,7 @@ func testTPDispatcherSetTPDispatcher(t *testing.T) {
 		Tenant:     "cgrates.org",
 		ID:         "Dsp1",
 		FilterIDs:  []string{"*string:Account:1002"},
-		Subsystems: make([]string, 0),
+		Subsystems: []string{"testSys"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",

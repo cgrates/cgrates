@@ -461,10 +461,10 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 		if err.Error() == utils.ErrAccountNotFound.Error() &&
 			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaDynaprepaid {
 			var reply string
-			// execute the actionPlan configured in RalS
+			// execute the actionPlan configured in Scheduler
 			if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().SchedulerConns, nil,
 				utils.SchedulerSv1ExecuteActionPlans, &utils.AttrsExecuteActionPlans{
-					ActionPlanIDs: sS.cgrCfg.RalsCfg().DynaprepaidActionPlans,
+					ActionPlanIDs: sS.cgrCfg.SchedulerCfg().DynaprepaidActionPlans,
 					Tenant:        cd.Tenant, AccountID: cd.Account},
 				&reply); err != nil {
 				return
