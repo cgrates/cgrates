@@ -35,6 +35,9 @@ type DataDBMock struct {
 	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
 	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
 	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
+	GetResourceProfileDrvF     func(*context.Context, string, string) (*ResourceProfile, error)
+	SetResourceProfileDrvF     func(*context.Context, *ResourceProfile) error
+	RemoveResourceProfileDrvF  func(*context.Context, string, string) error
 }
 
 //Storage methods
@@ -80,15 +83,24 @@ func (dbM *DataDBMock) HasDataDrv(*context.Context, string, string, string) (boo
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceProfileDrv(*context.Context, string, string) (*ResourceProfile, error) {
+func (dbM *DataDBMock) GetResourceProfileDrv(ctx *context.Context, tnt string, id string) (*ResourceProfile, error) {
+	if dbM.GetResourceProfileDrvF != nil {
+		return dbM.GetResourceProfileDrvF(ctx, tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceProfileDrv(*context.Context, *ResourceProfile) error {
+func (dbM *DataDBMock) SetResourceProfileDrv(ctx *context.Context, resPrf *ResourceProfile) error {
+	if dbM.SetResourceProfileDrvF != nil {
+		return dbM.SetResourceProfileDrvF(ctx, resPrf)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveResourceProfileDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveResourceProfileDrv(ctx *context.Context, tnt string, id string) error {
+	if dbM.RemoveResourceProfileDrvF != nil {
+		return dbM.RemoveResourceProfileDrvF(ctx, tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 
