@@ -63,6 +63,25 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.P
 	return nil
 }
 
+// GetAttributeProfileIDsCount returns the total number of AttributeProfileIDs registered for a tenant
+// returns ErrNotFound in case of 0 AttributeProfileIDs
+func (admS *AdminSv1) GetStatQueueProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.StatQueueProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return
+}
+
 // SetStatQueueProfile alters/creates a StatQueueProfile
 func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *engine.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
