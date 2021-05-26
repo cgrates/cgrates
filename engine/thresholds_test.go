@@ -1097,7 +1097,7 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.RemoveThreshold(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	if err := dm.RemoveThreshold(th.Tenant, th.ID); err != nil {
 		t.Fatal(err)
 	}
 	if err := dm.SetThresholdProfile(thp, true); err != nil {
@@ -1169,7 +1169,7 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
-	if err := dm.RemoveThresholdProfile(thp.Tenant, thp.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveThresholdProfile(thp.Tenant, thp.ID, true); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {

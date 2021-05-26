@@ -41,10 +41,10 @@ func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 		if rp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetRatingProfile(rp, utils.NonTransactional); err != nil {
+		if err := m.dmOut.DataManager().SetRatingProfile(rp); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveRatingProfile(idg, utils.NonTransactional); err != nil {
+		if err := m.dmIN.DataManager().RemoveRatingProfile(idg); err != nil {
 			return err
 		}
 		m.stats[utils.RatingProfile]++

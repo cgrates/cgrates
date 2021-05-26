@@ -119,7 +119,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			},
 		},
 	}
-	if err := dm.SetRatingPlan(rp1, utils.NonTransactional); err != nil {
+	if err := dm.SetRatingPlan(rp1); err != nil {
 		t.Error(err)
 	}
 
@@ -130,7 +130,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			FallbackKeys:   []string{},
 		}},
 	}
-	if err := dm.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
+	if err := dm.SetRatingProfile(rpfl); err != nil {
 		t.Error(err)
 	}
 

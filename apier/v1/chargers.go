@@ -103,7 +103,7 @@ func (apierSv1 *APIerSv1) RemoveChargerProfile(arg *utils.TenantIDWithAPIOpts, r
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.RemoveChargerProfile(tnt,
-		arg.ID, utils.NonTransactional, true); err != nil {
+		arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database

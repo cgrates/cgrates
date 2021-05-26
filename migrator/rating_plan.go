@@ -41,7 +41,7 @@ func (m *Migrator) migrateCurrentRatingPlans() (err error) {
 		if rp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		if err := m.dmOut.DataManager().SetRatingPlan(rp); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveRatingPlan(idg, utils.NonTransactional); err != nil {

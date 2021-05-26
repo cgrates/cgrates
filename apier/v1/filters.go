@@ -112,7 +112,7 @@ func (apierSv1 *APIerSv1) RemoveFilter(arg *utils.TenantIDWithAPIOpts, reply *st
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveFilter(tnt, arg.ID, utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveFilter(tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database

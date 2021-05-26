@@ -696,7 +696,7 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 	return
 }
 
-func (dm *DataManager) RemoveFilter(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveFilter(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -807,7 +807,7 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 	return
 }
 
-func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveThreshold(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -938,8 +938,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	return
 }
 
-func (dm *DataManager) RemoveThresholdProfile(tenant, id,
-	transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveThresholdProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -972,7 +971,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return dm.RemoveThreshold(tenant, id, transactionID) // remove the thrshold
+	return dm.RemoveThreshold(tenant, id) // remove the thrshold
 }
 
 // GetStatQueue retrieves a StatQueue from dataDB
@@ -1061,7 +1060,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 }
 
 // RemoveStatQueue removes the StoredStatQueue
-func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
+func (dm *DataManager) RemoveStatQueue(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1224,8 +1223,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	return
 }
 
-func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
-	transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1258,7 +1256,7 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return dm.RemoveStatQueue(tenant, id, transactionID)
+	return dm.RemoveStatQueue(tenant, id)
 }
 
 func (dm *DataManager) GetTiming(id string, skipCache bool,
@@ -1422,7 +1420,7 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 	return
 }
 
-func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err error) {
+func (dm *DataManager) RemoveResource(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1552,7 +1550,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	return
 }
 
-func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveResourceProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1585,7 +1583,7 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
-	return dm.RemoveResource(tenant, id, transactionID)
+	return dm.RemoveResource(tenant, id)
 }
 
 func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
@@ -1667,8 +1665,7 @@ type SetActionTriggersArgWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
-	transactionID string) (err error) {
+func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1739,8 +1736,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 	return
 }
 
-func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
-	transactionID string) (err error) {
+func (dm *DataManager) SetSharedGroup(sg *SharedGroup) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1846,7 +1842,7 @@ type SetActionsArgsWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
-func (dm *DataManager) SetActions(key string, as Actions, transactionID string) (err error) {
+func (dm *DataManager) SetActions(key string, as Actions) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1868,7 +1864,7 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	return
 }
 
-func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
+func (dm *DataManager) RemoveActions(key string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2127,7 +2123,7 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 	return
 }
 
-func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err error) {
+func (dm *DataManager) SetRatingPlan(rp *RatingPlan) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2226,8 +2222,7 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 	return
 }
 
-func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
-	transactionID string) (err error) {
+func (dm *DataManager) SetRatingProfile(rpf *RatingProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2248,8 +2243,7 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	return
 }
 
-func (dm *DataManager) RemoveRatingProfile(key string,
-	transactionID string) (err error) {
+func (dm *DataManager) RemoveRatingProfile(key string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2372,7 +2366,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 	return
 }
 
-func (dm *DataManager) RemoveRouteProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRouteProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2508,7 +2502,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2637,8 +2631,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 	return
 }
 
-func (dm *DataManager) RemoveChargerProfile(tenant, id string,
-	transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveChargerProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2767,8 +2760,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 	return
 }
 
-func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
-	transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveDispatcherProfile(tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2876,8 +2868,7 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 	return
 }
 
-func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
-	transactionID string) (err error) {
+func (dm *DataManager) RemoveDispatcherHost(tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}

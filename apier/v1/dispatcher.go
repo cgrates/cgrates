@@ -107,7 +107,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherProfile(arg *utils.TenantIDWithAPIOpts
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.RemoveDispatcherProfile(tnt,
-		arg.ID, utils.NonTransactional, true); err != nil {
+		arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherProfiles and store it in database
@@ -196,7 +196,7 @@ func (apierSv1 *APIerSv1) RemoveDispatcherHost(arg *utils.TenantIDWithAPIOpts, r
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
 	if err := apierSv1.DataManager.RemoveDispatcherHost(tnt,
-		arg.ID, utils.NonTransactional); err != nil {
+		arg.ID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherHosts and store it in database

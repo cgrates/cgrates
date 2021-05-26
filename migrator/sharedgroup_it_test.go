@@ -226,7 +226,7 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expected 1, received: %v", shrGrpMigrator.stats[utils.SharedGroups])
 		}
 	case utils.Move:
-		if err := shrGrpMigrator.dmIN.DataManager().SetSharedGroup(shrGrp, utils.NonTransactional); err != nil {
+		if err := shrGrpMigrator.dmIN.DataManager().SetSharedGroup(shrGrp); err != nil {
 			t.Error("Error when setting SharedGroup ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()

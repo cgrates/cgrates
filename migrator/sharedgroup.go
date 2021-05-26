@@ -47,7 +47,7 @@ func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 		if sgs == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetSharedGroup(sgs, utils.NonTransactional); err != nil {
+		if err := m.dmOut.DataManager().SetSharedGroup(sgs); err != nil {
 			return err
 		}
 		m.stats[utils.SharedGroups]++
@@ -69,7 +69,7 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 			continue
 		}
 		acnt := v1SG.AsSharedGroup()
-		if err = m.dmOut.DataManager().SetSharedGroup(acnt, utils.NonTransactional); err != nil {
+		if err = m.dmOut.DataManager().SetSharedGroup(acnt); err != nil {
 			return err
 		}
 		m.stats[utils.SharedGroups]++

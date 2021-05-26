@@ -491,7 +491,7 @@ func (apierSv1 *APIerSv1) SetRatingProfile(attrs *utils.AttrSetRatingProfile, re
 				FallbackKeys: utils.FallbackSubjKeys(tnt,
 					attrs.Category, ra.FallbackSubjects)})
 	}
-	if err := apierSv1.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
+	if err := apierSv1.DataManager.SetRatingProfile(rpfl); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//CacheReload
@@ -642,7 +642,7 @@ func (apierSv1 *APIerSv1) SetActions(attrs *V1AttrSetActions, reply *string) (er
 		}
 		storeActions[idx] = a
 	}
-	if err := apierSv1.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
+	if err := apierSv1.DataManager.SetActions(attrs.ActionsId, storeActions); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//CacheReload
@@ -1251,7 +1251,7 @@ func (apierSv1 *APIerSv1) RemoveRatingProfile(attr *AttrRemoveRatingProfile, rep
 		return utils.ErrMandatoryIeMissing
 	}
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		return 0, apierSv1.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
+		return 0, apierSv1.DataManager.RemoveRatingProfile(attr.GetId())
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
@@ -1348,7 +1348,7 @@ func (apierSv1 *APIerSv1) RemoveActions(attr *AttrRemoveActions, reply *string) 
 		}
 	*/
 	for _, aID := range attr.ActionIDs {
-		if err := apierSv1.DataManager.RemoveActions(aID, utils.NonTransactional); err != nil {
+		if err := apierSv1.DataManager.RemoveActions(aID); err != nil {
 			*reply = err.Error()
 			return err
 		}

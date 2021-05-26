@@ -271,7 +271,7 @@ func testActITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: 1, received: %+v", actMigrator.stats[utils.Actions])
 		}
 	case utils.Move:
-		if err := actMigrator.dmIN.DataManager().SetActions(v1act.Id, *act, utils.NonTransactional); err != nil {
+		if err := actMigrator.dmIN.DataManager().SetActions(v1act.Id, *act); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()

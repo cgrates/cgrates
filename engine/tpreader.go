@@ -274,7 +274,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 			}
 		}
-		if err := tpr.dm.SetRatingPlan(ratingPlan, utils.NonTransactional); err != nil {
+		if err := tpr.dm.SetRatingPlan(ratingPlan); err != nil {
 			return false, err
 		}
 	}
@@ -346,7 +346,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 						tpRpf.Category, tpRa.FallbackSubjects),
 				})
 		}
-		if err := tpr.dm.SetRatingProfile(resultRatingProfile, utils.NonTransactional); err != nil {
+		if err := tpr.dm.SetRatingProfile(resultRatingProfile); err != nil {
 			return err
 		}
 		tpr.ratingProfiles[tpRpf.KeyId()] = resultRatingProfile
@@ -416,7 +416,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 	}
 	if save {
 		for _, sg := range tpr.sharedGroups {
-			if err := tpr.dm.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+			if err := tpr.dm.SetSharedGroup(sg); err != nil {
 				return err
 			}
 		}
@@ -888,7 +888,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			// write action triggers
 			if err = tpr.dm.SetActionTriggers(accountAction.ActionTriggersId,
-				actionTriggers, utils.NonTransactional); err != nil {
+				actionTriggers); err != nil {
 				return errors.New(err.Error() + " (SetActionTriggers): " + accountAction.ActionTriggersId)
 			}
 			var reply string
@@ -1006,7 +1006,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		}
 		// write actions
 		for k, as := range facts {
-			if err = tpr.dm.SetActions(k, as, utils.NonTransactional); err != nil {
+			if err = tpr.dm.SetActions(k, as); err != nil {
 				return err
 			}
 			var reply string
@@ -1385,7 +1385,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Rating Plans:")
 	}
 	for _, rp := range tpr.ratingPlans {
-		if err = tpr.dm.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+		if err = tpr.dm.SetRatingPlan(rp); err != nil {
 			return
 		}
 		if verbose {
@@ -1399,7 +1399,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Rating Profiles:")
 	}
 	for _, rp := range tpr.ratingProfiles {
-		if err = tpr.dm.SetRatingProfile(rp, utils.NonTransactional); err != nil {
+		if err = tpr.dm.SetRatingProfile(rp); err != nil {
 			return
 		}
 		if verbose {
@@ -1469,7 +1469,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Action Triggers:")
 	}
 	for k, atrs := range tpr.actionsTriggers {
-		if err = tpr.dm.SetActionTriggers(k, atrs, utils.NonTransactional); err != nil {
+		if err = tpr.dm.SetActionTriggers(k, atrs); err != nil {
 			return
 		}
 		if verbose {
@@ -1483,7 +1483,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Shared Groups:")
 	}
 	for k, sg := range tpr.sharedGroups {
-		if err = tpr.dm.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+		if err = tpr.dm.SetSharedGroup(sg); err != nil {
 			return
 		}
 		if verbose {
@@ -1497,7 +1497,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("Actions:")
 	}
 	for k, as := range tpr.actions {
-		if err = tpr.dm.SetActions(k, as, utils.NonTransactional); err != nil {
+		if err = tpr.dm.SetActions(k, as); err != nil {
 			return
 		}
 		if verbose {
@@ -1962,7 +1962,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("Rating Profiles:")
 	}
 	for _, rp := range tpr.ratingProfiles {
-		if err = tpr.dm.RemoveRatingProfile(rp.Id, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveRatingProfile(rp.Id); err != nil {
 			return
 		}
 		if verbose {
@@ -2010,7 +2010,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("Actions:")
 	}
 	for k := range tpr.actions {
-		if err = tpr.dm.RemoveActions(k, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveActions(k); err != nil {
 			return
 		}
 		if verbose {
@@ -2032,7 +2032,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ResourceProfiles:")
 	}
 	for _, tpRsp := range tpr.resProfiles {
-		if err = tpr.dm.RemoveResourceProfile(tpRsp.Tenant, tpRsp.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveResourceProfile(tpRsp.Tenant, tpRsp.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2043,7 +2043,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("StatQueueProfiles:")
 	}
 	for _, tpST := range tpr.sqProfiles {
-		if err = tpr.dm.RemoveStatQueueProfile(tpST.Tenant, tpST.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveStatQueueProfile(tpST.Tenant, tpST.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2054,7 +2054,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ThresholdProfiles:")
 	}
 	for _, tpTH := range tpr.thProfiles {
-		if err = tpr.dm.RemoveThresholdProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveThresholdProfile(tpTH.Tenant, tpTH.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2065,7 +2065,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("RouteProfiles:")
 	}
 	for _, tpSpl := range tpr.routeProfiles {
-		if err = tpr.dm.RemoveRouteProfile(tpSpl.Tenant, tpSpl.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveRouteProfile(tpSpl.Tenant, tpSpl.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2077,8 +2077,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("AttributeProfiles:")
 	}
 	for _, tpAttr := range tpr.attributeProfiles {
-		if err = tpr.dm.RemoveAttributeProfile(tpAttr.Tenant, tpAttr.ID,
-			utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveAttributeProfile(tpAttr.Tenant, tpAttr.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2090,8 +2089,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ChargerProfiles:")
 	}
 	for _, tpChr := range tpr.chargerProfiles {
-		if err = tpr.dm.RemoveChargerProfile(tpChr.Tenant, tpChr.ID,
-			utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveChargerProfile(tpChr.Tenant, tpChr.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2103,8 +2101,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("DispatcherProfiles:")
 	}
 	for _, tpDsp := range tpr.dispatcherProfiles {
-		if err = tpr.dm.RemoveDispatcherProfile(tpDsp.Tenant, tpDsp.ID,
-			utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveDispatcherProfile(tpDsp.Tenant, tpDsp.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -2115,8 +2112,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("DispatcherHosts:")
 	}
 	for _, tpDsh := range tpr.dispatcherHosts {
-		if err = tpr.dm.RemoveDispatcherHost(tpDsh.Tenant, tpDsh.ID,
-			utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveDispatcherHost(tpDsh.Tenant, tpDsh.ID); err != nil {
 			return
 		}
 		if verbose {
@@ -2159,7 +2155,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpFltr := range tpr.filters {
 		if err = tpr.dm.RemoveFilter(tpFltr.Tenant, tpFltr.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {

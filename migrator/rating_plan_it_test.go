@@ -193,7 +193,7 @@ func testRtPlITMigrateAndMove(t *testing.T) {
 	switch rtplAction {
 	case utils.Migrate: // for the momment only one version of rating plans exists
 	case utils.Move:
-		if err := rtplMigrator.dmIN.DataManager().SetRatingPlan(rtplPlan, utils.NonTransactional); err != nil {
+		if err := rtplMigrator.dmIN.DataManager().SetRatingPlan(rtplPlan); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()

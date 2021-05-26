@@ -607,7 +607,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		},
 	}
 
-	dm.SetActions(actions[0].Id, actions, utils.NonTransactional)
+	dm.SetActions(actions[0].Id, actions)
 
 	at := &ActionTiming{
 		accountIDs: utils.StringMap{account1.ID: true},

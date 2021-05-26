@@ -297,7 +297,7 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 	atsID := ats[0].ID
-	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionTriggers(atsID, ats); err != nil {
 		t.Error(err)
 	}
 	expectedCAt := []string{"atr_testOnStorITCacheActionTrigger"}
@@ -357,7 +357,7 @@ func testOnStorITHasData(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingPlan(rp); err != nil {
 		t.Error(err)
 	}
 	expectedRP := []string{"rpl_HasData"}
@@ -444,7 +444,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingPlan(rp); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
@@ -484,7 +484,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 			StartTime: "00:00:00",
 		},
 	}
-	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingPlan(rp); err != nil {
 		t.Error(err)
 	}
 
@@ -529,7 +529,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingProfile(rpf); err != nil {
 		t.Error(err)
 	}
 
@@ -565,7 +565,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 			FallbackKeys:   []string{"*out:test:1:danb", "*out:test:1:teo"},
 		},
 	}
-	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
+	if err := onStor.SetRatingProfile(rpf); err != nil {
 		t.Error(err)
 	}
 	//get from database
@@ -585,7 +585,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		}
 	}
 
-	if err = onStor.RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
+	if err = onStor.RemoveRatingProfile(rpf.Id); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -742,7 +742,7 @@ func testOnStorITActions(t *testing.T) {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetActions(acts[0].Id,
-		acts, utils.NonTransactional); err != nil {
+		acts); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.HasData(utils.ActionPrefix, acts[0].Id, ""); err != nil {
@@ -852,7 +852,7 @@ func testOnStorITActions(t *testing.T) {
 		},
 	}
 	if err := onStor.SetActions(acts[0].Id,
-		acts, utils.NonTransactional); err != nil {
+		acts); err != nil {
 		t.Error(err)
 	}
 
@@ -872,7 +872,7 @@ func testOnStorITActions(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(acts[0]), utils.ToJSON(rcv[0]))
 		}
 	}
-	if err := onStor.RemoveActions(acts[0].Id, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveActions(acts[0].Id); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -902,7 +902,7 @@ func testOnStorITSharedGroup(t *testing.T) {
 		utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+	if err := onStor.SetSharedGroup(sg); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
@@ -932,7 +932,7 @@ func testOnStorITSharedGroup(t *testing.T) {
 			RatingSubject: "",
 		},
 	}
-	if err := onStor.SetSharedGroup(sg, utils.NonTransactional); err != nil {
+	if err := onStor.SetSharedGroup(sg); err != nil {
 		t.Error(err)
 	}
 	if onStor.dataDB.GetStorageType() != utils.INTERNAL {
@@ -983,7 +983,7 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionTriggers(atsID, ats); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); err != nil {
@@ -1216,8 +1216,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
 	}
 
-	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID,
-		utils.NonTransactional, false); err != nil {
+	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -1274,7 +1273,7 @@ func testOnStorITResource(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
 	}
 
-	if err := onStor.RemoveResource(res.Tenant, res.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveResource(res.Tenant, res.ID); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -1482,7 +1481,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
 	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID,
-		utils.NonTransactional, false); err != nil {
+		false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -1557,8 +1556,7 @@ func testOnStorITStatQueue(t *testing.T) {
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
 	}
-	if err := onStor.RemoveStatQueue(sq.Tenant, sq.ID,
-		utils.NonTransactional); err != nil {
+	if err := onStor.RemoveStatQueue(sq.Tenant, sq.ID); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -1632,7 +1630,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	if err := onStor.RemoveThresholdProfile(th.Tenant,
-		th.ID, utils.NonTransactional, false); err != nil {
+		th.ID, false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -1682,7 +1680,7 @@ func testOnStorITThreshold(t *testing.T) {
 	} else if !(reflect.DeepEqual(th, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
-	if err := onStor.RemoveThreshold(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveThreshold(th.Tenant, th.ID); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -1772,7 +1770,7 @@ func testOnStorITFilter(t *testing.T) {
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
-	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, utils.NonTransactional, true); err != nil {
+	if err := onStor.RemoveFilter(fp.Tenant, fp.ID, true); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
@@ -1880,7 +1878,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	if err := onStor.RemoveRouteProfile(splProfile.Tenant, splProfile.ID,
-		utils.NonTransactional, false); err != nil {
+		false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
@@ -1960,7 +1958,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant,
-		attrProfile.ID, utils.NonTransactional, false); err != nil {
+		attrProfile.ID, false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
@@ -2086,7 +2084,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	if err := onStor.RemoveChargerProfile(cpp.Tenant, cpp.ID,
-		utils.NonTransactional, false); err != nil {
+		false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
@@ -2142,7 +2140,7 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
 	}
 	if err := onStor.RemoveDispatcherProfile(dpp.Tenant, dpp.ID,
-		utils.NonTransactional, false); err != nil {
+		false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed

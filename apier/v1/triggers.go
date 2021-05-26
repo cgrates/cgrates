@@ -424,7 +424,7 @@ func (apierSv1 *APIerSv1) RemoveActionTrigger(attr *AttrRemoveActionTrigger, rep
 		}
 	}
 	// set the cleared list back
-	if err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional); err != nil {
+	if err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs); err != nil {
 		return
 	}
 	// CacheReload
@@ -474,7 +474,7 @@ func (apierSv1 *APIerSv1) SetActionTrigger(attr *AttrSetActionTrigger, reply *st
 		return
 	}
 
-	if err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
+	if err = apierSv1.DataManager.SetActionTriggers(attr.GroupID, atrs); err != nil {
 		return
 	}
 	// CacheReload
