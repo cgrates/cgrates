@@ -46,6 +46,7 @@ type DataDBMock struct {
 	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
+	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
 }
 
 //Storage methods
@@ -227,7 +228,10 @@ func (dbM *DataDBMock) GetFilterDrv(ctx *context.Context, str1 string, str2 stri
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetFilterDrv(*context.Context, *Filter) error {
+func (dbM *DataDBMock) SetFilterDrv(ctx *context.Context, fltr *Filter) error {
+	if dbM.SetFilterDrvF != nil {
+		return dbM.SetFilterDrvF(ctx, fltr)
+	}
 	return utils.ErrNotImplemented
 }
 
