@@ -29,6 +29,12 @@ import (
 
 var (
 	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
+	// Element or values of a filter that starts with one of this should not be indexed
+	ToNotBeIndexed = []string{utils.DynamicDataPrefix + utils.MetaAccounts,
+		utils.DynamicDataPrefix + utils.MetaStats,
+		utils.DynamicDataPrefix + utils.MetaResources,
+		utils.DynamicDataPrefix + utils.MetaLibPhoneNumber,
+		utils.DynamicDataPrefix + utils.MetaAsm}
 )
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
@@ -72,22 +78,16 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 			return
 		}
 		for _, flt := range fltr.Rules {
-			if !FilterIndexTypes.Has(flt.Type) {
+			if !FilterIndexTypes.Has(flt.Type) ||
+				IsDynamicDPPath(flt.Element) {
 				continue
 			}
 			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-			for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-				if strings.HasPrefix(flt.Element, notIndex) {
+			for _, fldVal := range flt.Values {
+				if IsDynamicDPPath(fldVal) {
 					continue
 				}
-			}
-			for _, fldVal := range flt.Values {
 				var idxKey string
-				for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-					if strings.HasPrefix(fldVal, notIndex) {
-						continue
-					}
-				}
 				if isDyn {
 					if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
 						continue
@@ -526,22 +526,16 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	newRules := utils.StringSet{}    // we only need to determine if we added new rules to rebuild
 	removeRules := utils.StringSet{} // but we need to know what indexes to remove
 	for _, flt := range newFlt.Rules {
-		if !FilterIndexTypes.Has(flt.Type) {
+		if !FilterIndexTypes.Has(flt.Type) ||
+			IsDynamicDPPath(flt.Element) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-		for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-			if strings.HasPrefix(flt.Element, notIndex) {
+		for _, fldVal := range flt.Values {
+			if IsDynamicDPPath(fldVal) {
 				continue
 			}
-		}
-		for _, fldVal := range flt.Values {
 			var idxKey string
-			for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-				if strings.HasPrefix(flt.Element, notIndex) {
-					continue
-				}
-			}
 			if isDyn {
 				if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
 					continue
@@ -557,11 +551,15 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 		}
 	}
 	for _, flt := range oldFlt.Rules {
-		if !FilterIndexTypes.Has(flt.Type) {
+		if !FilterIndexTypes.Has(flt.Type) ||
+			IsDynamicDPPath(flt.Element) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
 		for _, fldVal := range flt.Values {
+			if IsDynamicDPPath(fldVal) {
+				continue
+			}
 			var idxKey string
 			if isDyn {
 				if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
@@ -809,4 +807,15 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
 		}
 	}
 	return
+}
+
+// IsDynamicDPPath check dynamic path with ~*stats, ~*resources, ~*accounts, ~*libphonenumber, ~*asm to not be indexed
+// Used to determine if the rule will be indexed
+func IsDynamicDPPath(path string) bool {
+	for _, notIndex := range ToNotBeIndexed {
+		if strings.HasPrefix(path, notIndex) {
+			return true
+		}
+	}
+	return false
 }
