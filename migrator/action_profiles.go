@@ -49,7 +49,7 @@ func (m *Migrator) migrateCurrentActionProfiles() (err error) {
 		if err := m.dmOut.DataManager().SetActionProfile(context.TODO(), ap, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveActionProfile(context.TODO(), tntID[0], tntID[1], utils.NonTransactional, false); err != nil {
+		if err := m.dmIN.DataManager().RemoveActionProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.ActionProfiles]++

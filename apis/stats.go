@@ -98,7 +98,7 @@ func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.T
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := adms.dm.RemoveStatQueueProfile(ctx, tnt, args.ID, utils.NonTransactional, true); err != nil {
+	if err := adms.dm.RemoveStatQueueProfile(ctx, tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile

@@ -129,7 +129,7 @@ func (admS *AdminSv1) RemoveAccount(ctx *context.Context, arg *utils.TenantIDWit
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	if err := admS.dm.RemoveAccount(ctx, tnt, arg.ID,
-		utils.NonTransactional, true); err != nil {
+		true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAccountProfiles and store it in database

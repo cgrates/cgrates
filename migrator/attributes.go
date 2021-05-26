@@ -68,7 +68,7 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveAttributeProfile(context.TODO(), tntID[0],
-			tntID[1], utils.NonTransactional, false); err != nil {
+			tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.Attributes]++

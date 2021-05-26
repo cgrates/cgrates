@@ -724,7 +724,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ResourceProfiles:")
 	}
 	for _, tpRsp := range tpr.resProfiles {
-		if err = tpr.dm.RemoveResourceProfile(context.TODO(), tpRsp.Tenant, tpRsp.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveResourceProfile(context.TODO(), tpRsp.Tenant, tpRsp.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -735,7 +735,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("StatQueueProfiles:")
 	}
 	for _, tpST := range tpr.sqProfiles {
-		if err = tpr.dm.RemoveStatQueueProfile(context.TODO(), tpST.Tenant, tpST.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveStatQueueProfile(context.TODO(), tpST.Tenant, tpST.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -746,7 +746,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ThresholdProfiles:")
 	}
 	for _, tpTH := range tpr.thProfiles {
-		if err = tpr.dm.RemoveThresholdProfile(context.TODO(), tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveThresholdProfile(context.TODO(), tpTH.Tenant, tpTH.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -757,7 +757,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("RouteProfiles:")
 	}
 	for _, tpSpl := range tpr.routeProfiles {
-		if err = tpr.dm.RemoveRouteProfile(tpSpl.Tenant, tpSpl.ID, utils.NonTransactional, true); err != nil {
+		if err = tpr.dm.RemoveRouteProfile(tpSpl.Tenant, tpSpl.ID, true); err != nil {
 			return
 		}
 		if verbose {
@@ -770,7 +770,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpAttr := range tpr.attributeProfiles {
 		if err = tpr.dm.RemoveAttributeProfile(context.TODO(), tpAttr.Tenant, tpAttr.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {
@@ -783,7 +783,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpChr := range tpr.chargerProfiles {
 		if err = tpr.dm.RemoveChargerProfile(tpChr.Tenant, tpChr.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {
@@ -796,7 +796,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpDsp := range tpr.dispatcherProfiles {
 		if err = tpr.dm.RemoveDispatcherProfile(context.TODO(), tpDsp.Tenant, tpDsp.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {
@@ -807,8 +807,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("DispatcherHosts:")
 	}
 	for _, tpDsh := range tpr.dispatcherHosts {
-		if err = tpr.dm.RemoveDispatcherHost(tpDsh.Tenant, tpDsh.ID,
-			utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveDispatcherHost(tpDsh.Tenant, tpDsh.ID); err != nil {
 			return
 		}
 		if verbose {
@@ -821,7 +820,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpRp := range tpr.rateProfiles {
 		if err = tpr.dm.RemoveRateProfile(context.TODO(), tpRp.Tenant, tpRp.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {
@@ -834,7 +833,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpAp := range tpr.actionProfiles {
 		if err = tpr.dm.RemoveActionProfile(context.TODO(), tpAp.Tenant, tpAp.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {
@@ -847,7 +846,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpAp := range tpr.accounts {
 		if err = tpr.dm.RemoveAccount(context.TODO(), tpAp.Tenant, tpAp.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {
@@ -861,7 +860,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 	for _, tpFltr := range tpr.filters {
 		if err = tpr.dm.RemoveFilter(context.TODO(), tpFltr.Tenant, tpFltr.ID,
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		if verbose {

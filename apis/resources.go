@@ -118,7 +118,7 @@ func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := adms.dm.RemoveResourceProfile(ctx, tnt, arg.ID, utils.NonTransactional, true); err != nil {
+	if err := adms.dm.RemoveResourceProfile(ctx, tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile

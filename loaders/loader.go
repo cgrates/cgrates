@@ -730,7 +730,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveAttributeProfile(ctx, tntIDStruct.Tenant, tntIDStruct.ID,
-					utils.NonTransactional, true); err != nil {
+					true); err != nil {
 					return err
 				}
 				cacheArgs[utils.AttributeProfileIDs] = ids
@@ -750,7 +750,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveResourceProfile(ctx, tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.ResourceProfileIDs] = ids
@@ -768,7 +768,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveFilter(ctx, tntIDStruct.Tenant, tntIDStruct.ID,
-					utils.NonTransactional, true); err != nil {
+					true); err != nil {
 					return err
 				}
 				cacheArgs[utils.FilterIDs] = ids
@@ -786,7 +786,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveStatQueueProfile(ctx, tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.StatsQueueProfileIDs] = ids
@@ -805,7 +805,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveThresholdProfile(ctx, tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.ThresholdProfileIDs] = ids
@@ -824,7 +824,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveRouteProfile(tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.RouteProfileIDs] = ids
@@ -842,7 +842,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveChargerProfile(tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.ChargerProfileIDs] = ids
@@ -860,7 +860,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveDispatcherProfile(context.TODO(), tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.DispatcherProfileIDs] = ids
@@ -877,7 +877,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveDispatcherHost(tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional); err != nil {
+					tntIDStruct.ID); err != nil {
 					return err
 				}
 				cacheArgs[utils.DispatcherHostIDs] = ids
@@ -905,7 +905,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 					}
 				} else {
 					if err := ldr.dm.RemoveRateProfile(ctx, tntIDStruct.Tenant,
-						tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+						tntIDStruct.ID, true); err != nil {
 						return err
 					}
 				}
@@ -925,7 +925,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveActionProfile(ctx, tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 				cacheArgs[utils.ActionProfileIDs] = ids
@@ -943,7 +943,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
 				if err := ldr.dm.RemoveAccount(ctx, tntIDStruct.Tenant,
-					tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+					tntIDStruct.ID, true); err != nil {
 					return err
 				}
 			}

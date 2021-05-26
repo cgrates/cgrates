@@ -126,7 +126,7 @@ func (admS *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.Te
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	if err := admS.dm.RemoveAttributeProfile(ctx, tnt, arg.ID,
-		utils.NonTransactional, true); err != nil {
+		true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
