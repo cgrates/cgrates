@@ -156,6 +156,13 @@ var (
 		TBLTPDispatchers:      CacheTBLTPDispatchers,
 		TBLTPDispatcherHosts:  CacheTBLTPDispatcherHosts,
 	}
+
+	// Element or values of a filter that starts with one of this should not be indexed
+	ToNotBeIndexed = []string{DynamicDataPrefix + MetaAccounts,
+		DynamicDataPrefix + MetaStats,
+		DynamicDataPrefix + MetaResources,
+		DynamicDataPrefix + MetaLibPhoneNumber}
+
 	// ProtectedSFlds are the fields that sessions should not alter
 	ProtectedSFlds   = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 	ArgCacheToPrefix = map[string]string{
