@@ -1435,39 +1435,6 @@ func TestPrepareGeneralSectionFromDB(t *testing.T) {
 	}
 }
 
-// func TestPrepareRPCConnsSectionFromDB(t *testing.T) {
-// 	section := RPCConnsJSON
-// 	cfgJSONStr := `{
-// 		"rpc_conns": {
-// 			"*localhost": {
-// 				"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
-// 			},
-// 		},
-// 	}`
-
-// 	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-
-// 	expected := &RPCConnsJson{
-// 		"*localhost": {
-// 			Conns: &[]*RemoteHostJson{
-// 				{
-// 					Address:   utils.StringPointer("127.0.0.1:2012"),
-// 					Transport: utils.StringPointer("*json"),
-// 				},
-// 			},
-// 		},
-// 	}
-
-// 	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(cfgSec, expected) {
-// 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
-// 	}
-// }
-
 func TestPrepareCacheSectionFromDB(t *testing.T) {
 	section := CacheJSON
 	cfgJSONStr := `{
