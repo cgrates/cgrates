@@ -127,3 +127,20 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	*reply = utils.OK
 	return nil
 }
+
+func (admS *AdminSv1) GetFilterIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.FilterPrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return
+}
