@@ -62,6 +62,9 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 	// []string{ BalanceMap *monetary[0] Value }
 	var has bool
 	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
+		if data == nil {
+			err = utils.ErrNotFound
+		}
 		return
 	}
 	data = obj // in case the fldPath is empty we need to return the whole object
