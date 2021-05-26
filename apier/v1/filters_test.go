@@ -42,11 +42,17 @@ func (ccM *ccMock) Call(serviceMethod string, args interface{}, reply interface{
 }
 
 func TestFiltersSetFilterReloadCache(t *testing.T) {
+	tmp := engine.Cache
+	defer func() {
+		engine.Cache = tmp
+	}()
+
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil)
 	expArgs := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,
