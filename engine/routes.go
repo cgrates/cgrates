@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -448,8 +449,8 @@ func (rpS *RouteService) populateSortingData(ev *utils.CGREvent, route *Route,
 						sortedSpl.SortingData[metric] = -1.0
 						sortedSpl.sortingDataF64[metric] = -1.0
 					case utils.MetaPDD:
-						sortedSpl.SortingData[metric] = 10000000.0
-						sortedSpl.sortingDataF64[metric] = 10000000.0
+						sortedSpl.SortingData[metric] = math.MaxFloat64
+						sortedSpl.sortingDataF64[metric] = math.MaxFloat64
 					}
 				}
 			}

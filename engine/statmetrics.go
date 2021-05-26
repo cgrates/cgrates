@@ -272,7 +272,7 @@ func (acd *StatACD) GetFloat64Value(roundingDecimal int) (v float64) {
 	if val := acd.getValue(roundingDecimal); val == -time.Nanosecond {
 		v = utils.StatsNA
 	} else {
-		v = acd.getValue(roundingDecimal).Seconds()
+		v = float64(acd.getValue(roundingDecimal).Nanoseconds())
 	}
 	return
 }
@@ -409,7 +409,7 @@ func (tcd *StatTCD) GetFloat64Value(roundingDecimal int) (v float64) {
 	if val := tcd.getValue(roundingDecimal); val == -time.Nanosecond {
 		v = utils.StatsNA
 	} else {
-		v = tcd.getValue(roundingDecimal).Seconds()
+		v = float64(tcd.getValue(roundingDecimal).Nanoseconds())
 	}
 	return
 }
@@ -812,7 +812,7 @@ func (pdd *StatPDD) GetFloat64Value(roundingDecimal int) (v float64) {
 	if val := pdd.getValue(roundingDecimal); val == -time.Nanosecond {
 		v = utils.StatsNA
 	} else {
-		v = pdd.getValue(roundingDecimal).Seconds()
+		v = float64(pdd.getValue(roundingDecimal).Nanoseconds())
 	}
 	return
 }
