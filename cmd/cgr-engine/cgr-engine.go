@@ -640,7 +640,8 @@ func main() {
 	dspH := services.NewRegistrarCService(cfg, server, connManager, anz, srvDep)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager, anz, srvDep)
-	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz, srvDep)
+	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan,
+		connManager, server, internalThresholdSChan, anz, srvDep)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		internalStatSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,

@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -456,10 +457,10 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 				"*lt:~*req.CostDetails.AccountSummary.BalanceSummaries[0].Value:10",
 				"*string:~*req.Account:1005", // only for indexes
 			},
-			MaxHits:   -1,
-			Weight:    30,
-			ActionIDs: []string{"ACT_LOG"},
-			Async:     true,
+			MaxHits:          -1,
+			Weight:           30,
+			ActionProfileIDs: []string{"ACT_LOG"},
+			Async:            true,
 		},
 	}
 	if err := pecdrsRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {

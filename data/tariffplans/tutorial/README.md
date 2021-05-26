@@ -27,5 +27,5 @@ Scenario:
 
 
 - Add 2 ThresholdProfiles : 
- - THD_ACNT_1001 having as ActionIDs ACT_LOG_WARNING. THD_ACNT_1001 have MaxHits 1 so this will be executed once and after that will be deleted(the threshold not the profile).
- - THD_ACNT_1002 having as ActionIDs ACT_LOG_WARNING. THD_ACNT_1002 have MaxHits -1 so this will be executed each time when account 1002 make a call;
+ - THD_ACNT_1001 having as ActionProfileIDs ACT_LOG_WARNING. THD_ACNT_1001 have MaxHits 1 so this will be executed once and after that will be deleted(the threshold not the profile).
+ - THD_ACNT_1002 having as ActionProfileIDs ACT_LOG_WARNING. THD_ACNT_1002 have MaxHits -1 so this will be executed each time when account 1002 make a call;

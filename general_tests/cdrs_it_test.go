@@ -528,14 +528,14 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 	}
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_PoccessCDR",
-			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
-			MaxHits:   -1,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_THD_PoccessCDR"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "THD_PoccessCDR",
+			FilterIDs:        []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
+			MaxHits:          -1,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_THD_PoccessCDR"},
+			Async:            false,
 		},
 	}
 	if err := cdrsRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {

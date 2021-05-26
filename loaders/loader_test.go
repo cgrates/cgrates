@@ -524,8 +524,8 @@ func TestLoaderProcessThresholds(t *testing.T) {
 				Path:  "Blocker",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.7", utils.InfieldSep)},
-			{Tag: "ActionIDs",
-				Path:  "ActionIDs",
+			{Tag: "ActionProfileIDs",
+				Path:  "ActionProfileIDs",
 				Type:  utils.MetaComposed,
 				Value: config.NewRSRParsersMustCompile("~*req.8", utils.InfieldSep)},
 			{Tag: "Async",
@@ -549,16 +549,16 @@ func TestLoaderProcessThresholds(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	eTh1 := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Threshold1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
-		MaxHits:   12,
-		MinHits:   10,
-		MinSleep:  time.Second,
-		Blocker:   true,
-		Weight:    10,
-		ActionIDs: []string{"THRESH1"},
-		Async:     true,
+		Tenant:           "cgrates.org",
+		ID:               "Threshold1",
+		FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
+		MaxHits:          12,
+		MinHits:          10,
+		MinSleep:         time.Second,
+		Blocker:          true,
+		Weight:           10,
+		ActionProfileIDs: []string{"THRESH1"},
+		Async:            true,
 	}
 	aps, err := ldr.dm.GetThresholdProfile(context.TODO(), "cgrates.org", "Threshold1",
 		true, false, utils.NonTransactional)

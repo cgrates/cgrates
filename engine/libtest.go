@@ -99,7 +99,7 @@ cgrates.org,TestStats2,,20,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,
 `
 
 	ThresholdsCSVContent = `
-#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionIDs[8],Async[9]
+#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
 cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,10,12,10,1s,true,THRESH1,true
 `
 

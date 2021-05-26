@@ -338,7 +338,7 @@ func testActionsitThresholdCDrLog(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_TH_CDRLOG"},
+			ActionProfileIDs: []string{"ACT_TH_CDRLOG"},
 			Async:     false,
 		},
 	}
@@ -556,7 +556,7 @@ func testActionsitThresholdCgrRpcAction(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_TH_CGRRPC"},
+			ActionProfileIDs: []string{"ACT_TH_CGRRPC"},
 			Async:     false,
 		},
 	}
@@ -621,7 +621,7 @@ func testActionsitThresholdPostEvent(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_TH_POSTEVENT"},
+			ActionProfileIDs: []string{"ACT_TH_POSTEVENT"},
 			Async:     false,
 		},
 	}

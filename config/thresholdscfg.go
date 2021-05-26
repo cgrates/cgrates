@@ -33,6 +33,7 @@ type ThresholdSCfg struct {
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	NestedFields        bool
+	ActionSConns        []string // connections towards ActionS
 }
 
 func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -62,6 +63,9 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Actions_conns != nil {
+		t.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
+	}
 	return nil
 }
 
@@ -86,6 +90,9 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if t.SuffixIndexedFields != nil {
 		initialMP[utils.SuffixIndexedFieldsCfg] = utils.CloneStringSlice(*t.SuffixIndexedFields)
 	}
+	if t.ActionSConns != nil {
+		initialMP[utils.ActionSConnsCfg] = getInternalJSONConns(t.ActionSConns)
+	}
 	return
 }
 
@@ -107,6 +114,9 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	if t.SuffixIndexedFields != nil {
 		cln.SuffixIndexedFields = utils.SliceStringPointer(utils.CloneStringSlice(*t.SuffixIndexedFields))
 	}
+	if t.ActionSConns != nil {
+		cln.ActionSConns = utils.CloneStringSlice(t.ActionSConns)
+	}
 	return
 }
 
@@ -119,6 +129,7 @@ type ThresholdSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
+	Actions_conns         *[]string
 }
 
 func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *ThresholdSJsonCfg {
@@ -139,6 +150,9 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 	d.Suffix_indexed_fields = diffIndexSlice(d.Suffix_indexed_fields, v1.SuffixIndexedFields, v2.SuffixIndexedFields)
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
+	}
+	if !utils.SliceStringEqual(v1.ActionSConns, v2.ActionSConns) {
+		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
 	return d
 }

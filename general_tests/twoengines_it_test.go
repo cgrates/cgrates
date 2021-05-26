@@ -147,15 +147,15 @@ func testTwoEnginesSetThreshold(t *testing.T) {
 	var result string
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_TwoEnginesTest",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			MaxHits:   -1,
-			MinSleep:  5 * time.Minute,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "THD_TwoEnginesTest",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			MaxHits:          -1,
+			MinSleep:         5 * time.Minute,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1"},
+			Async:            true,
 		},
 	}
 	if err := engineOneRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
@@ -207,15 +207,15 @@ func testTwoEnginesCheckCacheAfterSet(t *testing.T) {
 	// after we verify the cache make sure it was set correctly there
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_TwoEnginesTest",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			MaxHits:   -1,
-			MinSleep:  5 * time.Minute,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "THD_TwoEnginesTest",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			MaxHits:          -1,
+			MinSleep:         5 * time.Minute,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1"},
+			Async:            true,
 		},
 	}
 	var rplTh *engine.ThresholdProfile
@@ -232,15 +232,15 @@ func testTwoEnginesUpdateThreshold(t *testing.T) {
 	var result string
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_TwoEnginesTest",
-			FilterIDs: []string{"*string:~*req.Account:10"},
-			MaxHits:   -1,
-			MinSleep:  time.Minute,
-			Blocker:   false,
-			Weight:    50.0,
-			ActionIDs: []string{"ACT_1.1"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "THD_TwoEnginesTest",
+			FilterIDs:        []string{"*string:~*req.Account:10"},
+			MaxHits:          -1,
+			MinSleep:         time.Minute,
+			Blocker:          false,
+			Weight:           50.0,
+			ActionProfileIDs: []string{"ACT_1.1"},
+			Async:            true,
 		},
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaReload,

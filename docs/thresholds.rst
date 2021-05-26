@@ -108,8 +108,8 @@ Blocker
 Weight
 	Sorts the execution of multiple thresholds matching the event. The higher the *Weight* is, the higher the priority to be executed.
 
-ActionIDs
-	List of *Actions* to execute for this threshold.
+ActionProfileIDs
+	List of *ActionProfiles* to execute for this threshold.
 
 Async
 	If true, do not wait for actions to complete.
