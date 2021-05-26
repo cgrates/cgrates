@@ -397,9 +397,9 @@ func testV1STSProcessEvent(t *testing.T) {
 
 	expectedFloatMetrics2 := map[string]float64{
 		utils.MetaASR: 66.66667,
-		utils.MetaACD: 60,
+		utils.MetaACD: 60 * 1e9,
 		utils.MetaTCC: 135.1,
-		utils.MetaTCD: 180,
+		utils.MetaTCD: 180 * 1e9,
 		utils.MetaACC: 45.03333,
 		utils.MetaPDD: -1.0,
 		utils.MetaSum + utils.HashtagSep + utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage:     180000000000,
