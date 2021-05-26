@@ -1268,7 +1268,7 @@ func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *RouteProfile, 
 	return
 }
 
-func (dm *DataManager) RemoveRouteProfile(tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRouteProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}

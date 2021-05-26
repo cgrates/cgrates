@@ -757,7 +757,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("RouteProfiles:")
 	}
 	for _, tpSpl := range tpr.routeProfiles {
-		if err = tpr.dm.RemoveRouteProfile(tpSpl.Tenant, tpSpl.ID, true); err != nil {
+		if err = tpr.dm.RemoveRouteProfile(context.TODO(), tpSpl.Tenant, tpSpl.ID, true); err != nil {
 			return
 		}
 		if verbose {

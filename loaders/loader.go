@@ -823,7 +823,7 @@ func (ldr *Loader) removeLoadedData(ctx *context.Context, loaderType string, lds
 				tntIDStruct := utils.NewTenantID(tntID)
 				// get IDs so we can reload in cache
 				ids = append(ids, tntID)
-				if err := ldr.dm.RemoveRouteProfile(tntIDStruct.Tenant,
+				if err := ldr.dm.RemoveRouteProfile(ctx, tntIDStruct.Tenant,
 					tntIDStruct.ID, true); err != nil {
 					return err
 				}

@@ -100,7 +100,7 @@ func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Tenan
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := adms.dm.RemoveRouteProfile(ctx, tnt, args.ID, utils.NonTransactional, true); err != nil {
+	if err := adms.dm.RemoveRouteProfile(ctx, tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database
