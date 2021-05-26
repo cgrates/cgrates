@@ -345,7 +345,7 @@ func composeCacheArgsForFilter(dm *engine.DataManager, fltr *engine.Filter, tnt,
 func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, cacheopt, dftCache, tnt string,
 	argC map[string][]string, opts map[string]interface{}) (err error) {
 	var reply, method string
-	var args interface{} = utils.AttrReloadCacheWithAPIOpts{
+	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:    tnt,
 		ArgsCache: argC,
 		APIOpts:   opts,
