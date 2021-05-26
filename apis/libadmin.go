@@ -120,20 +120,14 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 			return
 		}
 		for _, flt := range fltr.Rules {
-			if !engine.FilterIndexTypes.Has(flt.Type) {
+			if !engine.FilterIndexTypes.Has(flt.Type) ||
+				engine.IsDynamicDPPath(flt.Element) {
 				continue
 			}
 			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-			for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-				if strings.HasPrefix(flt.Element, notIndex) {
-					continue
-				}
-			}
 			for _, fldVal := range flt.Values {
-				for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-					if strings.HasPrefix(fldVal, notIndex) {
-						continue
-					}
+				if engine.IsDynamicDPPath(fldVal) {
+					continue
 				}
 				if isDyn {
 					if !strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
@@ -282,20 +276,14 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, fltr *engine.Filter, tnt, tntID string, args map[string][]string) (_ map[string][]string, err error) {
 	indxIDs := make([]string, 0, len(fltr.Rules))
 	for _, flt := range fltr.Rules {
-		if !engine.FilterIndexTypes.Has(flt.Type) {
+		if !engine.FilterIndexTypes.Has(flt.Type) ||
+			engine.IsDynamicDPPath(flt.Element) {
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-		for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-			if strings.HasPrefix(flt.Element, notIndex) {
-				continue
-			}
-		}
 		for _, fldVal := range flt.Values {
-			for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
-				if strings.HasPrefix(fldVal, notIndex) {
-					continue
-				}
+			if engine.IsDynamicDPPath(fldVal) {
+				continue
 			}
 			if isDyn {
 				if !strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
