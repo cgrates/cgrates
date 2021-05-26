@@ -47,6 +47,9 @@ type DataDBMock struct {
 	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
+	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*ActionProfile, error)
+	SetActionProfileDrvF       func(ctx *context.Context, ap *ActionProfile) error
+	RemoveActionProfileDrvF    func(ctx *context.Context, tenant string, ID string) error
 }
 
 //Storage methods
@@ -344,15 +347,24 @@ func (dbM *DataDBMock) RemoveRateProfileDrv(ctx *context.Context, str1 string, s
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionProfileDrv(*context.Context, string, string) (*ActionProfile, error) {
+func (dbM *DataDBMock) GetActionProfileDrv(ctx *context.Context, tenant string, ID string) (*ActionProfile, error) {
+	if dbM.GetActionProfileDrvF != nil {
+		return dbM.GetActionProfileDrvF(ctx, tenant, ID)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetActionProfileDrv(*context.Context, *ActionProfile) error {
+func (dbM *DataDBMock) SetActionProfileDrv(ctx *context.Context, ap *ActionProfile) error {
+	if dbM.SetActionProfileDrvF != nil {
+		return dbM.SetActionProfileDrvF(ctx, ap)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveActionProfileDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveActionProfileDrv(ctx *context.Context, tenant string, ID string) error {
+	if dbM.RemoveActionProfileDrvF != nil {
+		return dbM.RemoveActionProfileDrvF(ctx, tenant, ID)
+	}
 	return utils.ErrNotImplemented
 }
 

@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestResourcesSetGetRemResourceProfile(t *testing.T) {
+func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, true)
@@ -39,61 +39,61 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 		dm:  dm,
 	}
 	arg := &utils.TenantID{
-		ID: "RES_1",
+		ID: "thdID",
 	}
-	var result engine.ResourceProfile
+	var result engine.ThresholdProfile
 	var reply string
 
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "RES_1",
-			AllocationMessage: "Approved",
-			Limit:             5,
-			Weight:            10,
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      "thdID",
+			MaxHits: 10,
+			Weight:  10,
 		},
 	}
-	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err != nil {
+
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if reply != utils.OK {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
+		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
-	if err := adms.GetResourceProfile(context.Background(), arg, &result); err != nil {
+	if err := adms.GetThresholdProfile(context.Background(), arg, &result); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	} else if !reflect.DeepEqual(result, *resPrf.ResourceProfile) {
+	} else if !reflect.DeepEqual(result, *thPrf.ThresholdProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(resPrf.ResourceProfile), utils.ToJSON(result))
+			utils.ToJSON(thPrf.ThresholdProfile), utils.ToJSON(result))
 	}
 
-	var rsPrfIDs []string
-	expRsPrfIDs := []string{"RES_1"}
+	var thPrfIDs []string
+	expThPrfIDs := []string{"thdID"}
 
-	if err := adms.GetResourceProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
-		&rsPrfIDs); err != nil {
+	if err := adms.GetThresholdProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
+		&thPrfIDs); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	} else if !reflect.DeepEqual(rsPrfIDs, expRsPrfIDs) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expRsPrfIDs, rsPrfIDs)
+	} else if !reflect.DeepEqual(thPrfIDs, expThPrfIDs) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expThPrfIDs, thPrfIDs)
 	}
 
 	var rplyCount int
 
-	if err := adms.GetResourceProfileIDsCount(context.Background(), &utils.TenantWithAPIOpts{},
+	if err := adms.GetThresholdProfileIDsCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
-	} else if rplyCount != len(rsPrfIDs) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(rsPrfIDs), rplyCount)
+	} else if rplyCount != len(thPrfIDs) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(thPrfIDs), rplyCount)
 	}
 
 	argRem := &utils.TenantIDWithAPIOpts{
 		TenantID: arg,
 	}
 
-	if err := adms.RemoveResourceProfile(context.Background(), argRem, &reply); err != nil {
+	if err := adms.RemoveThresholdProfile(context.Background(), argRem, &reply); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	}
 
-	if err := adms.GetResourceProfile(context.Background(), arg, &result); err == nil ||
+	if err := adms.GetThresholdProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -101,7 +101,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
+func TestThresholdsGetThresholdProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, true)
@@ -110,10 +110,10 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.ResourceProfile
+	var rcv engine.ThresholdProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
-	if err := adms.GetResourceProfile(context.Background(), &utils.TenantID{}, &rcv); err == nil ||
+	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantID{}, &rcv); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -121,8 +121,8 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 	adms.dm = nil
 	experr = "SERVER_ERROR: NO_DATABASE_CONNECTION"
 
-	if err := adms.GetResourceProfile(context.Background(), &utils.TenantID{
-		ID: "TestResourcesGetResourceProfileCheckErrors",
+	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantID{
+		ID: "TestThresholdsGetThresholdProfileCheckErrors",
 	}, &rcv); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -130,7 +130,7 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
+func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, true)
@@ -140,52 +140,52 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{},
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{},
 	}
 
 	var reply string
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
-	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err == nil ||
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	resPrf.ID = "TestResourcesSetResourceProfileCheckErrors"
-	resPrf.FilterIDs = []string{"invalid_filter_format"}
-	experr = "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TestResourcesSetResourceProfileCheckErrors"
+	thPrf.ID = "TestThresholdsSetThresholdProfileCheckErrors"
+	thPrf.FilterIDs = []string{"invalid_filter_format"}
+	experr = "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TestThresholdsSetThresholdProfileCheckErrors"
 
-	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err == nil ||
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	resPrf.FilterIDs = []string{}
+	thPrf.FilterIDs = []string{}
 	adms.connMgr = engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): make(chan birpc.ClientConnector),
 	})
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	experr = "SERVER_ERROR: context deadline exceeded"
 	cfg.GeneralCfg().DefaultCaching = utils.MetaRemove
-	if err := adms.SetResourceProfile(ctx, resPrf, &reply); err == nil ||
+	if err := adms.SetThresholdProfile(ctx, thPrf, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected <%+v>,\nreceived <%+v>", experr, err)
 	}
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
+			thPrf := &engine.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
-			return resPrf, nil
+			return thPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
@@ -196,7 +196,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
-	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err == nil ||
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err == nil ||
 		err.Error() != experr {
 		t.Errorf("\nexpected <%+v>, \nreceived <%+v>", experr, err)
 	}
@@ -204,7 +204,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
+func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, true)
@@ -214,18 +214,17 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
-			ID:                "TestResourcesRemoveResourceProfileCheckErrors",
-			Tenant:            "cgrates.org",
-			Limit:             5,
-			Weight:            10,
-			AllocationMessage: "Approved",
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			ID:      "TestThresholdsRemoveThresholdProfileCheckErrors",
+			Tenant:  "cgrates.org",
+			MaxHits: 10,
+			Weight:  10,
 		},
 	}
 	var reply string
 
-	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err != nil {
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
 		t.Error(err)
 	}
 
@@ -236,9 +235,9 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	})
 	experr := "SERVER_ERROR: context deadline exceeded"
 
-	if err := adms.RemoveResourceProfile(ctx, &utils.TenantIDWithAPIOpts{
+	if err := adms.RemoveThresholdProfile(ctx, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
-			ID: "TestResourcesRemoveResourceProfileCheckErrors",
+			ID: "TestThresholdsRemoveThresholdProfileCheckErrors",
 		},
 	}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -246,17 +245,17 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.ResourceProfile
+	var rcv engine.ThresholdProfile
 
-	if err := adms.GetResourceProfile(context.Background(), &utils.TenantID{
-		ID: "TestResourcesRemoveResourceProfileCheckErrors",
+	if err := adms.GetThresholdProfile(context.Background(), &utils.TenantID{
+		ID: "TestThresholdsRemoveThresholdProfileCheckErrors",
 	}, &rcv); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
 	experr = "MANDATORY_IE_MISSING: [ID]"
 
-	if err := adms.RemoveResourceProfile(context.Background(),
+	if err := adms.RemoveThresholdProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected <%+v>, \nreceived: <%+v>", experr, err)
@@ -265,25 +264,25 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	adms.dm = nil
 	experr = "SERVER_ERROR: NO_DATABASE_CONNECTION"
 
-	if err := adms.RemoveResourceProfile(context.Background(), &utils.TenantIDWithAPIOpts{
+	if err := adms.RemoveThresholdProfile(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
-			ID: "TestResourcesRemoveResourceProfileCheckErrors",
+			ID: "TestThresholdsRemoveThresholdProfileCheckErrors",
 		}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
+			thPrf := &engine.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
-			return resPrf, nil
+			return thPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
@@ -297,10 +296,10 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
-	if err := adms.RemoveResourceProfile(context.Background(),
+	if err := adms.RemoveThresholdProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
-				ID: "TestResourcesRemoveResourceProfileCheckErrors",
+				ID: "TestThresholdsRemoveThresholdProfileCheckErrors",
 			}}, &reply); err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -308,21 +307,21 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
+func TestThresholdsGetThresholdProfileIDsErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
+			thPrf := &engine.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
-			return resPrf, nil
+			return thPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -336,7 +335,7 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 	var reply []string
 	experr := "NOT_IMPLEMENTED"
 
-	if err := adms.GetResourceProfileIDs(context.Background(),
+	if err := adms.GetThresholdProfileIDs(context.Background(),
 		&utils.PaginatorWithTenant{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err.Error() != experr {
@@ -346,7 +345,7 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
+func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -362,7 +361,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 
 	var reply []string
 
-	if err := adms.GetResourceProfileIDs(context.Background(),
+	if err := adms.GetThresholdProfileIDs(context.Background(),
 		&utils.PaginatorWithTenant{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -372,21 +371,21 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesGetResourceProfileIDsCountErrMock(t *testing.T) {
+func TestThresholdsGetThresholdProfileIDsCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetThresholdProfileDrvF: func(*context.Context, string, string) (*engine.ThresholdProfile, error) {
+			thPrf := &engine.ThresholdProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
-			return resPrf, nil
+			return thPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetThresholdProfileDrvF: func(*context.Context, *engine.ThresholdProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemThresholdProfileDrvF: func(*context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -398,7 +397,7 @@ func TestResourcesGetResourceProfileIDsCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetResourceProfileIDsCount(context.Background(),
+	if err := adms.GetThresholdProfileIDsCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -406,7 +405,7 @@ func TestResourcesGetResourceProfileIDsCountErrMock(t *testing.T) {
 	}
 }
 
-func TestResourcesGetResourceProfileIDsCountErrKeys(t *testing.T) {
+func TestThresholdsGetThresholdProfileIDsCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -422,7 +421,7 @@ func TestResourcesGetResourceProfileIDsCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetResourceProfileIDsCount(context.Background(),
+	if err := adms.GetThresholdProfileIDsCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
@@ -430,92 +429,28 @@ func TestResourcesGetResourceProfileIDsCountErrKeys(t *testing.T) {
 	}
 }
 
-func TestResourcesNewResourceSv1(t *testing.T) {
+func TestThresholdsNewThresholdSv1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	rls := engine.NewResourceService(dm, cfg, nil, nil)
+	tS := engine.NewThresholdService(dm, cfg, nil, nil)
 
-	exp := &ResourceSv1{
-		rls: rls,
+	exp := &ThresholdSv1{
+		tS: tS,
 	}
-	rcv := NewResourceSv1(rls)
+	rcv := NewThresholdSv1(tS)
 
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
-func TestResourcesSv1Ping(t *testing.T) {
-	resSv1 := new(ResourceSv1)
+func TestThresholdsSv1Ping(t *testing.T) {
+	thSv1 := new(ThresholdSv1)
 	var reply string
-	if err := resSv1.Ping(nil, nil, &reply); err != nil {
+	if err := thSv1.Ping(nil, nil, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply error")
 	}
 }
-
-// func TestResourcesGetResourcesForEvent(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-// 	data := engine.NewInternalDB(nil, nil, true)
-// 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-// 	fltrs := engine.NewFilterS(cfg, nil, dm)
-// 	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
-// 	adms := &AdminSv1{
-// 		dm:  dm,
-// 		cfg: cfg,
-// 	}
-
-// 	resPrf := &engine.ResourceProfileWithAPIOpts{
-// 		ResourceProfile: &engine.ResourceProfile{
-// 			Tenant:            "cgrates.org",
-// 			ID:                "TestResourcesGetResourcesForEvent",
-// 			FilterIDs:         []string{"*string:~*req.Account:1001"},
-// 			Limit:             5,
-// 			AllocationMessage: "Approved",
-// 			Weight:            10,
-// 		},
-// 	}
-
-// 	rs := &engine.Resource{
-// 		Tenant: "cgrates.org",
-// 		ID:     "R_1",
-// 		Usages: map[string]*engine.ResourceUsage{
-// 			"RU_Test": {
-// 				Tenant: "cgrates.org",
-// 				ID:     "RU_Test",
-// 				Units:  10,
-// 			},
-// 		},
-// 	}
-// 	ttl := utils.DurationPointer(10 * time.Second)
-
-// 	if err := dm.SetResource(context.Background(), rs, ttl, 1000, true); err != nil {
-// 		t.Error(err)
-// 	}
-
-// 	resSv1 := NewResourceSv1(rls)
-// 	args := &utils.ArgRSv1ResourceUsage{
-// 		CGREvent: &utils.CGREvent{
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 			ID: "EventTest",
-// 		},
-// 		UsageID: "RU_Test",
-// 	}
-// 	var result engine.Resources
-
-// 	expRes := &engine.Resources{}
-
-// 	if err := resSv1.GetResourcesForEvent(context.Background(), args, &result); err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		rplyPtr := &result
-// 		if !reflect.DeepEqual(expRes, rplyPtr) {
-// 			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRes), utils.ToJSON(rplyPtr))
-// 		}
-// 	}
-// }
