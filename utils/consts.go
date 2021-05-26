@@ -2200,21 +2200,6 @@ const (
 	OptsRouteID = "*routeID"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
-	// EEs Elasticsearch options
-	ElsIndex               = "elsIndex"
-	ElsIfPrimaryTerm       = "elsIfPrimaryTerm"
-	ElsIfSeqNo             = "elsIfSeqNo"
-	ElsOpType              = "elsOpType"
-	ElsPipeline            = "elsPipeline"
-	ElsRouting             = "elsRouting"
-	ElsTimeout             = "elsTimeout"
-	ElsVersionLow          = "elsVersion"
-	ElsVersionType         = "elsVersionType"
-	ElsWaitForActiveShards = "elsWaitForActiveShards"
-	// SQLEe options
-	SQLMaxOpenConns    = "sqlMaxOpenConns"
-	SQLMaxConnLifetime = "sqlMaxConnLifetime"
-
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
@@ -2297,6 +2282,9 @@ const (
 	SQLDBNameOpt    = "sqlDBName"
 	SQLTableNameOpt = "sqlTableName"
 
+	SQLMaxOpenConns    = "sqlMaxOpenConns"
+	SQLMaxConnLifetime = "sqlMaxConnLifetime"
+
 	// fileCSV
 	CSVRowLengthOpt     = "csvRowLength"
 	CSVFieldSepOpt      = "csvFieldSeparator"
@@ -2332,6 +2320,18 @@ const (
 	PartialCacheActionOpt      = "partialCacheAction"
 	PartialPathOpt             = "partialPath"
 	PartialCSVFieldSepartorOpt = "partialcsvFieldSeparator"
+
+	// EEs Elasticsearch options
+	ElsIndex               = "elsIndex"
+	ElsIfPrimaryTerm       = "elsIfPrimaryTerm"
+	ElsIfSeqNo             = "elsIfSeqNo"
+	ElsOpType              = "elsOpType"
+	ElsPipeline            = "elsPipeline"
+	ElsRouting             = "elsRouting"
+	ElsTimeout             = "elsTimeout"
+	ElsVersionLow          = "elsVersion"
+	ElsVersionType         = "elsVersionType"
+	ElsWaitForActiveShards = "elsWaitForActiveShards"
 )
 
 // Analyzers constants
@@ -2354,6 +2354,7 @@ const (
 const (
 	//Common
 	VerboseCgr      = "verbose"
+	VersionCgr      = "version"
 	QuitCgr         = "quit"
 	ExitCgr         = "exit"
 	ByeCgr          = "bye"
