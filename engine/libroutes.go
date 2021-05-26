@@ -163,11 +163,12 @@ func (sRoutes *SortedRoutes) SortResourceDescendent() {
 }
 
 // SortLoadDistribution is part of sort interface,
-// sort based on the following formula (float64(ratio + metricVal) / float64(ratio)) -1 with fallback on Weight
+// sort based on the following formula float64(metricVal/ratio) with fallback on Weight
 func (sRoutes *SortedRoutes) SortLoadDistribution() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		splIVal := ((sRoutes.Routes[i].sortingDataF64[utils.Ratio]+sRoutes.Routes[i].sortingDataF64[utils.Load])/sRoutes.Routes[i].sortingDataF64[utils.Ratio] - 1.0)
-		splJVal := ((sRoutes.Routes[j].sortingDataF64[utils.Ratio]+sRoutes.Routes[j].sortingDataF64[utils.Load])/sRoutes.Routes[j].sortingDataF64[utils.Ratio] - 1.0)
+		// ((ratio + metricVal) / (ratio)) -1 = ((ratio+metricVal)/ratio) - (ratio/ratio) = (ratio+metricVal-ratio)/ratio = metricVal/ratio
+		splIVal := sRoutes.Routes[i].sortingDataF64[utils.Load] / sRoutes.Routes[i].sortingDataF64[utils.Ratio]
+		splJVal := sRoutes.Routes[j].sortingDataF64[utils.Load] / sRoutes.Routes[j].sortingDataF64[utils.Ratio]
 		if splIVal == splJVal {
 			if sRoutes.Routes[i].sortingDataF64[utils.Weight] == sRoutes.Routes[j].sortingDataF64[utils.Weight] {
 				return utils.BoolGenerator().RandomBool()

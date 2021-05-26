@@ -725,17 +725,14 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 						utils.Weight:       10.,
 					},
 				},
-				/*
-					{
-						RouteID: "vendor2",
-						SortingData: map[string]interface{}{
-							utils.Cost:         0.1245,
-							utils.RatingPlanID: "RP_VENDOR2",
-							utils.Weight:       0.,
-						},
+				{
+					RouteID: "vendor2",
+					SortingData: map[string]interface{}{
+						utils.Cost:         0.1245,
+						utils.RatingPlanID: "RP_VENDOR2",
+						utils.Weight:       0.,
 					},
-
-				*/
+				},
 				{
 					RouteID: "vendor4",
 					SortingData: map[string]interface{}{
@@ -803,17 +800,14 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 						utils.Weight:       10.,
 					},
 				},
-				/*
-					{
-						RouteID: "vendor2",
-						SortingData: map[string]interface{}{
-							utils.Cost:         0.1245,
-							utils.RatingPlanID: "RP_VENDOR2",
-							utils.Weight:       0.,
-						},
+				{
+					RouteID: "vendor2",
+					SortingData: map[string]interface{}{
+						utils.Cost:         0.1245,
+						utils.RatingPlanID: "RP_VENDOR2",
+						utils.Weight:       0.,
 					},
-
-				*/
+				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
@@ -870,17 +864,14 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 						utils.Weight:       10.,
 					},
 				},
-				/*
-					{
-						RouteID: "vendor2",
-						SortingData: map[string]interface{}{
-							utils.Cost:         0.1245,
-							utils.RatingPlanID: "RP_VENDOR2",
-							utils.Weight:       0.,
-						},
+				{
+					RouteID: "vendor2",
+					SortingData: map[string]interface{}{
+						utils.Cost:         0.1245,
+						utils.RatingPlanID: "RP_VENDOR2",
+						utils.Weight:       0.,
 					},
-
-				*/
+				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
@@ -1019,11 +1010,11 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
 						utils.MetaACC:           1.,
-						utils.MetaACD:           150.,
+						utils.MetaACD:           150. * 1e9,
 						"*sum#1":                3.,
 						"*distinct#~*req.Usage": 1.,
 						utils.MetaTCC:           3.,
-						utils.MetaTCD:           450.,
+						utils.MetaTCD:           450. * 1e9,
 						utils.Weight:            0.,
 					},
 				},
@@ -1031,10 +1022,10 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
 						utils.MetaACC: 1.,
-						utils.MetaACD: 150.,
+						utils.MetaACD: 150. * 1e9,
 						"*sum#1":      2.,
 						utils.MetaTCC: 2.,
-						utils.MetaTCD: 300.,
+						utils.MetaTCD: 300. * 1e9,
 						utils.Weight:  0.,
 					},
 				},
@@ -1093,10 +1084,10 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 					RouteID: "vendor3",
 					SortingData: map[string]interface{}{
 						utils.MetaACC: 4.,
-						utils.MetaACD: 150.,
+						utils.MetaACD: 150. * 1e9,
 						"*sum#1":      3.,
 						utils.MetaTCC: 12.,
-						utils.MetaTCD: 450.,
+						utils.MetaTCD: 450. * 1e9,
 						utils.Weight:  20.,
 					},
 				},
@@ -1104,10 +1095,10 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 					RouteID: "vendor1",
 					SortingData: map[string]interface{}{
 						utils.MetaACC: 4.,
-						utils.MetaACD: 150.,
+						utils.MetaACD: 150. * 1e9,
 						"*sum#1":      3.,
 						utils.MetaTCC: 12.,
-						utils.MetaTCD: 450.,
+						utils.MetaTCD: 450. * 1e9,
 						utils.Weight:  0.,
 					},
 				},
@@ -1115,11 +1106,11 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 					RouteID: "vendor2",
 					SortingData: map[string]interface{}{
 						utils.MetaACC:           1.,
-						utils.MetaACD:           150.,
+						utils.MetaACD:           150. * 1e9,
 						"*sum#1":                3.,
 						"*distinct#~*req.Usage": 1.,
 						utils.MetaTCC:           3.,
-						utils.MetaTCD:           450.,
+						utils.MetaTCD:           450. * 1e9,
 						utils.Weight:            0.,
 					},
 				},

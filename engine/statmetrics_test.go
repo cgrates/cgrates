@@ -571,44 +571,44 @@ func TestACDGetFloat64Value(t *testing.T) {
 		},
 	}
 	acd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 35.0 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 35.0*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
 	// by default rounding decimal is 5
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.33333 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.33333*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	// test for other rounding decimals
 	config.CgrConfig().GeneralCfg().RoundingDecimals = 0
 	acd.(*StatACD).val = nil
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	config.CgrConfig().GeneralCfg().RoundingDecimals = 1
 	acd.(*StatACD).val = nil
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.3 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.3*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	config.CgrConfig().GeneralCfg().RoundingDecimals = 9
 	acd.(*StatACD).val = nil
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.333333333 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.333333333*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	config.CgrConfig().GeneralCfg().RoundingDecimals = -1
 	acd.(*StatACD).val = nil
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 50 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 50*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	//change back the rounding decimals to default value
 	config.CgrConfig().GeneralCfg().RoundingDecimals = 5
 	acd.(*StatACD).val = nil
 	acd.RemEvent(ev2.ID)
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.33333 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 53.33333*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev4.ID)
-	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 50.0 {
+	if strVal := acd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 50.0*1e9 {
 		t.Errorf("wrong acd value: %v", strVal)
 	}
 	acd.RemEvent(ev.ID)
@@ -835,19 +835,19 @@ func TestTCDGetFloat64Value(t *testing.T) {
 		},
 	}
 	tcd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 70.0 {
+	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 70.0*1e9 {
 		t.Errorf("wrong tcd value: %f", strVal)
 	}
 	tcd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
-	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 160.0 {
+	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 160.0*1e9 {
 		t.Errorf("wrong tcd value: %f", strVal)
 	}
 	tcd.RemEvent(ev2.ID)
-	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 160.0 {
+	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 160.0*1e9 {
 		t.Errorf("wrong tcd value: %f", strVal)
 	}
 	tcd.RemEvent(ev4.ID)
-	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 100.0 {
+	if strVal := tcd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 100.0*1e9 {
 		t.Errorf("wrong tcd value: %f", strVal)
 	}
 	tcd.RemEvent(ev.ID)
@@ -1719,15 +1719,15 @@ func TestPDDGetFloat64Value(t *testing.T) {
 		},
 	}
 	pdd.AddEvent(ev4.ID, utils.MapStorage{utils.MetaReq: ev4.Event})
-	if strVal := pdd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 7.5 {
+	if strVal := pdd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 7.5*1e9 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.AddEvent(ev5.ID, utils.MapStorage{utils.MetaReq: ev5.Event})
-	if strVal := pdd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 7.5 {
+	if strVal := pdd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 7.5*1e9 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.RemEvent(ev2.ID)
-	if strVal := pdd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 7.5 {
+	if strVal := pdd.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); strVal != 7.5*1e9 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.RemEvent(ev4.ID)
