@@ -460,11 +460,11 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 
 	//remove thresholds
 	if err := dataManager.RemoveThresholdProfile(context.TODO(), th.Tenant,
-		th.ID, utils.NonTransactional, true); err != nil {
+		th.ID, true); err != nil {
 		t.Error(err)
 	}
 	if err := dataManager.RemoveThresholdProfile(context.TODO(), th2.Tenant,
-		th2.ID, utils.NonTransactional, true); err != nil {
+		th2.ID, true); err != nil {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetIndexes(context.Background(),
@@ -589,7 +589,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 
 	if err := dataManager.RemoveAttributeProfile(context.Background(), attrProfile.Tenant,
-		attrProfile.ID, utils.NonTransactional, true); err != nil {
+		attrProfile.ID, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed
@@ -718,7 +718,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	}
 
 	if err := dataManager.RemoveAttributeProfile(context.Background(), attrProfile.Tenant,
-		attrProfile.ID, utils.NonTransactional, true); err != nil {
+		attrProfile.ID, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed
@@ -815,7 +815,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	}
 	//remove threshold
 	if err := dataManager.RemoveThresholdProfile(context.TODO(), th.Tenant,
-		th.ID, utils.NonTransactional, true); err != nil {
+		th.ID, true); err != nil {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetIndexes(context.Background(),

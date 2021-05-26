@@ -110,7 +110,7 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := adms.dm.RemoveFilter(ctx, tnt, arg.ID, utils.NonTransactional, true); err != nil {
+	if err := adms.dm.RemoveFilter(ctx, tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database

@@ -336,7 +336,7 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 			continue
 		}
 		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold
-			if err = tS.dm.RemoveThreshold(ctx, t.Tenant, t.ID, utils.NonTransactional); err != nil {
+			if err = tS.dm.RemoveThreshold(ctx, t.Tenant, t.ID); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing from database non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))

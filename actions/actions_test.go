@@ -141,7 +141,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	}
 
 	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant,
-		actPrf.ID, utils.NonTransactional, false); err != nil {
+		actPrf.ID, false); err != nil {
 		t.Error(err)
 	}
 }
@@ -399,7 +399,7 @@ func TestV1ScheduleActions(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
-	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -464,7 +464,7 @@ func TestV1ExecuteActions(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
-	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }

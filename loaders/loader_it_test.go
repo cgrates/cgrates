@@ -814,7 +814,7 @@ cgrates.org,NewRes1
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRes), utils.ToJSON(rcv))
 	}
 
-	if err := ldr.dm.RemoveResourceProfile(context.TODO(), expRes.Tenant, expRes.ID, utils.NonTransactional, true); err != nil {
+	if err := ldr.dm.RemoveResourceProfile(context.TODO(), expRes.Tenant, expRes.ID, true); err != nil {
 		t.Error(err)
 	}
 

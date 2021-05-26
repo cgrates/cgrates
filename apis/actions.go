@@ -122,7 +122,7 @@ func (admS *AdminSv1) RemoveActionProfile(ctx *context.Context, arg *utils.Tenan
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	if err := admS.dm.RemoveActionProfile(ctx, tnt, arg.ID,
-		utils.NonTransactional, true); err != nil {
+		true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheActionProfiles and store it in database

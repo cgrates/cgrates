@@ -3514,7 +3514,7 @@ func TestResourcesUpdateResource(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
 	}
 
-	if err := dm.RemoveResource(context.Background(), r.Tenant, r.ID, utils.NonTransactional); err != nil {
+	if err := dm.RemoveResource(context.Background(), r.Tenant, r.ID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -3588,7 +3588,7 @@ func TestResourcesUpdateResource(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
 	}
 
-	if err := dm.RemoveResourceProfile(context.Background(), res.Tenant, res.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveResourceProfile(context.Background(), res.Tenant, res.ID, true); err != nil {
 		t.Fatal(err)
 	}
 

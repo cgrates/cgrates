@@ -132,7 +132,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != true {
 		t.Error("should be in cache")
 	}
-	if err := dm2.RemoveStatQueue(context.TODO(), sq.Tenant, sq.ID, utils.EmptyString); err != nil {
+	if err := dm2.RemoveStatQueue(context.TODO(), sq.Tenant, sq.ID); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)

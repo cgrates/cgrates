@@ -176,7 +176,7 @@ func (admS *AdminSv1) RemoveRateProfile(ctx *context.Context, arg *utils.TenantI
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	if err := admS.dm.RemoveRateProfile(ctx, tnt, arg.ID,
-		utils.NonTransactional, true); err != nil {
+		true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database

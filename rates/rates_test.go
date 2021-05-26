@@ -167,7 +167,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRpCostAfterV1), utils.ToJSON(expectedRPCost))
 	}
 
-	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -264,7 +264,7 @@ func TestRateProfileCostForEventUnmatchEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := rateS.dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := rateS.dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -409,7 +409,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, utils.NonTransactional, true)
+	err = dm.RemoveRateProfile(context.Background(), rpp.Tenant, rpp.ID, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -495,7 +495,7 @@ func TestV1CostForEventError(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
-	if err := rateS.dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := rateS.dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -779,7 +779,7 @@ func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -842,7 +842,7 @@ func TestRateProfileCostForEventZeroIncrement(t *testing.T) {
 			}}}, rateS.cfg.RateSCfg().Verbosity); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }
@@ -906,7 +906,7 @@ func TestRateProfileCostForEventMaximumIterations(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
 }

@@ -50,7 +50,7 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveDispatcherProfile(context.TODO(), tntID[0],
-			tntID[1], utils.NonTransactional, false); err != nil {
+			tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.Dispatchers]++
@@ -80,7 +80,7 @@ func (m *Migrator) migrateCurrentDispatcherHost() (err error) {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveDispatcherHost(tntID[0],
-			tntID[1], utils.NonTransactional); err != nil {
+			tntID[1]); err != nil {
 			return err
 		}
 	}
