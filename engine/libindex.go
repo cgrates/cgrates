@@ -33,8 +33,7 @@ var (
 	ToNotBeIndexed = []string{utils.DynamicDataPrefix + utils.MetaAccounts,
 		utils.DynamicDataPrefix + utils.MetaStats,
 		utils.DynamicDataPrefix + utils.MetaResources,
-		utils.DynamicDataPrefix + utils.MetaLibPhoneNumber,
-		utils.DynamicDataPrefix + utils.MetaAsm}
+		utils.DynamicDataPrefix + utils.MetaLibPhoneNumber}
 )
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
