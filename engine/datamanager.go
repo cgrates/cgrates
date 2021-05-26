@@ -1417,10 +1417,10 @@ func (dm *DataManager) RemoveAttributeProfile(apiCtx *context.Context, tenant, i
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(apiCtx, dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheAttributeFilterIndexes,
+		if err = removeItemFromFilterIndex(apiCtx, dm, utils.CacheAttributeFilterIndexes,
 			tenant, utils.EmptyString, id, oldAttr.FilterIDs); err != nil {
 			return
 		}

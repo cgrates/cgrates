@@ -136,7 +136,9 @@
 },
 
 
-"filters": {								
+"filters": {
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
 	"admins_conns": ["*internal"],
 },
 

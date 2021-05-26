@@ -167,8 +167,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 		// 	internalChargerSChan <- chrgS
 		case thS := <-internalThdSChan:
 			internalThdSChan <- thS
-		// case splS := <-internalSuplSChan:
-		// 	internalSuplSChan <- splS
+		case rtS := <-internalRouteSChan:
+			internalRouteSChan <- rtS
 		// case analyzerS := <-internalAnalyzerSChan:
 		// 	internalAnalyzerSChan <- analyzerS
 		case loaderS := <-internalLoaderSChan:
