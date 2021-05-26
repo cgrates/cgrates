@@ -77,10 +77,19 @@ func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 			if !FilterIndexTypes.Has(flt.Type) {
 				continue
 			}
-
 			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+			for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+				if strings.HasPrefix(flt.Element, notIndex) {
+					continue
+				}
+			}
 			for _, fldVal := range flt.Values {
 				var idxKey string
+				for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+					if strings.HasPrefix(fldVal, notIndex) {
+						continue
+					}
+				}
 				if isDyn {
 					if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
 						continue
@@ -525,8 +534,18 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+		for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+			if strings.HasPrefix(flt.Element, notIndex) {
+				continue
+			}
+		}
 		for _, fldVal := range flt.Values {
 			var idxKey string
+			for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+				if strings.HasPrefix(flt.Element, notIndex) {
+					continue
+				}
+			}
 			if isDyn {
 				if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
 					continue
