@@ -49,7 +49,7 @@ func TestRatesGetRateProfileErrMandatoryIeMissing(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfile(t *testing.T) {
+func TestRatesGetRateProfile1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -110,7 +110,7 @@ func TestRatesGetRateProfile(t *testing.T) {
 
 }
 
-func TestApisRatesGetRateProfileErrorNotFound(t *testing.T) {
+func TestRatesGetRateProfileErrorNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -130,7 +130,7 @@ func TestApisRatesGetRateProfileErrorNotFound(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileIDs(t *testing.T) {
+func TestRatesGetRateProfileIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -168,7 +168,7 @@ func TestApisRatesGetRateProfileIDs(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfile(t *testing.T) {
+func TestRatesGetRateProfile2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -206,7 +206,7 @@ func TestApisRatesGetRateProfile(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileErr(t *testing.T) {
+func TestRatesGetRateProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -223,7 +223,7 @@ func TestApisRatesGetRateProfileErr(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileErr2(t *testing.T) {
+func TestRatesGetRateProfileErr2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -244,7 +244,7 @@ func TestApisRatesGetRateProfileErr2(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileIDsCount(t *testing.T) {
+func TestRatesGetRateProfileIDsCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -282,7 +282,7 @@ func TestApisRatesGetRateProfileIDsCount(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileIDsCountEmptyTenant(t *testing.T) {
+func TestRatesGetRateProfileIDsCountEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -320,7 +320,7 @@ func TestApisRatesGetRateProfileIDsCountEmptyTenant(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileIDsCountGetKeysError(t *testing.T) {
+func TestRatesGetRateProfileIDsCountGetKeysError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -337,7 +337,7 @@ func TestApisRatesGetRateProfileIDsCountGetKeysError(t *testing.T) {
 	}
 }
 
-func TestApisRatesGetRateProfileIDsCountKeysLenError(t *testing.T) {
+func TestRatesGetRateProfileIDsCountKeysLenError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -358,7 +358,7 @@ func TestApisRatesGetRateProfileIDsCountKeysLenError(t *testing.T) {
 	}
 }
 
-func TestApisRateSetRateProfileMissingStructFieldError(t *testing.T) {
+func TestRatesSetRateProfileMissingStructFieldError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -383,7 +383,7 @@ func TestApisRateSetRateProfileMissingStructFieldError(t *testing.T) {
 	}
 }
 
-func TestApisRateSetRateProfileEmptyTenant(t *testing.T) {
+func TestRatesSetRateProfileEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -443,7 +443,7 @@ func TestApisRateSetRateProfileEmptyTenant(t *testing.T) {
 	}
 }
 
-func TestApisRateSetRateProfileError(t *testing.T) {
+func TestRatesSetRateProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -503,7 +503,7 @@ func TestApisRateSetRateProfileError(t *testing.T) {
 	}
 }
 
-func TestApisRateSetRateProfile(t *testing.T) {
+func TestRatesSetRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -564,7 +564,7 @@ func TestApisRateSetRateProfile(t *testing.T) {
 	}
 }
 
-func TestApisRateNewRateSv1(t *testing.T) {
+func TestRatesNewRateSv1(t *testing.T) {
 	rateS := &rates.RateS{}
 	expected := &RateSv1{
 		rS: rateS,
@@ -575,7 +575,7 @@ func TestApisRateNewRateSv1(t *testing.T) {
 	}
 }
 
-func TestApisRateCostForEvent(t *testing.T) {
+func TestRatesCostForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -610,7 +610,7 @@ func TestApisRateCostForEvent(t *testing.T) {
 	}
 }
 
-func TestApisRateRemoveRateProfile(t *testing.T) {
+func TestRatesRemoveRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -662,7 +662,7 @@ func TestApisRateRemoveRateProfile(t *testing.T) {
 	}
 }
 
-func TestApisRateRemoveRateProfileMissing(t *testing.T) {
+func TestRatesRemoveRateProfileMissing(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -701,7 +701,7 @@ func TestApisRateRemoveRateProfileMissing(t *testing.T) {
 
 }
 
-func TestApisRateRemoveRateProfileEmptyTenant(t *testing.T) {
+func TestRatesRemoveRateProfileEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -750,7 +750,7 @@ func TestApisRateRemoveRateProfileEmptyTenant(t *testing.T) {
 	}
 }
 
-func TestApisRateSetGetRateProfileError(t *testing.T) {
+func TestRatesSetGetRateProfileError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -792,7 +792,7 @@ func TestApisRateSetGetRateProfileError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRemoveRateProfileError(t *testing.T) {
+func TestRatesSetRemoveRateProfileError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -847,7 +847,7 @@ func TestApisRateSetRemoveRateProfileError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileError2(t *testing.T) {
+func TestRatesSetRateProfileError2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -886,7 +886,7 @@ func TestApisRateSetRateProfileError2(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRates(t *testing.T) {
+func TestRatesSetRateProfileRates(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -960,7 +960,7 @@ func TestApisRateSetRateProfileRates(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRatesNoTenant(t *testing.T) {
+func TestRatesSetRateProfileRatesNoTenant(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1031,7 +1031,7 @@ func TestApisRateSetRateProfileRatesNoTenant(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRatesMissingField(t *testing.T) {
+func TestRatesSetRateProfileRatesMissingField(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1063,7 +1063,7 @@ func TestApisRateSetRateProfileRatesMissingField(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRatesErr(t *testing.T) {
+func TestRatesSetRateProfileRatesErr(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1097,7 +1097,7 @@ func TestApisRateSetRateProfileRatesErr(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRatesErr2(t *testing.T) {
+func TestRatesSetRateProfileRatesErr2(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1140,7 +1140,7 @@ func TestApisRateSetRateProfileRatesErr2(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileRate(t *testing.T) {
+func TestRatesRemoveRateProfileRate(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1221,7 +1221,7 @@ func TestApisRateRemoveRateProfileRate(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileRateEmptyTenant(t *testing.T) {
+func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1301,7 +1301,7 @@ func TestApisRateRemoveRateProfileRateEmptyTenant(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileRateError(t *testing.T) {
+func TestRatesRemoveRateProfileRateError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1325,7 +1325,7 @@ func TestApisRateRemoveRateProfileRateError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileRateErrorMissingField(t *testing.T) {
+func TestRatesRemoveRateProfileRateErrorMissingField(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1350,7 +1350,7 @@ func TestApisRateRemoveRateProfileRateErrorMissingField(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileErrorSetLoadIDs(t *testing.T) {
+func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1394,7 +1394,7 @@ func TestApisRateSetRateProfileErrorSetLoadIDs(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
+func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1443,7 +1443,7 @@ func TestApisRateSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
+func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1486,7 +1486,7 @@ func TestApisRateRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
+func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1530,7 +1530,7 @@ func TestApisRateRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileErrorCache(t *testing.T) {
+func TestRatesSetRateProfileErrorCache(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
@@ -1584,7 +1584,7 @@ func TestApisRateSetRateProfileErrorCache(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateSetRateProfileRatesErrorCache(t *testing.T) {
+func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
@@ -1638,7 +1638,7 @@ func TestApisRateSetRateProfileRatesErrorCache(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileRatesErrorCache(t *testing.T) {
+func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
@@ -1685,7 +1685,7 @@ func TestApisRateRemoveRateProfileRatesErrorCache(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRateRemoveRateProfileErrorSetCache(t *testing.T) {
+func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"

@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSetGetAttributeProfile(t *testing.T) {
+func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, true)
@@ -100,7 +100,7 @@ func TestSetGetAttributeProfile(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestSetAttributeProfileCheckErrors(t *testing.T) {
+func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, true)
@@ -182,7 +182,7 @@ func TestSetAttributeProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestGetAttributeProfileCheckErrors(t *testing.T) {
+func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, true)
@@ -213,7 +213,7 @@ func TestGetAttributeProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestRemoveAttributeProfileCheckErrors(t *testing.T) {
+func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, true)
@@ -289,7 +289,7 @@ func TestRemoveAttributeProfileCheckErrors(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestRemoveAttributeProfileMockErr(t *testing.T) {
+func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -330,7 +330,7 @@ func TestRemoveAttributeProfileMockErr(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestGetAttributeProfileIDsMockErr(t *testing.T) {
+func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -368,7 +368,7 @@ func TestGetAttributeProfileIDsMockErr(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestGetAttributeProfileIDsMockErrKeys(t *testing.T) {
+func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -393,7 +393,7 @@ func TestGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestGetAttributeProfileIDscOUNTMockErr(t *testing.T) {
+func TestAttributesGetAttributeProfileIDsCountMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -445,7 +445,7 @@ func TestGetAttributeProfileIDscOUNTMockErr(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestGetAttributeForEvent(t *testing.T) {
+func TestAttributesGetAttributeForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, true)
@@ -542,5 +542,4 @@ func TestAttributesSv1Ping(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply error")
 	}
-
 }
