@@ -107,16 +107,16 @@ func testTpTresITFlush(t *testing.T) {
 func testTpTresITPopulate(t *testing.T) {
 	tpThresholds = []*utils.TPThresholdProfile{
 		{
-			TPid:      "TH1",
-			Tenant:    "cgrates.org",
-			ID:        "Threhold",
-			FilterIDs: []string{"FLTR_1", "FLTR_2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-			MaxHits:   -1,
-			MinSleep:  "1s",
-			Blocker:   true,
-			Weight:    10,
-			ActionIDs: []string{"Thresh1", "Thresh2"},
-			Async:     true,
+			TPid:             "TH1",
+			Tenant:           "cgrates.org",
+			ID:               "Threhold",
+			FilterIDs:        []string{"FLTR_1", "FLTR_2", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			MaxHits:          -1,
+			MinSleep:         "1s",
+			Blocker:          true,
+			Weight:           10,
+			ActionProfileIDs: []string{"Thresh1", "Thresh2"},
+			Async:            true,
 		},
 	}
 	if err := tpTresMigrator.storDBIn.StorDB().SetTPThresholds(tpThresholds); err != nil {
@@ -144,7 +144,7 @@ func testTpTresITCheckData(t *testing.T) {
 	}
 	sort.Strings(result[0].FilterIDs)
 	sort.Strings(tpThresholds[0].FilterIDs)
-	sort.Strings(result[0].ActionIDs)
+	sort.Strings(result[0].ActionProfileIDs)
 	if !reflect.DeepEqual(tpThresholds[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpThresholds[0]), utils.ToJSON(result[0]))
 	}

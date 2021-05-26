@@ -255,11 +255,11 @@ func testV1AccSendToThreshold(t *testing.T) {
 			ID:     "THD_AccDisableAndLog",
 			FilterIDs: []string{"*string:~*opts.*eventType:AccountUpdate",
 				"*string:~*asm.ID:testAccThreshold"},
-			MaxHits:   -1,
-			MinSleep:  time.Second,
-			Weight:    20.0,
-			Async:     true,
-			ActionIDs: []string{"DISABLE_LOG"},
+			MaxHits:          -1,
+			MinSleep:         time.Second,
+			Weight:           20.0,
+			Async:            true,
+			ActionProfileIDs: []string{"DISABLE_LOG"},
 		},
 	}
 

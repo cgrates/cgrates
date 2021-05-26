@@ -165,13 +165,13 @@ func testRPCMethodsAddData(t *testing.T) {
 	//Add a thresholdProfile to disable account
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_AccDisableAndLog",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.DisableAction:DisableAction"},
-			MaxHits:   -1,
-			MinSleep:  time.Second,
-			Weight:    30.0,
-			ActionIDs: []string{"DISABLE_LOG"},
+			Tenant:           "cgrates.org",
+			ID:               "THD_AccDisableAndLog",
+			FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.DisableAction:DisableAction"},
+			MaxHits:          -1,
+			MinSleep:         time.Second,
+			Weight:           30.0,
+			ActionProfileIDs: []string{"DISABLE_LOG"},
 		},
 	}
 	if err := rpcRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &reply); err != nil {
@@ -182,13 +182,13 @@ func testRPCMethodsAddData(t *testing.T) {
 	//Add a thresholdProfile to enable account
 	tPrfl2 := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "THD_AccEnableAndLog",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.EnableAction:EnableAction"},
-			MaxHits:   -1,
-			MinSleep:  time.Second,
-			Weight:    30.0,
-			ActionIDs: []string{"ENABLE_LOG"},
+			Tenant:           "cgrates.org",
+			ID:               "THD_AccEnableAndLog",
+			FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.EnableAction:EnableAction"},
+			MaxHits:          -1,
+			MinSleep:         time.Second,
+			Weight:           30.0,
+			ActionProfileIDs: []string{"ENABLE_LOG"},
 		},
 	}
 	if err := rpcRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl2, &reply); err != nil {

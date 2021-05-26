@@ -295,14 +295,14 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 	//Add a threshold with filter from above and an inline filter for Account 1010
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TH_Stats1",
-			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			MaxHits:   -1,
-			MinSleep:  time.Millisecond,
-			Weight:    10.0,
-			ActionIDs: []string{"LOG"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "TH_Stats1",
+			FilterIDs:        []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
+			MaxHits:          -1,
+			MinSleep:         time.Millisecond,
+			Weight:           10.0,
+			ActionProfileIDs: []string{"LOG"},
+			Async:            true,
 		},
 	}
 	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
@@ -365,13 +365,13 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	//update the threshold with new filter
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TH_Stats1",
-			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
-			MaxHits:   -1,
-			MinSleep:  time.Millisecond,
-			Weight:    10.0,
-			ActionIDs: []string{"LOG"},
+			Tenant:           "cgrates.org",
+			ID:               "TH_Stats1",
+			FilterIDs:        []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z"},
+			MaxHits:          -1,
+			MinSleep:         time.Millisecond,
+			Weight:           10.0,
+			ActionProfileIDs: []string{"LOG"},
 		},
 	}
 	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
@@ -464,14 +464,14 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TH_ResTest",
-			FilterIDs: []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
-			MaxHits:   -1,
-			MinSleep:  time.Millisecond,
-			Weight:    10.0,
-			ActionIDs: []string{"LOG"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "TH_ResTest",
+			FilterIDs:        []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
+			MaxHits:          -1,
+			MinSleep:         time.Millisecond,
+			Weight:           10.0,
+			ActionProfileIDs: []string{"LOG"},
+			Async:            true,
 		},
 	}
 	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
@@ -736,14 +736,14 @@ func testV1FltrAccounts(t *testing.T) {
 	//Add a threshold with filter from above and an inline filter for Account 1010
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TH_Account",
-			FilterIDs: []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
-			MaxHits:   -1,
-			MinSleep:  time.Millisecond,
-			Weight:    90.0,
-			ActionIDs: []string{"LOG"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "TH_Account",
+			FilterIDs:        []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
+			MaxHits:          -1,
+			MinSleep:         time.Millisecond,
+			Weight:           90.0,
+			ActionProfileIDs: []string{"LOG"},
+			Async:            true,
 		},
 	}
 	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
@@ -824,14 +824,14 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	//Add a threshold with filter from above and an inline filter for Account 1010
 	tPrfl := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TH_AccountDinamic",
-			FilterIDs: []string{"*exists:~*accounts.<~*req.Account>:"},
-			MaxHits:   -1,
-			MinSleep:  time.Millisecond,
-			Weight:    90.0,
-			ActionIDs: []string{"LOG"},
-			Async:     true,
+			Tenant:           "cgrates.org",
+			ID:               "TH_AccountDinamic",
+			FilterIDs:        []string{"*exists:~*accounts.<~*req.Account>:"},
+			MaxHits:          -1,
+			MinSleep:         time.Millisecond,
+			Weight:           90.0,
+			ActionProfileIDs: []string{"LOG"},
+			Async:            true,
 		},
 	}
 	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {

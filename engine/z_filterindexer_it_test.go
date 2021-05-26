@@ -274,24 +274,24 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test",
-		FilterIDs: []string{"Filter1"},
-		MaxHits:   12,
-		MinSleep:  0,
-		Blocker:   true,
-		Weight:    1.4,
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "THD_Test",
+		FilterIDs:        []string{"Filter1"},
+		MaxHits:          12,
+		MinSleep:         0,
+		Blocker:          true,
+		Weight:           1.4,
+		ActionProfileIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test2",
-		FilterIDs: []string{"Filter1"},
-		MaxHits:   12,
-		MinSleep:  0,
-		Blocker:   true,
-		Weight:    1.4,
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "THD_Test2",
+		FilterIDs:        []string{"Filter1"},
+		MaxHits:          12,
+		MinSleep:         0,
+		Blocker:          true,
+		Weight:           1.4,
+		ActionProfileIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
@@ -753,14 +753,14 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	th := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test",
-		FilterIDs: []string{"Filter1"},
-		MaxHits:   12,
-		MinSleep:  0,
-		Blocker:   true,
-		Weight:    1.4,
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "THD_Test",
+		FilterIDs:        []string{"Filter1"},
+		MaxHits:          12,
+		MinSleep:         0,
+		Blocker:          true,
+		Weight:           1.4,
+		ActionProfileIDs: []string{},
 	}
 
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
@@ -783,14 +783,14 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	}
 	//Add an InlineFilter
 	th = &ThresholdProfile{ // recreate the profile because if we test on internal
-		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
-		ID:        "THD_Test",
-		FilterIDs: []string{"Filter1", "*string:~*req.Account:1001"},
-		MaxHits:   12,
-		MinSleep:  0,
-		Blocker:   true,
-		Weight:    1.4,
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org", // each update on the original item will update the item from DB
+		ID:               "THD_Test",
+		FilterIDs:        []string{"Filter1", "*string:~*req.Account:1001"},
+		MaxHits:          12,
+		MinSleep:         0,
+		Blocker:          true,
+		Weight:           1.4,
+		ActionProfileIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
@@ -1740,24 +1740,24 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 
 func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	th := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test",
-		FilterIDs: []string{},
-		MaxHits:   12,
-		MinSleep:  0,
-		Blocker:   true,
-		Weight:    1.4,
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "THD_Test",
+		FilterIDs:        []string{},
+		MaxHits:          12,
+		MinSleep:         0,
+		Blocker:          true,
+		Weight:           1.4,
+		ActionProfileIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test2",
-		FilterIDs: []string{},
-		MaxHits:   12,
-		MinSleep:  0,
-		Blocker:   true,
-		Weight:    1.4,
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "THD_Test2",
+		FilterIDs:        []string{},
+		MaxHits:          12,
+		MinSleep:         0,
+		Blocker:          true,
+		Weight:           1.4,
+		ActionProfileIDs: []string{},
 	}
 
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
@@ -1959,22 +1959,22 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 
 func testITTestIndexingThresholds(t *testing.T) {
 	th := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*gt:~*req.Balance:1000"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH1",
+		FilterIDs:        []string{"*string:~*req.Account:1001", "*gt:~*req.Balance:1000"},
+		ActionProfileIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH2",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*gt:~*req.Balance:1000"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH2",
+		FilterIDs:        []string{"*string:~*req.Account:1001", "*gt:~*req.Balance:1000"},
+		ActionProfileIDs: []string{},
 	}
 	th3 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH3",
-		FilterIDs: []string{"*string:~*req.Account:1002", "*lt:~*req.Balance:1000"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH3",
+		FilterIDs:        []string{"*string:~*req.Account:1002", "*lt:~*req.Balance:1000"},
+		ActionProfileIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
@@ -2021,22 +2021,22 @@ func testITTestIndexingThresholds(t *testing.T) {
 
 func testITTestIndexingMetaNot(t *testing.T) {
 	th := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*notstring:~*req.Destination:+49123"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH1",
+		FilterIDs:        []string{"*string:~*req.Account:1001", "*notstring:~*req.Destination:+49123"},
+		ActionProfileIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH2",
-		FilterIDs: []string{"*prefix:~*req.EventName:Name", "*notprefix:~*req.Destination:10"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH2",
+		FilterIDs:        []string{"*prefix:~*req.EventName:Name", "*notprefix:~*req.Destination:10"},
+		ActionProfileIDs: []string{},
 	}
 	th3 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH3",
-		FilterIDs: []string{"*notstring:~*req.Account:1002", "*notstring:~*req.Balance:1000"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH3",
+		FilterIDs:        []string{"*notstring:~*req.Account:1002", "*notstring:~*req.Balance:1000"},
+		ActionProfileIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)
@@ -2461,22 +2461,22 @@ func testITIndexRateProfileIndexes(t *testing.T) {
 
 func testITTestIndexingMetaSuffix(t *testing.T) {
 	th := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*suffix:~*req.Subject:10"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH1",
+		FilterIDs:        []string{"*string:~*req.Account:1001", "*suffix:~*req.Subject:10"},
+		ActionProfileIDs: []string{},
 	}
 	th2 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH2",
-		FilterIDs: []string{"*string:~*req.Destination:1002", "*suffix:~*req.Subject:101"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH2",
+		FilterIDs:        []string{"*string:~*req.Destination:1002", "*suffix:~*req.Subject:101"},
+		ActionProfileIDs: []string{},
 	}
 	th3 := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH3",
-		FilterIDs: []string{"*string:~*req.Destination:1002", "*prefix:~*req.Account:100", "*suffix:~*req.Random:Prfx"},
-		ActionIDs: []string{},
+		Tenant:           "cgrates.org",
+		ID:               "TH3",
+		FilterIDs:        []string{"*string:~*req.Destination:1002", "*prefix:~*req.Account:100", "*suffix:~*req.Random:Prfx"},
+		ActionProfileIDs: []string{},
 	}
 	if err := dataManager.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Error(err)

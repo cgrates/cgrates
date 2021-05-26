@@ -50,36 +50,36 @@ func TestThresholdsCache(t *testing.T) {
 	var dmTH *DataManager
 	tPrfls := []*ThresholdProfile{
 		{
-			Tenant:    "cgrates.org",
-			ID:        "TH_1",
-			FilterIDs: []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-			MaxHits:   12,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "TH_1",
+			FilterIDs:        []string{"FLTR_TH_1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			MaxHits:          12,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
+			Async:            false,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "TH_2",
-			FilterIDs: []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-			MaxHits:   12,
-			MinSleep:  5 * time.Minute,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "TH_2",
+			FilterIDs:        []string{"FLTR_TH_2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			MaxHits:          12,
+			MinSleep:         5 * time.Minute,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
+			Async:            false,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "TH_3",
-			FilterIDs: []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
-			MaxHits:   12,
-			MinSleep:  5 * time.Minute,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "TH_3",
+			FilterIDs:        []string{"FLTR_TH_3", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
+			MaxHits:          12,
+			MinSleep:         5 * time.Minute,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
+			Async:            false,
 		},
 	}
 	ths := Thresholds{
@@ -189,36 +189,36 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	var thServ *ThresholdService
 	var tPrfls = []*ThresholdProfile{
 		{
-			Tenant:    "cgrates.org",
-			ID:        "TH_1",
-			FilterIDs: []string{"FLTR_TH_1", "*ai:*now:2014-07-14T14:35:00Z"},
-			MaxHits:   12,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "TH_1",
+			FilterIDs:        []string{"FLTR_TH_1", "*ai:*now:2014-07-14T14:35:00Z"},
+			MaxHits:          12,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
+			Async:            false,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "TH_2",
-			FilterIDs: []string{"FLTR_TH_2", "*ai:*now:2014-07-14T14:35:00Z"},
-			MaxHits:   12,
-			MinSleep:  5 * time.Minute,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "TH_2",
+			FilterIDs:        []string{"FLTR_TH_2", "*ai:*now:2014-07-14T14:35:00Z"},
+			MaxHits:          12,
+			MinSleep:         5 * time.Minute,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
+			Async:            false,
 		},
 		{
-			Tenant:    "cgrates.org",
-			ID:        "TH_3",
-			FilterIDs: []string{"FLTR_TH_3", "*ai:*now:2014-07-14T14:35:00Z"},
-			MaxHits:   12,
-			MinSleep:  5 * time.Minute,
-			Blocker:   false,
-			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
-			Async:     false,
+			Tenant:           "cgrates.org",
+			ID:               "TH_3",
+			FilterIDs:        []string{"FLTR_TH_3", "*ai:*now:2014-07-14T14:35:00Z"},
+			MaxHits:          12,
+			MinSleep:         5 * time.Minute,
+			Blocker:          false,
+			Weight:           20.0,
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
+			Async:            false,
 		},
 	}
 	ths := Thresholds{
@@ -276,7 +276,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	defaultCfg.ThresholdSCfg().StoreInterval = 0
 	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
 	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
+	thServ = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg}, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -397,7 +397,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 		{
@@ -408,7 +408,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 		{
@@ -419,7 +419,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 	}
@@ -589,7 +589,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 		{
@@ -600,7 +600,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 		{
@@ -611,7 +611,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 	}
@@ -800,7 +800,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			MaxHits:   12,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 		{
@@ -811,7 +811,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 		{
@@ -822,7 +822,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 			MinSleep:  5 * time.Minute,
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1", "ACT_2"},
+			ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 			Async:     false,
 		},
 	}
@@ -969,7 +969,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		MaxHits:   12,
 		Blocker:   false,
 		Weight:    20.0,
-		ActionIDs: []string{"ACT_1", "ACT_2"},
+		ActionProfileIDs: []string{"ACT_1", "ACT_2"},
 		Async:     false,
 	}
 	th := &Threshold{

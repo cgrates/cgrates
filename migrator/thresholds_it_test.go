@@ -221,7 +221,7 @@ func testTrsITFlush(t *testing.T) {
 // 		MinSleep:  5 * time.Minute,
 // 		Blocker:   false,
 // 		Weight:    20.0,
-// 		ActionIDs: []string{},
+// 		ActionProfileIDs: []string{},
 // 		Async:     false,
 // 	}
 
@@ -237,7 +237,7 @@ func testTrsITFlush(t *testing.T) {
 // 		MinSleep:  5 * time.Minute,
 // 		Blocker:   false,
 // 		Weight:    20.0,
-// 		ActionIDs: []string{},
+// 		ActionProfileIDs: []string{},
 // 		Async:     false,
 // 	}
 
@@ -253,7 +253,7 @@ func testTrsITFlush(t *testing.T) {
 // 		MinSleep:  5 * time.Minute,
 // 		Blocker:   false,
 // 		Weight:    20.0,
-// 		ActionIDs: []string{},
+// 		ActionProfileIDs: []string{},
 // 		Async:     false,
 // 	}
 
@@ -269,7 +269,7 @@ func testTrsITFlush(t *testing.T) {
 // 		MinSleep:  5 * time.Minute,
 // 		Blocker:   false,
 // 		Weight:    20.0,
-// 		ActionIDs: []string{},
+// 		ActionProfileIDs: []string{},
 // 		Async:     false,
 // 	}
 

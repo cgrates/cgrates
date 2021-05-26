@@ -38,16 +38,16 @@ type ThresholdProfileWithAPIOpts struct {
 
 // ThresholdProfile the profile for threshold
 type ThresholdProfile struct {
-	Tenant    string
-	ID        string
-	FilterIDs []string
-	MaxHits   int
-	MinHits   int
-	MinSleep  time.Duration
-	Blocker   bool    // blocker flag to stop processing on filters matched
-	Weight    float64 // Weight to sort the thresholds
-	ActionIDs []string
-	Async     bool
+	Tenant           string
+	ID               string
+	FilterIDs        []string
+	MaxHits          int
+	MinHits          int
+	MinSleep         time.Duration
+	Blocker          bool    // blocker flag to stop processing on filters matched
+	Weight           float64 // Weight to sort the thresholds
+	ActionProfileIDs []string
+	Async            bool
 }
 
 // TenantID returns the concatenated key beteen tenant and ID
@@ -77,15 +77,17 @@ func (t *Threshold) TenantID() string {
 	return utils.ConcatenatedKey(t.Tenant, t.ID)
 }
 
-// ProcessEvent processes an ThresholdEvent
-// concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManager) (err error) {
+// processEventWithThreshold processes an ThresholdEvent
+func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actionsConns []string, args *utils.CGREvent, t *Threshold) (err error) {
 	if t.Snooze.After(time.Now()) || // snoozed, not executing actions
 		t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
 		(t.tPrfl.MaxHits != -1 &&
-			t.Hits > t.tPrfl.MaxHits) {
+			t.Hits > t.tPrfl.MaxHits) ||
+		(len(t.tPrfl.ActionProfileIDs) == 1 &&
+			t.tPrfl.ActionProfileIDs[0] == utils.MetaNone) {
 		return
 	}
+
 	// var tntAcnt string
 	// var acnt string
 	// if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
@@ -97,21 +99,21 @@ func (t *Threshold) ProcessEvent(args *ThresholdsArgsProcessEvent, dm *DataManag
 	// 	tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
 	// }
 
-	// for _, actionSetID := range t.tPrfl.ActionIDs {
-	// if tntAcnt != utils.EmptyString {
-	// 	at.accountIDs = utils.NewStringMap(tntAcnt)
-	// }
-	// if t.tPrfl.Async {
-	// 	go func() {
-	// 		if errExec := at.Execute(nil, nil); errExec != nil {
-	// 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-	// 		}
-	// 	}()
-	// } else if errExec := at.Execute(nil, nil); errExec != nil {
-	// 	utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-	// 	err = utils.ErrPartiallyExecuted
-	// }
-	// }
+	var reply string
+	if !t.tPrfl.Async {
+		return connMgr.Call(ctx, actionsConns, utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
+			CGREvent:         args,
+			ActionProfileIDs: t.tPrfl.ActionProfileIDs,
+		}, &reply)
+	}
+	go func() {
+		if errExec := connMgr.Call(context.Background(), actionsConns, utils.ActionSv1ExecuteActions, &utils.ArgActionSv1ScheduleActions{
+			CGREvent:         args,
+			ActionProfileIDs: t.tPrfl.ActionProfileIDs,
+		}, &reply); errExec != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions for threshold: %s, error: %s", t.TenantID(), errExec.Error()))
+		}
+	}()
 	return
 }
 
@@ -124,10 +126,12 @@ func (ts Thresholds) Sort() {
 }
 
 // NewThresholdService the constructor for ThresoldS service
-func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) (tS *ThresholdService) {
-	return &ThresholdService{dm: dm,
+func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS, connMgr *ConnManager) (tS *ThresholdService) {
+	return &ThresholdService{
+		dm:          dm,
 		cgrcfg:      cgrcfg,
 		filterS:     filterS,
+		connMgr:     connMgr,
 		stopBackup:  make(chan struct{}),
 		loopStoped:  make(chan struct{}),
 		storedTdIDs: make(utils.StringSet),
@@ -139,6 +143,7 @@ type ThresholdService struct {
 	dm          *DataManager
 	cgrcfg      *config.CGRConfig
 	filterS     *FilterS
+	connMgr     *ConnManager
 	stopBackup  chan struct{}
 	loopStoped  chan struct{}
 	storedTdIDs utils.StringSet // keep a record of stats which need saving, map[statsTenantID]bool
@@ -322,8 +327,8 @@ func (tS *ThresholdService) processEvent(ctx *context.Context, tnt string, args 
 	for _, t := range matchTS {
 		tIDs = append(tIDs, t.ID)
 		t.Hits++
-		err = t.ProcessEvent(args, tS.dm)
-		if err != nil {
+		if err = processEventWithThreshold(ctx, tS.connMgr,
+			tS.cgrcfg.ThresholdSCfg().ActionSConns, args.CGREvent, t); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
 					t.TenantID(), utils.ConcatenatedKey(tnt, args.CGREvent.ID), err.Error()))

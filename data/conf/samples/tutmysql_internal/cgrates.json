@@ -101,7 +101,7 @@
 					{"tag": "MinHits", "path": "MinHits", "type": "*variable", "value": "~5"},
 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~6"},
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~7"},
-					{"tag": "ActionIDs", "path": "ActionIDs", "type": "*variable", "value": "~8"},
+					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~8"},
 					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~9"},
 				],
 			},
