@@ -529,13 +529,13 @@ func TestThresholdsProcessEvent(t *testing.T) {
 	}
 	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+		if err = dmTH.SetThresholdProfile(context.Background(),th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range tPrfls {
-		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+		if temptTh, err := dmTH.GetThresholdProfile(context.Background(),th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -543,13 +543,13 @@ func TestThresholdsProcessEvent(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th); err != nil {
+		if err = dmTH.SetThreshold(context.Background(),th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range ths {
-		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+		if temptTh, err := dmTH.GetThreshold(context.Background(),th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -721,13 +721,13 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 	}
 	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+		if err = dmTH.SetThresholdProfile(context.Background(),th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range tPrfls {
-		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+		if temptTh, err := dmTH.GetThresholdProfile(context.Background(),th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -735,7 +735,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th); err != nil {
+		if err = dmTH.SetThreshold(context.Background(),th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -934,13 +934,13 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	dmTH.SetFilter(context.TODO(), fltrTh3, true)
 
 	for _, th := range tPrfls {
-		if err = dmTH.SetThresholdProfile(th, true); err != nil {
+		if err = dmTH.SetThresholdProfile(context.Background(),th, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range tPrfls {
-		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
+		if temptTh, err := dmTH.GetThresholdProfile(context.Background(),th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -948,13 +948,13 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		}
 	}
 	for _, th := range ths {
-		if err = dmTH.SetThreshold(th); err != nil {
+		if err = dmTH.SetThreshold(context.Background(),th); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//Test each threshold profile from cache
 	for _, th := range ths {
-		if temptTh, err := dmTH.GetThreshold(th.Tenant,
+		if temptTh, err := dmTH.GetThreshold(context.Background(),th.Tenant,
 			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
@@ -981,19 +981,19 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 		ThresholdIDs: []string{"TH_1", "TH_2", "TH_3", "TH_4"},
 		CGREvent:     argsGetThresholds[0].CGREvent,
 	}
-	if err = dmTH.SetThresholdProfile(thPrf, true); err != nil {
+	if err = dmTH.SetThresholdProfile(context.Background(),thPrf, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if temptTh, err := dmTH.GetThresholdProfile(thPrf.Tenant,
+	if temptTh, err := dmTH.GetThresholdProfile(context.Background(),thPrf.Tenant,
 		thPrf.ID, true, false, utils.NonTransactional); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(thPrf, temptTh) {
 		t.Errorf("Expecting: %+v, received: %+v", th, temptTh)
 	}
-	if err = dmTH.SetThreshold(th); err != nil {
+	if err = dmTH.SetThreshold(context.Background(),th); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if temptTh, err := dmTH.GetThreshold(th.Tenant,
+	if temptTh, err := dmTH.GetThreshold(context.Background(),th.Tenant,
 		th.ID, true, false, utils.NonTransactional); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(th, temptTh) {
@@ -1040,30 +1040,30 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 		ID:     thp.ID,
 	}
 
-	if err := dm.SetThresholdProfile(thp, true); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetThreshold(context.Background(), thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.RemoveThreshold(th.Tenant, th.ID, utils.NonTransactional); err != nil {
+	if err := dm.RemoveThreshold(context.Background(), th.Tenant, th.ID, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	}
-	if err := dm.SetThresholdProfile(thp, true); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetThreshold(context.Background(), thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.SetThreshold(th); err != nil {
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
 		t.Fatal(err)
 	}
 	thp = &ThresholdProfile{
@@ -1072,17 +1072,17 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 		MaxHits: 1,
 	}
 
-	if err := dm.SetThresholdProfile(thp, true); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetThreshold(context.Background(), thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.SetThreshold(th); err != nil {
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
 		t.Fatal(err)
 	}
 	thp = &ThresholdProfile{
@@ -1092,17 +1092,17 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 		MinHits: 1,
 	}
 
-	if err := dm.SetThresholdProfile(thp, true); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetThreshold(context.Background(), thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.SetThreshold(th); err != nil {
+	if err := dm.SetThreshold(context.Background(), th); err != nil {
 		t.Fatal(err)
 	}
 	thp = &ThresholdProfile{
@@ -1113,19 +1113,19 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 		MinSleep: 1,
 	}
 
-	if err := dm.SetThresholdProfile(thp, true); err != nil {
+	if err := dm.SetThresholdProfile(context.Background(), thp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetThreshold(context.Background(), thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
-	if err := dm.RemoveThresholdProfile(thp.Tenant, thp.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveThresholdProfile(context.Background(), thp.Tenant, thp.ID, utils.NonTransactional, true); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
+	if _, err := dm.GetThreshold(context.Background(), thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
 }

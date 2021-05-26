@@ -235,7 +235,7 @@ func TestMatchingStatQueuesForEvent(t *testing.T) {
 		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(context.TODO(),statQueue)
+		dmSTS.SetStatQueue(context.TODO(), statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -466,7 +466,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(context.TODO(),statQueue)
+		dmSTS.SetStatQueue(context.TODO(), statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -698,7 +698,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(context.TODO(),statQueue)
+		dmSTS.SetStatQueue(context.TODO(), statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -930,7 +930,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		dmSTS.SetStatQueueProfile(context.TODO(), statQueueProfile, true)
 	}
 	for _, statQueue := range stqs {
-		dmSTS.SetStatQueue(context.TODO(),statQueue)
+		dmSTS.SetStatQueue(context.TODO(), statQueue)
 	}
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
@@ -961,7 +961,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	if err := dmSTS.SetStatQueueProfile(context.TODO(), sqPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := dmSTS.SetStatQueue(context.TODO(),sq); err != nil {
+	if err := dmSTS.SetStatQueue(context.TODO(), sq); err != nil {
 		t.Error(err)
 	}
 	if tempStat, err := dmSTS.GetStatQueueProfile(context.TODO(), sqPrf.Tenant,
@@ -1017,29 +1017,29 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm2},
 	}
 
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.RemoveStatQueue(sqp.Tenant, sqp.ID, utils.NonTransactional); err != nil {
+	if err := dm.RemoveStatQueue(context.Background(), sqp.Tenant, sqp.ID, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	}
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1051,7 +1051,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		Metrics:     []*MetricWithFilters{{MetricID: utils.MetaTCC, FilterIDs: []string{"*string:~*req.Account:1001"}}},
 	}
 
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1065,13 +1065,13 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		SQItems:   []SQItem{{EventID: "ev1"}},
 		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm3},
 	}
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1085,7 +1085,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		SQMetrics: map[string]StatMetric{utils.MetaTCC: sqm2},
 	}
 	delete(sq.SQMetrics, utils.MetaTCD)
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1098,16 +1098,16 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		MinItems:    5,
 	}
 
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1121,17 +1121,17 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		TTL:         10,
 	}
 
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1145,17 +1145,17 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		MinItems:    5,
 	}
 
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.SetStatQueue(sq); err != nil {
+	if err := dm.SetStatQueue(context.Background(), sq); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1169,20 +1169,20 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		MinItems:    5,
 	}
 
-	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, true); err != nil {
 		t.Fatal(err)
 	}
 
-	if th, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
+	if th, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(expTh, th) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.RemoveStatQueueProfile(sqp.Tenant, sqp.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveStatQueueProfile(context.Background(), sqp.Tenant, sqp.ID, utils.NonTransactional, true); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
+	if _, err := dm.GetStatQueue(context.Background(), sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Fatal(err)
 	}
 }
