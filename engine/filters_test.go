@@ -1273,7 +1273,6 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	attrPrf1 := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*opts.*context:con1|con2|con3"},
 		Attributes: []*Attribute{
 			{
@@ -1290,7 +1289,6 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	attrPrf2 := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf2",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*string:~*resources.RES_GRP1.Available:4"},
 		Attributes: []*Attribute{
 			{
@@ -1306,7 +1304,6 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	attrPrf3 := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf3",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*prefix:~*req.Destination:1007", "*string:~*req.Account:1001", "*string:~*opts.TotalCost:~*stats.STS_PRF1.*tcc"},
 		Attributes: []*Attribute{
 			{
@@ -1322,7 +1319,6 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	attrPrf4 := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf4",
-		Contexts:  []string{utils.MetaAny},
 		FilterIDs: []string{"*prefix:~*req.Destination:1007", "*prefix:~*accounts.RES_GRP1.Available:10"},
 		Attributes: []*Attribute{
 			{
@@ -1335,13 +1331,13 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 		Weight:  20,
 	}
 
-	if err := dm.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dm.SetAttributeProfile(context.Background(), attrPrf1, true); err != nil {
 		t.Error(err)
-	} else if err := dm.SetAttributeProfile(attrPrf2, true); err != nil {
+	} else if err := dm.SetAttributeProfile(context.Background(), attrPrf2, true); err != nil {
 		t.Error(err)
-	} else if err := dm.SetAttributeProfile(attrPrf3, true); err != nil {
+	} else if err := dm.SetAttributeProfile(context.Background(), attrPrf3, true); err != nil {
 		t.Error(err)
-	} else if err := dm.SetAttributeProfile(attrPrf4, true); err != nil {
+	} else if err := dm.SetAttributeProfile(context.Background(), attrPrf4, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1364,8 +1360,8 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			"AttrPrf1": {},
 		},
 	}
-	if fltrIDx, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes,
-		"cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+	if fltrIDx, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes,
+		"cgrates.org", utils.EmptyString, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
