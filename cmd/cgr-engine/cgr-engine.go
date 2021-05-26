@@ -52,7 +52,7 @@ import (
 var (
 	cgrEngineFlags    = flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
 	cfgPath           = cgrEngineFlags.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path.")
-	version           = cgrEngineFlags.Bool(utils.ElsVersionLow, false, "Prints the application version.")
+	version           = cgrEngineFlags.Bool(utils.VersionCgr, false, "Prints the application version.")
 	checkConfig       = cgrEngineFlags.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine")
 	pidFile           = cgrEngineFlags.String(utils.PidCgr, utils.EmptyString, "Write pid file")
 	httpPprofPath     = cgrEngineFlags.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling")
