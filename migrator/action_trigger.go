@@ -66,7 +66,7 @@ func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 		if acts == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetActionTriggers(idg, acts, utils.NonTransactional); err != nil {
+		if err := m.dmOut.DataManager().SetActionTriggers(idg, acts); err != nil {
 			return err
 		}
 		m.stats[utils.ActionTriggers]++
@@ -148,7 +148,7 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 		}
 		if !m.dryRun {
 			//set action triggers
-			if err = m.dmOut.DataManager().SetActionTriggers(v2[0].ID, v2, utils.NonTransactional); err != nil {
+			if err = m.dmOut.DataManager().SetActionTriggers(v2[0].ID, v2); err != nil {
 				return
 			}
 		}

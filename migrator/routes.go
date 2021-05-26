@@ -129,7 +129,7 @@ func (m *Migrator) migrateCurrentRouteProfile() (err error) {
 		if err := m.dmOut.DataManager().SetRouteProfile(rPrf, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveRouteProfile(tntID[0], tntID[1], utils.NonTransactional, true); err != nil {
+		if err := m.dmIN.DataManager().RemoveRouteProfile(tntID[0], tntID[1], true); err != nil {
 			return err
 		}
 		m.stats[utils.Routes]++

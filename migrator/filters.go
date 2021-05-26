@@ -50,7 +50,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 			return
 		}
 		if err = m.dmIN.DataManager().RemoveFilter(tntID[0], tntID[1],
-			utils.NonTransactional, true); err != nil {
+			true); err != nil {
 			return
 		}
 		m.stats[utils.RQF]++

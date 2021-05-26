@@ -445,7 +445,7 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 			EndTime:   "15:00:00"}}
 	rp := &RatingPlan{Id: "test"}
 	rp.AddRateInterval("NAT", i)
-	dm.SetRatingPlan(rp, utils.NonTransactional)
+	dm.SetRatingPlan(rp)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		dm.GetRatingPlan(rp.Id, true, utils.NonTransactional)

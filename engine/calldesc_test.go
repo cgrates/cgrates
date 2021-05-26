@@ -116,8 +116,8 @@ func populateDB() {
 			}},
 	}
 	if dm.dataDB != nil {
-		dm.SetActions("TEST_ACTIONS", ats, utils.NonTransactional)
-		dm.SetActions("TEST_ACTIONS_ORDER", ats1, utils.NonTransactional)
+		dm.SetActions("TEST_ACTIONS", ats)
+		dm.SetActions("TEST_ACTIONS_ORDER", ats1)
 		dm.SetAccount(broker)
 		dm.SetAccount(minu)
 		dm.SetAccount(minitsboy)
@@ -1777,7 +1777,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		},
 	}
 	for _, rpl := range []*RatingPlan{rpSubj, rpDflt} {
-		dm.SetRatingPlan(rpl, utils.NonTransactional)
+		dm.SetRatingPlan(rpl)
 	}
 	rpfTCDDBSWF := &RatingProfile{Id: "*out:TCDDBSWF:call:SubjTCDDBSWF",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
@@ -1792,7 +1792,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		}},
 	}
 	for _, rpf := range []*RatingProfile{rpfTCDDBSWF, rpfAny} {
-		dm.SetRatingProfile(rpf, utils.NonTransactional)
+		dm.SetRatingProfile(rpf)
 	}
 	cd1 := &CallDescriptor{ // test the cost for subject within balance setup
 		Category:    "call",

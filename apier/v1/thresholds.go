@@ -158,7 +158,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveThresholdProfile(tnt, args.ID, utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveThresholdProfile(tnt, args.ID,  true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile

@@ -1065,7 +1065,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.RemoveStatQueue(sqp.Tenant, sqp.ID, utils.NonTransactional); err != nil {
+	if err := dm.RemoveStatQueue(sqp.Tenant, sqp.ID); err != nil {
 		t.Fatal(err)
 	}
 	if err := dm.SetStatQueueProfile(sqp, true); err != nil {
@@ -1217,7 +1217,7 @@ func TestStatQueuesUpdateStatQueue(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expTh), utils.ToJSON(th))
 	}
 
-	if err := dm.RemoveStatQueueProfile(sqp.Tenant, sqp.ID, utils.NonTransactional, true); err != nil {
+	if err := dm.RemoveStatQueueProfile(sqp.Tenant, sqp.ID, true); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := dm.GetStatQueue(sqp.Tenant, sqp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {

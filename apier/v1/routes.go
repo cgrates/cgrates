@@ -102,7 +102,7 @@ func (apierSv1 *APIerSv1) RemoveRouteProfile(args *utils.TenantIDWithAPIOpts, re
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveRouteProfile(tnt, args.ID, utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveRouteProfile(tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheRouteProfiles and store it in database

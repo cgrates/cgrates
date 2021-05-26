@@ -100,7 +100,7 @@ func (apierSv1 *APIerSv1) RemoveStatQueueProfile(args *utils.TenantIDWithAPIOpts
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveStatQueueProfile(tnt, args.ID, utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveStatQueueProfile(tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile

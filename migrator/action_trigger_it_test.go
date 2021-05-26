@@ -235,7 +235,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: 1, received: %+v", actTrgMigrator.stats[utils.ActionTriggers])
 		}
 	case utils.Move:
-		if err := actTrgMigrator.dmIN.DataManager().SetActionTriggers((*v1actTrg)[0].Id, actTrg, utils.NonTransactional); err != nil {
+		if err := actTrgMigrator.dmIN.DataManager().SetActionTriggers((*v1actTrg)[0].Id, actTrg); err != nil {
 			t.Error("Error when setting ActionTriggers ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()

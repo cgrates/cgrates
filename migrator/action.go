@@ -54,7 +54,7 @@ func (m *Migrator) migrateCurrentActions() (err error) {
 		if acts == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetActions(idg, acts, utils.NonTransactional); err != nil {
+		if err := m.dmOut.DataManager().SetActions(idg, acts); err != nil {
 			return err
 		}
 		m.stats[utils.Actions]++
@@ -116,7 +116,7 @@ func (m *Migrator) migrateActions() (err error) {
 			break
 		}
 		if !m.dryRun {
-			if err = m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+			if err = m.dmOut.DataManager().SetActions(acts[0].Id, acts); err != nil {
 				return
 			}
 		}

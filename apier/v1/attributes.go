@@ -132,8 +132,7 @@ func (apierSv1 *APIerSv1) RemoveAttributeProfile(arg *utils.TenantIDWithAPIOpts,
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveAttributeProfile(tnt, arg.ID,
-		utils.NonTransactional, true); err != nil {
+	if err := apierSv1.DataManager.RemoveAttributeProfile(tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
