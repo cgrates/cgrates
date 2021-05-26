@@ -123,7 +123,17 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 				continue
 			}
 			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+			for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+				if strings.HasPrefix(flt.Element, notIndex) {
+					continue
+				}
+			}
 			for _, fldVal := range flt.Values {
+				for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+					if strings.HasPrefix(fldVal, notIndex) {
+						continue
+					}
+				}
 				if isDyn {
 					if !strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
 						indxIDs = append(indxIDs, utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal))
@@ -273,7 +283,17 @@ func composeCacheArgsForFilter(dm *engine.DataManager, fltr *engine.Filter, tnt,
 			continue
 		}
 		isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+		for _, notIndex := range utils.ToNotBeIndexed { // element with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+			if strings.HasPrefix(flt.Element, notIndex) {
+				continue
+			}
+		}
 		for _, fldVal := range flt.Values {
+			for _, notIndex := range utils.ToNotBeIndexed { // value with ~*stats, ~*resources, ~*accounts, ~*libphonenumber to not be indexed
+				if strings.HasPrefix(fldVal, notIndex) {
+					continue
+				}
+			}
 			if isDyn {
 				if !strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
 					indxIDs = append(indxIDs, utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal))
