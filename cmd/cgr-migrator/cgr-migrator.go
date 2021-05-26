@@ -47,7 +47,7 @@ var (
 
 	exec = cgrMigratorFlags.String(utils.ExecCgr, utils.EmptyString, "fire up automatic migration "+
 		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*filters|*stordb|*datadb>")
-	version = cgrMigratorFlags.Bool(utils.ElsVersionLow, false, "prints the application version")
+	version = cgrMigratorFlags.Bool(utils.VersionCgr, false, "prints the application version")
 
 	inDataDBType = cgrMigratorFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
 		"the type of the DataDB Database <*redis|*mongo>")

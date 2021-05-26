@@ -37,7 +37,7 @@ import (
 var (
 	cgrConsoleFlags = flag.NewFlagSet(utils.CgrConsole, flag.ContinueOnError)
 	historyFN       = os.Getenv(utils.HomeCgr) + utils.HistoryCgr
-	version         = cgrConsoleFlags.Bool(utils.ElsVersionLow, false, "Prints the application version.")
+	version         = cgrConsoleFlags.Bool(utils.VersionCgr, false, "Prints the application version.")
 	verbose         = cgrConsoleFlags.Bool(utils.VerboseCgr, false, "Show extra info about command execution.")
 	server          = cgrConsoleFlags.String(utils.MailerServerCfg, "127.0.0.1:2012", "server address host:port")
 	rpcEncoding     = cgrConsoleFlags.String(utils.RpcEncodingCgr, utils.MetaJSON, "RPC encoding used <*gob|*json>")

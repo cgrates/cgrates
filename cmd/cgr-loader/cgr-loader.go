@@ -88,7 +88,7 @@ var (
 		"The tariff plan ID from the database")
 	dataPath = cgrLoaderFlags.String(utils.PathCfg, dfltCfg.LoaderCgrCfg().DataPath,
 		"The path to folder containing the data files")
-	version = cgrLoaderFlags.Bool(utils.ElsVersionLow, false,
+	version = cgrLoaderFlags.Bool(utils.VersionCgr, false,
 		"Prints the application version.")
 	verbose = cgrLoaderFlags.Bool(utils.VerboseCgr, false,
 		"Enable detailed verbose logging output")
