@@ -431,7 +431,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName": "AddStatEvent",
-				"AcdMetric": "11",
+				"AcdMetric": "11000000000",
 			},
 			APIOpts: map[string]interface{}{},
 		},
@@ -509,7 +509,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 			ID:     "testAttributeSProcessEventWithStat",
 			Event: map[string]interface{}{
 				"EventName":  "AddFullStats",
-				"AllMetrics": "{\"*acd\":11,\"*asr\":100,\"*tcd\":22}",
+				"AllMetrics": "{\"*acd\":11000000000,\"*asr\":100,\"*tcd\":22000000000}",
 			},
 			APIOpts: map[string]interface{}{},
 		},

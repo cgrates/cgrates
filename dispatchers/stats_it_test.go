@@ -308,7 +308,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	}
 	expectedMetrics := map[string]float64{
 		utils.MetaTCC: 133,
-		utils.MetaTCD: 180,
+		utils.MetaTCD: 180 * 1e9,
 	}
 
 	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueFloatMetrics,
