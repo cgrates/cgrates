@@ -122,6 +122,7 @@ func TestCallCache(t *testing.T) {
 	cn := engine.NewConnManager(config.CgrConfig(), map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): ch,
 	})
+	cn.Reload()
 	apv1 := &APIerSv1{
 		ConnMgr: cn,
 		Config:  config.CgrConfig(),
