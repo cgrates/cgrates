@@ -78,8 +78,8 @@ func (apierSv1 *APIerSv1) CallCache(cacheopt string, tnt, cacheID, itemID string
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl utils.AttrReloadCacheWithAPIOpts, err error) {
-	rpl = utils.AttrReloadCacheWithAPIOpts{
+func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterIDs *[]string, contexts []string, opts map[string]interface{}) (rpl *utils.AttrReloadCacheWithAPIOpts, err error) {
+	rpl = &utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{
 			utils.CacheInstanceToArg[cacheID]: {itemID},
@@ -160,7 +160,7 @@ func (apierSv1 *APIerSv1) composeArgsReload(tnt, cacheID, itemID string, filterI
 func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheID string,
 	itemIDs []string, opts map[string]interface{}) (err error) {
 	var reply, method string
-	var args interface{} = utils.AttrReloadCacheWithAPIOpts{
+	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
 		Tenant: tnt,
 		ArgsCache: map[string][]string{
 			utils.CacheInstanceToArg[cacheID]: itemIDs,
@@ -191,7 +191,7 @@ func (apierSv1 *APIerSv1) callCacheForRemoveIndexes(cacheopt string, tnt, cacheI
 func (apierSv1 *APIerSv1) callCacheForComputeIndexes(cacheopt, tnt string,
 	cacheItems map[string][]string, opts map[string]interface{}) (err error) {
 	var reply, method string
-	var args interface{} = utils.AttrReloadCacheWithAPIOpts{
+	var args interface{} = &utils.AttrReloadCacheWithAPIOpts{
 		Tenant:    tnt,
 		ArgsCache: cacheItems,
 		APIOpts:   opts,
@@ -233,7 +233,7 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
-		args = utils.AttrReloadCacheWithAPIOpts{
+		args = &utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
@@ -242,7 +242,7 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 		}
 	case utils.MetaLoad:
 		method = utils.CacheSv1LoadCache
-		args = utils.AttrReloadCacheWithAPIOpts{
+		args = &utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
@@ -251,7 +251,7 @@ func (apierSv1 *APIerSv1) callCacheMultiple(cacheopt, tnt, cacheID string, itemI
 		}
 	case utils.MetaRemove:
 		method = utils.CacheSv1RemoveItems
-		args = utils.AttrReloadCacheWithAPIOpts{
+		args = &utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,

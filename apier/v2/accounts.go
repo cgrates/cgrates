@@ -218,7 +218,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 				return 0, err
 			}
 			return 0, apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
+				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{utils.AccountActionPlanIDs: {accID}, utils.ActionPlanIDs: apIDs},
 				}, reply)
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)

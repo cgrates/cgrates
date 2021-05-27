@@ -784,7 +784,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
+				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{
 						utils.AccountActionPlanIDs: {id},
 						utils.ActionPlanIDs:        {accountAction.ActionPlanId},
@@ -893,7 +893,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
+				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{
 						utils.ActionTriggerIDs: {accountAction.ActionTriggersId},
 					},
@@ -1011,7 +1011,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 			var reply string
 			if err := connMgr.Call(tpr.cacheConns, nil,
-				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithAPIOpts{
+				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
 					ArgsCache: map[string][]string{
 						utils.ActionIDs: {k},
 					},
@@ -2331,7 +2331,7 @@ func CallCache(connMgr *ConnManager, cacheConns []string, caching string, args m
 		}
 	}
 	var method, reply string
-	var cacheArgs interface{} = utils.AttrReloadCacheWithAPIOpts{
+	var cacheArgs interface{} = &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:   opts,
 		ArgsCache: args,
 	}

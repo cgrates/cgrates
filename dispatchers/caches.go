@@ -124,7 +124,7 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 }
 
 // CacheSv1RemoveItems removes the Item with ID from cache
-func (dS *DispatcherService) CacheSv1RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
+func (dS *DispatcherService) CacheSv1RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -255,7 +255,7 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithAPI
 }
 
 // CacheSv1ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant
@@ -273,7 +273,7 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithA
 }
 
 // CacheSv1LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
 		tnt = args.Tenant

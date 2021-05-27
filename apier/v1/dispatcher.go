@@ -622,7 +622,7 @@ func (dS *DispatcherCacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts
 }
 
 // RemoveItems removes the Item with ID from cache
-func (dS *DispatcherCacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
+func (dS *DispatcherCacheSv1) RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
 	return dS.dS.CacheSv1RemoveItems(args, reply)
 }
@@ -664,12 +664,12 @@ func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 
 // ReloadCache reloads cache from DB for a prefix or completely
 func (dS *DispatcherCacheSv1) ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return dS.dS.CacheSv1ReloadCache(*args, reply)
+	return dS.dS.CacheSv1ReloadCache(args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
 func (dS *DispatcherCacheSv1) LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return dS.dS.CacheSv1LoadCache(*args, reply)
+	return dS.dS.CacheSv1LoadCache(args, reply)
 }
 
 // ReplicateSet replicate an item

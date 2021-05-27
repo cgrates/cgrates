@@ -3172,7 +3172,7 @@ func TestStoreLoadedDataAttributes(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
 
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3223,7 +3223,7 @@ func TestStoreLoadedDataResources(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3279,7 +3279,7 @@ func TestStoreLoadedDataFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3330,7 +3330,7 @@ func TestStoreLoadedDataStats(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3386,7 +3386,7 @@ func TestStoreLoadedDataThresholds(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3442,7 +3442,7 @@ func TestStoreLoadedDataRoutes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3493,7 +3493,7 @@ func TestStoreLoadedDataChargers(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3544,7 +3544,7 @@ func TestStoreLoadedDataDispatchers(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{
@@ -3595,7 +3595,7 @@ func TestStoreLoadedDataDispatcherHosts(t *testing.T) {
 	engine.Cache.Clear(nil)
 	data := engine.NewInternalDB(nil, nil, false)
 	cfg := config.NewDefaultCGRConfig()
-	argExpect := utils.AttrReloadCacheWithAPIOpts{
+	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: nil,
 		Tenant:  "",
 		ArgsCache: map[string][]string{

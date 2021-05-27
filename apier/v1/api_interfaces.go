@@ -120,7 +120,7 @@ type CacheSv1Interface interface {
 	HasItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *bool) error
 	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithAPIOpts, reply *time.Time) error
 	RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts, reply *string) error
-	RemoveItems(args utils.AttrReloadCacheWithAPIOpts, reply *string) error
+	RemoveItems(args *utils.AttrReloadCacheWithAPIOpts, reply *string) error
 	Clear(cacheIDs *utils.AttrCacheIDsWithAPIOpts, reply *string) error
 	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithAPIOpts, rply *map[string]*ltcache.CacheStats) error
 	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) error

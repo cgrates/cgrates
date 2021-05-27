@@ -60,7 +60,7 @@ func (chSv1 *CacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 }
 
 // RemoveItems removes the Items with ID from cache
-func (chSv1 *CacheSv1) RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItems(args, reply)
 }
@@ -102,12 +102,12 @@ func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 
 // ReloadCache reloads cache from DB for a prefix or completely
 func (chSv1 *CacheSv1) ReloadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return chSv1.cacheS.V1ReloadCache(*args, reply)
+	return chSv1.cacheS.V1ReloadCache(args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
 func (chSv1 *CacheSv1) LoadCache(args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return chSv1.cacheS.V1LoadCache(*args, reply)
+	return chSv1.cacheS.V1LoadCache(args, reply)
 }
 
 // Ping used to determinate if component is active
