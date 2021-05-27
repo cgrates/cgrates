@@ -96,7 +96,7 @@ type APIAttributeProfile struct {
 	Weight     float64
 }
 
-type AttributeWithAPIOpts struct {
+type APIAttributeProfileWithAPIOpts struct {
 	*APIAttributeProfile
 	APIOpts map[string]interface{}
 }

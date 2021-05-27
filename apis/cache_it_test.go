@@ -120,7 +120,7 @@ func testCacheSRpcConn(t *testing.T) {
 
 //Set an attribute profile and rate profile to test cache's apis
 func testCacheSSetAttributeProfile(t *testing.T) {
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
@@ -435,7 +435,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 }
 
 func testCacheSSetMoreAttributeProfiles(t *testing.T) {
-	attrPrf1 := &engine.AttributeWithAPIOpts{
+	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -449,7 +449,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	attrPrf2 := &engine.AttributeWithAPIOpts{
+	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
@@ -463,7 +463,7 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	attrPrf3 := &engine.AttributeWithAPIOpts{
+	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",

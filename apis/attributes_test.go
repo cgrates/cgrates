@@ -40,7 +40,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			ID: "TestGetAttributeProfile",
 			Attributes: []*engine.ExternalAttribute{
@@ -110,7 +110,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Attributes: []*engine.ExternalAttribute{
 				{
@@ -223,7 +223,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			ID: "TestGetAttributeProfile",
 			Attributes: []*engine.ExternalAttribute{
@@ -456,7 +456,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 		dm:  dm,
 		cfg: cfg,
 	}
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TestGetAttributeProfile",

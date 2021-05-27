@@ -138,7 +138,7 @@ func testAttributeSetFltr1(t *testing.T) {
 
 func testAttributeSetProfile(t *testing.T) {
 	var result string
-	alsPrf := &engine.AttributeWithAPIOpts{
+	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",

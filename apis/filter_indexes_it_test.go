@@ -163,7 +163,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set an AttributeProfile with our filter and check the indexes
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
@@ -321,7 +321,7 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our Attribute with our filters
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
@@ -428,7 +428,7 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 
 func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 	//we will more attributes with different context for matching filters
-	attrPrf2 := &engine.AttributeWithAPIOpts{
+	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_new_fltr",
@@ -442,7 +442,7 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 			},
 		},
 	}
-	attrPrf3 := &engine.AttributeWithAPIOpts{
+	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTE3",

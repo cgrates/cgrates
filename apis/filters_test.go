@@ -19,9 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
 	"testing"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -739,4 +742,332 @@ func TestApisRemoveFilterRemoveFilterError(t *testing.T) {
 	}
 
 	engine.Cache = cacheInit
+}
+
+type mockClientConn struct {
+	calls map[string]func(ctx *context.Context, args interface{}, reply interface{}) error
+}
+
+func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args interface{}, reply interface{}) (err error) {
+	if call, has := mCC.calls[serviceMethod]; !has {
+		return utils.ErrUnsupporteServiceMethod
+	} else {
+		return call(ctx, args, reply)
+	}
+}
+
+func TestFiltersSetFilterReloadCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	expArgs := &utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
+		Tenant: "cgrates.org",
+		ArgsCache: map[string][]string{
+			utils.FilterIDs: {"cgrates.org:FLTR_ID"},
+		},
+	}
+	ccM := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: cM,
+	}
+	arg := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID: "FLTR_ID",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
+	}
+	var reply string
+
+	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			FilterIDs: []string{"FLTR_ID"},
+			ID:        "ATTR_ID",
+			Weight:    10,
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  "*req.Account",
+					Value: "1003",
+					Type:  utils.MetaConstant,
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetAttributeProfile(context.Background(), attrPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			ID:        "THD_ID",
+			FilterIDs: []string{"FLTR_ID"},
+			MaxHits:   10,
+			Weight:    10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	rsPrf := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			ID:        "RES_ID",
+			FilterIDs: []string{"FLTR_ID"},
+			Weight:    10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetResourceProfile(context.Background(), rsPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			ID:        "SQ_ID",
+			FilterIDs: []string{"FLTR_ID"},
+			Weight:    10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetStatQueueProfile(context.Background(), sqPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	arg = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID: "FLTR_ID",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
+	}
+	expArgs = &utils.AttrReloadCacheWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaReload,
+		},
+		Tenant: "cgrates.org",
+		ArgsCache: map[string][]string{
+			utils.FilterIDs:               {"cgrates.org:FLTR_ID"},
+			utils.AttributeFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.ResourceFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.StatFilterIndexIDs:      {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		},
+	}
+
+	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
+		t.Error(err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestFiltersSetFilterClearCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	expArgs := &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaClear,
+		},
+		Tenant:   "cgrates.org",
+		CacheIDs: []string{utils.CacheFilters},
+	}
+	ccM := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CacheSv1Clear: func(ctx *context.Context, args, reply interface{}) error {
+				sort.Strings(args.(*utils.AttrCacheIDsWithAPIOpts).CacheIDs)
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg:     cfg,
+		dm:      dm,
+		connMgr: cM,
+	}
+	arg := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID: "FLTR_ID",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaClear,
+		},
+	}
+	var reply string
+
+	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	}
+
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &engine.APIAttributeProfile{
+			FilterIDs: []string{"FLTR_ID"},
+			ID:        "ATTR_ID",
+			Weight:    10,
+			Attributes: []*engine.ExternalAttribute{
+				{
+					Path:  "*req.Account",
+					Value: "1003",
+					Type:  utils.MetaConstant,
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetAttributeProfile(context.Background(), attrPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			ID:        "THD_ID",
+			FilterIDs: []string{"FLTR_ID"},
+			MaxHits:   10,
+			Weight:    10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	rsPrf := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			ID:        "RES_ID",
+			FilterIDs: []string{"FLTR_ID"},
+			Weight:    10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetResourceProfile(context.Background(), rsPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			ID:        "SQ_ID",
+			FilterIDs: []string{"FLTR_ID"},
+			Weight:    10,
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
+
+	if err := adms.SetStatQueueProfile(context.Background(), sqPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	arg = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID: "FLTR_ID",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaClear,
+		},
+	}
+	expArgs = &utils.AttrCacheIDsWithAPIOpts{
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaClear,
+		},
+		Tenant: "cgrates.org",
+		CacheIDs: []string{utils.CacheAttributeFilterIndexes, utils.CacheThresholdFilterIndexes,
+			utils.CacheResourceFilterIndexes, utils.CacheStatFilterIndexes,
+			utils.CacheFilters},
+	}
+	sort.Strings(expArgs.CacheIDs)
+
+	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
+		t.Error(err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
 }
