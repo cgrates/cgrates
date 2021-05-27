@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -196,10 +197,10 @@ func testSupITMigrateAndMove(t *testing.T) {
 	switch supAction {
 	case utils.Migrate: // for the momment only one version of rating plans exists
 	case utils.Move:
-		if err := supMigrator.dmIN.DataManager().SetRouteProfile(supPrfl, true); err != nil {
+		if err := supMigrator.dmIN.DataManager().SetRouteProfile(context.TODO(), supPrfl, true); err != nil {
 			t.Error(err)
 		}
-		if _, err := supMigrator.dmIN.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional); err != nil {
+		if _, err := supMigrator.dmIN.DataManager().GetRouteProfile(context.TODO(), "cgrates.org", "SUP1", false, false, utils.NonTransactional); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -208,7 +209,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Suppliers ", err.Error())
 		}
 
-		_, err = supMigrator.dmOut.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
+		_, err = supMigrator.dmOut.DataManager().GetRouteProfile(context.TODO(), "cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -217,14 +218,14 @@ func testSupITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Suppliers ", err.Error())
 		}
-		result, err := supMigrator.dmOut.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
+		result, err := supMigrator.dmOut.DataManager().GetRouteProfile(context.TODO(), "cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(result, supPrfl) {
 			t.Errorf("Expecting: %+v, received: %+v", supPrfl, result)
 		}
-		result, err = supMigrator.dmIN.DataManager().GetRouteProfile("cgrates.org", "SUP1", false, false, utils.NonTransactional)
+		result, err = supMigrator.dmIN.DataManager().GetRouteProfile(context.TODO(), "cgrates.org", "SUP1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		} else if supMigrator.stats[utils.Routes] != 1 {

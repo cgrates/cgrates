@@ -290,7 +290,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, th := range loader.routeProfiles {
-		rcv, err := loader.dm.GetRouteProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetRouteProfile(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetRouteProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 		}

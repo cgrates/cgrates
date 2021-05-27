@@ -1837,10 +1837,10 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		Weight: 20,
 	}
 
-	if err := dataManager.SetRouteProfile(splProfile, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.TODO(), splProfile, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetRouteProfile(splProfile2, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.TODO(), splProfile2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -1893,10 +1893,10 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	splProfile.FilterIDs = []string{"FIRST", "*prefix:~*req.Account:123"}
 	splProfile2.ID = "SPL_WITH_FILTER2"
 	splProfile2.FilterIDs = []string{"FIRST"}
-	if err := dataManager.SetRouteProfile(splProfile, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.TODO(), splProfile, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetRouteProfile(splProfile2, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.TODO(), splProfile2, true); err != nil {
 		t.Error(err)
 	}
 	expIdx := map[string]utils.StringSet{
