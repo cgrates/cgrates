@@ -69,9 +69,9 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.Pagina
 	return nil
 }
 
-// GetRateProfileIDsCount returns the total number of RateProfileIDs registered for a tenant
+// GetRateProfilesCount returns the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
-func (admS *AdminSv1) GetRateProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetRateProfilesCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

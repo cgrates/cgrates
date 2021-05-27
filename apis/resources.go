@@ -64,7 +64,7 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Pa
 
 // GetResourceProfileIDsCount returns the total number of ResourceProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ResourceProfileIDs
-func (admS *AdminSv1) GetResourceProfileIDsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetResourceProfilesCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
