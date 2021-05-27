@@ -391,7 +391,7 @@ func testCacheSRemoveItems(t *testing.T) {
 		t.Errorf("Expected: %v , received:%v", true, reply)
 	}
 	var remReply string
-	if err := chcRPC.Call(utils.CacheSv1RemoveItems, utils.AttrReloadCacheWithAPIOpts{
+	if err := chcRPC.Call(utils.CacheSv1RemoveItems, &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: make(map[string]interface{}),
 		Tenant:  "cgrates.org",
 		ArgsCache: map[string][]string{

@@ -147,11 +147,12 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 	var reply string
 	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*wrong:inline"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
+			Tenant:     "cgrates.org",
+			ID:         "Dsp1",
+			FilterIDs:  []string{"*wrong:inline"},
+			Subsystems: []string{utils.MetaAny},
+			Strategy:   utils.MetaFirst,
+			Weight:     20,
 		},
 	}
 
@@ -393,10 +394,11 @@ func testDispatcherSKillEngine(t *testing.T) {
 func testDispatcherSSetDispatcherProfileWithoutTenant(t *testing.T) {
 	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
+			ID:         "Dsp1",
+			FilterIDs:  []string{"*string:~*req.Account:1001"},
+			Subsystems: []string{utils.MetaAny},
+			Strategy:   utils.MetaFirst,
+			Weight:     20,
 		},
 	}
 	var reply string
@@ -502,8 +504,9 @@ func testDispatcherSCacheTestSet(t *testing.T) {
 	var reply string
 	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant: "cgrates.org",
-			ID:     "DISPATCHER_CACHE",
+			Tenant:     "cgrates.org",
+			ID:         "DISPATCHER_CACHE",
+			Subsystems: []string{utils.MetaAny},
 		},
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaNone,

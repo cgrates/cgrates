@@ -30,7 +30,7 @@ import (
 
 func TestComposeArgsReload(t *testing.T) {
 	apv1 := &APIerSv1{}
-	expArgs := utils.AttrReloadCacheWithAPIOpts{
+	expArgs := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: make(map[string]interface{}),
 		Tenant:  "cgrates.org",
 		ArgsCache: map[string][]string{
@@ -66,7 +66,7 @@ func TestComposeArgsReload(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", utils.ToJSON(expArgs), utils.ToJSON(rply))
 	}
 
-	expArgs = utils.AttrReloadCacheWithAPIOpts{
+	expArgs = &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: make(map[string]interface{}),
 		Tenant:  "cgrates.org",
 		ArgsCache: map[string][]string{
@@ -150,7 +150,7 @@ func TestCallCache(t *testing.T) {
 
 	exp = &rpcRequest{
 		Method: utils.CacheSv1ReloadCache,
-		Params: utils.AttrReloadCacheWithAPIOpts{
+		Params: &utils.AttrReloadCacheWithAPIOpts{
 			APIOpts: make(map[string]interface{}),
 			Tenant:  "cgrates.org",
 			ArgsCache: map[string][]string{

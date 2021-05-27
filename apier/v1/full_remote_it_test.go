@@ -545,11 +545,12 @@ func testFullRemoteITDispatcher(t *testing.T) {
 	var replySet string
 	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
+			Tenant:     "cgrates.org",
+			ID:         "Dsp1",
+			FilterIDs:  []string{"*string:~*req.Account:1001"},
+			Subsystems: []string{utils.MetaAny},
+			Strategy:   utils.MetaFirst,
+			Weight:     20,
 		},
 	}
 	// add a threshold profile in engine1 and verify it internal

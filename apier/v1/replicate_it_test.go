@@ -502,11 +502,12 @@ func testInternalReplicateITDispatcherProfile(t *testing.T) {
 	// set
 	dispatcherProfile = &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
+			Tenant:     "cgrates.org",
+			ID:         "Dsp1",
+			FilterIDs:  []string{"*string:~*req.Account:1001"},
+			Subsystems: []string{utils.MetaAny},
+			Strategy:   utils.MetaFirst,
+			Weight:     20,
 		},
 	}
 	if err := internalRPC.Call(utils.APIerSv1SetDispatcherProfile, dispatcherProfile,

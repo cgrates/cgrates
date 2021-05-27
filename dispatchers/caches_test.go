@@ -187,7 +187,7 @@ func TestDspCacheSv1RemoveItemsError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := utils.AttrReloadCacheWithAPIOpts{}
+	CGREvent := &utils.AttrReloadCacheWithAPIOpts{}
 	var reply *string
 	result := dspSrv.CacheSv1RemoveItems(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
@@ -199,7 +199,7 @@ func TestDspCacheSv1RemoveItemsError(t *testing.T) {
 func TestDspCacheSv1RemoveItemsArgsNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := utils.AttrReloadCacheWithAPIOpts{
+	CGREvent := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -376,7 +376,7 @@ func TestDspCacheSv1ReloadCacheError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := utils.AttrReloadCacheWithAPIOpts{}
+	CGREvent := &utils.AttrReloadCacheWithAPIOpts{}
 	var reply *string
 	result := dspSrv.CacheSv1ReloadCache(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
@@ -388,7 +388,7 @@ func TestDspCacheSv1ReloadCacheError(t *testing.T) {
 func TestDspCacheSv1ReloadCacheNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := utils.AttrReloadCacheWithAPIOpts{
+	CGREvent := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
@@ -403,7 +403,7 @@ func TestDspCacheSv1LoadCacheError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := utils.AttrReloadCacheWithAPIOpts{}
+	CGREvent := &utils.AttrReloadCacheWithAPIOpts{}
 	var reply *string
 	result := dspSrv.CacheSv1LoadCache(CGREvent, reply)
 	expected := "MANDATORY_IE_MISSING: [ApiKey]"
@@ -415,7 +415,7 @@ func TestDspCacheSv1LoadCacheError(t *testing.T) {
 func TestDspCacheSv1LoadCacheNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := utils.AttrReloadCacheWithAPIOpts{
+	CGREvent := &utils.AttrReloadCacheWithAPIOpts{
 		Tenant: "tenant",
 	}
 	var reply *string
