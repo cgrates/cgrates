@@ -169,8 +169,9 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 
 	dpPrf := &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			ID:        "DP_ID",
-			FilterIDs: []string{"FLTR_ID"},
+			ID:         "DP_ID",
+			FilterIDs:  []string{"FLTR_ID"},
+			Subsystems: []string{utils.MetaAny},
 		},
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaNone,
@@ -217,12 +218,13 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		},
 		Tenant: "cgrates.org",
 		ArgsCache: map[string][]string{
-			utils.FilterIDs:               {"cgrates.org:FLTR_ID"},
-			utils.AttributeFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
-			utils.ChargerFilterIndexIDs:   {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-			utils.ResourceFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-			utils.StatFilterIndexIDs:      {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-			utils.ThresholdFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.FilterIDs:                {"cgrates.org:FLTR_ID"},
+			utils.AttributeFilterIndexIDs:  {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+			utils.ChargerFilterIndexIDs:    {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.DispatcherFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+			utils.ResourceFilterIndexIDs:   {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.StatFilterIndexIDs:       {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+			utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 		},
 	}
 
@@ -233,7 +235,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestFiltersSetFilterReloadCache2(t *testing.T) {
+func TestFiltersSetFilterClearCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
@@ -359,8 +361,9 @@ func TestFiltersSetFilterReloadCache2(t *testing.T) {
 
 	dpPrf := &DispatcherWithAPIOpts{
 		DispatcherProfile: &engine.DispatcherProfile{
-			ID:        "DP_ID",
-			FilterIDs: []string{"FLTR_ID"},
+			ID:         "DP_ID",
+			FilterIDs:  []string{"FLTR_ID"},
+			Subsystems: []string{utils.MetaAny},
 		},
 		APIOpts: map[string]interface{}{
 			utils.CacheOpt: utils.MetaNone,
@@ -408,7 +411,7 @@ func TestFiltersSetFilterReloadCache2(t *testing.T) {
 		Tenant: "cgrates.org",
 		CacheIDs: []string{utils.CacheAttributeFilterIndexes, utils.CacheThresholdFilterIndexes,
 			utils.CacheResourceFilterIndexes, utils.CacheStatFilterIndexes,
-			utils.CacheChargerFilterIndexes, utils.CacheFilters},
+			utils.CacheChargerFilterIndexes, utils.CacheFilters, utils.CacheDispatcherFilterIndexes},
 	}
 	sort.Strings(expArgs.CacheIDs)
 
