@@ -1180,11 +1180,12 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Rules: "cgrates.org",
 			},
 		},
-		Timezone:        "UTC",
-		Filters:         []string{"Filter1"},
-		Flags:           utils.FlagsWithParams{},
-		Fields:          []*FCTemplate{},
-		CacheDumpFields: []*FCTemplate{},
+		Timezone:            "UTC",
+		Filters:             []string{"Filter1"},
+		Flags:               utils.FlagsWithParams{},
+		Fields:              []*FCTemplate{},
+		CacheDumpFields:     []*FCTemplate{},
+		PartialCommitFields: []*FCTemplate{},
 	}
 
 	v2 := &EventReaderCfg{
@@ -1211,12 +1212,20 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 		},
 		Fields: []*FCTemplate{
 			{
-				Type: "*string",
+				Type:   utils.MetaVariable,
+				Layout: time.RFC3339,
 			},
 		},
 		CacheDumpFields: []*FCTemplate{
 			{
-				Type: "*string",
+				Type:   utils.MetaConstant,
+				Layout: time.RFC3339,
+			},
+		},
+		PartialCommitFields: []*FCTemplate{
+			{
+				Type:   utils.MetaConstant,
+				Layout: time.RFC3339,
 			},
 		},
 	}
@@ -1237,19 +1246,66 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 		Flags:    &[]string{"FLAG1:PARAM_1:param1"},
 		Fields: &[]*FcTemplateJsonCfg{
 			{
-				Type:   utils.StringPointer("*string"),
-				Layout: utils.StringPointer(""),
+				Type: utils.StringPointer(utils.MetaVariable),
 			},
 		},
 		Cache_dump_fields: &[]*FcTemplateJsonCfg{
 			{
-				Type:   utils.StringPointer("*string"),
-				Layout: utils.StringPointer(""),
+				Type: utils.StringPointer(utils.MetaConstant),
+			},
+		},
+		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+			{
+				Type: utils.StringPointer(utils.MetaConstant),
 			},
 		},
 	}
 
 	rcv := diffEventReaderJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	d = &EventReaderJsonCfg{
+		Fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("ToR"),
+				Path:  utils.StringPointer("*cgreq.ToR"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.2"),
+			},
+		},
+		Cache_dump_fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("ToR2"),
+				Path:  utils.StringPointer("*cgreq.ToR2"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("~*req.3"),
+			},
+		},
+	}
+
+	expected = &EventReaderJsonCfg{
+		Opts: map[string]interface{}{},
+		Fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("ToR"),
+				Path:  utils.StringPointer("*cgreq.ToR"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.2"),
+			},
+		},
+		Cache_dump_fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("ToR2"),
+				Path:  utils.StringPointer("*cgreq.ToR2"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("~*req.3"),
+			},
+		},
+	}
+	rcv = diffEventReaderJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1409,6 +1465,29 @@ func TestDiffEventReadersJsonCfg(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+
+	v1 = v2
+	expected = &[]*EventReaderJsonCfg{
+		{
+			Opts: map[string]interface{}{},
+		},
+	}
+	rcv = diffEventReadersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	(*expected)[0].Id = utils.StringPointer("ERS_ID2")
+	d = &[]*EventReaderJsonCfg{
+		{
+			Id: utils.StringPointer("ERS_ID2"),
+		},
+	}
+
+	rcv = diffEventReadersJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }
 
 func TestDiffERsJsonCfg(t *testing.T) {
@@ -1417,36 +1496,45 @@ func TestDiffERsJsonCfg(t *testing.T) {
 	v1 := &ERsCfg{
 		Enabled:       false,
 		SessionSConns: []string{"*birpc"},
-		Readers:       []*EventReaderCfg{
-			// {
-			// 	ID: "ERS_ID",
-			// },
+		Readers: []*EventReaderCfg{
+			{
+				ID: "ERS_ID",
+			},
 		},
+		PartialCacheTTL:    24 * time.Hour,
+		PartialCacheAction: "partial_cache_action",
+		PartialPath:        "/partial/path",
 	}
 
 	v2 := &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"*localhost"},
-		Readers:       []*EventReaderCfg{
-			// {
-			// 	ID: "ERS_ID2",
-			// },
+		Readers: []*EventReaderCfg{
+			{
+				ID: "ERS_ID2",
+			},
 		},
+		PartialCacheTTL:    12 * time.Hour,
+		PartialCacheAction: "partial_cache_action2",
+		PartialPath:        "/partial/path/2",
 	}
 
 	expected := &ERsJsonCfg{
 		Enabled:        utils.BoolPointer(true),
 		Sessions_conns: &[]string{"*localhost"},
-		Readers:        &[]*EventReaderJsonCfg{
-			// {
-			// 	Id:   utils.StringPointer("ERS_ID2"),
-			// 	Opts: map[string]interface{}{},
-			// },
+		Readers: &[]*EventReaderJsonCfg{
+			{
+				Id:   utils.StringPointer("ERS_ID2"),
+				Opts: map[string]interface{}{},
+			},
 		},
+		Partial_cache_ttl:    utils.StringPointer("12h0m0s"),
+		Partial_cache_action: utils.StringPointer("partial_cache_action2"),
+		Partial_path:         utils.StringPointer("/partial/path/2"),
 	}
 
 	rcv := diffERsJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }

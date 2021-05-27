@@ -1296,6 +1296,13 @@ func TestDiffSTIRJsonCfg(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+
+	v1 = v2
+	expected = &STIRJsonCfg{}
+	rcv = diffSTIRJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }
 
 func TestDiffSessionSJsonCfg(t *testing.T) {

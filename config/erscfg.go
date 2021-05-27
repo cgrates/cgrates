@@ -385,14 +385,28 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 		flds = *d.Fields
 	}
 	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
-	d.Fields = &flds
+	if flds != nil {
+		d.Fields = &flds
+	}
+
+	var pcf []*FcTemplateJsonCfg
+	if d.Partial_commit_fields != nil {
+		pcf = *d.Partial_commit_fields
+	}
+	pcf = diffFcTemplateJsonCfg(pcf, v1.PartialCommitFields, v2.PartialCommitFields, separator)
+	if pcf != nil {
+		d.Partial_commit_fields = &pcf
+	}
 
 	var cdf []*FcTemplateJsonCfg
 	if d.Cache_dump_fields != nil {
 		cdf = *d.Cache_dump_fields
 	}
 	cdf = diffFcTemplateJsonCfg(cdf, v1.CacheDumpFields, v2.CacheDumpFields, separator)
-	d.Cache_dump_fields = &cdf
+	if cdf != nil {
+		d.Cache_dump_fields = &cdf
+	}
+
 	return d
 }
 
@@ -450,6 +464,15 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg
 	}
 	if !utils.SliceStringEqual(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.SessionSConns))
+	}
+	if v1.PartialCacheTTL != v2.PartialCacheTTL {
+		d.Partial_cache_ttl = utils.StringPointer(v2.PartialCacheTTL.String())
+	}
+	if v1.PartialCacheAction != v2.PartialCacheAction {
+		d.Partial_cache_action = utils.StringPointer(v2.PartialCacheAction)
+	}
+	if v1.PartialPath != v2.PartialPath {
+		d.Partial_path = utils.StringPointer(v2.PartialPath)
 	}
 	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers, separator)
 	return d

@@ -147,14 +147,22 @@ func diffLoaderCfgJson(d *LoaderCfgJson, v1, v2 *LoaderCgrCfg) *LoaderCfgJson {
 	gc1 := string(v1.GapiCredentials)
 	gc2 := string(v2.GapiCredentials)
 	if gc1 != gc2 {
-		rw := json.RawMessage(gc2)
-		d.Gapi_credentials = &rw
+		if v2.GapiCredentials != nil {
+			rw := json.RawMessage(gc2)
+			d.Gapi_credentials = &rw
+		} else {
+			d.Gapi_credentials = nil
+		}
 	}
 	gt1 := string(v1.GapiToken)
 	gt2 := string(v2.GapiToken)
 	if gt1 != gt2 {
-		rw := json.RawMessage(gt2)
-		d.Gapi_token = &rw
+		if v2.GapiToken != nil {
+			rw := json.RawMessage(gt2)
+			d.Gapi_token = &rw
+		} else {
+			d.Gapi_token = nil
+		}
 	}
 	return d
 }

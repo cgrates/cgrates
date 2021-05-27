@@ -157,14 +157,17 @@ func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor, sep
 		req = *d.Request_fields
 	}
 	req = diffFcTemplateJsonCfg(req, v1.RequestFields, v2.RequestFields, separator)
-	d.Request_fields = &req
-
+	if req != nil {
+		d.Request_fields = &req
+	}
 	var rply []*FcTemplateJsonCfg
 	if d.Reply_fields != nil {
 		rply = *d.Reply_fields
 	}
 	rply = diffFcTemplateJsonCfg(rply, v1.ReplyFields, v2.ReplyFields, separator)
-	d.Reply_fields = &rply
+	if rply != nil {
+		d.Reply_fields = &rply
+	}
 	return d
 }
 func getReqProcessorJsnCfg(d []*ReqProcessorJsnCfg, id string) (*ReqProcessorJsnCfg, int) {

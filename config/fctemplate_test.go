@@ -574,6 +574,40 @@ func TestFcTemplatesEqual(t *testing.T) {
 	if !fcTemplatesEqual(v1, v2) {
 		t.Error("Templates should match")
 	}
+
+	v1[0].Tag = "TenantTag"
+	if fcTemplatesEqual(v1, v2) {
+		t.Error("Templates should not match")
+	}
+
+	newTemplate := &FCTemplate{
+		Tag:  "TenantID",
+		Type: utils.MetaVariable,
+		Path: utils.Tenant,
+		Value: RSRParsers{
+			{
+				Rules: "*req.0",
+			},
+		},
+		Filters:          []string{"*string:~*req.Account:1001"},
+		Width:            2,
+		Strip:            "strip",
+		Padding:          "padding",
+		Mandatory:        true,
+		AttributeID:      "ATTR_PRF_1001",
+		NewBranch:        true,
+		Timezone:         "UTC",
+		Blocker:          true,
+		Layout:           "string",
+		CostShiftDigits:  2,
+		RoundingDecimals: utils.IntPointer(3),
+		MaskDestID:       "MK_ID",
+		MaskLen:          2,
+	}
+	v2 = append(v2, newTemplate)
+	if fcTemplatesEqual(v1, v2) {
+		t.Error("Templates should not match")
+	}
 }
 
 func TestDiffFcTemplateJsonCfg(t *testing.T) {
@@ -636,6 +670,23 @@ func TestDiffFcTemplateJsonCfg(t *testing.T) {
 	}
 
 	rcv := diffFcTemplateJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	d = []*FcTemplateJsonCfg{
+		{
+			Tag: utils.StringPointer("Tag"),
+		},
+	}
+
+	v1 = v2
+	expected = []*FcTemplateJsonCfg{
+		{
+			Tag: utils.StringPointer("Tag"),
+		},
+	}
+	rcv = diffFcTemplateJsonCfg(d, v1, v2, ";")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

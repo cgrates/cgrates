@@ -400,9 +400,11 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 	if d == nil {
 		d = new(STIRJsonCfg)
 	}
-
 	if v1.AllowedAttest.Equals(v2.AllowedAttest) {
-		d.Allowed_attest = utils.SliceStringPointer(v2.AllowedAttest.AsSlice())
+		d.Allowed_attest = nil
+		if v2.AllowedAttest != nil {
+			d.Allowed_attest = utils.SliceStringPointer(v2.AllowedAttest.AsSlice())
+		}
 	}
 	if v1.PayloadMaxduration != v2.PayloadMaxduration {
 		d.Payload_maxduration = utils.StringPointer(v2.PayloadMaxduration.String())

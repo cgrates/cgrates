@@ -1364,6 +1364,56 @@ func TestPrepareAccountSSectionFromMap(t *testing.T) {
 	}
 }
 
+func TestPrepareSectionFromMapError(t *testing.T) {
+	section := LoaderSJSON
+	// mp := map[string]interface{}{
+	// 	"enabled":  false,
+	// 	"url":      "/configs/",
+	// 	"root_dir": "/var/spool/cgrates/configs",
+	// }
+	cfgJSONStr := `{
+		"loaders": {
+			"id": "*default",									
+			"enabled": false,									
+			"tenant": "",										
+			"dry_run": false,									
+			"run_delay": "0",									
+			"lock_filename": ".cgr.lck",						
+			"caches_conns": ["*internal"],
+			"field_separator": ",",								
+			"tp_in_dir": "/var/spool/cgrates/loader/in",		
+			"tp_out_dir": "/var/spool/cgrates/loader/out",				
+			"data":[
+				{
+					"type": "*attributes",						
+					"file_name": "Attributes.csv",				
+					"fields": [
+						{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+						{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+						{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+						{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+						{"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.4"},
+						{"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.5"},
+						{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.6"},
+						{"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.7"},
+						{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.8"},
+					],
+				},
+			],
+		},	
+	}`
+
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	errExpect := "json: Unmarshal(non-pointer []*config.LoaderJsonCfg)"
+	if _, err := prepareSectionFromMap(section, cgrCfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected error: %v", err)
+	}
+}
+
 //Section from DB
 func TestPrepareGeneralSectionFromDB(t *testing.T) {
 	section := GeneralJSON
@@ -2545,6 +2595,355 @@ func TestPrepareMigratorSectionFromDB(t *testing.T) {
 		Out_storDB_password: utils.StringPointer(""),
 		Out_dataDB_opts:     map[string]interface{}{},
 		Out_storDB_opts:     map[string]interface{}{},
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareTlsSectionFromDB(t *testing.T) {
+	section := TlsJSON
+	cfgJSONStr := `{
+		"tls": {
+			"server_certificate" : "server_certificate",			
+			"server_key":"server_key",					
+			"client_certificate" : "client_certificate",			
+			"client_key":"client_key",					
+			"ca_certificate":"ca_certificate",				
+			"server_policy":4,					
+			"server_name":"server_name",
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &TlsJsonCfg{
+		Server_certificate: utils.StringPointer("server_certificate"),
+		Server_key:         utils.StringPointer("server_key"),
+		Server_policy:      utils.IntPointer(4),
+		Server_name:        utils.StringPointer("server_name"),
+		Client_certificate: utils.StringPointer("client_certificate"),
+		Client_key:         utils.StringPointer("client_key"),
+		Ca_certificate:     utils.StringPointer("ca_certificate"),
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareAnalyzerSSectionFromDB(t *testing.T) {
+	section := AnalyzerSJSON
+	cfgJSONStr := `{
+		"analyzers":{									
+			"enabled": true,							
+			 "db_path": "/var/spool/cgrates/analyzers",	
+			"index_type": "*scorch",					
+			"ttl": "24h",								
+			"cleanup_interval": "1h",					
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &AnalyzerSJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Db_path:          utils.StringPointer("/var/spool/cgrates/analyzers"),
+		Index_type:       utils.StringPointer("*scorch"),
+		Ttl:              utils.StringPointer("24h"),
+		Cleanup_interval: utils.StringPointer("1h"),
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareAdminSSectionFromDB(t *testing.T) {
+	section := AdminSJSON
+	cfgJSONStr := `{
+		"admins": {
+			"enabled": true,
+			"caches_conns":["*internal"],
+			"actions_conns": ["*birpc"],					
+			"attributes_conns": ["*birpc"],					
+			"ees_conns": ["*birpc"],						
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &AdminSJsonCfg{
+		Enabled:          utils.BoolPointer(true),
+		Caches_conns:     &[]string{"*internal"},
+		Actions_conns:    &[]string{"*birpc"},
+		Attributes_conns: &[]string{"*birpc"},
+		Ees_conns:        &[]string{"*birpc"},
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareRateSSectionFromDB(t *testing.T) {
+	section := RateSJSON
+	cfgJSONStr := `{
+		"rates": {
+			"enabled": true,
+			"indexed_selects": true,				// enable profile matching exclusively on indexes
+			"string_indexed_fields": ["*req.index1"],			// query indexes based on these fields for faster processing
+			"prefix_indexed_fields": ["*req.index2"],			// query indexes based on these fields for faster processing
+			"suffix_indexed_fields": ["*req.index3"],			// query indexes based on these fields for faster processing
+			"nested_fields": true,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+			"rate_indexed_selects": false,			// enable profile matching exclusively on indexes
+			"rate_string_indexed_fields": ["*req.index1"],		// query indexes based on these fields for faster processing
+			"rate_prefix_indexed_fields": ["*req.index2"],		// query indexes based on these fields for faster processing
+			"rate_suffix_indexed_fields": ["*req.index3"],		// query indexes based on these fields for faster processing
+			"rate_nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+			"verbosity": 1000,                      // number of increment iterations allowed
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &RateSJsonCfg{
+		Enabled:                    utils.BoolPointer(true),
+		Indexed_selects:            utils.BoolPointer(true),
+		String_indexed_fields:      &[]string{"*req.index1"},
+		Prefix_indexed_fields:      &[]string{"*req.index2"},
+		Suffix_indexed_fields:      &[]string{"*req.index3"},
+		Nested_fields:              utils.BoolPointer(true),
+		Rate_indexed_selects:       utils.BoolPointer(false),
+		Rate_string_indexed_fields: &[]string{"*req.index1"},
+		Rate_prefix_indexed_fields: &[]string{"*req.index2"},
+		Rate_suffix_indexed_fields: &[]string{"*req.index3"},
+		Rate_nested_fields:         utils.BoolPointer(false),
+		Verbosity:                  utils.IntPointer(1000),
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareSIPAgentSectionFromDB(t *testing.T) {
+	section := SIPAgentJSON
+	cfgJSONStr := `{
+		"sip_agent": {							// SIP Agents, only used for redirections
+			"enabled": false,					// enables the SIP agent: <true|false>
+			"listen": "127.0.0.1:5060",			// address where to listen for SIP requests <x.y.z.y:1234>
+			"listen_net": "tcp",				// network to listen on <udp|tcp|tcp-tls>
+			"sessions_conns": ["*internal"],
+			"timezone": "UTC",						// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
+			"retransmission_timer": "1s",		// the duration to wait to receive an ACK before resending the reply
+			"request_processors": [				// request processors to be applied to SIP messages
+			],
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &SIPAgentJsonCfg{
+		Enabled:              utils.BoolPointer(false),
+		Listen:               utils.StringPointer("127.0.0.1:5060"),
+		Listen_net:           utils.StringPointer("tcp"),
+		Sessions_conns:       &[]string{"*internal"},
+		Timezone:             utils.StringPointer("UTC"),
+		Retransmission_timer: utils.StringPointer("1s"),
+		Request_processors:   &[]*ReqProcessorJsnCfg{},
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareConfigSSectionFromDB(t *testing.T) {
+	section := ConfigSJSON
+	cfgJSONStr := `{
+		"configs": {
+			"enabled": true,
+			"url": "/configs/",										
+			"root_dir": "/var/spool/cgrates/configs",				
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &ConfigSCfgJson{
+		Enabled:  utils.BoolPointer(true),
+		Url:      utils.StringPointer("/configs/"),
+		Root_dir: utils.StringPointer("/var/spool/cgrates/configs"),
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareAPIBanSectionFromDB(t *testing.T) {
+	section := APIBanJSON
+	cfgJSONStr := `{
+		"apiban": {
+			"enabled": false,
+			"keys": ["key1", "key2"],
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &APIBanJsonCfg{
+		Enabled: utils.BoolPointer(false),
+		Keys:    &[]string{"key1", "key2"},
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareActionSSectionFromDB(t *testing.T) {
+	section := ActionSJSON
+	cfgJSONStr := `{
+		"actions": {								
+			"enabled": true,						
+			"cdrs_conns": ["*birpc"],						
+			"ees_conns": ["*birpc"],						
+			"thresholds_conns": ["*birpc"],					
+			"stats_conns": ["*birpc"],						
+			"accounts_conns": ["*birpc"],					
+			"tenants":["cgrates"],							
+			"indexed_selects": true,				
+			"string_indexed_fields": ["*req.index1"],			
+			"prefix_indexed_fields": ["*req.index2"],			
+			"suffix_indexed_fields": ["*req.index3"],			
+			"nested_fields": false,					
+			"dynaprepaid_actionprofile": [],	
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &ActionSJsonCfg{
+		Enabled:                   utils.BoolPointer(true),
+		Cdrs_conns:                &[]string{"*birpc"},
+		Ees_conns:                 &[]string{"*birpc"},
+		Thresholds_conns:          &[]string{"*birpc"},
+		Stats_conns:               &[]string{"*birpc"},
+		Accounts_conns:            &[]string{"*birpc"},
+		Tenants:                   &[]string{"cgrates"},
+		Indexed_selects:           utils.BoolPointer(true),
+		String_indexed_fields:     &[]string{"*req.index1"},
+		Prefix_indexed_fields:     &[]string{"*req.index2"},
+		Suffix_indexed_fields:     &[]string{"*req.index3"},
+		Nested_fields:             utils.BoolPointer(false),
+		Dynaprepaid_actionprofile: &[]string{},
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareAccountSSectionFromDB(t *testing.T) {
+	section := AccountSJSON
+	cfgJSONStr := `{
+		"accounts": {								
+			"enabled": true,						
+			"indexed_selects": true,				
+			"attributes_conns": ["*localhost"],					
+			"rates_conns": ["*localhost"],						
+			"thresholds_conns": ["*localhost"],					
+			"string_indexed_fields": [],			
+			"prefix_indexed_fields": [],			
+			"suffix_indexed_fields": [],			
+			"nested_fields": false,					
+			"max_iterations": 1000,                
+			"max_usage": "72h",                     
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &AccountSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Indexed_selects:       utils.BoolPointer(true),
+		Attributes_conns:      &[]string{"*localhost"},
+		Rates_conns:           &[]string{"*localhost"},
+		Thresholds_conns:      &[]string{"*localhost"},
+		String_indexed_fields: &[]string{},
+		Prefix_indexed_fields: &[]string{},
+		Suffix_indexed_fields: &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
+		Max_iterations:        utils.IntPointer(1000),
+		Max_usage:             utils.StringPointer("72h"),
+	}
+
+	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cfgSec, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(cfgSec))
+	}
+}
+
+func TestPrepareCoreSSectionFromDB(t *testing.T) {
+	section := CoreSJSON
+	cfgJSONStr := `{
+		"cores": {
+			"caps": 3,							 
+			"caps_strategy": "*busy",				
+			"caps_stats_interval": "0",			
+			"shutdown_timeout": "1s"			
+		},	
+	}`
+	cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &CoreSJsonCfg{
+		Caps:                utils.IntPointer(3),
+		Caps_strategy:       utils.StringPointer("*busy"),
+		Caps_stats_interval: utils.StringPointer("0"),
+		Shutdown_timeout:    utils.StringPointer("1s"),
 	}
 
 	if cfgSec, err := prepareSectionFromDB(section, cgrCfgJSON); err != nil {
