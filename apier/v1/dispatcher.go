@@ -75,7 +75,7 @@ type DispatcherWithAPIOpts struct {
 
 //SetDispatcherProfile add/update a new Dispatcher Profile
 func (apierSv1 *APIerSv1) SetDispatcherProfile(args *DispatcherWithAPIOpts, reply *string) error {
-	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{utils.ID, utils.Subsystems}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if args.Tenant == utils.EmptyString {
