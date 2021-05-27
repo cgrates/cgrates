@@ -39,6 +39,44 @@ func NewDfltRPCConn() *RPCConn {
 // RPCConns the config for all rpc pools
 type RPCConns map[string]*RPCConn
 
+func (rC RPCConns) loadFromJSONCfg(jsn RPCConnsJson) {
+	// hardoded the *internal connection
+	rC[utils.MetaInternal] = &RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*RemoteHost{{
+			Address: utils.MetaInternal,
+		}},
+	}
+	rC[rpcclient.BiRPCInternal] = &RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*RemoteHost{{
+			Address: rpcclient.BiRPCInternal,
+		}},
+	}
+	rC[utils.MetaLocalHost] = &RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*RemoteHost{{
+			Address:   "127.0.0.1:2012",
+			Transport: utils.MetaJSON,
+		}},
+	}
+	rC[utils.MetaBiJSONLocalHost] = &RPCConn{
+		Strategy: rpcclient.PoolFirst,
+		PoolSize: 0,
+		Conns: []*RemoteHost{{
+			Address:   "127.0.0.1:2014",
+			Transport: rpcclient.BiRPCJSON,
+		}},
+	}
+	for key, val := range jsn {
+		rC[key] = NewDfltRPCConn()
+		rC[key].loadFromJSONCfg(val)
+	}
+}
+
 // AsMapInterface returns the config as a map[string]interface{}
 func (rC RPCConns) AsMapInterface() (rpcConns map[string]interface{}) {
 	rpcConns = make(map[string]interface{})

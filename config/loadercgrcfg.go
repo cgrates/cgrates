@@ -29,8 +29,8 @@ type LoaderCgrCfg struct {
 	TpID            string
 	DataPath        string
 	DisableReverse  bool
-	FieldSeparator  rune     // The separator to use when reading csvs
-	CachesConns     []string // ToDoNext: add actions conn
+	FieldSeparator  rune // The separator to use when reading csvs
+	CachesConns     []string
 	ActionSConns    []string
 	GapiCredentials json.RawMessage
 	GapiToken       json.RawMessage

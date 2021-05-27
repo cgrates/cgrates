@@ -30,8 +30,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/rpcclient"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -396,41 +394,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg ConfigDB) (err error) {
 	if jsnRPCConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
 		return
 	}
-	// hardoded the *internal connection
-	cfg.rpcConns[utils.MetaInternal] = &RPCConn{
-		Strategy: rpcclient.PoolFirst,
-		PoolSize: 0,
-		Conns: []*RemoteHost{{
-			Address: utils.MetaInternal,
-		}},
-	}
-	cfg.rpcConns[rpcclient.BiRPCInternal] = &RPCConn{
-		Strategy: rpcclient.PoolFirst,
-		PoolSize: 0,
-		Conns: []*RemoteHost{{
-			Address: rpcclient.BiRPCInternal,
-		}},
-	}
-	cfg.rpcConns[utils.MetaLocalHost] = &RPCConn{
-		Strategy: rpcclient.PoolFirst,
-		PoolSize: 0,
-		Conns: []*RemoteHost{{
-			Address:   "127.0.0.1:2012",
-			Transport: utils.MetaJSON,
-		}},
-	}
-	cfg.rpcConns[utils.MetaBiJSONLocalHost] = &RPCConn{
-		Strategy: rpcclient.PoolFirst,
-		PoolSize: 0,
-		Conns: []*RemoteHost{{
-			Address:   "127.0.0.1:2014",
-			Transport: rpcclient.BiRPCJSON,
-		}},
-	}
-	for key, val := range jsnRPCConns {
-		cfg.rpcConns[key] = NewDfltRPCConn()
-		cfg.rpcConns[key].loadFromJSONCfg(val)
-	}
+	cfg.rpcConns.loadFromJSONCfg(jsnRPCConns)
 	return
 }
 
