@@ -78,7 +78,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetThresholdProfileIDsCount(context.Background(), &utils.TenantWithAPIOpts{},
+	if err := adms.GetThresholdProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if rplyCount != len(thPrfIDs) {
@@ -397,7 +397,7 @@ func TestThresholdsGetThresholdProfileIDsCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetThresholdProfileIDsCount(context.Background(),
+	if err := adms.GetThresholdProfileCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -421,7 +421,7 @@ func TestThresholdsGetThresholdProfileIDsCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetThresholdProfileIDsCount(context.Background(),
+	if err := adms.GetThresholdProfileCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {

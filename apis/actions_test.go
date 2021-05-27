@@ -81,7 +81,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetActionProfileIDsCount(context.Background(), &utils.TenantIDWithAPIOpts{
+	if err := adms.GetActionProfileCount(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{},
 	},
 		&rplyCount); err != nil {
@@ -405,7 +405,7 @@ func TestActionsGetActionProfileIDsCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetActionProfileIDsCount(context.Background(),
+	if err := adms.GetActionProfileCount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
@@ -431,7 +431,7 @@ func TestActionsGetActionProfileIDsCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetActionProfileIDsCount(context.Background(),
+	if err := adms.GetActionProfileCount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
