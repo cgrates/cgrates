@@ -20,6 +20,7 @@ package apis
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -111,6 +112,7 @@ func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
+	sort.Strings(reply5)
 	if !reflect.DeepEqual(reply5, []string{"fltr_for_attr", "fltr_for_attr2"}) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", []string{"fltr_for_attr", "fltr_for_attr2"}, reply5)
 	}
