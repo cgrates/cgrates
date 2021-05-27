@@ -89,7 +89,7 @@ func (admS *AdminSv1) GetAttributeProfileIDsCount(ctx *context.Context, args *ut
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.AttributeWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *engine.APIAttributeProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

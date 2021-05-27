@@ -154,7 +154,7 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 }
 
 func testAttributeSetAttributeProfile(t *testing.T) {
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
@@ -255,7 +255,7 @@ func testGetAttributeProfileBeforeSet2(t *testing.T) {
 }
 
 func testAttributeSetAttributeProfile2(t *testing.T) {
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
@@ -361,7 +361,7 @@ func testAttributeRemoveAttributeProfile(t *testing.T) {
 }
 
 func testAttributeSetAttributeProfileBrokenReference(t *testing.T) {
-	attrPrf := &engine.AttributeWithAPIOpts{
+	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
@@ -406,7 +406,7 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 			},
 		},
 	}
-	eAttrPrf2 := &engine.AttributeWithAPIOpts{
+	eAttrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_2",
@@ -560,7 +560,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
 	var result string
-	eAttrPrfApi := &engine.AttributeWithAPIOpts{
+	eAttrPrfApi := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_1",
@@ -661,7 +661,7 @@ func testAttributeProcessEvent(t *testing.T) {
 }
 
 func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
-	attrPrf1 := &engine.AttributeWithAPIOpts{
+	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_Search_and_replace",
@@ -721,7 +721,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 }
 
 func testAttributeSProcessWithMultipleRuns(t *testing.T) {
-	attrPrf1 := &engine.AttributeWithAPIOpts{
+	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -735,7 +735,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	attrPrf2 := &engine.AttributeWithAPIOpts{
+	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
@@ -749,7 +749,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	attrPrf3 := &engine.AttributeWithAPIOpts{
+	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
@@ -826,7 +826,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 }
 
 func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
-	attrPrf1 := &engine.AttributeWithAPIOpts{
+	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
@@ -840,7 +840,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Weight: 10,
 		},
 	}
-	attrPrf2 := &engine.AttributeWithAPIOpts{
+	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
@@ -854,7 +854,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	attrPrf3 := &engine.AttributeWithAPIOpts{
+	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
