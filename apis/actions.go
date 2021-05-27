@@ -69,9 +69,9 @@ func (admS *AdminSv1) GetActionProfileIDs(ctx *context.Context, args *utils.Pagi
 	return nil
 }
 
-// GetActionProfilesCount sets in reply var the total number of ActionProfileIDs registered for a tenant
+// GetActionProfileCount sets in reply var the total number of ActionProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ActionProfileIDs
-func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetActionProfileCount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdGetResourceIDs{
 		name:      "resources_profile_ids",
-		rpcMethod: utils.APIerSv1GetResourceProfileIDs,
+		rpcMethod: utils.AdminSv1GetResourceProfileIDs,
 		rpcParams: &utils.PaginatorWithTenant{},
 	}
 	commands[c.Name()] = c

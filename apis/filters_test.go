@@ -74,7 +74,7 @@ func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
 	argsCnt := &utils.TenantWithAPIOpts{
 		Tenant: utils.CGRateSorg,
 	}
-	err = admS.GetFilterIDsCount(context.Background(), argsCnt, &replyCnt)
+	err = admS.GetFilterCount(context.Background(), argsCnt, &replyCnt)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -96,7 +96,7 @@ func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
 	argsCnt2 := &utils.TenantWithAPIOpts{
 		Tenant: utils.CGRateSorg,
 	}
-	err = admS.GetFilterIDsCount(context.Background(), argsCnt2, &replyCnt2)
+	err = admS.GetFilterCount(context.Background(), argsCnt2, &replyCnt2)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -138,7 +138,7 @@ func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
 	argsCnt3 := &utils.TenantWithAPIOpts{
 		Tenant: utils.CGRateSorg,
 	}
-	err = admS.GetFilterIDsCount(context.Background(), argsCnt3, &replyCnt3)
+	err = admS.GetFilterCount(context.Background(), argsCnt3, &replyCnt3)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -178,7 +178,7 @@ func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
 
 	var replyCnt4 int
 	argsCnt4 := &utils.TenantWithAPIOpts{}
-	err = admS.GetFilterIDsCount(context.Background(), argsCnt4, &replyCnt4)
+	err = admS.GetFilterCount(context.Background(), argsCnt4, &replyCnt4)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -723,7 +723,7 @@ func TestFiltersGetFilterIDsCountError(t *testing.T) {
 	var reply int
 	args := &utils.TenantWithAPIOpts{}
 
-	err := admS.GetFilterIDsCount(context.Background(), args, &reply)
+	err := admS.GetFilterCount(context.Background(), args, &reply)
 	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
 	}
