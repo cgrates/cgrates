@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestApisSetGetGetIDsCountFilters(t *testing.T) {
+func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -103,6 +103,21 @@ func TestApisSetGetGetIDsCountFilters(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(&replyCnt2), utils.ToJSON(2)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(2), utils.ToJSON(&replyCnt2))
 	}
+
+	args5 := &utils.PaginatorWithTenant{
+		Tenant:    "",
+		Paginator: utils.Paginator{},
+		APIOpts:   nil,
+	}
+	var reply5 []string
+	err = admS.GetFilterIDs(context.Background(), args5, &reply5)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(reply5, []string{"fltr_for_attr", "fltr_for_attr2"}) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", []string{"fltr_for_attr", "fltr_for_attr2"}, reply5)
+	}
+
 	argRmv := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: utils.CGRateSorg,
@@ -129,6 +144,21 @@ func TestApisSetGetGetIDsCountFilters(t *testing.T) {
 	if !reflect.DeepEqual(utils.ToJSON(&replyCnt3), utils.ToJSON(1)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(1), utils.ToJSON(&replyCnt3))
 	}
+
+	args6 := &utils.PaginatorWithTenant{
+		Tenant:    "",
+		Paginator: utils.Paginator{},
+		APIOpts:   nil,
+	}
+	var reply6 []string
+	err = admS.GetFilterIDs(context.Background(), args6, &reply6)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(reply6, []string{"fltr_for_attr"}) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", []string{"fltr_for_attr"}, reply6)
+	}
+
 	argRmv2 := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: utils.CGRateSorg,
@@ -151,10 +181,21 @@ func TestApisSetGetGetIDsCountFilters(t *testing.T) {
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
+
+	args7 := &utils.PaginatorWithTenant{
+		Tenant:    "",
+		Paginator: utils.Paginator{},
+		APIOpts:   nil,
+	}
+	var reply7 []string
+	err = admS.GetFilterIDs(context.Background(), args7, &reply7)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
+	}
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersMissingField(t *testing.T) {
+func TestFiltersSetFiltersMissingField(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -181,7 +222,7 @@ func TestApisSetFiltersMissingField(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersTenantEmpty(t *testing.T) {
+func TestFiltersSetFiltersTenantEmpty(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -221,7 +262,7 @@ func TestApisSetFiltersTenantEmpty(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersGetFilterError(t *testing.T) {
+func TestFiltersSetFiltersGetFilterError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -253,7 +294,7 @@ func TestApisSetFiltersGetFilterError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersError(t *testing.T) {
+func TestFiltersSetFiltersError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -315,7 +356,7 @@ func TestApisSetFiltersError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersSetFilterError(t *testing.T) {
+func TestFiltersSetFiltersSetFilterError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -362,7 +403,7 @@ func TestApisSetFiltersSetFilterError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
+func TestFiltersSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -428,7 +469,7 @@ func TestApisSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisSetFiltersSetLoadIDsError(t *testing.T) {
+func TestFiltersSetFiltersSetLoadIDsError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -495,7 +536,7 @@ func TestApisSetFiltersSetLoadIDsError(t *testing.T) {
 
 	engine.Cache = cacheInit
 }
-func TestApisSetFiltersCacheForFilterError(t *testing.T) {
+func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = "123"
@@ -564,7 +605,7 @@ func TestApisSetFiltersCacheForFilterError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisGetFilterNoTenant(t *testing.T) {
+func TestFiltersGetFilterNoTenant(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -603,7 +644,7 @@ func TestApisGetFilterNoTenant(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisGetFilterMissingField(t *testing.T) {
+func TestFiltersGetFilterMissingField(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -637,7 +678,7 @@ func TestApisGetFilterMissingField(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisGetFilterGetFilterError(t *testing.T) {
+func TestFiltersGetFilterGetFilterError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -664,7 +705,7 @@ func TestApisGetFilterGetFilterError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisGetFilterIDsCountError(t *testing.T) {
+func TestFiltersGetFilterIDsCountError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -689,7 +730,7 @@ func TestApisGetFilterIDsCountError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRemoveFilterMissingStructFieldError(t *testing.T) {
+func TestFiltersRemoveFilterMissingStructFieldError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -713,7 +754,7 @@ func TestApisRemoveFilterMissingStructFieldError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestApisRemoveFilterRemoveFilterError(t *testing.T) {
+func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1070,4 +1111,124 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	}
 
 	dm.DataDB().Flush(utils.EmptyString)
+}
+func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.CacheCfg().ReplicationConns = []string{"rep"}
+	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
+	cfg.RPCConns()["connID"] = &config.RPCConn{}
+	config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes].Remote = true
+	config.CgrConfig().DataDbCfg().RmtConns = []string{"connID"}
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+			return &engine.Filter{}, nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotFound
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotFound
+		},
+		RemoveFilterDrvF: func(str1 string, str2 string) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var reply string
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "",
+			ID:     "testID",
+		},
+		APIOpts: nil,
+	}
+
+	err := admS.RemoveFilter(context.Background(), args, &reply)
+	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
+	}
+	config.CgrConfig().DataDbCfg().RmtConns = []string{}
+	config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes].Remote = false
+	engine.Cache = cacheInit
+}
+
+func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = "123"
+	cfg.CacheCfg().ReplicationConns = []string{"rep"}
+	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
+	cfg.RPCConns()["connID"] = &config.RPCConn{}
+	config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes].Remote = true
+	config.CgrConfig().DataDbCfg().RmtConns = []string{"connID"}
+	cfg.AdminSCfg().CachesConns = []string{}
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+			return nil
+		},
+		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+			return &engine.Filter{}, nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{}, utils.ErrNotFound
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return utils.ErrNotFound
+		},
+		RemoveFilterDrvF: func(str1 string, str2 string) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var reply string
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "",
+			ID:     "testID",
+		},
+		APIOpts: nil,
+	}
+
+	err := admS.RemoveFilter(context.Background(), args, &reply)
+	if err == nil || err.Error() != "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]", err)
+	}
+	config.CgrConfig().DataDbCfg().RmtConns = []string{}
+	config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes].Remote = false
+	engine.Cache = cacheInit
+}
+
+func TestFiltersGetFilterIDs(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	admS := NewAdminSv1(cfg, dm, connMgr)
+
+	args6 := &utils.PaginatorWithTenant{
+		Tenant:    "",
+		Paginator: utils.Paginator{},
+		APIOpts:   nil,
+	}
+	var reply6 []string
+	err := admS.GetFilterIDs(context.Background(), args6, &reply6)
+	if err == nil || err.Error() != "NOT_IMPLEMENTED" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_IMPLEMENTED", err)
+	}
+
+	engine.Cache = cacheInit
 }
