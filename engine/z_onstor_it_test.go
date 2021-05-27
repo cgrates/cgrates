@@ -679,22 +679,22 @@ func testOnStorITRouteProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if _, rcvErr := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if _, rcvErr := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetRouteProfile(splProfile, false); err != nil {
+	if err := onStor.SetRouteProfile(context.TODO(), splProfile, false); err != nil {
 		t.Error(err)
 	}
 	//get from cache
-	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
@@ -729,35 +729,35 @@ func testOnStorITRouteProfile(t *testing.T) {
 			RouteParameters: "param2",
 		},
 	}
-	if err := onStor.SetRouteProfile(splProfile, false); err != nil {
+	if err := onStor.SetRouteProfile(context.TODO(), splProfile, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from cache
-	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if rcv, err := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
-	if err := onStor.RemoveRouteProfile(splProfile.Tenant, splProfile.ID,
+	if err := onStor.RemoveRouteProfile(context.TODO(), splProfile.Tenant, splProfile.ID,
 		false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
-	if _, rcvErr := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if _, rcvErr := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetRouteProfile("cgrates.org", "SPRF_1",
+	if _, rcvErr := onStor.GetRouteProfile(context.TODO(), "cgrates.org", "SPRF_1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
