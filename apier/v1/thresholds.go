@@ -104,9 +104,9 @@ func (apierSv1 *APIerSv1) GetThresholdProfileIDs(args *utils.PaginatorWithTenant
 	return nil
 }
 
-// GetThresholdProfileIDsCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
+// GetThresholdProfileCount sets in reply var the total number of ThresholdProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 ThresholdProfileIDs
-func (apierSv1 *APIerSv1) GetThresholdProfileIDsCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (apierSv1 *APIerSv1) GetThresholdProfileCount(args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
@@ -158,7 +158,7 @@ func (apierSv1 *APIerSv1) RemoveThresholdProfile(args *utils.TenantIDWithAPIOpts
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	if err := apierSv1.DataManager.RemoveThresholdProfile(tnt, args.ID,  true); err != nil {
+	if err := apierSv1.DataManager.RemoveThresholdProfile(tnt, args.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile

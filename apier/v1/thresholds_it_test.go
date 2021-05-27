@@ -823,14 +823,14 @@ func testV1TSRemThresholdProfileWithoutTenant(t *testing.T) {
 
 func testv1TSGetThresholdProfileIDsCount(t *testing.T) {
 	var reply int
-	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileIDsCount,
+	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileCount,
 		&utils.TenantWithAPIOpts{},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != 7 {
 		t.Errorf("Expected 7, received %+v", reply)
 	}
-	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileIDsCount,
+	if err := tSv1Rpc.Call(utils.APIerSv1GetThresholdProfileCount,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"},
 		&reply); err != nil {
 		t.Error(err)
