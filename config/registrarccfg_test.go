@@ -513,4 +513,39 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+
+	d = new(RegistrarCJsonCfgs)
+	v1 = v2
+	expected = &RegistrarCJsonCfgs{
+		RPC: &RegistrarCJsonCfg{
+			Hosts: map[string][]*RemoteHostJson{
+				"HOST_1": {
+					{
+						Id:          utils.StringPointer("host2_ID"),
+						Address:     utils.StringPointer("0.0.0.0:8080"),
+						Transport:   utils.StringPointer("udp"),
+						Synchronous: utils.BoolPointer(true),
+						Tls:         utils.BoolPointer(true),
+					},
+				},
+			},
+		},
+		Dispatcher: &RegistrarCJsonCfg{
+			Hosts: map[string][]*RemoteHostJson{
+				"HOST_1": {
+					{
+						Id:          utils.StringPointer("host2_ID"),
+						Address:     utils.StringPointer("0.0.0.0:8080"),
+						Transport:   utils.StringPointer("udp"),
+						Synchronous: utils.BoolPointer(true),
+						Tls:         utils.BoolPointer(true),
+					},
+				},
+			},
+		},
+	}
+	rcv = diffRegistrarCJsonCfgs(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }

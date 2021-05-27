@@ -229,6 +229,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ActionSConns:        []string{},
 		IndexedSelects:      true,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {

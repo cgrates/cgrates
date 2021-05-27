@@ -735,4 +735,21 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+
+	d = &[]*HttpAgentJsonCfg{
+		{
+			Id: utils.StringPointer("http_agent2"),
+		},
+	}
+
+	v1 = v2
+	expected = &[]*HttpAgentJsonCfg{
+		{
+			Id: utils.StringPointer("http_agent2"),
+		},
+	}
+	rcv = diffHttpAgentsJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }

@@ -112,3 +112,45 @@ func TestLoaderCgrCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+
+func TestDiffLoaderCfgJson(t *testing.T) {
+	var d *LoaderCfgJson
+
+	v1 := &LoaderCgrCfg{
+		TpID:            "loaderID",
+		DataPath:        "/data/path",
+		DisableReverse:  false,
+		FieldSeparator:  rune(22),
+		CachesConns:     []string{"*localhost"},
+		ActionSConns:    []string{"*localhost"},
+		GapiCredentials: json.RawMessage(`{"field1":"value1"}`),
+		GapiToken:       json.RawMessage(`{"field1":"value1"}`),
+	}
+
+	v2 := &LoaderCgrCfg{
+		TpID:            "loaderID2",
+		DataPath:        "/data/path/2",
+		DisableReverse:  true,
+		FieldSeparator:  rune(97),
+		CachesConns:     []string{"*birpc"},
+		ActionSConns:    []string{"*birpc"},
+		GapiCredentials: nil,
+		GapiToken:       nil,
+	}
+
+	expected := &LoaderCfgJson{
+		Tpid:             utils.StringPointer("loaderID2"),
+		Data_path:        utils.StringPointer("/data/path/2"),
+		Disable_reverse:  utils.BoolPointer(true),
+		Field_separator:  utils.StringPointer("a"),
+		Caches_conns:     &[]string{"*birpc"},
+		Actions_conns:    &[]string{"*birpc"},
+		Gapi_credentials: nil,
+		Gapi_token:       nil,
+	}
+
+	rcv := diffLoaderCfgJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %+v \n but received \n %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
