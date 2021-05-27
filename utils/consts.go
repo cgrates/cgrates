@@ -1430,7 +1430,7 @@ const (
 	APIerSv1GetSharedGroup              = "APIerSv1.GetSharedGroup"
 	APIerSv1RemoveActionTrigger         = "APIerSv1.RemoveActionTrigger"
 	APIerSv1GetAccount                  = "APIerSv1.GetAccount"
-	APIerSv1GetAttributeProfileIDsCount = "APIerSv1.GetAttributeProfileIDsCount"
+	APIerSv1GetAttributeProfileCount    = "APIerSv1.GetAttributeProfileCount"
 	APIerSv1GetMaxUsage                 = "APIerSv1.GetMaxUsage"
 	APIerSv1GetTiming                   = "APIerSv1.GetTiming"
 	APIerSv1SetTiming                   = "APIerSv1.SetTiming"
@@ -1548,17 +1548,17 @@ const (
 
 // ThresholdS APIs
 const (
-	ThresholdSv1ProcessEvent            = "ThresholdSv1.ProcessEvent"
-	ThresholdSv1GetThreshold            = "ThresholdSv1.GetThreshold"
-	ThresholdSv1ResetThreshold          = "ThresholdSv1.ResetThreshold"
-	ThresholdSv1GetThresholdIDs         = "ThresholdSv1.GetThresholdIDs"
-	ThresholdSv1Ping                    = "ThresholdSv1.Ping"
-	ThresholdSv1GetThresholdsForEvent   = "ThresholdSv1.GetThresholdsForEvent"
-	APIerSv1GetThresholdProfileIDs      = "APIerSv1.GetThresholdProfileIDs"
-	APIerSv1GetThresholdProfileIDsCount = "APIerSv1.GetThresholdProfileIDsCount"
-	APIerSv1GetThresholdProfile         = "APIerSv1.GetThresholdProfile"
-	APIerSv1RemoveThresholdProfile      = "APIerSv1.RemoveThresholdProfile"
-	APIerSv1SetThresholdProfile         = "APIerSv1.SetThresholdProfile"
+	ThresholdSv1ProcessEvent          = "ThresholdSv1.ProcessEvent"
+	ThresholdSv1GetThreshold          = "ThresholdSv1.GetThreshold"
+	ThresholdSv1ResetThreshold        = "ThresholdSv1.ResetThreshold"
+	ThresholdSv1GetThresholdIDs       = "ThresholdSv1.GetThresholdIDs"
+	ThresholdSv1Ping                  = "ThresholdSv1.Ping"
+	ThresholdSv1GetThresholdsForEvent = "ThresholdSv1.GetThresholdsForEvent"
+	APIerSv1GetThresholdProfileIDs    = "APIerSv1.GetThresholdProfileIDs"
+	APIerSv1GetThresholdProfileCount  = "APIerSv1.GetThresholdProfileCount"
+	APIerSv1GetThresholdProfile       = "APIerSv1.GetThresholdProfile"
+	APIerSv1RemoveThresholdProfile    = "APIerSv1.RemoveThresholdProfile"
+	APIerSv1SetThresholdProfile       = "APIerSv1.SetThresholdProfile"
 )
 
 // StatS APIs
