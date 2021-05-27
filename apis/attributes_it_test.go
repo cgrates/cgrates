@@ -233,7 +233,7 @@ func testAttributeGetAttributeIDsCount(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDsCount,
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
@@ -324,7 +324,7 @@ func testAttributeGetAttributeIDsCount2(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDsCount,
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {
@@ -951,14 +951,14 @@ func testAttributeGetAttributeProfileAllIDs(t *testing.T) {
 
 func testAttributeGetAttributeProfileAllIDsCount(t *testing.T) {
 	var rply int
-	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDsCount,
+	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileCount,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "cgrates.org",
 			},
 		}, &rply); err != nil {
 		t.Error(err)
-	} else if rply != 5 { //6 for internal
+	} else if rply != 5 {
 		t.Errorf("Expected %+v, received %+v", 5, rply)
 	}
 }

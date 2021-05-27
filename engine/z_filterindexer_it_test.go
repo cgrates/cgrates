@@ -506,11 +506,13 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	//Set AttributeProfile with 2 contexts (con1 , con2)
 	if err := dataManager.SetAttributeProfile(context.Background(), attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
+		"*string:*opts.*context:con3": {
+			"AttrPrf": struct{}{},
+		},
 		"*string:*req.EventType:Event1": {
 			"AttrPrf": struct{}{},
 		},
@@ -537,11 +539,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	//check indexes with the new context (con3)
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
+		"cgrates.org", //utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eIdxes), utils.ToJSON(rcvIdx))
 	}
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
@@ -640,6 +642,9 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
+		"*string:*opts.*context:con3": {
+			"AttrPrf": struct{}{},
+		},
 		"*string:*req.Event1:EventType": {
 			"AttrPrf": struct{}{},
 		},
@@ -666,7 +671,7 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	//check indexes with the new context (con3)
 	if rcvIdx, err := dataManager.GetIndexes(context.Background(),
 		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrProfile.Tenant, "con3"),
+		"cgrates.org",
 		utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -1837,10 +1842,10 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		Weight: 20,
 	}
 
-	if err := dataManager.SetRouteProfile(context.TODO(), splProfile, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.Background(), splProfile, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetRouteProfile(context.TODO(), splProfile2, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.Background(), splProfile2, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringSet{
@@ -1893,10 +1898,10 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	splProfile.FilterIDs = []string{"FIRST", "*prefix:~*req.Account:123"}
 	splProfile2.ID = "SPL_WITH_FILTER2"
 	splProfile2.FilterIDs = []string{"FIRST"}
-	if err := dataManager.SetRouteProfile(context.TODO(), splProfile, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.Background(), splProfile, true); err != nil {
 		t.Error(err)
 	}
-	if err := dataManager.SetRouteProfile(context.TODO(), splProfile2, true); err != nil {
+	if err := dataManager.SetRouteProfile(context.Background(), splProfile2, true); err != nil {
 		t.Error(err)
 	}
 	expIdx := map[string]utils.StringSet{

@@ -67,12 +67,12 @@ CREATE TABLE tp_thresholds (
   "min_sleep" varchar(16) NOT NULL,
   "blocker" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
-  "action_ids" varchar(64) NOT NULL,
+  "action_profile_ids" varchar(64) NOT NULL,
   "async" BOOLEAN NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_thresholds_idx ON tp_thresholds (tpid);
-CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid","tenant", "id","filter_ids","action_ids");
+CREATE INDEX tp_thresholds_unique ON tp_thresholds  ("tpid","tenant", "id","filter_ids","action_profile_ids");
 
 --
 -- Table structure for table `tp_filter`

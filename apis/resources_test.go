@@ -78,7 +78,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetResourceProfileIDsCount(context.Background(), &utils.TenantWithAPIOpts{},
+	if err := adms.GetResourceProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if rplyCount != len(rsPrfIDs) {
@@ -398,7 +398,7 @@ func TestResourcesGetResourceProfileIDsCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetResourceProfileIDsCount(context.Background(),
+	if err := adms.GetResourceProfileCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -422,7 +422,7 @@ func TestResourcesGetResourceProfileIDsCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetResourceProfileIDsCount(context.Background(),
+	if err := adms.GetResourceProfileCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {

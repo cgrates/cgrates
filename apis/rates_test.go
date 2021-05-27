@@ -273,7 +273,7 @@ func TestRatesGetRateProfileIDsCount(t *testing.T) {
 	}
 	result := utils.IntPointer(0)
 	expected := utils.IntPointer(1)
-	err = admS.GetRateProfileIDsCount(context.Background(), args, result)
+	err = admS.GetRateProfileCount(context.Background(), args, result)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -311,7 +311,7 @@ func TestRatesGetRateProfileIDsCountEmptyTenant(t *testing.T) {
 	}
 	result := utils.IntPointer(0)
 	expected := utils.IntPointer(1)
-	err = admS.GetRateProfileIDsCount(context.Background(), args, result)
+	err = admS.GetRateProfileCount(context.Background(), args, result)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -331,7 +331,7 @@ func TestRatesGetRateProfileIDsCountGetKeysError(t *testing.T) {
 		Tenant: "",
 	}
 	result := utils.IntPointer(0)
-	err := admS.GetRateProfileIDsCount(context.Background(), args, result)
+	err := admS.GetRateProfileCount(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
 	}
@@ -352,7 +352,7 @@ func TestRatesGetRateProfileIDsCountKeysLenError(t *testing.T) {
 		Tenant: "",
 	}
 	result := utils.IntPointer(0)
-	err := admS.GetRateProfileIDsCount(context.Background(), args, result)
+	err := admS.GetRateProfileCount(context.Background(), args, result)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}

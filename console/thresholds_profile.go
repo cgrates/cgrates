@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetThresholdProfile{
 		name:      "thresholds_profile",
-		rpcMethod: utils.APIerSv1GetThresholdProfile,
+		rpcMethod: utils.AdminSv1GetThresholdProfile,
 		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c

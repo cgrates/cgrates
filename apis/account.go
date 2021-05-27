@@ -68,9 +68,9 @@ func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.PaginatorW
 	return nil
 }
 
-// GetAccountsCount sets in reply var the total number of AccountIDs registered for a tenant
+// GetAccountCount sets in reply var the total number of AccountIDs registered for a tenant
 // returns ErrNotFound in case of 0 AccountIDs
-func (admS *AdminSv1) GetAccountsCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+func (admS *AdminSv1) GetAccountCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
