@@ -16,7 +16,7 @@ cgrates.org,ATTR_1003_SESSIONAUTH,,,,*req.RequestType,*constant,*prepaid,
 cgrates.org,ATTR_1003_SESSIONAUTH,,,,*req.PaypalAccount,*constant,cgrates@paypal.com,
 cgrates.org,ATTR_1003_SESSIONAUTH,,,,*req.LCRProfile,*constant,premium_cli,
 cgrates.org,ATTR_ACC_ALIAS,*string:~*req.SubscriberId:1006,10,,*req.Account,*constant,1001,false
-cgrates.org,ATTR_ACC_ALIAS,,,,*req.RequestType,*constant,*prepaid,,
+cgrates.org,ATTR_ACC_ALIAS,,,,*req.RequestType,*constant,*prepaid,
 cgrates.com,ATTR_TNT_ALIAS,*string:~*req.SubscriberId:1006,10,,*req.Account,*constant,1001,false
 cgrates.com,ATTR_TNT_ALIAS,,,,*req.RequestType,*constant,*prepaid,
 cgrates.com,ATTR_TNT_ALIAS,,,,*tenant,*constant,cgrates.org,

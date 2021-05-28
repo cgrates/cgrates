@@ -26,6 +26,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc/context"
@@ -308,8 +309,13 @@ func testLoadItCheckAttributes(t *testing.T) {
 	}
 	if attr, err := db.GetAttributeProfileDrv(context.Background(), "cgrates.org", "ATTR_1001_SIMPLEAUTH"); err != nil {
 		t.Fatal(err)
-	} else if attr.Compile(); !reflect.DeepEqual(eAttrPrf, attr) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attr))
+	} else {
+		attr.Compile()
+		sort.Strings(eAttrPrf.FilterIDs)
+		sort.Strings(attr.FilterIDs)
+		if !reflect.DeepEqual(eAttrPrf, attr) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attr))
+		}
 	}
 }
 
