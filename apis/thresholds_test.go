@@ -291,6 +291,9 @@ func TestThresholdsRemoveThresholdProfileCheckErrors(t *testing.T) {
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
+		RemoveThresholdDrvF: func(ctx *context.Context, tnt, id string) error {
+			return nil
+		},
 	}
 
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
