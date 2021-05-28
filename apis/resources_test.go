@@ -474,7 +474,7 @@ func TestResourcesGetResource(t *testing.T) {
 	resPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
-			ID:                "TestResourcesGetResourcesForEvent",
+			ID:                "rsID",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             5,
 			AllocationMessage: "Approved",
@@ -502,7 +502,7 @@ func TestResourcesGetResource(t *testing.T) {
 	expResources := engine.Resources{
 		{
 			Tenant: "cgrates.org",
-			ID:     "TestResourcesGetResourcesForEvent",
+			ID:     "rsID",
 			Usages: make(map[string]*engine.ResourceUsage),
 		},
 	}
@@ -520,14 +520,14 @@ func TestResourcesGetResource(t *testing.T) {
 
 	expResource := engine.Resource{
 		Tenant: "cgrates.org",
-		ID:     "TestResourcesGetResourcesForEvent",
+		ID:     "rsID",
 		Usages: make(map[string]*engine.ResourceUsage),
 	}
 
 	var rplyResource engine.Resource
 	if err := rsv1.GetResource(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: "cgrates.org",
-		ID:     "TestResourcesGetResourcesForEvent",
+		ID:     "rsID",
 	}}, &rplyResource); err != nil {
 		t.Error(err)
 	} else {
@@ -541,7 +541,7 @@ func TestResourcesGetResource(t *testing.T) {
 	expResourceWithCfg := engine.ResourceWithConfig{
 		Resource: &engine.Resource{
 			Tenant: "cgrates.org",
-			ID:     "TestResourcesGetResourcesForEvent",
+			ID:     "rsID",
 			Usages: make(map[string]*engine.ResourceUsage),
 		},
 		Config: resPrf.ResourceProfile,
@@ -550,7 +550,7 @@ func TestResourcesGetResource(t *testing.T) {
 	var rplyResourceWithCfg engine.ResourceWithConfig
 	if err := rsv1.GetResourceWithConfig(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
 		Tenant: "cgrates.org",
-		ID:     "TestResourcesGetResourcesForEvent",
+		ID:     "rsID",
 	}}, &rplyResourceWithCfg); err != nil {
 		t.Error(err)
 	} else {
@@ -578,7 +578,7 @@ func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
 	resPrf := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:            "cgrates.org",
-			ID:                "TestResourcesGetResourcesForEvent",
+			ID:                "rsID",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
 			Limit:             5,
 			AllocationMessage: "Approved",
@@ -605,25 +605,19 @@ func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
 
 	if err := rsv1.AuthorizeResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else {
-		if reply != "Approved" {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
-		}
+	} else if reply != "Approved" {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
 	}
 
 	if err := rsv1.AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else {
-		if reply != "Approved" {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
-		}
+	} else if reply != "Approved" {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
 	}
 
 	if err := rsv1.ReleaseResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
-	} else {
-		if reply != utils.OK {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
-		}
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 }
