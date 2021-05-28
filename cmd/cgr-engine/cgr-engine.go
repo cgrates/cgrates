@@ -338,10 +338,7 @@ func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 			go func() {
 				var reply string
 				if err := config.CgrConfig().V1ReloadConfig(context.Background(),
-					&config.ReloadArgs{
-						Section: utils.EmptyString,
-						Path:    config.CgrConfig().ConfigPath, // use the same path
-					}, &reply); err != nil {
+					new(config.ReloadArgs), &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("Error reloading configuration: <%s>", err))
 				}

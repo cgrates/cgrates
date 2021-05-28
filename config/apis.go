@@ -127,39 +127,32 @@ func (cfg *CGRConfig) getSectionAsMap(section string) (mp interface{}, err error
 type ReloadArgs struct {
 	APIOpts map[string]interface{}
 	Tenant  string
-	Path    string
 	Section string
 	DryRun  bool
 }
 
 // V1ReloadConfig reloads the configuration
 func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, reply *string) (err error) {
-	updateDB := cfg.db != nil
-	if !updateDB &&
-		args.Path == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing("Path")
-	} else if updateDB &&
-		args.Path != utils.EmptyString {
-		return fmt.Errorf("Reload from the path is disabled when the configDB is enabled")
-	}
 	cfgV := cfg
 	if args.DryRun {
 		cfgV = cfg.Clone()
 	}
 	cfgV.reloadDPCache(args.Section)
-	if updateDB {
-		sections := []string{args.Section}
-		if args.Section == utils.MetaEmpty ||
-			args.Section == utils.MetaAll {
-			sections = sortedCfgSections[:len(sortedCfgSections)-1] // all exept the configDB section
-		}
-		err = cfgV.loadCfgFromDB(cfg.db, sections)
-	} else {
-		err = cfgV.loadCfgWithLocks(args.Path, args.Section)
-	}
-	if err != nil {
+	if err = cfgV.loadCfgWithLocks(cfg.ConfigPath, args.Section); err != nil {
 		return
 	}
+	if cfg.db != nil {
+		sections := []string{args.Section}
+		allSections := args.Section == utils.MetaEmpty ||
+			args.Section == utils.MetaAll
+		if allSections {
+			sections = sortedCfgSections
+		}
+		if err = cfgV.loadCfgFromDB(cfg.db, sections, allSections); err != nil {
+			return
+		}
+	}
+
 	//  lock all sections
 	cfgV.rLockSections()
 
@@ -388,19 +381,24 @@ func (cfg *CGRConfig) LoadFromDB(jsnCfg ConfigDB) (err error) {
 	return cfg.checkConfigSanity()
 }
 
-func (cfg *CGRConfig) loadCfgFromDB(db ConfigDB, sections []string) (err error) {
+func (cfg *CGRConfig) loadCfgFromDB(db ConfigDB, sections []string, ignoreConfigDB bool) (err error) {
 	loadMap := cfg.getLoadFunctions()
 	for _, section := range sections {
-		if fnct, has := loadMap[section]; !has ||
-			section == ConfigDBJSON {
-			return fmt.Errorf("Invalid section: <%s> ", section)
-		} else {
-			cfg.lks[section].Lock()
-			err = fnct(db)
-			cfg.lks[section].Unlock()
-			if err != nil {
-				return
+		if section == ConfigDBJSON {
+			if ignoreConfigDB {
+				continue
 			}
+			return fmt.Errorf("Invalid section: <%s> ", section)
+		}
+		fnct, has := loadMap[section]
+		if !has {
+			return fmt.Errorf("Invalid section: <%s> ", section)
+		}
+		cfg.lks[section].Lock()
+		err = fnct(db)
+		cfg.lks[section].Unlock()
+		if err != nil {
+			return
 		}
 	}
 	return
