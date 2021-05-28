@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -46,10 +48,11 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 
 	thPrf := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:  "cgrates.org",
-			ID:      "thdID",
-			MaxHits: 10,
-			Weight:  10,
+			Tenant:    "cgrates.org",
+			ID:        "thdID",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			MaxHits:   10,
+			Weight:    10,
 		},
 	}
 
@@ -455,5 +458,184 @@ func TestThresholdsSv1Ping(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply error")
+	}
+}
+
+func TestThresholds2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ThresholdSCfg().ActionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expActArgs := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+	mCC := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ActionSv1ExecuteActions: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args.(*utils.ArgActionSv1ScheduleActions), expActArgs) {
+					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>", expActArgs, args)
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- mCC
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions): rpcInternal,
+	})
+
+	tS := engine.NewThresholdService(dm, cfg, fltrs, cM)
+	adms := &AdminSv1{
+		dm:  dm,
+		cfg: cfg,
+	}
+
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    "cgrates.org",
+			ID:        "actPrfID",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Actions: []*engine.APAction{
+				{
+					ID: "actID",
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "thd1",
+			FilterIDs:        []string{"*string:~*req.Account:1001"},
+			MaxHits:          10,
+			Weight:           10,
+			ActionProfileIDs: []string{"actPrfID"},
+		},
+	}
+
+	if err := adms.SetThresholdProfile(context.Background(), thPrf1, &reply); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if reply != utils.OK {
+		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
+	}
+
+	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "thd2",
+			MaxHits:          10,
+			Weight:           10,
+			ActionProfileIDs: []string{"actPrfID"},
+		},
+	}
+
+	if err := adms.SetThresholdProfile(context.Background(), thPrf2, &reply); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if reply != utils.OK {
+		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
+	}
+
+	tSv1 := NewThresholdSv1(tS)
+	args := &engine.ThresholdsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		ThresholdIDs: []string{"thd1", "thd2"},
+	}
+
+	expThresholds := engine.Thresholds{
+		{
+			Tenant: "cgrates.org",
+			ID:     "thd1",
+		},
+		{
+			Tenant: "cgrates.org",
+			ID:     "thd2",
+		},
+	}
+
+	var rplyThresholds engine.Thresholds
+	if err := tSv1.GetThresholdsForEvent(context.Background(), args, &rplyThresholds); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(rplyThresholds, func(i, j int) bool {
+			return rplyThresholds[i].ID < rplyThresholds[j].ID
+		})
+		// We compare JSONs because the received Thresholds have unexported fields
+		if utils.ToJSON(expThresholds) != utils.ToJSON(rplyThresholds) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expThresholds), utils.ToJSON(rplyThresholds))
+		}
+	}
+
+	expThreshold := engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "thd1",
+	}
+
+	var rplyThreshold engine.Threshold
+	if err := tSv1.GetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "thd1",
+	}}, &rplyThreshold); err != nil {
+		t.Error(err)
+	} else {
+		// We compare JSONs because the received Threshold has unexported fields
+		if utils.ToJSON(expThreshold) != utils.ToJSON(rplyThreshold) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expThreshold), utils.ToJSON(rplyThreshold))
+		}
+	}
+
+	expIDs := []string{"thd1", "thd2"}
+	tIDs := make([]string, 2)
+	if err := tSv1.GetThresholdIDs(context.Background(), &utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+	}, &tIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(tIDs)
+		if !reflect.DeepEqual(tIDs, expIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expIDs), utils.ToJSON(tIDs))
+		}
+	}
+
+	if err := tSv1.ProcessEvent(context.Background(), args, &tIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(tIDs)
+		if !reflect.DeepEqual(tIDs, expIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expIDs), utils.ToJSON(tIDs))
+		}
+	}
+
+	if err := tSv1.ResetThreshold(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "thd1",
+	}}, &reply); err != nil {
+		t.Error(err)
 	}
 }
