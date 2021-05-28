@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 )
 
@@ -34,17 +33,5 @@ func TestConfigNewConfigSv1(t *testing.T) {
 	result := NewConfigSv1(cfg)
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestConfigReloadConfigError(t *testing.T) {
-	cfgDflt := config.NewDefaultCGRConfig()
-	cfg := NewConfigSv1(cfgDflt)
-	var reply *string
-	args := &config.ReloadArgs{}
-	err := cfg.ReloadConfig(context.Background(), args, reply)
-	expected := "MANDATORY_IE_MISSING: [Path]"
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
