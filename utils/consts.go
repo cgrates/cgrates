@@ -1929,7 +1929,6 @@ const (
 	IndexedSelectsCfg = "indexed_selects"
 	ProcessRunsCfg    = "process_runs"
 	NestedFieldsCfg   = "nested_fields"
-	AnyContextCfg     = "any_context"
 
 	// ChargerSCfg
 	StoreIntervalCfg = "store_interval"

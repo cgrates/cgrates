@@ -466,6 +466,23 @@ func TestDiffRPCConnJson(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+
+	v1 = v2
+	expected = &RPCConnJson{
+		Conns: &[]*RemoteHostJson{
+			{
+				Id:          utils.StringPointer("host2_ID"),
+				Address:     utils.StringPointer("0.0.0.0:8080"),
+				Transport:   utils.StringPointer("udp"),
+				Synchronous: utils.BoolPointer(true),
+				Tls:         utils.BoolPointer(true),
+			},
+		},
+	}
+	rcv = diffRPCConnJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }
 
 func TestEqualsRemoteHosts(t *testing.T) {
@@ -600,6 +617,13 @@ func TestDiffRPCConnsJson(t *testing.T) {
 	}
 
 	rcv := diffRPCConnsJson(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	v1 = v2
+	expected = RPCConnsJson{}
+	rcv = diffRPCConnsJson(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

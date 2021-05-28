@@ -25,14 +25,13 @@ type AttributeSCfg struct {
 	Enabled             bool
 	ResourceSConns      []string
 	StatSConns          []string
-	ApierSConns         []string
+	AdminSConns         []string
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
 	ProcessRuns         int
 	NestedFields        bool
-	AnyContext          bool
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -49,7 +48,7 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
 	if jsnCfg.Admins_conns != nil {
-		alS.ApierSConns = updateInternalConns(*jsnCfg.Admins_conns, utils.MetaAdminS)
+		alS.AdminSConns = updateInternalConns(*jsnCfg.Admins_conns, utils.MetaAdminS)
 	}
 	if jsnCfg.Indexed_selects != nil {
 		alS.IndexedSelects = *jsnCfg.Indexed_selects
@@ -69,9 +68,6 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
-	if jsnCfg.Any_context != nil {
-		alS.AnyContext = *jsnCfg.Any_context
-	}
 	return
 }
 
@@ -82,7 +78,6 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.ProcessRunsCfg:    alS.ProcessRuns,
 		utils.NestedFieldsCfg:   alS.NestedFields,
-		utils.AnyContextCfg:     alS.AnyContext,
 	}
 	if alS.StringIndexedFields != nil {
 		initialMP[utils.StringIndexedFieldsCfg] = utils.CloneStringSlice(*alS.StringIndexedFields)
@@ -100,8 +95,8 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	if alS.ResourceSConns != nil {
 		initialMP[utils.ResourceSConnsCfg] = getInternalJSONConns(alS.ResourceSConns)
 	}
-	if alS.ApierSConns != nil {
-		initialMP[utils.AdminSConnsCfg] = getInternalJSONConns(alS.ApierSConns)
+	if alS.AdminSConns != nil {
+		initialMP[utils.AdminSConnsCfg] = getInternalJSONConns(alS.AdminSConns)
 	}
 	return
 }
@@ -113,7 +108,6 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		IndexedSelects: alS.IndexedSelects,
 		NestedFields:   alS.NestedFields,
 		ProcessRuns:    alS.ProcessRuns,
-		AnyContext:     alS.AnyContext,
 	}
 	if alS.ResourceSConns != nil {
 		cln.ResourceSConns = utils.CloneStringSlice(alS.ResourceSConns)
@@ -121,8 +115,8 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 	if alS.StatSConns != nil {
 		cln.StatSConns = utils.CloneStringSlice(alS.StatSConns)
 	}
-	if alS.ApierSConns != nil {
-		cln.ApierSConns = utils.CloneStringSlice(alS.ApierSConns)
+	if alS.AdminSConns != nil {
+		cln.AdminSConns = utils.CloneStringSlice(alS.AdminSConns)
 	}
 
 	if alS.StringIndexedFields != nil {
@@ -149,7 +143,6 @@ type AttributeSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	Nested_fields         *bool // applies when indexed fields is not defined
 	Process_runs          *int
-	Any_context           *bool
 }
 
 func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *AttributeSJsonCfg {
@@ -165,8 +158,8 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 	if !utils.SliceStringEqual(v1.StatSConns, v2.StatSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
-	if !utils.SliceStringEqual(v1.ApierSConns, v2.ApierSConns) {
-		d.Admins_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ApierSConns))
+	if !utils.SliceStringEqual(v1.AdminSConns, v2.AdminSConns) {
+		d.Admins_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AdminSConns))
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

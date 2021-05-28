@@ -157,48 +157,51 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 	var d *ActionSJsonCfg
 
 	v1 := &ActionSCfg{
-		Enabled:             false,
-		CDRsConns:           []string{},
-		EEsConns:            []string{},
-		ThresholdSConns:     []string{},
-		StatSConns:          []string{},
-		AccountSConns:       []string{},
-		Tenants:             &[]string{},
-		IndexedSelects:      false,
-		StringIndexedFields: &[]string{},
-		PrefixIndexedFields: &[]string{},
-		SuffixIndexedFields: &[]string{},
-		NestedFields:        true,
+		Enabled:                  false,
+		CDRsConns:                []string{},
+		EEsConns:                 []string{},
+		ThresholdSConns:          []string{},
+		StatSConns:               []string{},
+		AccountSConns:            []string{},
+		Tenants:                  &[]string{},
+		IndexedSelects:           false,
+		StringIndexedFields:      &[]string{},
+		PrefixIndexedFields:      &[]string{},
+		SuffixIndexedFields:      &[]string{},
+		NestedFields:             true,
+		DynaprepaidActionProfile: []string{},
 	}
 
 	v2 := &ActionSCfg{
-		Enabled:             true,
-		CDRsConns:           []string{"*localhost"},
-		EEsConns:            []string{"*localhost"},
-		ThresholdSConns:     []string{"*localhost"},
-		StatSConns:          []string{"*localhost"},
-		AccountSConns:       []string{"*localhost"},
-		Tenants:             &[]string{"cgrates.org"},
-		IndexedSelects:      true,
-		StringIndexedFields: &[]string{"*req.Index1"},
-		PrefixIndexedFields: nil,
-		SuffixIndexedFields: nil,
-		NestedFields:        false,
+		Enabled:                  true,
+		CDRsConns:                []string{"*localhost"},
+		EEsConns:                 []string{"*localhost"},
+		ThresholdSConns:          []string{"*localhost"},
+		StatSConns:               []string{"*localhost"},
+		AccountSConns:            []string{"*localhost"},
+		Tenants:                  &[]string{"cgrates.org"},
+		IndexedSelects:           true,
+		StringIndexedFields:      &[]string{"*req.Index1"},
+		PrefixIndexedFields:      nil,
+		SuffixIndexedFields:      nil,
+		NestedFields:             false,
+		DynaprepaidActionProfile: []string{"dynaprepaid"},
 	}
 
 	expected := &ActionSJsonCfg{
-		Enabled:               utils.BoolPointer(true),
-		Cdrs_conns:            &[]string{"*localhost"},
-		Ees_conns:             &[]string{"*localhost"},
-		Thresholds_conns:      &[]string{"*localhost"},
-		Stats_conns:           &[]string{"*localhost"},
-		Accounts_conns:        &[]string{"*localhost"},
-		Tenants:               &[]string{"cgrates.org"},
-		Indexed_selects:       utils.BoolPointer(true),
-		String_indexed_fields: &[]string{"*req.Index1"},
-		Prefix_indexed_fields: nil,
-		Suffix_indexed_fields: nil,
-		Nested_fields:         utils.BoolPointer(false),
+		Enabled:                   utils.BoolPointer(true),
+		Cdrs_conns:                &[]string{"*localhost"},
+		Ees_conns:                 &[]string{"*localhost"},
+		Thresholds_conns:          &[]string{"*localhost"},
+		Stats_conns:               &[]string{"*localhost"},
+		Accounts_conns:            &[]string{"*localhost"},
+		Tenants:                   &[]string{"cgrates.org"},
+		Indexed_selects:           utils.BoolPointer(true),
+		String_indexed_fields:     &[]string{"*req.Index1"},
+		Prefix_indexed_fields:     nil,
+		Suffix_indexed_fields:     nil,
+		Nested_fields:             utils.BoolPointer(false),
+		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
 	}
 
 	rcv := diffActionSJsonCfg(d, v1, v2)
@@ -208,20 +211,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 
 	//The output "d" should be nil when there isn't any difference between v1 and v2_2
 	v2_2 := v1
-	expected2 := &ActionSJsonCfg{
-		Enabled:               nil,
-		Cdrs_conns:            nil,
-		Ees_conns:             nil,
-		Thresholds_conns:      nil,
-		Stats_conns:           nil,
-		Accounts_conns:        nil,
-		Tenants:               nil,
-		Indexed_selects:       nil,
-		String_indexed_fields: nil,
-		Prefix_indexed_fields: nil,
-		Suffix_indexed_fields: nil,
-		Nested_fields:         nil,
-	}
+	expected2 := &ActionSJsonCfg{}
 	rcv = diffActionSJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))

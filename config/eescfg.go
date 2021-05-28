@@ -389,7 +389,9 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 		flds = *d.Fields
 	}
 	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
-	d.Fields = &flds
+	if flds != nil {
+		d.Fields = &flds
+	}
 	return d
 }
 

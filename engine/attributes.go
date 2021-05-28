@@ -68,29 +68,8 @@ func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, t
 			alS.cgrcfg.AttributeSCfg().IndexedSelects,
 			alS.cgrcfg.AttributeSCfg().NestedFields,
 		)
-		if err != nil &&
-			err != utils.ErrNotFound {
+		if err != nil {
 			return nil, err
-		}
-		if err == utils.ErrNotFound ||
-			alS.cgrcfg.AttributeSCfg().AnyContext {
-			aPrflAnyIDs, err := MatchingItemIDsForEvent(apiCtx, evNm,
-				alS.cgrcfg.AttributeSCfg().StringIndexedFields,
-				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
-				alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
-				alS.dm, utils.CacheAttributeFilterIndexes,
-				utils.ConcatenatedKey(tnt, utils.MetaAny),
-				alS.cgrcfg.AttributeSCfg().IndexedSelects,
-				alS.cgrcfg.AttributeSCfg().NestedFields)
-
-			if aPrflIDs.Size() == 0 {
-				if err != nil { // return the error if no attribute matched the needed context
-					return nil, err
-				}
-				aPrflIDs = aPrflAnyIDs
-			} else if err == nil && aPrflAnyIDs.Size() != 0 {
-				aPrflIDs = utils.JoinStringSet(aPrflIDs, aPrflAnyIDs)
-			}
 		}
 		attrIDs = aPrflIDs.AsSlice()
 	}
@@ -310,7 +289,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 	matchedIDs := make([]string, 0, processRuns)
 	alteredFields := make(utils.StringSet)
 	dynDP := newDynamicDP(ctx, alS.cgrcfg.AttributeSCfg().ResourceSConns,
-		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, eNV)
+		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().AdminSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
 		(eNV[utils.MetaVars].(utils.MapStorage))[utils.ProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply

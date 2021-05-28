@@ -335,14 +335,16 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	// v1 = v2
-	// expected = &RadiusAgentJsonCfg{
-	// 	Client_secrets:      map[string]string{},
-	// 	Client_dictionaries: map[string]string{},
-	// 	Request_processors:  &[]*ReqProcessorJsnCfg{},
-	// }
-	// rcv = diffRadiusAgentJsonCfg(d, v1, v2, ";")
-	// if !reflect.DeepEqual(rcv, expected) {
-	// 	t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
-	// }
+	v1 = v2
+	expected = &RadiusAgentJsonCfg{
+		Client_secrets:      map[string]string{},
+		Client_dictionaries: map[string]string{},
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{},
+		},
+	}
+	rcv = diffRadiusAgentJsonCfg(d, v1, v2, ";")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }
