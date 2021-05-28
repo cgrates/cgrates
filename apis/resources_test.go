@@ -459,102 +459,171 @@ func TestResourcesSv1Ping(t *testing.T) {
 	}
 }
 
-// func TestResourcesGetResourcesForEvent(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-// 	data := engine.NewInternalDB(nil, nil, true)
-// 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-// 	fltrs := engine.NewFilterS(cfg, nil, dm)
-// 	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
-// 	adms := &AdminSv1{
-// 		dm:  dm,
-// 		cfg: cfg,
-// 	}
+func TestResourcesGetResource(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
+	adms := &AdminSv1{
+		dm:  dm,
+		cfg: cfg,
+	}
 
-// 	resPrf := &engine.ResourceProfileWithAPIOpts{
-// 		ResourceProfile: &engine.ResourceProfile{
-// 			Tenant:            "cgrates.org",
-// 			ID:                "TestResourcesGetResourcesForEvent",
-// 			FilterIDs:         []string{"*string:~*req.Account:1001"},
-// 			Limit:             5,
-// 			AllocationMessage: "Approved",
-// 			Weight:            10,
-// 		},
-// 	}
+	resPrf := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "TestResourcesGetResourcesForEvent",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             5,
+			AllocationMessage: "Approved",
+			Weight:            10,
+		},
+	}
 
-// 	var reply string
-// 	if err := adms.SetResourceProfile(context.Background(), resPrf,
-// 		&reply); err != nil {
-// 		t.Error(err)
-// 	}
+	var reply string
+	if err := adms.SetResourceProfile(context.Background(), resPrf,
+		&reply); err != nil {
+		t.Error(err)
+	}
 
-// 	resSv1 := NewResourceSv1(rls)
-// 	args := &utils.ArgRSv1ResourceUsage{
-// 		CGREvent: &utils.CGREvent{
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 			ID: "EventTest",
-// 		},
-// 		UsageID: "RU_Test",
-// 	}
+	rsv1 := NewResourceSv1(rls)
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		UsageID: "RU_Test",
+	}
 
-// 	expResources := &engine.Resources{
-// 		{
-// 			Tenant: "cgrates.org",
-// 			ID:     "TestResourcesGetResourcesForEvent",
-// 			Usages: make(map[string]*engine.ResourceUsage),
-// 		},
-// 	}
+	expResources := engine.Resources{
+		{
+			Tenant: "cgrates.org",
+			ID:     "TestResourcesGetResourcesForEvent",
+			Usages: make(map[string]*engine.ResourceUsage),
+		},
+	}
 
-// 	var rplyResources engine.Resources
-// 	if err := resSv1.GetResourcesForEvent(context.Background(), args, &rplyResources); err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		rplyPtr := &rplyResources
-// 		if !reflect.DeepEqual(expResources, rplyPtr) {
-// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expResources), utils.ToJSON(rplyPtr))
-// 		}
-// 	}
+	var rplyResources engine.Resources
+	if err := rsv1.GetResourcesForEvent(context.Background(), args, &rplyResources); err != nil {
+		t.Error(err)
+	} else {
+		// We compare JSONs because the received Resources have unexported fields
+		if utils.ToJSON(expResources) != utils.ToJSON(rplyResources) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expResources), utils.ToJSON(rplyResources))
+		}
+	}
 
-// 	expResource := &engine.Resource{
-// 		Tenant: "cgrates.org",
-// 		ID:     "TestResourcesGetResourcesForEvent",
-// 		Usages: make(map[string]*engine.ResourceUsage),
-// 	}
+	expResource := engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "TestResourcesGetResourcesForEvent",
+		Usages: make(map[string]*engine.ResourceUsage),
+	}
 
-// 	var rplyResource engine.Resource
-// 	if err := resSv1.GetResource(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
-// 		Tenant: "cgrates.org",
-// 		ID:     "TestResourcesGetResourcesForEvent",
-// 	}}, &rplyResource); err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		rplyPtr := &rplyResource
-// 		if !reflect.DeepEqual(expResource, rplyPtr) {
-// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expResource), utils.ToJSON(rplyPtr))
-// 		}
-// 	}
+	var rplyResource engine.Resource
+	if err := rsv1.GetResource(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "TestResourcesGetResourcesForEvent",
+	}}, &rplyResource); err != nil {
+		t.Error(err)
+	} else {
+		// We compare JSONs because the received Resource has unexported fields
+		if utils.ToJSON(rplyResource) != utils.ToJSON(expResource) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expResource), utils.ToJSON(rplyResource))
+		}
+	}
 
-// 	expResourceWithCfg := &engine.ResourceWithConfig{
-// 		Resource: &engine.Resource{
-// 			Tenant: "cgrates.org",
-// 			ID:     "TestResourcesGetResourcesForEvent",
-// 			Usages: make(map[string]*engine.ResourceUsage),
-// 		},
-// 		Config: resPrf.ResourceProfile,
-// 	}
+	expResourceWithCfg := engine.ResourceWithConfig{
+		Resource: &engine.Resource{
+			Tenant: "cgrates.org",
+			ID:     "TestResourcesGetResourcesForEvent",
+			Usages: make(map[string]*engine.ResourceUsage),
+		},
+		Config: resPrf.ResourceProfile,
+	}
 
-// 	var rplyResourceWithCfg engine.ResourceWithConfig
-// 	if err := resSv1.GetResourceWithConfig(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
-// 		Tenant: "cgrates.org",
-// 		ID:     "TestResourcesGetResourcesForEvent",
-// 	}}, &rplyResourceWithCfg); err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		rplyPtr := &rplyResourceWithCfg
-// 		if !reflect.DeepEqual(expResource, rplyPtr) {
-// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expResourceWithCfg), utils.ToJSON(rplyPtr))
-// 		}
-// 	}
-// }
+	var rplyResourceWithCfg engine.ResourceWithConfig
+	if err := rsv1.GetResourceWithConfig(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "TestResourcesGetResourcesForEvent",
+	}}, &rplyResourceWithCfg); err != nil {
+		t.Error(err)
+	} else {
+		// We compare JSONs because the received Resource has unexported fields
+		if utils.ToJSON(expResourceWithCfg) != utils.ToJSON(rplyResourceWithCfg) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expResourceWithCfg), utils.ToJSON(rplyResourceWithCfg))
+		}
+	}
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
+	adms := &AdminSv1{
+		dm:  dm,
+		cfg: cfg,
+	}
+
+	resPrf := &engine.ResourceProfileWithAPIOpts{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:            "cgrates.org",
+			ID:                "TestResourcesGetResourcesForEvent",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Limit:             5,
+			AllocationMessage: "Approved",
+			Weight:            10,
+		},
+	}
+
+	var reply string
+	if err := adms.SetResourceProfile(context.Background(), resPrf,
+		&reply); err != nil {
+		t.Error(err)
+	}
+
+	rsv1 := NewResourceSv1(rls)
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		UsageID: "RU_Test",
+	}
+
+	if err := rsv1.AuthorizeResources(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		if reply != "Approved" {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
+		}
+	}
+
+	if err := rsv1.AllocateResources(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		if reply != "Approved" {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
+		}
+	}
+
+	if err := rsv1.ReleaseResources(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		if reply != utils.OK {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
+		}
+	}
+}
