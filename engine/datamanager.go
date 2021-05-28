@@ -553,10 +553,10 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *ThresholdPr
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, th.Tenant, th.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, th.Tenant, th.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, th.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, th.TenantID())
 		}
 	}
 	oldTh, err := dm.GetThresholdProfile(ctx, th.Tenant, th.ID, true, false, utils.NonTransactional)
@@ -806,10 +806,10 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *StatQueueP
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, sqp.Tenant, sqp.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, sqp.Tenant, sqp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, sqp.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, sqp.TenantID())
 		}
 	}
 	oldSts, err := dm.GetStatQueueProfile(ctx, sqp.Tenant, sqp.ID, true, false, utils.NonTransactional)
@@ -1074,10 +1074,10 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProf
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, rp.Tenant, rp.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, rp.Tenant, rp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, rp.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, rp.TenantID())
 		}
 	}
 	oldRes, err := dm.GetResourceProfile(ctx, rp.Tenant, rp.ID, true, false, utils.NonTransactional)
@@ -1232,10 +1232,10 @@ func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *RouteProfile, 
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, rpp.Tenant, rpp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, rpp.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, rpp.TenantID())
 		}
 	}
 	oldRpp, err := dm.GetRouteProfile(ctx, rpp.Tenant, rpp.ID, true, false, utils.NonTransactional)
@@ -1366,10 +1366,10 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, ap.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, ap.TenantID())
 		}
 	}
 	oldAP, err := dm.GetAttributeProfile(ctx, ap.Tenant, ap.ID, true, false, utils.NonTransactional)
@@ -1493,10 +1493,10 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(context.TODO(), cpp.Tenant, cpp.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(context.TODO(), cpp.Tenant, cpp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, cpp.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, cpp.TenantID())
 		}
 	}
 	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, false, utils.NonTransactional)
@@ -1620,10 +1620,10 @@ func (dm *DataManager) SetDispatcherProfile(ctx *context.Context, dpp *Dispatche
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, dpp.Tenant, dpp.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, dpp.Tenant, dpp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, dpp.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, dpp.TenantID())
 		}
 	}
 	oldDpp, err := dm.GetDispatcherProfile(ctx, dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
@@ -1923,16 +1923,16 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rpp.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, rpp.Tenant, rpp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, rpp.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, rpp.TenantID())
 		}
 		for _, rate := range rpp.Rates {
-			if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
+			if err := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); err != nil {
 				// if we get a broken filter do not update the rates
-				return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
-					brokenReference, rate.ID)
+				return fmt.Errorf("%+s for item with ID: %+v",
+					err, rate.ID)
 			}
 		}
 	}
@@ -2089,10 +2089,11 @@ func (dm *DataManager) SetRateProfileRates(ctx *context.Context, rpp *utils.Rate
 	}
 	if withIndex {
 		for _, rate := range rpp.Rates {
-			if brokenReference := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); len(brokenReference) != 0 {
+			if err := dm.checkFilters(ctx, rpp.Tenant, rate.FilterIDs); err != nil {
 				// if we get a broken filter do not update the rates
-				return fmt.Errorf("broken reference to filter: %+v for rate with ID: %+v",
-					brokenReference, rate.ID)
+
+				return fmt.Errorf("%+s for item with ID: %+v",
+					err, rate.ID)
 			}
 		}
 	}
@@ -2188,10 +2189,10 @@ func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *ActionProfile,
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, ap.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, ap.TenantID())
 		}
 	}
 	oldRpp, err := dm.GetActionProfile(ctx, ap.Tenant, ap.ID, true, false, utils.NonTransactional)
@@ -2411,17 +2412,19 @@ func (dm *DataManager) GetAPIBan(ctx *context.Context, ip string, apiKeys []stri
 
 // checkFilters returns the id of the first Filter that is not valid
 // it should be called after the dm nil check
-func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []string) (brokenReference string) {
+func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []string) (err error) {
 	for _, id := range ids {
 		// in case of inline filter we try to build them
 		// if they are not correct it should fail here not in indexes
 		if strings.HasPrefix(id, utils.Meta) {
-			if _, err := NewFilterFromInline(tenant, id); err != nil {
-				return id
+			if fltr, err := NewFilterFromInline(tenant, id); err != nil {
+				return fmt.Errorf("broken reference to filter: <%s>", id)
+			} else if err := CheckFilter(fltr); err != nil {
+				return err
 			}
 		} else if x, has := Cache.Get(utils.CacheFilters, // because the method HasDataDrv doesn't use cache
 			utils.ConcatenatedKey(tenant, id)); has && x == nil { // check to see if filter is already in cache
-			return id
+			return fmt.Errorf("broken reference to filter: <%s>", id)
 		} else if has, err := dm.DataDB().HasDataDrv(ctx, utils.FilterPrefix, // check in local DB if we have the filter
 			id, tenant); err != nil || !has {
 			// in case we can not find it localy try to find it in the remote DB
@@ -2438,7 +2441,7 @@ func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []s
 			}
 			// not in local DB and not in remote DB
 			if err != nil || !has {
-				return id
+				return fmt.Errorf("broken reference to filter: <%s>", id)
 			}
 		}
 	}
@@ -2476,10 +2479,10 @@ func (dm *DataManager) SetAccount(ctx *context.Context, ap *utils.Account, withI
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if brokenReference := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); len(brokenReference) != 0 {
+		if err := dm.checkFilters(ctx, ap.Tenant, ap.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
-			return fmt.Errorf("broken reference to filter: %+v for item with ID: %+v",
-				brokenReference, ap.TenantID())
+			return fmt.Errorf("%+s for item with ID: %+v",
+				err, ap.TenantID())
 		}
 	}
 	oldRpp, err := dm.GetAccount(ctx, ap.Tenant, ap.ID)

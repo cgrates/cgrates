@@ -114,6 +114,17 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, utils.NewErrMandatoryIeMissing(utils.Path), data.Type, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, err, val.path, utils.Values)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.LoaderS, err, field.Filters, utils.Filters)
+				}
 			}
 		}
 	}
@@ -262,6 +273,17 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for template %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), prf, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, val.path, utils.Values)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Filters, utils.TemplatesCfg)
+				}
 			}
 		}
 		for _, req := range cfg.diameterAgentCfg.RequestProcessors {
@@ -271,6 +293,17 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.DiameterAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Filters, utils.RequestFieldsCfg)
+				}
 			}
 			for _, field := range req.ReplyFields {
 				if field.Type != utils.MetaNone &&
@@ -278,9 +311,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.DiameterAgent, err, val.path, utils.Values, utils.ReplyFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, field.Filters, utils.ReplyFieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(req.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.DiameterAgent, err, req.Filters, utils.RequestProcessorsCfg)
 			}
 		}
 	}
+
 	//Radius Agent
 	if cfg.radiusAgentCfg.Enabled {
 		if len(cfg.radiusAgentCfg.SessionSConns) == 0 {
@@ -300,11 +348,36 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.RadiusAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, field.Filters, utils.RequestFieldsCfg)
+				}
 			}
 			for _, field := range req.ReplyFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.RadiusAgent, err, val.path, utils.Values, utils.ReplyFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, field.Filters, utils.ReplyFieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(req.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.RadiusAgent, err, req.Filters, utils.RequestProcessorsCfg)
 			}
 		}
 	}
@@ -358,11 +431,36 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.HTTPAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, field.Filters, utils.RequestFieldsCfg)
+				}
 			}
 			for _, field := range req.ReplyFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.HTTPAgent, err, val.path, utils.Values, utils.ReplyFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, field.Filters, utils.ReplyFieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(req.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.HTTPAgent, err, req.Filters, utils.RequestProcessorsCfg)
 			}
 		}
 	}
@@ -386,11 +484,36 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.SIPAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, field.Filters, utils.RequestFieldsCfg)
+				}
 			}
 			for _, field := range req.ReplyFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.SIPAgent, err, val.path, utils.Values, utils.ReplyFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, field.Filters, utils.ReplyFieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(req.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.SIPAgent, err, req.Filters, utils.RequestProcessorsCfg)
 			}
 		}
 	}
@@ -410,6 +533,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+
 	// ResourceLimiter checks
 	if cfg.resourceSCfg.Enabled {
 		for _, connID := range cfg.resourceSCfg.ThresholdSConns {
@@ -548,11 +672,60 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Path, utils.Path)
+				}
+				if field.Type == utils.MetaVariable ||
+					field.Type == utils.MetaComposed ||
+					field.Type == utils.MetaGroup ||
+					field.Type == utils.MetaUsageDifference ||
+					field.Type == utils.MetaCCUsage ||
+					field.Type == utils.MetaSum ||
+					field.Type == utils.MetaDifference ||
+					field.Type == utils.MetaMultiply ||
+					field.Type == utils.MetaDivide ||
+					field.Type == utils.MetaValueExponent ||
+					field.Type == utils.MetaUnixTimestamp {
+					for _, val := range field.Value {
+						if err := utils.IsPathValidForExporters(val.path); err != nil {
+							return fmt.Errorf("<%s> %s for %s at %s of %s", utils.ERs, err, val.path, utils.Values, utils.CacheDumpFieldsCfg)
+						}
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Filters, utils.CacheDumpFieldsCfg)
+				}
 			}
 			for _, field := range rdr.Fields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, utils.NewErrMandatoryIeMissing(utils.Path), rdr.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Path, utils.Path)
+				}
+				if field.Type == utils.MetaVariable ||
+					field.Type == utils.MetaComposed ||
+					field.Type == utils.MetaGroup ||
+					field.Type == utils.MetaUsageDifference ||
+					field.Type == utils.MetaCCUsage ||
+					field.Type == utils.MetaSum ||
+					field.Type == utils.MetaDifference ||
+					field.Type == utils.MetaMultiply ||
+					field.Type == utils.MetaDivide ||
+					field.Type == utils.MetaValueExponent ||
+					field.Type == utils.MetaUnixTimestamp {
+					for _, val := range field.Value {
+						if err := utils.IsPathValidForExporters(val.path); err != nil {
+							return fmt.Errorf("<%s> %s for %s at %s of %s", utils.ERs, err, val.path, utils.Values, utils.FieldsCfg)
+						}
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, field.Filters, utils.FieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(rdr.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.ERs, err, rdr.Filters, utils.ReadersCfg)
 			}
 		}
 	}
@@ -597,6 +770,32 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.EEs, utils.NewErrMandatoryIeMissing(utils.Path), exp.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.EEs, err, field.Path, utils.Path)
+				}
+				if field.Type == utils.MetaVariable ||
+					field.Type == utils.MetaComposed ||
+					field.Type == utils.MetaGroup ||
+					field.Type == utils.MetaUsageDifference ||
+					field.Type == utils.MetaCCUsage ||
+					field.Type == utils.MetaSum ||
+					field.Type == utils.MetaDifference ||
+					field.Type == utils.MetaMultiply ||
+					field.Type == utils.MetaDivide ||
+					field.Type == utils.MetaValueExponent ||
+					field.Type == utils.MetaUnixTimestamp {
+					for _, val := range field.Value {
+						if err := utils.IsPathValidForExporters(val.path); err != nil {
+							return fmt.Errorf("<%s> %s for %s at %s of %s", utils.EEs, err, val.path, utils.Values, utils.FieldsCfg)
+						}
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.EEs, err, field.Filters, utils.FieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(exp.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.EEs, err, exp.Filters, utils.ExportersCfg)
 			}
 		}
 	}
