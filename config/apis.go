@@ -281,11 +281,8 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 	if !args.DryRun {
 		cfgV.reloadSections(sections...)
 		if updateDB { // need to update the DB but only parts
-			dft := NewDefaultCGRConfig()
-			for _, section := range sections {
-				if err = storeDiff(ctx, section, cfg.db, dft, oldCfg, cfg); err != nil {
-					return
-				}
+			if err = storeDiffSections(ctx, sections, cfgV.db, oldCfg, cfgV); err != nil {
+				return
 			}
 		}
 	}
@@ -342,11 +339,8 @@ func (cfg *CGRConfig) V1SetConfigFromJSON(ctx *context.Context, args *SetConfigF
 	if !args.DryRun {
 		cfgV.reloadSections(sortedCfgSections...)
 		if updateDB { // need to update the DB but only parts
-			dft := NewDefaultCGRConfig()
-			for _, section := range sortedCfgSections {
-				if err = storeDiff(ctx, section, cfg.db, dft, oldCfg, cfg); err != nil {
-					return
-				}
+			if err = storeDiffSections(ctx, sortedCfgSections, cfg.db, oldCfg, cfg); err != nil {
+				return
 			}
 		}
 	}
@@ -416,764 +410,284 @@ func (cfg *CGRConfig) V1StoreCfgInDB(ctx *context.Context, args *SectionWithAPIO
 	if cfg.db == nil {
 		return errors.New("no DB connection for config")
 	}
-	if len(args.Sections) != 0 && args.Sections[0] != utils.MetaAll {
-		dft := NewDefaultCGRConfig()
-		for _, section := range args.Sections {
-			if err = storeDiff(ctx, section, cfg.db, dft, nil, cfg); err != nil {
-				return
-			}
-		}
-	}
-	cfg.rLockSections()
-	mp := cfg.AsMapInterface(cfg.generalCfg.RSRSep)
-	cfg.rUnlockSections()
-	var data []byte
-	if data, err = json.Marshal(mp); err != nil {
+	v1 := NewDefaultCGRConfig()
+	if err = v1.loadFromJSONCfg(cfg.db); err != nil { // load the config from DB
 		return
 	}
-	var dp ConfigDB
-	if dp, err = NewCgrJsonCfgFromBytes(data); err != nil {
-		return
+	if len(args.Sections) != 0 && args.Sections[0] == utils.MetaAll {
+		args.Sections = sortedCfgSections
 	}
-	var sc interface{}
-	if sc, err = dp.GeneralJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, GeneralJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.RPCConnJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, RPCConnsJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.CacheJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, CacheJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ListenJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ListenJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.HttpJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, HTTPJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.DbJsonCfg(StorDBJSON); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, StorDBJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.DbJsonCfg(DataDBJSON); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, DataDBJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.FilterSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, FilterSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.CdrsJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, CDRsJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ERsJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ERsJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.EEsJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, EEsJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.SessionSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, SessionSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.FreeswitchAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, FreeSWITCHAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.KamAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, KamailioAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.AsteriskAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, AsteriskAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.DiameterAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, DiameterAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.RadiusAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, RadiusAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.HttpAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, HTTPAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.DNSAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, DNSAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.AttributeServJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, AttributeSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ChargerServJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ChargerSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ResourceSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ResourceSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.StatSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, StatSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ThresholdSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ThresholdSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.RouteSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, RouteSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.LoaderJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, LoaderSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.SureTaxJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, SureTaxJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.DispatcherSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, DispatcherSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.RegistrarCJsonCfgs(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, RegistrarCJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.LoaderCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, LoaderJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.MigratorCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, MigratorJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.TlsCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, TlsJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.AnalyzerCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, AnalyzerSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.AdminSCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, AdminSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.RateCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, RateSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.SIPAgentJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, SIPAgentJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.TemplateSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, TemplatesJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ConfigSJsonCfg(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ConfigSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ApiBanCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, APIBanJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.CoreSJSON(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, CoreSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.ActionSCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, ActionSJSON, sc); err != nil {
-		return
-	}
-	if sc, err = dp.AccountSCfgJson(); err != nil {
-		return
-	} else if err = cfg.db.SetSection(ctx, AccountSJSON, sc); err != nil {
+	err = storeDiffSections(ctx, args.Sections, cfg.db, v1, cfg)
+	if err != nil {
 		return
 	}
 	*rply = utils.OK
 	return
 }
 
-func storeDiff(ctx *context.Context, section string, db ConfigDB, dft, v1, v2 *CGRConfig) (err error) {
+func storeDiffSections(ctx *context.Context, sections []string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
+	for _, section := range sections {
+		if err = storeDiffSection(ctx, section, db, v1, v2); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
 	switch section {
 	case GeneralJSON:
 		var jsn *GeneralJsonCfg
 		if jsn, err = db.GeneralJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.GeneralCfg()
-		if v1 != nil {
-			g1 = v1.GeneralCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffGeneralJsonCfg(jsn, g1, v2.GeneralCfg()))
+		return db.SetSection(ctx, section, diffGeneralJsonCfg(jsn, v1.GeneralCfg(), v2.GeneralCfg()))
 	case RPCConnsJSON:
 		var jsn RPCConnsJson
 		if jsn, err = db.RPCConnJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.RPCConns()
-		if v1 != nil {
-			g1 = v1.RPCConns()
-		} else {
-			g1.loadFromJSONCfg(jsn)
-		}
-		return db.SetSection(ctx, section, diffRPCConnsJson(jsn, g1, v2.RPCConns()))
+		return db.SetSection(ctx, section, diffRPCConnsJson(jsn, v1.RPCConns(), v2.RPCConns()))
 	case CacheJSON:
 		var jsn *CacheJsonCfg
 		if jsn, err = db.CacheJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.CacheCfg()
-		if v1 != nil {
-			g1 = v1.CacheCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffCacheJsonCfg(jsn, g1, v2.CacheCfg()))
+		return db.SetSection(ctx, section, diffCacheJsonCfg(jsn, v1.CacheCfg(), v2.CacheCfg()))
 	case ListenJSON:
 		var jsn *ListenJsonCfg
 		if jsn, err = db.ListenJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.ListenCfg()
-		if v1 != nil {
-			g1 = v1.ListenCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffListenJsonCfg(jsn, g1, v2.ListenCfg()))
+		return db.SetSection(ctx, section, diffListenJsonCfg(jsn, v1.ListenCfg(), v2.ListenCfg()))
 	case HTTPJSON:
 		var jsn *HTTPJsonCfg
 		if jsn, err = db.HttpJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.HTTPCfg()
-		if v1 != nil {
-			g1 = v1.HTTPCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffHTTPJsonCfg(jsn, g1, v2.HTTPCfg()))
+		return db.SetSection(ctx, section, diffHTTPJsonCfg(jsn, v1.HTTPCfg(), v2.HTTPCfg()))
 	case StorDBJSON:
 		var jsn *DbJsonCfg
 		if jsn, err = db.DbJsonCfg(StorDBJSON); err != nil {
 			return
 		}
-		g1 := dft.StorDbCfg()
-		if v1 != nil {
-			g1 = v1.StorDbCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffStorDBDbJsonCfg(jsn, g1, v2.StorDbCfg()))
+		return db.SetSection(ctx, section, diffStorDBDbJsonCfg(jsn, v1.StorDbCfg(), v2.StorDbCfg()))
 	case DataDBJSON:
 		var jsn *DbJsonCfg
 		if jsn, err = db.DbJsonCfg(DataDBJSON); err != nil {
 			return
 		}
-		g1 := dft.DataDbCfg()
-		if v1 != nil {
-			g1 = v1.DataDbCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffDataDbJsonCfg(jsn, g1, v2.DataDbCfg()))
+		return db.SetSection(ctx, section, diffDataDbJsonCfg(jsn, v1.DataDbCfg(), v2.DataDbCfg()))
 	case FilterSJSON:
 		var jsn *FilterSJsonCfg
 		if jsn, err = db.FilterSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.FilterSCfg()
-		if v1 != nil {
-			g1 = v1.FilterSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffFilterSJsonCfg(jsn, g1, v2.FilterSCfg()))
+		return db.SetSection(ctx, section, diffFilterSJsonCfg(jsn, v1.FilterSCfg(), v2.FilterSCfg()))
 	case CDRsJSON:
 		var jsn *CdrsJsonCfg
 		if jsn, err = db.CdrsJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.CdrsCfg()
-		if v1 != nil {
-			g1 = v1.CdrsCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffCdrsJsonCfg(jsn, g1, v2.CdrsCfg()))
+		return db.SetSection(ctx, section, diffCdrsJsonCfg(jsn, v1.CdrsCfg(), v2.CdrsCfg()))
 	case ERsJSON:
 		var jsn *ERsJsonCfg
 		if jsn, err = db.ERsJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.ERsCfg()
-		if v1 != nil {
-			g1 = v1.ERsCfg()
-		} else {
-			if err = dft.loadTemplateSCfg(db); err != nil {
-				return
-			}
-			if err = g1.loadFromJSONCfg(jsn, dft.TemplatesCfg(), dft.GeneralCfg().RSRSep, dft.dfltEvRdr); err != nil {
-				return
-			}
-		}
-		return db.SetSection(ctx, section, diffERsJsonCfg(jsn, g1, v2.ERsCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffERsJsonCfg(jsn, v1.ERsCfg(), v2.ERsCfg(), v2.GeneralCfg().RSRSep))
 	case EEsJSON:
 		var jsn *EEsJsonCfg
 		if jsn, err = db.EEsJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.EEsCfg()
-		if v1 != nil {
-			g1 = v1.EEsCfg()
-		} else {
-			if err = dft.loadTemplateSCfg(db); err != nil {
-				return
-			}
-			if err = g1.loadFromJSONCfg(jsn, dft.TemplatesCfg(), dft.GeneralCfg().RSRSep, dft.dfltEvExp); err != nil {
-				return
-			}
-		}
-		return db.SetSection(ctx, section, diffEEsJsonCfg(jsn, g1, v2.EEsCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffEEsJsonCfg(jsn, v1.EEsCfg(), v2.EEsCfg(), v2.GeneralCfg().RSRSep))
 	case SessionSJSON:
 		var jsn *SessionSJsonCfg
 		if jsn, err = db.SessionSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.SessionSCfg()
-		if v1 != nil {
-			g1 = v1.SessionSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffSessionSJsonCfg(jsn, g1, v2.SessionSCfg()))
+		return db.SetSection(ctx, section, diffSessionSJsonCfg(jsn, v1.SessionSCfg(), v2.SessionSCfg()))
 	case FreeSWITCHAgentJSON:
 		var jsn *FreeswitchAgentJsonCfg
 		if jsn, err = db.FreeswitchAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.FsAgentCfg()
-		if v1 != nil {
-			g1 = v1.FsAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffFreeswitchAgentJsonCfg(jsn, g1, v2.FsAgentCfg()))
+		return db.SetSection(ctx, section, diffFreeswitchAgentJsonCfg(jsn, v1.FsAgentCfg(), v2.FsAgentCfg()))
 	case KamailioAgentJSON:
 		var jsn *KamAgentJsonCfg
 		if jsn, err = db.KamAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.KamAgentCfg()
-		if v1 != nil {
-			g1 = v1.KamAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffKamAgentJsonCfg(jsn, g1, v2.KamAgentCfg()))
+		return db.SetSection(ctx, section, diffKamAgentJsonCfg(jsn, v1.KamAgentCfg(), v2.KamAgentCfg()))
 	case AsteriskAgentJSON:
 		var jsn *AsteriskAgentJsonCfg
 		if jsn, err = db.AsteriskAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.AsteriskAgentCfg()
-		if v1 != nil {
-			g1 = v1.AsteriskAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffAsteriskAgentJsonCfg(jsn, g1, v2.AsteriskAgentCfg()))
+		return db.SetSection(ctx, section, diffAsteriskAgentJsonCfg(jsn, v1.AsteriskAgentCfg(), v2.AsteriskAgentCfg()))
 	case DiameterAgentJSON:
 		var jsn *DiameterAgentJsonCfg
 		if jsn, err = db.DiameterAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.DiameterAgentCfg()
-		if v1 != nil {
-			g1 = v1.DiameterAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn, dft.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffDiameterAgentJsonCfg(jsn, g1, v2.DiameterAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffDiameterAgentJsonCfg(jsn, v1.DiameterAgentCfg(), v2.DiameterAgentCfg(), v2.GeneralCfg().RSRSep))
 	case RadiusAgentJSON:
 		var jsn *RadiusAgentJsonCfg
 		if jsn, err = db.RadiusAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.RadiusAgentCfg()
-		if v1 != nil {
-			g1 = v1.RadiusAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn, dft.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, g1, v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
 	case HTTPAgentJSON:
 		var jsn *RadiusAgentJsonCfg
 		if jsn, err = db.RadiusAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.RadiusAgentCfg()
-		if v1 != nil {
-			g1 = v1.RadiusAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn, dft.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, g1, v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
 	case DNSAgentJSON:
 		var jsn *DNSAgentJsonCfg
 		if jsn, err = db.DNSAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.DNSAgentCfg()
-		if v1 != nil {
-			g1 = v1.DNSAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn, dft.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffDNSAgentJsonCfg(jsn, g1, v2.DNSAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffDNSAgentJsonCfg(jsn, v1.DNSAgentCfg(), v2.DNSAgentCfg(), v2.GeneralCfg().RSRSep))
 	case AttributeSJSON:
 		var jsn *AttributeSJsonCfg
 		if jsn, err = db.AttributeServJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.AttributeSCfg()
-		if v1 != nil {
-			g1 = v1.AttributeSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffAttributeSJsonCfg(jsn, g1, v2.AttributeSCfg()))
+		return db.SetSection(ctx, section, diffAttributeSJsonCfg(jsn, v1.AttributeSCfg(), v2.AttributeSCfg()))
 	case ChargerSJSON:
 		var jsn *ChargerSJsonCfg
 		if jsn, err = db.ChargerServJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.ChargerSCfg()
-		if v1 != nil {
-			g1 = v1.ChargerSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffChargerSJsonCfg(jsn, g1, v2.ChargerSCfg()))
+		return db.SetSection(ctx, section, diffChargerSJsonCfg(jsn, v1.ChargerSCfg(), v2.ChargerSCfg()))
 	case ResourceSJSON:
 		var jsn *ResourceSJsonCfg
 		if jsn, err = db.ResourceSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.ResourceSCfg()
-		if v1 != nil {
-			g1 = v1.ResourceSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffResourceSJsonCfg(jsn, g1, v2.ResourceSCfg()))
+		return db.SetSection(ctx, section, diffResourceSJsonCfg(jsn, v1.ResourceSCfg(), v2.ResourceSCfg()))
 	case StatSJSON:
 		var jsn *StatServJsonCfg
 		if jsn, err = db.StatSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.StatSCfg()
-		if v1 != nil {
-			g1 = v1.StatSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffStatServJsonCfg(jsn, g1, v2.StatSCfg()))
+		return db.SetSection(ctx, section, diffStatServJsonCfg(jsn, v1.StatSCfg(), v2.StatSCfg()))
 	case ThresholdSJSON:
 		var jsn *ThresholdSJsonCfg
 		if jsn, err = db.ThresholdSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.ThresholdSCfg()
-		if v1 != nil {
-			g1 = v1.ThresholdSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffThresholdSJsonCfg(jsn, g1, v2.ThresholdSCfg()))
+		return db.SetSection(ctx, section, diffThresholdSJsonCfg(jsn, v1.ThresholdSCfg(), v2.ThresholdSCfg()))
 	case RouteSJSON:
 		var jsn *RouteSJsonCfg
 		if jsn, err = db.RouteSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.RouteSCfg()
-		if v1 != nil {
-			g1 = v1.RouteSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffRouteSJsonCfg(jsn, g1, v2.RouteSCfg()))
+		return db.SetSection(ctx, section, diffRouteSJsonCfg(jsn, v1.RouteSCfg(), v2.RouteSCfg()))
 	case LoaderSJSON:
 		var jsn []*LoaderJsonCfg
 		if jsn, err = db.LoaderJsonCfg(); err != nil {
 			return
 		}
-		var g1 LoaderSCfgs
-		if v1 != nil {
-			g1 = v1.LoaderCfg()
-		} else {
-			if err = dft.loadTemplateSCfg(db); err != nil {
-				return
-			}
-			if err = dft.loadLoaderSCfg(db); err != nil {
-				return
-			}
-			g1 = dft.LoaderCfg()
-		}
-		return db.SetSection(ctx, section, diffLoadersJsonCfg(jsn, g1, v2.LoaderCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffLoadersJsonCfg(jsn, v1.LoaderCfg(), v2.LoaderCfg(), v2.GeneralCfg().RSRSep))
 	case SureTaxJSON:
 		var jsn *SureTaxJsonCfg
 		if jsn, err = db.SureTaxJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.SureTaxCfg()
-		if v1 != nil {
-			g1 = v1.SureTaxCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffSureTaxJsonCfg(jsn, g1, v2.SureTaxCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffSureTaxJsonCfg(jsn, v1.SureTaxCfg(), v2.SureTaxCfg(), v2.GeneralCfg().RSRSep))
 	case DispatcherSJSON:
 		var jsn *DispatcherSJsonCfg
 		if jsn, err = db.DispatcherSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.DispatcherSCfg()
-		if v1 != nil {
-			g1 = v1.DispatcherSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffDispatcherSJsonCfg(jsn, g1, v2.DispatcherSCfg()))
+		return db.SetSection(ctx, section, diffDispatcherSJsonCfg(jsn, v1.DispatcherSCfg(), v2.DispatcherSCfg()))
 	case RegistrarCJSON:
 		var jsn *RegistrarCJsonCfgs
 		if jsn, err = db.RegistrarCJsonCfgs(); err != nil {
 			return
 		}
-		g1 := dft.RegistrarCCfg()
-		if v1 != nil {
-			g1 = v1.RegistrarCCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffRegistrarCJsonCfgs(jsn, g1, v2.RegistrarCCfg()))
+		return db.SetSection(ctx, section, diffRegistrarCJsonCfgs(jsn, v1.RegistrarCCfg(), v2.RegistrarCCfg()))
 	case LoaderJSON:
 		var jsn *LoaderCfgJson
 		if jsn, err = db.LoaderCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.LoaderCgrCfg()
-		if v1 != nil {
-			g1 = v1.LoaderCgrCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffLoaderCfgJson(jsn, g1, v2.LoaderCgrCfg()))
+		return db.SetSection(ctx, section, diffLoaderCfgJson(jsn, v1.LoaderCgrCfg(), v2.LoaderCgrCfg()))
 	case MigratorJSON:
 		var jsn *MigratorCfgJson
 		if jsn, err = db.MigratorCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.MigratorCgrCfg()
-		if v1 != nil {
-			g1 = v1.MigratorCgrCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffMigratorCfgJson(jsn, g1, v2.MigratorCgrCfg()))
+		return db.SetSection(ctx, section, diffMigratorCfgJson(jsn, v1.MigratorCgrCfg(), v2.MigratorCgrCfg()))
 	case TlsJSON:
 		var jsn *TlsJsonCfg
 		if jsn, err = db.TlsCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.TLSCfg()
-		if v1 != nil {
-			g1 = v1.TLSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffTlsJsonCfg(jsn, g1, v2.TLSCfg()))
+		return db.SetSection(ctx, section, diffTlsJsonCfg(jsn, v1.TLSCfg(), v2.TLSCfg()))
 	case AnalyzerSJSON:
 		var jsn *AnalyzerSJsonCfg
 		if jsn, err = db.AnalyzerCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.AnalyzerSCfg()
-		if v1 != nil {
-			g1 = v1.AnalyzerSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffAnalyzerSJsonCfg(jsn, g1, v2.AnalyzerSCfg()))
+		return db.SetSection(ctx, section, diffAnalyzerSJsonCfg(jsn, v1.AnalyzerSCfg(), v2.AnalyzerSCfg()))
 	case AdminSJSON:
 		var jsn *AdminSJsonCfg
 		if jsn, err = db.AdminSCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.AdminSCfg()
-		if v1 != nil {
-			g1 = v1.AdminSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffAdminSJsonCfg(jsn, g1, v2.AdminSCfg()))
+		return db.SetSection(ctx, section, diffAdminSJsonCfg(jsn, v1.AdminSCfg(), v2.AdminSCfg()))
 	case RateSJSON:
 		var jsn *RateSJsonCfg
 		if jsn, err = db.RateCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.RateSCfg()
-		if v1 != nil {
-			g1 = v1.RateSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffRateSJsonCfg(jsn, g1, v2.RateSCfg()))
+		return db.SetSection(ctx, section, diffRateSJsonCfg(jsn, v1.RateSCfg(), v2.RateSCfg()))
 	case SIPAgentJSON:
 		var jsn *SIPAgentJsonCfg
 		if jsn, err = db.SIPAgentJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.SIPAgentCfg()
-		if v1 != nil {
-			g1 = v1.SIPAgentCfg()
-		} else if err = g1.loadFromJSONCfg(jsn, dft.GeneralCfg().RSRSep); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffSIPAgentJsonCfg(jsn, g1, v2.SIPAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffSIPAgentJsonCfg(jsn, v1.SIPAgentCfg(), v2.SIPAgentCfg(), v2.GeneralCfg().RSRSep))
 	case TemplatesJSON:
 		var jsn FcTemplatesJsonCfg
 		if jsn, err = db.TemplateSJsonCfg(); err != nil {
 			return
 		}
-		var g1 FCTemplates
-		if v1 != nil {
-			g1 = v1.TemplatesCfg()
-		} else if err = dft.loadTemplateSCfg(db); err != nil {
-			return
-		} else {
-			g1 = dft.TemplatesCfg()
-		}
-		return db.SetSection(ctx, section, diffFcTemplatesJsonCfg(jsn, g1, v2.TemplatesCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffFcTemplatesJsonCfg(jsn, v1.TemplatesCfg(), v2.TemplatesCfg(), v2.GeneralCfg().RSRSep))
 	case ConfigSJSON:
 		var jsn *ConfigSCfgJson
 		if jsn, err = db.ConfigSJsonCfg(); err != nil {
 			return
 		}
-		g1 := dft.ConfigSCfg()
-		if v1 != nil {
-			g1 = v1.ConfigSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffConfigSCfgJson(jsn, g1, v2.ConfigSCfg()))
+		return db.SetSection(ctx, section, diffConfigSCfgJson(jsn, v1.ConfigSCfg(), v2.ConfigSCfg()))
 	case APIBanJSON:
 		var jsn *APIBanJsonCfg
 		if jsn, err = db.ApiBanCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.APIBanCfg()
-		if v1 != nil {
-			g1 = v1.APIBanCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffAPIBanJsonCfg(jsn, g1, v2.APIBanCfg()))
+		return db.SetSection(ctx, section, diffAPIBanJsonCfg(jsn, v1.APIBanCfg(), v2.APIBanCfg()))
 	case CoreSJSON:
 		var jsn *CoreSJsonCfg
 		if jsn, err = db.CoreSJSON(); err != nil {
 			return
 		}
-		g1 := dft.CoreSCfg()
-		if v1 != nil {
-			g1 = v1.CoreSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffCoreSJsonCfg(jsn, g1, v2.CoreSCfg()))
+		return db.SetSection(ctx, section, diffCoreSJsonCfg(jsn, v1.CoreSCfg(), v2.CoreSCfg()))
 	case ActionSJSON:
 		var jsn *ActionSJsonCfg
 		if jsn, err = db.ActionSCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.ActionSCfg()
-		if v1 != nil {
-			g1 = v1.ActionSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffActionSJsonCfg(jsn, g1, v2.ActionSCfg()))
+		return db.SetSection(ctx, section, diffActionSJsonCfg(jsn, v1.ActionSCfg(), v2.ActionSCfg()))
 	case AccountSJSON:
 		var jsn *AccountSJsonCfg
 		if jsn, err = db.AccountSCfgJson(); err != nil {
 			return
 		}
-		g1 := dft.AccountSCfg()
-		if v1 != nil {
-			g1 = v1.AccountSCfg()
-		} else if err = g1.loadFromJSONCfg(jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffAccountSJsonCfg(jsn, g1, v2.AccountSCfg()))
+		return db.SetSection(ctx, section, diffAccountSJsonCfg(jsn, v1.AccountSCfg(), v2.AccountSCfg()))
 	}
 	return
 }
