@@ -45,6 +45,7 @@ func TestAMQPERv1(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
+	"sessions_conns":["*localhost"],
 	"readers": [
 		{
 			"id": "amqpv1",										// identifier of the EventReader profile
@@ -67,6 +68,9 @@ func TestAMQPERv1(t *testing.T) {
 },
 }`)
 	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cfg.CheckConfigSanity(); err != nil {
 		t.Fatal(err)
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
