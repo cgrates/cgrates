@@ -130,7 +130,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	attrPrf.ID = "TestSetAttributeProfileCheckErrors"
 
 	attrPrf.FilterIDs = []string{"invalid_fltier_format"}
-	expected = "SERVER_ERROR: broken reference to filter: invalid_fltier_format for item with ID: cgrates.org:TestSetAttributeProfileCheckErrors"
+	expected = "SERVER_ERROR: broken reference to filter: <invalid_fltier_format> for item with ID: cgrates.org:TestSetAttributeProfileCheckErrors"
 	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

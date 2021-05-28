@@ -160,7 +160,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 	actPrf.ID = "TestActionsSetActionProfileCheckErrors"
 	actPrf.Actions = make([]*engine.APAction, 1)
 	actPrf.FilterIDs = []string{"invalid_filter_format"}
-	experr = "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TestActionsSetActionProfileCheckErrors"
+	experr = "SERVER_ERROR: broken reference to filter: <invalid_filter_format> for item with ID: cgrates.org:TestActionsSetActionProfileCheckErrors"
 
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err == nil ||
 		err.Error() != experr {

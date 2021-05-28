@@ -182,7 +182,7 @@ func testResITMigrateAndMove(t *testing.T) {
 	resPrfl := &engine.ResourceProfile{
 		Tenant:       "cgrates.org",
 		ID:           "RES1",
-		FilterIDs:    []string{"*string:~Account:1001"},
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
 		UsageTTL:     time.Second,
 		Limit:        1,
 		Weight:       10,

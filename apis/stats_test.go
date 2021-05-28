@@ -153,7 +153,7 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 
 	sqPrf.ID = "TestStatsSetStatQueueProfileCheckErrors"
 	sqPrf.FilterIDs = []string{"invalid_filter_format"}
-	experr = "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TestStatsSetStatQueueProfileCheckErrors"
+	experr = "SERVER_ERROR: broken reference to filter: <invalid_filter_format> for item with ID: cgrates.org:TestStatsSetStatQueueProfileCheckErrors"
 
 	if err := adms.SetStatQueueProfile(context.Background(), sqPrf, &reply); err == nil ||
 		err.Error() != experr {

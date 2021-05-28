@@ -402,7 +402,7 @@ func testRateSetAttributeProfileBrokenReference(t *testing.T) {
 		},
 	}
 	var reply string
-	expectedErr := "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TEST_RATE_IT_TEST_SECOND"
+	expectedErr := "SERVER_ERROR: broken reference to filter: <invalid_filter_format> for item with ID: cgrates.org:TEST_RATE_IT_TEST_SECOND"
 	if err := rateSRPC.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		ratePrf, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v \n, received %+v", expectedErr, err)

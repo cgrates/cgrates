@@ -154,7 +154,7 @@ func TestThresholdsSetThresholdProfileCheckErrors(t *testing.T) {
 
 	thPrf.ID = "TestThresholdsSetThresholdProfileCheckErrors"
 	thPrf.FilterIDs = []string{"invalid_filter_format"}
-	experr = "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TestThresholdsSetThresholdProfileCheckErrors"
+	experr = "SERVER_ERROR: broken reference to filter: <invalid_filter_format> for item with ID: cgrates.org:TestThresholdsSetThresholdProfileCheckErrors"
 
 	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err == nil ||
 		err.Error() != experr {
