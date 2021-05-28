@@ -76,7 +76,7 @@ type testModelSql struct {
 	Cost       float64
 }
 
-func (_ *testModelSql) TableName() string {
+func (*testModelSql) TableName() string {
 	return "expTable"
 }
 
@@ -89,11 +89,11 @@ func testSqlEeCreateTable(t *testing.T) {
 	}); err != nil {
 		return
 	}
-	if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS exportedDatabase;`).Error; err != nil {
+	if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`).Error; err != nil {
 		t.Fatal(err)
 	}
 
-	if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "exportedDatabase")), &gorm.Config{
+	if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")), &gorm.Config{
 		AllowGlobalUpdate: true,
 		Logger:            logger.Default.LogMode(logger.Silent),
 	}); err != nil {
