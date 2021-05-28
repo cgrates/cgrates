@@ -90,6 +90,7 @@ func testSQLInitConfig(t *testing.T) {
 		},
 		"ers": {									// EventReaderService
 			"enabled": true,						// starts the EventReader service: <true|false>
+			"sessions_conns":["*localhost"],
 			"readers": [
 				{
 					"id": "mysql",										// identifier of the EventReader profile
@@ -113,6 +114,9 @@ func testSQLInitConfig(t *testing.T) {
 			],
 		},
 		}`); err != nil {
+		t.Fatal(err)
+	}
+	if err := sqlCfg.CheckConfigSanity(); err != nil {
 		t.Fatal(err)
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, sqlCfg.GeneralCfg().NodeID)

@@ -48,6 +48,7 @@ func TestS3ER(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
+	"sessions_conns":["*localhost"],
 	"readers": [
 		{
 			"id": "s3",										// identifier of the EventReader profile
@@ -76,7 +77,9 @@ func TestS3ER(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	if err := cfg.CheckConfigSanity(); err != nil {
+		t.Fatal(err)
+	}
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
