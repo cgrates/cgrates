@@ -23,6 +23,8 @@ import (
 	"net/rpc"
 	"os/exec"
 	"path"
+	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -43,16 +45,30 @@ var (
 		testFilterUpdateRpcConn,
 		testFilterUpdateSetFilterE1,
 		testFilterUpdateSetAttrProfileE1,
-		testFilterUpdateGetAttrProfileForEventFirstEvE1,
-		testFilterUpdateGetAttrProfileForEventFirstEvE2,
-		testFilterUpdateGetAttrProfileForEventSecondEvE1,
-		testFilterUpdateGetAttrProfileForEventSecondEvE2,
+		testFilterUpdateGetAttrProfileForEventEv1E1,
+		testFilterUpdateGetAttrProfileForEventEv1E2,
+		testFilterUpdateGetAttrProfileForEventEv2E1NotMatching,
+		testFilterUpdateGetAttrProfileForEventEv2E2NotMatching,
 		testFilterUpdateSetFilterAfterAttrE1,
-		testFilterUpdateGetAttrProfileForEventFirstEvE1,
-		testFilterUpdateGetAttrProfileForEventFirstEvE2,
-		testFilterUpdateGetAttrProfileForEventSecondEvE1,
-		testFilterUpdateGetAttrProfileForEventSecondEvE2,
+		testFilterUpdateGetAttrProfileForEventEv1E1NotMatching,
+		testFilterUpdateGetAttrProfileForEventEv1E2NotMatching,
+		testFilterUpdateGetAttrProfileForEventEv2E1,
+		testFilterUpdateGetAttrProfileForEventEv2E2,
 		testFilterUpdateStopEngine,
+	}
+	ev1 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event1",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+		},
+	}
+	ev2 = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event2",
+		Event: map[string]interface{}{
+			utils.AccountField: "1002",
+		},
 	}
 )
 
@@ -127,29 +143,296 @@ func testFilterUpdateStopEngine(t *testing.T) {
 }
 
 func testFilterUpdateSetFilterE1(t *testing.T) {
+	fltr := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID:     "FLTR_ID",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaLoad,
+		},
+	}
 
+	var reply string
+	if err := fltrUpdateRPC1.Call(utils.APIerSv1SetFilter, fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var result *engine.Filter
+	if err := fltrUpdateRPC1.Call(utils.APIerSv1GetFilter,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ID"}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fltr.Filter, result) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(fltr.Filter), utils.ToJSON(result))
+	}
 }
 
 func testFilterUpdateSetAttrProfileE1(t *testing.T) {
+	attrPrf := &engine.AttributeProfileWithAPIOpts{
+		AttributeProfile: &engine.AttributeProfile{
+			FilterIDs: []string{"FLTR_ID"},
+			ID:        "ATTR_ID",
+			Tenant:    "cgrates.org",
+			Contexts:  []string{utils.MetaAny},
+			Weight:    10,
+			Attributes: []*engine.Attribute{
+				{
+					Path:  "*req.Account",
+					Value: config.NewRSRParsersMustCompile("1003", ";"),
+					Type:  utils.MetaConstant,
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaNone,
+		},
+	}
 
+	attrPrf.Compile()
+	var reply string
+	if err := fltrUpdateRPC1.Call(utils.APIerSv1SetAttributeProfile, attrPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var result *engine.AttributeProfile
+	if err := fltrUpdateRPC1.Call(utils.APIerSv1GetAttributeProfile,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ID"}}, &result); err != nil {
+		t.Fatal(err)
+	}
+	result.Compile()
+	if !reflect.DeepEqual(attrPrf.AttributeProfile, result) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(attrPrf.AttributeProfile), utils.ToJSON(result))
+	}
 }
 
-func testFilterUpdateGetAttrProfileForEventFirstEvE1(t *testing.T) {
+func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev1,
+	}
 
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"FLTR_ID"},
+		ID:        "ATTR_ID",
+		Contexts:  []string{utils.MetaAny},
+		Weight:    10,
+		Attributes: []*engine.Attribute{
+			{
+				Path:  "*req.Account",
+				Value: config.NewRSRParsersMustCompile("1003", ";"),
+				Type:  utils.MetaConstant,
+			},
+		},
+	}
+
+	eAttrPrf.Compile()
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err != nil {
+		t.Fatal(err)
+	}
+	attrReply.Compile() // Populate private variables in RSRParsers
+	sort.Strings(attrReply.Contexts)
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
 }
 
-func testFilterUpdateGetAttrProfileForEventFirstEvE2(t *testing.T) {
+func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev1,
+	}
 
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"FLTR_ID"},
+		ID:        "ATTR_ID",
+		Contexts:  []string{utils.MetaAny},
+		Weight:    10,
+		Attributes: []*engine.Attribute{
+			{
+				Path:  "*req.Account",
+				Value: config.NewRSRParsersMustCompile("1003", ";"),
+				Type:  utils.MetaConstant,
+			},
+		},
+	}
+
+	eAttrPrf.Compile()
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err != nil {
+		t.Fatal(err)
+	}
+	attrReply.Compile() // Populate private variables in RSRParsers
+	sort.Strings(attrReply.Contexts)
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
 }
 
-func testFilterUpdateGetAttrProfileForEventSecondEvE1(t *testing.T) {
+func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev2,
+	}
 
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"FLTR_ID"},
+		ID:        "ATTR_ID",
+		Contexts:  []string{utils.MetaAny},
+		Weight:    10,
+		Attributes: []*engine.Attribute{
+			{
+				Path:  "*req.Account",
+				Value: config.NewRSRParsersMustCompile("1003", ";"),
+				Type:  utils.MetaConstant,
+			},
+		},
+	}
+
+	eAttrPrf.Compile()
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err != nil {
+		t.Fatal(err)
+	}
+	attrReply.Compile() // Populate private variables in RSRParsers
+	sort.Strings(attrReply.Contexts)
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
 }
 
-func testFilterUpdateGetAttrProfileForEventSecondEvE2(t *testing.T) {
+func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev2,
+	}
 
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"FLTR_ID"},
+		ID:        "ATTR_ID",
+		Contexts:  []string{utils.MetaAny},
+		Weight:    10,
+		Attributes: []*engine.Attribute{
+			{
+				Path:  "*req.Account",
+				Value: config.NewRSRParsersMustCompile("1003", ";"),
+				Type:  utils.MetaConstant,
+			},
+		},
+	}
+
+	eAttrPrf.Compile()
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err != nil {
+		t.Fatal(err)
+	}
+	attrReply.Compile() // Populate private variables in RSRParsers
+	sort.Strings(attrReply.Contexts)
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
 }
 
 func testFilterUpdateSetFilterAfterAttrE1(t *testing.T) {
+	fltr := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			ID:     "FLTR_ID",
+			Tenant: "cgrates.org",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1002"},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{
+			utils.CacheOpt: utils.MetaLoad,
+		},
+	}
 
+	var reply string
+	if err := fltrUpdateRPC1.Call(utils.APIerSv1SetFilter, fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var result *engine.Filter
+	if err := fltrUpdateRPC1.Call(utils.APIerSv1GetFilter,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ID"}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fltr.Filter, result) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(fltr.Filter), utils.ToJSON(result))
+	}
+}
+
+func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev1,
+	}
+
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev1,
+	}
+
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev2,
+	}
+
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC1.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testFilterUpdateGetAttrProfileForEventEv2E2NotMatching(t *testing.T) {
+	attrProcessEv := &engine.AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaAny),
+		CGREvent: ev2,
+	}
+
+	var attrReply *engine.AttributeProfile
+	if err := fltrUpdateRPC2.Call(utils.AttributeSv1GetAttributeForEvent,
+		attrProcessEv, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
 }
