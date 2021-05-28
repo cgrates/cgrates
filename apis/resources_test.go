@@ -292,6 +292,9 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
+		RemoveResourceDrvF: func(ctx *context.Context, tnt, id string) error {
+			return nil
+		},
 	}
 
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
@@ -479,20 +482,9 @@ func TestResourcesSv1Ping(t *testing.T) {
 // 		},
 // 	}
 
-// 	rs := &engine.Resource{
-// 		Tenant: "cgrates.org",
-// 		ID:     "R_1",
-// 		Usages: map[string]*engine.ResourceUsage{
-// 			"RU_Test": {
-// 				Tenant: "cgrates.org",
-// 				ID:     "RU_Test",
-// 				Units:  10,
-// 			},
-// 		},
-// 	}
-// 	ttl := utils.DurationPointer(10 * time.Second)
-
-// 	if err := dm.SetResource(context.Background(), rs, ttl, 1000, true); err != nil {
+// 	var reply string
+// 	if err := adms.SetResourceProfile(context.Background(), resPrf,
+// 		&reply); err != nil {
 // 		t.Error(err)
 // 	}
 
@@ -506,16 +498,63 @@ func TestResourcesSv1Ping(t *testing.T) {
 // 		},
 // 		UsageID: "RU_Test",
 // 	}
-// 	var result engine.Resources
 
-// 	expRes := &engine.Resources{}
+// 	expResources := &engine.Resources{
+// 		{
+// 			Tenant: "cgrates.org",
+// 			ID:     "TestResourcesGetResourcesForEvent",
+// 			Usages: make(map[string]*engine.ResourceUsage),
+// 		},
+// 	}
 
-// 	if err := resSv1.GetResourcesForEvent(context.Background(), args, &result); err != nil {
+// 	var rplyResources engine.Resources
+// 	if err := resSv1.GetResourcesForEvent(context.Background(), args, &rplyResources); err != nil {
 // 		t.Error(err)
 // 	} else {
-// 		rplyPtr := &result
-// 		if !reflect.DeepEqual(expRes, rplyPtr) {
-// 			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRes), utils.ToJSON(rplyPtr))
+// 		rplyPtr := &rplyResources
+// 		if !reflect.DeepEqual(expResources, rplyPtr) {
+// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expResources), utils.ToJSON(rplyPtr))
+// 		}
+// 	}
+
+// 	expResource := &engine.Resource{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestResourcesGetResourcesForEvent",
+// 		Usages: make(map[string]*engine.ResourceUsage),
+// 	}
+
+// 	var rplyResource engine.Resource
+// 	if err := resSv1.GetResource(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestResourcesGetResourcesForEvent",
+// 	}}, &rplyResource); err != nil {
+// 		t.Error(err)
+// 	} else {
+// 		rplyPtr := &rplyResource
+// 		if !reflect.DeepEqual(expResource, rplyPtr) {
+// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expResource), utils.ToJSON(rplyPtr))
+// 		}
+// 	}
+
+// 	expResourceWithCfg := &engine.ResourceWithConfig{
+// 		Resource: &engine.Resource{
+// 			Tenant: "cgrates.org",
+// 			ID:     "TestResourcesGetResourcesForEvent",
+// 			Usages: make(map[string]*engine.ResourceUsage),
+// 		},
+// 		Config: resPrf.ResourceProfile,
+// 	}
+
+// 	var rplyResourceWithCfg engine.ResourceWithConfig
+// 	if err := resSv1.GetResourceWithConfig(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestResourcesGetResourcesForEvent",
+// 	}}, &rplyResourceWithCfg); err != nil {
+// 		t.Error(err)
+// 	} else {
+// 		rplyPtr := &rplyResourceWithCfg
+// 		if !reflect.DeepEqual(expResource, rplyPtr) {
+// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expResourceWithCfg), utils.ToJSON(rplyPtr))
 // 		}
 // 	}
 // }

@@ -40,12 +40,15 @@ type DataDBMock struct {
 	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*Threshold, error)
+	RemoveThresholdDrvF        func(ctx *context.Context, tnt, id string) error
 	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*ResourceProfile, error)
 	SetResourceProfileDrvF     func(ctx *context.Context, rp *ResourceProfile) error
 	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
+	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
 	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
+	RemStatQueueDrvF           func(ctx *context.Context, tenant, id string) (err error)
 	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
 	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*ActionProfile, error)
 	SetActionProfileDrvF       func(ctx *context.Context, ap *ActionProfile) error
@@ -128,7 +131,10 @@ func (dbM *DataDBMock) SetResourceDrv(*context.Context, *Resource) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveResourceDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveResourceDrv(ctx *context.Context, tnt, id string) error {
+	if dbM.RemoveResourceDrvF != nil {
+		return dbM.RemoveResourceDrvF(ctx, tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 
@@ -189,6 +195,9 @@ func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueu
 }
 
 func (dbM *DataDBMock) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
+	if dbM.RemStatQueueDrvF != nil {
+		return dbM.RemStatQueueDrvF(ctx, tenant, id)
+	}
 	return utils.ErrNotImplemented
 }
 
@@ -224,7 +233,10 @@ func (dbM *DataDBMock) SetThresholdDrv(*context.Context, *Threshold) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveThresholdDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveThresholdDrv(ctx *context.Context, tnt, id string) error {
+	if dbM.RemoveThresholdDrvF != nil {
+		return dbM.RemoveThresholdDrvF(ctx, tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 

@@ -289,6 +289,9 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
+		RemStatQueueDrvF: func(ctx *context.Context, tenant, id string) (err error) {
+			return nil
+		},
 	}
 
 	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
