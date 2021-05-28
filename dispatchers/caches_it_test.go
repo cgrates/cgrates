@@ -112,7 +112,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := dispEngine.RPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithAPIOpts{
+	if err := dispEngine.RPC.Call(utils.CacheSv1LoadCache, &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "chc12345",
 		},

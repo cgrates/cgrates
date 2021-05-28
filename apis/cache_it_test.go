@@ -371,7 +371,7 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 	}
 
 	//remove all items
-	argsRemove := utils.AttrReloadCacheWithAPIOpts{
+	argsRemove := &utils.AttrReloadCacheWithAPIOpts{
 		ArgsCache: map[string][]string{
 			utils.AttributeProfileIDs: {"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
 		},

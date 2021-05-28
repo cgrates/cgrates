@@ -62,7 +62,7 @@ func (chSv1 *CacheSv1) RemoveItem(_ *context.Context, args *utils.ArgsGetCacheIt
 }
 
 // RemoveItems removes the Items with ID from cache
-func (chSv1 *CacheSv1) RemoveItems(_ *context.Context, args utils.AttrReloadCacheWithAPIOpts,
+func (chSv1 *CacheSv1) RemoveItems(_ *context.Context, args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) error {
 	return chSv1.cacheS.V1RemoveItems(args, reply)
 }
@@ -104,12 +104,12 @@ func (chSv1 *CacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts, //
 
 // ReloadCache reloads cache from DB for a prefix or completely
 func (chSv1 *CacheSv1) ReloadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return chSv1.cacheS.V1ReloadCache(ctx, *args, reply)
+	return chSv1.cacheS.V1ReloadCache(ctx, args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
 func (chSv1 *CacheSv1) LoadCache(ctx *context.Context, args *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
-	return chSv1.cacheS.V1LoadCache(ctx, *args, reply)
+	return chSv1.cacheS.V1LoadCache(ctx, args, reply)
 }
 
 // ReplicateSet replicate an item

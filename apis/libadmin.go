@@ -235,7 +235,7 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 		return
 	case utils.MetaReload:
 		method = utils.CacheSv1ReloadCache
-		args = utils.AttrReloadCacheWithAPIOpts{
+		args = &utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
@@ -244,7 +244,7 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 		}
 	case utils.MetaLoad:
 		method = utils.CacheSv1LoadCache
-		args = utils.AttrReloadCacheWithAPIOpts{
+		args = &utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,
@@ -253,7 +253,7 @@ func (apierSv1 *AdminS) callCacheMultiple(cacheopt, tnt, cacheID string, itemIDs
 		}
 	case utils.MetaRemove:
 		method = utils.CacheSv1RemoveItems
-		args = utils.AttrReloadCacheWithAPIOpts{
+		args = &utils.AttrReloadCacheWithAPIOpts{
 			Tenant: tnt,
 			ArgsCache: map[string][]string{
 				utils.CacheInstanceToArg[cacheID]: itemIDs,

@@ -287,7 +287,7 @@ func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1RemoveItems(args utils.AttrReloadCacheWithAPIOpts,
+func (chS *CacheS) V1RemoveItems(args *utils.AttrReloadCacheWithAPIOpts,
 	reply *string) (err error) {
 	for key, ids := range args.ArgsCache {
 		if cacheID, has := utils.ArgCacheToInstance[key]; has {
@@ -356,15 +356,15 @@ func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithAPIOpts,
 	return
 }
 
-func (chS *CacheS) V1ReloadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+func (chS *CacheS) V1ReloadCache(ctx *context.Context, attrs *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	return chS.cacheDataFromDB(ctx, attrs, reply, true)
 }
 
-func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
+func (chS *CacheS) V1LoadCache(ctx *context.Context, attrs *utils.AttrReloadCacheWithAPIOpts, reply *string) (err error) {
 	return chS.cacheDataFromDB(ctx, attrs, reply, false)
 }
 
-func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs utils.AttrReloadCacheWithAPIOpts, reply *string, mustBeCached bool) (err error) {
+func (chS *CacheS) cacheDataFromDB(ctx *context.Context, attrs *utils.AttrReloadCacheWithAPIOpts, reply *string, mustBeCached bool) (err error) {
 	for key, ids := range attrs.ArgsCache {
 		if prfx, has := utils.ArgCacheToPrefix[key]; has {
 			if err = chS.dm.CacheDataFromDB(ctx, prfx, ids, mustBeCached); err != nil {
