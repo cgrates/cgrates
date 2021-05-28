@@ -195,7 +195,7 @@ func testSupITMigrateAndMove(t *testing.T) {
 		}},
 	}
 	switch supAction {
-	case utils.Migrate: // for the momment only one version of rating plans exists
+	case utils.Migrate: // for the moment only one version of rating plans exists
 	case utils.Move:
 		if err := supMigrator.dmIN.DataManager().SetRouteProfile(context.TODO(), supPrfl, true); err != nil {
 			t.Error(err)

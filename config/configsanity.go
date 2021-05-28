@@ -400,11 +400,36 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.DNSAgent, err, val.path, utils.Values, utils.RequestFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, field.Filters, utils.RequestFieldsCfg)
+				}
 			}
 			for _, field := range req.ReplyFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
 					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, utils.NewErrMandatoryIeMissing(utils.Path), req.ID, field.Tag)
 				}
+				if err := utils.IsPathValidForExporters(field.Path); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, field.Path, utils.Path)
+				}
+				for _, val := range field.Value {
+					if err := utils.IsPathValidForExporters(val.path); err != nil {
+						return fmt.Errorf("<%s> %s for %s at %s of %s", utils.DNSAgent, err, val.path, utils.Values, utils.ReplyFieldsCfg)
+					}
+				}
+				if err := utils.CheckInLineFilter(field.Filters); err != nil {
+					return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, field.Filters, utils.ReplyFieldsCfg)
+				}
+			}
+			if err := utils.CheckInLineFilter(req.Filters); err != nil {
+				return fmt.Errorf("<%s> %s for %s at %s", utils.DNSAgent, err, req.Filters, utils.RequestProcessorsCfg)
 			}
 		}
 	}

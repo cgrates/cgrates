@@ -402,7 +402,7 @@ func TestAccountSetGetAccountErrorBadFilter(t *testing.T) {
 
 	var setRply string
 	err := admS.SetAccount(context.Background(), ext, &setRply)
-	if err == nil || err.Error() != "SERVER_ERROR: broken reference to filter: *string*req.Account1001 for item with ID: cgrates.org:test_ID1" {
+	if err == nil || err.Error() != "SERVER_ERROR: broken reference to filter: <*string*req.Account1001> for item with ID: cgrates.org:test_ID1" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: broken reference to filter: *string*req.Account1001 for item with ID: cgrates.org:test_ID1", err)
 	}
 	if !reflect.DeepEqual(setRply, "") {
