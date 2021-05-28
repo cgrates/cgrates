@@ -23,6 +23,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cgrates/cgrates/accounts"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -739,5 +741,174 @@ func TestAccountSetGetAccountIDs(t *testing.T) {
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
+}
 
+func TestAccountGetAccountIDSCountError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var getRplyCount3 int
+	err := admS.GetAccountIDsCount(context.Background(),
+		&utils.TenantWithAPIOpts{
+			APIOpts: nil,
+		}, &getRplyCount3)
+	if err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestAccountGetAccountIDSError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var getRplyCount3 []string
+	err := admS.GetAccountIDs(context.Background(),
+		&utils.PaginatorWithTenant{
+			APIOpts: nil,
+		}, &getRplyCount3)
+	if err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestAccountRemoveAccountErrorMissingID(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var getRplyRmv string
+	err := admS.RemoveAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "",
+			},
+			APIOpts: nil,
+		}, &getRplyRmv)
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	}
+}
+
+func TestAccountRemoveAccountErrorRmvAccount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var getRplyRmv string
+	err := admS.RemoveAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "id",
+			},
+			APIOpts: nil,
+		}, &getRplyRmv)
+	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
+	}
+}
+
+func TestAccountRemoveAccountErrorSetLoadIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+			return nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var getRplyRmv string
+	err := admS.RemoveAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "id",
+			},
+			APIOpts: nil,
+		}, &getRplyRmv)
+	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
+	}
+}
+
+func TestAccountRemoveAccountErrorCallCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = "123"
+	cfg.AdminSCfg().CachesConns = []string{}
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := &engine.DataDBMock{
+		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+			return &utils.Account{}, nil
+		},
+		RemoveAccountDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+			return nil
+		},
+		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+			return nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return nil, nil
+		},
+		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+			return nil
+		},
+	}
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	var getRplyRmv string
+	err := admS.RemoveAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "id",
+			},
+			APIOpts: nil,
+		}, &getRplyRmv)
+	if err == nil || err.Error() != "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]", err)
+	}
+}
+
+func TestAccountNewAccountSv1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	result1 := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	expected := &AccountSv1{
+		aS: result1,
+	}
+	result2 := NewAccountSv1(result1)
+	if !reflect.DeepEqual(expected, result2) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(result2))
+	}
 }
