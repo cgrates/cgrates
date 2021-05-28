@@ -98,11 +98,11 @@ func TestServerIT(t *testing.T) {
 
 type mockRegister string
 
-func (x *mockRegister) ForTest(method *context.Context, args, reply interface{}) error {
+func (x *mockRegister) ForTest(ctx *context.Context, args, reply interface{}) error {
 	return nil
 }
 
-func (robj *mockRegister) Ping(in string, out *string) error {
+func (robj *mockRegister) Ping(ctx *context.Context, in string, out *string) error {
 	*out = utils.Pong
 	return nil
 }
@@ -759,7 +759,7 @@ func testAcceptBiRPC(t *testing.T) {
 	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc.NewJSONBirpcCodec)
 	rpc := jsonrpc.NewClient(p2)
 	var reply string
-	expected := "rpc: can't find method AttributeSv1.Ping"
+	expected := "birpc: can't find method AttributeSv1.Ping"
 	if err := rpc.Call(context.TODO(), utils.AttributeSv1Ping, utils.CGREvent{}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

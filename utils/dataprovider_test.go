@@ -134,3 +134,84 @@ func TestComposeNavMapVal(t *testing.T) {
 		t.Errorf("Expected error: %s received: %v", ErrWrongPath, err)
 	}
 }
+
+func TestIsPathValid(t *testing.T) {
+	path := "Field1.Field2[0]"
+	if err := IsPathValid(path); err != nil {
+		t.Error(err)
+	}
+
+	///
+	path = "~Field1"
+	errExpect := "Path is missing "
+	if err := IsPathValid(path); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	///
+	path = "~Field1.\n\t.Field2[0]"
+	errExpect = "Empty field path "
+	if err := IsPathValid(path); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	///
+	path = "~Field1.Field2[0]"
+	if err := IsPathValid(path); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestIsPathValidForExporters(t *testing.T) {
+	path := "Field1.Field2[0]"
+	if err := IsPathValidForExporters(path); err != nil {
+		t.Error(err)
+	}
+
+	///
+	path = "~Field1.\n\t.Field2[0]"
+	errExpect := "Empty field path "
+	if err := IsPathValidForExporters(path); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	///
+	path = "~Field1.Field2[0]"
+	if err := IsPathValidForExporters(path); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCheckInLineFilter(t *testing.T) {
+	fltrs := []string{"Test1", "Test2"}
+	if err := CheckInLineFilter(fltrs); err != nil {
+		t.Error(err)
+	}
+
+	///
+	fltrs = []string{"*Test1", "*Test2"}
+	errExpect := "inline parse error for string: <*Test1>"
+	if err := CheckInLineFilter(fltrs); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	///
+	fltrs = []string{"*Test1:*Test2:*Test3:*Test4"}
+	if err := CheckInLineFilter(fltrs); err != nil {
+		t.Error(err)
+	}
+
+	///
+	fltrs = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
+	errExpect = "Empty field path  for <*empty:~Field1..Field2[0]:*Test3:*Test4>"
+	if err := CheckInLineFilter(fltrs); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+
+	///
+	fltrs = []string{"*empty:~Field1.Field2[0]:~Field1..Field2[0]|Test4"}
+	errExpect = "Empty field path  for <*empty:~Field1.Field2[0]:~Field1..Field2[0]|Test4>"
+	if err := CheckInLineFilter(fltrs); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v but received %v", errExpect, err)
+	}
+}

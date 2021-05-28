@@ -1137,7 +1137,7 @@ func testITResourceProfileIndexes(t *testing.T) {
 		Stored:    true,
 	}
 
-	expected := "broken reference to filter: FIRST for item with ID: cgrates.org:RES_PRF1"
+	expected := "broken reference to filter: <FIRST> for item with ID: cgrates.org:RES_PRF1"
 	if err := dataManager.SetResourceProfile(context.TODO(), resPref1, true); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}

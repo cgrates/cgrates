@@ -154,7 +154,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 
 	resPrf.ID = "TestResourcesSetResourceProfileCheckErrors"
 	resPrf.FilterIDs = []string{"invalid_filter_format"}
-	experr = "SERVER_ERROR: broken reference to filter: invalid_filter_format for item with ID: cgrates.org:TestResourcesSetResourceProfileCheckErrors"
+	experr = "SERVER_ERROR: broken reference to filter: <invalid_filter_format> for item with ID: cgrates.org:TestResourcesSetResourceProfileCheckErrors"
 
 	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err == nil ||
 		err.Error() != experr {
