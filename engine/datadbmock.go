@@ -51,6 +51,8 @@ type DataDBMock struct {
 	SetActionProfileDrvF       func(ctx *context.Context, ap *ActionProfile) error
 	RemoveActionProfileDrvF    func(ctx *context.Context, tenant string, ID string) error
 	RemoveFilterDrvF           func(str1 string, str2 string) error
+	SetAccountDrvF             func(ctx *context.Context, profile *utils.Account) error
+	GetAccountDrvF             func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error)
 }
 
 //Storage methods
@@ -372,11 +374,17 @@ func (dbM *DataDBMock) RemoveActionProfileDrv(ctx *context.Context, tenant strin
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountDrv(*context.Context, string, string) (*utils.Account, error) {
+func (dbM *DataDBMock) GetAccountDrv(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+	if dbM.GetAccountDrvF != nil {
+		return dbM.GetAccountDrvF(ctx, str1, str2)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
 func (dbM *DataDBMock) SetAccountDrv(ctx *context.Context, profile *utils.Account) error {
+	if dbM.SetAccountDrvF != nil {
+		return dbM.SetAccountDrvF(ctx, profile)
+	}
 	return utils.ErrNotImplemented
 }
 
