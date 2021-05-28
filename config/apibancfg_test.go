@@ -119,13 +119,10 @@ func TestDiffAPIBanJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	v2_2 := v1
-	expected2 := &APIBanJsonCfg{
-		Enabled: nil,
-		Keys:    nil,
-	}
+	v2 = v1
+	expected2 := &APIBanJsonCfg{}
 
-	rcv = diffAPIBanJsonCfg(d, v1, v2_2)
+	rcv = diffAPIBanJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}

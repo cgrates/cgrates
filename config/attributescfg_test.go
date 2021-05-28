@@ -36,11 +36,10 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index1"},
 		Process_runs:          utils.IntPointer(1),
 		Nested_fields:         utils.BoolPointer(true),
-		Any_context:           utils.BoolPointer(true),
 	}
 	expected := &AttributeSCfg{
 		Enabled:             true,
-		ApierSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
+		AdminSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		IndexedSelects:      false,
@@ -49,7 +48,6 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		ProcessRuns:         1,
 		NestedFields:        true,
-		AnyContext:          true,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.attributeSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -82,7 +80,6 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
-		utils.AnyContextCfg:          true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -110,7 +107,6 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
 		utils.ProcessRunsCfg:         7,
-		utils.AnyContextCfg:          true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -135,7 +131,6 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.ProcessRunsCfg:         1,
-		utils.AnyContextCfg:          true,
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
@@ -147,7 +142,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 func TestAttributeSCfgClone(t *testing.T) {
 	ban := &AttributeSCfg{
 		Enabled:             true,
-		ApierSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
+		AdminSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), "*conn1"},
 		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		IndexedSelects:      false,
@@ -156,13 +151,12 @@ func TestAttributeSCfgClone(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		ProcessRuns:         1,
 		NestedFields:        true,
-		AnyContext:          true,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(ban), utils.ToJSON(rcv))
 	}
-	if rcv.ApierSConns[1] = ""; ban.ApierSConns[1] != "*conn1" {
+	if rcv.AdminSConns[1] = ""; ban.AdminSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
@@ -189,7 +183,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Enabled:             false,
 		StatSConns:          []string{"*localhost"},
 		ResourceSConns:      []string{"*localhost"},
-		ApierSConns:         []string{"*localhost"},
+		AdminSConns:         []string{"*localhost"},
 		IndexedSelects:      false,
 		StringIndexedFields: &[]string{},
 		PrefixIndexedFields: &[]string{},
@@ -202,7 +196,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Enabled:             true,
 		StatSConns:          []string{"*birpc"},
 		ResourceSConns:      []string{"*birpc"},
-		ApierSConns:         []string{"*birpc"},
+		AdminSConns:         []string{"*birpc"},
 		IndexedSelects:      true,
 		StringIndexedFields: &[]string{"*req.Field1"},
 		PrefixIndexedFields: nil,

@@ -225,4 +225,13 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
+	v1 = v2
+	expected = &HTTPJsonCfg{
+		Client_opts: map[string]interface{}{},
+	}
+	rcv = diffHTTPJsonCfg(d, v1, v2)
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
 }

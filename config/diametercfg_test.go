@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -288,21 +287,25 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 	}
 
 	v2 := &DiameterAgentCfg{
-		Enabled:           true,
-		ListenNet:         "udp",
-		Listen:            "localhost:8037",
-		DictionariesPath:  "/path/different",
-		SessionSConns:     []string{"*birpc"},
-		OriginHost:        "diffOriginHost",
-		OriginRealm:       "diffOriginRealm",
-		VendorID:          5,
-		ProductName:       "diffProductName",
-		ConcurrentReqs:    3,
-		SyncedConnReqs:    true,
-		ASRTemplate:       "diffASRTemplate",
-		RARTemplate:       "diffRARTemplate",
-		ForcedDisconnect:  "diffForcedDisconnect",
-		RequestProcessors: []*RequestProcessor{},
+		Enabled:          true,
+		ListenNet:        "udp",
+		Listen:           "localhost:8037",
+		DictionariesPath: "/path/different",
+		SessionSConns:    []string{"*birpc"},
+		OriginHost:       "diffOriginHost",
+		OriginRealm:      "diffOriginRealm",
+		VendorID:         5,
+		ProductName:      "diffProductName",
+		ConcurrentReqs:   3,
+		SyncedConnReqs:   true,
+		ASRTemplate:      "diffASRTemplate",
+		RARTemplate:      "diffRARTemplate",
+		ForcedDisconnect: "diffForcedDisconnect",
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "id",
+			},
+		},
 	}
 
 	expected := &DiameterAgentJsonCfg{
@@ -320,13 +323,26 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 		Asr_template:         utils.StringPointer("diffASRTemplate"),
 		Rar_template:         utils.StringPointer("diffRARTemplate"),
 		Forced_disconnect:    utils.StringPointer("diffForcedDisconnect"),
-		Request_processors:   &[]*ReqProcessorJsnCfg{},
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				ID: utils.StringPointer("id"),
+			},
+		},
 	}
 
 	rcv := diffDiameterAgentJsonCfg(d, v1, v2, "")
-	if !reflect.DeepEqual(rcv.Request_processors, expected.Request_processors) {
-		fmt.Printf("%T and %T", rcv, expected)
+	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
+	v1 = v2
+	expected = &DiameterAgentJsonCfg{
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{},
+		},
+	}
+	rcv = diffDiameterAgentJsonCfg(d, v1, v2, "")
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
 }

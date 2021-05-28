@@ -342,21 +342,29 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 	}
 
 	v2 := &DNSAgentCfg{
-		Enabled:           true,
-		Listen:            "localhost:8037",
-		ListenNet:         "udp",
-		SessionSConns:     []string{"*birpc"},
-		Timezone:          "EEST",
-		RequestProcessors: []*RequestProcessor{},
+		Enabled:       true,
+		Listen:        "localhost:8037",
+		ListenNet:     "udp",
+		SessionSConns: []string{"*birpc"},
+		Timezone:      "EEST",
+		RequestProcessors: []*RequestProcessor{
+			{
+				ID: "id",
+			},
+		},
 	}
 
 	expected := &DNSAgentJsonCfg{
-		Enabled:            utils.BoolPointer(true),
-		Listen:             utils.StringPointer("localhost:8037"),
-		Listen_net:         utils.StringPointer("udp"),
-		Sessions_conns:     &[]string{"*birpc"},
-		Timezone:           utils.StringPointer("EEST"),
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		Enabled:        utils.BoolPointer(true),
+		Listen:         utils.StringPointer("localhost:8037"),
+		Listen_net:     utils.StringPointer("udp"),
+		Sessions_conns: &[]string{"*birpc"},
+		Timezone:       utils.StringPointer("EEST"),
+		Request_processors: &[]*ReqProcessorJsnCfg{
+			{
+				ID: utils.StringPointer("id"),
+			},
+		},
 	}
 
 	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")

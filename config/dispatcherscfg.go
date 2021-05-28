@@ -142,5 +142,8 @@ func diffDispatcherSJsonCfg(d *DispatcherSJsonCfg, v1, v2 *DispatcherSCfg) *Disp
 	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
+	if v1.AnySubsystem != v2.AnySubsystem {
+		d.Any_subsystem = utils.BoolPointer(v2.AnySubsystem)
+	}
 	return d
 }

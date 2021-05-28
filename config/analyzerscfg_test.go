@@ -150,15 +150,9 @@ func TestDiffAnalyzerSJsonCfg(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
-	v2_2 := v1
-	expected2 := &AnalyzerSJsonCfg{
-		Enabled:          nil,
-		Db_path:          nil,
-		Index_type:       nil,
-		Ttl:              nil,
-		Cleanup_interval: nil,
-	}
-	rcv = diffAnalyzerSJsonCfg(d, v1, v2_2)
+	v2 = v1
+	expected2 := &AnalyzerSJsonCfg{}
+	rcv = diffAnalyzerSJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected2), utils.ToJSON(rcv))
 	}

@@ -225,5 +225,8 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 	if v1.NestedFields != v2.NestedFields {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
+	if !utils.SliceStringEqual(v1.DynaprepaidActionProfile, v2.DynaprepaidActionProfile) {
+		d.Dynaprepaid_actionprofile = utils.SliceStringPointer(getInternalJSONConns(v2.DynaprepaidActionProfile))
+	}
 	return d
 }
