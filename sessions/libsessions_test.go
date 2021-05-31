@@ -211,22 +211,22 @@ func TestVerifySignature(t *testing.T) {
 
 	rply.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
 	expectedErr := "crypto/ecdsa: verification error"
-	if err := rply.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
+	if err := rply.VerifySignature(context.Background(), cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
 	rply.Header.X5u = "Invalid_url"
 	expectedErr = "open Invalid_url: no such file or directory"
-	if err := rply.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
+	if err := rply.VerifySignature(context.Background(), cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
 
 func TestAuthStirShaken(t *testing.T) {
-	if err := AuthStirShaken("", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
+	if err := AuthStirShaken(context.Background(), "", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
 		t.Error("Expected invalid identity")
 	}
-	if err := AuthStirShaken(
+	if err := AuthStirShaken(context.Background(),
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer2>;ppt=shaken",
 		"1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
 		t.Error("Expected invalid identity")
@@ -235,7 +235,7 @@ func TestAuthStirShaken(t *testing.T) {
 		nil, true, utils.NonTransactional); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	if err := AuthStirShaken(
+	if err := AuthStirShaken(context.Background(),
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
 		t.Error("Expected invalid identity")
 	}
@@ -254,12 +254,12 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	if err := AuthStirShaken(
+	if err := AuthStirShaken(context.Background(),
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1003", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err == nil {
 		t.Error("Expected invalid identity")
 	}
 
-	if err := AuthStirShaken(
+	if err := AuthStirShaken(context.Background(),
 		"eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
 	}
@@ -271,12 +271,12 @@ func TestNewSTIRIdentityError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem", -1); err != nil {
+	if _, err := NewSTIRIdentity(context.Background(), rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem", -1); err != nil {
 		t.Error(err)
 	}
 
 	expectedErr := "http status error: 404"
-	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe", -1); err == nil || err.Error() != expectedErr {
+	if _, err := NewSTIRIdentity(context.Background(), rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe", -1); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -301,7 +301,7 @@ IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	if _, err := NewSTIRIdentity(header, payload, "https://www.example.org/private.pem", time.Second); err == nil {
+	if _, err := NewSTIRIdentity(context.Background(), header, payload, "https://www.example.org/private.pem", time.Second); err == nil {
 		t.Error("Expected error when creating new identity")
 	}
 
@@ -328,9 +328,9 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 
-	if rcv, err := NewSTIRIdentity(header, payload, "https://www.example.org/private.pem", time.Second); err != nil {
+	if rcv, err := NewSTIRIdentity(context.Background(), header, payload, "https://www.example.org/private.pem", time.Second); err != nil {
 		t.Error(err)
-	} else if err := AuthStirShaken(rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
+	} else if err := AuthStirShaken(context.Background(), rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
 	}
 }
