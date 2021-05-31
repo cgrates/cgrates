@@ -912,3 +912,675 @@ func TestAccountNewAccountSv1(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(result2))
 	}
 }
+
+func TestAccountAccountsForEvent(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	ext := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:      "VoiceBalance",
+					Weights: ";12",
+					Type:    "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": 10,
+					},
+					Units: 0,
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+
+	var setRply string
+	err := admS.SetAccount(context.Background(), ext, &setRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(setRply, `OK`) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
+	}
+	var getRply utils.Account
+	err = admS.GetAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "test_ID1",
+			},
+			APIOpts: nil,
+		}, &getRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expectedGet := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID: "VoiceBalance",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": 10,
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	if !reflect.DeepEqual(getRply, expectedGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
+	}
+
+	accS := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	expected := &AccountSv1{
+		aS: accS,
+	}
+	accSv1 := NewAccountSv1(accS)
+	if !reflect.DeepEqual(expected, accSv1) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
+	}
+	rpEv := make([]*utils.Account, 0)
+	accArg := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestMatchingAccountsForEvent",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	err = accSv1.AccountsForEvent(context.Background(), accArg, &rpEv)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expEvAcc := []*utils.Account{
+		{
+
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID: "VoiceBalance",
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": 10,
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(rpEv, expEvAcc) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expEvAcc), utils.ToJSON(rpEv))
+	}
+	engine.Cache = cacheInit
+}
+
+func TestAccountMaxAbstracts(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	ext := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:      "VoiceBalance",
+					Weights: ";12",
+					Type:    "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": 10,
+					},
+					Units: 0,
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+
+	var setRply string
+	err := admS.SetAccount(context.Background(), ext, &setRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(setRply, `OK`) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
+	}
+	var getRply utils.Account
+	err = admS.GetAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "test_ID1",
+			},
+			APIOpts: nil,
+		}, &getRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expectedGet := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID: "VoiceBalance",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": 10,
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	if !reflect.DeepEqual(getRply, expectedGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
+	}
+
+	accS := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	expected := &AccountSv1{
+		aS: accS,
+	}
+	accSv1 := NewAccountSv1(accS)
+	if !reflect.DeepEqual(expected, accSv1) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
+	}
+	var rpEv utils.ExtEventCharges
+	accArg := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestMatchingAccountsForEvent",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	err = accSv1.MaxAbstracts(context.Background(), accArg, &rpEv)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	var accKEy, rtID string
+	for key, val := range rpEv.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	var crgID string
+	for _, val := range rpEv.Charges {
+		crgID = val.ChargingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range rpEv.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	rpEv.Rating = map[string]*utils.ExtRateSInterval{}
+	expEvAcc := &utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "test_ID1",
+				BalanceID:       "VoiceBalance",
+				Units:           utils.Float64Pointer(0),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"test_ID1": {
+				Tenant: "cgrates.org",
+				ID:     "test_ID1",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    10,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"VoiceBalance": {
+						ID: "VoiceBalance",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    12,
+							},
+						},
+						Type: "*abstract",
+						Opts: map[string]interface{}{
+							"Destination": 10,
+						},
+						Units: utils.Float64Pointer(0),
+					},
+				},
+				Opts: map[string]interface{}{},
+			},
+		},
+	}
+	eql := rpEv.Equals(expEvAcc)
+	if eql != true {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", true, eql)
+	}
+	engine.Cache = cacheInit
+}
+
+func TestAccountDebitAbstracts(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	engine.Cache = newCache
+	ext := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:      "VoiceBalance",
+					Weights: ";12",
+					Type:    "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": 10,
+					},
+					Units: 0,
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+
+	var setRply string
+	err := admS.SetAccount(context.Background(), ext, &setRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(setRply, `OK`) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
+	}
+	var getRply utils.Account
+	err = admS.GetAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "test_ID1",
+			},
+			APIOpts: nil,
+		}, &getRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expectedGet := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID: "VoiceBalance",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": 10,
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	if !reflect.DeepEqual(getRply, expectedGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
+	}
+
+	accS := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	expected := &AccountSv1{
+		aS: accS,
+	}
+	accSv1 := NewAccountSv1(accS)
+	if !reflect.DeepEqual(expected, accSv1) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
+	}
+	var rpEv utils.ExtEventCharges
+	accArg := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestMatchingAccountsForEvent",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	err = accSv1.DebitAbstracts(context.Background(), accArg, &rpEv)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	var accKEy, rtID string
+	for key, val := range rpEv.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	var crgID string
+	for _, val := range rpEv.Charges {
+		crgID = val.ChargingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range rpEv.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	rpEv.Rating = map[string]*utils.ExtRateSInterval{}
+	expEvAcc := &utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "test_ID1",
+				BalanceID:       "VoiceBalance",
+				Units:           utils.Float64Pointer(0),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"test_ID1": {
+				Tenant: "cgrates.org",
+				ID:     "test_ID1",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    10,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"VoiceBalance": {
+						ID: "VoiceBalance",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    12,
+							},
+						},
+						Type: "*abstract",
+						Opts: map[string]interface{}{
+							"Destination": 10,
+						},
+						Units: utils.Float64Pointer(0),
+					},
+				},
+				Opts: map[string]interface{}{},
+			},
+		},
+	}
+	eql := rpEv.Equals(expEvAcc)
+	if eql != true {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", true, eql)
+	}
+	engine.Cache = cacheInit
+}
+
+/*
+func TestAccountMaxConcretes(t *testing.T) {
+	cacheInit := engine.Cache
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg, nil)
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr)
+	newCache := engine.NewCacheS(cfg, dm, nil)
+	accS := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+	engine.Cache = newCache
+	ext := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "test_ID1",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:      "VoiceBalance",
+					Weights: ";12",
+					Type:    "*abstract",
+					Opts:    map[string]interface{}{},
+					Units:   1,
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+
+	var setRply string
+	err := admS.SetAccount(context.Background(), ext, &setRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(setRply, `OK`) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
+	}
+	expected := &AccountSv1{
+		aS: accS,
+	}
+
+	accSv1 := NewAccountSv1(accS)
+	if !reflect.DeepEqual(expected, accSv1) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
+	}
+	var rpEv utils.ExtEventCharges
+	accArg := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestMaxConcretes",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.Usage: 6,
+			},
+		},
+	}
+	err = accSv1.MaxConcretes(context.Background(), accArg, &rpEv)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+
+	var accKEy, rtID string
+	for key, val := range rpEv.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	var crgID string
+	for _, val := range rpEv.Charges {
+		crgID = val.ChargingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range rpEv.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	rpEv.Rating = map[string]*utils.ExtRateSInterval{}
+	expEvAcc := &utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "test_ID1",
+				BalanceID:       "VoiceBalance",
+				Units:           utils.Float64Pointer(0),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"test_ID1": {
+				Tenant: "cgrates.org",
+				ID:     "test_ID1",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    10,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"VoiceBalance": {
+						ID: "VoiceBalance",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    12,
+							},
+						},
+						Type: "*abstract",
+						Opts: map[string]interface{}{
+							"Destination": 10,
+						},
+						Units: utils.Float64Pointer(0),
+					},
+				},
+				Opts: map[string]interface{}{},
+			},
+		},
+	}
+	eql := rpEv.Equals(expEvAcc)
+	if eql != true {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", true, eql)
+	}
+	engine.Cache = cacheInit
+}
+*/
