@@ -183,15 +183,14 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 	}
 	expAttr := &AttributeSCfg{
 		Enabled:             true,
-		ApierSConns:         []string{},
 		ResourceSConns:      []string{},
+		AdminSConns:         []string{},
 		StatSConns:          []string{utils.MetaLocalHost},
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ProcessRuns:         1,
-		AnyContext:          true,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))

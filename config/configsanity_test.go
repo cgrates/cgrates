@@ -1772,3 +1772,150 @@ func TestConfigSanityFilterS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 }
+
+func TestConfigSanitySessionS(t *testing.T) {
+	cfg = NewDefaultCGRConfig()
+	cfg.sessionSCfg.Enabled = true
+	cfg.sessionSCfg.TerminateAttempts = 0
+	expected := "<SessionS> 'terminate_attempts' should be at least 1"
+	err := cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+
+	//ChargerS
+	cfg.sessionSCfg.ChargerSConns = []string{"*internal"}
+	cfg.chargerSCfg.Enabled = false
+	cfg.sessionSCfg.TerminateAttempts = 2
+	expected = "<ChargerS> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ChargerSConns = []string{"*test"}
+	cfg.chargerSCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ChargerSConns = []string{"*localhost"}
+
+	//ResourceS
+	cfg.sessionSCfg.ResSConns = []string{"*internal"}
+	cfg.resourceSCfg.Enabled = false
+	expected = "<ResourceS> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ResSConns = []string{"*test"}
+	cfg.resourceSCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ResSConns = []string{"*localhost"}
+
+	//ThresholdS
+	cfg.sessionSCfg.ThreshSConns = []string{"*internal"}
+	cfg.thresholdSCfg.Enabled = false
+	expected = "<ThresholdS> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ThreshSConns = []string{"*test"}
+	cfg.thresholdSCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ThreshSConns = []string{"*localhost"}
+
+	//StatS
+	cfg.sessionSCfg.StatSConns = []string{"*internal"}
+	cfg.statsCfg.Enabled = false
+	expected = "<StatS> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.StatSConns = []string{"*test"}
+	cfg.statsCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.StatSConns = []string{"*localhost"}
+
+	//RouteS
+	cfg.sessionSCfg.RouteSConns = []string{"*internal"}
+	cfg.routeSCfg.Enabled = false
+	expected = "<RouteS> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.RouteSConns = []string{"*test"}
+	cfg.routeSCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.RouteSConns = []string{"*localhost"}
+
+	//AttributeS
+	cfg.sessionSCfg.AttrSConns = []string{"*internal"}
+	cfg.attributeSCfg.Enabled = false
+	expected = "<AttributeS> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.AttrSConns = []string{"*test"}
+	cfg.attributeSCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.AttrSConns = []string{"*localhost"}
+
+	//CDRs
+	cfg.sessionSCfg.CDRsConns = []string{"*internal"}
+	cfg.cdrsCfg.Enabled = false
+	expected = "<CDRs> not enabled but requested by <SessionS> component"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.CDRsConns = []string{"*test"}
+	cfg.cdrsCfg.Enabled = true
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.CDRsConns = []string{"*localhost"}
+
+	//ReplicationConns
+	cfg.sessionSCfg.ReplicationConns = []string{"*test"}
+	expected = "<SessionS> connection with id: <*test> not defined"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+	cfg.sessionSCfg.ReplicationConns = []string{"*localhost"}
+
+	cfg.cacheCfg.Partitions[utils.CacheClosedSessions].Limit = 0
+	expected = "<CacheS> *closed_sessions needs to be != 0, received: 0"
+	err = cfg.checkConfigSanity()
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
