@@ -143,18 +143,18 @@ func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
 }
 
 // VerifySignature returns if the signature is valid
-func (pi *ProcessedStirIdentity) VerifySignature(timeoutVal time.Duration) (err error) {
+func (pi *ProcessedStirIdentity) VerifySignature(ctx *context.Context, timeoutVal time.Duration) (err error) {
 	var pubkey interface{}
 	var ok bool
 	if pubkey, ok = engine.Cache.Get(utils.CacheSTIR, pi.Header.X5u); !ok {
 		if pubkey, err = utils.NewECDSAPubKey(pi.Header.X5u, timeoutVal); err != nil {
-			if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, pi.Header.X5u, nil,
+			if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, pi.Header.X5u, nil,
 				nil, false, utils.NonTransactional); errCh != nil {
 				return errCh
 			}
 			return
 		}
-		if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, pi.Header.X5u, pubkey,
+		if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, pi.Header.X5u, pubkey,
 			nil, false, utils.NonTransactional); errCh != nil {
 			return errCh
 		}
@@ -192,18 +192,18 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 }
 
 // NewSTIRIdentity returns the identiy for stir header
-func NewSTIRIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
+func NewSTIRIdentity(ctx *context.Context, header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (identity string, err error) {
 	var prvKey interface{}
 	var ok bool
 	if prvKey, ok = engine.Cache.Get(utils.CacheSTIR, prvkeyPath); !ok {
 		if prvKey, err = utils.NewECDSAPrvKey(prvkeyPath, timeout); err != nil {
-			if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, prvkeyPath, nil,
+			if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, prvkeyPath, nil,
 				nil, false, utils.NonTransactional); errCh != nil {
 				return utils.EmptyString, errCh
 			}
 			return
 		}
-		if errCh := engine.Cache.Set(context.TODO(), utils.CacheSTIR, prvkeyPath, prvKey,
+		if errCh := engine.Cache.Set(ctx, utils.CacheSTIR, prvkeyPath, prvKey,
 			nil, false, utils.NonTransactional); errCh != nil {
 			return utils.EmptyString, errCh
 		}
@@ -228,7 +228,7 @@ func NewSTIRIdentity(header *utils.PASSporTHeader, payload *utils.PASSporTPayloa
 }
 
 // AuthStirShaken autentificates the given identity using STIR/SHAKEN
-func AuthStirShaken(identity, originatorTn, originatorURI, destinationTn, destinationURI string,
+func AuthStirShaken(ctx *context.Context, identity, originatorTn, originatorURI, destinationTn, destinationURI string,
 	attest utils.StringSet, hdrMaxDur time.Duration) (err error) {
 	var pi *ProcessedStirIdentity
 	if pi, err = NewProcessedIdentity(identity); err != nil {
@@ -237,7 +237,7 @@ func AuthStirShaken(identity, originatorTn, originatorURI, destinationTn, destin
 	if !pi.VerifyHeader() {
 		return errors.New("wrong header")
 	}
-	if err = pi.VerifySignature(config.CgrConfig().GeneralCfg().ReplyTimeout); err != nil {
+	if err = pi.VerifySignature(ctx, config.CgrConfig().GeneralCfg().ReplyTimeout); err != nil {
 		return
 	}
 	return pi.VerifyPayload(originatorTn, originatorURI, destinationTn, destinationURI, hdrMaxDur, attest)

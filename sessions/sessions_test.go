@@ -1636,7 +1636,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
 	}
 	//relocate the session
-	sS.relocateSession("111", "222", "127.0.0.1")
+	sS.relocateSession(context.Background(), "111", "222", "127.0.0.1")
 	//check if the session exist with old CGRID
 	rcvS = sS.getSessions(initialCGRID, false)
 	if len(rcvS) != 0 {
@@ -1758,7 +1758,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		t.Error(err)
 	}
 	fltrs := []string{"*string:~*req.ToR:*voice"}
-	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
@@ -1769,7 +1769,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{(utils.ToR): {utils.MetaVoice}}
 	expUindx = nil
-	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
@@ -1783,7 +1783,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
-	if rplyindx, rplyUnindx := sS.getIndexedFilters("cgrates.org", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "cgrates.org", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
@@ -2497,7 +2497,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 		OverwriteIAT:   true,
 	}, &rcv); err != nil {
 		t.Error(err)
-	} else if err := AuthStirShaken(rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
+	} else if err := AuthStirShaken(context.Background(), rcv, "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1); err != nil {
 		t.Fatal(err)
 	}
 }
