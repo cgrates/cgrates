@@ -39,7 +39,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		Prefix_indexed_fields:     &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields:     &[]string{"*req.index1"},
 		Nested_fields:             utils.BoolPointer(true),
-		Dynaprepaid_actionprofile: &[]string{},
+		Dynaprepaid_actionprofile: &[]string{"val1", "val2"},
 	}
 	expected := &ActionSCfg{
 		Enabled:                  true,
@@ -54,7 +54,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		PrefixIndexedFields:      &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields:      &[]string{"*req.index1"},
 		NestedFields:             true,
-		DynaprepaidActionProfile: []string{},
+		DynaprepaidActionProfile: []string{"val1", "val2"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -107,18 +107,19 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 
 func TestActionSCfgClone(t *testing.T) {
 	ban := &ActionSCfg{
-		Enabled:             true,
-		EEsConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
-		CDRsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
-		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-		AccountSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-		Tenants:             &[]string{"itsyscom.com"},
-		IndexedSelects:      false,
-		StringIndexedFields: &[]string{"*req.index1"},
-		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
-		SuffixIndexedFields: &[]string{"*req.index1"},
-		NestedFields:        true,
+		Enabled:                  true,
+		EEsConns:                 []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+		CDRsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+		ThresholdSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		StatSConns:               []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		AccountSConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		Tenants:                  &[]string{"itsyscom.com"},
+		IndexedSelects:           false,
+		StringIndexedFields:      &[]string{"*req.index1"},
+		PrefixIndexedFields:      &[]string{"*req.index1", "*req.index2"},
+		SuffixIndexedFields:      &[]string{"*req.index1"},
+		NestedFields:             true,
+		DynaprepaidActionProfile: []string{"val1"},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -149,6 +150,9 @@ func TestActionSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.AccountSConns[0] = utils.EmptyString; ban.AccountSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.DynaprepaidActionProfile[0] = utils.EmptyString; ban.DynaprepaidActionProfile[0] != "val1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }

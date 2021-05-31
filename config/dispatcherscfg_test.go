@@ -173,6 +173,7 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        true,
 		AttributeSConns:     []string{"*localhost"},
+		AnySubsystem:        false,
 	}
 
 	v2 := &DispatcherSCfg{
@@ -183,6 +184,7 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		AttributeSConns:     []string{"*birpc"},
+		AnySubsystem:        true,
 	}
 
 	expected := &DispatcherSJsonCfg{
@@ -193,6 +195,7 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Attributes_conns:      &[]string{"*birpc"},
+		Any_subsystem:         utils.BoolPointer(true),
 	}
 
 	rcv := diffDispatcherSJsonCfg(d, v1, v2)

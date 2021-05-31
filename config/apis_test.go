@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -194,5 +195,43 @@ func TestConfigLoadFromDB(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp2, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp2), utils.ToJSON(rpl))
+	}
+}
+
+func TestGetSectionAsMap(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	var cons []string
+	expected := map[string]interface{}{
+		"db_type":     utils.MetaInternal,
+		"db_host":     "",
+		"db_port":     0,
+		"db_name":     "",
+		"db_user":     "",
+		"db_password": "",
+		"items":       map[string]interface{}{},
+		"opts": map[string]interface{}{
+			"redis_sentinel":             "",
+			"redis_cluster":              false,
+			"redis_cluster_sync":         "5s",
+			"redis_cluster_ondown_delay": "0",
+			"query_timeout":              "10s",
+			"redis_tls":                  false,
+			"redis_client_certificate":   "",
+			"redis_client_key":           "",
+			"redis_ca_certificate":       "",
+		},
+		"remote_conn_id":       "",
+		"remote_conns":         cons,
+		"replication_cache":    "",
+		"replication_conns":    cons,
+		"replication_filtered": false,
+	}
+
+	rcv, err := cfg.getSectionAsMap(ConfigDBJSON)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expected) {
+		fmt.Printf("%T", rcv)
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
