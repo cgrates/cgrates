@@ -1,0 +1,37 @@
+---
+- name: Add an apt key for elastic
+  become: yes
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Add apt repository for elastic
+  become: yes
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+    filename: elastic-7.x
+    update_cache: yes
+
+- name: Install elastic
+  become: yes
+  apt:
+    name: "elasticsearch"
+    state: present
+
+- name: Enable elasticsearch service and ensure it is not masked
+  become: yes
+  systemd:
+    name: elasticsearch
+    state: started
+    enabled: yes
+    masked: no
+
+- name: Install the git
+  become: yes
+  apt:
+    name: curl
+
+
+- name:  create index
+  command: 'curl -X PUT "localhost:9200/cdrs?pretty"'    
+  ignore_errors: yes
