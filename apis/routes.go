@@ -62,6 +62,25 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.Pagin
 	return nil
 }
 
+// GetRouteProfileCount sets in reply var the total number of RouteProfileIDs registered for the received tenant
+// returns ErrNotFound in case of 0 RouteProfileIDs
+func (adms *AdminSv1) GetRouteProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = adms.cfg.GeneralCfg().DefaultTenant
+	}
+	var keys []string
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.RouteProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return nil
+}
+
 type RouteWithAPIOpts struct {
 	*engine.RouteProfile
 	APIOpts map[string]interface{}

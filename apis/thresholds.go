@@ -70,8 +70,8 @@ func (adms *AdminSv1) GetThresholdProfileCount(ctx *context.Context, args *utils
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
 	var keys []string
-	prfx := utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
-	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.ThresholdProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
