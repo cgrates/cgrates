@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -453,5 +456,267 @@ func TestStatsSv1Ping(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Unexpected reply error")
+	}
+}
+
+func TestStatsAPIs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.FilterSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+	cfg.FilterSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
+	cfg.FilterSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	cfg.StatSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	data := engine.NewInternalDB(nil, nil, true)
+
+	expThEv := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"thdID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.MetaACD:   time.Duration(0),
+				utils.MetaASR:   float64(0),
+				utils.MetaTCD:   time.Duration(0),
+				utils.EventType: utils.StatUpdate,
+				utils.StatID:    "sq2",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaEventType: utils.StatUpdate,
+			},
+		},
+	}
+	mCC := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				expThEv.ID = args.(*engine.ThresholdsArgsProcessEvent).ID
+				if !reflect.DeepEqual(args.(*engine.ThresholdsArgsProcessEvent), expThEv) {
+					return fmt.Errorf("expected: <%+v>, \nreceived: <%+v>",
+						utils.ToJSON(expThEv), utils.ToJSON(args))
+				}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- mCC
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+	})
+
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	adms := &AdminSv1{
+		dm:  dm,
+		cfg: cfg,
+	}
+	sS := engine.NewStatService(dm, cfg, fltrs, cM)
+	stV1 := NewStatSv1(sS)
+	var reply string
+
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    "cgrates.org",
+			ID:        "actPrfID",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Actions: []*engine.APAction{
+				{
+					ID: "actID",
+				},
+			},
+		},
+	}
+
+	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "thdID",
+			FilterIDs:        []string{"*string:~*req.Account:1002"},
+			MaxHits:          10,
+			Weight:           10,
+			ActionProfileIDs: []string{"actPrfID"},
+		},
+	}
+
+	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+	} else if reply != utils.OK {
+		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
+	}
+
+	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "sq1",
+			FilterIDs:   []string{"*string:~*req.Account:1001"},
+			QueueLength: 100,
+			TTL:         10 * time.Second,
+			MinItems:    0,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			Blocker:      true,
+			ThresholdIDs: []string{utils.MetaNone},
+			Weight:       20,
+		},
+	}
+
+	if err := adms.SetStatQueueProfile(context.Background(), sqPrf1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
+	}
+
+	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "sq2",
+			FilterIDs:   []string{"*string:~*req.Account:1002"},
+			QueueLength: 100,
+			TTL:         1 * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+			Blocker:      true,
+			ThresholdIDs: []string{"thdID"},
+			Weight:       20,
+		},
+	}
+
+	if err := adms.SetStatQueueProfile(context.Background(), sqPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
+	}
+
+	expIDs := []string{"sq1", "sq2"}
+	var qIDs []string
+	if err := stV1.GetQueueIDs(context.Background(), &utils.TenantWithAPIOpts{
+		Tenant: "cgrates.org",
+	}, &qIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(qIDs)
+		if !reflect.DeepEqual(qIDs, expIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, qIDs)
+		}
+	}
+
+	args := &engine.StatsArgsProcessEvent{
+		StatIDs: []string{"sq1", "sq2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "StatsEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+				utils.Usage:        3000,
+			},
+		},
+	}
+
+	expIDs = []string{"sq2"}
+	if err := stV1.ProcessEvent(context.Background(), args, &qIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(qIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, qIDs)
+	}
+
+	expIDs = []string{"sq2"}
+	if err := stV1.GetStatQueuesForEvent(context.Background(), args, &qIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(qIDs, expIDs) {
+		t.Errorf("expected: <%+v>, received: <%+v>", expIDs, qIDs)
+	}
+
+	expStatQueue := &engine.StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "sq1",
+		SQMetrics: map[string]engine.StatMetric{
+			utils.MetaACD: &engine.StatACD{
+				Events: make(map[string]*engine.DurationWithCompress),
+			},
+			utils.MetaTCD: &engine.StatTCD{
+				Events: make(map[string]*engine.DurationWithCompress),
+			},
+		},
+	}
+
+	var rplyStatQueue engine.StatQueue
+	if err := stV1.GetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "sq1",
+		},
+	}, &rplyStatQueue); err != nil {
+		t.Error(err)
+	} else {
+		// We compare JSONs because the received StatQueue has unexported fields
+		if utils.ToJSON(rplyStatQueue) != utils.ToJSON(expStatQueue) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expStatQueue), utils.ToJSON(rplyStatQueue))
+		}
+	}
+
+	expStrMetrics := map[string]string{
+		utils.MetaACD: "0s",
+		utils.MetaASR: "0%",
+		utils.MetaTCD: "0s",
+	}
+	rplyStrMetrics := make(map[string]string)
+	if err := stV1.GetQueueStringMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "sq2",
+		},
+	}, &rplyStrMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyStrMetrics, expStrMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			expStrMetrics, rplyStrMetrics)
+	}
+
+	expFloatMetrics := map[string]float64{
+		utils.MetaACD: 0,
+		utils.MetaASR: 0,
+		utils.MetaTCD: 0,
+	}
+	rplyFloatMetrics := make(map[string]float64)
+	if err := stV1.GetQueueFloatMetrics(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "sq2",
+		},
+	}, &rplyFloatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFloatMetrics, expFloatMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			expFloatMetrics, rplyFloatMetrics)
+	}
+
+	if err := stV1.ResetStatQueue(context.Background(), &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "sq2",
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 }

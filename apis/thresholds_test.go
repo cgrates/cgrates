@@ -461,7 +461,7 @@ func TestThresholdsSv1Ping(t *testing.T) {
 	}
 }
 
-func TestThresholds2(t *testing.T) {
+func TestThresholdsAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ThresholdSCfg().ActionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)}
