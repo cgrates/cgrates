@@ -20,9 +20,9 @@ package general_tests
 import (
 	"errors"
 	"flag"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,12 +35,12 @@ var (
 	err       error
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
 	}
