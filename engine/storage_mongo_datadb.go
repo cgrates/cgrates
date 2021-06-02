@@ -1374,7 +1374,7 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 
 func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if !overwrite {
-		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
 			for _, oldAPid := range oldaPlIDs {
