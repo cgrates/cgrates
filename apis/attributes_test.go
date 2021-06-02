@@ -492,21 +492,17 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 			},
 		},
 	}
-	var reply engine.AttributeProfile
+	var reply engine.APIAttributeProfile
 
-	rsr, err := config.NewRSRParsers(utils.MetaPrepaid, utils.InInFieldSep)
-	if err != nil {
-		t.Error(err)
-	}
-	expAttrPrf := &engine.AttributeProfile{
+	expAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TestGetAttributeProfile",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*engine.ExternalAttribute{
 			{
 				Path:  "*req.RequestType",
 				Type:  utils.MetaConstant,
-				Value: rsr,
+				Value: utils.MetaPrepaid,
 			},
 		},
 	}

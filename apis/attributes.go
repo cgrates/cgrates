@@ -154,7 +154,7 @@ type AttributeSv1 struct {
 
 // GetAttributeForEvent returns matching AttributeProfile for Event
 func (alSv1 *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *engine.AttrArgsProcessEvent,
-	reply *engine.AttributeProfile) (err error) {
+	reply *engine.APIAttributeProfile) (err error) {
 	return alSv1.attrS.V1GetAttributeForEvent(ctx, args, reply)
 }
 

@@ -436,27 +436,25 @@ func testAttributeSGetAttributeForEventAnyContext(t *testing.T) {
 	if !reflect.DeepEqual(eAttrPrf2.APIAttributeProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2.APIAttributeProfile, reply)
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 
-	expAttrFromEv := &engine.AttributeProfile{
+	expAttrFromEv := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*engine.ExternalAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:  utils.MetaConstant,
-				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+				Value: "1001",
 			},
 		},
 		Weight: 10.0,
 	}
-	expAttrFromEv.Compile()
-	attrReply.Compile()
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
 	}
@@ -473,27 +471,25 @@ func testAttributeSGetAttributeForEventSameAnyContext(t *testing.T) {
 			},
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
 
-	expAttrFromEv := &engine.AttributeProfile{
+	expAttrFromEv := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
 		FilterIDs: []string{"*string:~*req.Account:dan"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*engine.ExternalAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 				Type:  utils.MetaConstant,
-				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+				Value: "1001",
 			},
 		},
 		Weight: 10.0,
 	}
-	expAttrFromEv.Compile()
-	attrReply.Compile()
 	if !reflect.DeepEqual(expAttrFromEv, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expAttrFromEv), utils.ToJSON(attrReply))
 	}
@@ -513,7 +509,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			},
 		},
 	}
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -535,20 +531,20 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 	}
 
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &engine.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:~*req.Account:1007", "*string:~*opts.*context:*cdrs|*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*engine.ExternalAttribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.AccountField,
-				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+				Value:     "1001",
 				Type:      utils.MetaConstant,
 				FilterIDs: []string{},
 			},
 			{
 				Path:      utils.MetaReq + utils.NestingSep + utils.Subject,
-				Value:     config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+				Value:     "1001",
 				Type:      utils.MetaConstant,
 				FilterIDs: []string{},
 			},
@@ -589,26 +585,23 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	var attrReply *engine.AttributeProfile
+	var attrReply *engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Fatal(err)
 	}
-	attrReply.Compile()
-	eAttrPrf.Compile()
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
 
 	ev.Tenant = utils.EmptyString
 	ev.ID = "randomID"
-	var attrPrf *engine.AttributeProfile
+	var attrPrf *engine.APIAttributeProfile
 	if err := attrSRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrPrf); err != nil {
 		t.Fatal(err)
 	}
 
-	attrPrf.Compile()
 	// Populate private variables in RSRParsers
 	if !reflect.DeepEqual(eAttrPrf, attrPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(attrPrf))
