@@ -393,7 +393,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestAttributesGetAttributeProfileIDsCountMockErr(t *testing.T) {
+func TestAttributesGetAttributeProfileCountMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{

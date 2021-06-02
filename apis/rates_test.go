@@ -244,7 +244,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileIDsCount(t *testing.T) {
+func TestRatesGetRateProfileCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -282,7 +282,7 @@ func TestRatesGetRateProfileIDsCount(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileIDsCountEmptyTenant(t *testing.T) {
+func TestRatesGetRateProfileCountEmptyTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -320,7 +320,7 @@ func TestRatesGetRateProfileIDsCountEmptyTenant(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileIDsCountGetKeysError(t *testing.T) {
+func TestRatesGetRateProfileCountGetKeysError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)
@@ -337,7 +337,7 @@ func TestRatesGetRateProfileIDsCountGetKeysError(t *testing.T) {
 	}
 }
 
-func TestRatesGetRateProfileIDsCountKeysLenError(t *testing.T) {
+func TestRatesGetRateProfileCountKeysLenError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg, nil)

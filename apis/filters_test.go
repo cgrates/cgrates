@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestFiltersSetGetGetIDsCountFilters(t *testing.T) {
+func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -706,7 +706,7 @@ func TestFiltersGetFilterGetFilterError(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func TestFiltersGetFilterIDsCountError(t *testing.T) {
+func TestFiltersGetFilterCountError(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone

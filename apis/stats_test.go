@@ -77,7 +77,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 
 	var rplyCount int
 
-	if err := adms.GetStatQueueProfileIDsCount(context.Background(), &utils.TenantWithAPIOpts{},
+	if err := adms.GetStatQueueProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if rplyCount != len(sqPrfIDs) {
@@ -372,7 +372,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestStatsGetStatQueueProfileIDsCountErrMock(t *testing.T) {
+func TestStatsGetStatQueueProfileCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -398,7 +398,7 @@ func TestStatsGetStatQueueProfileIDsCountErrMock(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetStatQueueProfileIDsCount(context.Background(),
+	if err := adms.GetStatQueueProfileCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotImplemented {
@@ -406,7 +406,7 @@ func TestStatsGetStatQueueProfileIDsCountErrMock(t *testing.T) {
 	}
 }
 
-func TestStatsGetStatQueueProfileIDsCountErrKeys(t *testing.T) {
+func TestStatsGetStatQueueProfileCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -422,7 +422,7 @@ func TestStatsGetStatQueueProfileIDsCountErrKeys(t *testing.T) {
 
 	var reply int
 
-	if err := adms.GetStatQueueProfileIDsCount(context.Background(),
+	if err := adms.GetStatQueueProfileCount(context.Background(),
 		&utils.TenantWithAPIOpts{
 			Tenant: "cgrates.org",
 		}, &reply); err == nil || err != utils.ErrNotFound {
