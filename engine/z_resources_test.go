@@ -2741,7 +2741,7 @@ func TestResourcesRecordUsageZeroTTL(t *testing.T) {
 	err := r.recordUsage(ru)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 }
 
@@ -2779,7 +2779,7 @@ func TestResourcesRecordUsageGtZeroTTL(t *testing.T) {
 	exp.Usages[ru.ID].ExpiryTime = r.Usages[ru.ID].ExpiryTime
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if !reflect.DeepEqual(r, exp) {

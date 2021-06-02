@@ -56,13 +56,13 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	}
 
 	if err := adms.SetStatQueueProfile(context.Background(), sqPrf, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
 	if err := adms.GetStatQueueProfile(context.Background(), arg, &result); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(result, *sqPrf.StatQueueProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(sqPrf.StatQueueProfile), utils.ToJSON(result))
@@ -73,7 +73,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 
 	if err := adms.GetStatQueueProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
 		&sqPrfIDs); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(sqPrfIDs, expsqPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expsqPrfIDs, sqPrfIDs)
 	}
@@ -82,7 +82,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 
 	if err := adms.GetStatQueueProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if rplyCount != len(sqPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(sqPrfIDs), rplyCount)
 	}
@@ -92,7 +92,7 @@ func TestStatsSetGetRemStatQueueProfile(t *testing.T) {
 	}
 
 	if err := adms.RemoveStatQueueProfile(context.Background(), argRem, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if err := adms.GetStatQueueProfile(context.Background(), arg, &result); err == nil ||
@@ -542,7 +542,7 @@ func TestStatsAPIs(t *testing.T) {
 	}
 
 	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}

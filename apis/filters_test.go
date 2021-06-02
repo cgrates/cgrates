@@ -851,7 +851,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	var reply string
 
 	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
@@ -1010,7 +1010,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	var reply string
 
 	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{

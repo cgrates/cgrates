@@ -60,7 +60,7 @@ func TestCallCacheNoCaching(t *testing.T) {
 	err := CallCache(cM, ctx, cacheConns, caching, args, cacheIDs, opts, true)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if !reflect.DeepEqual(args, expArgs) {
@@ -284,7 +284,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 	err := CallCache(cM, ctx, cacheConns, caching, args, cacheIDs, opts, false)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 }
 
@@ -355,7 +355,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	err := CallCache(cM, ctx, cacheConns, caching, args, cacheIDs, opts, false)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 }
 
@@ -407,7 +407,7 @@ func TestCallCacheClear(t *testing.T) {
 	err := CallCache(cM, ctx, cacheConns, caching, args, cacheIDs, opts, false)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 }
 

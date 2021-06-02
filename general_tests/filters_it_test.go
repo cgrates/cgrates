@@ -276,7 +276,7 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -305,13 +305,13 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 			Async:            true,
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var rcvTh *engine.ThresholdProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRpc.Call(utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
@@ -356,7 +356,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -374,7 +374,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 			ActionProfileIDs: []string{"LOG"},
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -409,14 +409,14 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var reply *engine.ResourceProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := fltrRpc.Call(utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig) {
@@ -456,7 +456,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 		},
 	}
 
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -474,13 +474,13 @@ func testV1FltrPopulateResources(t *testing.T) {
 			Async:            true,
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var rcvTh *engine.ThresholdProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRpc.Call(utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
@@ -520,14 +520,14 @@ func testV1FltrPopulateResources(t *testing.T) {
 		},
 	}
 
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	//Overwrite the threshold
-	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -554,14 +554,14 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var reply *engine.ResourceProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetResourceProfile,
+	if err := fltrRpc.Call(utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsConfig) {
@@ -607,7 +607,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 		},
 	}
 
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -670,14 +670,14 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 		},
 	}
 
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	//overwrite the StatQueueProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetStatQueueProfile, &utils.TenantID{Tenant: "cgrates.org",
+	if err := fltrRpc.Call(utils.AdminSv1GetStatQueueProfile, &utils.TenantID{Tenant: "cgrates.org",
 		ID: "STATS_RES_TEST12"}, &replyStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statsPrf.StatQueueProfile, replyStats) {
@@ -695,7 +695,7 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 
 func testV1FltrAccounts(t *testing.T) {
 	var resp string
-	if err := fltrRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := fltrRpc.Call(utils.AdminSv1RemoveThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -719,7 +719,7 @@ func testV1FltrAccounts(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -746,13 +746,13 @@ func testV1FltrAccounts(t *testing.T) {
 			Async:            true,
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var rcvTh *engine.ThresholdProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRpc.Call(utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
@@ -790,7 +790,7 @@ func testV1FltrAccounts(t *testing.T) {
 		},
 	}
 
-	if err := fltrRpc.Call(utils.APIerSv1SetFilter, filter, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -804,7 +804,7 @@ func testV1FltrAccounts(t *testing.T) {
 
 func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 	var resp string
-	if err := fltrRpc.Call(utils.APIerSv1RemoveThresholdProfile,
+	if err := fltrRpc.Call(utils.AdminSv1RemoveThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH_Account"}}, &resp); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() { // no error if the threshold is already removed
 			t.Error(err)
@@ -834,13 +834,13 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 			Async:            true,
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetThresholdProfile, tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var rcvTh *engine.ThresholdProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetThresholdProfile,
+	if err := fltrRpc.Call(utils.AdminSv1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
@@ -1011,7 +1011,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		},
 	}
 	var result string
-	if err := fltrRpc.Call(utils.APIerSv1SetAttributeProfile, chargerProfile, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetAttributeProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

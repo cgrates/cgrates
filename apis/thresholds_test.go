@@ -57,13 +57,13 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 	}
 
 	if err := adms.SetThresholdProfile(context.Background(), thPrf, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
 	if err := adms.GetThresholdProfile(context.Background(), arg, &result); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(result, *thPrf.ThresholdProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(thPrf.ThresholdProfile), utils.ToJSON(result))
@@ -74,7 +74,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 
 	if err := adms.GetThresholdProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
 		&thPrfIDs); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(thPrfIDs, expThPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expThPrfIDs, thPrfIDs)
 	}
@@ -83,7 +83,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 
 	if err := adms.GetThresholdProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if rplyCount != len(thPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(thPrfIDs), rplyCount)
 	}
@@ -93,7 +93,7 @@ func TestThresholdsSetGetRemThresholdProfile(t *testing.T) {
 	}
 
 	if err := adms.RemoveThresholdProfile(context.Background(), argRem, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if err := adms.GetThresholdProfile(context.Background(), arg, &result); err == nil ||
@@ -531,7 +531,7 @@ func TestThresholdsAPIs(t *testing.T) {
 	}
 
 	if err := adms.SetThresholdProfile(context.Background(), thPrf1, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
@@ -547,7 +547,7 @@ func TestThresholdsAPIs(t *testing.T) {
 	}
 
 	if err := adms.SetThresholdProfile(context.Background(), thPrf2, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
