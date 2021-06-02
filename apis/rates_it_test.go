@@ -49,14 +49,14 @@ var (
 		testGetRateProfileBeforeSet,
 		testRateSetRateProfile,
 		testRateGetRateProfileIDs,
-		testRateGetRateIDsCount,
+		testRateGetRateCount,
 		testGetRateProfileBeforeSet2,
 		testRateSetRateProfile2,
 		testRateGetRateIDs2,
-		testRateGetRateIDsCount2,
+		testRateGetRateCount2,
 		testRateRemoveRateProfile,
 		testRateGetRateProfileIDs,
-		testRateGetRateIDsCount,
+		testRateGetRateCount,
 		testRateSetRateProfile3,
 		testRateSetAttributeProfileBrokenReference,
 		testRateRemoveRateProfileRates,
@@ -221,7 +221,7 @@ func testRateGetRateProfileIDs(t *testing.T) {
 	}
 }
 
-func testRateGetRateIDsCount(t *testing.T) {
+func testRateGetRateCount(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -338,7 +338,7 @@ func testRateGetRateIDs2(t *testing.T) {
 	}
 }
 
-func testRateGetRateIDsCount2(t *testing.T) {
+func testRateGetRateCount2(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{

@@ -50,14 +50,14 @@ var (
 		//testAttributeSLoadFromFolder,
 		testAttributeSetAttributeProfile,
 		testAttributeGetAttributeIDs,
-		testAttributeGetAttributeIDsCount,
+		testAttributeGetAttributeCount,
 		testGetAttributeProfileBeforeSet2,
 		testAttributeSetAttributeProfile2,
 		testAttributeGetAttributeIDs2,
-		testAttributeGetAttributeIDsCount2,
+		testAttributeGetAttributeCount2,
 		testAttributeRemoveAttributeProfile,
 		testAttributeGetAttributeIDs,
-		testAttributeGetAttributeIDsCount,
+		testAttributeGetAttributeCount,
 		testAttributeSetAttributeProfileBrokenReference,
 		testAttributeSGetAttributeForEventMissingEvent,
 		testAttributeSGetAttributeForEventAnyContext,
@@ -69,7 +69,7 @@ var (
 		testAttributeSProcessWithMultipleRuns,
 		testAttributeSProcessWithMultipleRuns2,
 		testAttributeGetAttributeProfileAllIDs,
-		testAttributeGetAttributeProfileAllIDsCount,
+		testAttributeGetAttributeProfileAllCount,
 		testAttributeRemoveRemainAttributeProfiles,
 		testAttributeGetAttributeProfileAfterRemove,
 		testAttributeSKillEngine,
@@ -226,7 +226,7 @@ func testAttributeGetAttributeIDs(t *testing.T) {
 	}
 }
 
-func testAttributeGetAttributeIDsCount(t *testing.T) {
+func testAttributeGetAttributeCount(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -317,7 +317,7 @@ func testAttributeGetAttributeIDs2(t *testing.T) {
 	}
 }
 
-func testAttributeGetAttributeIDsCount2(t *testing.T) {
+func testAttributeGetAttributeCount2(t *testing.T) {
 	var reply int
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -949,7 +949,7 @@ func testAttributeGetAttributeProfileAllIDs(t *testing.T) {
 	}
 }
 
-func testAttributeGetAttributeProfileAllIDsCount(t *testing.T) {
+func testAttributeGetAttributeProfileAllCount(t *testing.T) {
 	var rply int
 	if err := attrSRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileCount,
 		&utils.TenantIDWithAPIOpts{

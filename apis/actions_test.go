@@ -379,7 +379,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestActionsGetActionProfileIDsCountErrMock(t *testing.T) {
+func TestActionsGetActionProfileCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -415,7 +415,7 @@ func TestActionsGetActionProfileIDsCountErrMock(t *testing.T) {
 	}
 }
 
-func TestActionsGetActionProfileIDsCountErrKeys(t *testing.T) {
+func TestActionsGetActionProfileCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{

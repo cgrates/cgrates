@@ -375,7 +375,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesGetResourceProfileIDsCountErrMock(t *testing.T) {
+func TestResourcesGetResourceProfileCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -409,7 +409,7 @@ func TestResourcesGetResourceProfileIDsCountErrMock(t *testing.T) {
 	}
 }
 
-func TestResourcesGetResourceProfileIDsCountErrKeys(t *testing.T) {
+func TestResourcesGetResourceProfileCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{

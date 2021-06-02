@@ -377,7 +377,7 @@ func TestThresholdsGetThresholdProfileIDsErrKeys(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestThresholdsGetThresholdProfileIDsCountErrMock(t *testing.T) {
+func TestThresholdsGetThresholdProfileCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
@@ -411,7 +411,7 @@ func TestThresholdsGetThresholdProfileIDsCountErrMock(t *testing.T) {
 	}
 }
 
-func TestThresholdsGetThresholdProfileIDsCountErrKeys(t *testing.T) {
+func TestThresholdsGetThresholdProfileCountErrKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
