@@ -309,6 +309,14 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
 		},
+		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+			return map[string]utils.StringSet{
+				"testIndex": {},
+			}, nil
+		},
+		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+			return nil
+		},
 	}
 
 	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
