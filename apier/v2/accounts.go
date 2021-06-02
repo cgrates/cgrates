@@ -125,10 +125,10 @@ func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 			if attr.ActionPlansOverwrite {
 				// clean previous action plans
-				for i := 0; i < len(acntAPids); {
-					apID := acntAPids[i]
+				nAcntAPids := make([]string, 0, len(acntAPids))
+				for _, apID := range acntAPids {
 					if utils.IsSliceMember(attr.ActionPlanIDs, apID) {
-						i++      // increase index since we don't remove from slice
+						nAcntAPids = append(nAcntAPids, apID)
 						continue // not removing the ones where
 					}
 					ap, err := apiv2.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
@@ -137,8 +137,8 @@ func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 					}
 					delete(ap.AccountIDs, accID)
 					dirtyActionPlans[apID] = ap
-					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
+				acntAPids = nAcntAPids
 			}
 			for _, apID := range attr.ActionPlanIDs {
 				ap, err := apiv2.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
@@ -177,14 +177,12 @@ func (apiv2 *APIerSv2) SetAccount(attr AttrSetAccount, reply *string) error {
 			if len(dirtyActionPlans) != 0 && !schedNeedsReload {
 				schedNeedsReload = true
 			}
-			apIDs := make([]string, len(dirtyActionPlans))
-			i := 0
+			apIDs := make([]string, 0, len(dirtyActionPlans))
 			for actionPlanID, ap := range dirtyActionPlans {
 				if err := apiv2.DataManager.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 					return 0, err
 				}
-				apIDs[i] = actionPlanID
-				i++
+				apIDs = append(apIDs, actionPlanID)
 			}
 			if err := apiv2.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 				return 0, err
