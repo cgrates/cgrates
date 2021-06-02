@@ -147,9 +147,21 @@
     args:
       chdir: '{{ cgrates_dir }}/data/storage/mysql/'
 
+  - name:  post install for ers mysql
+    become: yes
+    command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_ers_db.sh root CGRateS.org localhost'
+    args:
+      chdir: '{{ cgrates_dir }}/data/storage/mysql/'
+
   - name:  post install postgres2
     become: yes
     command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
+    args:
+      chdir: '{{ cgrates_dir }}/data/storage/postgres/'
+
+  - name:  post install for ers postgres
+    become: yes
+    command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_ers_db.sh'
     args:
       chdir: '{{ cgrates_dir }}/data/storage/postgres/'
 
