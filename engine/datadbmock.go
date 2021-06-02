@@ -57,6 +57,9 @@ type DataDBMock struct {
 	SetAccountDrvF             func(ctx *context.Context, profile *utils.Account) error
 	GetAccountDrvF             func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error)
 	RemoveAccountDrvF          func(ctx *context.Context, str1 string, str2 string) error
+	GetRouteProfileDrvF        func(ctx *context.Context, tnt, id string) (*RouteProfile, error)
+	SetRouteProfileDrvF        func(ctx *context.Context, rtPrf *RouteProfile) error
+	RemoveRouteProfileDrvF     func(ctx *context.Context, tnt, id string) error
 }
 
 //Storage methods
@@ -261,15 +264,24 @@ func (dbM *DataDBMock) RemoveFilterDrv(str1 string, str2 string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRouteProfileDrv(*context.Context, string, string) (*RouteProfile, error) {
+func (dbM *DataDBMock) GetRouteProfileDrv(ctx *context.Context, tnt, id string) (*RouteProfile, error) {
+	if dbM.GetRouteProfileDrvF != nil {
+		return dbM.GetRouteProfileDrvF(ctx, tnt, id)
+	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRouteProfileDrv(*context.Context, *RouteProfile) error {
+func (dbM *DataDBMock) SetRouteProfileDrv(ctx *context.Context, rtPrf *RouteProfile) error {
+	if dbM.SetRouteProfileDrvF != nil {
+		return dbM.SetRouteProfileDrvF(ctx, rtPrf)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveRouteProfileDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveRouteProfileDrv(ctx *context.Context, tnt, id string) error {
+	if dbM.RemoveRouteProfileDrvF != nil {
+		return dbM.RemoveRouteProfileDrvF(ctx, tnt, id)
+	}
 	return utils.ErrNotImplemented
 }
 
