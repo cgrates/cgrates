@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -461,4 +465,213 @@ func TestChargerProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(rpl[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(rpl[0]), utils.ToJSON(rcv[0]))
 	}
+}
+
+func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+		"string",
+	}
+	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	defaultCfg.ChargerSCfg().IndexedSelects = false
+	defaultCfg.ChargerSCfg().NestedFields = false
+
+	dataDB := NewInternalDB(nil, nil, true)
+	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	cS := &ChargerService{
+		dm: dmCharger,
+		filterS: &FilterS{
+			dm:  dmCharger,
+			cfg: defaultCfg,
+		},
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event: map[string]interface{}{
+			"Charger":        "ChargerProfile1",
+			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "10.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+
+	experr := utils.ErrNotFound
+	rcv, err := cS.matchingChargerProfilesForEvent("tnt", cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+		"string",
+	}
+	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	defaultCfg.ChargerSCfg().IndexedSelects = false
+	defaultCfg.ChargerSCfg().NestedFields = false
+
+	dataDB := NewInternalDB(nil, nil, true)
+	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	cS := &ChargerService{
+		dm: dmCharger,
+		filterS: &FilterS{
+			dm:  dmCharger,
+			cfg: defaultCfg,
+		},
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event: map[string]interface{}{
+			"Charger":        "ChargerProfile1",
+			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "10.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+
+	experr := utils.ErrNotFound
+	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	defaultCfg.ChargerSCfg().StringIndexedFields = &[]string{
+		"string",
+	}
+	defaultCfg.ChargerSCfg().PrefixIndexedFields = &[]string{"prefix"}
+	defaultCfg.ChargerSCfg().SuffixIndexedFields = &[]string{"suffix"}
+	defaultCfg.ChargerSCfg().IndexedSelects = false
+	defaultCfg.ChargerSCfg().NestedFields = false
+
+	dbm := &DataDBMock{
+		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) {
+			return []string{":"}, nil
+		},
+	}
+	dmCharger := NewDataManager(dbm, defaultCfg.CacheCfg(), nil)
+	cS := &ChargerService{
+		dm: dmCharger,
+		filterS: &FilterS{
+			dm:  dmCharger,
+			cfg: defaultCfg,
+		},
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     "cgrEvID",
+		Event: map[string]interface{}{
+			"Charger":        "ChargerProfile1",
+			utils.AnswerTime: time.Date(2021, 4, 1, 10, 0, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			utils.Weight:     "10.0",
+		},
+		APIOpts: map[string]interface{}{
+			utils.Subsys: utils.MetaChargers,
+		},
+	}
+
+	experr := utils.ErrNotImplemented
+	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+
+	if err == nil || err != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+
+}
+
+func TestChargersprocessEvent(t *testing.T) {
+	defaultCfg := config.NewDefaultCGRConfig()
+	cS := &ChargerService{
+		cfg: defaultCfg,
+	}
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsAttributesProcessRuns: 2,
+		},
+	}
+
+	experr := "NO_DATABASE_CONNECTION"
+	rcv, err := cS.processEvent(cgrEv.Tenant, cgrEv)
+
+	if err == nil || err.Error() != experr {
+		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	if rcv != nil {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
+	}
+}
+
+func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
+	cS := &ChargerService{}
+	args := &utils.CGREvent{}
+	var reply *[]*ChrgSProcessEventReply
+
+	experr := "MANDATORY_IE_MISSING: [Event]"
+	err := cS.V1ProcessEvent(args, reply)
+
+	if err == nil || err.Error() != experr {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestChargersShutdown(t *testing.T) {
+	cS := &ChargerService{}
+
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	exp := []string{
+		"CGRateS <> [INFO] <ChargerS> shutdown initialized",
+		"CGRateS <> [INFO] <ChargerS> shutdown complete",
+	}
+	cS.Shutdown()
+	rcv := strings.Split(buf.String(), "\n")
+
+	for i := 0; i < 2; i++ {
+		rcv[i] = rcv[i][20:]
+		if rcv[i] != exp[i] {
+			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp[i], rcv[i])
+		}
+	}
+
+	utils.Logger.SetLogLevel(0)
 }
