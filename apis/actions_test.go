@@ -466,3 +466,59 @@ func TestActionsSv1Ping(t *testing.T) {
 		t.Errorf("Unexpected reply error")
 	}
 }
+
+func TestActionsAPIs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	adms := &AdminSv1{
+		dm:  dm,
+		cfg: cfg,
+	}
+	aS := actions.NewActionS(cfg, fltrs, dm, nil)
+	aSv1 := NewActionSv1(aS)
+
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    "cgrates.org",
+			ID:        "actPrfID",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Actions: []*engine.APAction{
+				{
+					ID: "actID",
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ScheduleActions(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
+	}
+}
