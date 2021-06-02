@@ -1094,7 +1094,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	subsys := utils.MetaSessionS
 
 	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, dsp2) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp2, rcv)
 	}
@@ -1154,7 +1154,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	subsys := utils.MetaSessionS
 
 	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, dsp1) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp1, rcv)
 	}
@@ -1332,7 +1332,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	subsys := utils.MetaSessionS
 
 	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, dsp2) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp2, rcv)
 	}
@@ -1344,7 +1344,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}
 
 	if rcv, err := dS.dispatcherProfileForEvent(tnt, ev, subsys); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, dsp1) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", dsp1, rcv)
 	}

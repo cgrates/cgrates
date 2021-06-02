@@ -1,0 +1,49 @@
+{
+    // CGRateS Configuration file
+    // Used in apis/filter_update_it_test.go
+    
+    "general": {
+        "node_id": "fltr_update_e1_mongo",
+        "log_level": 7
+    },
+    
+    
+    "listen": {
+        "rpc_json": ":22012",
+        "rpc_gob": ":22013",
+        "http": ":22080",
+    },
+    
+    
+    "data_db": {
+        "db_type": "mongo",
+        "db_name": "10",
+        "db_port": 27017,
+    },
+    
+    
+    "stor_db": {
+        "db_type": "mongo",
+        "db_name": "cgrates",
+        "db_port": 27017,
+    },
+    
+    
+    "rpc_conns": {
+        "cache_conn": {
+            "strategy": "*broadcast_sync",
+            "conns": [{"address": "127.0.0.1:22012", "transport": "*json"}, {"address": "127.0.0.1:2012", "transport": "*json"}],
+        },
+    },
+    
+    "attributes": {
+        "enabled": true
+    },
+    
+    "apiers": {
+        "enabled": true,
+        "caches_conns":["cache_conn"],
+    },
+    
+}
+    

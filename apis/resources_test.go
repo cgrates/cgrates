@@ -54,13 +54,13 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 		},
 	}
 	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
 
 	if err := adms.GetResourceProfile(context.Background(), arg, &result); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(result, *resPrf.ResourceProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(resPrf.ResourceProfile), utils.ToJSON(result))
@@ -71,7 +71,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 
 	if err := adms.GetResourceProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
 		&rsPrfIDs); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(rsPrfIDs, expRsPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expRsPrfIDs, rsPrfIDs)
 	}
@@ -80,7 +80,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 
 	if err := adms.GetResourceProfileCount(context.Background(), &utils.TenantWithAPIOpts{},
 		&rplyCount); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if rplyCount != len(rsPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(rsPrfIDs), rplyCount)
 	}
@@ -90,7 +90,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	}
 
 	if err := adms.RemoveResourceProfile(context.Background(), argRem, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if err := adms.GetResourceProfile(context.Background(), arg, &result); err == nil ||

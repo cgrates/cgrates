@@ -57,13 +57,13 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 	}
 
 	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("\nexpected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(result, *actPrf.ActionProfile) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(result))
@@ -74,7 +74,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 
 	if err := adms.GetActionProfileIDs(context.Background(), &utils.PaginatorWithTenant{},
 		&actPrfIDs); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if !reflect.DeepEqual(actPrfIDs, expactPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", expactPrfIDs, actPrfIDs)
 	}
@@ -85,13 +85,13 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		TenantID: &utils.TenantID{},
 	},
 		&rplyCount); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	} else if rplyCount != len(actPrfIDs) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", len(actPrfIDs), rplyCount)
 	}
 
 	if err := adms.RemoveActionProfile(context.Background(), arg, &reply); err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err == nil ||
