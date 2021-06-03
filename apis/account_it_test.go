@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -45,6 +46,16 @@ var (
 		testAccSStartEngine,
 		testAccSRPCConn,
 		testGetAccProfileBeforeSet,
+		testAccSetAccProfile,
+		testAccGetAccIDs,
+		testAccGetAccIDsCount,
+		testGetAccBeforeSet2,
+		testAccSetAcc2,
+		testAccGetAccIDs2,
+		testAccGetAccIDsCount2,
+		testAccRemoveAcc,
+		testAccGetAccountsForEvent,
+		//testAccMaxAbstracts,
 		testAccSKillEngine,
 	}
 )
@@ -52,11 +63,11 @@ var (
 func TestAccSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		accPrfConfigDIR = "rates_internal"
+		accPrfConfigDIR = "tutinternal"
 	case utils.MetaMongo:
-		accPrfConfigDIR = "rates_mongo"
+		accPrfConfigDIR = "tutmongo"
 	case utils.MetaMySQL:
-		accPrfConfigDIR = "rates_mysql"
+		accPrfConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -109,7 +120,7 @@ func testGetAccProfileBeforeSet(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: utils.CGRateSorg,
-				ID:     "TEST_ACCOUNT_IT_TEST",
+				ID:     "TEST_ACC_IT_TEST",
 			},
 		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -120,7 +131,7 @@ func testAccSetAccProfile(t *testing.T) {
 	accPrf := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
 			Tenant: "cgrates.org",
-			ID:     "test_ID1",
+			ID:     "TEST_ACC_IT_TEST",
 			Opts:   map[string]interface{}{},
 			Balances: map[string]*utils.APIBalance{
 				"VoiceBalance": {
@@ -129,7 +140,7 @@ func testAccSetAccProfile(t *testing.T) {
 					Weights:   ";12",
 					Type:      "*abstract",
 					Opts: map[string]interface{}{
-						"Destination": 10,
+						"Destination": "10",
 					},
 					Units: 0,
 				},
@@ -146,9 +157,9 @@ func testAccSetAccProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedAcc := &utils.Account{
+	expectedAcc := utils.Account{
 		Tenant: "cgrates.org",
-		ID:     "test_ID1",
+		ID:     "TEST_ACC_IT_TEST",
 		Opts:   map[string]interface{}{},
 		Balances: map[string]*utils.Balance{
 			"VoiceBalance": {
@@ -162,7 +173,7 @@ func testAccSetAccProfile(t *testing.T) {
 				},
 				Type: "*abstract",
 				Opts: map[string]interface{}{
-					"Destination": 10,
+					"Destination": "10",
 				},
 				Units: utils.NewDecimal(0, 0),
 			},
@@ -174,17 +185,299 @@ func testAccSetAccProfile(t *testing.T) {
 			},
 		},
 	}
-	var result *utils.Account
+	var result utils.Account
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: "",
-				ID:     "test_ID1",
+				ID:     "TEST_ACC_IT_TEST",
 			},
 		}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, expectedAcc) {
 		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc), utils.ToJSON(result))
+	}
+}
+
+func testAccGetAccIDs(t *testing.T) {
+	var reply []string
+	args := &utils.PaginatorWithTenant{
+		Tenant: "cgrates.org",
+	}
+	expected := []string{"TEST_ACC_IT_TEST"}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != len(expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func testAccGetAccIDsCount(t *testing.T) {
+	var reply int
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: utils.CGRateSorg,
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountCount,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 1 {
+		t.Errorf("Expected %+v \n, received %+v", 1, reply)
+	}
+}
+
+func testGetAccBeforeSet2(t *testing.T) {
+	var reply *utils.TenantIDWithAPIOpts
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "TEST_ACC_IT_TEST_SECOND",
+			},
+		}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testAccSetAcc2(t *testing.T) {
+	accPrf := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST2",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   ";12",
+					Type:      "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: 0,
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	expectedAcc := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ACC_IT_TEST2",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": "10",
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	var result utils.Account
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "TEST_ACC_IT_TEST2",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedAcc) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc), utils.ToJSON(result))
+	}
+}
+
+func testAccGetAccIDs2(t *testing.T) {
+	var reply []string
+	args := &utils.PaginatorWithTenant{
+		Tenant: "cgrates.org",
+	}
+	expected := []string{"TEST_ACC_IT_TEST", "TEST_ACC_IT_TEST2"}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountIDs,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != len(expected) {
+		t.Errorf("Expected %+v \n, received %+v", expected, reply)
+	}
+}
+
+func testAccGetAccIDsCount2(t *testing.T) {
+	var reply int
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: utils.CGRateSorg,
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccountCount,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 2 {
+		t.Errorf("Expected %+v \n, received %+v", 2, reply)
+	}
+}
+
+func testAccRemoveAcc(t *testing.T) {
+	var reply string
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID:     "TEST_ACC_IT_TEST2",
+			Tenant: utils.CGRateSorg,
+		},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1RemoveAccount,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	//nothing to get from db
+	var result *utils.RateProfile
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "TEST_ACC_IT_TEST2",
+			},
+		}, &result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v \n, received %+v", utils.ErrNotFound, err)
+	}
+}
+
+func testAccGetAccountsForEvent(t *testing.T) {
+	var reply []*utils.Account
+	expected := []*utils.Account{
+		{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.Balance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						{
+							FilterIDs: nil,
+							Weight:    12,
+						},
+					},
+					Type: "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: utils.NewDecimal(0, 0),
+				},
+			},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: nil,
+					Weight:    10,
+				},
+			},
+		},
+	}
+	args := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.CGRateSorg,
+			ID:     "testIDEvent",
+			Event: map[string]interface{}{
+				utils.Usage: 20 * time.Second,
+			},
+			APIOpts: nil,
+		},
+		AccountIDs: []string{"TEST_ACC_IT_TEST"},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1AccountsForEvent,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testAccMaxAbstracts(t *testing.T) {
+	accPrf := APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ACC_IT_TEST3",
+			Weights:   ";0",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: ";25",
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(0),
+						},
+					},
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: ";20",
+					Type:    utils.MetaConcrete,
+					Units:   213,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	var reply3 utils.ExtEventCharges
+	expected2 := utils.ExtEventCharges{}
+	args2 := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.CGRateSorg,
+			ID:     "testIDEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.Usage:        "27s",
+			},
+			APIOpts: nil,
+		},
+		AccountIDs: []string{"TEST_ACC_IT_TEST3"},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxConcretes,
+		args2, &reply3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply3, expected2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
 	}
 }
 
