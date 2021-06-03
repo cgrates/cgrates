@@ -201,7 +201,7 @@ func (rplSv1 *ReplicatorSv1) GetActions(id *utils.StringWithAPIOpts, reply *engi
 // GetActionPlan is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetActionPlan(id *utils.StringWithAPIOpts, reply *engine.ActionPlan) error {
 	engine.UpdateReplicationFilters(utils.ActionPlanPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id.Arg, true, utils.NonTransactional)
+	rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id.Arg)
 	if err != nil {
 		return err
 	}
@@ -225,7 +225,7 @@ func (rplSv1 *ReplicatorSv1) GetAllActionPlans(id *utils.StringWithAPIOpts, repl
 // GetAccountActionPlans is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id *utils.StringWithAPIOpts, reply *[]string) error {
 	engine.UpdateReplicationFilters(utils.AccountActionPlansPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id.Arg, false, utils.NonTransactional)
+	rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id.Arg)
 	if err != nil {
 		return err
 	}
@@ -591,7 +591,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfileW
 
 // SetActionPlan is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
+	if err = rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
@@ -604,7 +604,7 @@ func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArgWithAPIO
 
 // SetAccountActionPlans is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArgWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
+	if err = rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
@@ -830,7 +830,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActions(id *utils.StringWithAPIOpts, reply *s
 
 // RemoveActionPlan is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveActionPlanDrv(id.Arg, utils.NonTransactional); err != nil {
+	if err = rplSv1.dm.DataDB().RemoveActionPlanDrv(id.Arg); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(id.APIOpts[utils.CacheOpt]),
@@ -843,7 +843,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id *utils.StringWithAPIOpts, reply
 
 // RemAccountActionPlans is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgsWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID, args.ApIDs); err != nil {
+	if err = rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID); err != nil {
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),

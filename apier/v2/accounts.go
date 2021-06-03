@@ -147,7 +147,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 			}
 		}
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-			acntAPids, err := apiv2.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
+			acntAPids, err := apiv2.DataManager.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 			if err != nil && err != utils.ErrNotFound {
 				return 0, err
 			}
@@ -159,7 +159,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 						nAcntAPids = append(nAcntAPids, apID)
 						continue // not removing the ones where
 					}
-					ap, err := apiv2.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
+					ap, err := apiv2.DataManager.GetActionPlan(apID, true, true, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -169,7 +169,7 @@ func (apiv2 *APIerSv2) SetAccount(attr *AttrSetAccount, reply *string) error {
 				acntAPids = nAcntAPids
 			}
 			for _, apID := range attr.ActionPlanIDs {
-				ap, err := apiv2.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
+				ap, err := apiv2.DataManager.GetActionPlan(apID, true, true, utils.NonTransactional)
 				if err != nil {
 					return 0, err
 				}

@@ -153,9 +153,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ActionPrefix:
 			_, err = dm.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ActionPlanPrefix:
-			_, err = dm.GetActionPlan(dataID, true, utils.NonTransactional)
+			_, err = dm.GetActionPlan(dataID, false, true, utils.NonTransactional)
 		case utils.AccountActionPlansPrefix:
-			_, err = dm.GetAccountActionPlans(dataID, true, utils.NonTransactional)
+			_, err = dm.GetAccountActionPlans(dataID, false, true, utils.NonTransactional)
 		case utils.ActionTriggerPrefix:
 			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SharedGroupPrefix:
@@ -298,15 +298,20 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 		if keys, err = dm.dataDB.GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
 			return
 		}
+		accIDs := make(map[string][]string)
 		for _, key := range keys {
 			var apl *ActionPlan
-			if apl, err = dm.GetActionPlan(key[len(utils.ActionPlanPrefix):], true, utils.NonTransactional); err != nil {
-				return err
+			if apl, err = dm.GetActionPlan(key[len(utils.ActionPlanPrefix):],
+				true, false, utils.NonTransactional); err != nil {
+				return
 			}
 			for acntID := range apl.AccountIDs {
-				if err = dm.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
-					return err
-				}
+				accIDs[acntID] = append(accIDs[acntID], apl.Id)
+			}
+		}
+		for acntID, apIDs := range accIDs {
+			if err = dm.SetAccountActionPlans(acntID, apIDs, true); err != nil {
+				return
 			}
 		}
 	default:
@@ -1639,9 +1644,9 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	if err = dm.DataDB().RemoveActionTriggersDrv(id); err != nil {
 		return
 	}
-	if errCh := Cache.Remove(utils.CacheActionTriggers, id,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return errCh
+	if err = Cache.Remove(utils.CacheActionTriggers, id,
+		cacheCommit(transactionID), transactionID); err != nil {
+		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
 		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
@@ -1885,38 +1890,62 @@ func (dm *DataManager) RemoveActions(key string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
+func (dm *DataManager) GetActionPlan(key string, cacheRead, cacheWrite bool, transactionID string) (ats *ActionPlan, err error) {
+	if cacheRead {
+		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
+			if err != ltcache.ErrNotFound { // Only consider cache if item was found
+				return nil, err
+			}
+		} else if x == nil { // item was placed nil in cache
+			return nil, utils.ErrNotFound
+		} else {
+			return x.(*ActionPlan), nil
+		}
+	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	ats, err = dm.dataDB.GetActionPlanDrv(key, skipCache, transactionID)
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; err == utils.ErrNotFound && itm.Remote {
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-			utils.ReplicatorSv1GetActionPlan, &utils.StringWithAPIOpts{
-				Arg:    key,
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-					utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-						config.CgrConfig().GeneralCfg().NodeID)),
-			}, &ats); err == nil {
-			err = dm.dataDB.SetActionPlanDrv(key, ats, true, utils.NonTransactional)
+
+	ats, err = dm.dataDB.GetActionPlanDrv(key)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetActionPlan, &utils.StringWithAPIOpts{
+					Arg:    key,
+					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &ats); err == nil {
+				err = dm.dataDB.SetActionPlanDrv(key, ats)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheActionPlans, key, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
 		}
 	}
-	if err != nil {
-		err = utils.CastRPCErr(err)
-		return nil, err
+
+	if cacheWrite {
+		err = Cache.Set(utils.CacheActionPlans, key, ats, nil,
+			cacheCommit(transactionID), transactionID)
 	}
 	return
 }
 
 // SetActionPlanArgWithAPIOpts is used in replicatorV1 for dispatcher
 type SetActionPlanArgWithAPIOpts struct {
-	Key       string
-	Ats       *ActionPlan
-	Overwrite bool
-	Tenant    string
-	APIOpts   map[string]interface{}
+	Key     string
+	Ats     *ActionPlan
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
@@ -1924,7 +1953,22 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.dataDB.SetActionPlanDrv(key, ats, overwrite, transactionID); err != nil {
+	if len(ats.ActionTimings) == 0 { // special case to keep the old style
+		return dm.RemoveActionPlan(key, transactionID)
+	}
+	if !overwrite {
+		// get existing action plan to merge the account ids
+		if oldAP, _ := dm.GetActionPlan(key, true, true, transactionID); oldAP != nil {
+			if ats.AccountIDs == nil && len(oldAP.AccountIDs) > 0 {
+				ats.AccountIDs = make(utils.StringMap)
+			}
+			for accID := range oldAP.AccountIDs {
+				ats.AccountIDs[accID] = true
+			}
+		}
+	}
+
+	if err = dm.dataDB.SetActionPlanDrv(key, ats); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; itm.Replicate {
@@ -1933,10 +1977,9 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 			utils.ActionPlanPrefix, key, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionPlan,
 			&SetActionPlanArgWithAPIOpts{
-				Key:       key,
-				Ats:       ats,
-				Overwrite: overwrite,
-				Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+				Key:    key,
+				Ats:    ats,
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
@@ -1971,7 +2014,7 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.dataDB.RemoveActionPlanDrv(key, transactionID); err != nil {
+	if err = dm.dataDB.RemoveActionPlanDrv(key); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]; itm.Replicate {
@@ -1987,47 +2030,78 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 	}
 	return
 }
-func (dm *DataManager) GetAccountActionPlans(acntID string,
-	skipCache bool, transactionID string) (apIDs []string, err error) {
+func (dm *DataManager) GetAccountActionPlans(acntID string, cacheRead, cacheWrite bool, transactionID string) (apIDs []string, err error) {
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	apIDs, err = dm.dataDB.GetAccountActionPlansDrv(acntID, skipCache, transactionID)
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; ((err == nil && len(apIDs) == 0) || err == utils.ErrNotFound) && itm.Remote {
-		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
-			utils.ReplicatorSv1GetAccountActionPlans,
-			&utils.StringWithAPIOpts{
-				Arg:    acntID,
-				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
-					utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
-						config.CgrConfig().GeneralCfg().NodeID)),
-			}, &apIDs); err == nil {
-			err = dm.dataDB.SetAccountActionPlansDrv(acntID, apIDs, true)
+	apIDs, err = dm.dataDB.GetAccountActionPlansDrv(acntID)
+	if err != nil {
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; err == utils.ErrNotFound && itm.Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetAccountActionPlans,
+				&utils.StringWithAPIOpts{
+					Arg:    acntID,
+					Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &apIDs); err == nil {
+				err = dm.dataDB.SetAccountActionPlansDrv(acntID, apIDs)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+					cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
 		}
 	}
-	if err != nil {
-		err = utils.CastRPCErr(err)
-		return nil, err
+	if cacheWrite {
+		err = Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
+			cacheCommit(transactionID), transactionID)
 	}
 	return
 }
 
 //SetAccountActionPlansArgWithAPIOpts is used to send the key and the Actions to replicator
 type SetAccountActionPlansArgWithAPIOpts struct {
-	AcntID    string
-	AplIDs    []string
-	Overwrite bool
-	Tenant    string
-	APIOpts   map[string]interface{}
+	AcntID  string
+	AplIDs  []string
+	Tenant  string
+	APIOpts map[string]interface{}
 }
 
 func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.dataDB.SetAccountActionPlansDrv(acntID, aPlIDs, overwrite); err != nil {
+	if !overwrite {
+		var oldaPlIDs []string
+		if oldaPlIDs, err = dm.GetAccountActionPlans(acntID,
+			true, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return
+		}
+		for _, oldAPid := range oldaPlIDs {
+			if !utils.IsSliceMember(aPlIDs, oldAPid) {
+				aPlIDs = append(aPlIDs, oldAPid)
+			}
+		}
+	}
+
+	if err = dm.dataDB.SetAccountActionPlansDrv(acntID, aPlIDs); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {
@@ -2036,10 +2110,9 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 			utils.AccountActionPlansPrefix, acntID, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccountActionPlans,
 			&SetAccountActionPlansArgWithAPIOpts{
-				AcntID:    acntID,
-				AplIDs:    aPlIDs,
-				Overwrite: overwrite,
-				Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+				AcntID: acntID,
+				AplIDs: aPlIDs,
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
 	}
@@ -2058,7 +2131,22 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.dataDB.RemAccountActionPlansDrv(acntID, apIDs); err != nil {
+	if len(apIDs) != 0 { // special case to keep the old style
+		var oldAAP []string
+		if oldAAP, err = dm.GetAccountActionPlans(acntID, true, false, utils.NonTransactional); err != nil {
+			return
+		}
+		remainAAP := make([]string, 0, len(oldAAP))
+		for _, ap := range oldAAP {
+			if !utils.IsSliceMember(apIDs, ap) {
+				remainAAP = append(remainAAP, ap)
+			}
+		}
+		if len(remainAAP) != 0 {
+			return dm.SetAccountActionPlans(acntID, remainAAP, true)
+		}
+	}
+	if err = dm.dataDB.RemAccountActionPlansDrv(acntID); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {

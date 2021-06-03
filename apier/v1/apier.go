@@ -147,12 +147,16 @@ func (apierSv1 *APIerSv1) ComputeReverseDestinations(ignr *string, reply *string
 }
 
 // ComputeAccountActionPlans will rebuild complete reverse accountActions data
-func (apierSv1 *APIerSv1) ComputeAccountActionPlans(ignr *string, reply *string) (err error) {
+func (apierSv1 *APIerSv1) ComputeAccountActionPlans(tnt *utils.TenantWithAPIOpts, reply *string) (err error) {
 	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}
-	*reply = utils.OK
-	return
+	return apierSv1.ConnMgr.Call(apierSv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{
+			Tenant:   tnt.Tenant,
+			CacheIDs: []string{utils.CacheAccountActionPlans},
+			APIOpts:  tnt.APIOpts,
+		}, reply)
 }
 
 func (apierSv1 *APIerSv1) GetSharedGroup(sgId *string, reply *engine.SharedGroup) error {
@@ -763,7 +767,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(attrs *AttrSetActionPlan, reply *string)
 	}
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
-		if prevAP, err := apierSv1.DataManager.GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if prevAP, err := apierSv1.DataManager.GetActionPlan(attrs.Id, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, utils.NewErrServerError(err)
 		} else if err == nil && !attrs.Overwrite {
 			return 0, utils.ErrExists
@@ -961,7 +965,7 @@ func (apierSv1 *APIerSv1) GetActionPlan(attr *AttrGetActionPlan, reply *[]*engin
 			result = append(result, apls)
 		}
 	} else {
-		apls, err := apierSv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional)
+		apls, err := apierSv1.DataManager.GetActionPlan(attr.ID, true, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -977,7 +981,7 @@ func (apierSv1 *APIerSv1) RemoveActionPlan(attr *AttrGetActionPlan, reply *strin
 	}
 	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
-		if prevAP, err := apierSv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if prevAP, err := apierSv1.DataManager.GetActionPlan(attr.ID, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, err
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs

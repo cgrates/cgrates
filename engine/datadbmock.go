@@ -162,15 +162,15 @@ func (dbM *DataDBMock) RemoveActionTriggersDrv(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionPlanDrv(string, bool, string) (*ActionPlan, error) {
+func (dbM *DataDBMock) GetActionPlanDrv(string) (*ActionPlan, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetActionPlanDrv(string, *ActionPlan, bool, string) error {
+func (dbM *DataDBMock) SetActionPlanDrv(string, *ActionPlan) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveActionPlanDrv(key string, transactionID string) error {
+func (dbM *DataDBMock) RemoveActionPlanDrv(key string) error {
 	return utils.ErrNotImplemented
 }
 
@@ -178,16 +178,15 @@ func (dbM *DataDBMock) GetAllActionPlansDrv() (map[string]*ActionPlan, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountActionPlansDrv(acntID string, skipCache bool,
-	transactionID string) (apIDs []string, err error) {
+func (dbM *DataDBMock) GetAccountActionPlansDrv(acntID string) (apIDs []string, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAccountActionPlansDrv(acntID string, apIDs []string, overwrite bool) (err error) {
+func (dbM *DataDBMock) SetAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
+func (dbM *DataDBMock) RemAccountActionPlansDrv(acntID string) (err error) {
 	return utils.ErrNotImplemented
 }
 

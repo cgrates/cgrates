@@ -34,7 +34,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
@@ -1205,19 +1204,7 @@ func (ms *MongoStorage) RemoveActionTriggersDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
-	transactionID string) (ats *ActionPlan, err error) {
-	if !skipCache {
-		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
-			if err != ltcache.ErrNotFound { // Only consider cache if item was found
-				return nil, err
-			}
-		} else if x == nil { // item was placed nil in cache
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(*ActionPlan), nil
-		}
-	}
+func (ms *MongoStorage) GetActionPlanDrv(key string) (ats *ActionPlan, err error) {
 	var kv struct {
 		Key   string
 		Value []byte
@@ -1226,10 +1213,6 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 		cur := ms.getCol(ColApl).FindOne(sctx, bson.M{"key": key})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				if errCh := Cache.Set(utils.CacheActionPlans, key, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return errCh
-				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -1248,42 +1231,11 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 		return nil, err
 	}
 	r.Close()
-	if err = ms.ms.Unmarshal(out, &ats); err != nil {
-		return nil, err
-	}
-	if errCh := Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return nil, errCh
-	}
+	err = ms.ms.Unmarshal(out, &ats)
 	return
 }
 
-func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
-	overwrite bool, transactionID string) (err error) {
-	// clean dots from account ids map
-	cCommit := cacheCommit(transactionID)
-	if len(ats.ActionTimings) == 0 {
-		err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColApl).DeleteOne(sctx, bson.M{"key": key})
-			return err
-		})
-		if errCh := Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID); errCh != nil {
-			return errCh
-		}
-		return
-	}
-	if !overwrite {
-		// get existing action plan to merge the account ids
-		if existingAts, _ := ms.GetActionPlanDrv(key, true, transactionID); existingAts != nil {
-			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
-				ats.AccountIDs = make(utils.StringMap)
-			}
-			for accID := range existingAts.AccountIDs {
-				ats.AccountIDs[accID] = true
-			}
-		}
-	}
+func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan) (err error) {
 	result, err := ms.ms.Marshal(ats)
 	if err != nil {
 		return err
@@ -1304,11 +1256,7 @@ func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 	})
 }
 
-func (ms *MongoStorage) RemoveActionPlanDrv(key string, transactionID string) error {
-	cCommit := cacheCommit(transactionID)
-	if errCh := Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID); errCh != nil {
-		return errCh
-	}
+func (ms *MongoStorage) RemoveActionPlanDrv(key string) error {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColApl).DeleteOne(sctx, bson.M{"key": key})
 		return err
@@ -1325,8 +1273,7 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := ms.GetActionPlanDrv(key[len(utils.ActionPlanPrefix):],
-			false, utils.NonTransactional)
+		ap, err := ms.GetActionPlanDrv(key[len(utils.ActionPlanPrefix):])
 		if err != nil {
 			return nil, err
 		}
@@ -1335,15 +1282,7 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	return
 }
 
-func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
+func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string, err error) {
 	var kv struct {
 		Key   string
 		Value []string
@@ -1352,10 +1291,6 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 		cur := ms.getCol(ColAAp).FindOne(sctx, bson.M{"key": acntID})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-					cacheCommit(transactionID), transactionID); errCh != nil {
-					return errCh
-				}
 				return utils.ErrNotFound
 			}
 			return err
@@ -1365,25 +1300,10 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 		return nil, err
 	}
 	aPlIDs = kv.Value
-	if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
-		cacheCommit(transactionID), transactionID); errCh != nil {
-		return nil, errCh
-	}
 	return
 }
 
-func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string, overwrite bool) (err error) {
-	if !overwrite {
-		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return err
-		} else {
-			for _, oldAPid := range oldaPlIDs {
-				if !utils.IsSliceMember(aPlIDs, oldAPid) {
-					aPlIDs = append(aPlIDs, oldAPid)
-				}
-			}
-		}
-	}
+func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColAAp).UpdateOne(sctx, bson.M{"key": acntID},
 			bson.M{"$set": struct {
@@ -1397,44 +1317,12 @@ func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string,
 }
 
 // ToDo: check return len(aPlIDs) == 0
-func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
-	if len(aPlIDs) == 0 {
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
-			if dr.DeletedCount == 0 {
-				return utils.ErrNotFound
-			}
-			return err
-		})
-	}
-	oldAPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional)
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(oldAPlIDs); {
-		if utils.IsSliceMember(aPlIDs, oldAPlIDs[i]) {
-			oldAPlIDs = append(oldAPlIDs[:i], oldAPlIDs[i+1:]...)
-			continue // if we have stripped, don't increase index so we can check next element by next run
-		}
-		i++
-	}
-	if len(oldAPlIDs) == 0 { // no more elements, remove the reference
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
-			if dr.DeletedCount == 0 {
-				return utils.ErrNotFound
-			}
-			return err
-		})
-	}
+func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColAAp).UpdateOne(sctx, bson.M{"key": acntID},
-			bson.M{"$set": struct {
-				Key   string
-				Value []string
-			}{Key: acntID, Value: oldAPlIDs}},
-			options.Update().SetUpsert(true),
-		)
+		dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
 		return err
 	})
 }
