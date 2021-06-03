@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/accounts"
 
@@ -1435,8 +1436,7 @@ func TestAccountDebitAbstracts(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-/*
-func TestAccountMaxConcretes(t *testing.T) {
+func TestAccountActionSetBalance(t *testing.T) {
 	cacheInit := engine.Cache
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -1445,7 +1445,6 @@ func TestAccountMaxConcretes(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, nil)
-	accS := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	engine.Cache = newCache
 	ext := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
@@ -1457,8 +1456,10 @@ func TestAccountMaxConcretes(t *testing.T) {
 					ID:      "VoiceBalance",
 					Weights: ";12",
 					Type:    "*abstract",
-					Opts:    map[string]interface{}{},
-					Units:   1,
+					Opts: map[string]interface{}{
+						"Destination": 10,
+					},
+					Units: 0,
 				},
 			},
 			Weights: ";10",
@@ -1474,10 +1475,53 @@ func TestAccountMaxConcretes(t *testing.T) {
 	if !reflect.DeepEqual(setRply, `OK`) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
 	}
+	var getRply utils.Account
+	err = admS.GetAccount(context.Background(),
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "test_ID1",
+			},
+			APIOpts: nil,
+		}, &getRply)
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	expectedGet := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test_ID1",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID: "VoiceBalance",
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": 10,
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	if !reflect.DeepEqual(getRply, expectedGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
+	}
+
+	accS := accounts.NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	expected := &AccountSv1{
 		aS: accS,
 	}
-
 	accSv1 := NewAccountSv1(accS)
 	if !reflect.DeepEqual(expected, accSv1) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(accSv1))
@@ -1485,18 +1529,17 @@ func TestAccountMaxConcretes(t *testing.T) {
 	var rpEv utils.ExtEventCharges
 	accArg := &utils.ArgsAccountsForEvent{
 		CGREvent: &utils.CGREvent{
-			ID:     "TestMaxConcretes",
+			ID:     "TestMatchingAccountsForEvent",
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.Usage: 6,
+				utils.AccountField: "1001",
 			},
 		},
 	}
-	err = accSv1.MaxConcretes(context.Background(), accArg, &rpEv)
+	err = accSv1.DebitAbstracts(context.Background(), accArg, &rpEv)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-
 	var accKEy, rtID string
 	for key, val := range rpEv.Accounting {
 		accKEy = key
@@ -1583,4 +1626,323 @@ func TestAccountMaxConcretes(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
-*/
+
+func TestAccountActionRemoveBalance(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := accounts.NewAccountS(cfg, fltr, nil, dm)
+	accSv1 := NewAccountSv1(accnts)
+	argsSet := &utils.ArgsActSetBalance{
+		AccountID: "TestV1ActionRemoveBalance",
+		Tenant:    "cgrates.org",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.AbstractBalance1.Units",
+				Value: "10",
+			},
+		},
+		Reset: false,
+	}
+	var reply string
+
+	if err := accSv1.ActionSetBalance(context.Background(), argsSet, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected status reply", reply)
+	}
+
+	//remove it
+	args := &utils.ArgsActRemoveBalances{}
+
+	expected := "MANDATORY_IE_MISSING: [AccountID]"
+	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	args.AccountID = "TestV1ActionRemoveBalance"
+
+	expected = "MANDATORY_IE_MISSING: [BalanceIDs]"
+	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	args.BalanceIDs = []string{"AbstractBalance1"}
+
+	if err := accSv1.ActionRemoveBalance(context.Background(), args, &reply); err != nil {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	}
+
+}
+
+func TestAccountMaxConcretes(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := accounts.NewAccountS(cfg, fltr, nil, dm)
+	accSv1 := NewAccountSv1(accnts)
+	admS := NewAdminSv1(cfg, dm, nil)
+	accPrf := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+
+			Tenant:    "cgrates.org",
+			ID:        "TestV1DebitAbstracts",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: ";15",
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(float64(0)),
+							RecurrentFee: utils.Float64Pointer(float64(1)),
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID:      "ConcreteBalance1",
+					Weights: ";25",
+					Type:    utils.MetaConcrete,
+					Units:   float64(time.Minute),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(float64(0)),
+							RecurrentFee: utils.Float64Pointer(float64(1)),
+						},
+					},
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: ";5",
+					Type:    utils.MetaConcrete,
+					Units:   float64(30 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(float64(0)),
+							RecurrentFee: utils.Float64Pointer(float64(1)),
+						},
+					},
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+	var setRpl string
+	if err := admS.SetAccount(context.Background(), accPrf, &setRpl); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestV1DebitID",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.Usage:        "3m",
+			},
+		},
+	}
+	reply := utils.ExtEventCharges{}
+	if err := accSv1.MaxConcretes(context.Background(), args, &reply); err != nil {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	}
+
+	if err := accSv1.MaxConcretes(context.Background(), args, &reply); err != nil {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	}
+	accPrf.Balances["AbstractBalance1"].Weights = ""
+
+	extAccPrf := &utils.ExtAccount{
+		Tenant:    "cgrates.org",
+		ID:        "TestV1DebitAbstracts",
+		FilterIDs: []string{"*string:~*req.Account:1004"},
+		Balances: map[string]*utils.ExtBalance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 15,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.Float64Pointer(float64(40 * time.Second)),
+				CostIncrements: []*utils.ExtCostIncrement{
+					{
+						Increment:    utils.Float64Pointer(float64(time.Second)),
+						FixedFee:     utils.Float64Pointer(float64(0)),
+						RecurrentFee: utils.Float64Pointer(float64(1)),
+					},
+				},
+			},
+			"ConcreteBalance1": {
+				ID: "ConcreteBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 25,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.Float64Pointer(float64(time.Minute)),
+				CostIncrements: []*utils.ExtCostIncrement{
+					{
+						Increment:    utils.Float64Pointer(float64(time.Second)),
+						FixedFee:     utils.Float64Pointer(float64(0)),
+						RecurrentFee: utils.Float64Pointer(float64(1)),
+					},
+				},
+			},
+			"ConcreteBalance2": {
+				ID: "ConcreteBalance2",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  utils.MetaConcrete,
+				Units: utils.Float64Pointer(float64(30 * time.Second)),
+				CostIncrements: []*utils.ExtCostIncrement{
+					{
+						Increment:    utils.Float64Pointer(float64(time.Second)),
+						FixedFee:     utils.Float64Pointer(float64(0)),
+						RecurrentFee: utils.Float64Pointer(float64(1)),
+					},
+				},
+			},
+		},
+	}
+	extAccPrf.Balances["ConcreteBalance1"].Units = utils.Float64Pointer(0)
+	extAccPrf.Balances["ConcreteBalance2"].Units = utils.Float64Pointer(0)
+
+	exEvCh := utils.ExtEventCharges{
+		Concretes: utils.Float64Pointer(float64(time.Minute + 30*time.Second)),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "GENUUID1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "GENUUID2",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			"GENUUID1": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance1",
+				Units:        utils.Float64Pointer(float64(time.Minute)),
+				BalanceLimit: utils.Float64Pointer(0),
+			},
+			"GENUUID2": {
+				AccountID:    "TestV1DebitAbstracts",
+				BalanceID:    "ConcreteBalance2",
+				Units:        utils.Float64Pointer(float64(30 * time.Second)),
+				BalanceLimit: utils.Float64Pointer(0),
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"TestV1DebitAbstracts": extAccPrf,
+		},
+	}
+	if err := accSv1.MaxConcretes(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else {
+		exEvCh.Charges = reply.Charges
+		exEvCh.Accounting = reply.Accounting
+		if !reflect.DeepEqual(exEvCh, reply) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(exEvCh), utils.ToJSON(reply))
+		}
+	}
+}
+
+func TestAccountDebitConcretes(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := accounts.NewAccountS(cfg, fltr, nil, dm)
+	accSv1 := NewAccountSv1(accnts)
+	admS := NewAdminSv1(cfg, dm, nil)
+	accPrf := &APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+
+			Tenant:    "cgrates.org",
+			ID:        "TestV1DebitAbstracts",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: ";15",
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(float64(0)),
+							RecurrentFee: utils.Float64Pointer(float64(1)),
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID:      "ConcreteBalance1",
+					Weights: ";25",
+					Type:    utils.MetaConcrete,
+					Units:   float64(time.Minute),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(float64(0)),
+							RecurrentFee: utils.Float64Pointer(float64(1)),
+						},
+					},
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: ";5",
+					Type:    utils.MetaConcrete,
+					Units:   float64(30 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(float64(0)),
+							RecurrentFee: utils.Float64Pointer(float64(1)),
+						},
+					},
+				},
+			},
+		},
+		APIOpts: nil,
+	}
+	var setRpl string
+	if err := admS.SetAccount(context.Background(), accPrf, &setRpl); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			ID:     "TestV1DebitID",
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.Usage:        "3m",
+			},
+		},
+	}
+	reply := utils.ExtEventCharges{}
+	if err := accSv1.DebitConcretes(context.Background(), args, &reply); err != nil {
+		t.Errorf("Expected %+v, received %+v", nil, err)
+	}
+
+}
