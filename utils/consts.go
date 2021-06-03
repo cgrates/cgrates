@@ -1299,10 +1299,10 @@ const (
 	RouteSv1GetRoutesList            = "RouteSv1.GetRoutesList"
 	RouteSv1GetRouteProfilesForEvent = "RouteSv1.GetRouteProfilesForEvent"
 	RouteSv1Ping                     = "RouteSv1.Ping"
-	APIerSv1GetRouteProfile          = "APIerSv1.GetRouteProfile"
-	APIerSv1GetRouteProfileIDs       = "APIerSv1.GetRouteProfileIDs"
-	APIerSv1RemoveRouteProfile       = "APIerSv1.RemoveRouteProfile"
-	APIerSv1SetRouteProfile          = "APIerSv1.SetRouteProfile"
+	AdminSv1GetRouteProfile          = "AdminSv1.GetRouteProfile"
+	AdminSv1GetRouteProfileIDs       = "AdminSv1.GetRouteProfileIDs"
+	AdminSv1RemoveRouteProfile       = "AdminSv1.RemoveRouteProfile"
+	AdminSv1SetRouteProfile          = "AdminSv1.SetRouteProfile"
 )
 
 // AttributeS APIs
