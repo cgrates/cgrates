@@ -208,7 +208,7 @@ func testFilterSGetFilterIDsCount(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIDsCount,
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 1 {
@@ -317,7 +317,7 @@ func testFilterSGetFilterSIDsCount2(t *testing.T) {
 			Tenant: utils.CGRateSorg,
 		},
 	}
-	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterIDsCount,
+	if err := fltrSRPC.Call(context.Background(), utils.AdminSv1GetFilterCount,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 2 {

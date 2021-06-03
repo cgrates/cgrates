@@ -22,6 +22,7 @@ package apis
 
 import (
 	"path"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -115,7 +116,6 @@ func testGetAccProfileBeforeSet(t *testing.T) {
 	}
 }
 
-/*
 func testAccSetAccProfile(t *testing.T) {
 	accPrf := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
@@ -187,7 +187,7 @@ func testAccSetAccProfile(t *testing.T) {
 		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc), utils.ToJSON(result))
 	}
 }
-*/
+
 //Kill the engine when it is about to be finished
 func testAccSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
