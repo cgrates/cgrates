@@ -32,7 +32,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 	"github.com/mediocregopher/radix/v3"
 )
 
@@ -624,27 +623,11 @@ func (rs *RedisStorage) RemoveActionTriggersDrv(key string) (err error) {
 	return rs.Cmd(nil, redis_DEL, utils.ActionTriggerPrefix+key)
 }
 
-func (rs *RedisStorage) GetActionPlanDrv(key string, skipCache bool,
-	transactionID string) (ats *ActionPlan, err error) {
-	if !skipCache {
-		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
-			if err != ltcache.ErrNotFound { // Only consider cache if item was found
-				return nil, err
-			}
-		} else if x == nil { // item was placed nil in cache
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(*ActionPlan), nil
-		}
-	}
+func (rs *RedisStorage) GetActionPlanDrv(key string) (ats *ActionPlan, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redis_GET, utils.ActionPlanPrefix+key); err != nil {
 		return
 	} else if len(values) == 0 {
-		if errCh := Cache.Set(utils.CacheActionPlans, key, nil, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
-		}
 		err = utils.ErrNotFound
 		return
 	}
@@ -658,53 +641,17 @@ func (rs *RedisStorage) GetActionPlanDrv(key string, skipCache bool,
 		return
 	}
 	r.Close()
-	if err = rs.ms.Unmarshal(out, &ats); err != nil {
-		return
-	}
-	err = Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cacheCommit(transactionID), transactionID)
+	err = rs.ms.Unmarshal(out, &ats)
 	return
 }
-func (rs *RedisStorage) RemoveActionPlanDrv(key string,
-	transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
+func (rs *RedisStorage) RemoveActionPlanDrv(key string) (err error) {
 	if err = rs.Cmd(nil, redis_SREM, utils.ActionPlanIndexes, utils.ActionPlanPrefix+key); err != nil {
 		return
 	}
-	err = rs.Cmd(nil, redis_DEL, utils.ActionPlanPrefix+key)
-	if errCh := Cache.Remove(utils.CacheActionPlans, key,
-		cCommit, transactionID); errCh != nil {
-		return errCh
-	}
-	return
+	return rs.Cmd(nil, redis_DEL, utils.ActionPlanPrefix+key)
 }
 
-func (rs *RedisStorage) SetActionPlanDrv(key string, ats *ActionPlan,
-	overwrite bool, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	if len(ats.ActionTimings) == 0 {
-		// delete the key
-		if err = rs.Cmd(nil, redis_SREM, utils.ActionPlanIndexes, utils.ActionPlanPrefix+key); err != nil {
-			return
-		}
-		err = rs.Cmd(nil, redis_DEL, utils.ActionPlanPrefix+key)
-		if errCh := Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID); errCh != nil {
-			return errCh
-		}
-		return
-	}
-	if !overwrite {
-		// get existing action plan to merge the account ids
-		if existingAts, _ := rs.GetActionPlanDrv(key, true, transactionID); existingAts != nil {
-			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
-				ats.AccountIDs = make(utils.StringMap)
-			}
-			for accID := range existingAts.AccountIDs {
-				ats.AccountIDs[accID] = true
-			}
-		}
-	}
+func (rs *RedisStorage) SetActionPlanDrv(key string, ats *ActionPlan) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(ats); err != nil {
 		return
@@ -730,56 +677,27 @@ func (rs *RedisStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		if ats[key[len(utils.ActionPlanPrefix):]], err = rs.GetActionPlanDrv(key[len(utils.ActionPlanPrefix):],
-			false, utils.NonTransactional); err != nil {
+		if ats[key[len(utils.ActionPlanPrefix):]], err = rs.GetActionPlanDrv(key[len(utils.ActionPlanPrefix):]); err != nil {
 			return nil, err
 		}
 	}
 	return
 }
 
-func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string, skipCache bool,
-	transactionID string) (aPlIDs []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
+func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redis_GET,
 		utils.AccountActionPlansPrefix+acntID); err != nil {
 		return
 	} else if len(values) == 0 {
-		if errCh := Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-			cacheCommit(transactionID), transactionID); errCh != nil {
-			return nil, errCh
-		}
 		err = utils.ErrNotFound
 		return
 	}
-	if err = rs.ms.Unmarshal(values, &aPlIDs); err != nil {
-		return
-	}
-	err = Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
-		cacheCommit(transactionID), transactionID)
+	err = rs.ms.Unmarshal(values, &aPlIDs)
 	return
 }
 
-func (rs *RedisStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string, overwrite bool) (err error) {
-	if !overwrite {
-		var oldaPlIDs []string
-		if oldaPlIDs, err = rs.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return
-		}
-		for _, oldAPid := range oldaPlIDs {
-			if !utils.IsSliceMember(aPlIDs, oldAPid) {
-				aPlIDs = append(aPlIDs, oldAPid)
-			}
-		}
-	}
+func (rs *RedisStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(aPlIDs); err != nil {
 		return
@@ -787,30 +705,8 @@ func (rs *RedisStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string,
 	return rs.Cmd(nil, redis_SET, utils.AccountActionPlansPrefix+acntID, string(result))
 }
 
-func (rs *RedisStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
-	key := utils.AccountActionPlansPrefix + acntID
-	if len(aPlIDs) == 0 {
-		return rs.Cmd(nil, redis_DEL, key)
-	}
-	var oldaPlIDs []string
-	if oldaPlIDs, err = rs.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil {
-		return
-	}
-	for i := 0; i < len(oldaPlIDs); {
-		if utils.IsSliceMember(aPlIDs, oldaPlIDs[i]) {
-			oldaPlIDs = append(oldaPlIDs[:i], oldaPlIDs[i+1:]...)
-			continue // if we have stripped, don't increase index so we can check next element by next run
-		}
-		i++
-	}
-	if len(oldaPlIDs) == 0 { // no more elements, remove the reference
-		return rs.Cmd(nil, redis_DEL, key)
-	}
-	var result []byte
-	if result, err = rs.ms.Marshal(oldaPlIDs); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redis_SET, key, string(result))
+func (rs *RedisStorage) RemAccountActionPlansDrv(acntID string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.AccountActionPlansPrefix+acntID)
 }
 
 func (rs *RedisStorage) PushTask(t *Task) (err error) {

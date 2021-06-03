@@ -1198,10 +1198,9 @@ func testDspRplAccountActionPlans(t *testing.T) {
 	// Set AccountActionPlans
 	var replyStr string
 	setAccountActionPlans := &engine.SetAccountActionPlansArgWithAPIOpts{
-		AplIDs:    []string{"KeyAccountActionPlans"},
-		Overwrite: true,
-		AcntID:    "KeyAccountActionPlans",
-		Tenant:    "cgrates.org",
+		AplIDs: []string{"KeyAccountActionPlans"},
+		AcntID: "KeyAccountActionPlans",
+		Tenant: "cgrates.org",
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "repl12345",
 		},
