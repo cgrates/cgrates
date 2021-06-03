@@ -32,7 +32,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
@@ -428,105 +427,60 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-// RebuildReverseForPrefix implementation
-func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
+func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
+	var colName string
+	switch prefix {
+	case utils.DestinationPrefix:
+		colName = ColDst
+	case utils.REVERSE_DESTINATION_PREFIX:
+		colName = ColRds
+	case utils.ACTION_PREFIX:
+		colName = ColAct
+	case utils.ACTION_PLAN_PREFIX:
+		colName = ColApl
+	case utils.AccountActionPlansPrefix:
+		colName = ColAAp
+	case utils.TASKS_KEY:
+		colName = ColTsk
+	case utils.ACTION_TRIGGER_PREFIX:
+		colName = ColAtr
+	case utils.RATING_PLAN_PREFIX:
+		colName = ColRpl
+	case utils.RATING_PROFILE_PREFIX:
+		colName = ColRpf
+	case utils.ACCOUNT_PREFIX:
+		colName = ColAcc
+	case utils.SHARED_GROUP_PREFIX:
+		colName = ColShg
+	case utils.LOADINST_KEY:
+		colName = ColLht
+	case utils.VERSION_PREFIX:
+		colName = ColVer
+	case utils.TimingsPrefix:
+		colName = ColTmg
+	case utils.ResourcesPrefix:
+		colName = ColRes
+	case utils.ResourceProfilesPrefix:
+		colName = ColRsP
+	case utils.ThresholdProfilePrefix:
+		colName = ColTps
+	case utils.StatQueueProfilePrefix:
+		colName = ColSqp
+	case utils.ThresholdPrefix:
+		colName = ColThs
+	case utils.FilterPrefix:
+		colName = ColFlt
+	case utils.SupplierProfilePrefix:
+		colName = ColSpp
+	case utils.AttributeProfilePrefix:
+		colName = ColAttr
+	default:
 		return utils.ErrInvalidKey
 	}
-	colName, ok := ms.getColNameForPrefix(prefix)
-	if !ok {
-		return utils.ErrInvalidKey
-	}
+
 	return ms.query(func(sctx mongo.SessionContext) error {
-		col := ms.getCol(colName)
-		if _, err := col.DeleteMany(sctx, bson.M{}); err != nil {
-			return err
-		}
-		var keys []string
-		switch prefix {
-		case utils.REVERSE_DESTINATION_PREFIX:
-			if keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err = ms.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
-		case utils.AccountActionPlansPrefix:
-			if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				apl, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				for acntID := range apl.AccountIDs {
-					if err = ms.SetAccountActionPlansDrv(acntID, []string{apl.Id}, false); err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
-	})
-}
-
-// RemoveReverseForPrefix implementation
-func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
-		return utils.ErrInvalidKey
-	}
-	colName, ok := ms.getColNameForPrefix(prefix)
-	if !ok {
-		return utils.ErrInvalidKey
-	}
-	return ms.query(func(sctx mongo.SessionContext) error {
-		col := ms.getCol(colName)
-
-		if dr, err := col.DeleteMany(sctx, bson.M{}); err != nil {
-			return err
-		} else if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-
-		var keys []string
-		switch prefix {
-		case utils.REVERSE_DESTINATION_PREFIX:
-			if keys, err = ms.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := ms.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
-		case utils.AccountActionPlansPrefix:
-			if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				apl, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				for acntID := range apl.AccountIDs {
-					if err = ms.RemAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
+		_, err := ms.getCol(colName).DeleteMany(sctx, bson.M{})
+		return err
 	})
 }
 
@@ -1350,19 +1304,7 @@ func (ms *MongoStorage) RemoveActionTriggersDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
-	transactionID string) (ats *ActionPlan, err error) {
-	if !skipCache {
-		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
-			if err != ltcache.ErrNotFound { // Only consider cache if item was found
-				return nil, err
-			}
-		} else if x == nil { // item was placed nil in cache
-			return nil, utils.ErrNotFound
-		} else {
-			return x.(*ActionPlan), nil
-		}
-	}
+func (ms *MongoStorage) GetActionPlanDrv(key string) (ats *ActionPlan, err error) {
 	var kv struct {
 		Key   string
 		Value []byte
@@ -1371,8 +1313,6 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 		cur := ms.getCol(ColApl).FindOne(sctx, bson.M{"key": key})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheActionPlans, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
 				return utils.ErrNotFound
 			}
 			return err
@@ -1391,38 +1331,11 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 		return nil, err
 	}
 	r.Close()
-	if err = ms.ms.Unmarshal(out, &ats); err != nil {
-		return nil, err
-	}
-	Cache.Set(utils.CacheActionPlans, key, ats, nil,
-		cacheCommit(transactionID), transactionID)
+	err = ms.ms.Unmarshal(out, &ats)
 	return
 }
 
-func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
-	overwrite bool, transactionID string) (err error) {
-	// clean dots from account ids map
-	cCommit := cacheCommit(transactionID)
-	if len(ats.ActionTimings) == 0 {
-		err = ms.query(func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColApl).DeleteOne(sctx, bson.M{"key": key})
-			return err
-		})
-		Cache.Remove(utils.CacheActionPlans, key,
-			cCommit, transactionID)
-		return
-	}
-	if !overwrite {
-		// get existing action plan to merge the account ids
-		if existingAts, _ := ms.GetActionPlanDrv(key, true, transactionID); existingAts != nil {
-			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
-				ats.AccountIDs = make(utils.StringMap)
-			}
-			for accID := range existingAts.AccountIDs {
-				ats.AccountIDs[accID] = true
-			}
-		}
-	}
+func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan) (err error) {
 	result, err := ms.ms.Marshal(ats)
 	if err != nil {
 		return err
@@ -1443,9 +1356,7 @@ func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 	})
 }
 
-func (ms *MongoStorage) RemoveActionPlanDrv(key string, transactionID string) error {
-	cCommit := cacheCommit(transactionID)
-	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
+func (ms *MongoStorage) RemoveActionPlanDrv(key string) error {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColApl).DeleteOne(sctx, bson.M{"key": key})
 		return err
@@ -1462,8 +1373,7 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):],
-			false, utils.NonTransactional)
+		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):])
 		if err != nil {
 			return nil, err
 		}
@@ -1472,15 +1382,7 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	return
 }
 
-func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
+func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string, err error) {
 	var kv struct {
 		Key   string
 		Value []string
@@ -1489,8 +1391,6 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 		cur := ms.getCol(ColAAp).FindOne(sctx, bson.M{"key": acntID})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-					cacheCommit(transactionID), transactionID)
 				return utils.ErrNotFound
 			}
 			return err
@@ -1500,23 +1400,10 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 		return nil, err
 	}
 	aPlIDs = kv.Value
-	Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
-		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string, overwrite bool) (err error) {
-	if !overwrite {
-		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return err
-		} else {
-			for _, oldAPid := range oldaPlIDs {
-				if !utils.IsSliceMember(aPlIDs, oldAPid) {
-					aPlIDs = append(aPlIDs, oldAPid)
-				}
-			}
-		}
-	}
+func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColAAp).UpdateOne(sctx, bson.M{"key": acntID},
 			bson.M{"$set": struct {
@@ -1530,44 +1417,12 @@ func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string,
 }
 
 // ToDo: check return len(aPlIDs) == 0
-func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
-	if len(aPlIDs) == 0 {
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
-			if dr.DeletedCount == 0 {
-				return utils.ErrNotFound
-			}
-			return err
-		})
-	}
-	oldAPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional)
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(oldAPlIDs); {
-		if utils.IsSliceMember(aPlIDs, oldAPlIDs[i]) {
-			oldAPlIDs = append(oldAPlIDs[:i], oldAPlIDs[i+1:]...)
-			continue // if we have stripped, don't increase index so we can check next element by next run
-		}
-		i++
-	}
-	if len(oldAPlIDs) == 0 { // no more elements, remove the reference
-		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
-			if dr.DeletedCount == 0 {
-				return utils.ErrNotFound
-			}
-			return err
-		})
-	}
+func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(ColAAp).UpdateOne(sctx, bson.M{"key": acntID},
-			bson.M{"$set": struct {
-				Key   string
-				Value []string
-			}{Key: acntID, Value: oldAPlIDs}},
-			options.Update().SetUpsert(true),
-		)
+		dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
 		return err
 	})
 }

@@ -55,7 +55,7 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACTION_PLAN_PREFIX)
-		acts, err := m.dmIN.DataManager().GetActionPlan(idg, true, utils.NonTransactional)
+		acts, err := m.dmIN.DataManager().GetActionPlan(idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

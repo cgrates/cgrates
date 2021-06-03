@@ -245,7 +245,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating ActionPlan ", err.Error())
 		}
-		result, err := actPlnMigrator.dmOut.DataManager().GetActionPlan((*v1actPln)[0].Id, true, utils.NonTransactional)
+		result, err := actPlnMigrator.dmOut.DataManager().GetActionPlan((*v1actPln)[0].Id, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatal("Error when getting ActionPlan ", err.Error())
 		}
@@ -270,7 +270,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating ActionPlan ", err.Error())
 		}
-		result, err := actPlnMigrator.dmOut.DataManager().GetActionPlan((*v1actPln)[0].Id, true, utils.NonTransactional)
+		result, err := actPlnMigrator.dmOut.DataManager().GetActionPlan((*v1actPln)[0].Id, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting ActionPlan ", err.Error())
 		}
@@ -282,7 +282,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		} else if !reflect.DeepEqual(actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
 			t.Errorf("Expecting: %+v, received: %+v", actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
 		}
-		result, err = actPlnMigrator.dmIN.DataManager().GetActionPlan((*v1actPln)[0].Id, true, utils.NonTransactional)
+		result, err = actPlnMigrator.dmIN.DataManager().GetActionPlan((*v1actPln)[0].Id, false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}

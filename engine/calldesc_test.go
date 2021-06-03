@@ -38,10 +38,10 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup",
+		{ActionType: "*topup",
 			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 				Value: &utils.ValueFormula{Static: 10}}},
-		&Action{ActionType: "*topup",
+		{ActionType: "*topup",
 			Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE),
 				Weight:         utils.Float64Pointer(20),
 				Value:          &utils.ValueFormula{Static: 10 * float64(time.Second)},
@@ -49,18 +49,18 @@ func populateDB() {
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup",
+		{ActionType: "*topup",
 			Balance: &BalanceFilter{
 				Type:  utils.StringPointer(utils.MONETARY),
 				Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
-		&Action{ActionType: "*reset_account", Weight: 20},
+		{ActionType: "*reset_account", Weight: 20},
 	}
 
 	minu := &Account{
 		ID: "vdf:minu",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{&Balance{Value: 50}},
-			utils.VOICE: Balances{
+			utils.MONETARY: {&Balance{Value: 50}},
+			utils.VOICE: {
 				&Balance{Value: 200 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
 				&Balance{Value: 100 * float64(time.Second),
@@ -70,7 +70,7 @@ func populateDB() {
 	broker := &Account{
 		ID: "vdf:broker",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 20 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"),
 					Weight:         10, RatingSubject: "rif"},
@@ -81,7 +81,7 @@ func populateDB() {
 	luna := &Account{
 		ID: "vdf:luna",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
@@ -89,14 +89,14 @@ func populateDB() {
 	minitsboy := &Account{
 		ID: "vdf:minitsboy",
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{
+			utils.VOICE: {
 				&Balance{Value: 20 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("NAT"),
 					Weight:         10, RatingSubject: "rif"},
 				&Balance{Value: 100 * float64(time.Second),
 					DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
@@ -104,14 +104,14 @@ func populateDB() {
 	max := &Account{
 		ID: "cgrates.org:max",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
 		ID: "cgrates.org:money",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
+			utils.MONETARY: {
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}
@@ -685,7 +685,7 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxRate(t *testing.T) {
-	ap, err := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, err := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	if err != nil {
 		t.FailNow()
 	}
@@ -713,7 +713,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -736,7 +736,7 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 }
 
 func TestGetMaxSessiontWithBlocker(t *testing.T) {
-	ap, _ := dm.GetActionPlan("BLOCK_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("BLOCK_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -785,7 +785,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 }
 
 func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
-	ap, _ := dm.GetActionPlan("BLOCK_EMPTY_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("BLOCK_EMPTY_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -834,7 +834,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 }
 
 func TestGetCostWithMaxCost(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -857,7 +857,7 @@ func TestGetCostWithMaxCost(t *testing.T) {
 }
 
 func TestGetCostRoundingIssue(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -881,7 +881,7 @@ func TestGetCostRoundingIssue(t *testing.T) {
 }
 
 func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -908,7 +908,7 @@ func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
 }
 
 func TestDebitRatingInfoOnZeroTime(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -936,7 +936,7 @@ func TestDebitRatingInfoOnZeroTime(t *testing.T) {
 }
 
 func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -963,7 +963,7 @@ func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 }
 
 func TestMaxDebitUnknowDest(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -985,7 +985,7 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 }
 
 func TestMaxDebitRoundingIssue(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1019,7 +1019,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 }
 
 func TestDebitRoundingRefund(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1053,7 +1053,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1076,7 +1076,7 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxDebitWithMaxCostFree(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1099,7 +1099,7 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 }
 
 func TestGetCostWithMaxCostFree(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1123,12 +1123,12 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountShared(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
+	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1162,12 +1162,12 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 }
 
 func TestMaxDebitWithAccountShared(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP_SHARED0_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
+	ap, _ = dm.GetActionPlan("TOPUP_SHARED10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1378,7 +1378,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 }
 
 func TestDebitFromShareAndNormal(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP_SHARED10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP_SHARED10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1406,7 +1406,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 }
 
 func TestDebitFromEmptyShare(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP_EMPTY_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP_EMPTY_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1434,7 +1434,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 }
 
 func TestDebitNegatve(t *testing.T) {
-	ap, _ := dm.GetActionPlan("POST_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("POST_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1473,7 +1473,7 @@ func TestDebitNegatve(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRate(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1502,7 +1502,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 }
 
 func TestMaxDebitForceDuration(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1526,7 +1526,7 @@ func TestMaxDebitForceDuration(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
@@ -1554,7 +1554,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 }
 
 func TestMaxDebitConsumesMinutes(t *testing.T) {
-	ap, _ := dm.GetActionPlan("TOPUP10_AT", false, utils.NonTransactional)
+	ap, _ := dm.GetActionPlan("TOPUP10_AT", true, true, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
