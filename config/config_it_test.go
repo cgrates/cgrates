@@ -265,7 +265,6 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		ActionSConns:        []string{},
 		IndexedSelects:      true,
-		ActionSConns:        []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ThresholdSCfg()))
