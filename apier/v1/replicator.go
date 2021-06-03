@@ -179,7 +179,7 @@ func (rplSv1 *ReplicatorSv1) GetActions(id string, reply *engine.Actions) error 
 
 //GetActions
 func (rplSv1 *ReplicatorSv1) GetActionPlan(id string, reply *engine.ActionPlan) error {
-	if rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id, true, utils.NonTransactional); err != nil {
+	if rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -199,7 +199,7 @@ func (rplSv1 *ReplicatorSv1) GetAllActionPlans(_ string, reply *map[string]*engi
 
 //GetAccountActionPlans
 func (rplSv1 *ReplicatorSv1) GetAccountActionPlans(id string, reply *[]string) error {
-	if rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id, false, utils.NonTransactional); err != nil {
+	if rcv, err := rplSv1.dm.DataDB().GetAccountActionPlansDrv(id); err != nil {
 		return err
 	} else {
 		*reply = rcv
@@ -487,7 +487,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfile,
 }
 
 func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArg, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
+	if err := rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -495,7 +495,7 @@ func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArg, reply 
 }
 
 func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArg, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
+	if err := rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -623,7 +623,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActions(id string, reply *string) error {
 }
 
 func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id string, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemoveActionPlanDrv(id, utils.NonTransactional); err != nil {
+	if err := rplSv1.dm.DataDB().RemoveActionPlanDrv(id); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -631,7 +631,7 @@ func (rplSv1 *ReplicatorSv1) RemoveActionPlan(id string, reply *string) error {
 }
 
 func (rplSv1 *ReplicatorSv1) RemAccountActionPlans(args *engine.RemAccountActionPlansArgs, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID, args.ApIDs); err != nil {
+	if err := rplSv1.dm.DataDB().RemAccountActionPlansDrv(args.AcntID); err != nil {
 		return err
 	}
 	*reply = utils.OK

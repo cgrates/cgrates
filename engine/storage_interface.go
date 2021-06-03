@@ -34,8 +34,7 @@ type Storage interface {
 	Close()
 	Flush(string) error
 	GetKeysForPrefix(string) ([]string, error)
-	RebuildReverseForPrefix(string) error
-	RemoveReverseForPrefix(string) error
+	RemoveKeysForPrefix(string) error
 	GetVersions(itm string) (vrs Versions, err error)
 	SetVersions(vrs Versions, overwrite bool) (err error)
 	RemoveVersions(vrs Versions) (err error)
@@ -69,14 +68,13 @@ type DataDB interface {
 	GetActionTriggersDrv(string) (ActionTriggers, error)
 	SetActionTriggersDrv(string, ActionTriggers) error
 	RemoveActionTriggersDrv(string) error
-	GetActionPlanDrv(string, bool, string) (*ActionPlan, error)
-	SetActionPlanDrv(string, *ActionPlan, bool, string) error
-	RemoveActionPlanDrv(key string, transactionID string) error
+	GetActionPlanDrv(string) (*ActionPlan, error)
+	SetActionPlanDrv(string, *ActionPlan) error
+	RemoveActionPlanDrv(key string) error
 	GetAllActionPlansDrv() (map[string]*ActionPlan, error)
-	GetAccountActionPlansDrv(acntID string, skipCache bool,
-		transactionID string) (apIDs []string, err error)
-	SetAccountActionPlansDrv(acntID string, apIDs []string, overwrite bool) (err error)
-	RemAccountActionPlansDrv(acntID string, apIDs []string) (err error)
+	GetAccountActionPlansDrv(acntID string) (apIDs []string, err error)
+	SetAccountActionPlansDrv(acntID string, apIDs []string) (err error)
+	RemAccountActionPlansDrv(acntID string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	GetAccountDrv(string) (*Account, error)

@@ -260,7 +260,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 			{ActionsId: argActs1.ActionsId,
 				Time:   fmt.Sprintf("%v:%v:%v", tNow.Hour(), tNow.Minute(), tNow.Second()), // 10:4:12
 				Weight: 20.0}}}
-	if _, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetActionPlan(argAP1.Id, false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.APIerSv1SetActionPlan, argAP1, &reply); err != nil {
@@ -274,19 +274,19 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 		ActionPlanIDs: []string{argAP1.Id},
 	}
 	acntID := utils.ConcatenatedKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
-	if _, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt1, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP1.Id, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
 	eAAPids := []string{argAP1.Id}
-	if aapIDs, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if aapIDs, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
@@ -295,7 +295,7 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	argAP2 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_2",
 		ActionPlan: []*v1.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
-	if _, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetActionPlan(argAP2.Id, false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.APIerSv2SetActionPlan, argAP2, &reply); err != nil {
@@ -312,18 +312,18 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if ap, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP2.Id, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
-	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP1.Id, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
 	eAAPids = []string{argAP1.Id, argAP2.Id}
-	if aapIDs, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if aapIDs, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
@@ -338,18 +338,18 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call(utils.APIerSv2SetAccount, argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP1.Id, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; hasIt {
 		t.Errorf("ActionPlan does contain the accountID: %+v", ap)
 	}
-	if ap, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP2.Id, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
 	eAAPids = []string{argAP2.Id}
-	if aapIDs, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if aapIDs, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)

@@ -749,7 +749,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			exitingAccountIds := make(utils.StringMap)
-			existingActionPlan, err := tpr.dm.GetActionPlan(accountAction.ActionPlanId, true, utils.NonTransactional)
+			existingActionPlan, err := tpr.dm.GetActionPlan(accountAction.ActionPlanId, false, false, utils.NonTransactional)
 			if err == nil && existingActionPlan != nil {
 				exitingAccountIds = existingActionPlan.AccountIDs
 			}
@@ -1778,7 +1778,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 			if verbose {
 				log.Print("Rebuilding reverse destinations")
 			}
-			if err = tpr.dm.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			if err = tpr.dm.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 				return err
 			}
 		}
@@ -1786,7 +1786,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 			if verbose {
 				log.Print("Rebuilding account action plans")
 			}
-			if err = tpr.dm.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+			if err = tpr.dm.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 				return err
 			}
 		}
@@ -2274,7 +2274,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			if verbose {
 				log.Print("Removing reverse destinations")
 			}
-			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 				return err
 			}
 		}
@@ -2282,7 +2282,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			if verbose {
 				log.Print("Removing account action plans")
 			}
-			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+			if err = tpr.dm.DataDB().RemoveKeysForPrefix(utils.AccountActionPlansPrefix); err != nil {
 				return err
 			}
 		}
@@ -2302,6 +2302,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 	if len(tpr.destinations) != 0 {
 		loadIDs[utils.CacheDestinations] = loadID
+		loadIDs[utils.CacheReverseDestinations] = loadID
 	}
 	if len(tpr.revDests) != 0 {
 		loadIDs[utils.CacheReverseDestinations] = loadID

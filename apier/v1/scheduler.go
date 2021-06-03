@@ -120,7 +120,7 @@ type AttrsExecuteScheduledActions struct {
 
 func (self *APIerSv1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, reply *string) error {
 	if attr.ActionPlanID != "" { // execute by ActionPlanID
-		apl, err := self.DataManager.GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
+		apl, err := self.DataManager.GetActionPlan(attr.ActionPlanID, true, true, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 			return err

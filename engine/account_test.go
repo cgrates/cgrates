@@ -110,8 +110,8 @@ func TestGetSecondsForPrefix(t *testing.T) {
 		DestinationIDs: utils.StringMap{"RET": true}}
 	ub1 := &Account{ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]Balances{
-			utils.VOICE:    Balances{b1, b2},
-			utils.MONETARY: Balances{&Balance{Value: 200}}}}
+			utils.VOICE:    {b1, b2},
+			utils.MONETARY: {&Balance{Value: 200}}}}
 	cd := &CallDescriptor{
 		Category:      "0",
 		Tenant:        "vdf",

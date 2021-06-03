@@ -107,7 +107,7 @@ func (apiv1 *APIerSv1) GetReverseDestination(prefix string, reply *[]string) (er
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
 func (apiv1 *APIerSv1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
-	if err = apiv1.DataManager.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+	if err = apiv1.DataManager.RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -115,12 +115,16 @@ func (apiv1 *APIerSv1) ComputeReverseDestinations(ignr string, reply *string) (e
 }
 
 // ComputeAccountActionPlans will rebuild complete reverse accountActions data
-func (apiv1 *APIerSv1) ComputeAccountActionPlans(ignr string, reply *string) (err error) {
-	if err = apiv1.DataManager.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+func (apiv1 *APIerSv1) ComputeAccountActionPlans(tnt *utils.TenantWithArgDispatcher, reply *string) (err error) {
+	if err = apiv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}
-	*reply = utils.OK
-	return
+	return apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
+			ArgDispatcher: tnt.ArgDispatcher,
+			CacheIDs:      []string{utils.CacheAccountActionPlans},
+			TenantArg:     *tnt.TenantArg,
+		}, reply)
 }
 
 func (apiv1 *APIerSv1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
@@ -659,7 +663,7 @@ func (apiv1 *APIerSv1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (er
 	}
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
-		if prevAP, err := apiv1.DataManager.GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if prevAP, err := apiv1.DataManager.GetActionPlan(attrs.Id, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, utils.NewErrServerError(err)
 		} else if err == nil && !attrs.Overwrite {
 			return 0, utils.ErrExists
@@ -785,7 +789,7 @@ func (apiv1 *APIerSv1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.Ac
 			result = append(result, apls)
 		}
 	} else {
-		apls, err := apiv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional)
+		apls, err := apiv1.DataManager.GetActionPlan(attr.ID, true, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -801,7 +805,7 @@ func (apiv1 *APIerSv1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (
 	}
 	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
-		if prevAP, err := apiv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if prevAP, err := apiv1.DataManager.GetActionPlan(attr.ID, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, err
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs

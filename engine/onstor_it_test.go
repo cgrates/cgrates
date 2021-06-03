@@ -58,6 +58,7 @@ var (
 		testOnStorITSharedGroup,
 		testOnStorITCRUDActionPlan,
 		testOnStorITCRUDAccountActionPlans,
+		testOnStorITCRUDAccountActionPlans2,
 		testOnStorITCRUDAccount,
 		testOnStorITResource,
 		testOnStorITResourceProfile,
@@ -1034,13 +1035,13 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetActionPlan(ap.Id, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetActionPlan(ap.Id, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %v, received: %v", ap, rcv)
@@ -1073,13 +1074,13 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	expect := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
 	aAPs := []string{"PACKAGE_10_SHARED_A_5", "apl_PACKAGE_1001"}
 	aAPs2 := []string{"USE_SHARED_A"}
-	if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
@@ -1087,7 +1088,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	if err := onStor.SetAccountActionPlans(acntID, aAPs2, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
@@ -1100,7 +1101,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
@@ -1108,10 +1109,11 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
+
 	if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
@@ -1119,7 +1121,51 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	if err := onStor.RemAccountActionPlans(acntID, aAPs); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if v, rcvErr := onStor.GetAccountActionPlans(acntID, false, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr, v)
+	}
+}
+
+func testOnStorITCRUDAccountActionPlans2(t *testing.T) {
+	acntID := utils.ConcatenatedKey("cgrates.org2", "1001")
+	acntID2 := utils.ConcatenatedKey("cgrates.org2", "1002")
+	expect := []string{"PACKAGE_10_SHARED_A_15", "PACKAGE_10_SHARED_A_5"}
+	// aAPs := []string{"PACKAGE_10_SHARED_A_5"}
+	if err := onStor.SetActionPlan("PACKAGE_10_SHARED_A_5", &ActionPlan{
+		Id:            "PACKAGE_10_SHARED_A_5",
+		AccountIDs:    utils.NewStringMap(acntID, acntID2),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	if err := onStor.SetActionPlan("PACKAGE_10_SHARED_A_15", &ActionPlan{
+		Id:            "PACKAGE_10_SHARED_A_15",
+		AccountIDs:    utils.NewStringMap(acntID, acntID2),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	}
+	Cache.Set(utils.CacheAccountActionPlans, acntID2, nil, nil, true, utils.NonTransactional)
+	if err = onStor.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+		t.Fatal(err)
+	}
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expect, rcv) {
+		t.Errorf("Expecting: %v, received: %v", expect, rcv)
+	}
+	if rcv, err := onStor.GetAccountActionPlans(acntID2, false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expect, rcv) {
+		t.Errorf("Expecting: %v, received: %v", expect, rcv)
+	}
+	if err := onStor.RemAccountActionPlans(acntID, nil); err != nil {
+		t.Error(err)
+	}
+	if err := onStor.RemAccountActionPlans(acntID2, nil); err != nil {
+		t.Error(err)
+	}
+	if _, rcvErr := onStor.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

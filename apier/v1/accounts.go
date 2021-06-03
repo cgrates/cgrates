@@ -43,13 +43,13 @@ func (api *APIerSv1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*A
 	}
 	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := api.DataManager.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+		acntAPids, err := api.DataManager.GetAccountActionPlans(acntID, true, true, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
 		}
 		var acntAPs []*engine.ActionPlan
 		for _, apID := range acntAPids {
-			if ap, err := api.DataManager.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
+			if ap, err := api.DataManager.GetActionPlan(apID, true, true, utils.NonTransactional); err != nil {
 				return nil, err
 			} else if ap != nil {
 				acntAPs = append(acntAPs, ap)
@@ -99,7 +99,7 @@ func (api *APIerSv1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		ap, err := api.DataManager.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
+		ap, err := api.DataManager.GetActionPlan(attrs.ActionPlanId, true, true, utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		} else if ap == nil {
@@ -199,7 +199,7 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 		if attr.ActionPlanID != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := api.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
+				acntAPids, err := api.DataManager.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
@@ -210,7 +210,7 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 						i++ // increase index since we don't remove from slice
 						continue
 					}
-					ap, err := api.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
+					ap, err := api.DataManager.GetActionPlan(apID, true, true, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -219,7 +219,7 @@ func (api *APIerSv1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
 				if !utils.IsSliceMember(acntAPids, attr.ActionPlanID) { // Account not yet attached to action plan, do it here
-					ap, err := api.DataManager.GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
+					ap, err := api.DataManager.GetActionPlan(attr.ActionPlanID, true, true, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
