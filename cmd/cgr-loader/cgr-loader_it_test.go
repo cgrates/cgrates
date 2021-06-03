@@ -22,25 +22,39 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 	"os/exec"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
-
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
 	dataDir  = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	dbType   = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
+	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
 	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
+
+func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 func TestLoadConfig(t *testing.T) {
 	// DataDb
