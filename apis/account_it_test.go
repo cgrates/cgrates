@@ -55,7 +55,11 @@ var (
 		testAccGetAccIDsCount2,
 		testAccRemoveAcc,
 		testAccGetAccountsForEvent,
-		//testAccMaxAbstracts,
+		testAccMaxAbstracts,
+		testAccDebitAbstracts,
+		testAccMaxConcretes,
+		testAccDebitConcretes,
+		testAccActionSetRmvBalance,
 		testAccSKillEngine,
 	}
 )
@@ -425,7 +429,7 @@ func testAccMaxAbstracts(t *testing.T) {
 	accPrf := APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
 			Tenant:    "cgrates.org",
-			ID:        "TEST_ACC_IT_TEST3",
+			ID:        "TEST_ACC_IT_TEST4",
 			Weights:   ";0",
 			FilterIDs: []string{"*string:~*req.Account:1004"},
 			Balances: map[string]*utils.APIBalance{
@@ -460,7 +464,6 @@ func testAccMaxAbstracts(t *testing.T) {
 	}
 
 	var reply3 utils.ExtEventCharges
-	expected2 := utils.ExtEventCharges{}
 	args2 := &utils.ArgsAccountsForEvent{
 		CGREvent: &utils.CGREvent{
 			Tenant: utils.CGRateSorg,
@@ -471,14 +474,800 @@ func testAccMaxAbstracts(t *testing.T) {
 			},
 			APIOpts: nil,
 		},
-		AccountIDs: []string{"TEST_ACC_IT_TEST3"},
+		AccountIDs: []string{"TEST_ACC_IT_TEST4"},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxAbstracts,
+		args2, &reply3); err != nil {
+		t.Error(err)
+	}
+
+	var crgID string
+	for _, val := range reply3.Charges {
+		crgID = val.ChargingID
+	}
+
+	var accKEy, rtID string
+	for key, val := range reply3.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range reply3.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	reply3.Rating = map[string]*utils.ExtRateSInterval{}
+	expected2 := utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(27000000000),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "TEST_ACC_IT_TEST4",
+				BalanceID:       "AbstractBalance1",
+				Units:           utils.Float64Pointer(27000000000),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"TEST_ACC_IT_TEST4": {
+				Tenant:    "cgrates.org",
+				ID:        "TEST_ACC_IT_TEST4",
+				FilterIDs: []string{"*string:~*req.Account:1004"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    0,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"AbstractBalance1": {
+						ID: "AbstractBalance1",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    25,
+							},
+						},
+						Type: "*abstract",
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								FilterIDs:    nil,
+								Increment:    utils.Float64Pointer(1000000000),
+								FixedFee:     utils.Float64Pointer(0),
+								RecurrentFee: utils.Float64Pointer(0),
+							},
+						},
+						Units: utils.Float64Pointer(13000000000),
+					},
+					"ConcreteBalance2": {
+						ID:        "ConcreteBalance2",
+						FilterIDs: nil,
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    20,
+							},
+						},
+						Type:           "*concrete",
+						Units:          utils.Float64Pointer(213),
+						UnitFactors:    nil,
+						Opts:           nil,
+						CostIncrements: nil,
+						AttributeIDs:   nil,
+						RateProfileIDs: nil,
+					},
+				},
+				Opts: nil,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(reply3, expected2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
+	}
+}
+
+func testAccDebitAbstracts(t *testing.T) {
+	accPrf := APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ACC_IT_TEST5",
+			Weights:   ";0",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: ";25",
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(0),
+						},
+					},
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: ";20",
+					Type:    utils.MetaConcrete,
+					Units:   213,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	var reply3 utils.ExtEventCharges
+	args2 := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.CGRateSorg,
+			ID:     "testIDEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.Usage:        "27s",
+			},
+			APIOpts: nil,
+		},
+		AccountIDs: []string{"TEST_ACC_IT_TEST5"},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitAbstracts,
+		args2, &reply3); err != nil {
+		t.Error(err)
+	}
+
+	var crgID string
+	for _, val := range reply3.Charges {
+		crgID = val.ChargingID
+	}
+
+	var accKEy, rtID string
+	for key, val := range reply3.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range reply3.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	reply3.Rating = map[string]*utils.ExtRateSInterval{}
+	expected2 := utils.ExtEventCharges{
+		Abstracts: utils.Float64Pointer(27000000000),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "TEST_ACC_IT_TEST5",
+				BalanceID:       "AbstractBalance1",
+				Units:           utils.Float64Pointer(27000000000),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"TEST_ACC_IT_TEST5": {
+				Tenant:    "cgrates.org",
+				ID:        "TEST_ACC_IT_TEST5",
+				FilterIDs: []string{"*string:~*req.Account:1004"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    0,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"AbstractBalance1": {
+						ID: "AbstractBalance1",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    25,
+							},
+						},
+						Type: "*abstract",
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								FilterIDs:    nil,
+								Increment:    utils.Float64Pointer(1000000000),
+								FixedFee:     utils.Float64Pointer(0),
+								RecurrentFee: utils.Float64Pointer(0),
+							},
+						},
+						Units: utils.Float64Pointer(13000000000),
+					},
+					"ConcreteBalance2": {
+						ID:        "ConcreteBalance2",
+						FilterIDs: nil,
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    20,
+							},
+						},
+						Type:           "*concrete",
+						Units:          utils.Float64Pointer(213),
+						UnitFactors:    nil,
+						Opts:           nil,
+						CostIncrements: nil,
+						AttributeIDs:   nil,
+						RateProfileIDs: nil,
+					},
+				},
+				Opts: nil,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(reply3, expected2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
+	}
+}
+
+func testAccMaxConcretes(t *testing.T) {
+	accPrf := APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ACC_IT_TEST6",
+			Weights:   ";0",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: ";25",
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(0),
+						},
+					},
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: ";20",
+					Type:    utils.MetaConcrete,
+					Units:   213,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	var reply3 utils.ExtEventCharges
+	args2 := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.CGRateSorg,
+			ID:     "testIDEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.Usage:        "27s",
+			},
+			APIOpts: nil,
+		},
+		AccountIDs: []string{"TEST_ACC_IT_TEST6"},
 	}
 	if err := accSRPC.Call(context.Background(), utils.AccountSv1MaxConcretes,
 		args2, &reply3); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply3, expected2) {
+	}
+
+	var crgID string
+	for _, val := range reply3.Charges {
+		crgID = val.ChargingID
+	}
+
+	var accKEy, rtID string
+	for key, val := range reply3.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range reply3.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	reply3.Rating = map[string]*utils.ExtRateSInterval{}
+	expected2 := utils.ExtEventCharges{
+		Concretes: utils.Float64Pointer(213),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "TEST_ACC_IT_TEST6",
+				BalanceID:       "ConcreteBalance2",
+				Units:           utils.Float64Pointer(213),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"TEST_ACC_IT_TEST6": {
+				Tenant:    "cgrates.org",
+				ID:        "TEST_ACC_IT_TEST6",
+				FilterIDs: []string{"*string:~*req.Account:1004"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    0,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"AbstractBalance1": {
+						ID: "AbstractBalance1",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    25,
+							},
+						},
+						Type: "*abstract",
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								FilterIDs:    nil,
+								Increment:    utils.Float64Pointer(1000000000),
+								FixedFee:     utils.Float64Pointer(0),
+								RecurrentFee: utils.Float64Pointer(0),
+							},
+						},
+						Units: utils.Float64Pointer(40000000000),
+					},
+					"ConcreteBalance2": {
+						ID:        "ConcreteBalance2",
+						FilterIDs: nil,
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    20,
+							},
+						},
+						Type:           "*concrete",
+						Units:          utils.Float64Pointer(0),
+						UnitFactors:    nil,
+						Opts:           nil,
+						CostIncrements: nil,
+						AttributeIDs:   nil,
+						RateProfileIDs: nil,
+					},
+				},
+				Opts: nil,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(reply3, expected2) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
 	}
+}
+
+func testAccDebitConcretes(t *testing.T) {
+	accPrf := APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_ACC_IT_TEST7",
+			Weights:   ";0",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.APIBalance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: ";25",
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment:    utils.Float64Pointer(float64(time.Second)),
+							FixedFee:     utils.Float64Pointer(0),
+							RecurrentFee: utils.Float64Pointer(0),
+						},
+					},
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: ";20",
+					Type:    utils.MetaConcrete,
+					Units:   213,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	var reply3 utils.ExtEventCharges
+	args2 := &utils.ArgsAccountsForEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: utils.CGRateSorg,
+			ID:     "testIDEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1004",
+				utils.Usage:        "27s",
+			},
+			APIOpts: nil,
+		},
+		AccountIDs: []string{"TEST_ACC_IT_TEST7"},
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1DebitConcretes,
+		args2, &reply3); err != nil {
+		t.Error(err)
+	}
+
+	var crgID string
+	for _, val := range reply3.Charges {
+		crgID = val.ChargingID
+	}
+
+	var accKEy, rtID string
+	for key, val := range reply3.Accounting {
+		accKEy = key
+		rtID = val.RatingID
+	}
+	expRating := &utils.ExtRateSInterval{
+		IntervalStart: nil,
+		Increments: []*utils.ExtRateSIncrement{
+			{
+				IncrementStart:    nil,
+				IntervalRateIndex: 0,
+				RateID:            "",
+				CompressFactor:    0,
+				Usage:             nil,
+			},
+		},
+		CompressFactor: 1,
+	}
+	for _, val := range reply3.Rating {
+		if !reflect.DeepEqual(val, expRating) {
+			t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expRating, val)
+		}
+	}
+	reply3.Rating = map[string]*utils.ExtRateSInterval{}
+	expected2 := utils.ExtEventCharges{
+		Concretes: utils.Float64Pointer(213),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     crgID,
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.ExtAccountCharge{
+			accKEy: &utils.ExtAccountCharge{
+				AccountID:       "TEST_ACC_IT_TEST7",
+				BalanceID:       "ConcreteBalance2",
+				Units:           utils.Float64Pointer(213),
+				BalanceLimit:    utils.Float64Pointer(0),
+				UnitFactorID:    "",
+				RatingID:        rtID,
+				JoinedChargeIDs: nil,
+			},
+		},
+		UnitFactors: map[string]*utils.ExtUnitFactor{},
+		Rating:      map[string]*utils.ExtRateSInterval{},
+		Rates:       map[string]*utils.ExtIntervalRate{},
+		Accounts: map[string]*utils.ExtAccount{
+			"TEST_ACC_IT_TEST7": {
+				Tenant:    "cgrates.org",
+				ID:        "TEST_ACC_IT_TEST7",
+				FilterIDs: []string{"*string:~*req.Account:1004"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    0,
+					},
+				},
+				Balances: map[string]*utils.ExtBalance{
+					"AbstractBalance1": {
+						ID: "AbstractBalance1",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    25,
+							},
+						},
+						Type: "*abstract",
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								FilterIDs:    nil,
+								Increment:    utils.Float64Pointer(1000000000),
+								FixedFee:     utils.Float64Pointer(0),
+								RecurrentFee: utils.Float64Pointer(0),
+							},
+						},
+						Units: utils.Float64Pointer(40000000000),
+					},
+					"ConcreteBalance2": {
+						ID:        "ConcreteBalance2",
+						FilterIDs: nil,
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: nil,
+								Weight:    20,
+							},
+						},
+						Type:           "*concrete",
+						Units:          utils.Float64Pointer(0),
+						UnitFactors:    nil,
+						Opts:           nil,
+						CostIncrements: nil,
+						AttributeIDs:   nil,
+						RateProfileIDs: nil,
+					},
+				},
+				Opts: nil,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(reply3, expected2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected2), utils.ToJSON(reply3))
+	}
+}
+
+func testAccActionSetRmvBalance(t *testing.T) {
+	accPrf := APIAccountWithAPIOpts{
+		APIAccount: &utils.APIAccount{
+			Tenant: "cgrates.org",
+			ID:     "TEST_ACC_IT_TEST8",
+			Opts:   map[string]interface{}{},
+			Balances: map[string]*utils.APIBalance{
+				"VoiceBalance": {
+					ID:        "VoiceBalance",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights:   ";12",
+					Type:      "*abstract",
+					Opts: map[string]interface{}{
+						"Destination": "10",
+					},
+					Units: 0,
+				},
+			},
+			Weights: ";10",
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1SetAccount,
+		accPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	var reply3 string
+	args2 := &utils.ArgsActSetBalance{
+		AccountID: "TEST_ACC_IT_TEST8",
+		Tenant:    "cgrates.org",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.AbstractBalance3.Units",
+				Value: "10",
+			},
+		},
+		Reset: false,
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionSetBalance,
+		args2, &reply3); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(reply3, `OK`) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(`OK`), utils.ToJSON(reply3))
+	}
+
+	expectedAcc := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ACC_IT_TEST8",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance3": {
+				ID:          "AbstractBalance3",
+				FilterIDs:   nil,
+				Weights:     nil,
+				Type:        "*concrete",
+				Units:       utils.NewDecimal(10, 0),
+				UnitFactors: nil,
+				Opts:        nil,
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*voice"},
+						Increment:    utils.NewDecimal(1000000000, 0),
+						FixedFee:     nil,
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*data"},
+						Increment:    utils.NewDecimal(1048576, 0),
+						FixedFee:     nil,
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+					{
+						FilterIDs:    []string{"*string:~*req.ToR:*sms"},
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     nil,
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+
+				AttributeIDs:   nil,
+				RateProfileIDs: nil,
+			},
+
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": "10",
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	var result utils.Account
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "TEST_ACC_IT_TEST8",
+			},
+		}, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, expectedAcc) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc), utils.ToJSON(result))
+	}
+
+	var reply4 string
+	args3 := &utils.ArgsActRemoveBalances{
+		Tenant:     "",
+		AccountID:  "TEST_ACC_IT_TEST8",
+		BalanceIDs: []string{"AbstractBalance3"},
+		APIOpts:    nil,
+	}
+	if err := accSRPC.Call(context.Background(), utils.AccountSv1ActionRemoveBalance,
+		args3, &reply4); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(reply4, `OK`) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(`OK`), utils.ToJSON(reply4))
+	}
+	expectedAcc2 := utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "TEST_ACC_IT_TEST8",
+		Opts:   map[string]interface{}{},
+		Balances: map[string]*utils.Balance{
+			"VoiceBalance": {
+				ID:        "VoiceBalance",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: nil,
+						Weight:    12,
+					},
+				},
+				Type: "*abstract",
+				Opts: map[string]interface{}{
+					"Destination": "10",
+				},
+				Units: utils.NewDecimal(0, 0),
+			},
+		},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: nil,
+				Weight:    10,
+			},
+		},
+	}
+	var result2 utils.Account
+	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "",
+				ID:     "TEST_ACC_IT_TEST8",
+			},
+		}, &result2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result2, expectedAcc2) {
+		t.Errorf("\nExpected %+v , \nreceived %+v", utils.ToJSON(expectedAcc2), utils.ToJSON(result2))
+	}
+
 }
 
 //Kill the engine when it is about to be finished

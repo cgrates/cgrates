@@ -62,11 +62,11 @@ var (
 func TestFilterSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		fltrPrfConfigDIR = "rates_internal"
+		fltrPrfConfigDIR = "tutinternal"
 	case utils.MetaMongo:
-		fltrPrfConfigDIR = "rates_mongo"
+		fltrPrfConfigDIR = "tutmongo"
 	case utils.MetaMySQL:
-		fltrPrfConfigDIR = "rates_mysql"
+		fltrPrfConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
