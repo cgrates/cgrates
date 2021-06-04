@@ -95,6 +95,64 @@ func TestConfigV1StoreCfgInDB(t *testing.T) {
 	}
 }
 
+func TestConfigV1StoreCfgInDBErr1(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 10)
+	}
+	args := &SectionWithAPIOpts{
+		Sections: []string{},
+	}
+
+	var reply string
+	expected := "no DB connection for config"
+	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
+func TestConfigV1StoreCfgInDBErr2(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 10)
+	}
+
+	generalJsonCfg := func() (*GeneralJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	cfg.db = &mockDb{
+		GeneralJsonCfgF: generalJsonCfg,
+	}
+
+	args := &SectionWithAPIOpts{
+		Sections: []string{CDRsJSON},
+	}
+
+	var reply string
+	expected := utils.ErrNotImplemented
+	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
+func TestConfigV1StoreCfgInDBErr3(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 10)
+	}
+
+	args := &SectionWithAPIOpts{
+		Sections: []string{"cdrs"},
+	}
+
+	cfg.db = new(mockDb)
+	var reply string
+	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != utils.ErrNotImplemented {
+		t.Error(err)
+	}
+}
+
 func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	for _, section := range sortedCfgSections {
@@ -127,6 +185,32 @@ func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp2, rpl) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp2), utils.ToJSON(rpl))
+	}
+}
+
+func TestConfigV1SetConfigFromJSONWithDBErr(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	args := &SetConfigFromJSONArgs{
+		Config: `{
+			"cdrs":{
+				"enabled": false,
+				"store_cdrs": true,
+			}
+		}
+		`,
+	}
+
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 10)
+	}
+
+	cfg.db = &mockDb{
+		GeneralJsonCfgF: nil,
+	}
+	var reply string
+	expected := utils.ErrNotImplemented
+	if err := cfg.V1SetConfigFromJSON(context.Background(), args, &reply); err == nil || err != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, reply)
 	}
 }
 
@@ -237,154 +321,333 @@ func TestGetSectionAsMap(t *testing.T) {
 	}
 }
 
-type mockDb struct{}
-
-func (mockDb) GeneralJsonCfg() (*GeneralJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+type mockDb struct {
+	GeneralJsonCfgF         func() (*GeneralJsonCfg, error)
+	RPCConnJsonCfgF         func() (RPCConnsJson, error)
+	CacheJsonCfgF           func() (*CacheJsonCfg, error)
+	ListenJsonCfgF          func() (*ListenJsonCfg, error)
+	HttpJsonCfgF            func() (*HTTPJsonCfg, error)
+	DbJsonCfgF              func(section string) (*DbJsonCfg, error)
+	FilterSJsonCfgF         func() (*FilterSJsonCfg, error)
+	CdrsJsonCfgF            func() (*CdrsJsonCfg, error)
+	ERsJsonCfgF             func() (*ERsJsonCfg, error)
+	EEsJsonCfgF             func() (*EEsJsonCfg, error)
+	SessionSJsonCfgF        func() (*SessionSJsonCfg, error)
+	FreeswitchAgentJsonCfgF func() (*FreeswitchAgentJsonCfg, error)
+	KamAgentJsonCfgF        func() (*KamAgentJsonCfg, error)
+	AsteriskAgentJsonCfgF   func() (*AsteriskAgentJsonCfg, error)
+	DiameterAgentJsonCfgF   func() (*DiameterAgentJsonCfg, error)
+	RadiusAgentJsonCfgF     func() (*RadiusAgentJsonCfg, error)
+	HttpAgentJsonCfgF       func() (*[]*HttpAgentJsonCfg, error)
+	DNSAgentJsonCfgF        func() (*DNSAgentJsonCfg, error)
+	AttributeServJsonCfgF   func() (*AttributeSJsonCfg, error)
+	ChargerServJsonCfgF     func() (*ChargerSJsonCfg, error)
+	ResourceSJsonCfgF       func() (*ResourceSJsonCfg, error)
+	StatSJsonCfgF           func() (*StatServJsonCfg, error)
+	ThresholdSJsonCfgF      func() (*ThresholdSJsonCfg, error)
+	RouteSJsonCfgF          func() (*RouteSJsonCfg, error)
+	LoaderJsonCfgF          func() ([]*LoaderJsonCfg, error)
+	SureTaxJsonCfgF         func() (*SureTaxJsonCfg, error)
+	DispatcherSJsonCfgF     func() (*DispatcherSJsonCfg, error)
+	RegistrarCJsonCfgsF     func() (*RegistrarCJsonCfgs, error)
+	LoaderCfgJsonF          func() (*LoaderCfgJson, error)
+	MigratorCfgJsonF        func() (*MigratorCfgJson, error)
+	TlsCfgJsonF             func() (*TlsJsonCfg, error)
+	AnalyzerCfgJsonF        func() (*AnalyzerSJsonCfg, error)
+	AdminSCfgJsonF          func() (*AdminSJsonCfg, error)
+	RateCfgJsonF            func() (*RateSJsonCfg, error)
+	SIPAgentJsonCfgF        func() (*SIPAgentJsonCfg, error)
+	TemplateSJsonCfgF       func() (FcTemplatesJsonCfg, error)
+	ConfigSJsonCfgF         func() (*ConfigSCfgJson, error)
+	ApiBanCfgJsonF          func() (*APIBanJsonCfg, error)
+	CoreSJSONF              func() (*CoreSJsonCfg, error)
+	ActionSCfgJsonF         func() (*ActionSJsonCfg, error)
+	AccountSCfgJsonF        func() (*AccountSJsonCfg, error)
+	SetSectionF             func(*context.Context, string, interface{}) error
 }
 
-func (mockDb) RPCConnJsonCfg() (RPCConnsJson, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) GeneralJsonCfg() (*GeneralJsonCfg, error) {
+	if m.GeneralJsonCfgF != nil {
+		return m.GeneralJsonCfgF()
+	}
+	return &GeneralJsonCfg{}, nil
 }
-func (mockDb) CacheJsonCfg() (*CacheJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+
+func (m *mockDb) RPCConnJsonCfg() (RPCConnsJson, error) {
+	if m.RPCConnJsonCfgF != nil {
+		return m.RPCConnJsonCfgF()
+	}
+	return RPCConnsJson{}, nil
 }
-func (mockDb) ListenJsonCfg() (*ListenJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) CacheJsonCfg() (*CacheJsonCfg, error) {
+	if m.CacheJsonCfgF != nil {
+		return m.CacheJsonCfgF()
+	}
+	return &CacheJsonCfg{}, nil
 }
-func (mockDb) HttpJsonCfg() (*HTTPJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ListenJsonCfg() (*ListenJsonCfg, error) {
+	if m.ListenJsonCfgF != nil {
+		return m.ListenJsonCfgF()
+	}
+	return &ListenJsonCfg{}, nil
 }
-func (mockDb) DbJsonCfg(section string) (*DbJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) HttpJsonCfg() (*HTTPJsonCfg, error) {
+	if m.HttpJsonCfgF != nil {
+		return m.HttpJsonCfgF()
+	}
+	return &HTTPJsonCfg{}, nil
 }
-func (mockDb) FilterSJsonCfg() (*FilterSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) DbJsonCfg(section string) (*DbJsonCfg, error) {
+	if m.DbJsonCfgF != nil {
+		return m.DbJsonCfgF(section)
+	}
+	return &DbJsonCfg{}, nil
 }
-func (mockDb) CdrsJsonCfg() (*CdrsJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) FilterSJsonCfg() (*FilterSJsonCfg, error) {
+	if m.FilterSJsonCfgF != nil {
+		return m.FilterSJsonCfgF()
+	}
+	return &FilterSJsonCfg{}, nil
 }
-func (mockDb) ERsJsonCfg() (*ERsJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) CdrsJsonCfg() (*CdrsJsonCfg, error) {
+	if m.CdrsJsonCfgF != nil {
+		return m.CdrsJsonCfgF()
+	}
+	return &CdrsJsonCfg{}, nil
 }
-func (mockDb) EEsJsonCfg() (*EEsJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ERsJsonCfg() (*ERsJsonCfg, error) {
+	if m.ERsJsonCfgF != nil {
+		return m.ERsJsonCfgF()
+	}
+	return &ERsJsonCfg{}, nil
 }
-func (mockDb) SessionSJsonCfg() (*SessionSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) EEsJsonCfg() (*EEsJsonCfg, error) {
+	if m.EEsJsonCfgF != nil {
+		return m.EEsJsonCfgF()
+	}
+	return &EEsJsonCfg{}, nil
 }
-func (mockDb) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) SessionSJsonCfg() (*SessionSJsonCfg, error) {
+	if m.SessionSJsonCfgF != nil {
+		return m.SessionSJsonCfgF()
+	}
+	return &SessionSJsonCfg{}, nil
 }
-func (mockDb) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error) {
+	if m.FreeswitchAgentJsonCfgF != nil {
+		return m.FreeswitchAgentJsonCfgF()
+	}
+	return &FreeswitchAgentJsonCfg{}, nil
 }
-func (mockDb) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
+	if m.KamAgentJsonCfgF != nil {
+		return m.KamAgentJsonCfgF()
+	}
+	return &KamAgentJsonCfg{}, nil
 }
-func (mockDb) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) AsteriskAgentJsonCfg() (*AsteriskAgentJsonCfg, error) {
+	if m.AsteriskAgentJsonCfgF != nil {
+		return m.AsteriskAgentJsonCfgF()
+	}
+	return &AsteriskAgentJsonCfg{}, nil
 }
-func (mockDb) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
+	if m.DiameterAgentJsonCfgF != nil {
+		return m.DiameterAgentJsonCfgF()
+	}
+	return &DiameterAgentJsonCfg{}, nil
 }
-func (mockDb) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
+	if m.RadiusAgentJsonCfgF != nil {
+		return m.RadiusAgentJsonCfgF()
+	}
+	return &RadiusAgentJsonCfg{}, nil
 }
-func (mockDb) DNSAgentJsonCfg() (*DNSAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
+	if m.HttpAgentJsonCfgF != nil {
+		return m.HttpAgentJsonCfgF()
+	}
+	return &[]*HttpAgentJsonCfg{}, nil
 }
-func (mockDb) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) DNSAgentJsonCfg() (*DNSAgentJsonCfg, error) {
+	if m.DNSAgentJsonCfgF != nil {
+		return m.DNSAgentJsonCfgF()
+	}
+	return &DNSAgentJsonCfg{}, nil
 }
-func (mockDb) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
+	if m.AttributeServJsonCfgF != nil {
+		return m.AttributeServJsonCfgF()
+	}
+	return &AttributeSJsonCfg{}, nil
 }
-func (mockDb) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
+	if m.ChargerServJsonCfgF != nil {
+		return m.ChargerServJsonCfgF()
+	}
+	return &ChargerSJsonCfg{}, nil
 }
-func (mockDb) StatSJsonCfg() (*StatServJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
+	if m.ResourceSJsonCfgF != nil {
+		return m.ResourceSJsonCfgF()
+	}
+	return &ResourceSJsonCfg{}, nil
 }
-func (mockDb) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) StatSJsonCfg() (*StatServJsonCfg, error) {
+	if m.StatSJsonCfgF != nil {
+		return m.StatSJsonCfgF()
+	}
+	return &StatServJsonCfg{}, nil
 }
-func (mockDb) RouteSJsonCfg() (*RouteSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ThresholdSJsonCfg() (*ThresholdSJsonCfg, error) {
+	if m.ThresholdSJsonCfgF != nil {
+		return m.ThresholdSJsonCfgF()
+	}
+	return &ThresholdSJsonCfg{}, nil
 }
-func (mockDb) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) RouteSJsonCfg() (*RouteSJsonCfg, error) {
+	if m.RouteSJsonCfgF != nil {
+		return m.RouteSJsonCfgF()
+	}
+	return &RouteSJsonCfg{}, nil
 }
-func (mockDb) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
+	if m.LoaderJsonCfgF != nil {
+		return m.LoaderJsonCfgF()
+	}
+	return []*LoaderJsonCfg{}, nil
 }
-func (mockDb) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
+	if m.SureTaxJsonCfgF != nil {
+		return m.SureTaxJsonCfgF()
+	}
+	return &SureTaxJsonCfg{}, nil
 }
-func (mockDb) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
+	if m.DispatcherSJsonCfgF != nil {
+		return m.DispatcherSJsonCfgF()
+	}
+	return &DispatcherSJsonCfg{}, nil
 }
-func (mockDb) LoaderCfgJson() (*LoaderCfgJson, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) RegistrarCJsonCfgs() (*RegistrarCJsonCfgs, error) {
+	if m.RegistrarCJsonCfgsF != nil {
+		return m.RegistrarCJsonCfgsF()
+	}
+	return &RegistrarCJsonCfgs{}, nil
 }
-func (mockDb) MigratorCfgJson() (*MigratorCfgJson, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) LoaderCfgJson() (*LoaderCfgJson, error) {
+	if m.LoaderCfgJsonF != nil {
+		return m.LoaderCfgJsonF()
+	}
+	return &LoaderCfgJson{}, nil
 }
-func (mockDb) TlsCfgJson() (*TlsJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) MigratorCfgJson() (*MigratorCfgJson, error) {
+	if m.MigratorCfgJsonF != nil {
+		return m.MigratorCfgJsonF()
+	}
+	return &MigratorCfgJson{}, nil
 }
-func (mockDb) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) TlsCfgJson() (*TlsJsonCfg, error) {
+	if m.TlsCfgJsonF != nil {
+		return m.TlsCfgJsonF()
+	}
+	return &TlsJsonCfg{}, nil
 }
-func (mockDb) AdminSCfgJson() (*AdminSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
+	if m.AnalyzerCfgJsonF != nil {
+		return m.AnalyzerCfgJsonF()
+	}
+	return &AnalyzerSJsonCfg{}, nil
 }
-func (mockDb) RateCfgJson() (*RateSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) AdminSCfgJson() (*AdminSJsonCfg, error) {
+	if m.AdminSCfgJsonF != nil {
+		return m.AdminSCfgJsonF()
+	}
+	return &AdminSJsonCfg{}, nil
 }
-func (mockDb) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) RateCfgJson() (*RateSJsonCfg, error) {
+	if m.RateCfgJsonF != nil {
+		return m.RateCfgJsonF()
+	}
+	return &RateSJsonCfg{}, nil
 }
-func (mockDb) TemplateSJsonCfg() (FcTemplatesJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) SIPAgentJsonCfg() (*SIPAgentJsonCfg, error) {
+	if m.SIPAgentJsonCfgF != nil {
+		return m.SIPAgentJsonCfgF()
+	}
+	return &SIPAgentJsonCfg{}, nil
 }
-func (mockDb) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) TemplateSJsonCfg() (FcTemplatesJsonCfg, error) {
+	if m.TemplateSJsonCfgF != nil {
+		return m.TemplateSJsonCfgF()
+	}
+	return FcTemplatesJsonCfg{}, nil
 }
-func (mockDb) ApiBanCfgJson() (*APIBanJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ConfigSJsonCfg() (*ConfigSCfgJson, error) {
+	if m.ConfigSJsonCfgF != nil {
+		return m.ConfigSJsonCfgF()
+	}
+	return &ConfigSCfgJson{}, nil
 }
-func (mockDb) CoreSJSON() (*CoreSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ApiBanCfgJson() (*APIBanJsonCfg, error) {
+	if m.ApiBanCfgJsonF != nil {
+		return m.ApiBanCfgJsonF()
+	}
+	return &APIBanJsonCfg{}, nil
 }
-func (mockDb) ActionSCfgJson() (*ActionSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) CoreSJSON() (*CoreSJsonCfg, error) {
+	if m.CoreSJSONF != nil {
+		return m.CoreSJSONF()
+	}
+	return &CoreSJsonCfg{}, nil
 }
-func (mockDb) AccountSCfgJson() (*AccountSJsonCfg, error) {
-	return nil, utils.ErrAccountNotFound
+func (m *mockDb) ActionSCfgJson() (*ActionSJsonCfg, error) {
+	if m.ActionSCfgJsonF != nil {
+		return m.ActionSCfgJsonF()
+	}
+	return &ActionSJsonCfg{}, nil
 }
-func (mockDb) SetSection(*context.Context, string, interface{}) error {
-	return utils.ErrAccountNotFound
+func (m *mockDb) AccountSCfgJson() (*AccountSJsonCfg, error) {
+	if m.AccountSCfgJsonF != nil {
+		return m.AccountSCfgJsonF()
+	}
+	return &AccountSJsonCfg{}, nil
+}
+func (m *mockDb) SetSection(*context.Context, string, interface{}) error {
+	return utils.ErrNotImplemented
 }
 
 func TestStoreDiffSectionGeneral(t *testing.T) {
 	section := GeneralJSON
 
-	db := &mockDb{}
+	generalJsonCfg := func() (*GeneralJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		GeneralJsonCfgF: generalJsonCfg,
+	}
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.generalCfg = &GeneralCfg{}
 
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.generalCfg = &GeneralCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionRPCConns(t *testing.T) {
 	section := RPCConnsJSON
-	db := &mockDb{}
+
+	rpcConns := func() (RPCConnsJson, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		RPCConnJsonCfgF: rpcConns,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.rpcConns = RPCConns{}
@@ -392,14 +655,21 @@ func TestStoreDiffSectionRPCConns(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.rpcConns = RPCConns{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionCache(t *testing.T) {
 	section := CacheJSON
-	db := &mockDb{}
+
+	cacheJsonCfg := func() (*CacheJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		CacheJsonCfgF: cacheJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.cacheCfg = &CacheCfg{}
@@ -407,14 +677,21 @@ func TestStoreDiffSectionCache(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.cacheCfg = &CacheCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionListen(t *testing.T) {
 	section := ListenJSON
-	db := &mockDb{}
+
+	listenJsonCfg := func() (*ListenJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ListenJsonCfgF: listenJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.listenCfg = &ListenCfg{}
@@ -422,14 +699,21 @@ func TestStoreDiffSectionListen(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.listenCfg = &ListenCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionHTTP(t *testing.T) {
 	section := HTTPJSON
-	db := &mockDb{}
+
+	httpJsonCfg := func() (*HTTPJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		HttpJsonCfgF: httpJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.httpCfg = &HTTPCfg{}
@@ -437,14 +721,21 @@ func TestStoreDiffSectionHTTP(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.httpCfg = &HTTPCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionStorDB(t *testing.T) {
 	section := StorDBJSON
-	db := &mockDb{}
+
+	storDbJsonCfg := func(section string) (*DbJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		DbJsonCfgF: storDbJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.storDbCfg = &StorDbCfg{}
@@ -452,14 +743,21 @@ func TestStoreDiffSectionStorDB(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.storDbCfg = &StorDbCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionDataDB(t *testing.T) {
 	section := DataDBJSON
-	db := &mockDb{}
+
+	dataDbJsonCfg := func(section string) (*DbJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		DbJsonCfgF: dataDbJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.dataDbCfg = &DataDbCfg{}
@@ -467,14 +765,21 @@ func TestStoreDiffSectionDataDB(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.dataDbCfg = &DataDbCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionFilterS(t *testing.T) {
 	section := FilterSJSON
-	db := &mockDb{}
+
+	filterSJsonCfg := func() (*FilterSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		FilterSJsonCfgF: filterSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.filterSCfg = &FilterSCfg{}
@@ -482,14 +787,21 @@ func TestStoreDiffSectionFilterS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.filterSCfg = &FilterSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionCDRs(t *testing.T) {
 	section := CDRsJSON
-	db := &mockDb{}
+
+	cdrsJsonCfg := func() (*CdrsJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		CdrsJsonCfgF: cdrsJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.cdrsCfg = &CdrsCfg{}
@@ -497,14 +809,21 @@ func TestStoreDiffSectionCDRs(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.cdrsCfg = &CdrsCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionERs(t *testing.T) {
 	section := ERsJSON
-	db := &mockDb{}
+
+	erSJsonCfg := func() (*ERsJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ERsJsonCfgF: erSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.ersCfg = &ERsCfg{}
@@ -512,14 +831,21 @@ func TestStoreDiffSectionERs(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.ersCfg = &ERsCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionEEs(t *testing.T) {
 	section := EEsJSON
-	db := &mockDb{}
+
+	eeSJsonCfg := func() (*EEsJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		EEsJsonCfgF: eeSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.eesCfg = &EEsCfg{}
@@ -527,14 +853,21 @@ func TestStoreDiffSectionEEs(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.eesCfg = &EEsCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionSessionS(t *testing.T) {
 	section := SessionSJSON
-	db := &mockDb{}
+
+	sessionSJsonCfg := func() (*SessionSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		SessionSJsonCfgF: sessionSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.sessionSCfg = &SessionSCfg{}
@@ -542,14 +875,21 @@ func TestStoreDiffSectionSessionS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.sessionSCfg = &SessionSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionFreeSWITCH(t *testing.T) {
 	section := FreeSWITCHAgentJSON
-	db := &mockDb{}
+
+	freeswitchAgentJsonCfg := func() (*FreeswitchAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		FreeswitchAgentJsonCfgF: freeswitchAgentJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.fsAgentCfg = &FsAgentCfg{}
@@ -557,14 +897,21 @@ func TestStoreDiffSectionFreeSWITCH(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.fsAgentCfg = &FsAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionKamailio(t *testing.T) {
 	section := KamailioAgentJSON
-	db := &mockDb{}
+
+	kamailioJsonCfg := func() (*KamAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		KamAgentJsonCfgF: kamailioJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.kamAgentCfg = &KamAgentCfg{}
@@ -572,14 +919,21 @@ func TestStoreDiffSectionKamailio(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.kamAgentCfg = &KamAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionAsterisk(t *testing.T) {
 	section := AsteriskAgentJSON
-	db := &mockDb{}
+
+	asteriskJsonCfg := func() (*AsteriskAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		AsteriskAgentJsonCfgF: asteriskJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.asteriskAgentCfg = &AsteriskAgentCfg{}
@@ -587,14 +941,21 @@ func TestStoreDiffSectionAsterisk(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.asteriskAgentCfg = &AsteriskAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionDiameter(t *testing.T) {
 	section := DiameterAgentJSON
-	db := &mockDb{}
+
+	diameterJsonCfg := func() (*DiameterAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		DiameterAgentJsonCfgF: diameterJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.diameterAgentCfg = &DiameterAgentCfg{}
@@ -602,14 +963,21 @@ func TestStoreDiffSectionDiameter(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.diameterAgentCfg = &DiameterAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionRadius(t *testing.T) {
 	section := RadiusAgentJSON
-	db := &mockDb{}
+
+	radiusJsonCfg := func() (*RadiusAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		RadiusAgentJsonCfgF: radiusJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.diameterAgentCfg = &DiameterAgentCfg{}
@@ -617,14 +985,21 @@ func TestStoreDiffSectionRadius(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.diameterAgentCfg = &DiameterAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionHTTPAgent(t *testing.T) {
 	section := HTTPAgentJSON
-	db := &mockDb{}
+
+	httpAgentJsonCfg := func() (*[]*HttpAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		HttpAgentJsonCfgF: httpAgentJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.httpAgentCfg = HTTPAgentCfgs{}
@@ -632,14 +1007,21 @@ func TestStoreDiffSectionHTTPAgent(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.httpAgentCfg = HTTPAgentCfgs{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionDNS(t *testing.T) {
 	section := DNSAgentJSON
-	db := &mockDb{}
+
+	dnsJsonCfg := func() (*DNSAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		DNSAgentJsonCfgF: dnsJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.dnsAgentCfg = &DNSAgentCfg{}
@@ -647,14 +1029,21 @@ func TestStoreDiffSectionDNS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.dnsAgentCfg = &DNSAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionAttributeS(t *testing.T) {
 	section := AttributeSJSON
-	db := &mockDb{}
+
+	attributeSJsonCfg := func() (*AttributeSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		AttributeServJsonCfgF: attributeSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.attributeSCfg = &AttributeSCfg{}
@@ -662,14 +1051,21 @@ func TestStoreDiffSectionAttributeS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.attributeSCfg = &AttributeSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionChargerS(t *testing.T) {
 	section := ChargerSJSON
-	db := &mockDb{}
+
+	chargerSJsonCfg := func() (*ChargerSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ChargerServJsonCfgF: chargerSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.chargerSCfg = &ChargerSCfg{}
@@ -677,14 +1073,21 @@ func TestStoreDiffSectionChargerS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.chargerSCfg = &ChargerSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionResourceS(t *testing.T) {
 	section := ResourceSJSON
-	db := &mockDb{}
+
+	resourceSJsonCfg := func() (*ResourceSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ResourceSJsonCfgF: resourceSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.resourceSCfg = &ResourceSConfig{}
@@ -692,14 +1095,21 @@ func TestStoreDiffSectionResourceS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.resourceSCfg = &ResourceSConfig{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionStatS(t *testing.T) {
 	section := StatSJSON
-	db := &mockDb{}
+
+	statSJsonCfg := func() (*StatServJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		StatSJsonCfgF: statSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.statsCfg = &StatSCfg{}
@@ -707,14 +1117,21 @@ func TestStoreDiffSectionStatS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.statsCfg = &StatSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionThresholdS(t *testing.T) {
 	section := ThresholdSJSON
-	db := &mockDb{}
+
+	thresholdSJsonCfg := func() (*ThresholdSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ThresholdSJsonCfgF: thresholdSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.thresholdSCfg = &ThresholdSCfg{}
@@ -722,14 +1139,21 @@ func TestStoreDiffSectionThresholdS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.thresholdSCfg = &ThresholdSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionRouteS(t *testing.T) {
 	section := RouteSJSON
-	db := &mockDb{}
+
+	routeSJsonCfg := func() (*RouteSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		RouteSJsonCfgF: routeSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.routeSCfg = &RouteSCfg{}
@@ -737,14 +1161,21 @@ func TestStoreDiffSectionRouteS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.routeSCfg = &RouteSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionLoaderS(t *testing.T) {
 	section := LoaderSJSON
-	db := &mockDb{}
+
+	loaderSJsonCfg := func() ([]*LoaderJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		LoaderJsonCfgF: loaderSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.loaderCfg = LoaderSCfgs{}
@@ -752,14 +1183,21 @@ func TestStoreDiffSectionLoaderS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.loaderCfg = LoaderSCfgs{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionSureTax(t *testing.T) {
 	section := SureTaxJSON
-	db := &mockDb{}
+
+	sureTaxJsonCfg := func() (*SureTaxJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		SureTaxJsonCfgF: sureTaxJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.sureTaxCfg = &SureTaxCfg{}
@@ -767,14 +1205,21 @@ func TestStoreDiffSectionSureTax(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.sureTaxCfg = &SureTaxCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionDispatcherS(t *testing.T) {
 	section := DispatcherSJSON
-	db := &mockDb{}
+
+	dispatcherSJsonCfg := func() (*DispatcherSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		DispatcherSJsonCfgF: dispatcherSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.dispatcherSCfg = &DispatcherSCfg{}
@@ -782,14 +1227,21 @@ func TestStoreDiffSectionDispatcherS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.dispatcherSCfg = &DispatcherSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionRegistrarC(t *testing.T) {
 	section := RegistrarCJSON
-	db := &mockDb{}
+
+	registrarCJsonCfgs := func() (*RegistrarCJsonCfgs, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		RegistrarCJsonCfgsF: registrarCJsonCfgs,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.registrarCCfg = &RegistrarCCfgs{}
@@ -797,14 +1249,21 @@ func TestStoreDiffSectionRegistrarC(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.registrarCCfg = &RegistrarCCfgs{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionLoader(t *testing.T) {
 	section := LoaderJSON
-	db := &mockDb{}
+
+	loaderJsonCfg := func() (*LoaderCfgJson, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		LoaderCfgJsonF: loaderJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.loaderCgrCfg = &LoaderCgrCfg{}
@@ -812,14 +1271,21 @@ func TestStoreDiffSectionLoader(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.loaderCgrCfg = &LoaderCgrCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionMigrator(t *testing.T) {
 	section := MigratorJSON
-	db := &mockDb{}
+
+	migratorJsonCfg := func() (*MigratorCfgJson, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		MigratorCfgJsonF: migratorJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.migratorCgrCfg = &MigratorCgrCfg{}
@@ -827,14 +1293,21 @@ func TestStoreDiffSectionMigrator(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.migratorCgrCfg = &MigratorCgrCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionTls(t *testing.T) {
 	section := TlsJSON
-	db := &mockDb{}
+
+	tlsJsonCfg := func() (*TlsJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		TlsCfgJsonF: tlsJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.tlsCfg = &TLSCfg{}
@@ -842,14 +1315,21 @@ func TestStoreDiffSectionTls(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.tlsCfg = &TLSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionAnalyzerS(t *testing.T) {
 	section := AnalyzerSJSON
-	db := &mockDb{}
+
+	analyzerJsonCfg := func() (*AnalyzerSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		AnalyzerCfgJsonF: analyzerJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.analyzerSCfg = &AnalyzerSCfg{}
@@ -857,14 +1337,21 @@ func TestStoreDiffSectionAnalyzerS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.analyzerSCfg = &AnalyzerSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionAdminS(t *testing.T) {
 	section := AdminSJSON
-	db := &mockDb{}
+
+	adminSJsonCfg := func() (*AdminSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		AdminSCfgJsonF: adminSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.admS = &AdminSCfg{}
@@ -872,14 +1359,21 @@ func TestStoreDiffSectionAdminS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.admS = &AdminSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionRateS(t *testing.T) {
 	section := RateSJSON
-	db := &mockDb{}
+
+	rateSJsonCfg := func() (*RateSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		RateCfgJsonF: rateSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.rateSCfg = &RateSCfg{}
@@ -887,14 +1381,21 @@ func TestStoreDiffSectionRateS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.rateSCfg = &RateSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionSIP(t *testing.T) {
 	section := SIPAgentJSON
-	db := &mockDb{}
+
+	sipAgentJsonCfg := func() (*SIPAgentJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		SIPAgentJsonCfgF: sipAgentJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.sipAgentCfg = &SIPAgentCfg{}
@@ -902,14 +1403,21 @@ func TestStoreDiffSectionSIP(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV1.sipAgentCfg = &SIPAgentCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionTemplates(t *testing.T) {
 	section := TemplatesJSON
-	db := &mockDb{}
+
+	templatesJsonCfg := func() (FcTemplatesJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		TemplateSJsonCfgF: templatesJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.templates = FCTemplates{}
@@ -917,14 +1425,21 @@ func TestStoreDiffSectionTemplates(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.templates = FCTemplates{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionConfigS(t *testing.T) {
 	section := ConfigSJSON
-	db := &mockDb{}
+
+	configSJsonCfg := func() (*ConfigSCfgJson, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ConfigSJsonCfgF: configSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.configSCfg = &ConfigSCfg{}
@@ -932,14 +1447,21 @@ func TestStoreDiffSectionConfigS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.configSCfg = &ConfigSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionAPIBan(t *testing.T) {
 	section := APIBanJSON
-	db := &mockDb{}
+
+	apiBanJsonCfg := func() (*APIBanJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ApiBanCfgJsonF: apiBanJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.apiBanCfg = &APIBanCfg{}
@@ -947,14 +1469,21 @@ func TestStoreDiffSectionAPIBan(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.apiBanCfg = &APIBanCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionCoreS(t *testing.T) {
 	section := CoreSJSON
-	db := &mockDb{}
+
+	coreSJsonCfg := func() (*CoreSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		CoreSJSONF: coreSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.coreSCfg = &CoreSCfg{}
@@ -962,14 +1491,21 @@ func TestStoreDiffSectionCoreS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.coreSCfg = &CoreSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionActionS(t *testing.T) {
 	section := ActionSJSON
-	db := &mockDb{}
+
+	actionSJsonCfg := func() (*ActionSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		ActionSCfgJsonF: actionSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.actionSCfg = &ActionSCfg{}
@@ -977,14 +1513,21 @@ func TestStoreDiffSectionActionS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.actionSCfg = &ActionSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
 
 func TestStoreDiffSectionAccountS(t *testing.T) {
 	section := AccountSJSON
-	db := &mockDb{}
+
+	accountSJsonCfg := func() (*AccountSJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		AccountSCfgJsonF: accountSJsonCfg,
+	}
 
 	cgrCfgV1 := NewDefaultCGRConfig()
 	cgrCfgV1.accountSCfg = &AccountSCfg{}
@@ -992,7 +1535,7 @@ func TestStoreDiffSectionAccountS(t *testing.T) {
 	cgrCfgV2 := NewDefaultCGRConfig()
 	cgrCfgV2.accountSCfg = &AccountSCfg{}
 
-	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrAccountNotFound || err == nil {
+	if err := storeDiffSection(context.Background(), section, db, cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
 	}
 }
@@ -1005,36 +1548,9 @@ func TestV1ReloadConfig(t *testing.T) {
 		Section: utils.MetaAll,
 	}
 
-	cfg.rldChans[DataDBJSON] = make(chan struct{}, 1)
-	cfg.rldChans[StorDBJSON] = make(chan struct{}, 1)
-	cfg.rldChans[RPCConnsJSON] = make(chan struct{}, 1)
-	cfg.rldChans[HTTPJSON] = make(chan struct{}, 1)
-	cfg.rldChans[CDRsJSON] = make(chan struct{}, 1)
-	cfg.rldChans[ERsJSON] = make(chan struct{}, 1)
-	cfg.rldChans[SessionSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[AsteriskAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[FreeSWITCHAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[KamailioAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[DiameterAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[RadiusAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[HTTPAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[DNSAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[AttributeSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[ChargerSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[ResourceSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[StatSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[ThresholdSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[RouteSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[LoaderSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[DispatcherSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[AnalyzerSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[AdminSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[EEsJSON] = make(chan struct{}, 1)
-	cfg.rldChans[SIPAgentJSON] = make(chan struct{}, 1)
-	cfg.rldChans[RateSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[RegistrarCJSON] = make(chan struct{}, 1)
-	cfg.rldChans[AccountSJSON] = make(chan struct{}, 1)
-	cfg.rldChans[ActionSJSON] = make(chan struct{}, 1)
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 10)
+	}
 
 	var reply string
 	if err := cfg.V1ReloadConfig(context.Background(), args, &reply); err != nil {
@@ -1051,5 +1567,119 @@ func TestV1ReloadConfig(t *testing.T) {
 	if err := cfg.V1ReloadConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("%T and %T", expected, err.Error())
 		t.Errorf("Expected %q \n but received \n %q", expected, err)
+	}
+}
+
+func TestV1SetConfigErr1(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	args := &SetConfigArgs{
+		Config: map[string]interface{}{
+			"cores": map[string]interface{}{
+				"caps":                "0",
+				"caps_strategy":       "*busy",
+				"caps_stats_interval": "0",
+				"shutdown_timeout":    "1s",
+			},
+		},
+	}
+
+	var reply string
+	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.Caps of type int"
+	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
+func TestV1SetConfigErr2(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	args := &SetConfigArgs{
+		Config: map[string]interface{}{
+			"cdrs": map[string]interface{}{
+				"enabled":              false,
+				"extra_fields":         []string{},
+				"store_cdrs":           true,
+				"session_cost_retries": 5,
+				"chargers_conns":       []string{},
+				"attributes_conns":     []string{},
+				"thresholds_conns":     []string{},
+				"stats_conns":          []string{},
+				"online_cdr_exports":   []string{},
+				"actions_conns":        []string{},
+				"ees_conns":            []string{},
+			},
+		},
+		DryRun: true,
+	}
+	var reply string
+	cfg.sessionSCfg.Enabled = true
+	cfg.sessionSCfg.TerminateAttempts = 0
+	expected := "<SessionS> 'terminate_attempts' should be at least 1"
+	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
+func TestV1SetConfigErr3(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	args := &SetConfigArgs{
+		Config: map[string]interface{}{
+			"cdrs": map[string]interface{}{
+				"enabled":              false,
+				"extra_fields":         []string{},
+				"store_cdrs":           true,
+				"session_cost_retries": 5,
+				"chargers_conns":       []string{},
+				"attributes_conns":     []string{},
+				"thresholds_conns":     []string{},
+				"stats_conns":          []string{},
+				"online_cdr_exports":   []string{},
+				"actions_conns":        []string{},
+				"ees_conns":            []string{},
+			},
+		},
+	}
+
+	for _, section := range sortedCfgSections {
+		cfg.rldChans[section] = make(chan struct{}, 10)
+	}
+
+	var reply string
+	cfg.db = &mockDb{
+		GeneralJsonCfgF: nil,
+	}
+	expected := utils.ErrNotImplemented
+	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
+func TestLoadFromDBErr(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	generalJsonCfg := func() (*GeneralJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	jsnCfg := &mockDb{
+		GeneralJsonCfgF: generalJsonCfg,
+	}
+	expected := utils.ErrNotImplemented
+	if err := cfg.LoadFromDB(jsnCfg); err == nil || err != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
+func TestLoadCfgFromDBErr2(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	generalJsonCfg := func() (*GeneralJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	db := &mockDb{
+		GeneralJsonCfgF: generalJsonCfg,
+	}
+	sections := []string{"test"}
+	expected := "Invalid section: <test> "
+	if err := cfg.loadCfgFromDB(db, sections, false); err == nil || err.Error() != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
 	}
 }
