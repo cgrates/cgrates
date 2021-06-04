@@ -291,7 +291,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, ap := range loader.actionPlans {
-		rcv, err := loader.dm.GetActionPlan(k, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetActionPlan(k, false, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetActionPlan: ", err.Error())
 		}

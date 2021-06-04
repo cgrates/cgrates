@@ -141,6 +141,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
+	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 2
 	expStats[utils.CacheAttributeProfiles].Items = 10
 	expStats[utils.CacheChargerProfiles].Items = 2
