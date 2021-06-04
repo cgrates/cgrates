@@ -156,12 +156,12 @@ func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.Ar
 	return rsv1.rls.V1AuthorizeResources(ctx, *args, reply)
 }
 
-// V1InitiateResourceUsage records usage for an event
+// AllocateResources records usage for an event
 func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1AllocateResources(ctx, *args, reply)
 }
 
-// V1TerminateResourceUsage releases usage for an event
+// ReleaseResources releases usage for an event
 func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.ArgRSv1ResourceUsage, reply *string) error {
 	return rsv1.rls.V1ReleaseResources(ctx, *args, reply)
 }
