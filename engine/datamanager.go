@@ -1958,7 +1958,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if oldAP, _ := dm.GetActionPlan(key, true, true, transactionID); oldAP != nil {
+		if oldAP, _ := dm.GetActionPlan(key, true, false, transactionID); oldAP != nil {
 			if ats.AccountIDs == nil && len(oldAP.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
 			}

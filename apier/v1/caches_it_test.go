@@ -129,8 +129,6 @@ func testCacheSLoadTariffPlanFromFolder(t *testing.T) {
 func testCacheSAfterLoadFromFolder(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheAccountActionPlans].Items = 3
-	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
 	expStats[utils.CacheLoadIDs].Items = 18
@@ -147,6 +145,8 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
+	expStats[utils.CacheAccountActionPlans].Items = 3
+	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActionTriggers].Items = 1
 	expStats[utils.CacheActions].Items = 13
 	expStats[utils.CacheAttributeProfiles].Items = 1

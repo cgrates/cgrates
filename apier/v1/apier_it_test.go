@@ -841,7 +841,7 @@ func testApierLoadAccountActions(t *testing.T) {
 		t.Error("Calling APIerSv1.LoadAccountActions got reply: ", reply)
 	}
 	time.Sleep(10 * time.Millisecond)
-	expectedStats[utils.CacheAccountActionPlans].Items = 1
+	// expectedStats[utils.CacheAccountActionPlans].Items = 1 // was removed because the accountActionPlans are only set in DB not in Cache
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 6
@@ -877,7 +877,7 @@ func testApierSetRatingProfile(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
-	expectedStats[utils.CacheAccountActionPlans].Items = 1
+	// expectedStats[utils.CacheAccountActionPlans].Items = 1 // was removed because the accountActionPlans are only set in DB not in Cache
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 1
@@ -1075,7 +1075,7 @@ func testApierReloadCache(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
-	expectedStats[utils.CacheAccountActionPlans].Items = 1
+	// expectedStats[utils.CacheAccountActionPlans].Items = 1 // was removed because the accountActionPlans are only set in DB not in Cache
 	expectedStats[utils.CacheActionPlans].Items = 1
 	expectedStats[utils.CacheActions].Items = 1
 	expectedStats[utils.CacheRatingProfiles].Items = 3
@@ -1615,7 +1615,7 @@ func testApierComputeReverse(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
 	}
-	if err := rater.Call(utils.APIerSv1ComputeAccountActionPlans, utils.EmptyString, &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1ComputeAccountActionPlans, new(utils.TenantWithAPIOpts), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
@@ -1626,8 +1626,8 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheAccountActionPlans].Items = 3
-	expStats[utils.CacheActionPlans].Items = 7
+	// expStats[utils.CacheAccountActionPlans].Items = 3 // the items are cleared from Cache on Compute
+	// expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
 	expStats[utils.CacheLoadIDs].Items = 18
@@ -1644,6 +1644,8 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
+	expStats[utils.CacheAccountActionPlans].Items = 3
+	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActionTriggers].Items = 1
 	expStats[utils.CacheActions].Items = 13
 	expStats[utils.CacheAttributeProfiles].Items = 1
