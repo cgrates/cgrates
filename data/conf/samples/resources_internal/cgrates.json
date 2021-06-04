@@ -1,0 +1,34 @@
+{
+    // CGRateS Configuration file
+    // will be used in apis/resources_it_test.go
+  
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {
+      "db_type": "*internal",
+    },
+  
+    "stor_db": {
+      "db_type": "*internal",
+    },
+  
+    "actions": {
+        "enabled": true,
+    },
+
+    "thresholds": {
+        "enabled": true,
+        "actions_conns": ["*internal"],
+    },
+  
+    "resources": {
+      "enabled": true,
+      "thresholds_conns": ["*internal"],
+    },
+  
+    "admins": {
+      "enabled": true,
+    },
+  }

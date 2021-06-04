@@ -19,10 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"path"
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -33,6 +37,8 @@ import (
 )
 
 var (
+	rsSrv       *httptest.Server
+	rsBody      []byte
 	rsCfgPath   string
 	rsCfg       *config.CGRConfig
 	rsRPC       *birpc.Client
@@ -52,9 +58,9 @@ var (
 		testResourceSGetResourceProfileCount,
 		testResourceSGetResourcesForEvent,
 		testResourceSAllocateResources,
-		// testResourceSAuthorizeResourcesBeforeRelease,
-		// testResourceSReleaseResources,
-		// testResourceSAuthorizeResourcesAfterRelease,
+		testResourceSAuthorizeResourcesBeforeRelease,
+		testResourceSReleaseResources,
+		testResourceSAuthorizeResourcesAfterRelease,
 		testResourceSRemoveResourceProfiles,
 		testResourceSGetResourceProfilesAfterRemove,
 		testResourceSPing,
@@ -66,11 +72,13 @@ var (
 		testResourceSResetStorDB,
 		testResourceSStartEngine,
 		testResourceSRPCConn,
+		testResourceSStartServer,
 		testResourceSSetActionProfile,
 		testResourceSSetThresholdProfile,
 		testResourceSSetResourceProfile,
-		// testResourceSCheckThresholdAfterResourceAllocate,
-		// testResourceSCheckThresholdAfterResourceRelease,
+		testResourceSCheckThresholdAfterResourceAllocate,
+		testResourceSCheckThresholdAfterResourceRelease,
+		testResourceSStopServer,
 		testResourceSKillEngine,
 	}
 )
@@ -78,11 +86,11 @@ var (
 func TestResourceSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		rsConfigDIR = "tutinternal"
+		rsConfigDIR = "resources_internal"
 	case utils.MetaMongo:
-		rsConfigDIR = "tutmongo"
+		rsConfigDIR = "resources_mongo"
 	case utils.MetaMySQL:
-		rsConfigDIR = "tutmysql"
+		rsConfigDIR = "resources_mysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -364,8 +372,9 @@ func testResourceSAllocateResources(t *testing.T) {
 			},
 			ID: "EventTest",
 		},
-		UsageID: "RU_Test",
-		Units:   6,
+		UsageTTL: utils.DurationPointer(time.Minute),
+		UsageID:  "RU_Test",
+		Units:    6,
 	}
 
 	var reply string
@@ -377,68 +386,69 @@ func testResourceSAllocateResources(t *testing.T) {
 	}
 }
 
-// func testResourceSAuthorizeResourcesBeforeRelease(t *testing.T) {
-// 	args := &utils.ArgRSv1ResourceUsage{
-// 		CGREvent: &utils.CGREvent{
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 			ID: "EventTest",
-// 		},
-// 		UsageID: "RU_Test",
-// 		Units:   7,
-// 	}
+func testResourceSAuthorizeResourcesBeforeRelease(t *testing.T) {
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    7,
+	}
 
-// 	var reply string
-// 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
-// 		args, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != "Approved" {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
-// }
+	var reply string
+	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
+		args, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrResourceUnauthorized, err)
+	}
+}
 
-// func testResourceSReleaseResources(t *testing.T) {
-// 	args := &utils.ArgRSv1ResourceUsage{
-// 		CGREvent: &utils.CGREvent{
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 			ID: "EventTest",
-// 		},
-// 		UsageID: "RU_Test",
-// 		Units:   4,
-// 	}
-// 	var reply string
+func testResourceSReleaseResources(t *testing.T) {
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		UsageTTL: utils.DurationPointer(time.Minute),
+		UsageID:  "RU_Test",
+		Units:    4,
+	}
+	var reply string
 
-// 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1ReleaseResources,
-// 		args, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
-// }
+	if err := rsRPC.Call(context.Background(), utils.ResourceSv1ReleaseResources,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+}
 
-// func testResourceSAuthorizeResourcesAfterRelease(t *testing.T) {
-// 	args := &utils.ArgRSv1ResourceUsage{
-// 		CGREvent: &utils.CGREvent{
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 			ID: "EventTest",
-// 		},
-// 		UsageID: "RU_Test",
-// 		Units:   7,
-// 	}
+func testResourceSAuthorizeResourcesAfterRelease(t *testing.T) {
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			ID: "EventTest",
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    7,
+	}
 
-// 	var reply string
-// 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
-// 		args, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != "Approved" {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
-// }
+	var reply string
+	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AuthorizeResources,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Error("Unexpected reply returned:", reply)
+	}
+}
 
 func testResourceSRemoveResourceProfiles(t *testing.T) {
 	var reply string
@@ -493,15 +503,36 @@ func testResourceSPing(t *testing.T) {
 	}
 }
 
+func testResourceSStartServer(t *testing.T) {
+	rsSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		rsBody, err = io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
+
+		r.Body.Close()
+	}))
+}
+
+func testResourceSStopServer(t *testing.T) {
+	rsSrv.Close()
+}
 func testResourceSSetActionProfile(t *testing.T) {
 	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
-			Tenant:    "cgrates.org",
-			ID:        "actPrfID",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
 			Actions: []*engine.APAction{
 				{
-					ID: "actID",
+					ID:   "actID",
+					Type: utils.MetaHTTPPost,
+					Diktats: []*engine.APDiktat{
+						{
+							Path: rsSrv.URL,
+						},
+					},
+					TTL: time.Duration(time.Minute),
 				},
 			},
 		},
@@ -521,7 +552,7 @@ func testResourceSSetThresholdProfile(t *testing.T) {
 			FilterIDs:        []string{"*string:~*opts.*eventType:ResourceUpdate"},
 			ID:               "THD_1",
 			MaxHits:          -1,
-			ActionProfileIDs: []string{"actID"},
+			ActionProfileIDs: []string{"actPrfID"},
 		},
 	}
 	var reply string
@@ -550,6 +581,7 @@ func testResourceSSetResourceProfile(t *testing.T) {
 	rsPrf := &engine.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES_1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		AllocationMessage: "Approved",
 		Limit:             10,
 		ThresholdIDs:      []string{"THD_1"},
@@ -572,66 +604,72 @@ func testResourceSSetResourceProfile(t *testing.T) {
 	}
 }
 
-// func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
-// 	var reply string
-// 	argsRU := utils.ArgRSv1ResourceUsage{
-// 		UsageID: "RU_1",
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "EV_1",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 		},
+func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
+	var reply string
+	argsRU := utils.ArgRSv1ResourceUsage{
+		UsageID: "RU_1",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EV_1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
 
-// 		Units: 1,
-// 	}
-// 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AllocateResources,
-// 		argsRU, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != "Approved" {
-// 		t.Error("Unexpected reply returned", reply)
-// 	}
+		Units: 1,
+	}
 
-// 	args := &utils.TenantID{
-// 		Tenant: "cgrates.org",
-// 		ID:     "THD_1",
-// 	}
-// 	var result *engine.Threshold
-// 	if err := rsRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-// 		args, &result); err != nil {
-// 		t.Error(err)
-// 	} else if result.Hits != 1 {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 1, result.Hits)
-// 	}
-// }
+	expBody := `{"*opts":{"*eventType":"ResourceUpdate"},"*req":{"EventType":"ResourceUpdate","ResourceID":"RES_1","Usage":0}}`
+	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Error("Unexpected reply returned", reply)
+	}
 
-// func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
-// 	argsRU := &utils.ArgRSv1ResourceUsage{
-// 		UsageID: "RU_1",
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "EV_1",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 		},
-// 	}
-// 	var reply string
-// 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1ReleaseResources,
-// 		argsRU, &reply); err != nil {
-// 		t.Error(err)
-// 	}
+	if expBody != string(rsBody) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, rsBody)
+	}
 
-// 	args := &utils.TenantID{
-// 		Tenant: "cgrates.org",
-// 		ID:     "THD_1",
-// 	}
-// 	var result *engine.Threshold
-// 	if err := rsRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-// 		args, &result); err != nil {
-// 		t.Error(err)
-// 	} else if result.Hits != 2 {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 2, result.Hits)
-// 	}
-// }
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_1",
+	}
+	var result *engine.Threshold
+	if err := rsRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
+		args, &result); err != nil {
+		t.Error(err)
+	} else if result.Hits != 1 {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 1, result.Hits)
+	}
+}
+
+func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
+	argsRU := &utils.ArgRSv1ResourceUsage{
+		UsageID: "RU_1",
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EV_1",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	var reply string
+	if err := rsRPC.Call(context.Background(), utils.ResourceSv1ReleaseResources,
+		argsRU, &reply); err != nil {
+		t.Error(err)
+	}
+
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_1",
+	}
+	var result *engine.Threshold
+	if err := rsRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
+		args, &result); err != nil {
+		t.Error(err)
+	} else if result.Hits != 2 {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 2, result.Hits)
+	}
+}
