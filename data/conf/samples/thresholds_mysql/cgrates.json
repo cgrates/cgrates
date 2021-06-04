@@ -1,6 +1,6 @@
 {
     // CGRateS Configuration file
-    // will be used in apis/resources_it_test.go
+    // will be used in apis/thresholds_it_test.go
     "general": {
         "log_level": 7,
     },
@@ -21,12 +21,8 @@
 
     "thresholds": {	
         "enabled": true,
+        "store_interval": "",
         "actions_conns": ["*internal"],
-    },
-  
-    "resources": {
-      "enabled": true,
-      "thresholds_conns": ["*internal"],
     },
   
     "admins": {

@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -86,7 +88,8 @@ var (
 func TestResourceSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		rsConfigDIR = "resources_internal"
+		// rsConfigDIR = "resources_internal"
+		t.SkipNow()
 	case utils.MetaMongo:
 		rsConfigDIR = "resources_mongo"
 	case utils.MetaMySQL:
@@ -233,7 +236,8 @@ func testResourceSGetResourceAfterSet(t *testing.T) {
 		}, &rplyResPrf); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyResPrf, expResPrf) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expResPrf, rplyResPrf)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expResPrf), utils.ToJSON(rplyResPrf))
 	}
 
 	expRes = engine.Resource{
