@@ -326,16 +326,16 @@ func (dm *DataManager) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		var keys []string
-		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DestinationPrefix); err != nil {
+		if keys, err = dm.dataDB.GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
 			return
 		}
 		for _, key := range keys {
 			var dest *Destination
-			if dest, err = dm.GetDestination(key[len(utils.DestinationPrefix):], false, utils.NonTransactional); err != nil {
-				return err
+			if dest, err = dm.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional); err != nil {
+				return
 			}
 			if err = dm.SetReverseDestination(dest, utils.NonTransactional); err != nil {
-				return err
+				return
 			}
 		}
 	case utils.AccountActionPlansPrefix:
@@ -1414,7 +1414,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if oldAP, _ := dm.GetActionPlan(key, true, true, transactionID); oldAP != nil {
+		if oldAP, _ := dm.GetActionPlan(key, true, false, transactionID); oldAP != nil {
 			if ats.AccountIDs == nil && len(oldAP.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
 			}
