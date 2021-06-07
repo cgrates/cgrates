@@ -206,6 +206,18 @@ func InitStorDB(cfg *config.CGRConfig) error {
 	return nil
 }
 
+func InitConfigDB(cfg *config.CGRConfig) error {
+	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts)
+	if err != nil {
+		return err
+	}
+	return d.Flush("")
+}
+
 // Return reference towards the command started so we can stop it if necessary
 func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	enginePath, err := exec.LookPath("cgr-engine")

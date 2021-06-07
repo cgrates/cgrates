@@ -49,7 +49,7 @@ var (
 		testCfgSetGetConfig,
 		testCfgSetEmptyReload,
 		testCfgSetJSONGetJSONConfig,
-		testCfgEngine,
+		testCfgKillEngine,
 		//Store Cfg in Database Test
 		testCfgInitCfgStore,
 		testCfgInitCfgStore,
@@ -57,18 +57,18 @@ var (
 		testCfgResetStorDbStore,
 		testCfgStartEngineStore,
 		testCfgRPCConnStore,
-		testCfgEngineStore,
+		testCfgKillEngineStore,
 	}
 )
 
 func TestCfgSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		cfgDIR = "tutinternal"
+		cfgDIR = "apis_config_internal"
 	case utils.MetaMongo:
-		cfgDIR = "tutmongo"
+		cfgDIR = "apis_config_mongo"
 	case utils.MetaMySQL:
-		cfgDIR = "tutmysql"
+		cfgDIR = "apis_config_mysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -222,7 +222,8 @@ func testCfgSetEmptyReload(t *testing.T) {
 			Tenant:  "",
 			Config: map[string]interface{}{
 				"rates": map[string]interface{}{
-					"enabled": true,
+					"enabled":         true,
+					"indexed_selects": false,
 				},
 			},
 			DryRun: false,
@@ -250,7 +251,7 @@ func testCfgSetEmptyReload(t *testing.T) {
 	expectedGet := map[string]interface{}{
 		"rates": map[string]interface{}{
 			"enabled":                    true,
-			"indexed_selects":            true,
+			"indexed_selects":            false,
 			"nested_fields":              false,
 			"prefix_indexed_fields":      []string{},
 			"rate_indexed_selects":       true,
@@ -317,7 +318,7 @@ func testCfgInitCfgStore(t *testing.T) {
 	}
 }
 
-func testCfgEngine(t *testing.T) {
+func testCfgKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
@@ -331,6 +332,12 @@ func testCfgInitDataDbStore(t *testing.T) {
 
 func testCfgResetStorDbStore(t *testing.T) {
 	if err := engine.InitStorDB(cfgCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCfgResetConfigDBStore(t *testing.T) {
+	if err := engine.InitConfigDB(cfgCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -350,7 +357,7 @@ func testCfgRPCConnStore(t *testing.T) {
 	}
 }
 
-func testCfgEngineStore(t *testing.T) {
+func testCfgKillEngineStore(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
