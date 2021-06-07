@@ -149,6 +149,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index1"},
 		PrefixIndexedFields: &[]string{"req.index2"},
 		SuffixIndexedFields: &[]string{"req.index3"},
+		ActionSConns:        []string{},
 		NestedFields:        false,
 	}
 
@@ -159,6 +160,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"req.index11"},
 		PrefixIndexedFields: &[]string{"req.index22"},
 		SuffixIndexedFields: &[]string{"req.index33"},
+		ActionSConns:        []string{"*internal"},
 		NestedFields:        true,
 	}
 
@@ -169,6 +171,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"req.index11"},
 		Prefix_indexed_fields: &[]string{"req.index22"},
 		Suffix_indexed_fields: &[]string{"req.index33"},
+		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
 	}
 

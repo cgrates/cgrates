@@ -55,7 +55,7 @@ func TestERSClone(t *testing.T) {
             ],
             "failed_calls_prefix": "randomPrefix",
             "partial_record_cache": "1s",
-            "partial_cache_expiry_action": "randomAction"
+            "partial_cache_expiry_action": "randomAction",
          },
 	],
 },
@@ -201,6 +201,17 @@ func TestEventReaderloadFromJsonCase3(t *testing.T) {
 	}
 }
 
+func TestEventReaderloadFromJsonCase2(t *testing.T) {
+	cfgJSON := &ERsJsonCfg{
+		Partial_cache_ttl: utils.StringPointer("1ss"),
+	}
+	expected := `time: unknown unit "ss" in duration "1ss"`
+	jsonCfg := NewDefaultCGRConfig()
+	if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
 func TestERSLoadFromjsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:       true,
@@ -337,6 +348,82 @@ func TestERSloadFromJsonCfg(t *testing.T) {
 	jsonCfg := NewDefaultCGRConfig()
 	if err = jsonCfg.ersCfg.loadFromJSONCfg(cfgJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvRdr); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestEventReaderloadFromJsonCfgErr1(t *testing.T) {
+	erS := &EventReaderCfg{
+		PartialCommitFields: []*FCTemplate{
+			{
+				Type:  utils.MetaTemplate,
+				Value: NewRSRParsersMustCompile("1sa{*duration}", utils.InfieldSep),
+			},
+		},
+	}
+	jsnCfg := &EventReaderJsonCfg{
+		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+			{
+				Type:  utils.StringPointer(utils.MetaTemplate),
+				Value: utils.StringPointer("1sa{*duration}"),
+			},
+		},
+	}
+	expected := "time: unknown unit \"sa\" in duration \"1sa\""
+	cfg := NewDefaultCGRConfig()
+	if err = erS.loadFromJSONCfg(jsnCfg, cfg.templates, cfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestEventReaderloadFromJsonCfgErr2(t *testing.T) {
+	erS := &EventReaderCfg{
+		PartialCommitFields: make([]*FCTemplate, 0),
+	}
+	jsnCfg := &EventReaderJsonCfg{
+		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+			{
+				Value: utils.StringPointer("a{*"),
+			},
+		},
+	}
+	expected := "invalid converter terminator in rule: <a{*>"
+	cfg := NewDefaultCGRConfig()
+	if err = erS.loadFromJSONCfg(jsnCfg, cfg.templates, cfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+}
+
+func TestEventReaderloadFromJsonCfgErr3(t *testing.T) {
+	erS := &EventReaderCfg{
+		PartialCommitFields: []*FCTemplate{
+			{
+				Type:  utils.MetaTemplate,
+				Value: NewRSRParsersMustCompile("value", utils.InfieldSep),
+			},
+		},
+	}
+	jsnCfg := &EventReaderJsonCfg{
+		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("tag2"),
+				Type:  utils.StringPointer(utils.MetaTemplate),
+				Value: utils.StringPointer("value"),
+			},
+		},
+	}
+	tmpl := FCTemplates{
+		"value": {
+			{
+				Type: utils.MetaVariable,
+				Tag:  "tag",
+			},
+		},
+	}
+	cfg := NewDefaultCGRConfig()
+	if err = erS.loadFromJSONCfg(jsnCfg, tmpl, cfg.generalCfg.RSRSep); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(erS.PartialCommitFields, tmpl["value"]) {
+		t.Errorf("Expected %v \n but received \n %v", erS.PartialCommitFields, tmpl["value"])
 	}
 }
 

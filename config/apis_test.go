@@ -1668,6 +1668,22 @@ func TestLoadFromDBErr(t *testing.T) {
 	}
 }
 
+func TestLoadCfgFromDBErr(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	generalJsonCfg := func() (*GeneralJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	jsnCfg := &mockDb{
+		GeneralJsonCfgF: generalJsonCfg,
+	}
+	expected := utils.ErrNotImplemented
+	sections := []string{"general"}
+	if err := cfg.loadCfgFromDB(jsnCfg, sections, false); err == nil || err != expected {
+		t.Errorf("Expected %v \n but received \n %v", expected, err)
+	}
+}
+
 func TestLoadCfgFromDBErr2(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	generalJsonCfg := func() (*GeneralJsonCfg, error) {
@@ -1682,4 +1698,72 @@ func TestLoadCfgFromDBErr2(t *testing.T) {
 	if err := cfg.loadCfgFromDB(db, sections, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %v \n but received \n %v", expected, err)
 	}
+}
+
+func TestV1GetConfig(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.cacheDP[GeneralJSON] = &GeneralJsonCfg{
+		Node_id:              utils.StringPointer("randomID"),
+		Logger:               utils.StringPointer(utils.MetaSysLog),
+		Log_level:            utils.IntPointer(6),
+		Rounding_decimals:    utils.IntPointer(5),
+		Dbdata_encoding:      utils.StringPointer("msgpack"),
+		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
+		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
+		Poster_attempts:      utils.IntPointer(3),
+		Default_request_type: utils.StringPointer(utils.MetaRated),
+		Default_category:     utils.StringPointer(utils.Call),
+		Default_tenant:       utils.StringPointer("cgrates.org"),
+		Default_timezone:     utils.StringPointer("Local"),
+		Default_caching:      utils.StringPointer(utils.MetaReload),
+		Connect_attempts:     utils.IntPointer(3),
+		Reconnects:           utils.IntPointer(-1),
+		Connect_timeout:      utils.StringPointer("1s"),
+		Reply_timeout:        utils.StringPointer("2s"),
+		Locking_timeout:      utils.StringPointer("2s"),
+		Digest_separator:     utils.StringPointer(","),
+		Rsr_separator:        utils.StringPointer(";"),
+		Digest_equal:         utils.StringPointer(":"),
+		Failed_posts_ttl:     utils.StringPointer("2ns"),
+		Max_parallel_conns:   utils.IntPointer(100),
+	}
+	args := &SectionWithAPIOpts{
+		Sections: []string{GeneralJSON},
+	}
+
+	var reply map[string]interface{}
+	section := &GeneralJsonCfg{
+		Node_id:              utils.StringPointer("randomID"),
+		Logger:               utils.StringPointer(utils.MetaSysLog),
+		Log_level:            utils.IntPointer(6),
+		Rounding_decimals:    utils.IntPointer(5),
+		Dbdata_encoding:      utils.StringPointer("msgpack"),
+		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
+		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
+		Poster_attempts:      utils.IntPointer(3),
+		Default_request_type: utils.StringPointer(utils.MetaRated),
+		Default_category:     utils.StringPointer(utils.Call),
+		Default_tenant:       utils.StringPointer("cgrates.org"),
+		Default_timezone:     utils.StringPointer("Local"),
+		Default_caching:      utils.StringPointer(utils.MetaReload),
+		Connect_attempts:     utils.IntPointer(3),
+		Reconnects:           utils.IntPointer(-1),
+		Connect_timeout:      utils.StringPointer("1s"),
+		Reply_timeout:        utils.StringPointer("2s"),
+		Locking_timeout:      utils.StringPointer("2s"),
+		Digest_separator:     utils.StringPointer(","),
+		Rsr_separator:        utils.StringPointer(";"),
+		Digest_equal:         utils.StringPointer(":"),
+		Failed_posts_ttl:     utils.StringPointer("2ns"),
+		Max_parallel_conns:   utils.IntPointer(100),
+	}
+	expected := map[string]interface{}{
+		GeneralJSON: section,
+	}
+	if err := cfg.V1GetConfig(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("Expected %+v \n but received %+v \n", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+
 }

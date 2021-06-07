@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -2183,5 +2184,24 @@ func TestDfActionSJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("\n Expected <%+v>,\nReceived:<%+v>", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}
+
+func TestSetSection(t *testing.T) {
+	jsn := `
+		{
+			"general": {
+				"Node_id":2,
+			},
+		}
+	`
+	jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(jsn))
+	if err != nil {
+		t.Error(err)
+	}
+	payload := make(chan struct{})
+	errExpect := "json: unsupported type: chan struct {}"
+	if err := jsnCfg.SetSection(&context.Context{}, "general", payload); err == nil || err.Error() != errExpect {
+		t.Error(err)
 	}
 }
