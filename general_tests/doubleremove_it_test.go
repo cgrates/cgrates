@@ -103,7 +103,7 @@ func testdoubleRemoveRpcConn(t *testing.T) {
 func testdoubleRemoveStatQueueProfile(t *testing.T) {
 	// check
 	var reply *engine.StatQueueProfile
-	if err := sesRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := sesRPC.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -132,13 +132,13 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := sesRPC.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+	if err := sesRPC.Call(utils.AdminSv1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	//check
-	if err := sesRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := sesRPC.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
@@ -146,24 +146,24 @@ func testdoubleRemoveStatQueueProfile(t *testing.T) {
 	}
 
 	//remove
-	if err := sesRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := sesRPC.Call(utils.AdminSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := sesRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := sesRPC.Call(utils.AdminSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := sesRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := sesRPC.Call(utils.AdminSv1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// check
-	if err := sesRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := sesRPC.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

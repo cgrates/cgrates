@@ -279,7 +279,7 @@ func testExpVerifyStats(t *testing.T) {
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var reply *engine.StatQueueProfile
-	if err := expRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := expRpc.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}, &reply); err != nil {
 		t.Error(err)
 	}

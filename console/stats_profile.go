@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetStatQueueProfile{
 		name:      "stats_profile",
-		rpcMethod: utils.APIerSv1GetStatQueueProfile,
+		rpcMethod: utils.AdminSv1GetStatQueueProfile,
 		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c

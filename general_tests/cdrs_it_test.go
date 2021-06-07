@@ -464,7 +464,7 @@ func testV2CDRsGetCdrs5(t *testing.T) {
 
 func testV2CDRsSetStats(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	if err := cdrsRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := cdrsRpc.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -486,12 +486,12 @@ func testV2CDRsSetStats(t *testing.T) {
 		},
 	}
 	var result string
-	if err := cdrsRpc.Call(utils.APIerSv1SetStatQueueProfile, statConfig, &result); err != nil {
+	if err := cdrsRpc.Call(utils.AdminSv1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsRpc.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := cdrsRpc.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
