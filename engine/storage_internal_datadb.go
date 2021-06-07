@@ -98,13 +98,14 @@ func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error)
 }
 
 func (iDB *InternalDB) RemoveKeysForPrefix(prefix string) (err error) {
-	var keys []string
-	if keys, err = iDB.GetKeysForPrefix(prefix); err != nil {
-		return
+	keyLen := len(utils.DestinationPrefix)
+	if len(prefix) < keyLen {
+		return fmt.Errorf("unsupported prefix in RemoveKeysForPrefix: %s", prefix)
 	}
-	for _, key := range keys {
-		Cache.RemoveWithoutReplicate(utils.CacheReverseDestinations, key,
-			true, utils.NonTransactional)
+	cacheID := utils.CachePrefixToInstance[prefix[:keyLen]]
+	for _, key := range Cache.GetItemIDs(cacheID, prefix[keyLen:]) {
+		Cache.RemoveWithoutReplicate(cacheID, key,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
 }
