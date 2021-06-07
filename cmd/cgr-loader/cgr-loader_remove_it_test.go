@@ -57,11 +57,11 @@ var (
 		testCgrLdrGetResourceAfterLoad,
 		testCgrLdrGetRouteProfileAfterLoad,
 		testCgrLdrGetStatsProfileAfterLoad,
-		//testCgrLdrGetStatQueueAfterLoad,
+		testCgrLdrGetStatQueueAfterLoad,
 		testCgrLdrGetThresholdProfileAfterLoad,
 		testCgrLdrGetThresholdAfterLoad,
 
-		//remove all data with cgr-laoder and remove flag
+		//remove all data with cgr-loader and remove flag
 		testCgrLdrRemoveData,
 		testCgrLdrGetSubsystemsNotLoadedLoad,
 	    testCgrLdrKillEngine,
@@ -184,7 +184,6 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
 	}
 
-	/*
 	// statsPrf
 	var replySts *engine.StatQueueProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
@@ -192,8 +191,6 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 		&replySts); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
 	}
-
-	 */
 
 	// statQueue
 	var replyStQue *engine.StatQueue
@@ -603,13 +600,14 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 	}
 }
 
-
 func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
-	expStatQueue := &engine.StatQueue{
-
+	expStatQueue := map[string]string{
+		"*acd": "N/A",
+		"*tcd": "N/A",
+		"*asr": "N/A",
 	}
-	var replyStQue *engine.StatQueue
-	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetStatQueue,
+	replyStQue := make(map[string]string)
+	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replyStQue);err != nil {
 		t.Error(err)
