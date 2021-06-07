@@ -127,12 +127,6 @@
     "admins_conns": ["*internal"]
   },
 
-  "config_db": {
-    "db_type": "redis",
-    "db_host": "",
-    "db_port": 6379,
-    "db_name": "10",
-    "db_user": "",
-    "db_password": ""
-  }
+
+
 }

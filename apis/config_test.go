@@ -19,9 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"path"
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/utils"
+
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 )
 
@@ -33,5 +37,204 @@ func TestConfigNewConfigSv1(t *testing.T) {
 	result := NewConfigSv1(cfg)
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestConfigSetGetConfig(t *testing.T) {
+	//for coverage purposes only
+	var err error
+	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
+	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
+	if err != nil {
+		t.Error(err)
+	}
+	rlcCfg := NewConfigSv1(cfg)
+	args := &config.SetConfigArgs{}
+	var reply string
+	err = rlcCfg.SetConfig(context.Background(), args, &reply)
+	expected := `OK`
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, reply)
+	}
+	argsGet := &config.SectionWithAPIOpts{
+		Sections: []string{"attributes"},
+	}
+	var replyGet map[string]interface{}
+	errGet := rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
+	expectedGet := map[string]interface{}{
+		"attributes": map[string]interface{}{
+			"admins_conns":          []string{"*localhost"},
+			"enabled":               true,
+			"indexed_selects":       true,
+			"nested_fields":         false,
+			"prefix_indexed_fields": []string{},
+			"process_runs":          1,
+			"resources_conns":       []string{"*localhost"},
+			"stats_conns":           []string{"*localhost"},
+			"suffix_indexed_fields": []string{},
+		},
+	}
+	if errGet != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGet)
+	}
+	if !reflect.DeepEqual(expectedGet, replyGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+	}
+}
+
+func TestConfigSetGetReloadConfig(t *testing.T) {
+	//for coverage purposes only
+	var err error
+	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
+	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
+	if err != nil {
+		t.Error(err)
+	}
+	rlcCfg := NewConfigSv1(cfg)
+	args := &config.SetConfigArgs{
+		APIOpts: nil,
+		Tenant:  utils.CGRateSorg,
+		Config: map[string]interface{}{
+			"attributes": map[string]interface{}{
+				"admins_conns":          []string{"*internal"},
+				"enabled":               true,
+				"indexed_selects":       false,
+				"nested_fields":         false,
+				"prefix_indexed_fields": []string{},
+				"process_runs":          2,
+				"resources_conns":       []string{"*internal"},
+				"stats_conns":           []string{"*internal"},
+				"suffix_indexed_fields": []string{},
+			},
+		},
+		DryRun: true,
+	}
+	var reply string
+	err = rlcCfg.SetConfig(context.Background(), args, &reply)
+	expected := `OK`
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, reply)
+	}
+	argsGet := &config.SectionWithAPIOpts{
+		Sections: []string{"attributes"},
+	}
+	var replyGet map[string]interface{}
+	errGet := rlcCfg.GetConfig(context.Background(), argsGet, &replyGet)
+	expectedGet := map[string]interface{}{
+		"attributes": map[string]interface{}{
+			"admins_conns":          []string{"*localhost"},
+			"enabled":               true,
+			"indexed_selects":       true,
+			"nested_fields":         false,
+			"prefix_indexed_fields": []string{},
+			"process_runs":          1,
+			"resources_conns":       []string{"*localhost"},
+			"stats_conns":           []string{"*localhost"},
+			"suffix_indexed_fields": []string{},
+		},
+	}
+	if errGet != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGet)
+	}
+	if !reflect.DeepEqual(expectedGet, replyGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+	}
+	argsRld := &config.ReloadArgs{
+		DryRun:  true,
+		Section: "attributes",
+	}
+
+	var replyRld string
+	errRld := rlcCfg.ReloadConfig(context.Background(), argsRld, &replyRld)
+	expectedRld := `OK`
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errRld)
+	}
+	if !reflect.DeepEqual(expectedRld, replyRld) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedRld, replyRld)
+	}
+	argsGetRld := &config.SectionWithAPIOpts{
+		Sections: []string{"attributes"},
+	}
+	var replyGetRld map[string]interface{}
+	errGetRld := rlcCfg.GetConfig(context.Background(), argsGetRld, &replyGetRld)
+	expectedGetRld := map[string]interface{}{
+		"attributes": map[string]interface{}{
+			"admins_conns":          []string{"*localhost"},
+			"enabled":               true,
+			"indexed_selects":       true,
+			"nested_fields":         false,
+			"prefix_indexed_fields": []string{},
+			"process_runs":          1,
+			"resources_conns":       []string{"*localhost"},
+			"stats_conns":           []string{"*localhost"},
+			"suffix_indexed_fields": []string{},
+		},
+	}
+	if errGetRld != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGetRld)
+	}
+	if !reflect.DeepEqual(expectedGetRld, replyGetRld) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGetRld, replyGetRld)
+	}
+}
+
+func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
+	//for coverage purposes only
+	var err error
+	cfgTestPath := path.Join(*dataDir, "conf", "samples", "tutinternal")
+	cfg, err := config.NewCGRConfigFromPath(cfgTestPath)
+	if err != nil {
+		t.Error(err)
+	}
+	rlcCfg := NewConfigSv1(cfg)
+	args := &config.SetConfigFromJSONArgs{
+		APIOpts: nil,
+		Tenant:  utils.CGRateSorg,
+		Config:  "{\"attributes\":{\"admins_conns\":[\"*internal\"],\"enabled\":true,\"indexed_selects\":false,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":2,\"resources_conns\":[\"*internal\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}",
+		DryRun:  true,
+	}
+	var reply string
+	err = rlcCfg.SetConfigFromJSON(context.Background(), args, &reply)
+	expected := "OK"
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+	if !reflect.DeepEqual(expected, reply) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, reply)
+	}
+
+	argsGet := &config.SectionWithAPIOpts{
+		APIOpts:  nil,
+		Tenant:   utils.CGRateSorg,
+		Sections: []string{"attributes"},
+	}
+	var replyGet string
+	errGet := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet)
+	expectedGet := "{\"attributes\":{\"admins_conns\":[\"*localhost\"],\"enabled\":true,\"indexed_selects\":true,\"nested_fields\":false,\"prefix_indexed_fields\":[],\"process_runs\":1,\"resources_conns\":[\"*localhost\"],\"stats_conns\":[\"*localhost\"],\"suffix_indexed_fields\":[]}}"
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, errGet)
+	}
+	if !reflect.DeepEqual(expectedGet, replyGet) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedGet, replyGet)
+	}
+}
+
+func TestConfigStoreCfgInDBErr(t *testing.T) {
+	//for coverage purposes only
+	cfg := config.NewDefaultCGRConfig()
+	rlcCfg := NewConfigSv1(cfg)
+	args := &config.SectionWithAPIOpts{}
+	var reply string
+	err := rlcCfg.StoreCfgInDB(context.Background(), args, &reply)
+	expected := "no DB connection for config"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
