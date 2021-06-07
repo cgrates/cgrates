@@ -38,6 +38,7 @@ var (
 	dataDir  = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	dbType   = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
+	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 )
 
 func TestLoadConfig(t *testing.T) {
