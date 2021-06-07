@@ -537,11 +537,11 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 		}
 		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
 	case HTTPAgentJSON:
-		var jsn *RadiusAgentJsonCfg
-		if jsn, err = db.RadiusAgentJsonCfg(); err != nil {
+		var jsn *[]*HttpAgentJsonCfg
+		if jsn, err = db.HttpAgentJsonCfg(); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffHttpAgentsJsonCfg(jsn, v1.HTTPAgentCfg(), v2.HTTPAgentCfg(), v2.GeneralCfg().RSRSep))
 	case DNSAgentJSON:
 		var jsn *DNSAgentJsonCfg
 		if jsn, err = db.DNSAgentJsonCfg(); err != nil {

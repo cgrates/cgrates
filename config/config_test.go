@@ -3348,6 +3348,38 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 	}
 }
 
+func TestLoadConfigDBCfgErr(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+
+	dbJsonCfg := func(section string) (*DbJsonCfg, error) {
+
+		return nil, utils.ErrNotImplemented
+	}
+	jsnCfg := mockDb{
+		DbJsonCfgF: dbJsonCfg,
+	}
+	if err := cfg.loadConfigDBCfg(&jsnCfg); err != utils.ErrNotImplemented || err == nil {
+		t.Error(err)
+	}
+}
+
+func TestGetReloadChan(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	sectID := "test"
+	rcv := cfg.GetReloadChan(sectID)
+	if rcv != nil {
+		t.Errorf("Expected %v \b but received \n %v", nil, rcv)
+	}
+
+	cfg.initChanels()
+	sectID = GeneralJSON
+	rcv = cfg.GetReloadChan(sectID)
+	expected := make(chan struct{})
+	if len(rcv) != len(expected) {
+		t.Error("Channels should have the same length")
+	}
+}
+
 func TestCgrMigratorCfgDefault(t *testing.T) {
 	eMgrCfg := &MigratorCgrCfg{
 		OutDataDBType:     "redis",
