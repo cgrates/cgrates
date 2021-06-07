@@ -1344,18 +1344,19 @@ const (
 
 // StatS APIs
 const (
-	StatSv1ProcessEvent            = "StatSv1.ProcessEvent"
-	StatSv1GetQueueIDs             = "StatSv1.GetQueueIDs"
-	StatSv1GetQueueStringMetrics   = "StatSv1.GetQueueStringMetrics"
-	StatSv1GetQueueFloatMetrics    = "StatSv1.GetQueueFloatMetrics"
-	StatSv1Ping                    = "StatSv1.Ping"
-	StatSv1GetStatQueuesForEvent   = "StatSv1.GetStatQueuesForEvent"
-	StatSv1GetStatQueue            = "StatSv1.GetStatQueue"
-	StatSv1ResetStatQueue          = "StatSv1.ResetStatQueue"
-	APIerSv1GetStatQueueProfile    = "APIerSv1.GetStatQueueProfile"
-	APIerSv1RemoveStatQueueProfile = "APIerSv1.RemoveStatQueueProfile"
-	APIerSv1SetStatQueueProfile    = "APIerSv1.SetStatQueueProfile"
-	APIerSv1GetStatQueueProfileIDs = "APIerSv1.GetStatQueueProfileIDs"
+	StatSv1ProcessEvent              = "StatSv1.ProcessEvent"
+	StatSv1GetQueueIDs               = "StatSv1.GetQueueIDs"
+	StatSv1GetQueueStringMetrics     = "StatSv1.GetQueueStringMetrics"
+	StatSv1GetQueueFloatMetrics      = "StatSv1.GetQueueFloatMetrics"
+	StatSv1Ping                      = "StatSv1.Ping"
+	StatSv1GetStatQueuesForEvent     = "StatSv1.GetStatQueuesForEvent"
+	StatSv1GetStatQueue              = "StatSv1.GetStatQueue"
+	StatSv1ResetStatQueue            = "StatSv1.ResetStatQueue"
+	AdminSv1GetStatQueueProfile      = "AdminSv1.GetStatQueueProfile"
+	AdminSv1RemoveStatQueueProfile   = "AdminSv1.RemoveStatQueueProfile"
+	AdminSv1SetStatQueueProfile      = "AdminSv1.SetStatQueueProfile"
+	AdminSv1GetStatQueueProfileIDs   = "AdminSv1.GetStatQueueProfileIDs"
+	AdminSv1GetStatQueueProfileCount = "AdminSv1.GetStatQueueProfileCount"
 )
 
 // ResourceS APIs
