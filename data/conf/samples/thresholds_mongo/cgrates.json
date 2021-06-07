@@ -20,10 +20,12 @@
   
     "actions": {
         "enabled": true,
+        "thresholds_conns": ["*internal"],
     },
 
     "thresholds": {
         "enabled": true,
+        "store_interval": "-1",
         "actions_conns": ["*internal"],
     },
   

@@ -54,9 +54,15 @@ var (
 		testThresholdsGetThresholdProfileCount,
 		testThresholdsGetThresholdsForEvent,
 		testThresholdsRemoveThresholdProfiles,
-		testThresholdsGetThresholdProfileAfterRemove,
+		testThresholdsGetThresholdsAfterRemove,
+
+		// test if actions are executed properly when thresholds are hit
+		testThresholdsSetActionProfileBeforeProcessEv,
 		testThresholdsSetThresholdProfilesBeforeProcessEv,
 		testThresholdsProcessEvent,
+		testThresholdsGetThresholdsAfterFirstEvent,
+		testThresholdsProcessEvent,
+		testThresholdsGetThresholdsAfterSecondEvent,
 		testThresholdsPing,
 		testThresholdsKillEngine,
 	}
@@ -134,7 +140,7 @@ func testThresholdsPing(t *testing.T) {
 }
 
 func testThresholdsGetThresholdBeforeSet(t *testing.T) {
-	var rplyTh *engine.Threshold
+	var rplyTh engine.Threshold
 
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
 		&utils.TenantWithAPIOpts{
@@ -151,13 +157,6 @@ func testThresholdsSetActionProfile(t *testing.T) {
 			Actions: []*engine.APAction{
 				{
 					ID: "actID",
-					// Type: utils.MetaHTTPPost,
-					// Diktats: []*engine.APDiktat{
-					// 	{
-					// 		Path: rsSrv.URL,
-					// 	},
-					// },
-					// TTL: time.Duration(time.Minute),
 				},
 			},
 		},
@@ -238,7 +237,7 @@ func testThresholdsGetThresholdAfterSet(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyTh, expTh) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(rplyTh), utils.ToJSON(expTh))
+			utils.ToJSON(expTh), utils.ToJSON(rplyTh))
 	}
 
 	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
@@ -276,7 +275,7 @@ func testThresholdsGetThresholdAfterSet(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rplyTh, expTh) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-			utils.ToJSON(rplyTh), utils.ToJSON(expTh))
+			utils.ToJSON(expTh), utils.ToJSON(rplyTh))
 	}
 
 	if err := thRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
@@ -341,7 +340,7 @@ func testThresholdsGetThresholdsForEvent(t *testing.T) {
 		ThresholdIDs: []string{"THD_1", "THD_2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "ThresholdEventTest",
+			ID:     "GetThresholdEventTest",
 			Event: map[string]interface{}{
 				utils.AccountField: "1001",
 			},
@@ -396,14 +395,49 @@ func testThresholdsRemoveThresholdProfiles(t *testing.T) {
 	}
 }
 
-func testThresholdsGetThresholdProfileAfterRemove(t *testing.T) {
-	var rplyTh engine.ThresholdProfile
-
-	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-		&utils.TenantWithAPIOpts{
+func testThresholdsGetThresholdsAfterRemove(t *testing.T) {
+	args := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_1", "THD_2"},
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-		}, &rplyTh); err == nil || err.Error() != utils.ErrNotFound.Error() {
+			ID:     "RemThresholdEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	var rplyThs engine.Thresholds
+	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
+		args, &rplyThs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testThresholdsSetActionProfileBeforeProcessEv(t *testing.T) {
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaResetThreshold,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaThresholds: {
+					"THD_1": struct{}{},
+					"THD_2": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply *string
+	if err := thRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -468,6 +502,84 @@ func testThresholdsProcessEvent(t *testing.T) {
 		sort.Strings(tIDs)
 		if !reflect.DeepEqual(tIDs, expIDs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, tIDs)
+		}
+	}
+}
+
+func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
+	args := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_1", "THD_2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThresholdEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	expThs := engine.Thresholds{
+		&engine.Threshold{
+			Tenant: "cgrates.org",
+			ID:     "THD_2",
+			Hits:   0,
+		},
+		&engine.Threshold{
+			Tenant: "cgrates.org",
+			ID:     "THD_1",
+			Hits:   1,
+		},
+	}
+
+	var rplyThs engine.Thresholds
+	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
+		args, &rplyThs); err != nil {
+		t.Error(err)
+	} else {
+		for idx, thd := range rplyThs {
+			thd.Snooze = expThs[idx].Snooze
+		}
+		if !reflect.DeepEqual(rplyThs, expThs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expThs), utils.ToJSON(rplyThs))
+		}
+	}
+}
+
+func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
+	args := &engine.ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_1", "THD_2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThresholdEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	expThs := engine.Thresholds{
+		&engine.Threshold{
+			Tenant: "cgrates.org",
+			ID:     "THD_2",
+			Hits:   0,
+		},
+		&engine.Threshold{
+			Tenant: "cgrates.org",
+			ID:     "THD_1",
+			Hits:   2,
+		},
+	}
+
+	var rplyThs engine.Thresholds
+	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
+		args, &rplyThs); err != nil {
+		t.Error(err)
+	} else {
+		for idx, thd := range rplyThs {
+			thd.Snooze = expThs[idx].Snooze
+		}
+		if !reflect.DeepEqual(rplyThs, expThs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+				utils.ToJSON(expThs), utils.ToJSON(rplyThs))
 		}
 	}
 }
