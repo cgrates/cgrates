@@ -76,10 +76,6 @@ func (dbM *DataDBMock) GetKeysForPrefix(ctx *context.Context, prf string) ([]str
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveKeysForPrefix(string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) GetVersions(itm string) (vrs Versions, err error) {
 	return nil, utils.ErrNotImplemented
 }

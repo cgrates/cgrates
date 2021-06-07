@@ -196,19 +196,6 @@ func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	return true, nil
 }
 
-func (rs *RedisStorage) RemoveKeysForPrefix(prefix string) (err error) {
-	var keys []string
-	if keys, err = rs.GetKeysForPrefix(context.TODO(), prefix); err != nil {
-		return
-	}
-	for _, key := range keys {
-		if err = rs.Cmd(nil, redisDEL, key); err != nil {
-			return
-		}
-	}
-	return
-}
-
 func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []string, err error) {
 	for _, itemIDPrefix := range fkeys {
 		mp := make(map[string]string)

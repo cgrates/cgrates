@@ -299,24 +299,24 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 	} else if len(aps) != 1 {
 		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
 	} else if aps[0].Id != "ATMS_1" {
-	// remove
-	if err := sesRPC.Call(utils.APIerSv1RemoveActionPlan, &v1.AttrGetActionPlan{
-		ID: "ATMS_1"}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
-	}
-	//check again
-	/*
-		this should return ErrNotFound, right now it returns nil and an empty slice,
-		needs to be reviewed.
-
-		if err := sesRPC.Call(utils.APIerSv1GetActionPlan,
-			v1.AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
-			t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+		// remove
+		if err := sesRPC.Call(utils.APIerSv1RemoveActionPlan, &v1.AttrGetActionPlan{
+			ID: "ATMS_1"}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned", reply)
 		}
-	*/
+		//check again
+		/*
+			this should return ErrNotFound, right now it returns nil and an empty slice,
+			needs to be reviewed.
 
+			if err := sesRPC.Call(utils.APIerSv1GetActionPlan,
+				v1.AttrGetActionPlan{ID: utils.EmptyString}, &aps); err == nil || err.Error() != utils.ErrNotFound.Error() {
+				t.Errorf("Error: %+v, rcv: %+v", err, utils.ToJSON(aps))
+			}
+		*/
+	}
 }
 
 func testdoubleRemoveKillEngine(t *testing.T) {
