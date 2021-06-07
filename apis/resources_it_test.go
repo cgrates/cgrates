@@ -522,6 +522,7 @@ func testResourceSStartServer(t *testing.T) {
 func testResourceSStopServer(t *testing.T) {
 	rsSrv.Close()
 }
+
 func testResourceSSetActionProfile(t *testing.T) {
 	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
