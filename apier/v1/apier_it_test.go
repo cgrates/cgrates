@@ -1503,7 +1503,7 @@ func testApierComputeReverse(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
 	}
-	if err := rater.Call(utils.APIerSv1ComputeAccountActionPlans, new(utils.TenantWithAPIOpts), &reply); err != nil {
+	if err := rater.Call(utils.APIerSv1ComputeAccountActionPlans, new(utils.TenantWithArgDispatcher), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
@@ -1532,7 +1532,7 @@ func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
-	expStats[utils.CacheAccountActionPlans].Items = 3
+	expStats[utils.CacheAccountActionPlans].Items = 13
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActionTriggers].Items = 1
 	expStats[utils.CacheActions].Items = 13

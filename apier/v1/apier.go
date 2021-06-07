@@ -119,11 +119,15 @@ func (apiv1 *APIerSv1) ComputeAccountActionPlans(tnt *utils.TenantWithArgDispatc
 	if err = apiv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}
+	tn := apiv1.Config.GeneralCfg().DefaultTenant
+	if tnt.TenantArg != nil {
+		tn = utils.FirstNonEmpty(tnt.Tenant, tn)
+	}
 	return apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 		utils.CacheSv1Clear, &utils.AttrCacheIDsWithArgDispatcher{
 			ArgDispatcher: tnt.ArgDispatcher,
 			CacheIDs:      []string{utils.CacheAccountActionPlans},
-			TenantArg:     *tnt.TenantArg,
+			TenantArg:     utils.TenantArg{Tenant: tn},
 		}, reply)
 }
 

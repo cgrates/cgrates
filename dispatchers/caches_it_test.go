@@ -108,8 +108,6 @@ func testDspChcPingEmptyCGREventWIthArgDispatcher(t *testing.T) {
 func testDspChcLoadAfterFolder(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	expStats[utils.CacheAccountActionPlans].Items = 3
-	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
 	expStats[utils.CacheLoadIDs].Items = 17
@@ -141,6 +139,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(reply)
 	}
+	expStats[utils.CacheAccountActionPlans].Items = 3
+	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 2
 	expStats[utils.CacheAttributeProfiles].Items = 10
