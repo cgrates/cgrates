@@ -75,10 +75,6 @@ func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix string) ([
 	return nil, utils.ErrNotImplemented
 }
 
-func (SQLStorage) RemoveKeysForPrefix(string) error {
-	return utils.ErrNotImplemented
-}
-
 func (sqls *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 	fileContent, err := os.ReadFile(scriptPath)
 	if err != nil {

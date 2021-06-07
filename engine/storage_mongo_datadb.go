@@ -411,39 +411,6 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 	return
 }
 
-func (ms *MongoStorage) RemoveKeysForPrefix(prefix string) (err error) {
-	var colName string
-	switch prefix {
-	case utils.LoadInstKey:
-		colName = ColLht
-	case utils.VersionPrefix:
-		colName = ColVer
-	case utils.ResourcesPrefix:
-		colName = ColRes
-	case utils.ResourceProfilesPrefix:
-		colName = ColRsP
-	case utils.ThresholdProfilePrefix:
-		colName = ColTps
-	case utils.StatQueueProfilePrefix:
-		colName = ColSqp
-	case utils.ThresholdPrefix:
-		colName = ColThs
-	case utils.FilterPrefix:
-		colName = ColFlt
-	case utils.RouteProfilePrefix:
-		colName = ColRts
-	case utils.AttributeProfilePrefix:
-		colName = ColAttr
-	default:
-		return utils.ErrInvalidKey
-	}
-
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) error {
-		_, err := ms.getCol(colName).DeleteMany(sctx, bson.M{})
-		return err
-	})
-}
-
 // IsDBEmpty implementation
 func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) error {
