@@ -40,7 +40,7 @@ var (
 	cgrLdrCfgPath string
 	cgrLdrCfgDir string
 	cgrLdrCfg  *config.CGRConfig
-	cgrLdrBIRPC        *rpc.Client
+	cgrLdrRPC        *rpc.Client
 	cgrLdrTests = []func(t *testing.T) {
 		testCgrLdrInitCfg,
 		testCgrLdrInitDataDB,
@@ -58,6 +58,7 @@ var (
 		testCgrLdrGetStatQueueAfterLoad,
 		testCgrLdrGetThresholdProfileAfterLoad,
 		testCgrLdrGetThresholdAfterLoad,
+		testCgrLdrGetChargerProfileAfterLoad,
 
 		//remove all data with cgr-loader and remove flag
 		testCgrLdrRemoveData,
@@ -113,7 +114,7 @@ func testCgrLdrStartEngine(t *testing.T){
 
 func testCgrLdrRPCConn(t *testing.T) {
 	var err error
-	cgrLdrBIRPC, err = newRPCClient(cgrLdrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	cgrLdrRPC, err = newRPCClient(cgrLdrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,7 @@ func testCgrLdrRPCConn(t *testing.T) {
 func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	//attributesPrf
 	var replyAttr *engine.AttributeProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -130,7 +131,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	//filtersPrf
 	var replyFltr *engine.Filter
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetFilter,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetFilter,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}},
 		&replyFltr); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -138,7 +139,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// resourcesPrf
 	var replyResPrf *engine.ResourceProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyResPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -146,7 +147,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// resource
 	var replyRes *engine.Resource
-	if err := cgrLdrBIRPC.Call(utils.ResourceSv1GetResource,
+	if err := cgrLdrRPC.Call(utils.ResourceSv1GetResource,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -154,7 +155,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// routesPrf
 	var replyRts *engine.RouteProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&replyRts); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -162,7 +163,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// statsPrf
 	var replySts *engine.StatQueueProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replySts); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -170,7 +171,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// statQueue
 	var replyStQue *engine.StatQueue
-	if err := cgrLdrBIRPC.Call(utils.StatSv1GetStatQueue,
+	if err := cgrLdrRPC.Call(utils.StatSv1GetStatQueue,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replyStQue); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -178,7 +179,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// thresholdPrf
 	var replyThdPrf *engine.ThresholdProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
 		&replyThdPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
@@ -186,11 +187,20 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 
 	// threshold
 	var rplyThd *engine.Threshold
-	if err := cgrLdrBIRPC.Call(utils.ThresholdSv1GetThreshold,
+	if err := cgrLdrRPC.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1"}},
 		&rplyThd); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %+q", utils.ErrNotFound.Error(), err.Error())
 	}
+
+	//chargers
+	var replyChrgr *engine.ChargerProfile
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
+		&replyChrgr); err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Errorf("Expected %+v, received %+v", utils.ErrNotFound.Error(), err.Error())
+		}
+
 }
 
 func testCgrLdrLoadData(t *testing.T) {
@@ -225,7 +235,7 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 		},
 	}
 	var replyAttr *engine.AttributeProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetAttributeProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err != nil {
 		t.Error(err)
@@ -266,7 +276,7 @@ func testCgrLdrGetFilterAfterLoad(t *testing.T) {
 		},
 	}
 	var replyFltr *engine.Filter
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetFilter,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetFilter,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_1"}},
 		&replyFltr); err != nil {
 		t.Error(err)
@@ -286,7 +296,7 @@ func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 		ThresholdIDs: []string{},
 	}
 	var replyRes *engine.ResourceProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetResourceProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err != nil {
 		t.Error(err)
@@ -302,7 +312,7 @@ func testCgrLdrGetResourceAfterLoad(t *testing.T) {
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	var replyRes *engine.Resource
-	if err := cgrLdrBIRPC.Call(utils.ResourceSv1GetResource,
+	if err := cgrLdrRPC.Call(utils.ResourceSv1GetResource,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err != nil {
 		t.Error(err)
@@ -332,7 +342,7 @@ func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 
 	}
 	var replyRts *engine.RouteProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetRouteProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ACNT_1001"}},
 		&replyRts); err != nil {
 		t.Error(err)
@@ -376,7 +386,7 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 		},
 	}
 	var replySts *engine.StatQueueProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replySts); err != nil {
 		t.Error(err)
@@ -400,7 +410,7 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 		"*asr": "N/A",
 	}
 	replyStQue := make(map[string]string)
-	if err := cgrLdrBIRPC.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := cgrLdrRPC.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
 		&replyStQue);err != nil {
 		t.Error(err)
@@ -423,7 +433,7 @@ func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 		ActionIDs: []string{"TOPUP_MONETARY_10"},
 	}
 	var replyThdPrf *engine.ThresholdProfile
-	if err := cgrLdrBIRPC.Call(utils.APIerSv1GetThresholdProfile,
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetThresholdProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}},
 		&replyThdPrf); err != nil {
 		t.Error(err)
@@ -439,12 +449,32 @@ func testCgrLdrGetThresholdAfterLoad(t *testing.T) {
 		Hits: 0,
 	}
 	var replyThdPrf *engine.Threshold
-	if err := cgrLdrBIRPC.Call(utils.ThresholdSv1GetThreshold,
+	if err := cgrLdrRPC.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}},
 		&replyThdPrf); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expThPrf, replyThdPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expThPrf), utils.ToJSON(replyThdPrf))
+	}
+}
+
+func testCgrLdrGetChargerProfileAfterLoad(t *testing.T) {
+	expChPrf := &engine.ChargerProfile{
+		Tenant: "cgrates.org",
+		ID: "Raw",
+		FilterIDs: []string{},
+		RunID: "raw",
+		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
+		Weight: 20,
+	}
+
+	var replyChrgr *engine.ChargerProfile
+	if err := cgrLdrRPC.Call(utils.APIerSv1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
+		&replyChrgr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expChPrf, replyChrgr) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expChPrf), utils.ToJSON(replyChrgr))
 	}
 }
 
