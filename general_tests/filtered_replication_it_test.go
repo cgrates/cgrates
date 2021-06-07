@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -581,11 +582,11 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		},
 	}
 	// empty
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -599,12 +600,12 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1SetStatQueueProfile, stPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -613,11 +614,11 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 	}
 	replyPrfl = nil
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -631,7 +632,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fltrRplEngine1RPC.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -652,12 +653,12 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 
 	replyPrfl = nil
 	stPrf.Weight = 15
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1SetStatQueueProfile, stPrf, &result); err != nil {
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1SetStatQueueProfile, stPrf, &result); err != nil {
 		t.Fatal(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1GetStatQueueProfile,
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: stID}, &replyPrfl); err != nil {
 		t.Fatal(err)
 	}
@@ -675,7 +676,7 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(stPrf.StatQueueProfile), utils.ToJSON(replyPrfl))
 	}
 
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -710,17 +711,17 @@ func testFltrRplStatQueueProfile(t *testing.T) {
 		t.Errorf("Expecting : %s, received: %s", utils.ToJSON(sq), utils.ToJSON(replySq))
 	}
 
-	if err := fltrRplInternalRPC.Call(utils.APIerSv1RemoveStatQueueProfile,
+	if err := fltrRplInternalRPC.Call(utils.AdminSv1RemoveStatQueueProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: stID}}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := fltrRplEngine1RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine1RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if err := fltrRplEngine2RPC.Call(utils.APIerSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
+	if err := fltrRplEngine2RPC.Call(utils.AdminSv1GetStatQueueProfileIDs, &utils.PaginatorWithTenant{}, &rplyIDs); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Unexpected error: %v", err)
 	}

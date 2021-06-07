@@ -622,14 +622,14 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 			Weight:    50,
 		},
 	}
-	if err := fltrRpc.Call(utils.APIerSv1SetStatQueueProfile, statsPrf, &result); err != nil {
+	if err := fltrRpc.Call(utils.AdminSv1SetStatQueueProfile, statsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var replyStats *engine.StatQueueProfile
-	if err := fltrRpc.Call(utils.APIerSv1GetStatQueueProfile, &utils.TenantID{Tenant: "cgrates.org",
+	if err := fltrRpc.Call(utils.AdminSv1GetStatQueueProfile, &utils.TenantID{Tenant: "cgrates.org",
 		ID: "STATS_RES_TEST12"}, &replyStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statsPrf.StatQueueProfile, replyStats) {
