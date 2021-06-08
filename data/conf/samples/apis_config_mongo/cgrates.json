@@ -145,7 +145,7 @@
 
   "config_db": {
     "db_type": "mongo",
-    "db_name": "11",
+    "db_name": "16",
     "db_port": 27017,
-  }
+  },
 }

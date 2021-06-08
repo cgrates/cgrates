@@ -191,11 +191,7 @@ func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v1, v2 map[string]*
 		d = make(map[string]*CacheParamJsonCfg)
 	}
 	for k, val2 := range v2 {
-		val1, has := v1[k]
-		if !has || val1 == nil {
-			val1 = new(CacheParamCfg)
-		}
-		d[k] = diffCacheParamJsonCfg(d[k], val1, val2)
+		d[k] = diffCacheParamJsonCfg(d[k], new(CacheParamCfg), val2)
 	}
 	return d
 }

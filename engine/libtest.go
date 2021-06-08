@@ -207,11 +207,11 @@ func InitStorDB(cfg *config.CGRConfig) error {
 }
 
 func InitConfigDB(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts)
+	d, err := NewDataDBConn(cfg.ConfigDBCfg().Type,
+		cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
+		cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
+		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.ConfigDBCfg().Opts)
 	if err != nil {
 		return err
 	}
