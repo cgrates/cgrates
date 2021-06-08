@@ -448,7 +448,7 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg, separator string) *EEsJsonCfg
 	if !utils.SliceStringEqual(v1.AttributeSConns, v2.AttributeSConns) {
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
-	d.Cache = diffCacheParamsJsonCfg(d.Cache, v1.Cache, v2.Cache)
+	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)
 	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters, separator)
 	return d
 }

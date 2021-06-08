@@ -164,34 +164,18 @@ type CacheParamJsonCfg struct {
 	Replicate  *bool
 }
 
-func diffCacheParamJsonCfg(d *CacheParamJsonCfg, v1, v2 *CacheParamCfg) *CacheParamJsonCfg {
-	if d == nil {
-		d = new(CacheParamJsonCfg)
-	}
-	if v1.Limit != v2.Limit {
-		d.Limit = utils.IntPointer(v2.Limit)
-	}
-	if v1.TTL != v2.TTL {
-		d.Ttl = utils.StringPointer(v2.TTL.String())
-	}
-	if v1.StaticTTL != v2.StaticTTL {
-		d.Static_ttl = utils.BoolPointer(v2.StaticTTL)
-	}
-	if v1.Precache != v2.Precache {
-		d.Precache = utils.BoolPointer(v2.Precache)
-	}
-	if v1.Replicate != v2.Replicate {
-		d.Replicate = utils.BoolPointer(v2.Replicate)
-	}
-	return d
-}
-
-func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v1, v2 map[string]*CacheParamCfg) map[string]*CacheParamJsonCfg {
+func diffCacheParamsJsonCfg(d map[string]*CacheParamJsonCfg, v2 map[string]*CacheParamCfg) map[string]*CacheParamJsonCfg {
 	if d == nil {
 		d = make(map[string]*CacheParamJsonCfg)
 	}
 	for k, val2 := range v2 {
-		d[k] = diffCacheParamJsonCfg(d[k], new(CacheParamCfg), val2)
+		d[k] = &CacheParamJsonCfg{
+			Limit:      utils.IntPointer(val2.Limit),
+			Ttl:        utils.StringPointer(val2.TTL.String()),
+			Static_ttl: utils.BoolPointer(val2.StaticTTL),
+			Precache:   utils.BoolPointer(val2.Precache),
+			Replicate:  utils.BoolPointer(val2.Replicate),
+		}
 	}
 	return d
 }
@@ -205,7 +189,7 @@ func diffCacheJsonCfg(d *CacheJsonCfg, v1, v2 *CacheCfg) *CacheJsonCfg {
 	if d == nil {
 		d = new(CacheJsonCfg)
 	}
-	d.Partitions = diffCacheParamsJsonCfg(d.Partitions, v1.Partitions, v2.Partitions)
+	d.Partitions = diffCacheParamsJsonCfg(d.Partitions, v2.Partitions)
 	if !utils.SliceStringEqual(v1.ReplicationConns, v2.ReplicationConns) {
 		d.Replication_conns = &v2.ReplicationConns
 	}
