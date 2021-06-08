@@ -21,8 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"path"
+	"reflect"
+	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -32,6 +38,8 @@ import (
 )
 
 var (
+	sqSrv       *httptest.Server
+	sqBody      []byte
 	sqCfgPath   string
 	sqCfg       *config.CGRConfig
 	sqRPC       *birpc.Client
@@ -45,13 +53,22 @@ var (
 		testStatsRPCConn,
 		testStatsGetStatQueueBeforeSet,
 		testStatsSetStatQueueProfiles,
-		// testStatsGetStatQueueAfterSet,
-		// testStatsGetStatQueueIDs,
-		// testStatsGetStatQueueProfileIDs,
-		// testStatsGetStatQueueProfileCount,
-		// testStatsGetStatQueuesForEvent,
-		// testStatsRemoveStatQueueProfiles,
-		// testStatsGetStatQueuesAfterRemove,
+		testStatsGetStatQueueAfterSet,
+		testStatsGetStatQueueIDs,
+		testStatsGetStatQueueProfileIDs,
+		testStatsGetStatQueueProfileCount,
+		testStatsRemoveStatQueueProfiles,
+		testStatsGetStatQueuesAfterRemove,
+
+		// check if stats, thresholds and actions subsystems function properly together
+		testStatsStartServer,
+		testStatsSetActionProfileBeforeProcessEv,
+		testStatsSetThresholdProfilesBeforeProcessEv,
+		testStatsSetStatQueueProfileBeforeProcessEv,
+		testStatsProcessEvent,
+		testStatsGetStatQueuesAfterProcessEv,
+		testStatsGetThresholdAfterProcessEvent,
+		testStatsStopServer,
 		testStatsPing,
 		testStatsKillEngine,
 	}
@@ -150,9 +167,29 @@ func testStatsGetStatQueueBeforeSet(t *testing.T) {
 func testStatsSetStatQueueProfiles(t *testing.T) {
 	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:       "cgrates.org",
-			ID:           "SQ_1",
-			Weight:       10,
+			Tenant:      "cgrates.org",
+			ID:          "SQ_1",
+			Weight:      10,
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    5,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACC,
+				},
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaDDC,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
@@ -167,9 +204,26 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 
 	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
 		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant:       "cgrates.org",
-			ID:           "SQ_2",
-			Weight:       20,
+			Tenant: "cgrates.org",
+			ID:     "SQ_2",
+			Weight: 20,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaASR,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+				{
+					MetricID: utils.MetaPDD,
+				},
+				{
+					MetricID: utils.MetaTCC,
+				},
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
 			ThresholdIDs: []string{utils.MetaNone},
 		},
 	}
@@ -182,232 +236,483 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 	}
 }
 
-// func testStatsGetStatQueueAfterSet(t *testing.T) {
-// 	var rplySq engine.StatQueue
-// 	var rplySqPrf engine.StatQueueProfile
-// 	expSq := engine.StatQueue{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "SQ_1",
-// 		SQMetrics: make(map[string]engine.StatMetric),
-// 		SQItems:   []engine.SQItem{},
-// 	}
-// 	expSqPrf := engine.StatQueueProfile{
-// 		Tenant:       "cgrates.org",
-// 		ID:           "SQ_1",
-// 		Weight:       10,
-// 		ThresholdIDs: []string{utils.MetaNone},
-// 	}
+func testStatsGetStatQueueAfterSet(t *testing.T) {
+	var rplySqPrf engine.StatQueueProfile
+	expStrMetrics := map[string]string{
+		utils.MetaACC: utils.NotAvailable,
+		utils.MetaACD: utils.NotAvailable,
+		utils.MetaASR: utils.NotAvailable,
+		utils.MetaDDC: utils.NotAvailable,
+		utils.MetaTCD: utils.NotAvailable,
+	}
+	expFloatMetrics := map[string]float64{
+		utils.MetaACC: -1,
+		utils.MetaACD: -1,
+		utils.MetaASR: -1,
+		utils.MetaDDC: -1,
+		utils.MetaTCD: -1,
+	}
+	expSqPrf := engine.StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ_1",
+		Weight:      10,
+		QueueLength: 100,
+		TTL:         time.Duration(1 * time.Minute),
+		MinItems:    5,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaACC,
+			},
+			{
+				MetricID: utils.MetaACD,
+			},
+			{
+				MetricID: utils.MetaASR,
+			},
+			{
+				MetricID: utils.MetaDDC,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
 
-// 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueue,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{
-// 				Tenant: "cgrates.org",
-// 				ID:     "SQ_1",
-// 			},
-// 		}, &rplySq); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplySq, expSq) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expSq), utils.ToJSON(rplySq))
-// 	}
+	rplyStrMetrics := make(map[string]string)
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_1",
+			},
+		}, &rplyStrMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyStrMetrics, expStrMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expStrMetrics), utils.ToJSON(rplyStrMetrics))
+	}
 
-// 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
-// 		utils.TenantID{
-// 			Tenant: "cgrates.org",
-// 			ID:     "SQ_1",
-// 		}, &rplySqPrf); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
-// 	}
+	rplyFloatMetrics := make(map[string]float64)
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_1",
+			},
+		}, &rplyFloatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFloatMetrics, expFloatMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expFloatMetrics), utils.ToJSON(rplyFloatMetrics))
+	}
 
-// 	expSq = engine.StatQueue{
-// 		Tenant:    "cgrates.org",
-// 		ID:        "SQ_2",
-// 		SQMetrics: make(map[string]engine.StatMetric),
-// 		SQItems:   []engine.SQItem{},
-// 	}
-// 	expSqPrf = engine.StatQueueProfile{
-// 		Tenant:       "cgrates.org",
-// 		ID:           "SQ_2",
-// 		Weight:       20,
-// 		ThresholdIDs: []string{utils.MetaNone},
-// 	}
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_1",
+		}, &rplySqPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
+	}
 
-// 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueue,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{
-// 				Tenant: "cgrates.org",
-// 				ID:     "SQ_2",
-// 			},
-// 		}, &rplySq); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplySq, expSq) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expSq), utils.ToJSON(rplySq))
-// 	}
+	expStrMetrics = map[string]string{
+		utils.MetaASR: utils.NotAvailable,
+		utils.MetaPDD: utils.NotAvailable,
+		utils.MetaTCC: utils.NotAvailable,
+		utils.MetaTCD: utils.NotAvailable,
+	}
+	expFloatMetrics = map[string]float64{
+		utils.MetaASR: -1,
+		utils.MetaPDD: -1,
+		utils.MetaTCC: -1,
+		utils.MetaTCD: -1,
+	}
+	expSqPrf = engine.StatQueueProfile{
+		Tenant: "cgrates.org",
+		ID:     "SQ_2",
+		Weight: 20,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaASR,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+			{
+				MetricID: utils.MetaPDD,
+			},
+			{
+				MetricID: utils.MetaTCC,
+			},
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
 
-// 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
-// 		&utils.TenantID{
-// 			Tenant: "cgrates.org",
-// 			ID:     "SQ_2",
-// 		}, &rplySqPrf); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
-// 	}
-// }
+	rplyStrMetrics = map[string]string{}
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_2",
+			},
+		}, &rplyStrMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyStrMetrics, expStrMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expStrMetrics), utils.ToJSON(rplyStrMetrics))
+	}
 
-// func testStatsGetStatQueueIDs(t *testing.T) {
-// 	expIDs := []string{"SQ_1", "SQ_2"}
-// 	var sqIDs []string
-// 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueIDs,
-// 		&utils.TenantWithAPIOpts{
-// 			Tenant: "cgrates.org",
-// 		}, &sqIDs); err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		sort.Strings(sqIDs)
-// 		if !reflect.DeepEqual(sqIDs, expIDs) {
-// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, sqIDs)
-// 		}
-// 	}
-// }
+	rplyFloatMetrics = make(map[string]float64)
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_2",
+			},
+		}, &rplyFloatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFloatMetrics, expFloatMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expFloatMetrics), utils.ToJSON(rplyFloatMetrics))
+	}
 
-// func testStatsGetStatQueueProfileIDs(t *testing.T) {
-// 	expIDs := []string{"SQ_1", "SQ_2"}
-// 	var sqIDs []string
-// 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
-// 		&utils.PaginatorWithTenant{
-// 			Tenant:    "cgrates.org",
-// 			Paginator: utils.Paginator{},
-// 		}, &sqIDs); err != nil {
-// 		t.Error(err)
-// 	} else {
-// 		sort.Strings(sqIDs)
-// 		if !reflect.DeepEqual(sqIDs, expIDs) {
-// 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, sqIDs)
-// 		}
-// 	}
-// }
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_2",
+		}, &rplySqPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
+	}
+}
 
-// func testStatsGetStatQueueProfileCount(t *testing.T) {
-// 	var reply int
-// 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileCount,
-// 		&utils.TenantWithAPIOpts{
-// 			Tenant: "cgrates.org",
-// 		}, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != 2 {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", 2, reply)
-// 	}
-// }
+func testStatsGetStatQueueIDs(t *testing.T) {
+	expIDs := []string{"SQ_1", "SQ_2"}
+	var sqIDs []string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueIDs,
+		&utils.TenantWithAPIOpts{
+			Tenant: "cgrates.org",
+		}, &sqIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(sqIDs)
+		if !reflect.DeepEqual(sqIDs, expIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, sqIDs)
+		}
+	}
+}
 
-// func testStatsGetStatQueuesForEvent(t *testing.T) {
-// 	args := &engine.StatsArgsProcessEvent{
-// 		StatIDs: []string{"SQ_1", "SQ_2"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "StatsEventTest",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 		},
-// 	}
-// 	expSqs := engine.StatQueues{
-// 		&engine.StatQueue{
-// 			Tenant:    "cgrates.org",
-// 			ID:        "SQ_2",
-// 			SQMetrics: make(map[string]engine.StatMetric),
-// 		},
-// 		&engine.StatQueue{
-// 			Tenant:    "cgrates.org",
-// 			ID:        "SQ_1",
-// 			SQMetrics: make(map[string]engine.StatMetric),
-// 		},
-// 	}
+func testStatsGetStatQueueProfileIDs(t *testing.T) {
+	expIDs := []string{"SQ_1", "SQ_2"}
+	var sqIDs []string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileIDs,
+		&utils.PaginatorWithTenant{
+			Tenant:    "cgrates.org",
+			Paginator: utils.Paginator{},
+		}, &sqIDs); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(sqIDs)
+		if !reflect.DeepEqual(sqIDs, expIDs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, sqIDs)
+		}
+	}
+}
 
-// 	rplySqs := engine.StatQueues{
-// 		{
-// 			SQMetrics: map[string]engine.StatMetric{
-// 				utils.MetaTCD: &engine.StatTCD{},
-// 				utils.MetaASR: &engine.StatASR{},
-// 				utils.MetaACD: &engine.StatACD{},
-// 			},
-// 		},
-// 		{
-// 			SQMetrics: map[string]engine.StatMetric{
-// 				utils.MetaTCD: &engine.StatTCD{},
-// 				utils.MetaASR: &engine.StatASR{},
-// 				utils.MetaACD: &engine.StatACD{},
-// 			},
-// 		},
-// 	}
-// 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent,
-// 		args, &rplySqs); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplySqs, expSqs) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expSqs), utils.ToJSON(rplySqs))
-// 	}
-// }
+func testStatsGetStatQueueProfileCount(t *testing.T) {
+	var reply int
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfileCount,
+		&utils.TenantWithAPIOpts{
+			Tenant: "cgrates.org",
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 2 {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", 2, reply)
+	}
+}
 
-// func testStatsRemoveStatQueueProfiles(t *testing.T) {
-// 	var reply string
+func testStatsRemoveStatQueueProfiles(t *testing.T) {
+	var reply string
 
-// 	if err := sqRPC.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{
-// 				Tenant: "cgrates.org",
-// 				ID:     "SQ_1",
-// 			}}, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_1",
+			}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
 
-// 	if err := sqRPC.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
-// 		&utils.TenantIDWithAPIOpts{
-// 			TenantID: &utils.TenantID{
-// 				Tenant: "cgrates.org",
-// 				ID:     "SQ_2",
-// 			}}, &reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
-// }
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_2",
+			}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+}
 
-// func testStatsGetStatQueuesAfterRemove(t *testing.T) {
-// 	args := &engine.StatsArgsProcessEvent{
-// 		StatIDs: []string{"SQ_1", "SQ_2"},
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "StatsEventTest",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 		},
-// 	}
-// 	expSqs := engine.StatQueues{
-// 		&engine.StatQueue{
-// 			Tenant: "cgrates.org",
-// 			ID:     "SQ_2",
-// 		},
-// 		&engine.StatQueue{
-// 			Tenant: "cgrates.org",
-// 			ID:     "SQ_1",
-// 		},
-// 	}
+func testStatsGetStatQueuesAfterRemove(t *testing.T) {
+	args := &engine.StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_1", "SQ_2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "StatsEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
 
-// 	var rplySqs engine.StatQueues
-// 	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent,
-// 		args, &rplySqs); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(rplySqs, expSqs) {
-// 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-// 			utils.ToJSON(expSqs), utils.ToJSON(rplySqs))
-// 	}
-// }
+	var reply []string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetStatQueuesForEvent,
+		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func testStatsStartServer(t *testing.T) {
+	sqSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		sqBody, err = io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
+
+		r.Body.Close()
+	}))
+}
+
+func testStatsStopServer(t *testing.T) {
+	sqSrv.Close()
+}
+
+func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaHTTPPost,
+					Diktats: []*engine.APDiktat{
+						{
+							Path: sqSrv.URL,
+						},
+					},
+					TTL: time.Duration(time.Minute),
+				},
+			},
+		},
+	}
+
+	var reply *string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
+	}
+
+	var rplyActPrf engine.ActionProfile
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "actPrfID",
+			}}, &rplyActPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyActPrf, *actPrf.ActionProfile) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", actPrf.ActionProfile, rplyActPrf)
+	}
+}
+
+func testStatsSetThresholdProfilesBeforeProcessEv(t *testing.T) {
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "THD_ID",
+			FilterIDs:        []string{"*string:~*req.EventType:StatUpdate"},
+			ActionProfileIDs: []string{"actPrfID"},
+			MaxHits:          2,
+			MinHits:          0,
+			Weight:           10,
+		},
+	}
+
+	var reply string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+		thPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	var rplyTh engine.Threshold
+	var rplyThPrf engine.ThresholdProfile
+	expTh := engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ID",
+	}
+	expThPrf := engine.ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THD_ID",
+		FilterIDs:        []string{"*string:~*req.EventType:StatUpdate"},
+		ActionProfileIDs: []string{"actPrfID"},
+		MaxHits:          2,
+		MinHits:          0,
+		Weight:           10,
+	}
+
+	if err := sqRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "THD_ID",
+			},
+		}, &rplyTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyTh, expTh) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expTh), utils.ToJSON(rplyTh))
+	}
+
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "THD_ID",
+		}, &rplyThPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyThPrf, expThPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expThPrf), utils.ToJSON(rplyThPrf))
+	}
+
+}
+
+func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "SQ_3",
+			Weight:      10,
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    0,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{"THD_ID"},
+		},
+	}
+
+	var reply string
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	expSqPrf := engine.StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ_3",
+		Weight:      10,
+		QueueLength: 100,
+		TTL:         time.Duration(1 * time.Minute),
+		MinItems:    0,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{"THD_ID"},
+	}
+
+	var rplySqPrf engine.StatQueueProfile
+	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_3",
+		}, &rplySqPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
+	}
+}
+
+func testStatsProcessEvent(t *testing.T) {
+	args := &engine.StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_3"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "StatsEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Usage:        30 * time.Second,
+			},
+		},
+	}
+	expected := []string{"SQ_3"}
+	expBody := `{"*opts":{"*eventType":"StatUpdate"},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
+	var reply []string
+	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
+	}
+
+	if expBody != string(sqBody) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, string(sqBody))
+	}
+}
+
+func testStatsGetStatQueuesAfterProcessEv(t *testing.T) {
+	expFloatMetrics := map[string]float64{
+		utils.MetaTCD: 30000000000,
+	}
+
+	rplyFloatMetrics := make(map[string]float64)
+	if err := sqRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_3",
+			},
+		}, &rplyFloatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFloatMetrics, expFloatMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expFloatMetrics), utils.ToJSON(rplyFloatMetrics))
+	}
+}
+
+func testStatsGetThresholdAfterProcessEvent(t *testing.T) {
+	args := &utils.TenantID{
+		Tenant: "cgrates.org",
+		ID:     "THD_ID",
+	}
+	var reply *engine.Threshold
+	if err := sqRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply.Hits != 1 {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", 1, reply.Hits)
+	}
+}

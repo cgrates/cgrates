@@ -633,7 +633,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 	}
 
 	if expBody != string(rsBody) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, rsBody)
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, string(rsBody))
 	}
 
 	args := &utils.TenantID{

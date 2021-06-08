@@ -23,6 +23,7 @@
     "stats": {
         "enabled": true,
         "store_interval": "-1",
+        "thresholds_conns": ["*internal"],
     },
 
     "thresholds": {	
