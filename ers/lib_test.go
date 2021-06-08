@@ -57,7 +57,8 @@ func testCreateDirs(t *testing.T) {
 		"/tmp/partErs1/in", "/tmp/partErs1/out", "/tmp/partErs2/in", "/tmp/partErs2/out",
 		"/tmp/flatstoreErs/in", "/tmp/flatstoreErs/out", "/tmp/ErsJSON/in", "/tmp/ErsJSON/out",
 		"/tmp/readerWithTemplate/in", "/tmp/readerWithTemplate/out",
-		"/tmp/flatstoreACKErs/in", "/tmp/flatstoreACKErs/out"} {
+		"/tmp/flatstoreACKErs/in", "/tmp/flatstoreACKErs/out",
+		"/tmp/flatstoreMMErs/in", "/tmp/flatstoreMMErs/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
