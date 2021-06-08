@@ -1265,6 +1265,7 @@ const (
 	ConfigSv1SetConfig         = "ConfigSv1.SetConfig"
 	ConfigSv1GetConfigAsJSON   = "ConfigSv1.GetConfigAsJSON"
 	ConfigSv1SetConfigFromJSON = "ConfigSv1.SetConfigFromJSON"
+	ConfigSv1StoreCfgInDB      = "ConfigSv1.StoreCfgInDB"
 )
 
 const (

@@ -33,6 +33,7 @@ import (
 )
 
 var (
+	connDb  engine.DataDBDriver
 	cfgPath string
 	cfgCfg  *config.CGRConfig
 	cfgRPC  *birpc.Client
@@ -52,11 +53,14 @@ var (
 		testCfgKillEngine,
 		//Store Cfg in Database Test
 		testCfgInitCfgStore,
-		testCfgInitCfgStore,
 		testCfgInitDataDbStore,
 		testCfgResetStorDbStore,
 		testCfgStartEngineStore,
 		testCfgRPCConnStore,
+		testCfgResetConfigDBStore,
+		testCfgDataDBConnStore,
+		testCfgGetConfigStore,
+		testCfgStoreConfigStore,
 		testCfgKillEngineStore,
 	}
 )
@@ -64,7 +68,7 @@ var (
 func TestCfgSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		cfgDIR = "apis_config_internal"
+		t.SkipNow()
 	case utils.MetaMongo:
 		cfgDIR = "apis_config_mongo"
 	case utils.MetaMySQL:
@@ -355,6 +359,39 @@ func testCfgRPCConnStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func testCfgDataDBConnStore(t *testing.T) {
+	var err error
+	connDb, err = engine.NewDataDBConn(cfgCfg.ConfigDBCfg().Type,
+		cfgCfg.ConfigDBCfg().Host, cfgCfg.ConfigDBCfg().Port,
+		cfgCfg.ConfigDBCfg().Name, cfgCfg.ConfigDBCfg().User,
+		cfgCfg.ConfigDBCfg().Password, cfgCfg.GeneralCfg().DBDataEncoding,
+		cfgCfg.ConfigDBCfg().Opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCfgGetConfigStore(t *testing.T) {
+	connDb.AttributeServJsonCfg()
+}
+
+func testCfgStoreConfigStore(t *testing.T) {
+	var reply string
+	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1StoreCfgInDB,
+		&config.SectionWithAPIOpts{
+			APIOpts:  nil,
+			Tenant:   utils.CGRateSorg,
+			Sections: []string{"attributes"},
+		},
+		&reply); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual("OK", reply) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
+	}
+
 }
 
 func testCfgKillEngineStore(t *testing.T) {

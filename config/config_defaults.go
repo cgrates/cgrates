@@ -1199,15 +1199,15 @@ const CGRATES_CFG_JSON = `
 	"db_user": "",		 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
 	"opts":{
-		"redis_sentinel": "",					// the name of sentinel when used
-		"redis_cluster": false,					// if enabled the datadb will try to connect to the redis cluster
-		"redis_cluster_sync": "5s",				// the sync interval for the redis cluster
-		"redis_cluster_ondown_delay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"query_timeout":"10s",
-		"redis_tls": false,						// if true it will use a tls connection and use the redis_client_certificate certificate, redis_client_key and redis_ca_certificate for tls connection
-		"redis_client_certificate":"",			// path to client certificate
-		"redis_client_key":"",					// path to client key
-		"redis_ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"redisSentinel": "",					// the name of sentinel when used
+		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
+		"redisClusterSync": "5s",				// the sync interval for the redis cluster
+		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
+		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+		"redisClientCertificate":"",			// path to client certificate
+		"redisClientKey":"",					// path to client key
+		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	}
 },
 
