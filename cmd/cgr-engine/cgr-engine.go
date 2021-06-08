@@ -452,7 +452,7 @@ func main() {
 			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 			cfg.ConfigDBCfg().Opts)
 		if err != nil { // Cannot configure getter database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
+			log.Fatalf("Could not configure configDB: %s exiting!", err)
 			return
 		}
 		if err = cfg.LoadFromDB(d); err != nil {
