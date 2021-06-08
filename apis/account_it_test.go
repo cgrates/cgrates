@@ -67,11 +67,11 @@ var (
 func TestAccSIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		accPrfConfigDIR = "apis_config_internal"
+		accPrfConfigDIR = "tutinternal"
 	case utils.MetaMongo:
-		accPrfConfigDIR = "apis_config_mongo"
+		accPrfConfigDIR = "tutmongo"
 	case utils.MetaMySQL:
-		accPrfConfigDIR = "apis_config_mysql"
+		accPrfConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

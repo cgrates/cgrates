@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 	"testing"
@@ -43,6 +44,7 @@ var (
 		testCfgInitCfg,
 		testCfgInitDataDb,
 		testCfgResetStorDb,
+		testCfgResetConfigDBStore,
 		testCfgStartEngine,
 		testCfgRPCConn,
 		testCfgGetConfigInvalidSection,
@@ -52,16 +54,16 @@ var (
 		testCfgSetJSONGetJSONConfig,
 		testCfgKillEngine,
 		//Store Cfg in Database Test
-		testCfgInitCfgStore,
-		testCfgInitDataDbStore,
-		testCfgResetStorDbStore,
-		testCfgStartEngineStore,
-		testCfgRPCConnStore,
-		testCfgResetConfigDBStore,
-		testCfgDataDBConnStore,
-		testCfgGetConfigStore,
-		testCfgStoreConfigStore,
-		testCfgKillEngineStore,
+		//testCfgInitCfgStore,
+		//testCfgInitDataDbStore,
+		//testCfgResetStorDbStore,
+		//testCfgResetConfigDBStore,
+		//testCfgStartEngineStore,
+		//testCfgRPCConnStore,
+		//testCfgDataDBConnStore,
+		//testCfgGetConfigStore,
+		//testCfgStoreConfigStore,
+		//testCfgKillEngineStore,
 	}
 )
 
@@ -374,7 +376,11 @@ func testCfgDataDBConnStore(t *testing.T) {
 }
 
 func testCfgGetConfigStore(t *testing.T) {
-	connDb.AttributeServJsonCfg()
+	attr, err := connDb.AttributeServJsonCfg()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(attr)
 }
 
 func testCfgStoreConfigStore(t *testing.T) {
