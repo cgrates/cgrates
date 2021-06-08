@@ -58,7 +58,7 @@ var (
 	httpPprofPath     = cgrEngineFlags.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling")
 	cpuProfDir        = cgrEngineFlags.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files")
 	memProfDir        = cgrEngineFlags.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file")
-	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time betwen memory profile saves")
+	memProfInterval   = cgrEngineFlags.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time between memory profile saves")
 	memProfNrFiles    = cgrEngineFlags.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profile to write")
 	scheduledShutdown = cgrEngineFlags.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration")
 	singlecpu         = cgrEngineFlags.Bool(utils.SingleCpuCgr, false, "Run on single CPU core")
