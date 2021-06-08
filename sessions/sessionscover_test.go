@@ -4535,14 +4535,14 @@ func (sT *mkCallForces) Call(ctx *context.Context, method string, arg interface{
 func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	engine.Cache.Clear(nil)
 
-	client := new(mkCall)
+	ctx := context.WithClient(context.Background(), new(mkCall))
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
 	var reply string
-	if err := sessions.BiRPCv1ForceDisconnect(client, nil, &reply); err == nil || err != utils.ErrNotFound {
+	if err := sessions.BiRPCv1ForceDisconnect(ctx, nil, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 	args := &utils.SessionFilter{
@@ -4552,7 +4552,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	}
 	sessions.dm = nil
 
-	if err := sessions.BiRPCv1ForceDisconnect(client, args, &reply); err == nil || err != utils.ErrNoDatabaseConn {
+	if err := sessions.BiRPCv1ForceDisconnect(ctx, args, &reply); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 	sessions.dm = dm
@@ -4594,7 +4594,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 
-	if err := sessions.BiRPCv1ForceDisconnect(client, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ForceDisconnect(ctx, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -4613,7 +4613,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 			conn: testMk,
 		},
 	}
-	if err := sessions.BiRPCv1ForceDisconnect(client, args, &reply); err != nil {
+	if err := sessions.BiRPCv1ForceDisconnect(ctx, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")

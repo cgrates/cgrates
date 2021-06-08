@@ -20,6 +20,7 @@ package apis
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -95,70 +96,60 @@ func (ssv1 *SessionSv1) GetActiveSessionsCount(ctx *context.Context, args *utils
 	return ssv1.sS.BiRPCv1GetActiveSessionsCount(ctx, args, rply)
 }
 
-/*
-
-func (ssv1 *SessionSv1) ForceDisconnect(ctx *context.Context,args *utils.SessionFilter,
+func (ssv1 *SessionSv1) ForceDisconnect(ctx *context.Context, args *utils.SessionFilter,
 	rply *string) error {
 	return ssv1.sS.BiRPCv1ForceDisconnect(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessions(ctx *context.Context,args *utils.SessionFilter,
+func (ssv1 *SessionSv1) GetPassiveSessions(ctx *context.Context, args *utils.SessionFilter,
 	rply *[]*sessions.ExternalSession) error {
 	return ssv1.sS.BiRPCv1GetPassiveSessions(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessionsCount(ctx *context.Context,args *utils.SessionFilter,
+func (ssv1 *SessionSv1) GetPassiveSessionsCount(ctx *context.Context, args *utils.SessionFilter,
 	rply *int) error {
 	return ssv1.sS.BiRPCv1GetPassiveSessionsCount(ctx, args, rply)
 }
 
-func (ssv1 *SessionSv1) Ping(ctx *context.Context,ign *utils.CGREvent, reply *string) error {
-	*reply = utils.Pong
-	return nil
-}
-
-func (ssv1 *SessionSv1) ReplicateSessions(ctx *context.Context,args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error {
+func (ssv1 *SessionSv1) ReplicateSessions(ctx *context.Context, args *dispatchers.ArgsReplicateSessionsWithAPIOpts, rply *string) error {
 	return ssv1.sS.BiRPCv1ReplicateSessions(ctx, args.ArgsReplicateSessions, rply)
 }
 
-func (ssv1 *SessionSv1) SetPassiveSession(ctx *context.Context,args *sessions.Session,
+func (ssv1 *SessionSv1) SetPassiveSession(ctx *context.Context, args *sessions.Session,
 	reply *string) error {
 	return ssv1.sS.BiRPCv1SetPassiveSession(ctx, args, reply)
 }
 
 // ActivateSessions is called to activate a list/all sessions
-func (ssv1 *SessionSv1) ActivateSessions(ctx *context.Context,args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
+func (ssv1 *SessionSv1) ActivateSessions(ctx *context.Context, args *utils.SessionIDsWithAPIOpts, reply *string) error {
 	return ssv1.sS.BiRPCv1ActivateSessions(ctx, args, reply)
 }
 
 // DeactivateSessions is called to deactivate a list/all active sessios
-func (ssv1 *SessionSv1) DeactivateSessions(ctx *context.Context,args *utils.SessionIDsWithArgsDispatcher, reply *string) error {
+func (ssv1 *SessionSv1) DeactivateSessions(ctx *context.Context, args *utils.SessionIDsWithAPIOpts, reply *string) error {
 	return ssv1.sS.BiRPCv1DeactivateSessions(ctx, args, reply)
 }
 
-// Call implements rpcclient.ClientConnector interface for internal RPC
-func (ssv1 *SessionSv1) Call(ctx *context.Context,serviceMethod string,
-	args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(ssv1, serviceMethod, args, reply)
-}
-
 // ReAuthorize sends the RAR for filterd sessions
-func (ssv1 *SessionSv1) ReAuthorize(ctx *context.Context,args *utils.SessionFilter, reply *string) error {
+func (ssv1 *SessionSv1) ReAuthorize(ctx *context.Context, args *utils.SessionFilter, reply *string) error {
 	return ssv1.sS.BiRPCv1ReAuthorize(ctx, args, reply)
 }
 
 // DisconnectPeer sends the DPR for the OriginHost and OriginRealm
-func (ssv1 *SessionSv1) DisconnectPeer(ctx *context.Context,args *utils.DPRArgs, reply *string) error {
+func (ssv1 *SessionSv1) DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) error {
 	return ssv1.sS.BiRPCv1DisconnectPeer(ctx, args, reply)
 }
 
 // STIRAuthenticate checks the identity using STIR/SHAKEN
-func (ssv1 *SessionSv1) STIRAuthenticate(ctx *context.Context,args *sessions.V1STIRAuthenticateArgs, reply *string) error {
+func (ssv1 *SessionSv1) STIRAuthenticate(ctx *context.Context, args *sessions.V1STIRAuthenticateArgs, reply *string) error {
 	return ssv1.sS.BiRPCv1STIRAuthenticate(ctx, args, reply)
 }
 
 // STIRIdentity creates the identity for STIR/SHAKEN
-func (ssv1 *SessionSv1) STIRIdentity(ctx *context.Context,args *sessions.V1STIRIdentityArgs, reply *string) error {
+func (ssv1 *SessionSv1) STIRIdentity(ctx *context.Context, args *sessions.V1STIRIdentityArgs, reply *string) error {
 	return ssv1.sS.BiRPCv1STIRIdentity(ctx, args, reply)
 }
-*/
+
+func (ssv1 *SessionSv1) RegisterInternalBiJSONConn(ctx *context.Context, args string, rply *string) (err error) {
+	return ssv1.sS.BiRPCv1RegisterInternalBiJSONConn(ctx, args, rply)
+}

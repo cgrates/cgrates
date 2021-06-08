@@ -1507,7 +1507,7 @@ type ArgsReplicateSessions struct {
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	sS.replicateSessions(context.TODO(), args.CGRID, args.Passive, args.ConnIDs)
+	sS.replicateSessions(ctx, args.CGRID, args.Passive, args.ConnIDs)
 	*reply = utils.OK
 	return
 }
@@ -3256,7 +3256,7 @@ func (sS *SessionS) BiRPCv1SyncSessions(ctx *context.Context,
 }
 
 // BiRPCv1ForceDisconnect will force disconnecting sessions matching sessions
-func (sS *SessionS) BiRPCv1ForceDisconnect(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -3264,7 +3264,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt birpc.ClientConnector,
 	if len(args.Filters) != 0 && sS.dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	aSs := sS.filterSessions(context.TODO(), args, false)
+	aSs := sS.filterSessions(ctx, args, false)
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
@@ -3274,7 +3274,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt birpc.ClientConnector,
 			continue
 		}
 		ss[0].Lock()
-		if errTerm := sS.forceSTerminate(context.TODO(), ss[0], 0, nil, nil); errTerm != nil {
+		if errTerm := sS.forceSTerminate(ctx, ss[0], 0, nil, nil); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed force-terminating session with id: <%s>, err: <%s>",
@@ -3292,16 +3292,16 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt birpc.ClientConnector,
 }
 
 // BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
-func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Context,
 	connID string, reply *string) error {
-	sS.RegisterIntBiJConn(clnt, connID)
+	sS.RegisterIntBiJConn(ctx.Client, connID)
 	*reply = utils.OK
 	return nil
 }
 
 // BiRPCv1ActivateSessions is called to activate a list/all sessions
 // returns utils.ErrPartiallyExecuted in case of errors
-func (sS *SessionS) BiRPCv1ActivateSessions(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
 	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if len(sIDs.IDs) == 0 {
 		sS.pSsMux.RLock()
@@ -3327,7 +3327,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(clnt birpc.ClientConnector,
 
 // BiRPCv1DeactivateSessions is called to deactivate a list/all active sessios
 // returns utils.ErrPartiallyExecuted in case of errors
-func (sS *SessionS) BiRPCv1DeactivateSessions(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if len(sIDs.IDs) == 0 {
 		sS.aSsMux.RLock()
@@ -3496,6 +3496,7 @@ func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREven
 	return
 }
 
+/*
 // BiRPCV1GetMaxUsage returns the maximum usage as seconds, compatible with OpenSIPS 2.3
 // DEPRECATED, it will be removed in future versions
 func (sS *SessionS) BiRPCV1GetMaxUsage(clnt birpc.ClientConnector,
@@ -3605,8 +3606,8 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt birpc.ClientConnector,
 			Event: ev},
 		rply)
 }
-
-func (sS *SessionS) sendRar(s *Session) (err error) {
+*/
+func (sS *SessionS) sendRar(ctx *context.Context, s *Session) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
@@ -3617,19 +3618,19 @@ func (sS *SessionS) sendRar(s *Session) (err error) {
 		return
 	}
 	var rply string
-	if err = clnt.conn.Call(context.TODO(), utils.SessionSv1ReAuthorize, originID, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.SessionSv1ReAuthorize, originID, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
 }
 
 // BiRPCv1ReAuthorize sends a RAR for the matching sessions
-func (sS *SessionS) BiRPCv1ReAuthorize(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	aSs := sS.filterSessions(context.TODO(), args, false)
+	aSs := sS.filterSessions(ctx, args, false)
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
@@ -3643,7 +3644,7 @@ func (sS *SessionS) BiRPCv1ReAuthorize(clnt birpc.ClientConnector,
 		if len(ss) == 0 {
 			continue
 		}
-		if errTerm := sS.sendRar(ss[0]); errTerm != nil {
+		if errTerm := sS.sendRar(ctx, ss[0]); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
@@ -3659,7 +3660,7 @@ func (sS *SessionS) BiRPCv1ReAuthorize(clnt birpc.ClientConnector,
 }
 
 // BiRPCv1DisconnectPeer sends a DPR for the given OriginHost and OriginRealm
-func (sS *SessionS) BiRPCv1DisconnectPeer(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1DisconnectPeer(ctx *context.Context,
 	args *utils.DPRArgs, reply *string) (err error) {
 	hasErrors := false
 	clients := make(map[string]*biJClient)
@@ -3669,7 +3670,7 @@ func (sS *SessionS) BiRPCv1DisconnectPeer(clnt birpc.ClientConnector,
 	}
 	sS.biJMux.RUnlock()
 	for ID, clnt := range clients {
-		if err = clnt.conn.Call(context.TODO(), utils.SessionSv1DisconnectPeer, args, reply); err != nil && err != utils.ErrNotImplemented {
+		if err = clnt.conn.Call(ctx, utils.SessionSv1DisconnectPeer, args, reply); err != nil && err != utils.ErrNotImplemented {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed sending DPR for connection with id: <%s>, err: <%s>",
@@ -3685,7 +3686,7 @@ func (sS *SessionS) BiRPCv1DisconnectPeer(clnt birpc.ClientConnector,
 }
 
 // BiRPCv1STIRAuthenticate the API for STIR checking
-func (sS *SessionS) BiRPCv1STIRAuthenticate(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx *context.Context,
 	args *V1STIRAuthenticateArgs, reply *string) (err error) {
 	attest := sS.cgrCfg.SessionSCfg().STIRCfg.AllowedAttest
 	if len(args.Attest) != 0 {
@@ -3697,7 +3698,7 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(clnt birpc.ClientConnector,
 			return
 		}
 	}
-	if err = AuthStirShaken(context.TODO(), args.Identity, args.OriginatorTn, args.OriginatorURI,
+	if err = AuthStirShaken(ctx, args.Identity, args.OriginatorTn, args.OriginatorURI,
 		args.DestinationTn, args.DestinationURI, attest, stirMaxDur); err != nil {
 		return utils.NewSTIRError(err.Error())
 	}
@@ -3706,7 +3707,7 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(clnt birpc.ClientConnector,
 }
 
 // BiRPCv1STIRIdentity the API for STIR header creation
-func (sS *SessionS) BiRPCv1STIRIdentity(clnt birpc.ClientConnector,
+func (sS *SessionS) BiRPCv1STIRIdentity(ctx *context.Context,
 	args *V1STIRIdentityArgs, identity *string) (err error) {
 	if args.Payload.ATTest == utils.EmptyString {
 		args.Payload.ATTest = sS.cgrCfg.SessionSCfg().STIRCfg.DefaultAttest
@@ -3715,7 +3716,7 @@ func (sS *SessionS) BiRPCv1STIRIdentity(clnt birpc.ClientConnector,
 		args.Payload.IAT = time.Now().Unix()
 	}
 	if *identity, err = NewSTIRIdentity(
-		context.TODO(),
+		ctx,
 		utils.NewPASSporTHeader(utils.FirstNonEmpty(args.PublicKeyPath,
 			sS.cgrCfg.SessionSCfg().STIRCfg.PublicKeyPath)),
 		args.Payload, utils.FirstNonEmpty(args.PrivateKeyPath,
