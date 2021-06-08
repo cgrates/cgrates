@@ -1112,7 +1112,11 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		Attributes_conns: &[]string{"*birpc"},
 		Cache: map[string]*CacheParamJsonCfg{
 			"CACHE_1": {
-				Limit: utils.IntPointer(1),
+				Limit:      utils.IntPointer(1),
+				Ttl:        utils.StringPointer("0s"),
+				Static_ttl: utils.BoolPointer(false),
+				Precache:   utils.BoolPointer(false),
+				Replicate:  utils.BoolPointer(false),
 			},
 		},
 		Exporters: &[]*EventExporterJsonCfg{
@@ -1131,7 +1135,13 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 	v1 = v2
 	expected = &EEsJsonCfg{
 		Cache: map[string]*CacheParamJsonCfg{
-			"CACHE_1": {},
+			"CACHE_1": {
+				Limit:      utils.IntPointer(1),
+				Ttl:        utils.StringPointer("0s"),
+				Static_ttl: utils.BoolPointer(false),
+				Precache:   utils.BoolPointer(false),
+				Replicate:  utils.BoolPointer(false),
+			},
 		},
 		Exporters: &[]*EventExporterJsonCfg{
 			{
