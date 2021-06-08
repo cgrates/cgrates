@@ -122,7 +122,7 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	client := &birpc.Service{}
 
 	var reply string
-	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(client, utils.EmptyString, &reply); err != nil {
+	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(context.WithClient(context.Background(), client), utils.EmptyString, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v, received %+v", reply, utils.OK)
