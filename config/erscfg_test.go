@@ -53,6 +53,13 @@ func TestERSClone(t *testing.T) {
 			"cache_dump_fields": [
                {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
             ],
+			"partial_commit_fields": [{
+				"mandatory": true,
+				"path": "*cgreq.ToR",
+				"tag": "ToR",
+				"type": "*variable",
+				"value": "~*req.2"
+			}],
             "failed_calls_prefix": "randomPrefix",
             "partial_record_cache": "1s",
             "partial_cache_expiry_action": "randomAction",
@@ -130,7 +137,16 @@ func TestERSClone(t *testing.T) {
 					{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
 				},
-				PartialCommitFields: make([]*FCTemplate, 0),
+				PartialCommitFields: []*FCTemplate{
+					{
+						Type:      utils.MetaVariable,
+						Value:     NewRSRParsersMustCompile("~*req.2", utils.InfieldSep),
+						Tag:       utils.ToR,
+						Path:      utils.MetaCgreq + utils.NestingSep + utils.ToR,
+						Mandatory: true,
+						Layout:    time.RFC3339,
+					},
+				},
 				Opts: map[string]interface{}{
 					utils.MetaDefault:     "randomVal",
 					"csvFieldSeparator":   ",",
@@ -149,6 +165,9 @@ func TestERSClone(t *testing.T) {
 			v.ComputePath()
 		}
 		for _, v := range profile.CacheDumpFields {
+			v.ComputePath()
+		}
+		for _, v := range profile.PartialCommitFields {
 			v.ComputePath()
 		}
 	}
@@ -1015,8 +1034,15 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
                 "partial_record_cache": "1s",
 				"processed_path": "/tmp/ers/out",
 				"cache_dump_fields": [
-                           {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}                
+                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true}                
 				],
+				"partial_commit_fields": [{
+					"mandatory": true,
+					"path": "*cgreq.ToR",
+					"tag": "ToR",
+					"type": "*variable",
+					"value": "~*req.2"
+				}],
 				"opts":{
 					"kafkaGroupID": "test",
 				},
@@ -1066,9 +1092,17 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.CacheDumpFieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 				},
-				utils.PartialCommitFieldsCfg: []map[string]interface{}{},
-				utils.ConcurrentRequestsCfg:  1024,
-				utils.TypeCfg:                "*file_csv",
+				utils.PartialCommitFieldsCfg: []map[string]interface{}{
+					{
+						"mandatory": true,
+						"path":      "*cgreq.ToR",
+						"tag":       "ToR",
+						"type":      "*variable",
+						"value":     "~*req.2",
+					},
+				},
+				utils.ConcurrentRequestsCfg: 1024,
+				utils.TypeCfg:               "*file_csv",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
@@ -1371,6 +1405,14 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*req.3"),
 			},
 		},
+		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("ToR3"),
+				Path:  utils.StringPointer("*cgreq.ToR3"),
+				Type:  utils.StringPointer(utils.MetaTemplate),
+				Value: utils.StringPointer("~*req.4"),
+			},
+		},
 	}
 
 	expected = &EventReaderJsonCfg{
@@ -1389,6 +1431,14 @@ func TestDiffEventReaderJsonCfg(t *testing.T) {
 				Path:  utils.StringPointer("*cgreq.ToR2"),
 				Type:  utils.StringPointer(utils.MetaConstant),
 				Value: utils.StringPointer("~*req.3"),
+			},
+		},
+		Partial_commit_fields: &[]*FcTemplateJsonCfg{
+			{
+				Tag:   utils.StringPointer("ToR3"),
+				Path:  utils.StringPointer("*cgreq.ToR3"),
+				Type:  utils.StringPointer(utils.MetaTemplate),
+				Value: utils.StringPointer("~*req.4"),
 			},
 		},
 	}

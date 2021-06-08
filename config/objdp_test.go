@@ -204,3 +204,32 @@ func TestFieldAsInterfaceObjDPMultiplePaths(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", "1", rcv)
 	}
 }
+
+func TestFieldAsInterface(t *testing.T) {
+	type aNewStruct struct {
+		Field1 int
+		Field2 int
+	}
+	type pNewStruct struct {
+		Field3 aNewStruct
+		Field4 int
+		Field5 []string
+	}
+	objDp := &ObjectDP{
+		obj: pNewStruct{
+			Field3: aNewStruct{
+				Field1: 2,
+				Field2: 4,
+			},
+			Field4: 2,
+			Field5: []string{""},
+		},
+		cache: map[string]interface{}{
+			"field1": nil,
+		},
+	}
+	_, err := objDp.FieldAsInterface([]string{"field1"})
+	if err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
