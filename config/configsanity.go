@@ -646,7 +646,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					utils.IfaceAsString(fldSep) == utils.EmptyString {
 					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialOrderFieldOpt, rdr.ID)
 				}
-			} else if pAct == utils.MetaDumpToFile { // only if the action is *dump_to_file
+			}
+			if pAct == utils.MetaDumpToFile { // only if the action is *dump_to_file
 				if path, has := rdr.Opts[utils.PartialPathOpt]; has { // the path from options needs to exists if overwriten by reader
 					if _, err := os.Stat(utils.IfaceAsString(path)); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> nonexistent partial folder: %s for reader with ID: %s", utils.ERs, path, rdr.ID)
