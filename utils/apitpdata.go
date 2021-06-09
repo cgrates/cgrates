@@ -487,7 +487,6 @@ func (attr *ArgRSv1ResourceUsage) Clone() *ArgRSv1ResourceUsage {
 
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
-	Subsystem        string
 	APIOpts          map[string]interface{}
 	AttributeIDs     []string
 	ResourceIDs      []string
@@ -503,7 +502,6 @@ type ArgsComputeFilterIndexIDs struct {
 
 type ArgsComputeFilterIndexes struct {
 	Tenant      string
-	Subsystem   string
 	APIOpts     map[string]interface{}
 	AttributeS  bool
 	ResourceS   bool
@@ -680,7 +678,6 @@ type TPDispatcherProfile struct {
 	TPid           string
 	Tenant         string
 	ID             string
-	Subsystems     []string
 	FilterIDs      []string
 	Strategy       string
 	StrategyParams []interface{} // ie for distribution, set here the pool weights

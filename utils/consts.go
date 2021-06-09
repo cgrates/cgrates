@@ -270,7 +270,6 @@ const (
 	Direction                = "Direction"
 	Tenant                   = "Tenant"
 	Category                 = "Category"
-	Contexts                 = "Contexts"
 	AccountField             = "Account"
 	BalancesFld              = "Balances"
 	Subject                  = "Subject"
@@ -493,7 +492,6 @@ const (
 	Addresses          = "Addresses"
 	Transport          = "Transport"
 	TLS                = "TLS"
-	Subsystems         = "Subsystems"
 	Strategy           = "Strategy"
 	StrategyParameters = "StrategyParameters"
 	ConnID             = "ConnID"
@@ -1989,9 +1987,6 @@ const (
 	// AccountSCfg
 	MaxIterations = "max_iterations"
 	MaxUsage      = "max_usage"
-
-	// DispatcherSCfg
-	AnySubsystemCfg = "any_subsystem"
 )
 
 // FC Template

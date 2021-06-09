@@ -1,4 +1,4 @@
-#Tenant,ID,Subsystems,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,BROADCAST,*sessions,,30,*broadcast_sync,,AU_SITE,,20,false,
-cgrates.org,BROADCAST,,,,,,US_SITE,,20,,
-cgrates.org,SELF,*any,,10,*weight,,SELF,,20,false,
+#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+cgrates.org,BROADCAST,*string:~*vars.*subsys:*sessions,30,*broadcast_sync,,AU_SITE,,20,false,
+cgrates.org,BROADCAST,,,,,US_SITE,,20,,
+cgrates.org,SELF,,10,*weight,,SELF,,20,false,

@@ -58,9 +58,6 @@ Tenant
 ID
  	Identifier for the *AttributeProfile*, unique within a *Tenant*
  
-Context
-	A list of *contexts* applying to this profile. A *context* is usually associated with a logical phase during event processing (ie: *\*sessions* or *\*cdrs* for events parsed by :ref:`SessionS` or :ref:`CDRs`)
-
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the *AttributeProfile* matching the event.
 

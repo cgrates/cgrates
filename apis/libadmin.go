@@ -307,25 +307,10 @@ func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, flt
 		return args, nil
 	}
 
-	for k, ids := range rcvIndx {
-		switch k {
-		default:
-			if cField, has := utils.CacheInstanceToArg[k]; has {
-				for _, indx := range indxIDs {
-					args[cField] = append(args[cField], utils.ConcatenatedKey(tnt, indx))
-				}
-			}
-		case utils.CacheDispatcherFilterIndexes: // this is slow
-			for attrID := range ids {
-				var attr *engine.DispatcherProfile
-				if attr, err = dm.GetDispatcherProfile(ctx, tnt, attrID, true, true, utils.NonTransactional); err != nil {
-					return
-				}
-				for _, ctx := range attr.Subsystems {
-					for _, indx := range indxIDs {
-						args[utils.DispatcherFilterIndexIDs] = append(args[utils.DispatcherFilterIndexIDs], utils.ConcatenatedKey(tnt, ctx, indx))
-					}
-				}
+	for k := range rcvIndx {
+		if cField, has := utils.CacheInstanceToArg[k]; has {
+			for _, indx := range indxIDs {
+				args[cField] = append(args[cField], utils.ConcatenatedKey(tnt, indx))
 			}
 		}
 	}

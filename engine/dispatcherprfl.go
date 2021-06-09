@@ -43,10 +43,7 @@ func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
 		Blocker: dC.Blocker,
 	}
 	if dC.FilterIDs != nil {
-		cln.FilterIDs = make([]string, len(dC.FilterIDs))
-		for i, fltr := range dC.FilterIDs {
-			cln.FilterIDs[i] = fltr
-		}
+		cln.FilterIDs = utils.CloneStringSlice(dC.FilterIDs)
 	}
 	if dC.Params != nil {
 		cln.Params = make(map[string]interface{})
@@ -103,7 +100,6 @@ func (dHPrfls DispatcherHostProfiles) HostIDs() (hostIDs []string) {
 type DispatcherProfile struct {
 	Tenant         string
 	ID             string
-	Subsystems     []string
 	FilterIDs      []string
 	Strategy       string
 	StrategyParams map[string]interface{} // ie for distribution, set here the pool weights

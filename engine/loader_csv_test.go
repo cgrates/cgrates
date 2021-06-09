@@ -452,13 +452,12 @@ func TestLoadChargerProfiles(t *testing.T) {
 
 func TestLoadDispatcherProfiles(t *testing.T) {
 	eDispatcherProfiles := &utils.TPDispatcherProfile{
-		TPid:       testTPID,
-		Tenant:     "cgrates.org",
-		ID:         "D1",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		Strategy:   "*first",
-		Weight:     20,
+		TPid:      testTPID,
+		Tenant:    "cgrates.org",
+		ID:        "D1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Strategy:  "*first",
+		Weight:    20,
 		Hosts: []*utils.TPDispatcherHostProfile{
 			{
 				ID:        "C1",

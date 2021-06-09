@@ -817,16 +817,15 @@ const CGRATES_CFG_JSON = `
 				"fields": [
 					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
-					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
-					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.4"},
-					{"tag": "Strategy", "path": "Strategy", "type": "*variable", "value": "~*req.5"},
-					{"tag": "StrategyParameters", "path": "StrategyParameters", "type": "*variable", "value": "~*req.6"},
-					{"tag": "ConnID", "path": "ConnID", "type": "*variable", "value": "~*req.7"},
-					{"tag": "ConnFilterIDs", "path": "ConnFilterIDs", "type": "*variable", "value": "~*req.8"},
-					{"tag": "ConnWeight", "path": "ConnWeight", "type": "*variable", "value": "~*req.9"},
-					{"tag": "ConnBlocker", "path": "ConnBlocker", "type": "*variable", "value": "~*req.10"},
-					{"tag": "ConnParameters", "path": "ConnParameters", "type": "*variable", "value": "~*req.11"},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
+					{"tag": "Strategy", "path": "Strategy", "type": "*variable", "value": "~*req.4"},
+					{"tag": "StrategyParameters", "path": "StrategyParameters", "type": "*variable", "value": "~*req.5"},
+					{"tag": "ConnID", "path": "ConnID", "type": "*variable", "value": "~*req.6"},
+					{"tag": "ConnFilterIDs", "path": "ConnFilterIDs", "type": "*variable", "value": "~*req.7"},
+					{"tag": "ConnWeight", "path": "ConnWeight", "type": "*variable", "value": "~*req.8"},
+					{"tag": "ConnBlocker", "path": "ConnBlocker", "type": "*variable", "value": "~*req.9"},
+					{"tag": "ConnParameters", "path": "ConnParameters", "type": "*variable", "value": "~*req.10"},
 				],
 			},
 			{
@@ -990,7 +989,6 @@ const CGRATES_CFG_JSON = `
 	"suffix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"nested_fields": false,					// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
-	"any_subsystem": true,					// if we match the *any subsystem
 },
 
 

@@ -130,9 +130,9 @@ cgrates.org,ALS1,*string:~*opts.*context:con2|con3,20,,*req.Field2,*variable,Sub
 cgrates.org,Charger1,*string:~*req.Account:1001,20,*rated,ATTR_1001_SIMPLEAUTH
 `
 	DispatcherCSVContent = `
-#Tenant,ID,Subsystems,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,D1,*any,*string:~*req.Account:1001,20,*first,,C1,*gt:~*req.Usage:10,10,false,192.168.56.203
-cgrates.org,D1,,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204
+#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+cgrates.org,D1,*string:~*req.Account:1001,20,*first,,C1,*gt:~*req.Usage:10,10,false,192.168.56.203
+cgrates.org,D1,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204
 `
 	DispatcherHostCSVContent = `
 #Tenant[0],ID[1],Address[2],Transport[3],TLS[4]

@@ -1634,14 +1634,12 @@ func (dm *DataManager) SetDispatcherProfile(ctx *context.Context, dpp *Dispatche
 		return err
 	}
 	if withIndex {
-		var oldContexes *[]string
 		var oldFiltersIDs *[]string
 		if oldDpp != nil {
-			oldContexes = &oldDpp.Subsystems
 			oldFiltersIDs = &oldDpp.FilterIDs
 		}
-		if err = updatedIndexesWithContexts(ctx, dm, utils.CacheDispatcherFilterIndexes, dpp.Tenant, dpp.ID,
-			oldContexes, oldFiltersIDs, dpp.Subsystems, dpp.FilterIDs); err != nil {
+		if err = updatedIndexes(ctx, dm, utils.CacheDispatcherFilterIndexes, dpp.Tenant,
+			utils.EmptyString, dpp.ID, oldFiltersIDs, dpp.FilterIDs, false); err != nil {
 			return
 		}
 	}
@@ -1676,11 +1674,9 @@ func (dm *DataManager) RemoveDispatcherProfile(ctx *context.Context, tenant, id 
 		if err = removeIndexFiltersItem(ctx, dm, utils.CacheDispatcherFilterIndexes, tenant, id, oldDpp.FilterIDs); err != nil {
 			return
 		}
-		for _, sub := range oldDpp.Subsystems {
-			if err = removeItemFromFilterIndex(ctx, dm, utils.CacheDispatcherFilterIndexes,
-				tenant, sub, id, oldDpp.FilterIDs); err != nil {
-				return
-			}
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheDispatcherFilterIndexes,
+			tenant, utils.EmptyString, id, oldDpp.FilterIDs); err != nil {
+			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]; itm.Replicate {

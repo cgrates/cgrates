@@ -34,7 +34,6 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		Attributes_conns:      &[]string{utils.MetaInternal, "*conn1"},
 		Nested_fields:         utils.BoolPointer(true),
-		Any_subsystem:         utils.BoolPointer(true),
 	}
 	expected := &DispatcherSCfg{
 		Enabled:             true,
@@ -44,7 +43,6 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		NestedFields:        true,
-		AnySubsystem:        true,
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
@@ -73,7 +71,6 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
-		utils.AnySubsystemCfg:        true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -103,7 +100,6 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix"},
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{"*internal", "*conn1"},
-		utils.AnySubsystemCfg:        true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -123,7 +119,6 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.AttributeSConnsCfg:     []string{},
-		utils.AnySubsystemCfg:        true,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -140,7 +135,6 @@ func TestDispatcherSCfgClone(t *testing.T) {
 		SuffixIndexedFields: &[]string{"*req.prefix", "*req.indexed", "*req.fields"},
 		AttributeSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		NestedFields:        true,
-		AnySubsystem:        true,
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -173,7 +167,6 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        true,
 		AttributeSConns:     []string{"*localhost"},
-		AnySubsystem:        false,
 	}
 
 	v2 := &DispatcherSCfg{
@@ -184,7 +177,6 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        false,
 		AttributeSConns:     []string{"*birpc"},
-		AnySubsystem:        true,
 	}
 
 	expected := &DispatcherSJsonCfg{
@@ -195,7 +187,6 @@ func TestDispatcherSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Attributes_conns:      &[]string{"*birpc"},
-		Any_subsystem:         utils.BoolPointer(true),
 	}
 
 	rcv := diffDispatcherSJsonCfg(d, v1, v2)
