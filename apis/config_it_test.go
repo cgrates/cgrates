@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"fmt"
 	"path"
 	"reflect"
 	"testing"
@@ -54,16 +53,22 @@ var (
 		testCfgSetJSONGetJSONConfig,
 		testCfgKillEngine,
 		//Store Cfg in Database Test
-		//testCfgInitCfgStore,
-		//testCfgInitDataDbStore,
-		//testCfgResetStorDbStore,
-		//testCfgResetConfigDBStore,
-		//testCfgStartEngineStore,
-		//testCfgRPCConnStore,
-		//testCfgDataDBConnStore,
-		//testCfgGetConfigStore,
-		//testCfgStoreConfigStore,
-		//testCfgKillEngineStore,
+		testCfgInitCfgStore,
+		testCfgInitDataDbStore,
+		testCfgResetStorDbStore,
+		testCfgResetConfigDBStore,
+		testCfgStartEngineStore,
+		testCfgRPCConnStore,
+		testCfgDataDBConnStore,
+		testCfgGetConfigStoreNil,
+		testCfgStoreConfigStore,
+		testCfgGetConfigStore,
+		testCfgSetGetConfigStore,
+		testCfgGetConfigStoreAgain,
+		testCfgMdfSectConfigStore,
+		testCfgReloadConfigStore,
+		//testCfgGetAfterReloadStore,
+		testCfgKillEngineStore,
 	}
 )
 
@@ -375,12 +380,15 @@ func testCfgDataDBConnStore(t *testing.T) {
 	}
 }
 
-func testCfgGetConfigStore(t *testing.T) {
+func testCfgGetConfigStoreNil(t *testing.T) {
 	attr, err := connDb.AttributeServJsonCfg()
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(attr)
+	var expected *config.AttributeSJsonCfg
+	if !reflect.DeepEqual(attr, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, attr)
+	}
 }
 
 func testCfgStoreConfigStore(t *testing.T) {
@@ -398,6 +406,171 @@ func testCfgStoreConfigStore(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
 
+}
+
+func testCfgGetConfigStore(t *testing.T) {
+	attr, err := connDb.AttributeServJsonCfg()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := &config.AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Stats_conns:           &[]string{"*localhost"},
+		Resources_conns:       &[]string{"*localhost"},
+		Admins_conns:          &[]string{"*localhost"},
+		Indexed_selects:       nil,
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         nil,
+		Process_runs:          nil,
+	}
+	if !reflect.DeepEqual(attr, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
+	}
+}
+
+func testCfgSetGetConfigStore(t *testing.T) {
+	var reply string
+
+	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1SetConfig,
+		&config.SetConfigArgs{
+			APIOpts: nil,
+			Tenant:  "",
+			Config: map[string]interface{}{
+				"attributes": map[string]interface{}{
+					"admins_conns":          []string{"*internal"},
+					"enabled":               true,
+					"indexed_selects":       false,
+					"nested_fields":         false,
+					"prefix_indexed_fields": []string{},
+					"process_runs":          2,
+					"resources_conns":       []string{"*internal"},
+					"stats_conns":           []string{"*internal"},
+					"suffix_indexed_fields": []string{},
+				},
+			},
+			DryRun: false,
+		},
+		&reply); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
+	}
+	expectedGet := map[string]interface{}{
+		"attributes": map[string]interface{}{
+			"admins_conns":          []string{"*internal"},
+			"enabled":               true,
+			"indexed_selects":       false,
+			"nested_fields":         false,
+			"prefix_indexed_fields": []string{},
+			"process_runs":          2,
+			"resources_conns":       []string{"*internal"},
+			"stats_conns":           []string{"*internal"},
+			"suffix_indexed_fields": []string{},
+		},
+	}
+	var replyGet map[string]interface{}
+	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
+		&config.SectionWithAPIOpts{
+			APIOpts:  nil,
+			Tenant:   utils.CGRateSorg,
+			Sections: []string{"attributes"},
+		},
+		&replyGet); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(expectedGet), utils.ToJSON(replyGet)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
+	}
+}
+
+func testCfgGetConfigStoreAgain(t *testing.T) {
+	attr, err := connDb.AttributeServJsonCfg()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := &config.AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Stats_conns:           &[]string{"*internal"},
+		Resources_conns:       &[]string{"*internal"},
+		Admins_conns:          &[]string{"*internal"},
+		Indexed_selects:       utils.BoolPointer(false),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         nil,
+		Process_runs:          utils.IntPointer(2),
+	}
+	if !reflect.DeepEqual(attr, expected) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(attr))
+	}
+}
+
+func testCfgMdfSectConfigStore(t *testing.T) {
+	attrSect := map[string]interface{}{
+		"admins_conns":          []string{"*internal"},
+		"enabled":               true,
+		"indexed_selects":       false,
+		"nested_fields":         false,
+		"prefix_indexed_fields": []string{},
+		"process_runs":          2,
+		"resources_conns":       []string{"*internal"},
+		"stats_conns":           []string{"*internal"},
+		"suffix_indexed_fields": []string{},
+	}
+	err := connDb.SetSection(context.Background(), "attributes", attrSect)
+
+	if err != nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+	}
+}
+
+func testCfgReloadConfigStore(t *testing.T) {
+	var rldArgs string
+	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1ReloadConfig,
+		&config.ReloadArgs{
+			APIOpts: nil,
+			Tenant:  "",
+			Section: "attributes",
+			DryRun:  false,
+		},
+		&rldArgs); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(rldArgs)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(rldArgs))
+	}
+}
+
+func testCfgGetAfterReloadStore(t *testing.T) {
+	expectedGet := map[string]interface{}{
+		"attributes": map[string]interface{}{
+			"admins_conns":          []string{"*internal"},
+			"enabled":               true,
+			"indexed_selects":       false,
+			"nested_fields":         false,
+			"prefix_indexed_fields": []string{},
+			"process_runs":          2,
+			"resources_conns":       []string{"*internal"},
+			"stats_conns":           []string{"*internal"},
+			"suffix_indexed_fields": []string{},
+		},
+	}
+	var replyGet map[string]interface{}
+	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfig,
+		&config.SectionWithAPIOpts{
+			APIOpts:  nil,
+			Tenant:   utils.CGRateSorg,
+			Sections: []string{"attributes"},
+		},
+		&replyGet); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(utils.ToJSON(expectedGet), utils.ToJSON(replyGet)) {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(replyGet))
+	}
 }
 
 func testCfgKillEngineStore(t *testing.T) {
