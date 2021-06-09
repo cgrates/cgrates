@@ -520,10 +520,12 @@ func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
 		},
 	}
 
-	var reply *string
+	var reply string
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
 		actPrf, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
 	}
 
 	var rplyActPrf engine.ActionProfile
