@@ -514,7 +514,7 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Stats_conns:           &[]string{"*internal"},
 		Resources_conns:       &[]string{"*internal"},
 		Admins_conns:          &[]string{"*internal"},
-		Indexed_selects:       utils.BoolPointer(false),
+		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: nil,
 		Suffix_indexed_fields: nil,
@@ -550,7 +550,7 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 		"attributes": map[string]interface{}{
 			"admins_conns":          []string{"*internal"},
 			"enabled":               true,
-			"indexed_selects":       false,
+			"indexed_selects":       true,
 			"nested_fields":         false,
 			"prefix_indexed_fields": []string{},
 			"process_runs":          2,
