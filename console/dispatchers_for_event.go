@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdDispatcherProfile{
 		name:      "dispatches_for_event",
-		rpcMethod: utils.DispatcherSv1GetProfileForEvent,
+		rpcMethod: utils.DispatcherSv1GetProfilesForEvent,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -60,6 +60,6 @@ func (self *CmdDispatcherProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdDispatcherProfile) RpcResult() interface{} {
-	var s engine.DispatcherProfile
+	var s engine.DispatcherProfiles
 	return &s
 }

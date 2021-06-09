@@ -1410,10 +1410,10 @@ const (
 
 // DispatcherS APIs
 const (
-	DispatcherSv1                   = "DispatcherSv1"
-	DispatcherSv1Ping               = "DispatcherSv1.Ping"
-	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
-	DispatcherServicePing           = "DispatcherService.Ping"
+	DispatcherSv1                    = "DispatcherSv1"
+	DispatcherSv1Ping                = "DispatcherSv1.Ping"
+	DispatcherSv1GetProfilesForEvent = "DispatcherSv1.GetProfilesForEvent"
+	DispatcherServicePing            = "DispatcherService.Ping"
 )
 
 // RegistrarS APIs
@@ -2143,7 +2143,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesStartTime, OptsRatesUsage, Op
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext,
 	OptsAttributesProcessRuns, OptsRoutesLimit, OptsRoutesOffset, OptsChargeable,
-	RemoteHostOpt, CacheOpt})
+	RemoteHostOpt, CacheOpt, OptsRoutesProfilesCount, OptsDispatchersProfilesCount})
 
 // EventExporter metrics
 const (
@@ -2165,7 +2165,7 @@ const (
 
 // Event Opts
 const (
-	OptsRouteProfilesCount   = "*routeProfilesCount"
+	OptsRoutesProfilesCount  = "*routesProfilesCount"
 	OptsRoutesLimit          = "*routes_limit"
 	OptsRoutesOffset         = "*routes_offset"
 	OptsRatesStartTime       = "*ratesStartTime"
@@ -2189,8 +2189,9 @@ const (
 	OptsStirPublicKeyPath      = "*stirPublicKeyPath"
 	OptsStirPrivateKeyPath     = "*stirPrivateKeyPath"
 	// DispatcherS
-	OptsAPIKey  = "*apiKey"
-	OptsRouteID = "*routeID"
+	OptsAPIKey                   = "*apiKey"
+	OptsRouteID                  = "*routeID"
+	OptsDispatchersProfilesCount = "*dispatchersProfilesCount"
 	// EEs
 	OptsEEsVerbose = "*eesVerbose"
 	// Others
