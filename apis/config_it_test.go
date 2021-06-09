@@ -67,7 +67,7 @@ var (
 		testCfgGetConfigStoreAgain,
 		testCfgMdfSectConfigStore,
 		testCfgReloadConfigStore,
-		//testCfgGetAfterReloadStore,
+		testCfgGetAfterReloadStore,
 		testCfgKillEngineStore,
 	}
 )
@@ -509,16 +509,17 @@ func testCfgGetConfigStoreAgain(t *testing.T) {
 }
 
 func testCfgMdfSectConfigStore(t *testing.T) {
-	attrSect := map[string]interface{}{
-		"admins_conns":          []string{"*internal"},
-		"enabled":               true,
-		"indexed_selects":       false,
-		"nested_fields":         false,
-		"prefix_indexed_fields": []string{},
-		"process_runs":          2,
-		"resources_conns":       []string{"*internal"},
-		"stats_conns":           []string{"*internal"},
-		"suffix_indexed_fields": []string{},
+	attrSect := &config.AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(true),
+		Stats_conns:           &[]string{"*internal"},
+		Resources_conns:       &[]string{"*internal"},
+		Admins_conns:          &[]string{"*internal"},
+		Indexed_selects:       utils.BoolPointer(false),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: nil,
+		Suffix_indexed_fields: nil,
+		Nested_fields:         nil,
+		Process_runs:          utils.IntPointer(2),
 	}
 	err := connDb.SetSection(context.Background(), "attributes", attrSect)
 
