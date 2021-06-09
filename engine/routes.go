@@ -698,7 +698,7 @@ func (rpS *RouteService) sortedRoutesForEvent(tnt string, args *ArgsGetRoutes) (
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
-	if prfCountOpt, err := args.OptAsInt64(utils.OptsRouteProfilesCount); err != nil {
+	if prfCountOpt, err := args.OptAsInt64(utils.OptsRoutesProfilesCount); err != nil {
 		if err != utils.ErrNotFound { // is an conversion error
 			return nil, err
 		}

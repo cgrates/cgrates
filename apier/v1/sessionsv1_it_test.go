@@ -311,7 +311,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:        authUsage,
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest

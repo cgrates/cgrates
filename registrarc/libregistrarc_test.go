@@ -281,7 +281,7 @@ func TestRegister(t *testing.T) {
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfileForEvent, id, id)
+	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfilesForEvent, id, id)
 	args2JSON, err = json.Marshal(args2)
 	if err != nil {
 		t.Fatal(err)
@@ -290,7 +290,7 @@ func TestRegister(t *testing.T) {
 	if _, err := register(req); err == nil {
 		t.Errorf("Expected error,received: nil")
 	}
-	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfileForEvent, id, id)
+	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfilesForEvent, id, id)
 	args2JSON, err = json.Marshal(args2)
 	if err != nil {
 		t.Fatal(err)

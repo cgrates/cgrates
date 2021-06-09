@@ -749,9 +749,9 @@ type DispatcherSv1 struct {
 }
 
 // GetProfileForEvent returns the matching dispatcher profile for the provided event
-func (dSv1 DispatcherSv1) GetProfileForEvent(ev *utils.CGREvent,
-	dPrfl *engine.DispatcherProfile) error {
-	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
+func (dSv1 DispatcherSv1) GetProfilesForEvent(ev *utils.CGREvent,
+	dPrfl *engine.DispatcherProfiles) error {
+	return dSv1.dS.V1GetProfilesForEvent(ev, dPrfl)
 }
 
 /*
