@@ -185,7 +185,7 @@ func testV1RouteGetWeightRoutes(t *testing.T) {
 				utils.AccountField: "1007",
 				utils.Destination:  "+491511231234",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -237,7 +237,7 @@ func testV1RouteGetLeastCostRoutes(t *testing.T) {
 				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        "1m20s",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -291,7 +291,7 @@ func testV1RouteGetLeastCostRoutesWithoutUsage(t *testing.T) {
 				utils.Destination:  "1002",
 				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -347,7 +347,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost(t *testing.T) {
 				utils.SetupTime:    time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:        "1m20s",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -418,7 +418,7 @@ func testV1RouteGetLeastCostRoutesWithMaxCost2(t *testing.T) {
 				utils.Usage:        "10m20s",
 				utils.Category:     "call",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -465,7 +465,7 @@ func testV1RouteGetHighestCostRoutes(t *testing.T) {
 				utils.Usage:        "1m20s",
 				"DistinctMatch":    "*highest_cost",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -1162,7 +1162,7 @@ func testV1RoutesOneRouteWithoutDestination(t *testing.T) {
 				utils.SetupTime:    utils.MetaNow,
 				utils.Usage:        "2m",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -1239,7 +1239,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 				utils.Usage:        "2m",
 				"Month":            "April",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := engine.SortedRoutesList{{
@@ -1277,7 +1277,7 @@ func testV1RouteMultipleRouteSameID(t *testing.T) {
 				utils.Usage:        "2m",
 				"Month":            "May",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls = engine.SortedRoutesList{{
@@ -1375,7 +1375,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				utils.Usage:        "30s",
 				"EventType":        "testV1RouteAccountWithRatingPlan",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls := &engine.SortedRoutesList{{
@@ -1445,7 +1445,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				utils.Usage:        "60s",
 				"EventType":        "testV1RouteAccountWithRatingPlan",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls = &engine.SortedRoutesList{{
@@ -1517,7 +1517,7 @@ func testV1RouteAccountWithRatingPlan(t *testing.T) {
 				utils.Usage:        "1m1s",
 				"EventType":        "testV1RouteAccountWithRatingPlan",
 			},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 1},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 1},
 		},
 	}
 	eSpls = &engine.SortedRoutesList{{

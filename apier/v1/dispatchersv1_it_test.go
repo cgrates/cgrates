@@ -139,10 +139,11 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			utils.EventName: "Event1",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAny,
+			utils.Subsys:                       utils.MetaAny,
+			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
-	var reply engine.DispatcherProfile
+	var reply engine.DispatcherProfiles
 	expected := engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "EVENT1",
@@ -171,12 +172,14 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		expected.Hosts[1].FilterIDs = nil
 	}
 	expected.Hosts.Sort()
-	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
+	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
 		t.Fatal(err)
+	} else if len(reply) != 1 {
+		t.Fatalf("Unexpected number of profiles:%v", len(reply))
 	}
-	reply.Hosts.Sort()
-	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+	reply[0].Hosts.Sort()
+	if !reflect.DeepEqual(expected, *reply[0]) {
+		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply[0]))
 	}
 
 	arg2 := &utils.CGREvent{
@@ -185,16 +188,19 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			utils.EventName: "Event1",
 		},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAny,
+			utils.Subsys:                       utils.MetaAny,
+			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
 	expected.Hosts.Sort()
-	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg2, &reply); err != nil {
+	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg2, &reply); err != nil {
 		t.Fatal(err)
+	} else if len(reply) != 1 {
+		t.Fatalf("Unexpected number of profiles:%v", len(reply))
 	}
-	reply.Hosts.Sort()
-	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+	reply[0].Hosts.Sort()
+	if !reflect.DeepEqual(expected, *reply[0]) {
+		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply[0]))
 	}
 }
 
@@ -204,11 +210,12 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		ID:     "testDspv2",
 		Event:  map[string]interface{}{},
 		APIOpts: map[string]interface{}{
-			utils.Subsys: utils.MetaAny,
-			"*method":    utils.DispatcherSv1GetProfileForEvent,
+			utils.Subsys:                       utils.MetaAny,
+			"*method":                          utils.DispatcherSv1GetProfilesForEvent,
+			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
-	var reply engine.DispatcherProfile
+	var reply engine.DispatcherProfiles
 	expected := engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "EVENT6",
@@ -230,12 +237,14 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		expected.Hosts[0].FilterIDs = nil
 	}
 	expected.Hosts.Sort()
-	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
+	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
 		t.Fatal(err)
+	} else if len(reply) != 1 {
+		t.Fatalf("Unexpected number of profiles:%v", len(reply))
 	}
-	reply.Hosts.Sort()
-	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+	reply[0].Hosts.Sort()
+	if !reflect.DeepEqual(expected, *reply[0]) {
+		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply[0]))
 	}
 }
 
