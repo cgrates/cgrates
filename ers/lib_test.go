@@ -74,7 +74,7 @@ func testCleanupFiles(t *testing.T) {
 		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs",
 		"/tmp/partErs1", "/tmp/partErs2", "tmp/flatstoreErs",
 		"/tmp/ErsJSON", "/tmp/readerWithTemplate",
-		"/tmp/flatstoreACKErs"} {
+		"/tmp/flatstoreACKErs", "/tmp/flatstoreMMErs"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}

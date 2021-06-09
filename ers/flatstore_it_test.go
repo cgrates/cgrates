@@ -72,6 +72,14 @@ INVITE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK
 ACK|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454690|*prepaid|1001|1002||3099:1909036290|flatstore"1.0
 BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454692|||||3099:1909036290|flatstore"1.0`
 
+	ackSuccessfull2 = `"1","INVITE","CG123456789-1","123456789","CGqwerty-asd5sdf456s1f53a1sf51s648486h4et86h46","200","OK","2021-06-01 00:00:09","1001","1001@192.168.56.203","192.168.56.203","192.168.56.20","sip:1001@192.168.56.203:5060;transport=UDP","1002","1002","local","1","test"
+"2","ACK","CG123456789-1","123456789","CGqwerty-asd5sdf456s1f53a1sf51s648486h4et86h46","200","OK","2021-06-01 00:00:09","1001","1001@192.168.56.203","192.168.56.203","192.168.56.20",,"1002","1002","192.168.57.203","1","test"
+"3","INVITE","CG123456789-2","123456799","CGqwerty-56dfghs56hj4fg56j56sdgf516351drfg","200","OK","2021-06-01 00:00:10","1003","1003@192.168.56.204","192.168.56.204","192.168.56.21","sip:1003@192.168.56.204:5060;transport=UDP","1004","1004","local","1","test"
+"4","ACK","CG123456789-2","123456799","CGqwerty-56dfghs56hj4fg56j56sdgf516351drfg","200","OK","2021-06-01 00:00:10","1003","1003@192.168.56.204","192.168.56.204","192.168.56.21",,"1004","1004","192.168.57.204","1","test"
+"5","BYE","CG123456789-1","123456789","CGqwerty-asd5sdf456s1f53a1sf51s648486h4et86h46","200","OK","2021-06-01 00:00:37","1001","1001@192.168.56.203","192.168.56.203","192.168.56.20",,"1002","1002","192.168.57.203","1","test"
+"6","CANCEL","CG123456789-3",,"CGqwerty-dfgdfhdfgjfgdh534dfg563h56dr56deghed6r5","200","OK","2021-06-01 00:00:42","1005","1005@192.168.56.201","192.168.56.201","192.168.56.2",,"1006","1006","192.168.56.301","0","test"
+"7","BYE","CG123456789-2","123456799","CGqwerty-56dfghs56hj4fg56j56sdgf516351drfg","200","OK","2021-06-01 00:00:50","1003","1003@192.168.56.204","192.168.56.204","192.168.56.21",,"1004","1004","192.168.57.204","1","test"`
+
 	flatstoreTests = []func(t *testing.T){
 		testCreateDirs,
 		testFlatstoreITInitConfig,
@@ -84,6 +92,8 @@ BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|14
 		testFlatstoreITAnalyseCDRs,
 		testFlatstoreITHandleCdr2File,
 		testFlatstoreITAnalyseCDRs2,
+		testFlatstoreITHandleCdr3File,
+		testFlatstoreITAnalyseCDRs3,
 		testCleanupFiles,
 		testFlatstoreITKillEngine,
 	}
@@ -268,6 +278,49 @@ func testFlatstoreITAnalyseCDRs2(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }
+
+func testFlatstoreITHandleCdr3File(t *testing.T) {
+	if err := os.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(ackSuccessfull2), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	//Rename(oldpath, newpath string)
+	if err := os.Rename(path.Join("/tmp", "acc_1.log"), path.Join("/tmp/flatstoreMMErs/in", "acc_1.log")); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second)
+	// check the files to be processed
+	filesInDir, _ := os.ReadDir("/tmp/flatstoreErs/in")
+	if len(filesInDir) != 0 {
+		fls := make([]string, len(filesInDir))
+		for i, fs := range filesInDir {
+			fls[i] = fs.Name()
+		}
+		t.Errorf("Files in ersInDir: %+v", fls)
+	}
+	filesOutDir, _ := os.ReadDir("/tmp/flatstoreMMErs/out")
+	ids := []string{}
+	for _, fD := range filesOutDir {
+		ids = append(ids, fD.Name())
+	}
+	if len(filesOutDir) != 1 {
+		t.Errorf("Unexpected number of files in output directory: %+v, %q", len(filesOutDir), ids)
+	}
+}
+
+func testFlatstoreITAnalyseCDRs3(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatstoreMMErs"}}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 3 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+	if err := flatstoreRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{OriginHosts: []string{"flatstoreMMErs"}, MinUsage: "1"}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
 func testFlatstoreITKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
