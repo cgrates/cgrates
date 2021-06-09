@@ -129,4 +129,57 @@ func testDspApierUnkownAPiKey(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+func TestDispatcherServiceDispatcherProfileForEventGetDispatchertWithoutAuthentification(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DispatcherSCfg().IndexedSelects = false
+	rpcCl := map[string]chan rpcclient.ClientConnector{}
+	connMng := engine.NewConnManager(cfg, rpcCl)
+	dm := engine.NewDataManager(&engine.DataDBMock{
+		GetKeysForPrefixF: func(string) ([]string, error) {
+			return []string{"dpp_cgrates.org:123"}, nil
+		},
+	}, nil, connMng)
+	dsp := &engine.DispatcherProfile{
+		ID:                 "321",
+		Subsystems:         []string{utils.MetaAccounts},
+		FilterIDs:          []string{"filter"},
+		ActivationInterval: &utils.ActivationInterval{},
+		Strategy:           "",
+		StrategyParams:     nil,
+		Weight:             0,
+		Hosts:              nil,
+	}
+	err := dm.SetDispatcherProfile(dsp, false)
+	if err == nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
+	}
+	fltr := &engine.Filter{
+		ID:    "filter",
+		Rules: nil,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(1999, 2, 3, 4, 5, 6, 700000000, time.UTC),
+			ExpiryTime:     time.Date(2000, 2, 3, 4, 5, 6, 700000000, time.UTC),
+		},
+	}
+	err = dm.SetFilter(fltr, false)
+	if err == nil {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotImplemented, err)
+	}
+	fltrs := engine.NewFilterS(cfg, connMng, dm)
+	dss := NewDispatcherService(dm, cfg, fltrs, connMng)
+	ev := &utils.CGREvent{
+		ID: "321",
+		Event: map[string]interface{}{
+			utils.AccountField: "1001",
+			"Password":         "CGRateS.org",
+			"RunID":            utils.MetaDefault,
+		},
+	}
+	tnt := ev.Tenant
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MetaAccounts)
+	expected := utils.ErrNotImplemented
+	if err == nil || err != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
 */

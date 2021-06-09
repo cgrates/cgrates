@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherService constructs a DispatcherService
@@ -100,8 +101,8 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string) (er
 
 // dispatcherForEvent returns a dispatcher instance configured for specific event
 // or utils.ErrNotFound if none present
-func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGREvent,
-	subsys string) (dPrlf *engine.DispatcherProfile, err error) {
+func (dS *DispatcherService) dispatcherProfilesForEvent(tnt string, ev *utils.CGREvent,
+	subsys string) (dPrlfs engine.DispatcherProfiles, err error) {
 	// find out the matching profiles
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -136,13 +137,22 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 		} else if !pass {
 			continue
 		}
-		if dPrlf == nil || prfl.Weight > dPrlf.Weight {
-			dPrlf = prfl
-		}
+		dPrlfs = append(dPrlfs, prfl)
 	}
-	if dPrlf == nil {
+	if len(dPrlfs) == 0 {
 		err = utils.ErrNotFound
+		return
 	}
+	prfCount := len(dPrlfs) // if the option is not present return for all profiles
+	if prfCountOpt, err := ev.OptAsInt64(utils.OptsDispatchersProfilesCount); err != nil {
+		if err != utils.ErrNotFound { // is an conversion error
+			return nil, err
+		}
+	} else if prfCount > int(prfCountOpt) { // it has the option and is smaller that the current number of profiles
+		prfCount = int(prfCountOpt)
+	}
+	dPrlfs.Sort()
+	dPrlfs = dPrlfs[:prfCount]
 	return
 }
 
@@ -153,35 +163,40 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
-	dPrfl, errDsp := dS.dispatcherProfileForEvent(tnt, ev, subsys)
-	if errDsp != nil {
-		return utils.NewErrDispatcherS(errDsp)
-	}
-	tntID := dPrfl.TenantID()
-	// get or build the Dispatcher for the config
-	var d Dispatcher
-	if x, ok := engine.Cache.Get(utils.CacheDispatchers,
-		tntID); ok && x != nil {
-		d = x.(Dispatcher)
-	} else if d, err = newDispatcher(dS.dm, dPrfl); err != nil {
+	var dPrfls engine.DispatcherProfiles
+	if dPrfls, err = dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
 		return utils.NewErrDispatcherS(err)
 	}
-	if errCh := engine.Cache.Set(context.TODO(), utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); errCh != nil {
-		return utils.NewErrDispatcherS(errCh)
+	for _, dPrfl := range dPrfls {
+		tntID := dPrfl.TenantID()
+		// get or build the Dispatcher for the config
+		var d Dispatcher
+		if x, ok := engine.Cache.Get(utils.CacheDispatchers,
+			tntID); ok && x != nil {
+			d = x.(Dispatcher)
+		} else if d, err = newDispatcher(dS.dm, dPrfl); err != nil {
+			return utils.NewErrDispatcherS(err)
+		}
+		if err = engine.Cache.Set(context.TODO(), utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
+			return utils.NewErrDispatcherS(err)
+		}
+		if err = d.Dispatch(utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]), subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+			return
+		}
 	}
-	return d.Dispatch(utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]), subsys, serviceMethod, args, reply)
+	return // return the last error
 }
 
-func (dS *DispatcherService) V1GetProfileForEvent(ev *utils.CGREvent,
-	dPfl *engine.DispatcherProfile) (err error) {
+func (dS *DispatcherService) V1GetProfilesForEvent(ev *utils.CGREvent,
+	dPfl *engine.DispatcherProfiles) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
 		tnt = dS.cfg.GeneralCfg().DefaultTenant
 	}
-	retDPfl, errDpfl := dS.dispatcherProfileForEvent(tnt, ev, utils.IfaceAsString(ev.APIOpts[utils.Subsys]))
+	retDPfl, errDpfl := dS.dispatcherProfilesForEvent(tnt, ev, utils.IfaceAsString(ev.APIOpts[utils.Subsys]))
 	if errDpfl != nil {
 		return utils.NewErrDispatcherS(errDpfl)
 	}
-	*dPfl = *retDPfl
+	*dPfl = retDPfl
 	return
 }

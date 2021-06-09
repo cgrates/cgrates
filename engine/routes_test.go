@@ -2180,7 +2180,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "utils.CGREvent1",
 			Event:   map[string]interface{}{},
-			APIOpts: map[string]interface{}{utils.OptsRouteProfilesCount: 3},
+			APIOpts: map[string]interface{}{utils.OptsRoutesProfilesCount: 3},
 		},
 	}
 
