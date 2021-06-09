@@ -1,0 +1,41 @@
+{
+    // CGRateS Configuration file
+    // will be used in apis/actions_it_test.go
+  
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {
+      "db_type": "mongo",
+      "db_name": "10",
+      "db_port": 27017,
+    },
+  
+    "stor_db": {
+      "db_type": "mongo",
+      "db_name": "cgrates",
+      "db_port": 27017,
+    },
+  
+    "actions": {
+        "enabled": true,
+        "thresholds_conns": ["*internal"],
+    },
+
+    "stats": {
+        "enabled": true,
+        "store_interval": "-1",
+        "thresholds_conns": ["*internal"],
+    },
+
+    "thresholds": {
+        "enabled": true,
+        "store_interval": "-1",
+        "actions_conns": ["*internal"],
+    },
+  
+    "admins": {
+      "enabled": true,
+    }
+}
