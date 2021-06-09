@@ -103,46 +103,23 @@ func (dS *DispatcherService) authorize(method, tenant string, apiKey string) (er
 func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGREvent,
 	subsys string) (dPrlf *engine.DispatcherProfile, err error) {
 	// find out the matching profiles
-	anyIdxPrfx := utils.ConcatenatedKey(tnt, utils.MetaAny)
-	idxKeyPrfx := anyIdxPrfx
-	if subsys != "" {
-		idxKeyPrfx = utils.ConcatenatedKey(tnt, subsys)
-	}
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
+		utils.MetaVars: utils.MapStorage{
+			utils.Subsys: subsys,
+		},
 	}
 	var prflIDs utils.StringSet
 	if prflIDs, err = engine.MatchingItemIDsForEvent(context.TODO(), evNm,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.cfg.DispatcherSCfg().SuffixIndexedFields,
-		dS.dm, utils.CacheDispatcherFilterIndexes, idxKeyPrfx,
+		dS.dm, utils.CacheDispatcherFilterIndexes, tnt,
 		dS.cfg.DispatcherSCfg().IndexedSelects,
 		dS.cfg.DispatcherSCfg().NestedFields,
-	); err != nil &&
-		err != utils.ErrNotFound {
+	); err != nil {
 		return
-	}
-	if err == utils.ErrNotFound ||
-		dS.cfg.DispatcherSCfg().AnySubsystem {
-		var dPrflAnyIDs utils.StringSet
-		if dPrflAnyIDs, err = engine.MatchingItemIDsForEvent(context.TODO(), evNm,
-			dS.cfg.DispatcherSCfg().StringIndexedFields,
-			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
-			dS.cfg.DispatcherSCfg().SuffixIndexedFields,
-			dS.dm, utils.CacheDispatcherFilterIndexes, anyIdxPrfx,
-			dS.cfg.DispatcherSCfg().IndexedSelects,
-			dS.cfg.DispatcherSCfg().NestedFields,
-		); prflIDs.Size() == 0 {
-			if err != nil { // return the error if no dispatcher matched the needed subsystem
-				return
-			}
-			prflIDs = dPrflAnyIDs
-		} else if err == nil && dPrflAnyIDs.Size() != 0 {
-			prflIDs = utils.JoinStringSet(prflIDs, dPrflAnyIDs)
-		}
-		err = nil // make sure we ignore the error from *any subsystem matching
 	}
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(context.TODO(), tnt, prflID, true, true, utils.NonTransactional)
@@ -153,10 +130,6 @@ func (dS *DispatcherService) dispatcherProfileForEvent(tnt string, ev *utils.CGR
 			continue
 		}
 
-		if (len(prfl.Subsystems) != 1 || prfl.Subsystems[0] != utils.MetaAny) &&
-			!utils.IsSliceMember(prfl.Subsystems, subsys) {
-			continue
-		}
 		if pass, err := dS.fltrS.Pass(context.TODO(), tnt, prfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err

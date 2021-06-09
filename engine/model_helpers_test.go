@@ -1609,7 +1609,6 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		TPid:           "TP1",
 		Tenant:         "cgrates.org",
 		ID:             "Dsp",
-		Subsystems:     []string{"*any"},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
@@ -1628,7 +1627,6 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 	expected := &DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "Dsp",
-		Subsystems:     []string{"*any"},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
 		StrategyParams: map[string]interface{}{},
@@ -1654,7 +1652,6 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 	exp := &utils.TPDispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "Dsp",
-		Subsystems:     []string{"*any"},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
@@ -1672,7 +1669,6 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 	exp2 := &utils.TPDispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "Dsp",
-		Subsystems:     []string{"*any"},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
@@ -1691,7 +1687,6 @@ func TestDispatcherProfileToAPI(t *testing.T) {
 	dspPrf := &DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "Dsp",
-		Subsystems:     []string{"*any"},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
 		StrategyParams: map[string]interface{}{},
@@ -1718,7 +1713,6 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 		TPid:           "TP1",
 		Tenant:         "cgrates.org",
 		ID:             "Dsp",
-		Subsystems:     []string{"*any"},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "FLTR_ACNT_dan", "FLTR_DST_DE"},
 		Strategy:       utils.MetaFirst,
 		StrategyParams: []interface{}{},
@@ -1745,7 +1739,6 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			Tpid:           "TP1",
 			Tenant:         "cgrates.org",
 			ID:             "Dsp",
-			Subsystems:     "*any",
 			FilterIDs:      "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
 			Strategy:       utils.MetaFirst,
 			Weight:         20,
@@ -3217,8 +3210,7 @@ func TestRateProfileMdlsCSVHeader(t *testing.T) {
 
 func TestDispatcherProfileToAPICase2(t *testing.T) {
 	structTest := &DispatcherProfile{
-		Subsystems: []string{},
-		FilterIDs:  []string{"field1", "field2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
+		FilterIDs: []string{"field1", "field2", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z"},
 		StrategyParams: map[string]interface{}{
 			"Field1": "Params1",
 		},
@@ -3231,7 +3223,6 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 	}
 
 	expStruct := &utils.TPDispatcherProfile{
-		Subsystems:     []string{},
 		FilterIDs:      []string{"*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:35:00Z", "field1", "field2"},
 		StrategyParams: []interface{}{"Params1"},
 		Hosts: []*utils.TPDispatcherHostProfile{
@@ -3251,7 +3242,6 @@ func TestDispatcherProfileToAPICase2(t *testing.T) {
 
 func TestAPItoDispatcherProfileCase2(t *testing.T) {
 	structTest := &utils.TPDispatcherProfile{
-		Subsystems:     []string{},
 		FilterIDs:      []string{},
 		StrategyParams: []interface{}{"Param1"},
 		Hosts: []*utils.TPDispatcherHostProfile{{
@@ -3259,8 +3249,7 @@ func TestAPItoDispatcherProfileCase2(t *testing.T) {
 		}},
 	}
 	expStruct := &DispatcherProfile{
-		Subsystems: []string{},
-		FilterIDs:  []string{},
+		FilterIDs: []string{},
 		StrategyParams: map[string]interface{}{
 			"0": "Param1",
 		},
@@ -3319,7 +3308,6 @@ func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
 			Tpid:           "TP1",
 			Tenant:         "cgrates.org",
 			ID:             "Dsp",
-			Subsystems:     "*any",
 			FilterIDs:      "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z;FLTR_ACNT_dan;FLTR_DST_DE",
 			Strategy:       utils.MetaFirst,
 			Weight:         20,
@@ -3338,7 +3326,7 @@ func TestTPDispatcherProfilesCSVHeader(t *testing.T) {
 			ConnParameters: "192.168.54.204",
 		},
 	}
-	expected := []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.Weight,
+	expected := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
 		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters}
 	result := structTest.CSVHeader()

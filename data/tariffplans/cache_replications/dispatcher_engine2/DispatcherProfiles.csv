@@ -1,4 +1,4 @@
-#Tenant,ID,Subsystems,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,InternalDispatcher,*caches;*core,,30,*weight,,Self,,20,false,
-cgrates.org,ExternalDispatcher,*attributes,,10,*weight,,Engine1,,20,false,
-cgrates.org,Engine2,*chargers,,10,*weight,,Engine1,,20,false,*ratio:1
+#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
+cgrates.org,InternalDispatcher,*string:~*vars.*subsys:*caches|*core,30,*weight,,Self,,20,false,
+cgrates.org,ExternalDispatcher,*string:~*vars.*subsys:*attributes,10,*weight,,Engine1,,20,false,
+cgrates.org,Engine2,*string:~*vars.*subsys:*chargers,10,*weight,,Engine1,,20,false,*ratio:1

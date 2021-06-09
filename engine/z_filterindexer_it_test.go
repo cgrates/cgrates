@@ -1464,16 +1464,14 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 	}
 
 	dspPrf1 := &DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "DISPATCHER_PRF1",
-		Subsystems: []string{"thresholds"},
-		FilterIDs:  []string{"DISPATCHER_FLTR1"},
+		Tenant:    "cgrates.org",
+		ID:        "DISPATCHER_PRF1",
+		FilterIDs: []string{"DISPATCHER_FLTR1"},
 	}
 	dspPrf2 := &DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "DISPATCHER_PRF2",
-		Subsystems: []string{"thresholds"},
-		FilterIDs:  []string{"DISPATCHER_FLTR2", "*prefix:23:~*req.Destination"},
+		Tenant:    "cgrates.org",
+		ID:        "DISPATCHER_PRF2",
+		FilterIDs: []string{"DISPATCHER_FLTR2", "*prefix:23:~*req.Destination"},
 	}
 	if err := dataManager.SetDispatcherProfile(context.TODO(), dspPrf1, true); err != nil {
 		t.Error(err)
@@ -1503,7 +1501,7 @@ func testITDispatcherProfileIndexes(t *testing.T) {
 		},
 	}
 	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
-		"cgrates.org:thresholds", utils.EmptyString, false, false); err != nil {
+		"cgrates.org", utils.EmptyString, false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))

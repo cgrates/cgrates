@@ -1343,7 +1343,7 @@ type DispatcherProfileMdls []*DispatcherProfileMdl
 
 // CSVHeader return the header for csv fields as a slice of string
 func (tps DispatcherProfileMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.Subsystems, utils.FilterIDs, utils.Weight,
+	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weight,
 		utils.Strategy, utils.StrategyParameters, utils.ConnID, utils.ConnFilterIDs,
 		utils.ConnWeight, utils.ConnBlocker, utils.ConnParameters}
 }
@@ -1351,7 +1351,6 @@ func (tps DispatcherProfileMdls) CSVHeader() (result []string) {
 func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
 	mst := make(map[string]*utils.TPDispatcherProfile)
 	filterMap := make(map[string]utils.StringSet)
-	contextMap := make(map[string]utils.StringSet)
 	connsMap := make(map[string]map[string]utils.TPDispatcherHostProfile)
 	connsFilterMap := make(map[string]map[string]utils.StringSet)
 	for _, tp := range tps {
@@ -1363,12 +1362,6 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 				Tenant: tp.Tenant,
 				ID:     tp.ID,
 			}
-		}
-		if tp.Subsystems != utils.EmptyString {
-			if _, has := contextMap[tenantID]; !has {
-				contextMap[tenantID] = make(utils.StringSet)
-			}
-			contextMap[tenantID].AddSlice(strings.Split(tp.Subsystems, utils.InfieldSep))
 		}
 		if tp.FilterIDs != utils.EmptyString {
 			if _, has := filterMap[tenantID]; !has {
@@ -1423,7 +1416,6 @@ func (tps DispatcherProfileMdls) AsTPDispatcherProfiles() (result []*utils.TPDis
 	for tntID, tp := range mst {
 		result[i] = tp
 		result[i].FilterIDs = filterMap[tntID].AsSlice()
-		result[i].Subsystems = contextMap[tntID].AsSlice()
 		for conID, conn := range connsMap[tntID] {
 			conn.FilterIDs = connsFilterMap[tntID][conID].AsSlice()
 			result[i].Hosts = append(result[i].Hosts,
@@ -1456,7 +1448,6 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 	}
 
 	filters := strings.Join(tpDPP.FilterIDs, utils.InfieldSep)
-	subsystems := strings.Join(tpDPP.Subsystems, utils.InfieldSep)
 
 	strategy := paramsToString(tpDPP.StrategyParams)
 
@@ -1465,7 +1456,6 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 			Tpid:               tpDPP.TPid,
 			Tenant:             tpDPP.Tenant,
 			ID:                 tpDPP.ID,
-			Subsystems:         subsystems,
 			FilterIDs:          filters,
 			Strategy:           tpDPP.Strategy,
 			StrategyParameters: strategy,
@@ -1480,7 +1470,6 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls Dispa
 		Tpid:               tpDPP.TPid,
 		Tenant:             tpDPP.Tenant,
 		ID:                 tpDPP.ID,
-		Subsystems:         subsystems,
 		FilterIDs:          filters,
 		Strategy:           tpDPP.Strategy,
 		StrategyParameters: strategy,
@@ -1518,15 +1507,11 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		Weight:         tpDPP.Weight,
 		Strategy:       tpDPP.Strategy,
 		FilterIDs:      make([]string, len(tpDPP.FilterIDs)),
-		Subsystems:     make([]string, len(tpDPP.Subsystems)),
 		StrategyParams: make(map[string]interface{}),
 		Hosts:          make(DispatcherHostProfiles, len(tpDPP.Hosts)),
 	}
 	for i, fli := range tpDPP.FilterIDs {
 		dpp.FilterIDs[i] = fli
-	}
-	for i, sub := range tpDPP.Subsystems {
-		dpp.Subsystems[i] = sub
 	}
 	for i, param := range tpDPP.StrategyParams {
 		if param != utils.EmptyString {
@@ -1563,7 +1548,6 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 	tpDPP = &utils.TPDispatcherProfile{
 		Tenant:         dpp.Tenant,
 		ID:             dpp.ID,
-		Subsystems:     make([]string, len(dpp.Subsystems)),
 		FilterIDs:      make([]string, len(dpp.FilterIDs)),
 		Strategy:       dpp.Strategy,
 		StrategyParams: make([]interface{}, len(dpp.StrategyParams)),
@@ -1573,9 +1557,6 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 
 	for i, fli := range dpp.FilterIDs {
 		tpDPP.FilterIDs[i] = fli
-	}
-	for i, sub := range dpp.Subsystems {
-		tpDPP.Subsystems[i] = sub
 	}
 	for key, val := range dpp.StrategyParams {
 		// here we expect that the key to be an integer because
@@ -1587,13 +1568,10 @@ func DispatcherProfileToAPI(dpp *DispatcherProfile) (tpDPP *utils.TPDispatcherPr
 	for i, host := range dpp.Hosts {
 		tpDPP.Hosts[i] = &utils.TPDispatcherHostProfile{
 			ID:        host.ID,
-			FilterIDs: make([]string, len(host.FilterIDs)),
+			FilterIDs: utils.CloneStringSlice(host.FilterIDs),
 			Weight:    host.Weight,
 			Params:    make([]interface{}, len(host.Params)),
 			Blocker:   host.Blocker,
-		}
-		for j, fltr := range host.FilterIDs {
-			tpDPP.Hosts[i].FilterIDs[j] = fltr
 		}
 		idx := 0
 		for key, val := range host.Params {

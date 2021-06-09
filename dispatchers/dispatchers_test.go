@@ -44,8 +44,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "321",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      []string{"filter"},
+		FilterIDs:      []string{"filter", "*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -94,7 +93,7 @@ func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	connMng := engine.NewConnManager(cfg, rpcCl)
 	dataDB := engine.NewInternalDB(nil, nil, true)
 	dm := engine.NewDataManager(dataDB, nil, connMng)
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{}
 	tnt := ""
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
@@ -491,8 +490,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -502,7 +500,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -533,8 +531,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -544,7 +541,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -581,8 +578,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -592,7 +588,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -623,8 +619,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -634,7 +629,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -665,8 +660,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      []string{"filter"},
+		FilterIDs:      []string{"filter", "*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -708,8 +702,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -719,7 +712,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -752,8 +745,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,
 		Weight:         0,
@@ -772,7 +764,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -804,8 +796,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      []string{"*string:~*req.RunID:1"},
+		FilterIDs:      []string{"*string:~*req.RunID:1", "*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -888,8 +879,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      []string{"*string:~*req.RunID:1"},
+		FilterIDs:      []string{"*string:~*req.RunID:1", "*string:~*vars.*subsys:" + utils.MetaAccounts},
 		Strategy:       "",
 		StrategyParams: nil,
 		Weight:         0,
@@ -932,8 +922,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,
 		Weight:         0,
@@ -952,7 +941,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMng)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMng, dm), connMng)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -999,8 +988,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	dsp := &engine.DispatcherProfile{
 		Tenant:         "cgrates.org",
 		ID:             "123",
-		Subsystems:     []string{utils.MetaAccounts},
-		FilterIDs:      nil,
+		FilterIDs:      []string{"*string:~*vars.*subsys:" + utils.MetaAccounts},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,
 		Weight:         0,
@@ -1013,7 +1001,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
-	dss := NewDispatcherService(dm, cfg, nil, connMgr)
+	dss := NewDispatcherService(dm, cfg, engine.NewFilterS(cfg, connMgr, dm), connMgr)
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "123",
@@ -1056,15 +1044,13 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 		dm:    dm,
 		fltrS: engine.NewFilterS(cfg, nil, dm),
 	}
-	dS.cfg.DispatcherSCfg().AnySubsystem = false
 
 	dsp1 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1002"},
-		Subsystems: []string{utils.MetaSessionS},
-		ID:         "DSP_1",
-		Strategy:   "*weight",
-		Weight:     10,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*vars.*subsys:" + utils.MetaSessionS},
+		ID:        "DSP_1",
+		Strategy:  "*weight",
+		Weight:    10,
 	}
 	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
 	if err != nil {
@@ -1072,12 +1058,11 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	}
 
 	dsp2 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		Subsystems: []string{utils.MetaAny},
-		ID:         "DSP_2",
-		Strategy:   "*weight",
-		Weight:     20,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ID:        "DSP_2",
+		Strategy:  "*weight",
+		Weight:    20,
 	}
 	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
 	if err != nil {
@@ -1116,15 +1101,13 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 		dm:    dm,
 		fltrS: engine.NewFilterS(cfg, nil, dm),
 	}
-	dS.cfg.DispatcherSCfg().AnySubsystem = false
 
 	dsp1 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		Subsystems: []string{utils.MetaSessionS},
-		ID:         "DSP_1",
-		Strategy:   "*weight",
-		Weight:     20,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*vars.*subsys:" + utils.MetaSessionS},
+		ID:        "DSP_1",
+		Strategy:  "*weight",
+		Weight:    20,
 	}
 	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
 	if err != nil {
@@ -1132,12 +1115,11 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	}
 
 	dsp2 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		Subsystems: []string{utils.MetaAny},
-		ID:         "DSP_2",
-		Strategy:   "*weight",
-		Weight:     10,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ID:        "DSP_2",
+		Strategy:  "*weight",
+		Weight:    10,
 	}
 	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
 	if err != nil {
@@ -1176,15 +1158,13 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 		dm:    dm,
 		fltrS: engine.NewFilterS(cfg, nil, dm),
 	}
-	dS.cfg.DispatcherSCfg().AnySubsystem = false
 
 	dsp1 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1002"},
-		Subsystems: []string{utils.MetaSessionS},
-		ID:         "DSP_1",
-		Strategy:   "*weight",
-		Weight:     20,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*vars.*subsys:" + utils.MetaSessionS},
+		ID:        "DSP_1",
+		Strategy:  "*weight",
+		Weight:    20,
 	}
 	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
 	if err != nil {
@@ -1192,12 +1172,11 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 	}
 
 	dsp2 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1002"},
-		Subsystems: []string{utils.MetaAny},
-		ID:         "DSP_2",
-		Strategy:   "*weight",
-		Weight:     10,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		ID:        "DSP_2",
+		Strategy:  "*weight",
+		Weight:    10,
 	}
 	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
 	if err != nil {
@@ -1238,12 +1217,11 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	}
 
 	dsp1 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1002"},
-		Subsystems: []string{utils.MetaSessionS},
-		ID:         "DSP_1",
-		Strategy:   "*weight",
-		Weight:     20,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1002", "*string:~*vars.*subsys:" + utils.MetaSessionS},
+		ID:        "DSP_1",
+		Strategy:  "*weight",
+		Weight:    20,
 	}
 	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
 	if err != nil {
@@ -1251,12 +1229,11 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	}
 
 	dsp2 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1002"},
-		Subsystems: []string{utils.MetaAny},
-		ID:         "DSP_2",
-		Strategy:   "*weight",
-		Weight:     10,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		ID:        "DSP_2",
+		Strategy:  "*weight",
+		Weight:    10,
 	}
 	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
 	if err != nil {
@@ -1297,12 +1274,11 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}
 
 	dsp1 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		Subsystems: []string{utils.MetaSessionS},
-		ID:         "DSP_1",
-		Strategy:   "*weight",
-		Weight:     10,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*vars.*subsys:" + utils.MetaSessionS},
+		ID:        "DSP_1",
+		Strategy:  "*weight",
+		Weight:    10,
 	}
 	err := dS.dm.SetDispatcherProfile(context.TODO(), dsp1, true)
 	if err != nil {
@@ -1310,12 +1286,11 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}
 
 	dsp2 := &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		FilterIDs:  []string{"*string:~*req.Account:1001"},
-		Subsystems: []string{utils.MetaAny},
-		ID:         "DSP_2",
-		Strategy:   "*weight",
-		Weight:     20,
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ID:        "DSP_2",
+		Strategy:  "*weight",
+		Weight:    20,
 	}
 	err = dS.dm.SetDispatcherProfile(context.TODO(), dsp2, true)
 	if err != nil {

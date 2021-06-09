@@ -49,7 +49,7 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	tntCtx := arg.Tenant
+	tntCtx := tnt
 	switch arg.ItemType {
 	case utils.MetaThresholds:
 		arg.ItemType = utils.CacheThresholdFilterIndexes
@@ -62,11 +62,7 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 	case utils.MetaChargers:
 		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaDispatchers:
-		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
 		arg.ItemType = utils.CacheDispatcherFilterIndexes
-		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	case utils.MetaAttributes:
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
@@ -97,7 +93,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	tntCtx := arg.Tenant
+	tntCtx := tnt
 	switch arg.ItemType {
 	case utils.MetaThresholds:
 		arg.ItemType = utils.CacheThresholdFilterIndexes
@@ -110,11 +106,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 	case utils.MetaChargers:
 		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaDispatchers:
-		if missing := utils.MissingStructFields(arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
 		arg.ItemType = utils.CacheDispatcherFilterIndexes
-		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	case utils.MetaAttributes:
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
@@ -219,17 +211,13 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//ThresholdProfile Indexes
 	if args.ThresholdS {
 		cacheIDs[utils.ThresholdFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheThresholdFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheThresholdFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				th, e := adms.dm.GetThresholdProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(th.FilterIDs))
-				for i, fltrID := range th.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -238,17 +226,13 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//StatQueueProfile Indexes
 	if args.StatS {
 		cacheIDs[utils.StatFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheStatFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheStatFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				sq, e := adms.dm.GetStatQueueProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(sq.FilterIDs))
-				for i, fltrID := range sq.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(sq.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -257,17 +241,13 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//ResourceProfile Indexes
 	if args.ResourceS {
 		cacheIDs[utils.ResourceFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheResourceFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheResourceFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rp, e := adms.dm.GetResourceProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(rp.FilterIDs))
-				for i, fltrID := range rp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -276,17 +256,13 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//RouteSProfile Indexes
 	if args.RouteS {
 		cacheIDs[utils.RouteFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheRouteFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheRouteFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rp, e := adms.dm.GetRouteProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(rp.FilterIDs))
-				for i, fltrID := range rp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -295,7 +271,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//AttributeProfile Indexes
 	if args.AttributeS {
 		cacheIDs[utils.AttributeFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheAttributeFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheAttributeFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				ap, e := adms.dm.GetAttributeProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -315,17 +291,13 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//ChargerProfile  Indexes
 	if args.ChargerS {
 		cacheIDs[utils.ChargerFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheChargerFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheChargerFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				ap, e := adms.dm.GetChargerProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(ap.FilterIDs))
-				for i, fltrID := range ap.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(ap.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -334,30 +306,19 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//DispatcherProfile Indexes
 	if args.DispatcherS {
 		cacheIDs[utils.DispatcherFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheDispatcherFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheDispatcherFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				dsp, e := adms.dm.GetDispatcherProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				if !utils.IsSliceMember(dsp.Subsystems, ctx) {
-					return nil, nil
-				}
-				fltrIDs := make([]string, len(dsp.FilterIDs))
-				for i, fltrID := range dsp.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(dsp.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
 		args.DispatcherS = indexes.Size() != 0
 	}
 
-	tntCtx := args.Tenant
-	if args.Subsystem != utils.EmptyString {
-		tntCtx = utils.ConcatenatedKey(tnt, args.Subsystem)
-	}
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
 	if args.ThresholdS {
@@ -385,7 +346,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	}
 	//AttributeProfile Indexes
 	if args.AttributeS {
-		if err = adms.dm.SetIndexes(cntxt, utils.CacheAttributeFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+		if err = adms.dm.SetIndexes(cntxt, utils.CacheAttributeFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
@@ -397,7 +358,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	}
 	//DispatcherProfile Indexes
 	if args.DispatcherS {
-		if err = adms.dm.SetIndexes(cntxt, utils.CacheDispatcherFilterIndexes, tntCtx, nil, true, transactionID); err != nil {
+		if err = adms.dm.SetIndexes(cntxt, utils.CacheDispatcherFilterIndexes, tnt, nil, true, transactionID); err != nil {
 			return
 		}
 	}
@@ -426,20 +387,16 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	indexes := make(utils.StringSet)
+	var indexes utils.StringSet
 	cacheIDs := make(map[string][]string)
 	//ThresholdProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheThresholdFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheThresholdFilterIndexes,
 		&args.ThresholdIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			th, e := adms.dm.GetThresholdProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
-			fltrIDs := make([]string, len(th.FilterIDs))
-			for i, fltrID := range th.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(th.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -447,18 +404,14 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.ThresholdFilterIndexIDs] = indexes.AsSlice()
 	}
 	//StatQueueProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheStatFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheStatFilterIndexes,
 		&args.StatIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			sq, e := adms.dm.GetStatQueueProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
 			cacheIDs[utils.StatFilterIndexIDs] = []string{sq.ID}
-			fltrIDs := make([]string, len(sq.FilterIDs))
-			for i, fltrID := range sq.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(sq.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -466,18 +419,14 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.StatFilterIndexIDs] = indexes.AsSlice()
 	}
 	//ResourceProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheResourceFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheResourceFilterIndexes,
 		&args.ResourceIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			rp, e := adms.dm.GetResourceProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
 			cacheIDs[utils.ResourceFilterIndexIDs] = []string{rp.ID}
-			fltrIDs := make([]string, len(rp.FilterIDs))
-			for i, fltrID := range rp.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -485,18 +434,14 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.ResourceFilterIndexIDs] = indexes.AsSlice()
 	}
 	//RouteProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheRouteFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheRouteFilterIndexes,
 		&args.RouteIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			rp, e := adms.dm.GetRouteProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
 			cacheIDs[utils.RouteFilterIndexIDs] = []string{rp.ID}
-			fltrIDs := make([]string, len(rp.FilterIDs))
-			for i, fltrID := range rp.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(rp.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -504,17 +449,13 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.RouteFilterIndexIDs] = indexes.AsSlice()
 	}
 	//AttributeProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheAttributeFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheAttributeFilterIndexes,
 		&args.AttributeIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			ap, e := adms.dm.GetAttributeProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
-			fltrIDs := make([]string, len(ap.FilterIDs))
-			for i, fltrID := range ap.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(ap.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -522,17 +463,13 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.AttributeFilterIndexIDs] = indexes.AsSlice()
 	}
 	//ChargerProfile  Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheChargerFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheChargerFilterIndexes,
 		&args.ChargerIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			ap, e := adms.dm.GetChargerProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
-			fltrIDs := make([]string, len(ap.FilterIDs))
-			for i, fltrID := range ap.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(ap.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -540,20 +477,13 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.ChargerFilterIndexIDs] = indexes.AsSlice()
 	}
 	//DispatcherProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheDispatcherFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheDispatcherFilterIndexes,
 		&args.DispatcherIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			dsp, e := adms.dm.GetDispatcherProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
-			if !utils.IsSliceMember(dsp.Subsystems, ctx) {
-				return nil, nil
-			}
-			fltrIDs := make([]string, len(dsp.FilterIDs))
-			for i, fltrID := range dsp.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(dsp.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}

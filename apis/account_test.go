@@ -1195,7 +1195,7 @@ func TestAccountMaxAbstracts(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
+			accKEy: {
 				AccountID:       "test_ID1",
 				BalanceID:       "VoiceBalance",
 				Units:           utils.Float64Pointer(0),
@@ -1386,7 +1386,7 @@ func TestAccountDebitAbstracts(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
+			accKEy: {
 				AccountID:       "test_ID1",
 				BalanceID:       "VoiceBalance",
 				Units:           utils.Float64Pointer(0),
@@ -1577,7 +1577,7 @@ func TestAccountActionSetBalance(t *testing.T) {
 			},
 		},
 		Accounting: map[string]*utils.ExtAccountCharge{
-			accKEy: &utils.ExtAccountCharge{
+			accKEy: {
 				AccountID:       "test_ID1",
 				BalanceID:       "VoiceBalance",
 				Units:           utils.Float64Pointer(0),

@@ -250,135 +250,6 @@ func updatedIndexes(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 	return
 }
 
-// updatedIndexesWithContexts will compare the old contexts with the new ones and only update what is needed
-// this is used by the profiles that have context(e.g. AttributeProfile)
-// idxItmType - the index object type(e.g.*attribute_filter_indexes, *rate_filter_indexes, *threshold_filter_indexes)
-// tnt - the tenant of the object
-// itemID - the object id
-// oldContexts -  the old contexts/subsystems for profile; this is optional if the object did not exist
-// oldFilterIds - the filtersIDs that the old object had; this is optional if the object did not exist
-// newContexts -  the new contexts/subsystems for profile that will be set
-// newFilterIDs - the filtersIDs for the object that will be set
-func updatedIndexesWithContexts(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, itemID string,
-	oldContexts, oldFilterIDs *[]string, newContexts, newFilterIDs []string) (err error) {
-	if oldContexts == nil { // new profile add all indexes
-		if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
-			return
-		}
-		for _, ctx := range newContexts {
-			if err = addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
-				return
-			}
-		}
-		return
-	}
-
-	oldCtx := utils.NewStringSet(*oldContexts)
-	newCtx := utils.NewStringSet(newContexts)
-
-	// split the contexts in three categories
-	removeContexts := make([]string, 0, len(*oldContexts))
-	addContexts := make([]string, 0, len(newContexts))
-	updateContexts := make([]string, 0, len(newContexts))
-
-	for ctx := range oldCtx {
-		if !newCtx.Has(ctx) { // append only if the index needs to be removed
-			removeContexts = append(removeContexts, ctx)
-		} else {
-			updateContexts = append(updateContexts, ctx)
-		}
-	}
-
-	for ctx := range newCtx {
-		if !oldCtx.Has(ctx) { // append only if the index needs to be added
-			addContexts = append(addContexts, ctx)
-		}
-	}
-
-	// remove all indexes for the old contexs
-	if oldFilterIDs != nil {
-		if len(updateContexts) == 0 {
-			if err = removeIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itemID, *oldFilterIDs); err != nil {
-				return
-			}
-		}
-		for _, ctx := range removeContexts {
-			if err = removeItemFromFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, *oldFilterIDs); err != nil {
-				return
-			}
-		}
-	}
-	// update the indexes for the contexts tha were not removed
-	// in a similar way we do for the profile that do not have contexs
-	if len(updateContexts) != 0 {
-		if oldFilterIDs == nil { // nothing to remove so just create the new indexes
-			if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
-				return
-			}
-			for _, ctx := range updateContexts {
-				if err = addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
-					return
-				}
-			}
-		} else if len(*oldFilterIDs) != 0 || len(newFilterIDs) != 0 { // nothing to update
-			// check what indexes needs to be updated
-			oldFltrs := utils.NewStringSet(*oldFilterIDs)
-			newFltrs := utils.NewStringSet(newFilterIDs)
-
-			removeFilterIDs := make([]string, 0, len(*oldFilterIDs))
-			addFilterIDs := make([]string, 0, len(newFilterIDs))
-
-			for fltrID := range oldFltrs {
-				if !newFltrs.Has(fltrID) { // append only if the index needs to be removed
-					removeFilterIDs = append(removeFilterIDs, fltrID)
-				}
-			}
-
-			for fltrID := range newFltrs {
-				if !oldFltrs.Has(fltrID) { // append only if the index needs to be added
-					addFilterIDs = append(addFilterIDs, fltrID)
-				}
-			}
-
-			if len(removeFilterIDs) != 0 || oldFltrs.Size() == 0 {
-				// has some indexes to remove or
-				// the old profile doesn't have filters but the new one has so remove the *none index
-				if err = removeIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itemID, removeFilterIDs); err != nil {
-					return
-				}
-				for _, ctx := range updateContexts {
-					if err = removeItemFromFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, removeFilterIDs); err != nil {
-						return
-					}
-				}
-			}
-
-			if len(addFilterIDs) != 0 || newFltrs.Size() == 0 {
-				// has some indexes to add or
-				// the old profile has filters but the new one does not so add the *none index
-				if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itemID, addFilterIDs); err != nil {
-					return
-				}
-				for _, ctx := range updateContexts {
-					if err = addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, addFilterIDs); err != nil {
-						return
-					}
-				}
-			}
-		}
-	} else if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itemID, newFilterIDs); err != nil {
-		return
-	}
-
-	// add indexes for new contexts
-	for _, ctx := range addContexts {
-		if err = addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // splitFilterIndex splits the cache key so it can be used to recache the indexes
 func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
 	splt := utils.SplitConcatenatedKey(tntCtxIdxKey) // tntCtx:filterType:fieldName:fieldVal
@@ -841,37 +712,24 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheDispatcherFilterIndexes:
-			for itemID := range indx {
-				var dp *DispatcherProfile
-				if dp, err = dm.GetDispatcherProfile(apiCtx, newFlt.Tenant, itemID,
-					true, false, utils.NonTransactional); err != nil {
-					return
-				}
-				for _, ctx := range dp.Subsystems {
-					tntCtx := utils.ConcatenatedKey(newFlt.Tenant, ctx)
-					if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType,
-						tntCtx, // remove the indexes for the filter
-						removeIndexKeys, indx); err != nil {
-						return
+			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+				removeIndexKeys, indx); err != nil {
+				return
+			}
+			idxSlice := indx.AsSlice()
+			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, _ string) (*[]string, error) {
+					dp, e := dm.GetDispatcherProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+					if e != nil {
+						return nil, e
 					}
-					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
-					var updIdx map[string]utils.StringSet
-					if updIdx, err = newFilterIndex(apiCtx, dm, idxItmType,
-						newFlt.Tenant, ctx, itemID, dp.FilterIDs, newFlt); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
-						return
+					fltrIDs := make([]string, len(dp.FilterIDs))
+					for i, fltrID := range dp.FilterIDs {
+						fltrIDs[i] = fltrID
 					}
-					for _, idx := range updIdx {
-						idx.Add(itemID)
-					}
-					if err = dm.SetIndexes(apiCtx, idxItmType, tntCtx,
-						updIdx, false, utils.NonTransactional); err != nil {
-						guardian.Guardian.UnguardIDs(refID)
-						return
-					}
-					guardian.Guardian.UnguardIDs(refID)
-				}
+					return &fltrIDs, nil
+				}, newFlt); err != nil && err != utils.ErrNotFound {
+				return utils.APIErrorHandler(err)
 			}
 		}
 	}

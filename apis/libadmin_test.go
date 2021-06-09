@@ -56,10 +56,9 @@ func TestCallCacheForFilter(t *testing.T) {
 		t.Fatal(err)
 	}
 	dsp := &engine.DispatcherProfile{
-		Tenant:     tnt,
-		Subsystems: []string{utils.MetaAny},
-		ID:         "Dsp1",
-		FilterIDs:  []string{flt.ID},
+		Tenant:    tnt,
+		ID:        "Dsp1",
+		FilterIDs: []string{flt.ID},
 	}
 	if err := dm.SetDispatcherProfile(context.TODO(), dsp, true); err != nil {
 		t.Fatal(err)
@@ -67,7 +66,7 @@ func TestCallCacheForFilter(t *testing.T) {
 
 	exp := map[string][]string{
 		utils.FilterIDs:                {"cgrates.org:FLTR1"},
-		utils.DispatcherFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001"},
+		utils.DispatcherFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001"},
 		utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001"},
 	}
 	rpl, err := composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), map[string][]string{utils.FilterIDs: {"cgrates.org:FLTR1"}})
@@ -93,7 +92,7 @@ func TestCallCacheForFilter(t *testing.T) {
 	}
 	exp = map[string][]string{
 		utils.FilterIDs:                {"cgrates.org:FLTR1"},
-		utils.DispatcherFilterIndexIDs: {"cgrates.org:*any:*string:*req.Account:1001", "cgrates.org:*any:*string:*req.Account:1002"},
+		utils.DispatcherFilterIndexIDs: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 		utils.ThresholdFilterIndexIDs:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 	}
 	rpl, err = composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), rpl)

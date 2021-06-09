@@ -109,13 +109,12 @@ func testTpDispITFlush(t *testing.T) {
 func testTpDispITPopulate(t *testing.T) {
 	tpDisps = []*utils.TPDispatcherProfile{
 		{
-			TPid:       "TP1",
-			Tenant:     "cgrates.org",
-			ID:         "Dsp1",
-			FilterIDs:  []string{"*string:Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-			Subsystems: make([]string, 0),
-			Strategy:   utils.MetaFirst,
-			Weight:     10,
+			TPid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:Account:1002", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
+			Strategy:  utils.MetaFirst,
+			Weight:    10,
 		},
 	}
 	if err := tpDispMigrator.storDBIn.StorDB().SetTPDispatcherProfiles(tpDisps); err != nil {
@@ -140,7 +139,6 @@ func testTpDispITCheckData(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error when getting TpDispatchers ", err.Error())
 	}
-	tpDisps[0].Subsystems = nil // because of converting and empty string into a slice
 	sort.Strings(tpDisps[0].FilterIDs)
 	sort.Strings(result[0].FilterIDs)
 	if !reflect.DeepEqual(tpDisps[0], result[0]) {
