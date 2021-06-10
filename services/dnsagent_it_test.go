@@ -224,6 +224,7 @@ func TestDNSAgentReload6(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	cfg.DNSAgentCfg().Listen = "127.0.0.1:0"
 	err := srv.Start()
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
