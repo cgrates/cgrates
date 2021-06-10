@@ -26,8 +26,8 @@ import (
 
 // RegistrarCCfgs is the configuration of registrarc rpc and dispatcher
 type RegistrarCCfgs struct {
-	RPC        *RegistrarCCfg
-	Dispatcher *RegistrarCCfg
+	RPC         *RegistrarCCfg
+	Dispatchers *RegistrarCCfg
 }
 
 func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err error) {
@@ -37,22 +37,22 @@ func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err erro
 	if err = dps.RPC.loadFromJSONCfg(jsnCfg.RPC); err != nil {
 		return
 	}
-	return dps.Dispatcher.loadFromJSONCfg(jsnCfg.Dispatcher)
+	return dps.Dispatchers.loadFromJSONCfg(jsnCfg.Dispatchers)
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (dps *RegistrarCCfgs) AsMapInterface() (initialMP map[string]interface{}) {
 	return map[string]interface{}{
 		utils.RPCCfg:        dps.RPC.AsMapInterface(),
-		utils.DispatcherCfg: dps.Dispatcher.AsMapInterface(),
+		utils.DispatcherCfg: dps.Dispatchers.AsMapInterface(),
 	}
 }
 
 // Clone returns a deep copy of DispatcherHCfg
 func (dps RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {
 	return &RegistrarCCfgs{
-		RPC:        dps.RPC.Clone(),
-		Dispatcher: dps.Dispatcher.Clone(),
+		RPC:         dps.RPC.Clone(),
+		Dispatchers: dps.Dispatchers.Clone(),
 	}
 }
 

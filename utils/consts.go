@@ -2364,7 +2364,7 @@ const (
 // RegistrarCCfg
 const (
 	RPCCfg             = "rpc"
-	DispatcherCfg      = "dispatcher"
+	DispatcherCfg      = "dispatchers"
 	RegistrarsConnsCfg = "registrars_conns"
 	HostsCfg           = "hosts"
 	RefreshIntervalCfg = "refresh_interval"

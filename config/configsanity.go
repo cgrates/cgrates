@@ -1016,24 +1016,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
-	if cfg.registrarCCfg.Dispatcher.Enabled {
-		if len(cfg.registrarCCfg.Dispatcher.Hosts) == 0 {
+	if cfg.registrarCCfg.Dispatchers.Enabled {
+		if len(cfg.registrarCCfg.Dispatchers.Hosts) == 0 {
 			return fmt.Errorf("<%s> missing dispatcher host IDs", utils.RegistrarC)
 		}
-		if cfg.registrarCCfg.Dispatcher.RefreshInterval <= 0 {
+		if cfg.registrarCCfg.Dispatchers.RefreshInterval <= 0 {
 			return fmt.Errorf("<%s> the register imterval needs to be bigger than 0", utils.RegistrarC)
 		}
-		for tnt, hosts := range cfg.registrarCCfg.Dispatcher.Hosts {
+		for tnt, hosts := range cfg.registrarCCfg.Dispatchers.Hosts {
 			for _, host := range hosts {
 				if !utils.SliceHasMember([]string{utils.MetaGOB, rpcclient.HTTPjson, utils.MetaJSON, rpcclient.BiRPCJSON, rpcclient.BiRPCGOB}, host.Transport) {
 					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
 				}
 			}
 		}
-		if len(cfg.registrarCCfg.Dispatcher.RegistrarSConns) == 0 {
+		if len(cfg.registrarCCfg.Dispatchers.RegistrarSConns) == 0 {
 			return fmt.Errorf("<%s> missing dispatcher connection IDs", utils.RegistrarC)
 		}
-		for _, connID := range cfg.registrarCCfg.Dispatcher.RegistrarSConns {
+		for _, connID := range cfg.registrarCCfg.Dispatchers.RegistrarSConns {
 			if connID == utils.MetaInternal {
 				return fmt.Errorf("<%s> internal connection IDs are not supported", utils.RegistrarC)
 			}

@@ -89,7 +89,7 @@ func TestDispatcherHReload(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
-	cfg.RegistrarCCfg().Dispatcher.Enabled = false
+	cfg.RegistrarCCfg().Dispatchers.Enabled = false
 	cfg.GetReloadChan(config.RegistrarCJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
 	if srv.IsRunning() {

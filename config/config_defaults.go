@@ -1014,7 +1014,7 @@ const CGRATES_CFG_JSON = `
         "hosts": {},  
         "refresh_interval": "5m",
     },
-    "dispatcher":{
+    "dispatchers":{
         "enabled": false,
         "registrars_conns": [],
         "hosts": {},  

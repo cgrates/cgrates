@@ -47,8 +47,8 @@ type RegistrarCService struct {
 func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) {
 	dTm, rTm := &time.Timer{}, &time.Timer{}
 	var dTmStarted, rTmStarted bool
-	if dTmStarted = dhS.cfg.RegistrarCCfg().Dispatcher.Enabled; dTmStarted {
-		dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatcher.RefreshInterval)
+	if dTmStarted = dhS.cfg.RegistrarCCfg().Dispatchers.Enabled; dTmStarted {
+		dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
 		dhS.registerDispHosts()
 	}
 	if rTmStarted = dhS.cfg.RegistrarCCfg().RPC.Enabled; rTmStarted {
@@ -64,8 +64,8 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 			if dTmStarted {
 				dTm.Stop()
 			}
-			if dTmStarted = dhS.cfg.RegistrarCCfg().Dispatcher.Enabled; dTmStarted {
-				dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatcher.RefreshInterval)
+			if dTmStarted = dhS.cfg.RegistrarCCfg().Dispatchers.Enabled; dTmStarted {
+				dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
 				dhS.registerDispHosts()
 			}
 			if rTmStarted = dhS.cfg.RegistrarCCfg().RPC.Enabled; rTmStarted {
@@ -73,7 +73,7 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 				dhS.registerRPCHosts()
 			}
 		case <-stopChan:
-			if dhS.cfg.RegistrarCCfg().Dispatcher.Enabled {
+			if dhS.cfg.RegistrarCCfg().Dispatchers.Enabled {
 				dTm.Stop()
 			}
 			if dhS.cfg.RegistrarCCfg().RPC.Enabled {
@@ -82,7 +82,7 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 			return
 		case <-dTm.C:
 			dhS.registerDispHosts()
-			dTm.Reset(dhS.cfg.RegistrarCCfg().Dispatcher.RefreshInterval)
+			dTm.Reset(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
 		case <-rTm.C:
 			dhS.registerRPCHosts()
 			rTm.Reset(dhS.cfg.RegistrarCCfg().RPC.RefreshInterval)
@@ -93,8 +93,8 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 // Shutdown is called to shutdown the service
 func (dhS *RegistrarCService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RegistrarC))
-	if dhS.cfg.RegistrarCCfg().Dispatcher.Enabled {
-		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().Dispatcher,
+	if dhS.cfg.RegistrarCCfg().Dispatchers.Enabled {
+		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().Dispatchers,
 			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterDispatcherHosts)
 	}
 	if dhS.cfg.RegistrarCCfg().RPC.Enabled {
@@ -105,8 +105,8 @@ func (dhS *RegistrarCService) Shutdown() {
 }
 
 func (dhS *RegistrarCService) registerDispHosts() {
-	for _, connID := range dhS.cfg.RegistrarCCfg().Dispatcher.RegistrarSConns {
-		for tnt, hostCfgs := range dhS.cfg.RegistrarCCfg().Dispatcher.Hosts {
+	for _, connID := range dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns {
+		for tnt, hostCfgs := range dhS.cfg.RegistrarCCfg().Dispatchers.Hosts {
 			if tnt == utils.MetaDefault {
 				tnt = dhS.cfg.GeneralCfg().DefaultTenant
 			}
