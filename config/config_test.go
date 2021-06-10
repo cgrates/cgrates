@@ -5848,3 +5848,184 @@ func TestCGRConfigGetDP(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", exp, err)
 	}
 }
+
+func TestStoreCfgInDb(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	db := &CgrJsonCfg{}
+	cfg.db = db
+	cfg.attributeSCfg.Enabled = true
+	cfg.attributeSCfg.AdminSConns = []string{"*internal"}
+	args := &SectionWithAPIOpts{
+		Sections: []string{AttributeSJSON},
+	}
+	var reply string
+	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	rcv, err := db.AttributeServJsonCfg()
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rcv.Enabled, utils.BoolPointer(true)) {
+		t.Errorf("Expected %v \n but received \n %v", utils.BoolPointer(false), rcv.Enabled)
+	} else if !reflect.DeepEqual(rcv.Admins_conns, &[]string{"*internal"}) {
+		t.Errorf("Expected %v \n but received \n %v", &[]string{"*internal"}, rcv.Admins_conns)
+	}
+}
+
+func TestSetCfgInDb(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	db := &CgrJsonCfg{}
+	cfg.db = db
+	cfg.attributeSCfg = &AttributeSCfg{
+		Enabled:             true,
+		ResourceSConns:      []string{"*internal"},
+		StatSConns:          []string{"*internal"},
+		AdminSConns:         []string{"*internal"},
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"field1"},
+		SuffixIndexedFields: &[]string{"field1"},
+		PrefixIndexedFields: &[]string{"field1"},
+		ProcessRuns:         2,
+		NestedFields:        true,
+	}
+	cfg.rldChans[DataDBJSON] = make(chan struct{}, 1)
+	cfg.rldChans[AttributeSJSON] = make(chan struct{}, 1)
+	args := &SetConfigArgs{
+		Config: map[string]interface{}{
+			"attributes": &AttributeSJsonCfg{
+				Enabled:               utils.BoolPointer(false),
+				Resources_conns:       &[]string{"*localhost"},
+				Stats_conns:           &[]string{"*localhost"},
+				Admins_conns:          &[]string{"*localhost"},
+				Indexed_selects:       utils.BoolPointer(false),
+				String_indexed_fields: &[]string{"field2"},
+				Suffix_indexed_fields: &[]string{"field2"},
+				Prefix_indexed_fields: &[]string{"field2"},
+				Process_runs:          utils.IntPointer(3),
+				Nested_fields:         utils.BoolPointer(false),
+			},
+		},
+	}
+	expected := &AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(false),
+		Resources_conns:       &[]string{"*localhost"},
+		Stats_conns:           &[]string{"*localhost"},
+		Admins_conns:          &[]string{"*localhost"},
+		Indexed_selects:       utils.BoolPointer(false),
+		String_indexed_fields: &[]string{"field2"},
+		Suffix_indexed_fields: &[]string{"field2"},
+		Prefix_indexed_fields: &[]string{"field2"},
+		Process_runs:          utils.IntPointer(3),
+		Nested_fields:         utils.BoolPointer(false),
+	}
+	var reply string
+	if err := cfg.V1SetConfig(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	rcv, err := db.AttributeServJsonCfg()
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
+	}
+}
+
+func TestSetNilCfgInDb(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	db := &CgrJsonCfg{}
+	cfg.db = db
+	cfg.attributeSCfg = &AttributeSCfg{
+		Enabled:             true,
+		ResourceSConns:      []string{"*internal"},
+		StatSConns:          []string{"*internal"},
+		AdminSConns:         []string{"*internal"},
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"field1"},
+		SuffixIndexedFields: &[]string{"field1"},
+		PrefixIndexedFields: &[]string{"field1"},
+		ProcessRuns:         2,
+		NestedFields:        true,
+	}
+	cfg.rldChans[DataDBJSON] = make(chan struct{}, 1)
+	cfg.rldChans[AttributeSJSON] = make(chan struct{}, 1)
+	attributes := &AttributeSJsonCfg{}
+	args := &SetConfigArgs{
+		Config: map[string]interface{}{
+			"attributes": attributes,
+		},
+	}
+	expected := &AttributeSJsonCfg{}
+	var reply string
+	if err := cfg.V1SetConfig(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	rcv, err := db.AttributeServJsonCfg()
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
+	}
+}
+
+func TestReloadCfgInDb(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	db := &CgrJsonCfg{}
+	cfg.db = db
+	cfg.attributeSCfg = &AttributeSCfg{
+		Enabled:             true,
+		ResourceSConns:      []string{"*internal"},
+		StatSConns:          []string{"*internal"},
+		AdminSConns:         []string{"*internal"},
+		IndexedSelects:      false,
+		StringIndexedFields: &[]string{"field1"},
+		SuffixIndexedFields: &[]string{"field1"},
+		PrefixIndexedFields: &[]string{"field1"},
+		ProcessRuns:         2,
+		NestedFields:        true,
+	}
+	var reply string
+	cfg.rldChans[AttributeSJSON] = make(chan struct{}, 1)
+	cfg.rldChans[DataDBJSON] = make(chan struct{}, 1)
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "attributes_internal")
+	jsn := &AttributeSJsonCfg{
+		Enabled:               utils.BoolPointer(false),
+		Resources_conns:       &[]string{"*localhost"},
+		Stats_conns:           &[]string{"*localhost"},
+		Admins_conns:          &[]string{"*localhost"},
+		Indexed_selects:       utils.BoolPointer(true),
+		String_indexed_fields: &[]string{"field2"},
+		Suffix_indexed_fields: &[]string{"field2"},
+		Prefix_indexed_fields: &[]string{"field2"},
+		Process_runs:          utils.IntPointer(3),
+		Nested_fields:         utils.BoolPointer(false),
+	}
+	db.SetSection(context.Background(), AttributeSJSON, jsn)
+	expected := &AttributeSCfg{
+		Enabled:             false,
+		ResourceSConns:      []string{"*localhost"},
+		StatSConns:          []string{"*localhost"},
+		AdminSConns:         []string{"*localhost"},
+		IndexedSelects:      true,
+		StringIndexedFields: &[]string{"field2"},
+		SuffixIndexedFields: &[]string{"field2"},
+		PrefixIndexedFields: &[]string{"field2"},
+		ProcessRuns:         3,
+		NestedFields:        false,
+	}
+	args2 := &ReloadArgs{
+		Section: AttributeSJSON,
+	}
+	if err := cfg.V1ReloadConfig(context.Background(), args2, &reply); err != nil {
+		t.Error(err)
+	}
+
+	rcv := cfg.AttributeSCfg()
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
