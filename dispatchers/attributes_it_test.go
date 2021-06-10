@@ -145,7 +145,8 @@ func testDspAttrPingFailoverNotFoundHost(t *testing.T) {
 			"EventName": "NonexistingHost",
 		},
 		APIOpts: map[string]interface{}{
-			utils.OptsAPIKey: "attr12345",
+			utils.OptsAPIKey:                   "attr12345",
+			utils.OptsDispatchersProfilesCount: 1,
 		},
 	}
 

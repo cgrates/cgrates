@@ -180,7 +180,7 @@ func testFWVITHandleCdr1File(t *testing.T) {
 }
 
 func testFWVITAnalyseCDRs(t *testing.T) {
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(time.Second)
 	var reply []*engine.ExternalCDR
 	if err := fwvRPC.Call(utils.APIerSv2GetCDRs, &utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
