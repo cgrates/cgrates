@@ -22,7 +22,7 @@ package console
 func init() {
 	c := &CmdSetChargers{
 		name:      "chargers_profile_set",
-		rpcMethod: utils.APIerSv1SetChargerProfile,
+		rpcMethod: utils.AdminSv1SetChargerProfile,
 		rpcParams: &v1.ChargerWithAPIOpts{},
 	}
 	commands[c.Name()] = c

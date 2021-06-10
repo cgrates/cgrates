@@ -908,15 +908,15 @@ func testOnStorITChargerProfile(t *testing.T) {
 		AttributeIDs: []string{"ATTR_1"},
 		Weight:       20,
 	}
-	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+	if _, rcvErr := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetChargerProfile(cpp, false); err != nil {
+	if err := onStor.SetChargerProfile(context.Background(), cpp, false); err != nil {
 		t.Error(err)
 	}
 	//get from database
-	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+	if rcv, err := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(cpp, rcv)) {
@@ -930,23 +930,23 @@ func testOnStorITChargerProfile(t *testing.T) {
 	}
 	//update
 	cpp.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
-	if err := onStor.SetChargerProfile(cpp, false); err != nil {
+	if err := onStor.SetChargerProfile(context.Background(), cpp, false); err != nil {
 		t.Error(err)
 	}
 
 	//get from database
-	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+	if rcv, err := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(cpp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
-	if err := onStor.RemoveChargerProfile(cpp.Tenant, cpp.ID,
+	if err := onStor.RemoveChargerProfile(context.Background(), cpp.Tenant, cpp.ID,
 		false); err != nil {
 		t.Error(err)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+	if _, rcvErr := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}

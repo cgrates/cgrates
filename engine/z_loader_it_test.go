@@ -320,7 +320,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, cpp := range loader.chargerProfiles {
-		rcv, err := loader.dm.GetChargerProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetChargerProfile(context.Background(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetChargerProfile, tenant: %s, id: %s,  error: %s ", cpp.Tenant, cpp.ID, err.Error())
 		}
