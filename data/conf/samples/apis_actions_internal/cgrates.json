@@ -17,6 +17,7 @@
     "actions": {
         "enabled": true,
         "thresholds_conns": ["*internal"],
+        "stats_conns": ["*internal"],
     },
 
     "stats": {
