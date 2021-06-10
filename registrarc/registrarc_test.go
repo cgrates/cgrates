@@ -45,8 +45,8 @@ func TestDispatcherHostsService(t *testing.T) {
 			Transport:   rpcclient.HTTPjson,
 		}},
 	}
-	cfg.RegistrarCCfg().Dispatcher.Enabled = true
-	cfg.RegistrarCCfg().Dispatcher.Hosts = map[string][]*config.RemoteHost{
+	cfg.RegistrarCCfg().Dispatchers.Enabled = true
+	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
 				ID:        "Host1",
@@ -54,8 +54,8 @@ func TestDispatcherHostsService(t *testing.T) {
 			},
 		},
 	}
-	cfg.RegistrarCCfg().Dispatcher.RefreshInterval = 100 * time.Millisecond
-	cfg.RegistrarCCfg().Dispatcher.RegistrarSConns = []string{"conn1"}
+	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 100 * time.Millisecond
+	cfg.RegistrarCCfg().Dispatchers.RegistrarSConns = []string{"conn1"}
 
 	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{}))
 
@@ -75,7 +75,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	} else if !reflect.DeepEqual(host1, x) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
 	}
-	cfg.RegistrarCCfg().Dispatcher.Hosts = map[string][]*config.RemoteHost{
+	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
 				ID:        "Host2",
@@ -92,7 +92,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	} else if !reflect.DeepEqual(host1, x) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
 	}
-	unregisterHosts(ds.connMgr, cfg.RegistrarCCfg().Dispatcher, "cgrates.org", utils.RegistrarSv1UnregisterDispatcherHosts)
+	unregisterHosts(ds.connMgr, cfg.RegistrarCCfg().Dispatchers, "cgrates.org", utils.RegistrarSv1UnregisterDispatcherHosts)
 	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
 		t.Errorf("Expected to not find Host2 in cache")
 	}
@@ -101,7 +101,7 @@ func TestDispatcherHostsService(t *testing.T) {
 	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
 
 	host1.ID = "Host1"
-	cfg.RegistrarCCfg().Dispatcher.Hosts = map[string][]*config.RemoteHost{
+	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
 				ID:        "Host1",
@@ -127,7 +127,7 @@ func TestDispatcherHostsService(t *testing.T) {
 func TestRegistrarcListenAndServe(t *testing.T) {
 	//cover purposes only
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatcher.Enabled = true
+	cfg.RegistrarCCfg().Dispatchers.Enabled = true
 	cfg.RegistrarCCfg().RPC.Enabled = true
 	regStSrv := NewRegistrarCService(cfg, nil)
 	stopChan := make(chan struct{}, 1)
@@ -194,8 +194,8 @@ func TestRegisterRPCHosts(t *testing.T) {
 func TestRegistrarcListenAndServedTmCDispatcher(t *testing.T) {
 	//cover purposes only
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatcher.Enabled = true
-	cfg.RegistrarCCfg().Dispatcher.RefreshInterval = 1
+	cfg.RegistrarCCfg().Dispatchers.Enabled = true
+	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 1
 	cfg.RegistrarCCfg().RPC.Enabled = true
 	regStSrv := NewRegistrarCService(cfg, nil)
 	stopChan := make(chan struct{}, 1)
@@ -211,7 +211,7 @@ func TestRegistrarcListenAndServedTmCDispatcher(t *testing.T) {
 func TestRegistrarcListenAndServedTmCRPC(t *testing.T) {
 	//cover purposes only
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatcher.Enabled = true
+	cfg.RegistrarCCfg().Dispatchers.Enabled = true
 	cfg.RegistrarCCfg().RPC.Enabled = true
 	cfg.RegistrarCCfg().RPC.RefreshInterval = 1
 	regStSrv := NewRegistrarCService(cfg, nil)

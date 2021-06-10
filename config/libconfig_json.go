@@ -544,8 +544,8 @@ type RegistrarCJsonCfg struct {
 }
 
 type RegistrarCJsonCfgs struct {
-	RPC        *RegistrarCJsonCfg
-	Dispatcher *RegistrarCJsonCfg
+	RPC         *RegistrarCJsonCfg
+	Dispatchers *RegistrarCJsonCfg
 }
 
 type LoaderCfgJson struct {

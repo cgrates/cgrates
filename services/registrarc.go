@@ -103,5 +103,5 @@ func (dspS *RegistrarCService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (dspS *RegistrarCService) ShouldRun() bool {
-	return dspS.cfg.RegistrarCCfg().Dispatcher.Enabled || dspS.cfg.RegistrarCCfg().RPC.Enabled
+	return dspS.cfg.RegistrarCCfg().Dispatchers.Enabled || dspS.cfg.RegistrarCCfg().RPC.Enabled
 }

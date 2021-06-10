@@ -98,7 +98,7 @@
     
     
     "registrarc":{
-        "dispatcher":{
+        "dispatchers":{
             "enabled": true,
             "registrars_conns": ["dispConn"],
             "hosts": {

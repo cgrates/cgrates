@@ -56,7 +56,7 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 			},
 			Refresh_interval: utils.StringPointer("5"),
 		},
-		Dispatcher: &RegistrarCJsonCfg{
+		Dispatchers: &RegistrarCJsonCfg{
 			Enabled:          utils.BoolPointer(true),
 			Registrars_conns: &[]string{"*conn1", "*conn2"},
 			Hosts: map[string][]*RemoteHostJson{
@@ -116,7 +116,7 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 			},
 			RefreshInterval: 5,
 		},
-		Dispatcher: &RegistrarCCfg{
+		Dispatchers: &RegistrarCCfg{
 			Enabled:         true,
 			RegistrarSConns: []string{"*conn1", "*conn2"},
 			Hosts: map[string][]*RemoteHost{
@@ -176,7 +176,7 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 				},
 				"refresh_interval": "0",
 			},
-			"dispatcher":{
+			"dispatchers":{
 				"enabled": true,
 				"registrars_conns": ["*conn1","*conn2"],
 				"hosts": {
@@ -255,7 +255,7 @@ func TestDispatcherCfgParseWithNanoSec(t *testing.T) {
 
 func TestDispatcherCfgParseWithNanoSec2(t *testing.T) {
 	jsonCfg := &RegistrarCJsonCfgs{
-		Dispatcher: &RegistrarCJsonCfg{
+		Dispatchers: &RegistrarCJsonCfg{
 			Refresh_interval: utils.StringPointer("1ss"),
 		},
 	}
