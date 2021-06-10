@@ -63,8 +63,8 @@ func TestCoreSReload(t *testing.T) {
 	}
 
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue"),
 		Section: config.CoreSJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

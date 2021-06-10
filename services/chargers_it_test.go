@@ -70,8 +70,8 @@ func TestChargerSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.ChargerSJSON,
 	}, &reply); err != nil {
 		t.Error(err)

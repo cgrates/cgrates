@@ -69,8 +69,8 @@ func TestDNSAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
 		Section: config.DNSAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
