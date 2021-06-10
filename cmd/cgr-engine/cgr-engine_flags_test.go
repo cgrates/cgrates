@@ -53,7 +53,7 @@ func TestCgrEngineFlags(t *testing.T) {
 
 	if err := cgrEngineFlags.Parse([]string{"-httprof_path", "http://example.com/"}); err != nil {
 		t.Fatal(err)
-	} else if *httpPprofPath!= "http://example.com/" {
+	} else if *httpPprofPath != "http://example.com/" {
 		t.Errorf("Expected http://example.com/, received %+v", *httpPprofPath)
 	}
 
@@ -77,7 +77,7 @@ func TestCgrEngineFlags(t *testing.T) {
 
 	if err := cgrEngineFlags.Parse([]string{"-memprof_nrfiles", "3"}); err != nil {
 		t.Fatal(err)
-	} else if *memProfNrFiles!= 3 {
+	} else if *memProfNrFiles != 3 {
 		t.Errorf("Expected 3, received %+v", *memProfNrFiles)
 	}
 

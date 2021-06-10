@@ -34,7 +34,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	defaultCfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &DataDBMock{
-		GetChargerProfileDrvF: func(s1, s2 string) (*ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx *context.Context, s1, s2 string) (*ChargerProfile, error) {
 			return &ChargerProfile{
 				Tenant:    s1,
 				ID:        s2,
@@ -73,7 +73,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	}
 
 	experr := utils.ErrNotImplemented
-	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(),  cgrEv.Tenant, cgrEv)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -99,7 +99,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := dm.SetChargerProfile(cP, true); err != nil {
+	if err := dm.SetChargerProfile(context.Background(), cP, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -157,7 +157,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := cS.processEvent(cgrEv.Tenant, cgrEv)
+	rcv, err := cS.processEvent(context.Background(), cgrEv.Tenant, cgrEv)
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -188,7 +188,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := dm.SetChargerProfile(cP, true); err != nil {
+	if err := dm.SetChargerProfile(context.Background(), cP, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -240,7 +240,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 			},
 		},
 	}
-	rcv, err := cS.processEvent(cgrEv.Tenant, cgrEv)
+	rcv, err := cS.processEvent(context.Background(), cgrEv.Tenant, cgrEv)
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -271,7 +271,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := dm.SetChargerProfile(cP, true); err != nil {
+	if err := dm.SetChargerProfile(context.Background(), cP, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -316,7 +316,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	reply := &[]*ChrgSProcessEventReply{}
 
 	experr := utils.ErrNotFound
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -342,7 +342,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := dm.SetChargerProfile(cP, true); err != nil {
+	if err := dm.SetChargerProfile(context.Background(), cP, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -388,7 +388,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 
 	exp := &[]*ChrgSProcessEventReply{}
 	experr := fmt.Sprintf("SERVER_ERROR: %s", rpcclient.ErrUnsupporteServiceMethod)
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -419,7 +419,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := dm.SetChargerProfile(cP, true); err != nil {
+	if err := dm.SetChargerProfile(context.Background(), cP, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -476,7 +476,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -507,7 +507,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 		RunID:     utils.MetaDefault,
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	if err := dm.SetChargerProfile(cP, true); err != nil {
+	if err := dm.SetChargerProfile(context.Background(), cP, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -535,7 +535,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 			RunID:     "*default",
 		},
 	}
-	err := cS.V1GetChargersForEvent(args, reply)
+	err := cS.V1GetChargersForEvent(context.Background(), args, reply)
 
 	if err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -581,7 +581,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 
 	exp := &ChargerProfiles{}
 	experr := fmt.Sprintf("SERVER_ERROR: %s", utils.ErrNotImplemented)
-	err := cS.V1GetChargersForEvent(args, reply)
+	err := cS.V1GetChargersForEvent(context.Background(), args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)

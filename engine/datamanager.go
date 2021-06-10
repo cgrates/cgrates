@@ -173,7 +173,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetAttributeProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ChargerProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetChargerProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.DispatcherProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetDispatcherProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1438,7 +1438,7 @@ func (dm *DataManager) RemoveAttributeProfile(apiCtx *context.Context, tenant, i
 	return
 }
 
-func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (cpp *ChargerProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -1453,10 +1453,10 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	cpp, err = dm.dataDB.GetChargerProfileDrv(tenant, id)
+	cpp, err = dm.dataDB.GetChargerProfileDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetChargerProfile,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -1464,13 +1464,13 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &cpp); err == nil {
-				err = dm.dataDB.SetChargerProfileDrv(cpp)
+				err = dm.dataDB.SetChargerProfileDrv(ctx, cpp)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheChargerProfiles, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheChargerProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1480,7 +1480,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 		}
 	}
 	if cacheWrite {
-		if errCh := Cache.Set(context.TODO(), utils.CacheChargerProfiles, tntID, cpp, nil,
+		if errCh := Cache.Set(ctx, utils.CacheChargerProfiles, tntID, cpp, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
 			return nil, errCh
 		}
@@ -1488,22 +1488,22 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 	return
 }
 
-func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *ChargerProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if withIndex {
-		if err := dm.checkFilters(context.TODO(), cpp.Tenant, cpp.FilterIDs); err != nil {
+		if err := dm.checkFilters(ctx, cpp.Tenant, cpp.FilterIDs); err != nil {
 			// if we get a broken filter do not set the profile
 			return fmt.Errorf("%+s for item with ID: %+v",
 				err, cpp.TenantID())
 		}
 	}
-	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, false, utils.NonTransactional)
+	oldCpp, err := dm.GetChargerProfile(ctx, cpp.Tenant, cpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().SetChargerProfileDrv(cpp); err != nil {
+	if err = dm.DataDB().SetChargerProfileDrv(ctx, cpp); err != nil {
 		return err
 	}
 	if withIndex {
@@ -1511,13 +1511,13 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		if oldCpp != nil {
 			oldFiltersIDs = &oldCpp.FilterIDs
 		}
-		if err := updatedIndexes(context.TODO(), dm, utils.CacheChargerFilterIndexes, cpp.Tenant,
+		if err := updatedIndexes(ctx, dm, utils.CacheChargerFilterIndexes, cpp.Tenant,
 			utils.EmptyString, cpp.ID, oldFiltersIDs, cpp.FilterIDs, false); err != nil {
 			return err
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ChargerProfilePrefix, cpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetChargerProfile,
@@ -1529,31 +1529,31 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 	return
 }
 
-func (dm *DataManager) RemoveChargerProfile(tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveChargerProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldCpp, err := dm.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
+	oldCpp, err := dm.GetChargerProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveChargerProfileDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveChargerProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldCpp == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(context.TODO(), dm, utils.CacheChargerFilterIndexes, tenant, id, oldCpp.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheChargerFilterIndexes, tenant, id, oldCpp.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(context.TODO(), dm, utils.CacheChargerFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheChargerFilterIndexes,
 			tenant, utils.EmptyString, id, oldCpp.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ChargerProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveChargerProfile,

@@ -122,13 +122,13 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	}
 	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 	for _, cp := range cPPs {
-		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
+		if err = dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//verify each charger from cache
 	for _, cp := range cPPs {
-		if tempCp, err := dmCharger.GetChargerProfile(cp.Tenant, cp.ID,
+		if tempCp, err := dmCharger.GetChargerProfile(context.Background(), cp.Tenant, cp.ID,
 			true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(cp, tempCp) {
@@ -262,13 +262,13 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 
 	for _, cp := range cPPs {
-		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
+		if err = dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//verify each charger from cache
 	for _, cp := range cPPs {
-		if tempCp, err := dmCharger.GetChargerProfile(cp.Tenant, cp.ID,
+		if tempCp, err := dmCharger.GetChargerProfile(context.Background(), cp.Tenant, cp.ID,
 			true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(cp, tempCp) {
@@ -276,18 +276,18 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		}
 	}
 
-	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
+	if _, err = chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v", err)
 	}
 
-	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0].Tenant, chargerEvents[0]); err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[0].Tenant, chargerEvents[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(cPPs[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", cPPs[0], rcv[0])
 	}
 
-	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1].Tenant, chargerEvents[1]); err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[1].Tenant, chargerEvents[1]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(cPPs[1], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cPPs[1]), utils.ToJSON(rcv))
@@ -420,13 +420,13 @@ func TestChargerProcessEvent(t *testing.T) {
 	dmCharger.SetFilter(context.Background(), fltrCP4, true)
 
 	for _, cp := range cPPs {
-		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
+		if err = dmCharger.SetChargerProfile(context.Background(), cp, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
 	//verify each charger from cache
 	for _, cp := range cPPs {
-		if tempCp, err := dmCharger.GetChargerProfile(cp.Tenant, cp.ID,
+		if tempCp, err := dmCharger.GetChargerProfile(context.Background(), cp.Tenant, cp.ID,
 			true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(cp, tempCp) {
@@ -434,18 +434,18 @@ func TestChargerProcessEvent(t *testing.T) {
 		}
 	}
 
-	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
+	if _, err = chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[2].Tenant, chargerEvents[2]); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v", err)
 	}
 
-	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0].Tenant, chargerEvents[0]); err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[0].Tenant, chargerEvents[0]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(cPPs[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", cPPs[0], rcv[0])
 	}
 
-	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1].Tenant, chargerEvents[1]); err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(context.Background(), chargerEvents[1].Tenant, chargerEvents[1]); err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(cPPs[1], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cPPs[1]), utils.ToJSON(rcv))
@@ -458,7 +458,7 @@ func TestChargerProcessEvent(t *testing.T) {
 		},
 	}
 	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID
-	rcv, err := chargerSrv.processEvent(rpl[0].CGREvent.Tenant, chargerEvents[0])
+	rcv, err := chargerSrv.processEvent(context.Background(), rpl[0].CGREvent.Tenant, chargerEvents[0])
 	if err != nil {
 		t.Fatalf("Error: %+v", err)
 	}
@@ -502,7 +502,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 	}
 
 	experr := utils.ErrNotFound
-	rcv, err := cS.matchingChargerProfilesForEvent("tnt", cgrEv)
+	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(), "tnt", cgrEv)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -548,7 +548,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 	}
 
 	experr := utils.ErrNotFound
-	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -598,7 +598,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	}
 
 	experr := utils.ErrNotImplemented
-	rcv, err := cS.matchingChargerProfilesForEvent(cgrEv.Tenant, cgrEv)
+	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -623,7 +623,7 @@ func TestChargersprocessEvent(t *testing.T) {
 	}
 
 	experr := "NO_DATABASE_CONNECTION"
-	rcv, err := cS.processEvent(cgrEv.Tenant, cgrEv)
+	rcv, err := cS.processEvent(context.Background(), cgrEv.Tenant, cgrEv)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -640,7 +640,7 @@ func TestChargersV1ProcessEventMissingArgs(t *testing.T) {
 	var reply *[]*ChrgSProcessEventReply
 
 	experr := "MANDATORY_IE_MISSING: [Event]"
-	err := cS.V1ProcessEvent(args, reply)
+	err := cS.V1ProcessEvent(context.Background(), args, reply)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)

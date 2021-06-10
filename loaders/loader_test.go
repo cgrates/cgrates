@@ -1053,7 +1053,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 		Weight:       20,
 	}
 
-	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charger1",
+	if rcv, err := ldr.dm.GetChargerProfile(context.Background(), "cgrates.org", "Charger1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCharger1, rcv) {
@@ -3748,7 +3748,7 @@ cgrates.org,REM_ROUTES_1
 		Tenant: "cgrates.org",
 		ID:     "REM_ROUTES_1",
 	}
-	if err := ldr.dm.SetChargerProfile(expChargers, true); err != nil {
+	if err := ldr.dm.SetChargerProfile(context.Background(), expChargers, true); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(context.Background(), utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)

@@ -37,10 +37,10 @@ import (
 
 var (
 	cgrLdrCfgPath string
-	cgrLdrCfgDir string
-	cgrLdrCfg  *config.CGRConfig
-	cgrLdrBIRPC        *birpc.Client
-	cgrLdrTests = []func(t *testing.T) {
+	cgrLdrCfgDir  string
+	cgrLdrCfg     *config.CGRConfig
+	cgrLdrBIRPC   *birpc.Client
+	cgrLdrTests   = []func(t *testing.T){
 		testCgrLdrInitCfg,
 		testCgrLdrInitDataDB,
 		testCgrLdrInitStorDB,
@@ -64,12 +64,12 @@ var (
 		//remove all data with cgr-loader and remove flag
 		testCgrLdrRemoveData,
 		testCgrLdrGetSubsystemsNotLoadedLoad,
-	    testCgrLdrKillEngine,
+		testCgrLdrKillEngine,
 	}
 )
 
 func TestCGRLoaderRemove(t *testing.T) {
-	switch *dbType{
+	switch *dbType {
 	case utils.MetaInternal:
 		cgrLdrCfgDir = "tutinternal"
 	case utils.MetaMongo:
@@ -107,7 +107,7 @@ func testCgrLdrInitStorDB(t *testing.T) {
 	}
 }
 
-func testCgrLdrStartEngine(t *testing.T){
+func testCgrLdrStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cgrLdrCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -235,7 +235,7 @@ func testCgrLdrLoadData(t *testing.T) {
 func testCgrLdrGetAccountAfterLoad(t *testing.T) {
 	expAcc := &utils.Account{
 		Tenant: "cgrates.org",
-		ID: "ACC_PRF_1",
+		ID:     "ACC_PRF_1",
 		Weights: []*utils.DynamicWeight{
 			{
 				Weight: 20,
@@ -243,34 +243,34 @@ func testCgrLdrGetAccountAfterLoad(t *testing.T) {
 		},
 		FilterIDs: []string{},
 		Balances: map[string]*utils.Balance{
-			"MonetaryBalance":{
+			"MonetaryBalance": {
 				ID: "MonetaryBalance",
 				Weights: []*utils.DynamicWeight{
 					{
 						Weight: 10,
 					},
 				},
-				Type: utils.MetaMonetary,
+				Type:  utils.MetaMonetary,
 				Units: utils.NewDecimal(14, 0),
 				UnitFactors: []*utils.UnitFactor{
 					{
 						FilterIDs: []string{"fltr1", "fltr2"},
-						Factor: utils.NewDecimal(100, 0),
+						Factor:    utils.NewDecimal(100, 0),
 					},
 					{
 						FilterIDs: []string{"fltr3"},
-						Factor: utils.NewDecimal(200, 0),
+						Factor:    utils.NewDecimal(200, 0),
 					},
 				},
 				CostIncrements: []*utils.CostIncrement{
 					{
-						FilterIDs: []string{"fltr1", "fltr2"},
-						Increment: utils.NewDecimal(13,1),
-						FixedFee: utils.NewDecimal(23,1),
-						RecurrentFee: utils.NewDecimal(33,1),
+						FilterIDs:    []string{"fltr1", "fltr2"},
+						Increment:    utils.NewDecimal(13, 1),
+						FixedFee:     utils.NewDecimal(23, 1),
+						RecurrentFee: utils.NewDecimal(33, 1),
 					},
 				},
-				AttributeIDs: []string{"attr1","attr2"},
+				AttributeIDs: []string{"attr1", "attr2"},
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
@@ -287,80 +287,80 @@ func testCgrLdrGetAccountAfterLoad(t *testing.T) {
 
 func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 	expActPrf := &engine.ActionProfile{
-		Tenant: "cgrates.org",
-		ID: "ONE_TIME_ACT",
+		Tenant:    "cgrates.org",
+		ID:        "ONE_TIME_ACT",
 		FilterIDs: []string{},
-		Weight: 10,
-		Schedule: utils.MetaASAP,
+		Weight:    10,
+		Schedule:  utils.MetaASAP,
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: {
-               "1001": {},
-               "1002": {},
+				"1001": {},
+				"1002": {},
 			},
 		},
 		Actions: []*engine.APAction{
 			{
-				ID: "TOPUP",
+				ID:   "TOPUP",
 				Type: utils.MetaAddBalance,
 				Diktats: []*engine.APDiktat{
 					{
-						Path: "*balance.TestBalance.Units",
+						Path:  "*balance.TestBalance.Units",
 						Value: "10",
 					},
 				},
 			},
 			{
-				ID: "SET_BALANCE_TEST_DATA",
+				ID:   "SET_BALANCE_TEST_DATA",
 				Type: utils.MetaSetBalance,
 				Diktats: []*engine.APDiktat{
 					{
-						Path: "*balance.TestDataBalance.Type",
+						Path:  "*balance.TestDataBalance.Type",
 						Value: utils.MetaData,
 					},
 				},
 			},
 			{
-				ID: "TOPUP_TEST_DATA",
+				ID:   "TOPUP_TEST_DATA",
 				Type: utils.MetaAddBalance,
 				Diktats: []*engine.APDiktat{
 					{
-						Path: "*balance.TestDataBalance.Units",
+						Path:  "*balance.TestDataBalance.Units",
 						Value: "1024",
 					},
 				},
 			},
 			{
-				ID: "SET_BALANCE_TEST_VOICE",
+				ID:   "SET_BALANCE_TEST_VOICE",
 				Type: utils.MetaSetBalance,
 				Diktats: []*engine.APDiktat{
 					{
-						Path: "*balance.TestVoiceBalance.Type",
+						Path:  "*balance.TestVoiceBalance.Type",
 						Value: utils.MetaVoice,
 					},
 				},
 			},
 			{
-				ID: "TOPUP_TEST_VOICE",
+				ID:   "TOPUP_TEST_VOICE",
 				Type: utils.MetaAddBalance,
 				Diktats: []*engine.APDiktat{
 					{
-						Path: "*balance.TestVoiceBalance.Units",
+						Path:  "*balance.TestVoiceBalance.Units",
 						Value: "15m15s",
 					},
 				},
 			},
 			{
-				ID: "SET_BALANCE_TEST_FILTERS",
+				ID:   "SET_BALANCE_TEST_FILTERS",
 				Type: utils.MetaSetBalance,
 				Diktats: []*engine.APDiktat{
 					{
-						Path: "*balance.TestVoiceBalance.Filters",
+						Path:  "*balance.TestVoiceBalance.Filters",
 						Value: "*string:~*req.CustomField:500",
 					},
 				},
 			},
 			{
-				ID: "TOPUP_REM_VOICE",
+				ID:   "TOPUP_REM_VOICE",
 				Type: utils.MetaRemBalance,
 				Diktats: []*engine.APDiktat{
 					{
@@ -382,16 +382,16 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 
 func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 	extAttrPrf := &engine.APIAttributeProfile{
-		Tenant: utils.CGRateSorg,
-		ID: "ATTR_ACNT_1001",
-		FilterIDs: []string{"*string:~*opts.*context:*sessions","FLTR_ACCOUNT_1001"},
-		Weight: 10,
+		Tenant:    utils.CGRateSorg,
+		ID:        "ATTR_ACNT_1001",
+		FilterIDs: []string{"*string:~*opts.*context:*sessions", "FLTR_ACCOUNT_1001"},
+		Weight:    10,
 		Attributes: []*engine.ExternalAttribute{
 			{
 				FilterIDs: []string{},
-				Path: "*req.OfficeGroup",
-				Type: utils.MetaConstant,
-				Value: "Marketing",
+				Path:      "*req.OfficeGroup",
+				Type:      utils.MetaConstant,
+				Value:     "Marketing",
 			},
 		},
 	}
@@ -412,22 +412,22 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 func testCgrLdrGetFilterAfterLoad(t *testing.T) {
 	expFilter := &engine.Filter{
 		Tenant: utils.CGRateSorg,
-		ID: "FLTR_1",
+		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
 			{
-				Type: utils.MetaString,
+				Type:    utils.MetaString,
 				Element: "~*req.Account",
-				Values: []string{"1003","1002"},
+				Values:  []string{"1003", "1002"},
 			},
 			{
-				Type: utils.MetaPrefix,
+				Type:    utils.MetaPrefix,
 				Element: "~*req.Destination",
-				Values: []string{"10","20"},
+				Values:  []string{"10", "20"},
 			},
 			{
-				Type: utils.MetaRSR,
+				Type:    utils.MetaRSR,
 				Element: "~*req.Destination",
-				Values: []string{"1002"},
+				Values:  []string{"1002"},
 			},
 		},
 	}
@@ -437,26 +437,26 @@ func testCgrLdrGetFilterAfterLoad(t *testing.T) {
 		&replyFltr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFilter, replyFltr) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expFilter), utils.ToJSON(replyFltr))
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expFilter), utils.ToJSON(replyFltr))
 	}
 }
 
 func testCgrLdrGetRateProfileAfterLoad(t *testing.T) {
 	expRatePrf := &utils.RateProfile{
-		Tenant: utils.CGRateSorg,
-		ID: "RT_SPECIAL_1002",
+		Tenant:    utils.CGRateSorg,
+		ID:        "RT_SPECIAL_1002",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
 		Weights: []*utils.DynamicWeight{
 			{
 				Weight: 10,
 			},
 		},
-		MinCost: utils.NewDecimal(0, 0),
-		MaxCost: utils.NewDecimal(0, 0),
+		MinCost:         utils.NewDecimal(0, 0),
+		MaxCost:         utils.NewDecimal(0, 0),
 		MaxCostStrategy: utils.MetaMaxCostFree,
 		Rates: map[string]*utils.Rate{
 			"RT_ALWAYS": {
-				ID: "RT_ALWAYS",
+				ID:              "RT_ALWAYS",
 				ActivationTimes: "* * * * *",
 				Weights: []*utils.DynamicWeight{
 					{
@@ -466,10 +466,10 @@ func testCgrLdrGetRateProfileAfterLoad(t *testing.T) {
 				IntervalRates: []*utils.IntervalRate{
 					{
 						IntervalStart: utils.NewDecimal(0, 0),
-						RecurrentFee: utils.NewDecimal(1, 2),
-						FixedFee: utils.NewDecimal(0, 0),
-						Unit: utils.NewDecimal(int64(time.Minute), 0),
-						Increment: utils.NewDecimal(int64(time.Second), 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						FixedFee:      utils.NewDecimal(0, 0),
+						Unit:          utils.NewDecimal(int64(time.Minute), 0),
+						Increment:     utils.NewDecimal(int64(time.Second), 0),
 					},
 				},
 			},
@@ -487,12 +487,12 @@ func testCgrLdrGetRateProfileAfterLoad(t *testing.T) {
 
 func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 	expREsPrf := &engine.ResourceProfile{
-		Tenant: utils.CGRateSorg,
-		ID: "RES_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight: 10,
-		UsageTTL: time.Hour,
-		Limit: 1,
+		Tenant:       utils.CGRateSorg,
+		ID:           "RES_ACNT_1001",
+		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
+		Weight:       10,
+		UsageTTL:     time.Hour,
+		Limit:        1,
 		ThresholdIDs: []string{},
 	}
 	var replyRes *engine.ResourceProfile
@@ -508,7 +508,7 @@ func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 func testCgrLdrGetResourceAfterLoad(t *testing.T) {
 	expREsPrf := &engine.Resource{
 		Tenant: "cgrates.org",
-		ID: "RES_ACNT_1001",
+		ID:     "RES_ACNT_1001",
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	var replyRes *engine.Resource
@@ -523,23 +523,22 @@ func testCgrLdrGetResourceAfterLoad(t *testing.T) {
 
 func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 	expRoutePrf := &engine.RouteProfile{
-		ID: "ROUTE_ACNT_1001",
-		Tenant: "cgrates.org",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight: 10,
-		Sorting: utils.MetaWeight,
+		ID:                "ROUTE_ACNT_1001",
+		Tenant:            "cgrates.org",
+		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
+		Weight:            10,
+		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID: "route1",
+				ID:     "route1",
 				Weight: 20,
 			},
 			{
-				ID: "route2",
+				ID:     "route2",
 				Weight: 10,
 			},
 		},
-
 	}
 	var replyRts *engine.RouteProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
@@ -553,21 +552,21 @@ func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 		sort.Slice(replyRts.Routes, func(i, j int) bool {
 			return replyRts.Routes[i].ID < replyRts.Routes[j].ID
 		})
-		 if !reflect.DeepEqual(expRoutePrf, replyRts) {
-			 t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRoutePrf), utils.ToJSON(replyRts))
-		 }
+		if !reflect.DeepEqual(expRoutePrf, replyRts) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRoutePrf), utils.ToJSON(replyRts))
+		}
 	}
 }
 
 func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 	expStatsprf := &engine.StatQueueProfile{
-		Tenant: utils.CGRateSorg,
-		ID: "Stat_1",
-		FilterIDs: []string{"FLTR_STAT_1"},
-		Weight: 30,
+		Tenant:      utils.CGRateSorg,
+		ID:          "Stat_1",
+		FilterIDs:   []string{"FLTR_STAT_1"},
+		Weight:      30,
 		QueueLength: 100,
-		TTL: 10 * time.Second,
-		MinItems: 0,
+		TTL:         10 * time.Second,
+		MinItems:    0,
 		Metrics: []*engine.MetricWithFilters{
 			{
 				MetricID: "*tcd",
@@ -579,7 +578,7 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blocker: true,
+		Blocker:      true,
 		ThresholdIDs: []string{utils.MetaNone},
 	}
 	var replySts *engine.StatQueueProfile
@@ -609,7 +608,7 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 	replyStQue := make(map[string]string)
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
-		&replyStQue);err != nil {
+		&replyStQue); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStatQueue, replyStQue) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expStatQueue), utils.ToJSON(replyStQue))
@@ -618,12 +617,12 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 
 func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 	expThPrf := &engine.ThresholdProfile{
-		Tenant: utils.CGRateSorg,
-		ID: "THD_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight: 10,
-		MaxHits: -1,
-		MinHits: 0,
+		Tenant:           utils.CGRateSorg,
+		ID:               "THD_ACNT_1001",
+		FilterIDs:        []string{"FLTR_ACCOUNT_1001"},
+		Weight:           10,
+		MaxHits:          -1,
+		MinHits:          0,
 		ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
 	}
 	var replyThdPrf *engine.ThresholdProfile
@@ -639,8 +638,8 @@ func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 func testCgrLdrGetThresholdAfterLoad(t *testing.T) {
 	expThPrf := &engine.Threshold{
 		Tenant: "cgrates.org",
-		ID: "THD_ACNT_1001",
-		Hits: 0,
+		ID:     "THD_ACNT_1001",
+		Hits:   0,
 	}
 	var replyThdPrf *engine.Threshold
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ThresholdSv1GetThreshold,

@@ -39,10 +39,10 @@ import (
 )
 
 var (
-	dataDir  = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	dbType   = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
-	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
+	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 )
 
 func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
