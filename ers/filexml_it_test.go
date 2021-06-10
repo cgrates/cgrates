@@ -264,7 +264,7 @@ func testXMLITHandleCdr1File(t *testing.T) {
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/xmlErs/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testXmlITAnalyseCDRs(t *testing.T) {
