@@ -1016,7 +1016,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
-	if cfg.registrarCCfg.Dispatchers.Enabled {
+	if len(cfg.registrarCCfg.Dispatchers.RegistrarSConns) != 0 {
 		if len(cfg.registrarCCfg.Dispatchers.Hosts) == 0 {
 			return fmt.Errorf("<%s> missing dispatcher host IDs", utils.RegistrarC)
 		}
@@ -1029,9 +1029,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
 				}
 			}
-		}
-		if len(cfg.registrarCCfg.Dispatchers.RegistrarSConns) == 0 {
-			return fmt.Errorf("<%s> missing dispatcher connection IDs", utils.RegistrarC)
 		}
 		for _, connID := range cfg.registrarCCfg.Dispatchers.RegistrarSConns {
 			if connID == utils.MetaInternal {
@@ -1050,7 +1047,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
-	if cfg.registrarCCfg.RPC.Enabled {
+	if len(cfg.registrarCCfg.RPC.RegistrarSConns) != 0 {
 		if len(cfg.registrarCCfg.RPC.Hosts) == 0 {
 			return fmt.Errorf("<%s> missing RPC host IDs", utils.RegistrarC)
 		}
@@ -1063,9 +1060,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					return fmt.Errorf("<%s> unsupported transport <%s> for host <%s>", utils.RegistrarC, host.Transport, utils.ConcatenatedKey(tnt, host.ID))
 				}
 			}
-		}
-		if len(cfg.registrarCCfg.RPC.RegistrarSConns) == 0 {
-			return fmt.Errorf("<%s> missing RPC connection IDs", utils.RegistrarC)
 		}
 		for _, connID := range cfg.registrarCCfg.RPC.RegistrarSConns {
 			if connID == utils.MetaInternal {

@@ -28,7 +28,7 @@ func TestFlags(t *testing.T) {
 	if err := cgrMigratorFlags.Parse([]string{"-config_path", "true"}); err != nil {
 		t.Fatal(err)
 	} else if *cfgPath != "true" {
-		t.Errorf( "Expected true received:%v ", *cfgPath)
+		t.Errorf("Expected true received:%v ", *cfgPath)
 	}
 	if err := cgrMigratorFlags.Parse([]string{"-exec", "true"}); err != nil {
 		t.Fatal(err)

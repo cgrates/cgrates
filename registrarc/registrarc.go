@@ -47,11 +47,11 @@ type RegistrarCService struct {
 func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) {
 	dTm, rTm := &time.Timer{}, &time.Timer{}
 	var dTmStarted, rTmStarted bool
-	if dTmStarted = dhS.cfg.RegistrarCCfg().Dispatchers.Enabled; dTmStarted {
+	if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
 		dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
 		dhS.registerDispHosts()
 	}
-	if rTmStarted = dhS.cfg.RegistrarCCfg().RPC.Enabled; rTmStarted {
+	if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 		rTm = time.NewTimer(dhS.cfg.RegistrarCCfg().RPC.RefreshInterval)
 		dhS.registerRPCHosts()
 	}
@@ -64,19 +64,19 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 			if dTmStarted {
 				dTm.Stop()
 			}
-			if dTmStarted = dhS.cfg.RegistrarCCfg().Dispatchers.Enabled; dTmStarted {
+			if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
 				dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
 				dhS.registerDispHosts()
 			}
-			if rTmStarted = dhS.cfg.RegistrarCCfg().RPC.Enabled; rTmStarted {
+			if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 				rTm = time.NewTimer(dhS.cfg.RegistrarCCfg().RPC.RefreshInterval)
 				dhS.registerRPCHosts()
 			}
 		case <-stopChan:
-			if dhS.cfg.RegistrarCCfg().Dispatchers.Enabled {
+			if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
 				dTm.Stop()
 			}
-			if dhS.cfg.RegistrarCCfg().RPC.Enabled {
+			if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 				rTm.Stop()
 			}
 			return
@@ -93,11 +93,11 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 // Shutdown is called to shutdown the service
 func (dhS *RegistrarCService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RegistrarC))
-	if dhS.cfg.RegistrarCCfg().Dispatchers.Enabled {
+	if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
 		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().Dispatchers,
 			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterDispatcherHosts)
 	}
-	if dhS.cfg.RegistrarCCfg().RPC.Enabled {
+	if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().RPC,
 			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterRPCHosts)
 	}

@@ -58,7 +58,6 @@ func (dps RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {
 
 // RegistrarCCfg is the configuration of registrarc
 type RegistrarCCfg struct {
-	Enabled         bool
 	RegistrarSConns []string
 	Hosts           map[string][]*RemoteHost
 	RefreshInterval time.Duration
@@ -67,9 +66,6 @@ type RegistrarCCfg struct {
 func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
-	}
-	if jsnCfg.Enabled != nil {
-		dps.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Registrars_conns != nil {
 		dps.RegistrarSConns = make([]string, len(*jsnCfg.Registrars_conns))
@@ -95,7 +91,6 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 // AsMapInterface returns the config as a map[string]interface{}
 func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:         dps.Enabled,
 		utils.RegistrarsConnsCfg: dps.RegistrarSConns,
 		utils.RefreshIntervalCfg: dps.RefreshInterval.String(),
 	}
@@ -119,7 +114,6 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 // Clone returns a deep copy of DispatcherHCfg
 func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 	cln = &RegistrarCCfg{
-		Enabled:         dps.Enabled,
 		RefreshInterval: dps.RefreshInterval,
 		Hosts:           make(map[string][]*RemoteHost),
 	}

@@ -1514,7 +1514,7 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 
 	cfg.registrarCCfg = &RegistrarCCfgs{
 		RPC: &RegistrarCCfg{
-			Enabled: true,
+			RegistrarSConns: []string{utils.MetaLocalHost},
 			Hosts: map[string][]*RemoteHost{
 				"hosts": {},
 			},
@@ -1547,11 +1547,10 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 	}
 
 	cfg.registrarCCfg.RPC.Hosts["hosts"][0].Transport = utils.MetaJSON
-	expected = "<RegistrarC> missing RPC connection IDs"
+	expected = "<RegistrarC> connection with id: <*localhost> unsupported transport <*json>"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-
 	cfg.registrarCCfg.RPC.RegistrarSConns = []string{utils.MetaInternal}
 	expected = "<RegistrarC> internal connection IDs are not supported"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
@@ -1584,7 +1583,7 @@ func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
 
 	cfg.registrarCCfg = &RegistrarCCfgs{
 		Dispatchers: &RegistrarCCfg{
-			Enabled: true,
+			RegistrarSConns: []string{utils.MetaLocalHost},
 			Hosts: map[string][]*RemoteHost{
 				"hosts": {},
 			},
@@ -1617,7 +1616,7 @@ func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
 	}
 
 	cfg.registrarCCfg.Dispatchers.Hosts["hosts"][0].Transport = utils.MetaJSON
-	expected = "<RegistrarC> missing dispatcher connection IDs"
+	expected = "<RegistrarC> connection with id: <*localhost> unsupported transport <*json>"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
