@@ -91,8 +91,8 @@ func TestLoaderSReload(t *testing.T) {
 	}
 
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "loaders", "tutinternal")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "loaders", "tutinternal"),
 		Section: config.LoaderSJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

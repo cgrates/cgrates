@@ -70,8 +70,8 @@ func TestRadiusAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql"),
 		Section: config.RadiusAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -134,8 +134,8 @@ func TestRadiusAgentReload2(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql"),
 		Section: config.RadiusAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

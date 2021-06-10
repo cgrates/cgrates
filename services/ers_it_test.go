@@ -77,8 +77,8 @@ func TestEventReaderSReload(t *testing.T) {
 		t.Fatal("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal"),
 		Section: config.ERsJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

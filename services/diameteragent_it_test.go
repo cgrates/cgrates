@@ -62,8 +62,8 @@ func TestDiameterAgentReload1(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "diamagent_mysql")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "diamagent_mysql"),
 		Section: config.DiameterAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

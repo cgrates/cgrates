@@ -85,8 +85,8 @@ func TestEventExporterSReload(t *testing.T) {
 	fcTmp.ComputePath()
 	cfg.TemplatesCfg()["requiredFields"] = []*config.FCTemplate{fcTmp}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "ees")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ees"),
 		Section: config.EEsJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

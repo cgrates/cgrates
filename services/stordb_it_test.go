@@ -70,8 +70,8 @@ func TestStorDBReload(t *testing.T) {
 	}
 
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.CDRsJSON,
 	}, &reply); err != nil {
 		t.Error(err)
@@ -97,8 +97,8 @@ func TestStorDBReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	cfg.StorDbCfg().Password = ""
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.StorDBJSON,
 	}, &reply); err != nil {
 		t.Error(err)

@@ -65,8 +65,8 @@ func TestSIPAgentReload(t *testing.T) {
 		t.Fatalf("Expected service to be down")
 	}
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "sipagent_mysql"),
 		Section: config.SIPAgentJSON,
 	}, &reply); err != nil {
 		t.Fatal(err)

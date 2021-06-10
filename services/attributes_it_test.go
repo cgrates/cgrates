@@ -70,8 +70,8 @@ func TestAttributeSReload(t *testing.T) {
 	}
 
 	var reply string
+	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo")
 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.AttributeSJSON,
 	}, &reply); err != nil {
 		t.Error(err)
