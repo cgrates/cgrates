@@ -35,7 +35,8 @@ type DataDBMock struct {
 	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
 	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
 	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
-	GetChargerProfileDrvF      func(tnt, id string) (*ChargerProfile, error)
+	GetChargerProfileDrvF      func(ctx *context.Context, tnt, id string) (*ChargerProfile, error)
+	SetChargerProfileDrvF      func(ctx *context.Context, chr *ChargerProfile)  (err error)
 	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
@@ -302,18 +303,18 @@ func (dbM *DataDBMock) RemoveAttributeProfileDrv(ctx *context.Context, str1 stri
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetChargerProfileDrv(tnt, id string) (*ChargerProfile, error) {
+func (dbM *DataDBMock) GetChargerProfileDrv(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
 	if dbM.GetChargerProfileDrvF != nil {
-		return dbM.GetChargerProfileDrvF(tnt, id)
+		return dbM.GetChargerProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetChargerProfileDrv(*ChargerProfile) error {
+func (dbM *DataDBMock) SetChargerProfileDrv(*context.Context, *ChargerProfile) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveChargerProfileDrv(string, string) error {
+func (dbM *DataDBMock) RemoveChargerProfileDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

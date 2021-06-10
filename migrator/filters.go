@@ -523,7 +523,7 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for chragerProfile", id)
 		}
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		cpp, err := m.dmIN.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -533,7 +533,7 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 		for i, fl := range cpp.FilterIDs {
 			cpp.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
+		if err := m.dmOut.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -742,7 +742,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for chargerProfile", id)
 		}
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(tntID[0], tntID[1], false, false, utils.NonTransactional)
+		cpp, err := m.dmIN.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting charger profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -753,7 +753,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 		for i, fl := range cpp.FilterIDs {
 			cpp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
+		if err := m.dmOut.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting charger profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}

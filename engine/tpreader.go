@@ -490,7 +490,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		if th, err = APItoChargerProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}
-		if err = tpr.dm.SetChargerProfile(th, true); err != nil {
+		if err = tpr.dm.SetChargerProfile(context.TODO(), th, true); err != nil {
 			return
 		}
 		if verbose {
@@ -782,7 +782,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("ChargerProfiles:")
 	}
 	for _, tpChr := range tpr.chargerProfiles {
-		if err = tpr.dm.RemoveChargerProfile(tpChr.Tenant, tpChr.ID,
+		if err = tpr.dm.RemoveChargerProfile(context.TODO(), tpChr.Tenant, tpChr.ID,
 			true); err != nil {
 			return
 		}

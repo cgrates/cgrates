@@ -81,9 +81,9 @@ type DataDB interface {
 	GetAttributeProfileDrv(ctx *context.Context, tnt string, id string) (*AttributeProfile, error)
 	SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error
 	RemoveAttributeProfileDrv(*context.Context, string, string) error
-	GetChargerProfileDrv(string, string) (*ChargerProfile, error)
-	SetChargerProfileDrv(*ChargerProfile) error
-	RemoveChargerProfileDrv(string, string) error
+	GetChargerProfileDrv(*context.Context, string, string) (*ChargerProfile, error)
+	SetChargerProfileDrv(*context.Context, *ChargerProfile) error
+	RemoveChargerProfileDrv(*context.Context, string, string) error
 	GetDispatcherProfileDrv(*context.Context, string, string) (*DispatcherProfile, error)
 	SetDispatcherProfileDrv(*context.Context, *DispatcherProfile) error
 	RemoveDispatcherProfileDrv(*context.Context, string, string) error

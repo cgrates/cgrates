@@ -1068,9 +1068,9 @@ func (ms *MongoStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, 
 	})
 }
 
-func (ms *MongoStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfile, err error) {
+func (ms *MongoStorage) GetChargerProfileDrv(ctx *context.Context, tenant, id string) (r *ChargerProfile, err error) {
 	r = new(ChargerProfile)
-	err = ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColCpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
 			r = nil
@@ -1084,8 +1084,8 @@ func (ms *MongoStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfi
 	return
 }
 
-func (ms *MongoStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) SetChargerProfileDrv(ctx *context.Context, r *ChargerProfile) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColCpp).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
 			options.Update().SetUpsert(true),
@@ -1094,8 +1094,8 @@ func (ms *MongoStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
-	return ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
+func (ms *MongoStorage) RemoveChargerProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColCpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

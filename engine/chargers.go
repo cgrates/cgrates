@@ -47,12 +47,12 @@ func (cS *ChargerService) Shutdown() {
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
+func (cS *ChargerService) matchingChargerProfilesForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
-	cpIDs, err := MatchingItemIDsForEvent(context.TODO(), evNm,
+	cpIDs, err := MatchingItemIDsForEvent(ctx, evNm,
 		cS.cfg.ChargerSCfg().StringIndexedFields,
 		cS.cfg.ChargerSCfg().PrefixIndexedFields,
 		cS.cfg.ChargerSCfg().SuffixIndexedFields,
@@ -65,14 +65,14 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(tnt string, cgrEv *uti
 	}
 	matchingCPs := make(map[string]*ChargerProfile)
 	for cpID := range cpIDs {
-		cP, err := cS.dm.GetChargerProfile(tnt, cpID, true, true, utils.NonTransactional)
+		cP, err := cS.dm.GetChargerProfile(ctx, tnt, cpID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if pass, err := cS.filterS.Pass(context.TODO(), tnt, cP.FilterIDs,
+		if pass, err := cS.filterS.Pass(ctx, tnt, cP.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {
@@ -101,7 +101,7 @@ type ChrgSProcessEventReply struct {
 	CGREvent           *utils.CGREvent
 }
 
-func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
+func (cS *ChargerService) processEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
 	var processRuns *int
 	if val, has := cgrEv.APIOpts[utils.OptsAttributesProcessRuns]; has {
@@ -109,7 +109,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 			processRuns = utils.IntPointer(int(v))
 		}
 	}
-	if cPs, err = cS.matchingChargerProfilesForEvent(tnt, cgrEv); err != nil {
+	if cPs, err = cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv); err != nil {
 		return nil, err
 	}
 	rply = make([]*ChrgSProcessEventReply, len(cPs))
@@ -135,7 +135,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 			CGREvent:     clonedEv,
 		}
 		var evReply AttrSProcessEventReply
-		if err = cS.connMgr.Call(context.TODO(), cS.cfg.ChargerSCfg().AttributeSConns,
+		if err = cS.connMgr.Call(ctx, cS.cfg.ChargerSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, args, &evReply); err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {
 				return nil, err
@@ -152,7 +152,7 @@ func (cS *ChargerService) processEvent(tnt string, cgrEv *utils.CGREvent) (rply 
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
+func (cS *ChargerService) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 	reply *[]*ChrgSProcessEventReply) (err error) {
 	if args == nil ||
 		args.Event == nil {
@@ -162,7 +162,7 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 	if tnt == utils.EmptyString {
 		tnt = cS.cfg.GeneralCfg().DefaultTenant
 	}
-	rply, err := cS.processEvent(tnt, args)
+	rply, err := cS.processEvent(ctx, tnt, args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -174,13 +174,13 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREvent,
+func (cS *ChargerService) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
 	rply *ChargerProfiles) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = cS.cfg.GeneralCfg().DefaultTenant
 	}
-	cPs, err := cS.matchingChargerProfilesForEvent(tnt, args)
+	cPs, err := cS.matchingChargerProfilesForEvent(ctx, tnt, args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
