@@ -220,7 +220,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 		Tenant:         "cgrates.org",
 		ID:             "EVENT6",
 		Subsystems:     []string{utils.MetaAny},
-		FilterIDs:      []string{"*string:~*opts.*method:DispatcherSv1.GetProfileForEvent"},
+		FilterIDs:      []string{"*string:~*opts.*method:DispatcherSv1.GetProfilesForEvent"},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,
 		Weight:         20,
@@ -240,6 +240,7 @@ func testDspDspv1GetProfileForEventWithMethod(t *testing.T) {
 	if err := dspRPC.Call(utils.DispatcherSv1GetProfilesForEvent, &arg, &reply); err != nil {
 		t.Fatal(err)
 	} else if len(reply) != 1 {
+		t.Error(utils.ToJSON(reply))
 		t.Fatalf("Unexpected number of profiles:%v", len(reply))
 	}
 	reply[0].Hosts.Sort()

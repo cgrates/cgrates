@@ -200,7 +200,7 @@ func testCsvITHandleSessionFile(t *testing.T) {
 }
 
 func testCsvITCheckSession(t *testing.T) {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := csvRPC.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
@@ -289,7 +289,7 @@ func testCsvITProcessFilteredCDR(t *testing.T) {
 }
 
 func testCsvITAnalyzeFilteredCDR(t *testing.T) {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	var cdrs []*engine.CDR
 	args := &utils.RPCCDRsFilterWithAPIOpts{

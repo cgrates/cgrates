@@ -12,6 +12,6 @@ cgrates.org,EVENT3,,,,,,ALL,,10,,,
 cgrates.org,EVENT4,*any,*string:~*req.EventName:Broadcast,,*broadcast_sync,,ALL2,,20,false,,20
 cgrates.org,EVENT4,,,,,,ALL,,10,,,
 cgrates.org,EVENT5,*any,*string:~*req.EventName:Internal,,*weight,,SELF,,20,false,,20
-cgrates.org,EVENT6,*any,*string:~*opts.*method:DispatcherSv1.GetProfileForEvent,,*weight,,SELF,,20,false,,20
+cgrates.org,EVENT6,*any,*string:~*opts.*method:DispatcherSv1.GetProfilesForEvent,,*weight,,SELF,,20,false,,20
 cgrates.org,EVENT7,*any,*string:~*opts.EventType:LoadDispatcher,,*weight,*default_ratio:1,ALL,,20,false,,20
 cgrates.org,EVENT7,,,,,,ALL2,,20,,*ratio:1,20
