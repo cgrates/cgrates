@@ -26,8 +26,8 @@ import (
 
 // RegistrarCCfgs is the configuration of registrarc rpc and dispatcher
 type RegistrarCCfgs struct {
-	RPC        *RegistrarCCfg
-	Dispatcher *RegistrarCCfg
+	RPC         *RegistrarCCfg
+	Dispatchers *RegistrarCCfg
 }
 
 func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err error) {
@@ -37,28 +37,27 @@ func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err erro
 	if err = dps.RPC.loadFromJSONCfg(jsnCfg.RPC); err != nil {
 		return
 	}
-	return dps.Dispatcher.loadFromJSONCfg(jsnCfg.Dispatcher)
+	return dps.Dispatchers.loadFromJSONCfg(jsnCfg.Dispatchers)
 }
 
 // AsMapInterface returns the config as a map[string]interface{}
 func (dps *RegistrarCCfgs) AsMapInterface() (initialMP map[string]interface{}) {
 	return map[string]interface{}{
 		utils.RPCCfg:        dps.RPC.AsMapInterface(),
-		utils.DispatcherCfg: dps.Dispatcher.AsMapInterface(),
+		utils.DispatcherCfg: dps.Dispatchers.AsMapInterface(),
 	}
 }
 
 // Clone returns a deep copy of DispatcherHCfg
 func (dps RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {
 	return &RegistrarCCfgs{
-		RPC:        dps.RPC.Clone(),
-		Dispatcher: dps.Dispatcher.Clone(),
+		RPC:         dps.RPC.Clone(),
+		Dispatchers: dps.Dispatchers.Clone(),
 	}
 }
 
 // RegistrarCCfg is the configuration of registrarc
 type RegistrarCCfg struct {
-	Enabled         bool
 	RegistrarSConns []string
 	Hosts           map[string][]*RemoteHost
 	RefreshInterval time.Duration
@@ -67,9 +66,6 @@ type RegistrarCCfg struct {
 func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
-	}
-	if jsnCfg.Enabled != nil {
-		dps.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Registrars_conns != nil {
 		dps.RegistrarSConns = utils.CloneStringSlice(*jsnCfg.Registrars_conns)
@@ -94,7 +90,6 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 // AsMapInterface returns the config as a map[string]interface{}
 func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:         dps.Enabled,
 		utils.RegistrarsConnsCfg: utils.CloneStringSlice(dps.RegistrarSConns),
 		utils.RefreshIntervalCfg: dps.RefreshInterval.String(),
 	}
@@ -118,7 +113,6 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 // Clone returns a deep copy of DispatcherHCfg
 func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 	cln = &RegistrarCCfg{
-		Enabled:         dps.Enabled,
 		RefreshInterval: dps.RefreshInterval,
 		Hosts:           make(map[string][]*RemoteHost),
 	}
@@ -136,7 +130,6 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 }
 
 type RegistrarCJsonCfg struct {
-	Enabled          *bool
 	Registrars_conns *[]string
 	Hosts            map[string][]*RemoteHostJson
 	Refresh_interval *string
@@ -145,9 +138,6 @@ type RegistrarCJsonCfg struct {
 func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *RegistrarCJsonCfg {
 	if d == nil {
 		d = new(RegistrarCJsonCfg)
-	}
-	if v1.Enabled != v2.Enabled {
-		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !utils.SliceStringEqual(v1.RegistrarSConns, v2.RegistrarSConns) {
 		d.Registrars_conns = utils.SliceStringPointer(utils.CloneStringSlice(v2.RegistrarSConns))
@@ -170,8 +160,8 @@ func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *Registr
 }
 
 type RegistrarCJsonCfgs struct {
-	RPC        *RegistrarCJsonCfg
-	Dispatcher *RegistrarCJsonCfg
+	RPC         *RegistrarCJsonCfg
+	Dispatchers *RegistrarCJsonCfg
 }
 
 func diffRegistrarCJsonCfgs(d *RegistrarCJsonCfgs, v1, v2 *RegistrarCCfgs) *RegistrarCJsonCfgs {
@@ -179,6 +169,6 @@ func diffRegistrarCJsonCfgs(d *RegistrarCJsonCfgs, v1, v2 *RegistrarCCfgs) *Regi
 		d = new(RegistrarCJsonCfgs)
 	}
 	d.RPC = diffRegistrarCJsonCfg(d.RPC, v1.RPC, v2.RPC)
-	d.Dispatcher = diffRegistrarCJsonCfg(d.Dispatcher, v1.Dispatcher, v2.Dispatcher)
+	d.Dispatchers = diffRegistrarCJsonCfg(d.Dispatchers, v1.Dispatchers, v2.Dispatchers)
 	return d
 }
