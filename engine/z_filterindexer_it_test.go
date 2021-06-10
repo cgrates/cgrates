@@ -1365,9 +1365,9 @@ func testITChargerProfileIndexes(t *testing.T) {
 		FilterIDs: []string{"CHARGER_FLTR", "*string:~*req.Usage:~*req.Debited"},
 		Weight:    10,
 	}
-	if err := dataManager.SetChargerProfile(chrgr1, true); err != nil {
+	if err := dataManager.SetChargerProfile(context.Background(), chrgr1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetChargerProfile(chrgr2, true); err != nil {
+	} else if err := dataManager.SetChargerProfile(context.Background(), chrgr2, true); err != nil {
 		t.Error(err)
 	}
 
@@ -1399,9 +1399,9 @@ func testITChargerProfileIndexes(t *testing.T) {
 	}
 	chrgr1.ID = "CHANGED_CHARGER_PRF1"
 	chrgr2.ID = "CHANGED_CHARGER_PRF2"
-	if err := dataManager.SetChargerProfile(chrgr1, true); err != nil {
+	if err := dataManager.SetChargerProfile(context.Background(), chrgr1, true); err != nil {
 		t.Error(err)
-	} else if err := dataManager.SetChargerProfile(chrgr2, true); err != nil {
+	} else if err := dataManager.SetChargerProfile(context.Background(), chrgr2, true); err != nil {
 		t.Error(err)
 	}
 

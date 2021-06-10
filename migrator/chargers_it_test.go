@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"github.com/cgrates/birpc/context"
 	"log"
 	"path"
 	"reflect"
@@ -194,10 +195,10 @@ func testChrgITMigrateAndMove(t *testing.T) {
 	switch chrgAction {
 	case utils.Migrate: // for the momment only one version of chargers exists
 	case utils.Move:
-		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(chrgPrf, false); err != nil {
+		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(context.Background(), chrgPrf, false); err != nil {
 			t.Error(err)
 		}
-		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(chrgPrf2, false); err != nil {
+		if err := chrgMigrator.dmIN.DataManager().SetChargerProfile(context.Background(), chrgPrf2, false); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -206,7 +207,7 @@ func testChrgITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Chargers ", err.Error())
 		}
 
-		_, err = chrgMigrator.dmOut.DataManager().GetChargerProfile("cgrates.org",
+		_, err = chrgMigrator.dmOut.DataManager().GetChargerProfile(context.Background(), "cgrates.org",
 			"CHRG_1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
@@ -216,23 +217,23 @@ func testChrgITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Chargers ", err.Error())
 		}
-		if result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile("cgrates.org",
+		if result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile(context.Background(), "cgrates.org",
 			"CHRG_1", false, false, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(result, chrgPrf) {
 			t.Errorf("Expecting: %+v, received: %+v", chrgPrf, result)
 		}
-		if result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile("cgrates.com",
+		if result, err := chrgMigrator.dmOut.DataManager().GetChargerProfile(context.Background(), "cgrates.com",
 			"CHRG_1", false, false, utils.NonTransactional); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(result, chrgPrf2) {
 			t.Errorf("Expecting: %+v, received: %+v", chrgPrf2, result)
 		}
-		if _, err = chrgMigrator.dmIN.DataManager().GetChargerProfile("cgrates.org",
+		if _, err = chrgMigrator.dmIN.DataManager().GetChargerProfile(context.Background(), "cgrates.org",
 			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		}
-		if _, err = chrgMigrator.dmIN.DataManager().GetChargerProfile("cgrates.com",
+		if _, err = chrgMigrator.dmIN.DataManager().GetChargerProfile(context.Background(), "cgrates.com",
 			"CHRG_1", false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 			t.Error(err)
 		} else if chrgMigrator.stats[utils.Chargers] != 2 {
