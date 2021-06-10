@@ -19,7 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"bytes"
+	"fmt"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -521,4 +526,635 @@ func TestActionsAPIs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
 	}
+}
+
+func TestActionsExecuteActionsResetTH(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expArgs := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "THD_ID",
+		},
+	}
+	var executed bool
+	cc := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ResetThreshold: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+						utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				executed = true
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+	aSv1 := NewActionSv1(aS)
+
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaResetThreshold,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaThresholds: {
+					"THD_ID": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// ExecuteActions with ResetThreshold
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	if !executed {
+		t.Errorf("ResetThreshold hasn't been executed")
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestActionsExecuteActionsResetSQ(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expArgs := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_ID",
+		},
+	}
+	var executed bool
+	cc := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.StatSv1ResetStatQueue: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+						utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				executed = true
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+	aSv1 := NewActionSv1(aS)
+
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaResetStatQueue,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaStats: {
+					"SQ_ID": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// ExecuteActions with ResetStatQueue
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// Check if ResetStatQueue has been executed
+	if !executed {
+		t.Errorf("ResetStatQueue hasn't been executed")
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestActionsExecuteActionsLog(t *testing.T) {
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	aS := actions.NewActionS(cfg, fltrs, dm, nil)
+	aSv1 := NewActionSv1(aS)
+
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaLog,
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// ExecuteActions with Log
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// Check if the log action was executed
+	expected := `CGRateS <> [INFO] LOG Event: {"*opts":null,"*req":{"Account":"1001"}}`
+	if rcv := buf.String(); !strings.Contains(rcv, expected) {
+		t.Errorf("Expected log: %q", expected)
+	}
+
+	utils.Logger.SetLogLevel(0)
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+// func TestActionsExecuteActionsLogCDRs(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+// 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}
+// 	dataDB := engine.NewInternalDB(nil, nil, true)
+// 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+// 	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+// 	// expArgs := &engine.ArgV1ProcessEvent{
+// 	// 	Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
+// 	// 	CGREvent: *utils.NMAsCGREvent(utils.NewOrderedNavigableMap(), "cgrates.org",
+// 	// 		utils.NestingSep, utils.MapStorage{}),
+// 	// }
+// 	var executed bool
+// 	cc := &mockClientConn{
+// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+// 			utils.CDRsV1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+// 				// if !reflect.DeepEqual(args, expArgs) {
+// 				// 	return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+// 				// 		utils.ToJSON(expArgs), utils.ToJSON(args))
+// 				// }
+// 				executed = true
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	rpcInternal := make(chan birpc.ClientConnector, 1)
+// 	rpcInternal <- cc
+// 	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+// 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): rpcInternal,
+// 	})
+// 	adms := &AdminSv1{
+// 		cfg: cfg,
+// 		dm:  dm,
+// 	}
+
+// 	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+// 	aSv1 := NewActionSv1(aS)
+
+// 	// Set ActionProfile
+// 	actPrf := &engine.ActionProfileWithAPIOpts{
+// 		ActionProfile: &engine.ActionProfile{
+// 			Tenant: "cgrates.org",
+// 			ID:     "actPrfID",
+// 			Actions: []*engine.APAction{
+// 				{
+// 					ID:   "actID",
+// 					Type: utils.CDRLog,
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	var reply string
+// 	if err := adms.SetActionProfile(context.Background(), actPrf,
+// 		&reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != utils.OK {
+// 		t.Error("Unexpected reply returned:", reply)
+// 	}
+
+// 	// ExecuteActions with CDRLog
+// 	argsAct := &utils.ArgActionSv1ScheduleActions{
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant: "cgrates.org",
+// 			ID:     "EventExecuteActions",
+// 			Event: map[string]interface{}{
+// 				utils.AccountField: "1001",
+// 			},
+// 		},
+// 		ActionProfileIDs: []string{"actPrfID"},
+// 	}
+
+// 	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+// 		&reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != utils.OK {
+// 		t.Error("Unexpected reply returned:", reply)
+// 	}
+
+// 	// Check if CDRs ProcessEvent has been executed
+// 	if !executed {
+// 		t.Errorf("CDRLog hasn't been executed")
+// 	}
+
+// 	dm.DataDB().Flush(utils.EmptyString)
+// }
+
+func TestActionsExecuteActionsSetBalance(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expArgs := &utils.ArgsActSetBalance{
+		Tenant:    "cgrates.org",
+		AccountID: "ACC_ID",
+		Diktats:   []*utils.BalDiktat{},
+		Reset:     true,
+	}
+	var executed bool
+	cc := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+						utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				executed = true
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+	aSv1 := NewActionSv1(aS)
+
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaSetBalance,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaAccounts: {
+					"ACC_ID": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// ExecuteActions with SetBalance
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// Check if SetBalance has been executed
+	if !executed {
+		t.Errorf("SetBalance hasn't been executed")
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestActionsExecuteActionsRemBalance(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expArgs := &utils.ArgsActRemoveBalances{
+		Tenant:     "cgrates.org",
+		AccountID:  "ACC_ID",
+		BalanceIDs: []string{},
+	}
+	var executed bool
+	cc := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1ActionRemoveBalance: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+						utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				executed = true
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+	aSv1 := NewActionSv1(aS)
+
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaRemBalance,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaAccounts: {
+					"ACC_ID": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// ExecuteActions with RemBalance
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// Check if RemoveBalance has been executed
+	if !executed {
+		t.Errorf("RemoveBalance hasn't been executed")
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestActionsExecuteActionsAddBalance(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+
+	expArgs := &utils.ArgsActSetBalance{
+		Tenant:    "cgrates.org",
+		AccountID: "ACC_ID",
+		Diktats:   []*utils.BalDiktat{},
+		Reset:     false,
+	}
+	var executed bool
+	cc := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply interface{}) error {
+				if !reflect.DeepEqual(args, expArgs) {
+					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+						utils.ToJSON(expArgs), utils.ToJSON(args))
+				}
+				executed = true
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
+
+	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+	aSv1 := NewActionSv1(aS)
+
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaAddBalance,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaAccounts: {
+					"ACC_ID": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// ExecuteActions with AddBalance
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	// Check if AddBalance has been executed
+	if !executed {
+		t.Errorf("AddBalance hasn't been executed")
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
 }

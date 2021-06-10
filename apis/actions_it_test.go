@@ -21,9 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -33,8 +37,8 @@ import (
 )
 
 var (
-	// actSrv       *httptest.Server
-	// actBody      []byte
+	actSrv       *httptest.Server
+	actBody      []byte
 	actCfgPath   string
 	actCfg       *config.CGRConfig
 	actRPC       *birpc.Client
@@ -56,8 +60,25 @@ var (
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
 		testActionsPing,
-		// testActionsStartServer,
-		// testActionsStopServer,
+
+		// execute http_post
+		testActionsStartServer,
+		testActionsSetActionProfileBeforeExecuteHTTPPost,
+		testActionsExecuteActionsHTTPPost,
+		testActionsStopServer,
+		testActionsRemoveActionProfile,
+		testActionsGetActionProfileAfterRemove,
+
+		// execute reset_statqueue
+		testActionsSetStatQueueProfileBeforeExecuteResetSQ,
+		testActionsStatProcessEvent,
+		testActionsSetActionProfileBeforeExecuteResetSQ,
+		testActionsGetStatQueuesBeforeReset,
+		testActionsExecuteActionsResetSQ,
+		testActionsGetStatQueueAfterReset,
+		testActionsRemoveActionProfile,
+		testActionsGetActionProfileAfterRemove,
+
 		testActionsKillEngine,
 	}
 )
@@ -120,6 +141,16 @@ func testActionsRPCConn(t *testing.T) {
 func testActionsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testActionsPing(t *testing.T) {
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.StatSv1Ping,
+		new(utils.CGREvent), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
@@ -274,28 +305,244 @@ func testActionsGetActionProfileAfterRemove(t *testing.T) {
 	}
 }
 
-func testActionsPing(t *testing.T) {
+func testActionsStartServer(t *testing.T) {
+	actSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		actBody, err = io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
+
+		r.Body.Close()
+	}))
+}
+
+func testActionsStopServer(t *testing.T) {
+	actSrv.Close()
+}
+
+func testActionsSetActionProfileBeforeExecuteHTTPPost(t *testing.T) {
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaHTTPPost,
+					Diktats: []*engine.APDiktat{
+						{
+							Path: actSrv.URL,
+						},
+					},
+					TTL: time.Duration(time.Minute),
+				},
+			},
+		},
+	}
+
 	var reply string
-	if err := actRPC.Call(context.Background(), utils.StatSv1Ping,
-		new(utils.CGREvent), &reply); err != nil {
+	if err := actRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.Pong {
+	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned:", reply)
+	}
+
+	var rplyActPrf engine.ActionProfile
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "actPrfID",
+			}}, &rplyActPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyActPrf, *actPrf.ActionProfile) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", actPrf.ActionProfile, rplyActPrf)
 	}
 }
 
-// func testActionsStartServer(t *testing.T) {
-// 	actSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		var err error
-// 		actBody, err = io.ReadAll(r.Body)
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusNotFound)
-// 		}
+func testActionsExecuteActionsHTTPPost(t *testing.T) {
+	args := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
 
-// 		r.Body.Close()
-// 	}))
-// }
+	expBody := `{"*opts":null,"*req":{"Account":"1001"}}`
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
 
-// func testActionsStopServer(t *testing.T) {
-// 	actSrv.Close()
-// }
+	if string(actBody) != expBody {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, string(actBody))
+	}
+}
+
+func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:      "cgrates.org",
+			ID:          "SQ_ID",
+			Weight:      10,
+			QueueLength: 100,
+			TTL:         time.Duration(1 * time.Minute),
+			MinItems:    0,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCD,
+				},
+			},
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
+
+	expSqPrf := engine.StatQueueProfile{
+		Tenant:      "cgrates.org",
+		ID:          "SQ_ID",
+		Weight:      10,
+		QueueLength: 100,
+		TTL:         time.Duration(1 * time.Minute),
+		MinItems:    0,
+		Metrics: []*engine.MetricWithFilters{
+			{
+				MetricID: utils.MetaTCD,
+			},
+		},
+		ThresholdIDs: []string{utils.MetaNone},
+	}
+
+	var rplySqPrf engine.StatQueueProfile
+	if err := actRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,
+		utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "SQ_ID",
+		}, &rplySqPrf); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplySqPrf, expSqPrf) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expSqPrf), utils.ToJSON(rplySqPrf))
+	}
+}
+
+func testActionsStatProcessEvent(t *testing.T) {
+	args := &engine.StatsArgsProcessEvent{
+		StatIDs: []string{"SQ_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "StatsEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Usage:        30 * time.Second,
+			},
+		},
+	}
+	expected := []string{"SQ_ID"}
+	var reply []string
+	if err := actRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
+	}
+}
+
+func testActionsSetActionProfileBeforeExecuteResetSQ(t *testing.T) {
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.MetaResetStatQueue,
+				},
+			},
+			Targets: map[string]utils.StringSet{
+				utils.MetaStats: {
+					"SQ_ID": struct{}{},
+				},
+			},
+		},
+	}
+
+	var reply *string
+	if err := actRPC.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testActionsGetStatQueuesBeforeReset(t *testing.T) {
+	expFloatMetrics := map[string]float64{
+		utils.MetaTCD: 30000000000,
+	}
+
+	rplyFloatMetrics := make(map[string]float64)
+	if err := actRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_ID",
+			},
+		}, &rplyFloatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFloatMetrics, expFloatMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expFloatMetrics), utils.ToJSON(rplyFloatMetrics))
+	}
+}
+
+func testActionsExecuteActionsResetSQ(t *testing.T) {
+	args := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
+
+	var reply string
+	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
+		args, &reply); err != nil {
+		t.Error(err)
+	}
+}
+
+func testActionsGetStatQueueAfterReset(t *testing.T) {
+	expFloatMetrics := map[string]float64{
+		utils.MetaTCD: -1,
+	}
+
+	rplyFloatMetrics := make(map[string]float64)
+	if err := actRPC.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "SQ_ID",
+			},
+		}, &rplyFloatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rplyFloatMetrics, expFloatMetrics) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(expFloatMetrics), utils.ToJSON(rplyFloatMetrics))
+	}
+}
