@@ -28,7 +28,6 @@ import (
 func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &RegistrarCJsonCfgs{
 		RPC: &RegistrarCJsonCfg{
-			Enabled:          utils.BoolPointer(true),
 			Registrars_conns: &[]string{"*conn1", "*conn2"},
 			Hosts: map[string][]*RemoteHostJson{
 				utils.MetaDefault: {
@@ -57,7 +56,6 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 			Refresh_interval: utils.StringPointer("5"),
 		},
 		Dispatchers: &RegistrarCJsonCfg{
-			Enabled:          utils.BoolPointer(true),
 			Registrars_conns: &[]string{"*conn1", "*conn2"},
 			Hosts: map[string][]*RemoteHostJson{
 				utils.MetaDefault: {
@@ -88,7 +86,6 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &RegistrarCCfgs{
 		RPC: &RegistrarCCfg{
-			Enabled:         true,
 			RegistrarSConns: []string{"*conn1", "*conn2"},
 			Hosts: map[string][]*RemoteHost{
 				utils.MetaDefault: {
@@ -117,7 +114,6 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 			RefreshInterval: 5,
 		},
 		Dispatchers: &RegistrarCCfg{
-			Enabled:         true,
 			RegistrarSConns: []string{"*conn1", "*conn2"},
 			Hosts: map[string][]*RemoteHost{
 				utils.MetaDefault: {
@@ -158,7 +154,6 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 		"registrarc":{
 			"rpc":{
-				"enabled": true,
 				"registrars_conns": ["*conn1","*conn2"],
 				"hosts": {
 					"*default": [
@@ -199,7 +194,6 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.RPCCfg: map[string]interface{}{
-			utils.EnabledCfg:         true,
 			utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
 			utils.HostsCfg: map[string][]map[string]interface{}{
 				utils.MetaDefault: {
@@ -216,7 +210,6 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 			utils.RefreshIntervalCfg: "0",
 		},
 		utils.DispatcherCfg: map[string]interface{}{
-			utils.EnabledCfg:         true,
 			utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
 			utils.HostsCfg: map[string][]map[string]interface{}{
 				utils.MetaDefault: {
@@ -272,13 +265,11 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 }`
 	eMap := map[string]interface{}{
 		utils.DispatcherCfg: map[string]interface{}{
-			utils.EnabledCfg:         false,
 			utils.RegistrarsConnsCfg: []string{},
 			utils.HostsCfg:           map[string][]map[string]interface{}{},
 			utils.RefreshIntervalCfg: "5m0s",
 		},
 		utils.RPCCfg: map[string]interface{}{
-			utils.EnabledCfg:         false,
 			utils.RegistrarsConnsCfg: []string{},
 			utils.HostsCfg:           map[string][]map[string]interface{}{},
 			utils.RefreshIntervalCfg: "5m0s",
@@ -293,7 +284,6 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 
 func TestDispatcherHCfgClone(t *testing.T) {
 	ban := &RegistrarCCfg{
-		Enabled:         true,
 		RegistrarSConns: []string{"*conn1", "*conn2"},
 		Hosts: map[string][]*RemoteHost{
 			utils.MetaDefault: {

@@ -45,7 +45,6 @@ func TestDispatcherHostsService(t *testing.T) {
 			Transport:   rpcclient.HTTPjson,
 		}},
 	}
-	cfg.RegistrarCCfg().Dispatchers.Enabled = true
 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
 		utils.MetaDefault: {
 			{
@@ -127,8 +126,6 @@ func TestDispatcherHostsService(t *testing.T) {
 func TestRegistrarcListenAndServe(t *testing.T) {
 	//cover purposes only
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatchers.Enabled = true
-	cfg.RegistrarCCfg().RPC.Enabled = true
 	regStSrv := NewRegistrarCService(cfg, nil)
 	stopChan := make(chan struct{}, 1)
 	rldChan := make(chan struct{}, 1)
@@ -194,9 +191,7 @@ func TestRegisterRPCHosts(t *testing.T) {
 func TestRegistrarcListenAndServedTmCDispatcher(t *testing.T) {
 	//cover purposes only
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatchers.Enabled = true
 	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 1
-	cfg.RegistrarCCfg().RPC.Enabled = true
 	regStSrv := NewRegistrarCService(cfg, nil)
 	stopChan := make(chan struct{}, 1)
 	rldChan := make(chan struct{}, 1)
@@ -211,8 +206,6 @@ func TestRegistrarcListenAndServedTmCDispatcher(t *testing.T) {
 func TestRegistrarcListenAndServedTmCRPC(t *testing.T) {
 	//cover purposes only
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatchers.Enabled = true
-	cfg.RegistrarCCfg().RPC.Enabled = true
 	cfg.RegistrarCCfg().RPC.RefreshInterval = 1
 	regStSrv := NewRegistrarCService(cfg, nil)
 	stopChan := make(chan struct{}, 1)
