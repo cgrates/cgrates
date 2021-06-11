@@ -3599,7 +3599,6 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 	} else {
 		for idx, val := range rtIvls {
 			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
-				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
 				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
 			}
 		}
