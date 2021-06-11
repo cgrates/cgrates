@@ -127,7 +127,7 @@ func (ldrs *LoaderService) Shutdown() (err error) {
 	ldrs.ldrs = nil
 	ldrs.rpc = nil
 	close(ldrs.stopChan)
-	//<-ldrs.connChan
+	<-ldrs.connChan
 	ldrs.Unlock()
 	return
 }

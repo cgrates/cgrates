@@ -1,0 +1,30 @@
+{
+    // CGRateS Configuration file
+    // will be used in apis/loaders_it_test.go
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+      "db_type": "redis",						// data_db type: <redis|mongo>
+      "db_port": 6379, 						// data_db port to reach the database
+      "db_name": "10", 						// data_db database name to connect to
+    },
+  
+    "stor_db": {
+      "db_password": "CGRateS.org",
+    },
+
+    "loaders": [
+        {
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/tmp/TestLoadersIT/in",
+            "tp_out_dir": "/tmp/TestLoadersIT/out",
+        },
+    ],
+
+    "admins": {
+        "enabled": true,
+      }
+}
