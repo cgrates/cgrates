@@ -84,7 +84,10 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	expected := utils.ErrNotImplemented
 	if err == nil || err != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -102,7 +105,10 @@ func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	ev := &utils.CGREvent{}
 	tnt := ""
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err := dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err := dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -571,7 +577,10 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -615,7 +624,10 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
@@ -665,7 +677,10 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -709,7 +724,10 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	}
 	tnt := ""
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -757,7 +775,10 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundTime(t *testing.T)
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
@@ -801,7 +822,10 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err.Error() != "NOT_FOUND:filter" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND:filter", err)
 	}
@@ -871,7 +895,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 		Hosts:              nil,
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
-	value, errDsp := newDispatcher(dm, dsp)
+	value, errDsp := newDispatcher(dsp)
 	if errDsp != nil {
 		t.Fatal(errDsp)
 	}
@@ -956,7 +980,10 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND:filter", err)
 	}
@@ -996,7 +1023,10 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err := dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err := dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	expected := utils.ErrNotImplemented
 	if err == nil || err != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -1054,7 +1084,10 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, subsys)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys)
 	if err == nil || err.Error() != "NOT_FOUND" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND:filter", err)
 	}
@@ -1080,7 +1113,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 		Hosts:              nil,
 	}
 	newCache := engine.NewCacheS(cfg, dm, nil)
-	value, errDsp := newDispatcher(dm, dsp)
+	value, errDsp := newDispatcher(dsp)
 	if errDsp != nil {
 		t.Fatal(errDsp)
 	}
@@ -1329,7 +1362,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalses(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
@@ -1348,7 +1384,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalses(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
@@ -1413,7 +1452,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
@@ -1478,7 +1520,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
@@ -1543,7 +1588,10 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err == nil || err != utils.ErrNotFound {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -1605,7 +1653,10 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err == nil || err != utils.ErrNotFound {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	} else if rcv != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
@@ -1667,7 +1718,10 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
@@ -1681,7 +1735,10 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, subsys); err != nil {
+	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, subsys); err != nil {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
 	} else if len(rcv) != 1 {
 		t.Errorf("Unexpected number of profiles:%v", len(rcv))
