@@ -36,7 +36,7 @@ type DataDBMock struct {
 	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
 	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
 	GetChargerProfileDrvF      func(ctx *context.Context, tnt, id string) (*ChargerProfile, error)
-	SetChargerProfileDrvF      func(ctx *context.Context, chr *ChargerProfile)  (err error)
+	SetChargerProfileDrvF      func(ctx *context.Context, chr *ChargerProfile) (err error)
 	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrvF    func(ctx *context.Context, tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
@@ -61,6 +61,7 @@ type DataDBMock struct {
 	GetRouteProfileDrvF        func(ctx *context.Context, tnt, id string) (*RouteProfile, error)
 	SetRouteProfileDrvF        func(ctx *context.Context, rtPrf *RouteProfile) error
 	RemoveRouteProfileDrvF     func(ctx *context.Context, tnt, id string) error
+	RemoveChargerProfileDrvF   func(ctx *context.Context, chr string, rpl string) error
 }
 
 //Storage methods
@@ -310,11 +311,17 @@ func (dbM *DataDBMock) GetChargerProfileDrv(ctx *context.Context, tnt, id string
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetChargerProfileDrv(*context.Context, *ChargerProfile) error {
+func (dbM *DataDBMock) SetChargerProfileDrv(ctx *context.Context, chrg *ChargerProfile) error {
+	if dbM.SetChargerProfileDrvF != nil {
+		return dbM.SetChargerProfileDrvF(ctx, chrg)
+	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveChargerProfileDrv(*context.Context, string, string) error {
+func (dbM *DataDBMock) RemoveChargerProfileDrv(ctx *context.Context, chr string, rpl string) error {
+	if dbM.RemoveChargerProfileDrvF != nil {
+		return dbM.RemoveChargerProfileDrvF(ctx, chr, rpl)
+	}
 	return utils.ErrNotImplemented
 }
 
