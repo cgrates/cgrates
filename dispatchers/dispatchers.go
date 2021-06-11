@@ -160,7 +160,8 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.Subsys: subsys,
+			utils.Subsys:     subsys,
+			utils.MetaMethod: serviceMethod,
 		},
 	}
 	var dPrfls engine.DispatcherProfiles
@@ -197,7 +198,8 @@ func (dS *DispatcherService) V1GetProfilesForEvent(ev *utils.CGREvent,
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.Subsys: ev.APIOpts[utils.Subsys],
+			utils.Subsys:     ev.APIOpts[utils.Subsys],
+			utils.MetaMethod: ev.APIOpts[utils.MetaMethod],
 		},
 	})
 	if errDpfl != nil {
