@@ -74,7 +74,9 @@ var (
 		testActionsStatProcessEvent,
 		testActionsSetActionProfileBeforeExecuteResetSQ,
 		testActionsGetStatQueuesBeforeReset,
-		testActionsExecuteActionsResetSQ,
+		testActionsScheduleActionsResetSQ,
+		testActionsGetStatQueuesBeforeReset,
+		testActionsSleep,
 		testActionsGetStatQueueAfterReset,
 		testActionsRemoveActionProfile,
 		testActionsGetActionProfileAfterRemove,
@@ -478,6 +480,7 @@ func testActionsSetActionProfileBeforeExecuteResetSQ(t *testing.T) {
 					"SQ_ID": struct{}{},
 				},
 			},
+			Schedule: "@every 1s",
 		},
 	}
 
@@ -508,7 +511,7 @@ func testActionsGetStatQueuesBeforeReset(t *testing.T) {
 	}
 }
 
-func testActionsExecuteActionsResetSQ(t *testing.T) {
+func testActionsScheduleActionsResetSQ(t *testing.T) {
 	args := &utils.ArgActionSv1ScheduleActions{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -521,7 +524,7 @@ func testActionsExecuteActionsResetSQ(t *testing.T) {
 	}
 
 	var reply string
-	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
+	if err := actRPC.Call(context.Background(), utils.ActionSv1ScheduleActions,
 		args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -545,4 +548,8 @@ func testActionsGetStatQueueAfterReset(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(expFloatMetrics), utils.ToJSON(rplyFloatMetrics))
 	}
+}
+
+func testActionsSleep(t *testing.T) {
+	time.Sleep(time.Second)
 }

@@ -790,93 +790,97 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-// func TestActionsExecuteActionsLogCDRs(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-// 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}
-// 	dataDB := engine.NewInternalDB(nil, nil, true)
-// 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
-// 	fltrs := engine.NewFilterS(cfg, nil, dm)
+func TestActionsExecuteActionsLogCDRs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}
+	dataDB := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
 
-// 	// expArgs := &engine.ArgV1ProcessEvent{
-// 	// 	Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
-// 	// 	CGREvent: *utils.NMAsCGREvent(utils.NewOrderedNavigableMap(), "cgrates.org",
-// 	// 		utils.NestingSep, utils.MapStorage{}),
-// 	// }
-// 	var executed bool
-// 	cc := &mockClientConn{
-// 		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
-// 			utils.CDRsV1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
-// 				// if !reflect.DeepEqual(args, expArgs) {
-// 				// 	return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
-// 				// 		utils.ToJSON(expArgs), utils.ToJSON(args))
-// 				// }
-// 				executed = true
-// 				return nil
-// 			},
-// 		},
-// 	}
-// 	rpcInternal := make(chan birpc.ClientConnector, 1)
-// 	rpcInternal <- cc
-// 	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-// 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): rpcInternal,
-// 	})
-// 	adms := &AdminSv1{
-// 		cfg: cfg,
-// 		dm:  dm,
-// 	}
+	// expArgs := &engine.ArgV1ProcessEvent{
+	// 	Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
+	// 	CGREvent: *utils.NMAsCGREvent(utils.NewOrderedNavigableMap(), "cgrates.org",
+	// 		utils.NestingSep, utils.MapStorage{}),
+	// }
+	var executed bool
+	cc := &mockClientConn{
+		calls: map[string]func(ctx *context.Context, args interface{}, reply interface{}) error{
+			utils.CDRsV1ProcessEvent: func(ctx *context.Context, args, reply interface{}) error {
+				// if !reflect.DeepEqual(args, expArgs) {
+				// 	return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
+				// 		utils.ToJSON(expArgs), utils.ToJSON(args))
+				// }
+				executed = true
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- cc
+	cM := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs): rpcInternal,
+	})
+	adms := &AdminSv1{
+		cfg: cfg,
+		dm:  dm,
+	}
 
-// 	aS := actions.NewActionS(cfg, fltrs, dm, cM)
-// 	aSv1 := NewActionSv1(aS)
+	aS := actions.NewActionS(cfg, fltrs, dm, cM)
+	aSv1 := NewActionSv1(aS)
 
-// 	// Set ActionProfile
-// 	actPrf := &engine.ActionProfileWithAPIOpts{
-// 		ActionProfile: &engine.ActionProfile{
-// 			Tenant: "cgrates.org",
-// 			ID:     "actPrfID",
-// 			Actions: []*engine.APAction{
-// 				{
-// 					ID:   "actID",
-// 					Type: utils.CDRLog,
-// 				},
-// 			},
-// 		},
-// 	}
+	// Set ActionProfile
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "actPrfID",
+			Actions: []*engine.APAction{
+				{
+					ID:   "actID",
+					Type: utils.CDRLog,
+				},
+			},
+		},
+	}
 
-// 	var reply string
-// 	if err := adms.SetActionProfile(context.Background(), actPrf,
-// 		&reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
+	var reply string
+	if err := adms.SetActionProfile(context.Background(), actPrf,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
 
-// 	// ExecuteActions with CDRLog
-// 	argsAct := &utils.ArgActionSv1ScheduleActions{
-// 		CGREvent: &utils.CGREvent{
-// 			Tenant: "cgrates.org",
-// 			ID:     "EventExecuteActions",
-// 			Event: map[string]interface{}{
-// 				utils.AccountField: "1001",
-// 			},
-// 		},
-// 		ActionProfileIDs: []string{"actPrfID"},
-// 	}
+	// ExecuteActions with CDRLog
+	argsAct := &utils.ArgActionSv1ScheduleActions{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventExecuteActions",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.Tenant:       "cgrates.org",
+				utils.BalanceType:  utils.MetaConcrete,
+				utils.Cost:         0.15,
+				utils.ActionType:   utils.MetaTopUp,
+			},
+		},
+		ActionProfileIDs: []string{"actPrfID"},
+	}
 
-// 	if err := aSv1.ExecuteActions(context.Background(), argsAct,
-// 		&reply); err != nil {
-// 		t.Error(err)
-// 	} else if reply != utils.OK {
-// 		t.Error("Unexpected reply returned:", reply)
-// 	}
+	if err := aSv1.ExecuteActions(context.Background(), argsAct,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned:", reply)
+	}
 
-// 	// Check if CDRs ProcessEvent has been executed
-// 	if !executed {
-// 		t.Errorf("CDRLog hasn't been executed")
-// 	}
+	// Check if CDRs ProcessEvent has been executed
+	if !executed {
+		t.Errorf("CDRLog hasn't been executed")
+	}
 
-// 	dm.DataDB().Flush(utils.EmptyString)
-// }
+	dm.DataDB().Flush(utils.EmptyString)
+}
 
 func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
