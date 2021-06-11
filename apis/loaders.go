@@ -27,7 +27,7 @@ func NewLoaderSv1(ldrS *loaders.LoaderService) *LoaderSv1 {
 	return &LoaderSv1{ldrS: ldrS}
 }
 
-// Exports RPC from LoaderService
+// LoaderSv1 Exports RPC from LoaderService
 type LoaderSv1 struct {
 	ldrS *loaders.LoaderService
 	ping
