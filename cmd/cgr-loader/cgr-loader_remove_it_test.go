@@ -1,4 +1,4 @@
- // +build integration
+// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -20,28 +20,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package main
 
- import (
-	 "bytes"
-	 "errors"
-	 "github.com/cgrates/cgrates/config"
-	 "github.com/cgrates/cgrates/engine"
-	 "github.com/cgrates/cgrates/utils"
-	 "net/rpc"
-	 "net/rpc/jsonrpc"
-	 "os/exec"
-	 "path"
-	 "reflect"
-	 "sort"
-	 "testing"
-	 "time"
- )
+import (
+	"bytes"
+	"errors"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os/exec"
+	"path"
+	"reflect"
+	"sort"
+	"testing"
+	"time"
+)
 
 var (
 	cgrLdrCfgPath string
-	cgrLdrCfgDir string
-	cgrLdrCfg  *config.CGRConfig
-	cgrLdrRPC        *rpc.Client
-	cgrLdrTests = []func(t *testing.T) {
+	cgrLdrCfgDir  string
+	cgrLdrCfg     *config.CGRConfig
+	cgrLdrRPC     *rpc.Client
+	cgrLdrTests   = []func(t *testing.T){
 		testCgrLdrInitCfg,
 		testCgrLdrInitDataDB,
 		testCgrLdrInitStorDB,
@@ -68,7 +68,7 @@ var (
 )
 
 func TestCGRLoaderRemove(t *testing.T) {
-	switch *dbType{
+	switch *dbType {
 	case utils.MetaInternal:
 		cgrLdrCfgDir = "tutinternal"
 	case utils.MetaMongo:
@@ -106,7 +106,7 @@ func testCgrLdrInitStorDB(t *testing.T) {
 	}
 }
 
-func testCgrLdrStartEngine(t *testing.T){
+func testCgrLdrStartEngine(t *testing.T) {
 	if _, err := engine.StartEngine(cgrLdrCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -198,8 +198,8 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	if err := cgrLdrRPC.Call(utils.APIerSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
 		&replyChrgr); err == nil || err.Error() != utils.ErrNotFound.Error() {
-			t.Errorf("Expected %+v, received %+v", utils.ErrNotFound.Error(), err.Error())
-		}
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound.Error(), err.Error())
+	}
 
 }
 
@@ -220,17 +220,17 @@ func testCgrLdrLoadData(t *testing.T) {
 
 func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 	extAttrPrf := &engine.AttributeProfile{
-		Tenant: "cgrates.org",
-		ID: "ATTR_ACNT_1001",
-		Contexts: []string{utils.MetaSessionS},
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_ACNT_1001",
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight: 10,
+		Weight:    10,
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				Path: "*req.OfficeGroup",
-				Type: utils.MetaConstant,
-				Value: config.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
+				Path:      "*req.OfficeGroup",
+				Type:      utils.MetaConstant,
+				Value:     config.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
 			},
 		},
 	}
@@ -253,26 +253,26 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 func testCgrLdrGetFilterAfterLoad(t *testing.T) {
 	expFilter := &engine.Filter{
 		Tenant: "cgrates.org",
-		ID: "FLTR_1",
+		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
 			{
-				Type: utils.MetaString,
+				Type:    utils.MetaString,
 				Element: "~*req.Account",
-				Values: []string{"1003","1002"},
+				Values:  []string{"1003", "1002"},
 			},
 			{
-				Type: utils.MetaPrefix,
+				Type:    utils.MetaPrefix,
 				Element: "~*req.Destination",
-				Values: []string{"10","20"},
+				Values:  []string{"10", "20"},
 			},
 			{
-				Type: utils.MetaRSR,
+				Type:    utils.MetaRSR,
 				Element: "~*req.Destination",
-				Values: []string{"1002"},
+				Values:  []string{"1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-             ActivationTime: time.Date(2014, time.July, 29, 15, 0, 0, 0, time.UTC),
+			ActivationTime: time.Date(2014, time.July, 29, 15, 0, 0, 0, time.UTC),
 		},
 	}
 	var replyFltr *engine.Filter
@@ -287,12 +287,12 @@ func testCgrLdrGetFilterAfterLoad(t *testing.T) {
 
 func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 	expREsPrf := &engine.ResourceProfile{
-		Tenant: "cgrates.org",
-		ID: "RES_ACNT_1001",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight: 10,
-		UsageTTL: time.Hour,
-		Limit: 1,
+		Tenant:       "cgrates.org",
+		ID:           "RES_ACNT_1001",
+		FilterIDs:    []string{"FLTR_ACCOUNT_1001"},
+		Weight:       10,
+		UsageTTL:     time.Hour,
+		Limit:        1,
 		ThresholdIDs: []string{},
 	}
 	var replyRes *engine.ResourceProfile
@@ -308,7 +308,7 @@ func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 func testCgrLdrGetResourceAfterLoad(t *testing.T) {
 	expREsPrf := &engine.Resource{
 		Tenant: "cgrates.org",
-		ID: "RES_ACNT_1001",
+		ID:     "RES_ACNT_1001",
 		Usages: map[string]*engine.ResourceUsage{},
 	}
 	var replyRes *engine.Resource
@@ -323,23 +323,22 @@ func testCgrLdrGetResourceAfterLoad(t *testing.T) {
 
 func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 	expRoutePrf := &engine.RouteProfile{
-		ID: "ROUTE_ACNT_1001",
-		Tenant: "cgrates.org",
-		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
-		Weight: 10,
-		Sorting: utils.MetaWeight,
+		ID:                "ROUTE_ACNT_1001",
+		Tenant:            "cgrates.org",
+		FilterIDs:         []string{"FLTR_ACCOUNT_1001"},
+		Weight:            10,
+		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 		Routes: []*engine.Route{
 			{
-				ID: "route1",
+				ID:     "route1",
 				Weight: 20,
 			},
 			{
-				ID: "route2",
+				ID:     "route2",
 				Weight: 10,
 			},
 		},
-
 	}
 	var replyRts *engine.RouteProfile
 	if err := cgrLdrRPC.Call(utils.APIerSv1GetRouteProfile,
@@ -361,13 +360,13 @@ func testCgrLdrGetRouteProfileAfterLoad(t *testing.T) {
 
 func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 	expStatsprf := &engine.StatQueueProfile{
-		Tenant: "cgrates.org",
-		ID: "Stat_1",
-		FilterIDs: []string{"FLTR_STAT_1"},
-		Weight: 30,
+		Tenant:      "cgrates.org",
+		ID:          "Stat_1",
+		FilterIDs:   []string{"FLTR_STAT_1"},
+		Weight:      30,
 		QueueLength: 100,
-		TTL: 10 * time.Second,
-		MinItems: 0,
+		TTL:         10 * time.Second,
+		MinItems:    0,
 		Metrics: []*engine.MetricWithFilters{
 			{
 				MetricID: "*tcd",
@@ -379,7 +378,7 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 				MetricID: "*acd",
 			},
 		},
-		Blocker: true,
+		Blocker:      true,
 		ThresholdIDs: []string{utils.MetaNone},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, time.July, 29, 15, 0, 0, 0, time.UTC),
@@ -412,7 +411,7 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 	replyStQue := make(map[string]string)
 	if err := cgrLdrRPC.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}},
-		&replyStQue);err != nil {
+		&replyStQue); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStatQueue, replyStQue) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expStatQueue), utils.ToJSON(replyStQue))
@@ -421,15 +420,15 @@ func testCgrLdrGetStatQueueAfterLoad(t *testing.T) {
 
 func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 	expThPrf := &engine.ThresholdProfile{
-		Tenant: "cgrates.org",
-		ID: "THD_ACNT_1001",
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, time.July, 29, 15, 0, 0, 0, time.UTC),
 		},
-		Weight: 10,
-		MaxHits: -1,
-		MinHits: 0,
+		Weight:    10,
+		MaxHits:   -1,
+		MinHits:   0,
 		ActionIDs: []string{"TOPUP_MONETARY_10"},
 	}
 	var replyThdPrf *engine.ThresholdProfile
@@ -445,8 +444,8 @@ func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 func testCgrLdrGetThresholdAfterLoad(t *testing.T) {
 	expThPrf := &engine.Threshold{
 		Tenant: "cgrates.org",
-		ID: "THD_ACNT_1001",
-		Hits: 0,
+		ID:     "THD_ACNT_1001",
+		Hits:   0,
 	}
 	var replyThdPrf *engine.Threshold
 	if err := cgrLdrRPC.Call(utils.ThresholdSv1GetThreshold,
@@ -460,12 +459,12 @@ func testCgrLdrGetThresholdAfterLoad(t *testing.T) {
 
 func testCgrLdrGetChargerProfileAfterLoad(t *testing.T) {
 	expChPrf := &engine.ChargerProfile{
-		Tenant: "cgrates.org",
-		ID: "Raw",
-		FilterIDs: []string{},
-		RunID: "raw",
+		Tenant:       "cgrates.org",
+		ID:           "Raw",
+		FilterIDs:    []string{},
+		RunID:        "raw",
 		AttributeIDs: []string{"*constant:*req.RequestType:*none"},
-		Weight: 20,
+		Weight:       20,
 	}
 
 	var replyChrgr *engine.ChargerProfile
@@ -500,13 +499,13 @@ func testCgrLdrKillEngine(t *testing.T) {
 	}
 }
 
- func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	 switch *encoding {
-	 case utils.MetaJSON:
-		 return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	 case utils.MetaGOB:
-		 return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	 default:
-		 return nil, errors.New("UNSUPPORTED_RPC")
-	 }
- }
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
