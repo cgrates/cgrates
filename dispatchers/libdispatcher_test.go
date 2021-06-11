@@ -1057,3 +1057,96 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 	engine.Cache = cacheInit
 	engine.IntRPC = tmp
 }
+
+func TestLibDispatcherDispatchFilterError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	flts := engine.NewFilterS(cfg, nil, nil)
+	var dsp Dispatcher = &singleResultDispatcher{
+		sorter: new(noSort),
+		hosts: engine.DispatcherHostProfiles{{
+			ID:        "testID",
+			FilterIDs: []string{"*wrongType"},
+		}},
+	}
+	expErrMsg := "inline parse error for string: <*wrongType>"
+	if err := dsp.Dispatch(nil, flts, nil, "", "", "", "", "", ""); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
+	}
+	dsp = &loadDispatcher{
+		sorter: new(noSort),
+		hosts: engine.DispatcherHostProfiles{{
+			ID:        "testID2",
+			FilterIDs: []string{"*wrongType"},
+		}},
+		defaultRatio: 1,
+	}
+	if err := dsp.Dispatch(nil, flts, nil, "", "", "", "", "", ""); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
+	}
+	dsp = &broadcastDispatcher{
+		hosts: engine.DispatcherHostProfiles{{
+			ID:        "testID",
+			FilterIDs: []string{"*wrongType"},
+		}},
+	}
+	if err := dsp.Dispatch(nil, flts, nil, "", "", "", "", "", ""); err == nil || err.Error() != expErrMsg {
+		t.Errorf("Expected error: %s received: %v", expErrMsg, err)
+	}
+}
+
+func TestLibDispatcherDispatchHostNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	flts := engine.NewFilterS(cfg, nil, nil)
+	db := engine.NewDataManager(engine.NewInternalDB(nil, nil, true), nil, nil)
+	var dsp Dispatcher = &singleResultDispatcher{
+		sorter: new(noSort),
+		hosts: engine.DispatcherHostProfiles{{
+			ID: "testID",
+		}},
+	}
+	if err := dsp.Dispatch(db, flts, nil, "", "", "", "", "", ""); err != utils.ErrHostNotFound {
+		t.Errorf("Expected error: %s received: %v", utils.ErrHostNotFound, err)
+	}
+}
+
+func TestLibDispatcherRandomSort(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	flts := engine.NewFilterS(cfg, nil, nil)
+	sorter := new(randomSort)
+	hosts := engine.DispatcherHostProfiles{
+		{ID: "testID1"},
+		{ID: "testID2"},
+	}
+
+	expHostIDs1 := engine.DispatcherHostIDs{"testID1", "testID2"}
+	expHostIDs2 := engine.DispatcherHostIDs{"testID2", "testID1"}
+	if hostIDs, err := sorter.Sort(flts, nil, "", hosts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expHostIDs1, hostIDs) &&
+		!reflect.DeepEqual(expHostIDs2, hostIDs) {
+		t.Errorf("Expected: %q or %q, received: %q", expHostIDs1, expHostIDs2, hostIDs)
+	}
+}
+
+func TestLibDispatcherRoundRobinSort(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	flts := engine.NewFilterS(cfg, nil, nil)
+	sorter := new(roundRobinSort)
+	hosts := engine.DispatcherHostProfiles{
+		{ID: "testID1"},
+		{ID: "testID2"},
+	}
+
+	expHostIDs1 := engine.DispatcherHostIDs{"testID1", "testID2"}
+	if hostIDs, err := sorter.Sort(flts, nil, "", hosts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expHostIDs1, hostIDs) {
+		t.Errorf("Expected: %q, received: %q", expHostIDs1, hostIDs)
+	}
+	expHostIDs2 := engine.DispatcherHostIDs{"testID2", "testID1"}
+	if hostIDs, err := sorter.Sort(flts, nil, "", hosts); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expHostIDs2, hostIDs) {
+		t.Errorf("Expected: %q, received: %q", expHostIDs2, hostIDs)
+	}
+}
