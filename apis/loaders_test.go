@@ -1,0 +1,115 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package apis
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
+)
+
+func TestLoadersNewLoaderSv1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), "", fltrs, nil)
+
+	exp := &LoaderSv1{
+		ldrS: ldrS,
+	}
+	rcv := NewLoaderSv1(ldrS)
+
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+// func TestLoadersLoad(t *testing.T) {
+// 	dirPath := "/tmp/TestLoadersLoad"
+// 	err := os.Mkdir(dirPath, 0755)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer os.RemoveAll(dirPath)
+
+// 	dirPathIn := "/tmp/TestLoadersLoad/in"
+// 	err = os.Mkdir(dirPathIn, 0755)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer os.RemoveAll(dirPathIn)
+
+// 	f1, err := os.Create(dirPathIn + "/emptyfile.txt")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer f1.Close()
+
+// 	dirPathOut := "/tmp/TestLoadersLoad/out"
+// 	err = os.Mkdir(dirPathOut, 0755)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer os.RemoveAll(dirPathOut)
+
+// 	f2, err := os.Create(dirPathOut + "/emptyfile.txt")
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer f2.Close()
+
+// 	cfg := config.NewDefaultCGRConfig()
+// 	loaderCfg := &config.LoaderSCfg{
+// 		ID:      "LoaderID",
+// 		Enabled: true,
+// 		Tenant: config.RSRParsers{
+// 			{
+// 				Rules: "cgrates.org",
+// 			},
+// 		},
+// 		RunDelay:       1 * time.Millisecond,
+// 		LockFileName:   "lockFileName",
+// 		FieldSeparator: ";",
+// 		TpInDir:        dirPathIn,
+// 		TpOutDir:       dirPathOut,
+// 	}
+
+// 	cfg.LoaderCfg()[0] = loaderCfg
+// 	data := engine.NewInternalDB(nil, nil, true)
+// 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+// 	fltrs := engine.NewFilterS(cfg, nil, dm)
+// 	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), "", fltrs, nil)
+// 	lSv1 := NewLoaderSv1(ldrS)
+
+// 	args := &loaders.ArgsProcessFolder{
+// 		LoaderID: "LoaderID",
+// 	}
+// 	var reply string
+// 	if err := lSv1.Load(context.Background(), args, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	if err := lSv1.Remove(context.Background(), args, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+// }

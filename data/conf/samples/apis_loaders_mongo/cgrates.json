@@ -1,0 +1,33 @@
+{
+    // CGRateS Configuration file
+    // will be used in apis/loaders_it_test.go
+  
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {
+      "db_type": "mongo",
+      "db_name": "10",
+      "db_port": 27017,
+    },
+  
+    "stor_db": {
+      "db_type": "mongo",
+      "db_name": "cgrates",
+      "db_port": 27017,
+    },
+  
+    "loaders": [
+        {
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/tmp/TestLoadersIT/in",
+            "tp_out_dir": "/tmp/TestLoadersIT/out",
+        },
+    ],
+
+    "admins": {
+        "enabled": true,
+      }
+}

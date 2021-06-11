@@ -1,0 +1,29 @@
+{
+    // CGRateS Configuration file
+    // will be used in apis/loaders_it_test.go
+  
+    "general": {
+        "log_level": 7,
+    },
+
+    "data_db": {
+      "db_type": "*internal",
+    },
+  
+    "stor_db": {
+      "db_type": "*internal",
+    },
+  
+    "loaders": [
+        {
+            "enabled": true,
+            "tenant": "cgrates.org",
+            "tp_in_dir": "/tmp/TestLoadersIT/in",
+            "tp_out_dir": "/tmp/TestLoadersIT/out",
+        },
+    ],
+
+    "admins": {
+        "enabled": true,
+    }
+  }
