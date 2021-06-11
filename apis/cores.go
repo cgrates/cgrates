@@ -43,3 +43,9 @@ func (cS *CoreSv1) Sleep(_ *context.Context, arg *utils.DurationArgs, reply *str
 	*reply = utils.OK
 	return nil
 }
+
+func (cS *CoreSv1) Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string) error {
+	cS.cS.ShutdownEngine()
+	*reply = utils.OK
+	return nil
+}
