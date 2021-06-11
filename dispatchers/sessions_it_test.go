@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1045,7 +1046,7 @@ func testDspSessionSTIRIdentity(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if err := sessions.AuthStirShaken(rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+	if err := sessions.AuthStirShaken(context.Background(), rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
 		t.Fatal(err)
 	}
 }
