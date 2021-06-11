@@ -176,7 +176,10 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatchertWithoutAuthenti
 		},
 	}
 	tnt := ev.Tenant
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MetaAccounts)
+	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}, utils.MetaAccounts)
 	expected := utils.ErrNotImplemented
 	if err == nil || err != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
