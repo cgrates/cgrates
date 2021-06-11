@@ -33,24 +33,26 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) *CoreService {
+	srvDep map[string]*sync.WaitGroup, shdEngine *utils.SyncedChan) *CoreService {
 	return &CoreService{
-		connChan: internalCoreSChan,
-		cfg:      cfg,
-		caps:     caps,
-		server:   server,
-		anz:      anz,
-		srvDep:   srvDep,
+		connChan:  internalCoreSChan,
+		cfg:       cfg,
+		caps:      caps,
+		server:    server,
+		anz:       anz,
+		srvDep:    srvDep,
+		shdEngine: shdEngine,
 	}
 }
 
 // CoreService implements Service interface
 type CoreService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	server   *cores.Server
-	caps     *engine.Caps
-	stopChan chan struct{}
+	cfg       *config.CGRConfig
+	server    *cores.Server
+	caps      *engine.Caps
+	stopChan  chan struct{}
+	shdEngine *utils.SyncedChan
 
 	cS       *cores.CoreService
 	rpc      *apis.CoreSv1
@@ -69,7 +71,7 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.stopChan)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.stopChan, cS.shdEngine)
 	cS.rpc = apis.NewCoreSv1(cS.cS)
 	srv, _ := birpc.NewService(cS.rpc, utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {

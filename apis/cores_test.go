@@ -29,7 +29,7 @@ import (
 func TestCoreSStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, make(chan struct{}))
+	coreService := cores.NewCoreService(cfg, caps, make(chan struct{}), nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -44,7 +44,7 @@ func TestCoreSStatus(t *testing.T) {
 func TestCoreSSleep(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, make(chan struct{}))
+	coreService := cores.NewCoreService(cfg, caps, make(chan struct{}), nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
 		Duration: 3 * time.Second,
@@ -55,5 +55,19 @@ func TestCoreSSleep(t *testing.T) {
 	} else if reply != "OK" {
 		t.Errorf("Expected OK, reveived %+v", reply)
 	}
+}
 
+func TestCoreSShutdown(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	caps := engine.NewCaps(2, utils.MetaTopUp)
+	shdChan := utils.NewSyncedChan()
+	coreService := cores.NewCoreService(cfg, caps, make(chan struct{}), shdChan)
+	cS := NewCoreSv1(coreService)
+	arg := &utils.CGREvent{}
+	var reply string
+	if err := cS.Shutdown(context.Background(), arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "OK" {
+		t.Errorf("Expected OK, received %+v", reply)
+	}
 }

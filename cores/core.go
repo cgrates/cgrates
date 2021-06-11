@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, stopChan chan struct{}) *CoreService {
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, stopChan chan struct{}, shdEngine *utils.SyncedChan) *CoreService {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
@@ -35,12 +35,18 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, stopChan chan stru
 	return &CoreService{
 		cfg:       cfg,
 		CapsStats: st,
+		shdEngine: shdEngine,
 	}
 }
 
 type CoreService struct {
 	cfg       *config.CGRConfig
 	CapsStats *engine.CapsStats
+	shdEngine *utils.SyncedChan
+}
+
+func (cS *CoreService) ShutdownEngine() {
+	cS.shdEngine.CloseOnce()
 }
 
 // Shutdown is called to shutdown the service

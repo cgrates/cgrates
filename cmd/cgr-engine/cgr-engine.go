@@ -616,7 +616,7 @@ func main() {
 	}
 
 	// init CoreSv1
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, srvDep)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, srvDep, shdChan)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)
