@@ -330,7 +330,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//AccountFilter Indexes
 	if args.AccountS {
 		cacheIDs[utils.AccountsFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheAccountsFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheAccountsFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				acnts, e := adms.dm.GetAccount(cntxt, tnt, id)
 				if e != nil {
@@ -349,7 +349,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	//ActionFilter Indexes
 	if args.ActionS {
 		cacheIDs[utils.ActionProfilesFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheActionProfilesFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheActionProfilesFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				act, e := adms.dm.GetActionProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -368,7 +368,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 	var ratePrf []string
 	if args.RateS {
 		cacheIDs[utils.RateProfilesFilterIndexIDs] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheRateProfilesFilterIndexes,
+		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheRateProfilesFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 				rtPrf, e := adms.dm.GetRateProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
@@ -600,7 +600,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.ChargerFilterIndexIDs] = indexes.AsSlice()
 	}
 	//AccountIndexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheAccountsFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheAccountsFilterIndexes,
 		&args.AccountIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			acc, e := adms.dm.GetAccount(cntxt, tnt, id)
 			if e != nil {
@@ -618,7 +618,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.CacheAccountsFilterIndexes] = indexes.AsSlice()
 	}
 	//ActionProfile Indexes
-	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheActionProfilesFilterIndexes,
+	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheActionProfilesFilterIndexes,
 		&args.ActionProfileIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			act, e := adms.dm.GetActionProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
@@ -636,7 +636,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 		cacheIDs[utils.ActionProfilesFilterIndexIDs] = indexes.AsSlice()
 	}
 	//RateProfile Indexes
-	if _, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, args.Subsystem, utils.CacheRateProfilesFilterIndexes,
+	if _, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheRateProfilesFilterIndexes,
 		&args.RateProfileIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
 			rpr, e := adms.dm.GetRateProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
