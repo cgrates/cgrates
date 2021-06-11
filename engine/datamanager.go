@@ -55,6 +55,8 @@ var (
 		utils.ChargerProfilePrefix:          {},
 		utils.DispatcherProfilePrefix:       {},
 		utils.DispatcherHostPrefix:          {},
+		utils.AccountFilterIndexPrfx: {},
+		utils.AccountPrefix: {},
 		utils.RateProfilePrefix:             {},
 		utils.ActionProfilePrefix:           {},
 		utils.AttributeFilterIndexes:        {},
