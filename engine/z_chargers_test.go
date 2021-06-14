@@ -73,7 +73,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	}
 
 	experr := utils.ErrNotImplemented
-	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(),  cgrEv.Tenant, cgrEv)
+	rcv, err := cS.matchingChargerProfilesForEvent(context.Background(), cgrEv.Tenant, cgrEv)
 
 	if err == nil || err != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
