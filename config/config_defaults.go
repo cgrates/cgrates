@@ -703,6 +703,17 @@ const CGRATES_CFG_JSON = `
 		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed TPs will be moved
 		"data":[											// data profiles to load
 			{
+				"type": "*filters",						// data source type
+				"file_name": "Filters.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.2"},
+					{"tag": "Element", "path": "Element", "type": "*variable", "value": "~*req.3"},
+					{"tag": "Values", "path": "Values", "type": "*variable", "value": "~*req.4"},
+				],
+			},
+			{
 				"type": "*attributes",						// data source type
 				"file_name": "Attributes.csv",				// file name in the tp_in_dir
 				"fields": [
@@ -715,17 +726,6 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.7"},
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.8"},
-				],
-			},
-			{
-				"type": "*filters",						// data source type
-				"file_name": "Filters.csv",				// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.2"},
-					{"tag": "Element", "path": "Element", "type": "*variable", "value": "~*req.3"},
-					{"tag": "Values", "path": "Values", "type": "*variable", "value": "~*req.4"},
 				],
 			},
 			{

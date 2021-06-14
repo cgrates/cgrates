@@ -1996,9 +1996,10 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetRateProfile(ctx, tenant, id, true, false, utils.NonTransactional)
+	var oldRpp *utils.RateProfile
+	oldRpp, err = dm.GetRateProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
-		return err
+		return
 	}
 	if err = dm.DataDB().RemoveRateProfileDrv(ctx, tenant, id); err != nil {
 		return
@@ -2008,10 +2009,16 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	}
 	if withIndex {
 		for key, rate := range oldRpp.Rates {
+			if err = removeIndexFiltersItem(ctx, dm, utils.CacheRateFilterIndexes, tenant, utils.ConcatenatedKey(key, oldRpp.ID), rate.FilterIDs); err != nil {
+				return
+			}
 			if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
 				oldRpp.Tenant, oldRpp.ID, key, rate.FilterIDs); err != nil {
 				return
 			}
+		}
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheRateProfilesFilterIndexes, tenant, id, oldRpp.FilterIDs); err != nil {
+			return
 		}
 		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateProfilesFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
