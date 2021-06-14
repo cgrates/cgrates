@@ -65,6 +65,12 @@ var (
 		testV1FIdxAccountRemoveAccountNoIndexes,
 		testV1IndexClearCache,
 
+		testV1FIdxSetActionProfileWithFltr,
+		testV1FIdxSetActionProfileMoreFltrsMoreIndexing,
+		testV1FIdxActionProfileRemoveIndexes,
+		testV1FIdxActionProfileComputeIndexes,
+		//testV1FIdxActionMoreProfileForFilters,
+
 		testV1FIdxStopEngine,
 	}
 	fltr = &engine.FilterWithAPIOpts{
@@ -242,7 +248,8 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	// check the updated indexes
-	expectedIDx = []string{"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST", "*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
+	expectedIDx = []string{"*string:*opts.*context:*sessions:TEST_ATTRIBUTES_IT_TEST",
+		"*string:*req.CGRID:QWEASDZXC:TEST_ATTRIBUTES_IT_TEST",
 		"*string:*req.CGRID:IOPJKLBNM:TEST_ATTRIBUTES_IT_TEST"}
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAttributes},
@@ -415,7 +422,7 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 }
 
 func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
-	//we will more attributes with different context for matching filters
+	//we will add more attributes with different context for matching filters
 	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
@@ -608,6 +615,12 @@ func testV1FIdxAttributesRemoveProfilesNoIndexes(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
 	}
 
 	// Check indexes as we removed, not found for both indexes
@@ -1080,15 +1093,371 @@ func testV1FIdxAccountRemoveAccountNoIndexes(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
 	}
 
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
+	}
+
 	// Check indexes as we removed, not found for both indexes
 	var replyIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
-		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaAccounts}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+}
+
+func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
+	// First we will set a filter for usage
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// Get filter for checking it's existence
+	var resultFltr *engine.Filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{Tenant: utils.CGRateSorg, ID: "fltr_for_attr"}, &resultFltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resultFltr, fltr.Filter) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(fltr.Filter), utils.ToJSON(resultFltr))
+	}
+
+	// we will set anActionProfile with our filter and check the indexes
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant:    "cgrates.org",
+			ID:        "REM_ACC",
+			FilterIDs: []string{"fltr_for_attr", "*string:~*req.Account:1001"},
+			Weight:    0,
+			Targets:   map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule:  utils.MetaASAP,
+			Actions: []*engine.APAction{
+				{
+					ID:   "REM_BAL",
+					Type: utils.MetaRemBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path: "MONETARY",
+						},
+						{
+							Path: "VOICE",
+						},
+					},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	//check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:REM_ACC",
+		"*string:*req.Subject:6774:REM_ACC",
+		"*string:*req.Account:1001:REM_ACC",
+		"*string:*req.Subject:22312:REM_ACC",
+		"*string:*opts.Subsystems:*attributes:REM_ACC",
+		"*prefix:*req.Destinations:+0775:REM_ACC",
+		"*prefix:*req.Destinations:+442:REM_ACC"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// update the filter for checking the indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrSameID, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// check the updated indexes
+	expectedIDx = []string{"*string:*req.Account:1001:REM_ACC",
+		"*string:*req.CGRID:QWEASDZXC:REM_ACC",
+		"*string:*req.CGRID:IOPJKLBNM:REM_ACC"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+
+	// back to our initial filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+}
+
+func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
+	// More filters for our ActionProfile
+	fltr1 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Usage",
+					Values:  []string{"123s"},
+				},
+			},
+		},
+	}
+	fltr2 := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr3",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"12", "33"},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	//update our ActionProfile with our filters
+	actPrf := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "REM_ACC",
+			FilterIDs: []string{"fltr_for_attr", "*string:~*req.Account:1001",
+				"fltr_for_attr3", "fltr_for_attr2"},
+			Weight:   0,
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
+			Actions: []*engine.APAction{
+				{
+					ID:   "REM_BAL",
+					Type: utils.MetaRemBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path: "MONETARY",
+						},
+						{
+							Path: "VOICE",
+						},
+					},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	//check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:REM_ACC",
+		"*string:*req.Subject:6774:REM_ACC",
+		"*string:*req.Subject:22312:REM_ACC",
+		"*string:*opts.Subsystems:*attributes:REM_ACC",
+		"*prefix:*req.Destinations:+0775:REM_ACC",
+		"*prefix:*req.Destinations:+442:REM_ACC",
+		"*string:*req.Usage:123s:REM_ACC",
+		"*string:*req.Account:1001:REM_ACC",
+		"*prefix:*req.AnswerTime:12:REM_ACC",
+		"*prefix:*req.AnswerTime:33:REM_ACC"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxActionProfileRemoveIndexes(t *testing.T) {
+	var reply string
+	var replyIdx []string
+	//indexes will be removed for this specific context
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
+	}
+}
+func testV1FIdxActionProfileComputeIndexes(t *testing.T) {
+	// compute our indexes
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, ActionS: true}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	var replyIdx []string
+
+	//matching for our context
+	expectedIDx := []string{"*string:*req.Subject:1004:REM_ACC",
+		"*string:*req.Subject:6774:REM_ACC",
+		"*string:*req.Subject:22312:REM_ACC",
+		"*string:*opts.Subsystems:*attributes:REM_ACC",
+		"*prefix:*req.Destinations:+0775:REM_ACC",
+		"*prefix:*req.Destinations:+442:REM_ACC",
+		"*string:*req.Usage:123s:REM_ACC",
+		"*string:*req.Account:1001:REM_ACC",
+		"*prefix:*req.AnswerTime:12:REM_ACC",
+		"*prefix:*req.AnswerTime:33:REM_ACC"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
+	//we will add more attributes with different context for matching filters
+	actPrf2 := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "TOPUP_ACC",
+			FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
+				"*string:~*req.Account:1001"},
+			Weight:   0,
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
+			Actions: []*engine.APAction{
+				{
+					ID:   "ADD_BAL",
+					Type: utils.MetaAddBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "MONETARY",
+							Value: "10",
+						}},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	actPrf3 := &engine.ActionProfileWithAPIOpts{
+		ActionProfile: &engine.ActionProfile{
+			Tenant: "cgrates.org",
+			ID:     "SET_BAL",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Weight:   0,
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
+			Schedule: utils.MetaASAP,
+			Actions: []*engine.APAction{
+				{
+					ID:   "SET_BAL",
+					Type: utils.MetaSetBalance,
+					Diktats: []*engine.APDiktat{
+						{
+							Path:  "MONETARY",
+							Value: "10",
+						}},
+				},
+			},
+		},
+		APIOpts: map[string]interface{}{},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetActionProfile,
+		actPrf3, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Account:1001:SET_BAL",
+		"*string:*req.Account:1001:REM_ACC",
+		"*string:*req.Account:1001:ADD_BAL",
+		"*prefix:*req.AnswerTime:12:TOPUP_ACC",
+		"*prefix:*req.AnswerTime:33:TOPUP_ACC",
+		"*prefix:*req.AnswerTime:12:REM_ACC",
+		"*prefix:*req.AnswerTime:33:REM_ACC",
+		"*string:*req.Usage:123s:TOPUP_ACC",
+		"*string:*req.Usage:123s:ADD_BAL",
+		"*string:*req.Subject:1004:ADD_BAL",
+		"*string:*req.Subject:6774:ADD_BAL",
+		"*string:*req.Subject:22312:ADD_BAL",
+		"*string:*opts.Subsystems:*attributes:ADD_BAL",
+		"*prefix:*req.Destinations:+0775:ADD_BAL",
+		"*prefix:*req.Destinations:+442:ADD_BAL",
+		"*string:*req.Subject:1004:SET_BAL",
+		"*string:*req.Subject:6774:SET_BAL",
+		"*string:*req.Subject:22312:SET_BAL",
+		"*string:*opts.Subsystems:*attributes:SET_BAL",
+		"*prefix:*req.Destinations:+0775:SET_BAL",
+		"*prefix:*req.Destinations:+442:SET_BAL"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
 	}
 }
 
