@@ -134,11 +134,3 @@ func (s RPCClientSet) Call(ctx *context.Context, method string, args interface{}
 	}
 	return conn.Call(ctx, method, args, reply)
 }
-
-// func (s RPCClientSet) ReconnectInternals(subsystems ...string) (err error) {
-// 	for _, subsystem := range subsystems {
-// 		if err = s[subsystem].Reconnect(); err != nil {
-// 			return
-// 		}
-// 	}
-// }

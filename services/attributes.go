@@ -35,7 +35,7 @@ import (
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
-	anz *AnalyzerService,
+	anz *AnalyzerService, dspS *DispatcherService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
 		connChan:    internalChan,
@@ -46,6 +46,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		server:      server,
 		anz:         anz,
 		srvDep:      srvDep,
+		dspS:        dspS,
 	}
 }
 
@@ -62,6 +63,7 @@ type AttributeService struct {
 	rpc      *apis.AttributeSv1         // useful on restart
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	anz      *AnalyzerService
+	dspS     *DispatcherService
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -89,6 +91,16 @@ func (attrS *AttributeService) Start() (err error) {
 	if !attrS.cfg.DispatcherSCfg().Enabled {
 		attrS.server.RpcRegister(srv)
 	}
+	dspShtdChan := attrS.dspS.RegisterShutdownChan(attrS.ServiceName())
+	go func() {
+		for {
+			if _, closed := <-dspShtdChan; closed {
+				return
+			}
+			attrS.server.RpcRegister(srv)
+
+		}
+	}()
 	attrS.connChan <- attrS.anz.GetInternalCodec(srv, utils.AttributeS)
 	return
 }
@@ -106,6 +118,7 @@ func (attrS *AttributeService) Shutdown() (err error) {
 	attrS.rpc = nil
 	<-attrS.connChan
 	attrS.server.RpcUnregisterName(utils.AttributeSv1)
+	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()
 	return
 }
