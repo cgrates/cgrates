@@ -19,7 +19,7 @@
             "enabled": true,
             "tenant": "cgrates.org",
             "tp_in_dir": "/tmp/TestLoadersIT/in",
-            "tp_out_dir": "/tmp/TestLoadersIT/out",
+            "tp_out_dir": "",
         },
     ],
 
