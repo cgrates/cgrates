@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/apis"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -58,8 +60,8 @@ type ChargerService struct {
 	server      *cores.Server
 	connMgr     *engine.ConnManager
 
-	chrS *engine.ChargerService
-	// rpc      *v1.ChargerSv1
+	chrS     *engine.ChargerService
+	rpc      *apis.ChargerSv1
 	connChan chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
@@ -84,11 +86,12 @@ func (chrS *ChargerService) Start() (err error) {
 	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
-	// cSv1 := v1.NewChargerSv1(chrS.chrS)
-	// if !chrS.cfg.DispatcherSCfg().Enabled {
-	// chrS.server.RpcRegister(cSv1)
-	// }
-	// chrS.connChan <- chrS.anz.GetInternalCodec(cSv1, utils.ChargerS)
+	chrS.rpc = apis.NewChargerSv1(chrS.chrS)
+	srv, _ := birpc.NewService(chrS.rpc, "", false)
+	if !chrS.cfg.DispatcherSCfg().Enabled {
+		chrS.server.RpcRegister(srv)
+	}
+	chrS.connChan <- chrS.anz.GetInternalCodec(srv, utils.ChargerS)
 	return
 }
 
@@ -103,8 +106,7 @@ func (chrS *ChargerService) Shutdown() (err error) {
 	defer chrS.Unlock()
 	chrS.chrS.Shutdown()
 	chrS.chrS = nil
-	// chrS.rpc = nil
-	//<-chrS.connChan
+	<-chrS.connChan
 	return
 }
 
