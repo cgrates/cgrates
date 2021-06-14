@@ -632,8 +632,8 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, shdChan, shdWg, connManager)
-	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz, srvDep)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager, anz, srvDep)
+	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, anz, dspS, srvDep)
 	dspH := services.NewRegistrarCService(cfg, server, connManager, anz, srvDep)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager, anz, srvDep)

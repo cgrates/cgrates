@@ -79,7 +79,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherProfileNF(t *tes
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -103,7 +103,7 @@ func TestDispatcherServiceDispatcherProfileForEventMIIDENotFound(t *testing.T) {
 	ev := &utils.CGREvent{}
 	tnt := ""
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err := dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err := dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -156,7 +156,7 @@ func TestDispatcherV1GetProfileForEventErr(t *testing.T) {
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
 	ev := &utils.CGREvent{}
 	dPfl := &engine.DispatcherProfiles{}
-	err := dsp.V1GetProfilesForEvent(ev, dPfl)
+	err := dsp.V1GetProfilesForEvent(context.Background(), ev, dPfl)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -169,7 +169,7 @@ func TestDispatcherV1GetProfileForEvent(t *testing.T) {
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
 	ev := &utils.CGREvent{}
 	dPfl := &engine.DispatcherProfiles{}
-	err := dsp.V1GetProfilesForEvent(ev, dPfl)
+	err := dsp.V1GetProfilesForEvent(context.Background(), ev, dPfl)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -527,7 +527,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNil(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -574,7 +574,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -585,7 +585,7 @@ func TestDispatcherV1GetProfileForEventReturn(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	dPfl := &engine.DispatcherProfiles{}
-	err = dss.V1GetProfilesForEvent(ev, dPfl)
+	err = dss.V1GetProfilesForEvent(context.Background(), ev, dPfl)
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -627,7 +627,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -674,7 +674,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFound2(t *testing.T) {
 	}
 	tnt := ""
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -722,7 +722,7 @@ func TestDispatcherServiceDispatcherProfileForEventErrNotFoundFilter(t *testing.
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -864,7 +864,7 @@ func TestDispatcherServiceDispatcherProfileForEventFoundFilter(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -888,7 +888,7 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 			if cnt == 0 {
 				cnt++
 				return map[string]utils.StringSet{
-					idxKey: utils.StringSet{"cgrates.org:dsp1": {}},
+					idxKey: {"cgrates.org:dsp1": {}},
 				}, nil
 			}
 			return nil, utils.ErrNotImplemented
@@ -910,7 +910,7 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err := dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err := dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -959,7 +959,7 @@ func TestDispatcherServiceDispatcherProfileForEventGetDispatcherError(t *testing
 	}
 	tnt := ev.Tenant
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	_, err = dss.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	_, err = dss.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -1083,11 +1083,6 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 	engine.Cache = cacheInit
 }
 
-func (dS *DispatcherService) DispatcherServiceTest(ev *utils.CGREvent, reply *string) (error, interface{}) {
-	*reply = utils.Pong
-	return nil, nil
-}
-
 func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.T) {
 	tmp := engine.Cache
 	defer func() {
@@ -1141,7 +1136,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFirstNotFound(t *testing.
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	if rcv, err := dS.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -1209,7 +1204,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	if rcv, err := dS.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -1277,7 +1272,7 @@ func TestDispatchersdispatcherProfileForEventAnySSfalseNotFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	if rcv, err := dS.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -1343,7 +1338,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueNotFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	if rcv, err := dS.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -1409,7 +1404,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 	}
 	subsys := utils.MetaSessionS
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	if rcv, err := dS.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
@@ -1429,7 +1424,7 @@ func TestDispatchersdispatcherProfileForEventAnySStrueBothFound(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := dS.dispatcherProfilesForEvent(tnt, ev, utils.MapStorage{
+	if rcv, err := dS.dispatcherProfilesForEvent(context.Background(), tnt, ev, utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
