@@ -55,6 +55,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		dataTpls:      make(map[string][]*config.FCTemplate),
 		flagsTpls:     make(map[string]utils.FlagsWithParams),
 		rdrs:          make(map[string]map[string]*openedCSVFile),
+		rdrTypes:      make([]string, len(cfg.Data)),
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            dm,
 		timezone:      timezone,
@@ -62,7 +63,8 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		connMgr:       connMgr,
 		cacheConns:    cacheConns,
 	}
-	for _, ldrData := range cfg.Data {
+	for i, ldrData := range cfg.Data {
+		ldr.rdrTypes[i] = ldrData.Type
 		ldr.dataTpls[ldrData.Type] = ldrData.Fields
 		ldr.flagsTpls[ldrData.Type] = ldrData.Flags
 		ldr.rdrs[ldrData.Type] = make(map[string]*openedCSVFile)
@@ -98,8 +100,9 @@ type Loader struct {
 	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
 	flagsTpls     map[string]utils.FlagsWithParams     //map[loaderType]utils.FlagsWithParams
 	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
-	procRows      int                                  // keep here the last processed row in the file/-s
-	bufLoaderData map[string][]LoaderData              // cache of data read, indexed on tenantID
+	rdrTypes      []string
+	procRows      int                     // keep here the last processed row in the file/-s
+	bufLoaderData map[string][]LoaderData // cache of data read, indexed on tenantID
 	dm            *engine.DataManager
 	timezone      string
 	filterS       *engine.FilterS
@@ -118,14 +121,26 @@ func (ldr *Loader) ProcessFolder(ctx *context.Context, caching, loadOption strin
 		return
 	}
 	defer ldr.unlockFolder()
-	for ldrType := range ldr.rdrs {
-		if err = ldr.processFiles(ctx, ldrType, caching, loadOption); err != nil {
-			if stopOnError {
-				return
+	switch loadOption {
+	case utils.MetaStore:
+		for _, ldrType := range ldr.rdrTypes {
+			if err = ldr.processFiles(ctx, ldrType, caching, loadOption); err != nil {
+				if stopOnError {
+					return
+				}
+				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
+					utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
 			}
-			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
-				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
-			continue
+		}
+	case utils.MetaRemove:
+		for i := len(ldr.rdrTypes) - 1; i >= 0; i-- {
+			if err = ldr.processFiles(ctx, ldr.rdrTypes[i], caching, loadOption); err != nil {
+				if stopOnError {
+					return
+				}
+				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
+					utils.LoaderS, ldr.ldrID, ldr.rdrTypes[i], err.Error()))
+			}
 		}
 	}
 	err = ldr.moveFiles()
