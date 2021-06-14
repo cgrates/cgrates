@@ -908,6 +908,34 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out"),
 			Data: &[]*LoaderJsonDataType{
 				{
+					Type:      utils.StringPointer(utils.MetaFilters),
+					File_name: utils.StringPointer(utils.FiltersCsv),
+					Fields: &[]*FcTemplateJsonCfg{
+						{Tag: utils.StringPointer(utils.Tenant),
+							Path:      utils.StringPointer(utils.Tenant),
+							Type:      utils.StringPointer(utils.MetaVariable),
+							Value:     utils.StringPointer("~*req.0"),
+							Mandatory: utils.BoolPointer(true)},
+						{Tag: utils.StringPointer(utils.ID),
+							Path:      utils.StringPointer(utils.ID),
+							Type:      utils.StringPointer(utils.MetaVariable),
+							Value:     utils.StringPointer("~*req.1"),
+							Mandatory: utils.BoolPointer(true)},
+						{Tag: utils.StringPointer("Type"),
+							Path:  utils.StringPointer("Type"),
+							Type:  utils.StringPointer(utils.MetaVariable),
+							Value: utils.StringPointer("~*req.2")},
+						{Tag: utils.StringPointer("Element"),
+							Path:  utils.StringPointer("Element"),
+							Type:  utils.StringPointer(utils.MetaVariable),
+							Value: utils.StringPointer("~*req.3")},
+						{Tag: utils.StringPointer("Values"),
+							Path:  utils.StringPointer("Values"),
+							Type:  utils.StringPointer(utils.MetaVariable),
+							Value: utils.StringPointer("~*req.4")},
+					},
+				},
+				{
 					Type:      utils.StringPointer(utils.MetaAttributes),
 					File_name: utils.StringPointer(utils.AttributesCsv),
 					Fields: &[]*FcTemplateJsonCfg{
@@ -949,34 +977,6 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 							Path:  utils.StringPointer("Blocker"),
 							Type:  utils.StringPointer(utils.MetaVariable),
 							Value: utils.StringPointer("~*req.8")},
-					},
-				},
-				{
-					Type:      utils.StringPointer(utils.MetaFilters),
-					File_name: utils.StringPointer(utils.FiltersCsv),
-					Fields: &[]*FcTemplateJsonCfg{
-						{Tag: utils.StringPointer(utils.Tenant),
-							Path:      utils.StringPointer(utils.Tenant),
-							Type:      utils.StringPointer(utils.MetaVariable),
-							Value:     utils.StringPointer("~*req.0"),
-							Mandatory: utils.BoolPointer(true)},
-						{Tag: utils.StringPointer(utils.ID),
-							Path:      utils.StringPointer(utils.ID),
-							Type:      utils.StringPointer(utils.MetaVariable),
-							Value:     utils.StringPointer("~*req.1"),
-							Mandatory: utils.BoolPointer(true)},
-						{Tag: utils.StringPointer("Type"),
-							Path:  utils.StringPointer("Type"),
-							Type:  utils.StringPointer(utils.MetaVariable),
-							Value: utils.StringPointer("~*req.2")},
-						{Tag: utils.StringPointer("Element"),
-							Path:  utils.StringPointer("Element"),
-							Type:  utils.StringPointer(utils.MetaVariable),
-							Value: utils.StringPointer("~*req.3")},
-						{Tag: utils.StringPointer("Values"),
-							Path:  utils.StringPointer("Values"),
-							Type:  utils.StringPointer(utils.MetaVariable),
-							Value: utils.StringPointer("~*req.4")},
 					},
 				},
 				{
@@ -1537,7 +1537,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJSONCfg.LoaderJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expecting: %s, received: %s ",
+		t.Errorf("Expecting: %s,\nreceived: %s ",
 			utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }

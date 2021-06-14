@@ -128,6 +128,7 @@ cgrates.org,NewRes1
 			},
 		},
 	}
+	ldrs.ldrs["testV1LoadResource"].rdrTypes = []string{utils.MetaResources}
 
 	var reply string
 	expected := "ANOTHER_LOADER_RUNNING"
@@ -295,6 +296,7 @@ NOT_UINT
 			},
 		},
 	}
+	ldrs.ldrs["testV1LoadResource"].rdrTypes = []string{utils.MetaResources}
 
 	var reply string
 	expected := "SERVER_ERROR: open testV1LoadProcessFolderError/not_a_file: no such file or directory"
@@ -371,6 +373,7 @@ cgrates.org,NewRes1
 			},
 		},
 	}
+	ldrs.ldrs["testV1RemoveResource"].rdrTypes = []string{utils.MetaResources}
 
 	expRes := &engine.ResourceProfile{
 		Tenant: "cgrates.org",
@@ -578,6 +581,7 @@ func testV1RemoveProcessFolderError(t *testing.T) {
 			},
 		},
 	}
+	ldrs.ldrs["testV1RemoveProcessFolderError"].rdrTypes = []string{utils.MetaResources}
 
 	var reply string
 	expected := "SERVER_ERROR: open testV1RemoveProcessFolderError/not_a_file2: no such file or directory"
