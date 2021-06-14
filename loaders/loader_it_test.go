@@ -420,14 +420,10 @@ func testLoadFromFilesCsvActionProfile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	newFile.Write([]byte(`
-#Tenant[0],ID[1]
+	content := `#Tenant[0],ID[1]
 cgrates.org,SET_ACTPROFILE_3
-`))
-	content, err := os.ReadFile(path.Join(flPath, "ActionProfiles.csv"))
-	if err != nil {
-		t.Error(err)
-	}
+`
+	newFile.Write([]byte(content))
 	newFile.Close()
 
 	data := engine.NewInternalDB(nil, nil, true)
@@ -437,7 +433,8 @@ cgrates.org,SET_ACTPROFILE_3
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		tpInDir:       flPath,
 		tpOutDir:      utils.EmptyString,
-		lockFilename:  "ActionProfiles.csv",
+		lockFilename:  "ActionProfiles.lks",
+		rdrTypes:      []string{utils.MetaActionProfiles},
 		fieldSep:      ",",
 		timezone:      "UTC",
 	}
@@ -456,16 +453,9 @@ cgrates.org,SET_ACTPROFILE_3
 		},
 	}
 
-	rdr := io.NopCloser(strings.NewReader(string(content)))
-	csvRdr := csv.NewReader(rdr)
-	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
-			utils.ActionProfilesCsv: &openedCSVFile{
-				fileName: utils.ActionProfilesCsv,
-				rdr:      rdr,
-				csvRdr:   csvRdr,
-			},
+			utils.ActionProfilesCsv: nil,
 		},
 	}
 	if err := ldr.ProcessFolder(context.TODO(), utils.EmptyString, utils.MetaStore, true); err != nil {
@@ -485,11 +475,11 @@ cgrates.org,SET_ACTPROFILE_3
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expACtPrf), utils.ToJSON(rcv))
 	}
 
-	//checking the error by adding a caching method
+	// checking the error by adding a caching method
 	ldr.connMgr = engine.NewConnManager(config.NewDefaultCGRConfig(), nil)
 	ldr.cacheConns = []string{utils.MetaInternal}
-	rdr = io.NopCloser(strings.NewReader(string(content)))
-	csvRdr = csv.NewReader(rdr)
+	rdr := io.NopCloser(strings.NewReader(string(content)))
+	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaActionProfiles: {
@@ -517,6 +507,7 @@ func testLoadFromFilesCsvActionProfileOpenError(t *testing.T) {
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		tpInDir:       "/tmp/testLoadFromFilesCsvActionProfileOpenError",
+		rdrTypes:      []string{utils.MetaActionProfiles},
 		timezone:      "UTC",
 	}
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -563,6 +554,7 @@ cgrates.org,SET_ACTPROFILE_3
 		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		tpInDir:       flPath,
 		tpOutDir:      utils.EmptyString,
+		rdrTypes:      []string{utils.MetaActionProfiles},
 		lockFilename:  "ActionProfiles.csv",
 		fieldSep:      ",",
 		timezone:      "UTC",
