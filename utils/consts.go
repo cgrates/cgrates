@@ -124,6 +124,7 @@ var (
 		CacheRateProfiles:       CacheRateProfilesFilterIndexes,
 		CacheActionProfiles:     CacheActionProfilesFilterIndexes,
 		CacheFilters:            CacheReverseFilterIndexes,
+		CacheAccounts:           CacheAccountsFilterIndexes,
 		// CacheRates:              CacheRateFilterIndexes,
 	}
 
@@ -162,6 +163,7 @@ var (
 		DispatcherHostIDs:    DispatcherHostPrefix,
 		RateProfileIDs:       RateProfilePrefix,
 		ActionProfileIDs:     ActionProfilePrefix,
+		AccountIDs:           AccountPrefix,
 
 		AttributeFilterIndexIDs:      AttributeFilterIndexes,
 		ResourceFilterIndexIDs:       ResourceFilterIndexes,
@@ -193,6 +195,7 @@ var (
 		DispatcherHostIDs:    CacheDispatcherHosts,
 		RateProfileIDs:       CacheRateProfiles,
 		ActionProfileIDs:     CacheActionProfiles,
+		AccountIDs:           CacheAccounts,
 
 		AttributeFilterIndexIDs:      CacheAttributeFilterIndexes,
 		ResourceFilterIndexIDs:       CacheResourceFilterIndexes,

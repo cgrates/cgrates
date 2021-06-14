@@ -337,8 +337,8 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 					return nil, e
 				}
 				fltrIDs := make([]string, len(acnts.FilterIDs))
-                for i, fltr := range acnts.FilterIDs {
-                	fltrIDs[i] = fltr
+				for i, fltr := range acnts.FilterIDs {
+					fltrIDs[i] = fltr
 				}
 				return &fltrIDs, nil
 			}, nil); err != nil && err != utils.ErrNotFound {
@@ -610,12 +610,12 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 			for i, fltr := range acc.FilterIDs {
 				fltrIDs[i] = fltr
 			}
-            return &fltrIDs, nil
+			return &fltrIDs, nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	if indexes.Size() != 0 {
-		cacheIDs[utils.CacheAccountsFilterIndexes] = indexes.AsSlice()
+		cacheIDs[utils.AccountsFilterIndexIDs] = indexes.AsSlice()
 	}
 	//ActionProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheActionProfilesFilterIndexes,

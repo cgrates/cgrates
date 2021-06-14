@@ -310,8 +310,8 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	// update our Attribute with our filters
 	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
-			Tenant:    utils.CGRateSorg,
-			ID:        "TEST_ATTRIBUTES_IT_TEST",
+			Tenant: utils.CGRateSorg,
+			ID:     "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
 			Attributes: []*engine.ExternalAttribute{
@@ -644,16 +644,16 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 	//we will set an Account with our filter and check the indexes
 	accPrf := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
-			Tenant: "cgrates.org",
-			ID:     "ACCOUNT_FILTER_INDEXES",
-			Weights: ";0",
+			Tenant:    "cgrates.org",
+			ID:        "ACCOUNT_FILTER_INDEXES",
+			Weights:   ";0",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
 			Balances: map[string]*utils.APIBalance{
 				"AbstractBalance1": {
-					ID: "AbstractBalance1",
+					ID:      "AbstractBalance1",
 					Weights: ";15",
-					Type:  utils.MetaAbstract,
-					Units: float64(40*time.Second),
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
 					CostIncrements: []*utils.APICostIncrement{
 						{
 							Increment:    utils.Float64Pointer(float64(time.Second)),
@@ -770,17 +770,17 @@ func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 	// update our Account with our filters
 	accPrf := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
-			Tenant: "cgrates.org",
-			ID:     "ACCOUNT_FILTER_INDEXES",
+			Tenant:  "cgrates.org",
+			ID:      "ACCOUNT_FILTER_INDEXES",
 			Weights: ";0",
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
 			Balances: map[string]*utils.APIBalance{
 				"AbstractBalance1": {
-					ID: "AbstractBalance1",
+					ID:      "AbstractBalance1",
 					Weights: ";15",
-					Type:  utils.MetaAbstract,
-					Units: float64(40*time.Second),
+					Type:    utils.MetaAbstract,
+					Units:   float64(40 * time.Second),
 					CostIncrements: []*utils.APICostIncrement{
 						{
 							Increment:    utils.Float64Pointer(float64(time.Second)),
@@ -882,32 +882,32 @@ func testV1FIdxAccountsMoreProfilesForFilters(t *testing.T) {
 	// more accounts with our filters
 	accPrf2 := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
-			Tenant: "cgrates.org",
-			ID:     "ACCOUNT_FILTER_INDEXES2",
-			Weights: ";0",
+			Tenant:    "cgrates.org",
+			ID:        "ACCOUNT_FILTER_INDEXES2",
+			Weights:   ";0",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3"},
 			Balances: map[string]*utils.APIBalance{
 				"ConcreteBalance1": {
-					ID: "ConcreteBalance1",
+					ID:      "ConcreteBalance1",
 					Weights: ";15",
-					Type:  utils.MetaConcrete,
-					Units: float64(40*time.Second),
+					Type:    utils.MetaConcrete,
+					Units:   float64(40 * time.Second),
 				},
 			},
 		},
 	}
 	accPrf3 := &APIAccountWithAPIOpts{
 		APIAccount: &utils.APIAccount{
-			Tenant: "cgrates.org",
-			ID:     "ACCOUNT_FILTER_INDEXES3",
-			Weights: ";0",
+			Tenant:    "cgrates.org",
+			ID:        "ACCOUNT_FILTER_INDEXES3",
+			Weights:   ";0",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
 			Balances: map[string]*utils.APIBalance{
 				"ConcreteBalance1": {
-					ID: "ConcreteBalance1",
+					ID:      "ConcreteBalance1",
 					Weights: ";15",
-					Type:  utils.MetaConcrete,
-					Units: float64(40*time.Second),
+					Type:    utils.MetaConcrete,
+					Units:   float64(40 * time.Second),
 				},
 			},
 		},
@@ -929,7 +929,7 @@ func testV1FIdxAccountsMoreProfilesForFilters(t *testing.T) {
 	var replyIdx []string
 	expectedIDx := []string{"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES",
 		"*string:*opts.*context:*sessions:ACCOUNT_FILTER_INDEXES3",
-	    "*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES2",
+		"*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES2",
 		"*prefix:*req.AnswerTime:33:ACCOUNT_FILTER_INDEXES2",
 		"*prefix:*req.AnswerTime:12:ACCOUNT_FILTER_INDEXES",
 		"*prefix:*req.AnswerTime:33:ACCOUNT_FILTER_INDEXES",
@@ -980,7 +980,7 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
 			AccountIDs: []string{"ACCOUNT_FILTER_INDEXES", "ACCOUNT_FILTER_INDEXES2"}},
-			&reply); err != nil {
+		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned")
