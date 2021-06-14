@@ -2227,19 +2227,22 @@ func (dm *DataManager) RemoveActionProfile(ctx *context.Context, tenant, id stri
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldRpp, err := dm.GetActionProfile(ctx, tenant, id, true, false, utils.NonTransactional)
+	oldAct, err := dm.GetActionProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if err = dm.DataDB().RemoveActionProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
-	if oldRpp == nil {
+	if oldAct == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheActionProfilesFilterIndexes, tenant, id, oldAct.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheActionProfilesFilterIndexes,
-			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
+			tenant, utils.EmptyString, id, oldAct.FilterIDs); err != nil {
 			return
 		}
 	}
@@ -2528,6 +2531,9 @@ func (dm *DataManager) RemoveAccount(ctx *context.Context, tenant, id string, wi
 		return utils.ErrNotFound
 	}
 	if withIndex {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheAccountsFilterIndexes, tenant, id, oldRpp.FilterIDs); err != nil {
+			return
+		}
 		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheAccountsFilterIndexes,
 			tenant, utils.EmptyString, id, oldRpp.FilterIDs); err != nil {
 			return
