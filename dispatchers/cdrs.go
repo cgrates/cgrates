@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,7 +40,7 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaCDRs,
+	return dS.Dispatch(context.TODO(), args, utils.MetaCDRs,
 		utils.CDRsV1Ping, args, reply)
 }
 
@@ -55,7 +56,7 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args *utils.RPCCDRsFilterWithAPIOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRs, args, reply)
@@ -73,7 +74,7 @@ func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithAPI
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1GetCDRsCount, args, reply)
@@ -90,7 +91,7 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1RateCDRs, args, reply)
@@ -107,7 +108,7 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessExternalCDR, args, reply)
@@ -124,7 +125,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs,
+	return dS.Dispatch(context.TODO(), &args.CGREvent, utils.MetaCDRs,
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
@@ -139,7 +140,7 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithAPIOpts, reply
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCDRs, utils.CDRsV1ProcessCDR, args, reply)
@@ -156,6 +157,6 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(args *engine.ArgV1ProcessEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs,
+	return dS.Dispatch(context.TODO(), &args.CGREvent, utils.MetaCDRs,
 		utils.CDRsV2ProcessEvent, args, reply)
 }

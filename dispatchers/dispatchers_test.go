@@ -181,7 +181,7 @@ func TestDispatcherDispatch(t *testing.T) {
 	cfg.GeneralCfg().DefaultTenant = utils.EmptyString
 	dsp := NewDispatcherService(nil, cfg, nil, nil)
 	ev := &utils.CGREvent{}
-	err := dsp.Dispatch(ev, "", "", "", "")
+	err := dsp.Dispatch(context.TODO(), ev, "", "", "", "")
 	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -768,7 +768,7 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 		},
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	err = dss.Dispatch(ev, subsys, "", "", "")
+	err = dss.Dispatch(context.TODO(), ev, subsys, "", "", "")
 	expected := "DISPATCHER_ERROR:unsupported dispatch strategy: <>"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -820,7 +820,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {
 		},
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	err = dss.Dispatch(ev, subsys, "", "", "")
+	err = dss.Dispatch(context.TODO(), ev, subsys, "", "", "")
 	expected := "HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -1015,7 +1015,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound2(t *testing.T) {
 		},
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	err = dss.Dispatch(ev, subsys, "", "", "")
+	err = dss.Dispatch(context.TODO(), ev, subsys, "", "", "")
 	expected := "HOST_NOT_FOUND"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
@@ -1075,7 +1075,7 @@ func TestDispatcherServiceDispatchDspErrHostNotFound3(t *testing.T) {
 		},
 	}
 	subsys := utils.IfaceAsString(ev.APIOpts[utils.Subsys])
-	err = dss.Dispatch(ev, subsys, "", "", "")
+	err = dss.Dispatch(context.TODO(), ev, subsys, "", "", "")
 	expected := "DISPATCHER_ERROR:NOT_IMPLEMENTED"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)

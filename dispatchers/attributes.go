@@ -43,7 +43,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ctx *context.Conte
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
+	return dS.Dispatch(ctx, args.CGREvent, utils.MetaAttributes, utils.AttributeSv1GetAttributeForEvent, args, reply)
 }
 
 // AttributeSv1ProcessEvent .
@@ -60,5 +60,5 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(ctx *context.Context, args
 		}
 
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
+	return dS.Dispatch(ctx, args.CGREvent, utils.MetaAttributes, utils.AttributeSv1ProcessEvent, args, reply)
 }

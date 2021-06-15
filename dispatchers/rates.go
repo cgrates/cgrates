@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,7 +34,7 @@ func (dS *DispatcherService) RateSv1Ping(args *utils.CGREvent, rpl *string) (err
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.RateS, utils.RateSv1Ping, args, rpl)
+	return dS.Dispatch(context.TODO(), args, utils.RateS, utils.RateSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, rpCost *utils.RateProfileCost) (err error) {
@@ -49,5 +50,5 @@ func (dS *DispatcherService) RateSv1CostForEvent(args *utils.ArgsCostForEvent, r
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.RateS, utils.RateSv1CostForEvent, args, rpCost)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.RateS, utils.RateSv1CostForEvent, args, rpCost)
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,7 +36,7 @@ func (dS *DispatcherService) RouteSv1Ping(args *utils.CGREvent, reply *string) (
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes, reply *engine.SortedRoutesList) (err error) {
@@ -47,7 +48,7 @@ func (dS *DispatcherService) RouteSv1GetRoutes(args *engine.ArgsGetRoutes, reply
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaRoutes, utils.RouteSv1GetRoutes, args, reply)
 }
 
 func (dS *DispatcherService) RouteSv1GetRoutesList(args *engine.ArgsGetRoutes, reply *[]string) (err error) {
@@ -59,7 +60,7 @@ func (dS *DispatcherService) RouteSv1GetRoutesList(args *engine.ArgsGetRoutes, r
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaRoutes, utils.RouteSv1GetRoutesList, args, reply)
 }
 
 func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREvent, reply *[]*engine.RouteProfile) (err error) {
@@ -71,5 +72,5 @@ func (dS *DispatcherService) RouteSv1GetRouteProfilesForEvent(args *utils.CGREve
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaRoutes, utils.RouteSv1GetRouteProfilesForEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaRoutes, utils.RouteSv1GetRouteProfilesForEvent, args, reply)
 }

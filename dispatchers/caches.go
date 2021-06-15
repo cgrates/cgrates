@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -41,7 +42,7 @@ func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaCaches, utils.CacheSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaCaches, utils.CacheSv1Ping, args, reply)
 }
 
 // CacheSv1GetItemIDs returns the IDs for cacheID with given prefix
@@ -57,7 +58,7 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsW
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1GetItemIDs, args, reply)
@@ -77,7 +78,7 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithAPI
 		}
 	}
 
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	},
@@ -98,7 +99,7 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheI
 		}
 	}
 
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1GetItemExpiryTime, args, reply)
@@ -117,7 +118,7 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1RemoveItem, args, reply)
@@ -136,7 +137,7 @@ func (dS *DispatcherService) CacheSv1RemoveItems(args *utils.AttrReloadCacheWith
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1RemoveItems, args, reply)
@@ -155,7 +156,7 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithAPIOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1Clear, args, reply)
@@ -174,7 +175,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithA
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1GetCacheStats, args, reply)
@@ -192,7 +193,7 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1PrecacheStatus, args, reply)
@@ -211,7 +212,7 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithAPIOpt
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1HasGroup, args, reply)
@@ -230,7 +231,7 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWit
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1GetGroupItemIDs, args, reply)
@@ -248,7 +249,7 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithAPI
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1RemoveGroup, args, reply)
@@ -266,7 +267,7 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args *utils.AttrReloadCacheWith
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1ReloadCache, args, reply)
@@ -284,7 +285,7 @@ func (dS *DispatcherService) CacheSv1LoadCache(args *utils.AttrReloadCacheWithAP
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1LoadCache, args, reply)
@@ -302,7 +303,7 @@ func (dS *DispatcherService) CacheSv1ReplicateRemove(args *utils.ArgCacheReplica
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1ReplicateRemove, args, reply)
@@ -320,7 +321,7 @@ func (dS *DispatcherService) CacheSv1ReplicateSet(args *utils.ArgCacheReplicateS
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCaches, utils.CacheSv1ReplicateSet, args, reply)

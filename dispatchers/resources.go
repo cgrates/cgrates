@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,7 +35,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREvent, rpl *string) 
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaResources, utils.ResourceSv1Ping, args, rpl)
+	return dS.Dispatch(context.TODO(), args, utils.MetaResources, utils.ResourceSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
@@ -49,7 +50,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
@@ -64,7 +65,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1ResourceUsage,
@@ -79,7 +80,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1AllocateResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1ResourceUsage,
@@ -94,7 +95,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaResources, utils.ResourceSv1ReleaseResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithAPIOpts, reply *engine.Resource) (err error) {
@@ -108,7 +109,7 @@ func (dS *DispatcherService) ResourceSv1GetResource(args *utils.TenantIDWithAPIO
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
@@ -126,7 +127,7 @@ func (dS *DispatcherService) ResourceSv1GetResourceWithConfig(args *utils.Tenant
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,

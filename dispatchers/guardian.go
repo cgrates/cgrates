@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +36,7 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaGuardian, utils.GuardianSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaGuardian, utils.GuardianSv1Ping, args, reply)
 }
 
 // GuardianSv1RemoteLock will lock a key from remote
@@ -51,7 +52,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithAPIOpt
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteLock, args, reply)
@@ -70,7 +71,7 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAP
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaGuardian, utils.GuardianSv1RemoteUnlock, args, reply)

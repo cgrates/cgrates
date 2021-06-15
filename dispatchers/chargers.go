@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +38,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREvent, reply *string)
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaChargers, utils.ChargerSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREvent,
@@ -52,7 +53,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaChargers, utils.ChargerSv1GetChargersForEvent, args, reply)
 }
 
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREvent,
@@ -67,5 +68,5 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaChargers, utils.ChargerSv1ProcessEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaChargers, utils.ChargerSv1ProcessEvent, args, reply)
 }

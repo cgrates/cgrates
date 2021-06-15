@@ -150,7 +150,7 @@ func (dS *DispatcherService) dispatcherProfilesForEvent(ctx *context.Context, tn
 }
 
 // Dispatch is the method forwarding the request towards the right connection
-func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
+func (dS *DispatcherService) Dispatch(ctx *context.Context, ev *utils.CGREvent, subsys string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	tnt := ev.Tenant
 	if tnt == utils.EmptyString {
@@ -165,7 +165,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		},
 	}
 	var dPrfls engine.DispatcherProfiles
-	if dPrfls, err = dS.dispatcherProfilesForEvent(context.TODO(), tnt, ev, evNm); err != nil {
+	if dPrfls, err = dS.dispatcherProfilesForEvent(ctx, tnt, ev, evNm); err != nil {
 		return utils.NewErrDispatcherS(err)
 	}
 	for _, dPrfl := range dPrfls {
@@ -178,10 +178,11 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		} else if d, err = newDispatcher(dPrfl); err != nil {
 			return utils.NewErrDispatcherS(err)
 		}
-		if err = engine.Cache.Set(context.TODO(), utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
+		if err = engine.Cache.Set(ctx, utils.CacheDispatchers, tntID, d, nil, true, utils.EmptyString); err != nil {
 			return utils.NewErrDispatcherS(err)
 		}
-		if err = d.Dispatch(dS.dm, dS.fltrS, context.TODO(), evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]), subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
+		if err = d.Dispatch(dS.dm, dS.fltrS, ctx, evNm, tnt, utils.IfaceAsString(ev.APIOpts[utils.OptsRouteID]),
+			subsys, serviceMethod, args, reply); !rpcclient.IsNetworkError(err) {
 			return
 		}
 	}
@@ -224,5 +225,5 @@ func (dS *DispatcherService) ping(ctx *context.Context, subsys, method string, a
 			return
 		}
 	}
-	return dS.Dispatch(args, subsys, method, args, reply)
+	return dS.Dispatch(ctx, args, subsys, method, args, reply)
 }

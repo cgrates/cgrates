@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,7 +35,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREvent, reply *strin
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaThresholds, utils.ThresholdSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.ThresholdsArgsProcessEvent,
@@ -47,7 +48,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Thre
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, t)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaThresholds, utils.ThresholdSv1GetThresholdsForEvent, args, t)
 }
 
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ThresholdsArgsProcessEvent,
@@ -60,7 +61,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ThresholdsArg
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, utils.ThresholdSv1ProcessEvent, args, tIDs)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaThresholds, utils.ThresholdSv1ProcessEvent, args, tIDs)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithAPIOpts, tIDs *[]string) (err error) {
@@ -74,7 +75,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaThresholds, utils.ThresholdSv1GetThresholdIDs, args, tIDs)
@@ -91,7 +92,7 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAP
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,

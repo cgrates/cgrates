@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,7 +32,7 @@ func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREvent, reply *string)
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaSessionS, utils.SessionSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1AuthorizeArgs,
@@ -43,7 +44,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1Authorize
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEvent, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
@@ -55,7 +56,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSessionArgs,
@@ -67,7 +68,7 @@ func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSess
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSession, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSession, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
@@ -79,7 +80,7 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSessionArgs,
@@ -91,7 +92,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1UpdateSession, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpts,
@@ -106,7 +107,7 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithAPIOpt
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1SyncSessions, args, reply)
@@ -121,7 +122,7 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1Termina
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1TerminateSession, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1TerminateSession, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREvent,
@@ -133,7 +134,7 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaSessionS, utils.SessionSv1ProcessCDR, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaSessionS, utils.SessionSv1ProcessCDR, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMessageArgs,
@@ -145,7 +146,7 @@ func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMe
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessMessage, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessMessage, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEventArgs,
@@ -157,7 +158,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaSessionS, utils.SessionSv1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,
@@ -172,7 +173,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilt
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessions, args, reply)
@@ -190,7 +191,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *utils.Sessio
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1GetActiveSessionsCount, args, reply)
@@ -208,7 +209,7 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(args *utils.SessionFilter
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1ForceDisconnect, args, reply)
@@ -226,7 +227,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *utils.SessionFil
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessions, args, reply)
@@ -244,7 +245,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *utils.Sessi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1GetPassiveSessionsCount, args, reply)
@@ -262,7 +263,7 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1ReplicateSessions, args, reply)
@@ -280,7 +281,7 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.OptsStart,
 	}, utils.MetaSessionS, utils.SessionSv1SetPassiveSession, args, reply)
@@ -297,7 +298,7 @@ func (dS *DispatcherService) SessionSv1ActivateSessions(args *utils.SessionIDsWi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1ActivateSessions, args, reply)
@@ -314,7 +315,7 @@ func (dS *DispatcherService) SessionSv1DeactivateSessions(args *utils.SessionIDs
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1DeactivateSessions, args, reply)
@@ -328,7 +329,7 @@ func (dS *DispatcherService) SessionSv1STIRAuthenticate(args *sessions.V1STIRAut
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1STIRAuthenticate, args, reply)
@@ -342,7 +343,7 @@ func (dS *DispatcherService) SessionSv1STIRIdentity(args *sessions.V1STIRIdentit
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaSessionS, utils.SessionSv1STIRIdentity, args, reply)
