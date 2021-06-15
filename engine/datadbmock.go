@@ -55,7 +55,7 @@ type DataDBMock struct {
 	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*ActionProfile, error)
 	SetActionProfileDrvF       func(ctx *context.Context, ap *ActionProfile) error
 	RemoveActionProfileDrvF    func(ctx *context.Context, tenant string, ID string) error
-	RemoveFilterDrvF           func(str1 string, str2 string) error
+	RemoveFilterDrvF           func(ctx *context.Context, str1 string, str2 string) error
 	SetAccountDrvF             func(ctx *context.Context, profile *utils.Account) error
 	GetAccountDrvF             func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error)
 	RemoveAccountDrvF          func(ctx *context.Context, str1 string, str2 string) error
@@ -166,7 +166,7 @@ func (dbM *DataDBMock) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx st
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
+func (dbM *DataDBMock) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
 	return utils.ErrNotImplemented
 }
 
@@ -259,9 +259,9 @@ func (dbM *DataDBMock) SetFilterDrv(ctx *context.Context, fltr *Filter) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveFilterDrv(str1 string, str2 string) error {
+func (dbM *DataDBMock) RemoveFilterDrv(ctx *context.Context, str1 string, str2 string) error {
 	if dbM.RemoveFilterDrvF != nil {
-		return dbM.RemoveFilterDrvF(str1, str2)
+		return dbM.RemoveFilterDrvF(ctx, str1, str2)
 	}
 	return utils.ErrNotImplemented
 }
@@ -341,7 +341,7 @@ func (dbM *DataDBMock) RemoveDispatcherProfileDrv(*context.Context, string, stri
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (dbM *DataDBMock) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
@@ -356,15 +356,15 @@ func (dbM *DataDBMock) RemoveLoadIDsDrv() error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetDispatcherHostDrv(string, string) (*DispatcherHost, error) {
+func (dbM *DataDBMock) GetDispatcherHostDrv(*context.Context, string, string) (*DispatcherHost, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetDispatcherHostDrv(*DispatcherHost) error {
+func (dbM *DataDBMock) SetDispatcherHostDrv(*context.Context, *DispatcherHost) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveDispatcherHostDrv(string, string) error {
+func (dbM *DataDBMock) RemoveDispatcherHostDrv(*context.Context, string, string) error {
 	return utils.ErrNotImplemented
 }
 

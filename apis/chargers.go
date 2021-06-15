@@ -16,8 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"github.com/cgrates/birpc/context"
 	"time"
+
+	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -62,6 +63,25 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Pag
 	return nil
 }
 
+// GetChargerProfileCount returns the total number of ChargerProfiles registered for a tenant
+// returns ErrNotFound in case of 0 ChargerProfiles
+func (admS *AdminSv1) GetChargerProfileCount(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *int) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	var keys []string
+	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx,
+		utils.ChargerProfilePrefix+tnt+utils.ConcatenatedKeySep); err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = len(keys)
+	return
+}
+
 type ChargerWithAPIOpts struct {
 	*engine.ChargerProfile
 	APIOpts map[string]interface{}
@@ -84,7 +104,7 @@ func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWithAP
 	}
 	//handle caching for ChargerProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheChargerProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
+		arg.TenantID(), &arg.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -110,7 +130,7 @@ func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.Tena
 	}
 	//handle caching for ChargerProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheChargerProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

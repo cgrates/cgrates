@@ -56,7 +56,7 @@ func (cS *CoreService) Shutdown() {
 }
 
 // Status returns the status of the engine
-func (cS *CoreService) Status(arg *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+func (cS *CoreService) Status(_ *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})

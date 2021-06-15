@@ -548,7 +548,7 @@ func (rs *RedisStorage) SetFilterDrv(ctx *context.Context, r *Filter) (err error
 	return rs.Cmd(nil, redisSET, utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveFilterDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.FilterPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -648,7 +648,7 @@ func (rs *RedisStorage) RemoveDispatcherProfileDrv(ctx *context.Context, tenant,
 	return rs.Cmd(nil, redisDEL, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHost, err error) {
+func (rs *RedisStorage) GetDispatcherHostDrv(ctx *context.Context, tenant, id string) (r *DispatcherHost, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -660,7 +660,7 @@ func (rs *RedisStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHo
 	return
 }
 
-func (rs *RedisStorage) SetDispatcherHostDrv(r *DispatcherHost) (err error) {
+func (rs *RedisStorage) SetDispatcherHostDrv(ctx *context.Context, r *DispatcherHost) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -668,7 +668,7 @@ func (rs *RedisStorage) SetDispatcherHostDrv(r *DispatcherHost) (err error) {
 	return rs.Cmd(nil, redisSET, utils.DispatcherHostPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveDispatcherHostDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -676,7 +676,7 @@ func (rs *RedisStorage) GetStorageType() string {
 	return utils.Redis
 }
 
-func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (rs *RedisStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	if itemIDPrefix != "" {
 		var fldVal int64
 		mn := radix.MaybeNil{Rcv: &fldVal}
@@ -825,7 +825,7 @@ func (rs *RedisStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 	return
 }
 
-func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
+func (rs *RedisStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
 	if idxKey == utils.EmptyString {
 		return rs.Cmd(nil, redisDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx)
 	}

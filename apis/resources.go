@@ -102,7 +102,7 @@ func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *engine.Resou
 	}
 	//handle caching for ResourceProfile
 	if err = adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), arg.Tenant, utils.CacheResourceProfiles,
-		arg.TenantID(), &arg.FilterIDs, nil, arg.APIOpts); err != nil {
+		arg.TenantID(), &arg.FilterIDs, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -123,7 +123,7 @@ func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 	}
 	//handle caching for ResourceProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]), tnt, utils.CacheResourceProfiles,
-		utils.ConcatenatedKey(tnt, arg.ID), nil, nil, arg.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, arg.ID), nil, arg.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database

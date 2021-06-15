@@ -210,7 +210,9 @@ func (dspS *DispatcherService) RegisterShutdownChan(subsys string) (c chan struc
 
 func (dspS *DispatcherService) UnregisterShutdownChan(subsys string) {
 	dspS.Lock()
-	close(dspS.srvsReload[subsys])
+	if dspS.srvsReload[subsys] != nil {
+		close(dspS.srvsReload[subsys])
+	}
 	delete(dspS.srvsReload, subsys)
 	dspS.Unlock()
 }

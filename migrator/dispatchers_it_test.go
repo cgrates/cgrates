@@ -193,7 +193,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if err := dspMigrator.dmIN.DataManager().SetDispatcherProfile(context.TODO(), dspPrf, false); err != nil {
 		t.Error(err)
 	}
-	if err := dspMigrator.dmIN.DataManager().SetDispatcherHost(dspHost); err != nil {
+	if err := dspMigrator.dmIN.DataManager().SetDispatcherHost(context.TODO(), dspHost); err != nil {
 		t.Error(err)
 	}
 	currentVersion := engine.CurrentDataDBVersions()
@@ -226,7 +226,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 
-	resultHost, err := dspMigrator.dmOut.DataManager().GetDispatcherHost("cgrates.org",
+	resultHost, err := dspMigrator.dmOut.DataManager().GetDispatcherHost(context.TODO(), "cgrates.org",
 		"ALL", false, false, utils.NonTransactional)
 	if err != nil {
 		t.Error(err)
@@ -234,7 +234,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	if !reflect.DeepEqual(resultHost, dspHost) {
 		t.Errorf("Expecting: %+v, received: %+v", dspHost, resultHost)
 	}
-	resultHost, err = dspMigrator.dmIN.DataManager().GetDispatcherHost("cgrates.org",
+	resultHost, err = dspMigrator.dmIN.DataManager().GetDispatcherHost(context.TODO(), "cgrates.org",
 		"ALL", false, false, utils.NonTransactional)
 	if err != utils.ErrNotFound {
 		t.Error(err)

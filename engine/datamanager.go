@@ -181,7 +181,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			_, err = dm.GetDispatcherProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.DispatcherHostPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetDispatcherHost(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.RateProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetRateProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -393,7 +393,7 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, wit
 				tntCtx, utils.ToJSON(rcvIndx))
 		}
 	}
-	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveFilterDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldFlt == nil {
@@ -1694,7 +1694,7 @@ func (dm *DataManager) RemoveDispatcherProfile(ctx *context.Context, tenant, id 
 	return
 }
 
-func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetDispatcherHost(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (dH *DispatcherHost, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -1709,10 +1709,10 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	dH, err = dm.dataDB.GetDispatcherHostDrv(tenant, id)
+	dH, err = dm.dataDB.GetDispatcherHostDrv(ctx, tenant, id)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; err == utils.ErrNotFound && itm.Remote {
-			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetDispatcherHost,
 				&utils.TenantIDWithAPIOpts{
 					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
@@ -1720,13 +1720,13 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
 							config.CgrConfig().GeneralCfg().NodeID)),
 				}, &dH); err == nil {
-				err = dm.dataDB.SetDispatcherHostDrv(dH)
+				err = dm.dataDB.SetDispatcherHostDrv(ctx, dH)
 			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite && dm.dataDB.GetStorageType() != utils.Internal {
-				if errCh := Cache.Set(context.TODO(), utils.CacheDispatcherHosts, tntID, nil, nil,
+				if errCh := Cache.Set(ctx, utils.CacheDispatcherHosts, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID); errCh != nil {
 					return nil, errCh
 				}
@@ -1736,7 +1736,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		}
 	}
 	if cacheWrite {
-		if err = Cache.Set(context.TODO(), utils.CacheDispatcherHosts, tntID, dH, nil,
+		if err = Cache.Set(ctx, utils.CacheDispatcherHosts, tntID, dH, nil,
 			cacheCommit(transactionID), transactionID); err != nil {
 			return nil, err
 		}
@@ -1744,15 +1744,15 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 	return
 }
 
-func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
+func (dm *DataManager) SetDispatcherHost(ctx *context.Context, dpp *DispatcherHost) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().SetDispatcherHostDrv(dpp); err != nil {
+	if err = dm.DataDB().SetDispatcherHostDrv(ctx, dpp); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; itm.Replicate {
-		err = replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DispatcherHostPrefix, dpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetDispatcherHost,
@@ -1764,22 +1764,22 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 	return
 }
 
-func (dm *DataManager) RemoveDispatcherHost(tenant, id string) (err error) {
+func (dm *DataManager) RemoveDispatcherHost(ctx *context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldDpp, err := dm.GetDispatcherHost(tenant, id, true, false, utils.NonTransactional)
+	oldDpp, err := dm.GetDispatcherHost(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err = dm.DataDB().RemoveDispatcherHostDrv(tenant, id); err != nil {
+	if err = dm.DataDB().RemoveDispatcherHostDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldDpp == nil {
 		return utils.ErrNotFound
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]; itm.Replicate {
-		replicate(context.TODO(), dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.DispatcherHostPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveDispatcherHost,
@@ -1796,7 +1796,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
+	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(ctx, itemIDPrefix)
 	if err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(ctx, config.CgrConfig().DataDbCfg().RmtConns,
@@ -2365,7 +2365,7 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx, i
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
+	if err = dm.DataDB().RemoveIndexesDrv(ctx, idxItmType, tntCtx, idxKey); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIndexes]; itm.Replicate {

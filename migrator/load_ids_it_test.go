@@ -143,12 +143,12 @@ func testLoadIdsITMigrateAndMove(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.LoadIDsVrs])
 	}
 	//check if user was migrate correctly
-	_, err = loadMigrator.dmOut.DataManager().DataDB().GetItemLoadIDsDrv("")
+	_, err = loadMigrator.dmOut.DataManager().DataDB().GetItemLoadIDsDrv(context.TODO(), "")
 	if err != utils.ErrNotFound {
 		t.Error("Error should be not found : ", err)
 	}
 	// no need to modify the LoadIDs from dmIN
-	// if _, err = loadMigrator.dmIN.DataManager().DataDB().GetItemLoadIDsDrv(""); err != utils.ErrNotFound {
+	// if _, err = loadMigrator.dmIN.DataManager().DataDB().GetItemLoadIDsDrv(context.TODO(),""); err != utils.ErrNotFound {
 	// 	t.Error("Error should be not found : ", err)
 	// }
 }

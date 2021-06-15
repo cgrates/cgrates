@@ -59,7 +59,7 @@ type DataDB interface {
 	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error)
+	RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error)
 	GetStatQueueProfileDrv(ctx *context.Context, tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error)
@@ -74,7 +74,7 @@ type DataDB interface {
 	RemoveThresholdDrv(*context.Context, string, string) error
 	GetFilterDrv(ctx *context.Context, tnt string, id string) (*Filter, error)
 	SetFilterDrv(ctx *context.Context, f *Filter) error
-	RemoveFilterDrv(string, string) error
+	RemoveFilterDrv(ctx *context.Context, tnt string, id string) error
 	GetRouteProfileDrv(*context.Context, string, string) (*RouteProfile, error)
 	SetRouteProfileDrv(*context.Context, *RouteProfile) error
 	RemoveRouteProfileDrv(*context.Context, string, string) error
@@ -87,12 +87,12 @@ type DataDB interface {
 	GetDispatcherProfileDrv(*context.Context, string, string) (*DispatcherProfile, error)
 	SetDispatcherProfileDrv(*context.Context, *DispatcherProfile) error
 	RemoveDispatcherProfileDrv(*context.Context, string, string) error
-	GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error)
+	GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
 	SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error
 	RemoveLoadIDsDrv() error
-	GetDispatcherHostDrv(string, string) (*DispatcherHost, error)
-	SetDispatcherHostDrv(*DispatcherHost) error
-	RemoveDispatcherHostDrv(string, string) error
+	GetDispatcherHostDrv(*context.Context, string, string) (*DispatcherHost, error)
+	SetDispatcherHostDrv(*context.Context, *DispatcherHost) error
+	RemoveDispatcherHostDrv(*context.Context, string, string) error
 	GetRateProfileDrv(*context.Context, string, string) (*utils.RateProfile, error)
 	SetRateProfileDrv(*context.Context, *utils.RateProfile) error
 	RemoveRateProfileDrv(*context.Context, string, string) error

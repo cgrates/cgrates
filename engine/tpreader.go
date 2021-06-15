@@ -523,7 +523,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	}
 	for _, tpTH := range tpr.dispatcherHosts {
 		th := APItoDispatcherHost(tpTH)
-		if err = tpr.dm.SetDispatcherHost(th); err != nil {
+		if err = tpr.dm.SetDispatcherHost(context.TODO(), th); err != nil {
 			return
 		}
 		if verbose {
@@ -807,7 +807,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 		log.Print("DispatcherHosts:")
 	}
 	for _, tpDsh := range tpr.dispatcherHosts {
-		if err = tpr.dm.RemoveDispatcherHost(tpDsh.Tenant, tpDsh.ID); err != nil {
+		if err = tpr.dm.RemoveDispatcherHost(context.TODO(), tpDsh.Tenant, tpDsh.ID); err != nil {
 			return
 		}
 		if verbose {
