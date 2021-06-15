@@ -55,7 +55,7 @@ func TestAttributeSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server, attrRPC,
-		anz, srvDep)
+		anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)

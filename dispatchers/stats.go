@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,7 +36,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREvent, reply *string) (e
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaStats, utils.StatSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaStats, utils.StatSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent,
@@ -48,7 +49,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaStats, utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithAPIOpts,
@@ -61,7 +62,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  args.Tenant,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
@@ -78,7 +79,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaStats, utils.StatSv1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithAPIOpts,
@@ -90,7 +91,7 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  args.Tenant,
 		ID:      args.ID,
 		APIOpts: args.APIOpts,
@@ -109,7 +110,7 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithAPIOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaStats, utils.StatSv1GetQueueIDs, args, reply)

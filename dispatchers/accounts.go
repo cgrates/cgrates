@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,7 +34,7 @@ func (dS *DispatcherService) AccountSv1Ping(args *utils.CGREvent, rpl *string) (
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaAccounts, utils.AccountSv1Ping, args, rpl)
+	return dS.Dispatch(context.TODO(), args, utils.MetaAccounts, utils.AccountSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) AccountsForEvent(args *utils.ArgsAccountsForEvent, reply *[]*utils.Account) (err error) {
@@ -47,7 +48,7 @@ func (dS *DispatcherService) AccountsForEvent(args *utils.ArgsAccountsForEvent, 
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1AccountsForEvent, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaAccounts, utils.AccountSv1AccountsForEvent, args, reply)
 }
 
 func (dS *DispatcherService) MaxAbstracts(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
@@ -61,7 +62,7 @@ func (dS *DispatcherService) MaxAbstracts(args *utils.ArgsAccountsForEvent, repl
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1MaxAbstracts, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaAccounts, utils.AccountSv1MaxAbstracts, args, reply)
 }
 
 func (dS *DispatcherService) DebitAbstracts(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
@@ -75,7 +76,7 @@ func (dS *DispatcherService) DebitAbstracts(args *utils.ArgsAccountsForEvent, re
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitAbstracts, args, reply)
 }
 
 func (dS *DispatcherService) MaxConcretes(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
@@ -89,7 +90,7 @@ func (dS *DispatcherService) MaxConcretes(args *utils.ArgsAccountsForEvent, repl
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1MaxConcretes, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaAccounts, utils.AccountSv1MaxConcretes, args, reply)
 }
 
 func (dS *DispatcherService) DebitConcretes(args *utils.ArgsAccountsForEvent, reply *utils.ExtEventCharges) (err error) {
@@ -103,7 +104,7 @@ func (dS *DispatcherService) DebitConcretes(args *utils.ArgsAccountsForEvent, re
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitConcretes, args, reply)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaAccounts, utils.AccountSv1DebitConcretes, args, reply)
 }
 
 func (dS *DispatcherService) AccountSv1ActionSetBalance(args *utils.ArgsActSetBalance, reply *string) (err error) {
@@ -117,7 +118,7 @@ func (dS *DispatcherService) AccountSv1ActionSetBalance(args *utils.ArgsActSetBa
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaAccounts, utils.AccountSv1ActionSetBalance, args, reply)
@@ -134,7 +135,7 @@ func (dS *DispatcherService) AccountSv1ActionRemoveBalance(args *utils.ArgsActRe
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaAccounts, utils.AccountSv1ActionRemoveBalance, args, reply)

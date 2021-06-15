@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func (dS *DispatcherService) ActionSv1Ping(args *utils.CGREvent, rpl *string) (err error) {
 	if args == nil {
@@ -31,7 +34,7 @@ func (dS *DispatcherService) ActionSv1Ping(args *utils.CGREvent, rpl *string) (e
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
+	return dS.Dispatch(context.TODO(), args, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
@@ -50,7 +53,7 @@ func (dS *DispatcherService) ActionSv1ScheduleActions(args *utils.ArgActionSv1Sc
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaActions, utils.ActionSv1ScheduleActions, args, rpl)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaActions, utils.ActionSv1ScheduleActions, args, rpl)
 }
 
 func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.ArgActionSv1ScheduleActions, rpl *string) (err error) {
@@ -69,5 +72,5 @@ func (dS *DispatcherService) ActionSv1ExecuteActions(args *utils.ArgActionSv1Sch
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
+	return dS.Dispatch(context.TODO(), args.CGREvent, utils.MetaActions, utils.ActionSv1Ping, args, rpl)
 }

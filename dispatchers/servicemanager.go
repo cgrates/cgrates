@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,5 +36,5 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREvent,
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaServiceManager, utils.ServiceManagerV1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaServiceManager, utils.ServiceManagerV1Ping, args, reply)
 }

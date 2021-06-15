@@ -55,9 +55,9 @@ func TestDispatcherSReload(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	srv := NewDispatcherService(cfg, db, chS, filterSChan, server,
 		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srv, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(attrS, srv,
 		NewLoaderService(cfg, db, filterSChan, server,

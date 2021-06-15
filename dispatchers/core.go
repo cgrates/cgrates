@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -34,7 +35,7 @@ func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithAPIOpts,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
@@ -51,7 +52,7 @@ func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREvent, reply *string) (e
 			return
 		}
 	}
-	return dS.Dispatch(args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
+	return dS.Dispatch(context.TODO(), args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
@@ -66,7 +67,7 @@ func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{
+	return dS.Dispatch(context.TODO(), &utils.CGREvent{
 		Tenant:  tnt,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)

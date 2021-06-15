@@ -64,7 +64,7 @@ func TestEventExporterSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan birpc.ClientConnector, 1),
-		anz, srvDep)
+		anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg, nil),
 		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	srvMngr.AddServices(ees, attrS,
