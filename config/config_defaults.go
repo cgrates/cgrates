@@ -996,13 +996,13 @@ const CGRATES_CFG_JSON = `
     "rpc":{
         "enabled": false,
         "registrars_conns": [],
-        "hosts": {},  
+        "hosts": [],  
         "refresh_interval": "5m",
     },
     "dispatchers":{
         "enabled": false,
         "registrars_conns": [],
-        "hosts": {},  
+        "hosts": [],  
         "refresh_interval": "5m",
     },
 },

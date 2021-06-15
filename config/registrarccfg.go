@@ -63,6 +63,11 @@ type RegistrarCCfg struct {
 	RefreshInterval time.Duration
 }
 
+type RemoteHostJsonWithTenant struct {
+	*RemoteHostJson
+	Tenant *string
+}
+
 func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
@@ -71,11 +76,13 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 		dps.RegistrarSConns = utils.CloneStringSlice(*jsnCfg.Registrars_conns)
 	}
 	if jsnCfg.Hosts != nil {
-		for tnt, hosts := range jsnCfg.Hosts {
-			for _, hostJSON := range hosts {
-				conn := new(RemoteHost)
-				conn.loadFromJSONCfg(hostJSON)
-				dps.Hosts[tnt] = append(dps.Hosts[tnt], conn)
+		for _, hostJSON := range jsnCfg.Hosts {
+			conn := new(RemoteHost)
+			conn.loadFromJSONCfg(hostJSON.RemoteHostJson)
+			if hostJSON.Tenant == nil || *hostJSON.Tenant == "" {
+				dps.Hosts[utils.MetaDefault] = append(dps.Hosts[utils.MetaDefault], conn)
+			} else {
+				dps.Hosts[*hostJSON.Tenant] = append(dps.Hosts[*hostJSON.Tenant], conn)
 			}
 		}
 	}
@@ -97,12 +104,13 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.RefreshIntervalCfg] = "0"
 	}
 	if dps.Hosts != nil {
-		hosts := make(map[string][]map[string]interface{})
+		hosts := []map[string]interface{}{}
 		for tnt, hs := range dps.Hosts {
 			for _, h := range hs {
 				mp := h.AsMapInterface()
 				delete(mp, utils.AddressCfg)
-				hosts[tnt] = append(hosts[tnt], mp)
+				mp[utils.Tenant] = tnt
+				hosts = append(hosts, mp)
 			}
 		}
 		initialMP[utils.HostsCfg] = hosts
@@ -131,7 +139,7 @@ func (dps RegistrarCCfg) Clone() (cln *RegistrarCCfg) {
 
 type RegistrarCJsonCfg struct {
 	Registrars_conns *[]string
-	Hosts            map[string][]*RemoteHostJson
+	Hosts            []*RemoteHostJsonWithTenant
 	Refresh_interval *string
 }
 
@@ -143,15 +151,34 @@ func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *Registr
 		d.Registrars_conns = utils.SliceStringPointer(utils.CloneStringSlice(v2.RegistrarSConns))
 	}
 	if d.Hosts == nil {
-		d.Hosts = make(map[string][]*RemoteHostJson)
+		d.Hosts = []*RemoteHostJsonWithTenant{}
 	}
 	for k, host := range v2.Hosts {
-		dft := new(RemoteHost)
-		conns := make([]*RemoteHostJson, len(host))
-		for i, conn := range host {
-			conns[i] = diffRemoteHostJson(dft, conn)
+		for _, conn := range host {
+			dConn := &RemoteHostJsonWithTenant{
+				RemoteHostJson: new(RemoteHostJson),
+			}
+			if conn.ID != utils.EmptyString {
+				dConn.Id = utils.StringPointer(conn.ID)
+			}
+			if conn.Transport != utils.EmptyString {
+				dConn.Transport = utils.StringPointer(conn.Transport)
+			}
+			if conn.Address != utils.EmptyString {
+				dConn.Address = utils.StringPointer(conn.Address)
+			}
+			if conn.Synchronous != false {
+				dConn.Synchronous = utils.BoolPointer(conn.Synchronous)
+			}
+			if conn.TLS != false {
+				dConn.Tls = utils.BoolPointer(conn.TLS)
+			}
+			if k != utils.MetaDefault {
+				dConn.Tenant = utils.StringPointer(k)
+			}
+			d.Hosts = append(d.Hosts, dConn)
+
 		}
-		d.Hosts[k] = conns
 	}
 	if v1.RefreshInterval != v2.RefreshInterval {
 		d.Refresh_interval = utils.StringPointer(v2.RefreshInterval.String())
