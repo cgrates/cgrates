@@ -2200,7 +2200,7 @@ const (
 	// Others
 	OptsContext               = "*context"
 	Subsys                    = "*subsys"
-	MetaMethod                = "*method"
+	MetaMethod                = "*reqMethod"
 	OptsAttributesProcessRuns = "*processRuns"
 	MetaEventType             = "*eventType"
 	EventType                 = "EventType"
