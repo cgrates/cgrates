@@ -30,24 +30,33 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &RegistrarCJsonCfgs{
 		RPC: &RegistrarCJsonCfg{
 			Registrars_conns: &[]string{"*conn1", "*conn2"},
-			Hosts: map[string][]*RemoteHostJson{
-				utils.MetaDefault: {
-					{
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+
+					Tenant: utils.StringPointer(utils.MetaDefault),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host1"),
 						Transport: utils.StringPointer(utils.MetaJSON),
 					},
-					{
+				},
+				{
+					Tenant: utils.StringPointer(utils.MetaDefault),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host2"),
 						Transport: utils.StringPointer(utils.MetaGOB),
 					},
 				},
-				"cgrates.net": {
-					{
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host1"),
 						Transport: utils.StringPointer(utils.MetaJSON),
 						Tls:       utils.BoolPointer(true),
 					},
-					{
+				},
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host2"),
 						Transport: utils.StringPointer(utils.MetaGOB),
 						Tls:       utils.BoolPointer(true),
@@ -58,24 +67,34 @@ func TestDispatcherHCfgloadFromJsonCfg(t *testing.T) {
 		},
 		Dispatchers: &RegistrarCJsonCfg{
 			Registrars_conns: &[]string{"*conn1", "*conn2"},
-			Hosts: map[string][]*RemoteHostJson{
-				utils.MetaDefault: {
-					{
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+
+					Tenant: utils.StringPointer(utils.MetaDefault),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host1"),
 						Transport: utils.StringPointer(utils.MetaJSON),
 					},
-					{
+				},
+				{
+					Tenant: utils.StringPointer(utils.MetaDefault),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host2"),
 						Transport: utils.StringPointer(utils.MetaGOB),
 					},
 				},
-				"cgrates.net": {
-					{
+				{
+
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host1"),
 						Transport: utils.StringPointer(utils.MetaJSON),
 						Tls:       utils.BoolPointer(true),
 					},
-					{
+				},
+				{
+					Tenant: utils.StringPointer("cgrates.net"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:        utils.StringPointer("Host2"),
 						Transport: utils.StringPointer(utils.MetaGOB),
 						Tls:       utils.BoolPointer(true),
@@ -156,38 +175,36 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 		"registrarc":{
 			"rpc":{
 				"registrars_conns": ["*conn1","*conn2"],
-				"hosts": {
-					"*default": [
-						{
+				"hosts":  [
+						{	"Tenant":"*default",
 							"ID": "Host1",
 							"transport": "*json",
 							"tls": false
 						},
-						{
+						{	
+							"Tenant":"*default",	
 							"ID": "Host2",
 							"transport": "*gob",
 							"tls": false
-						}
-					]
-				},
+						},
+					],
 				"refresh_interval": "0",
 			},
 			"dispatchers":{
 				"registrars_conns": ["*conn1","*conn2"],
-				"hosts": {
-					"*default": [
-						{
+				"hosts": [
+						{	"Tenant":"*default",
 							"ID": "Host1",
 							"transport": "*json",
 							"tls": false
 						},
-						{
+						{	
+							"Tenant":"*default",	
 							"ID": "Host2",
 							"transport": "*gob",
 							"tls": false
-						}
-					]
-				},
+						},
+					],
 				"refresh_interval": "0",
 			},
 		},		
@@ -195,32 +212,32 @@ func TestDispatcherHCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.RPCCfg: map[string]interface{}{
 			utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
-			utils.HostsCfg: map[string][]map[string]interface{}{
-				utils.MetaDefault: {
-					{
-						utils.IDCfg:        "Host1",
-						utils.TransportCfg: "*json",
-					},
-					{
-						utils.IDCfg:        "Host2",
-						utils.TransportCfg: "*gob",
-					},
+			utils.HostsCfg: []map[string]interface{}{
+				{
+					utils.Tenant:       utils.MetaDefault,
+					utils.IDCfg:        "Host1",
+					utils.TransportCfg: "*json",
+				},
+				{
+					utils.Tenant:       utils.MetaDefault,
+					utils.IDCfg:        "Host2",
+					utils.TransportCfg: "*gob",
 				},
 			},
 			utils.RefreshIntervalCfg: "0",
 		},
 		utils.DispatcherCfg: map[string]interface{}{
 			utils.RegistrarsConnsCfg: []string{"*conn1", "*conn2"},
-			utils.HostsCfg: map[string][]map[string]interface{}{
-				utils.MetaDefault: {
-					{
-						utils.IDCfg:        "Host1",
-						utils.TransportCfg: "*json",
-					},
-					{
-						utils.IDCfg:        "Host2",
-						utils.TransportCfg: "*gob",
-					},
+			utils.HostsCfg: []map[string]interface{}{
+				{
+					utils.Tenant:       utils.MetaDefault,
+					utils.IDCfg:        "Host1",
+					utils.TransportCfg: "*json",
+				},
+				{
+					utils.Tenant:       utils.MetaDefault,
+					utils.IDCfg:        "Host2",
+					utils.TransportCfg: "*gob",
 				},
 			},
 			utils.RefreshIntervalCfg: "0",
@@ -266,12 +283,12 @@ func TestDispatcherHCfgAsMapInterface2(t *testing.T) {
 	eMap := map[string]interface{}{
 		utils.DispatcherCfg: map[string]interface{}{
 			utils.RegistrarsConnsCfg: []string{},
-			utils.HostsCfg:           map[string][]map[string]interface{}{},
+			utils.HostsCfg:           []map[string]interface{}{},
 			utils.RefreshIntervalCfg: "5m0s",
 		},
 		utils.RPCCfg: map[string]interface{}{
 			utils.RegistrarsConnsCfg: []string{},
-			utils.HostsCfg:           map[string][]map[string]interface{}{},
+			utils.HostsCfg:           []map[string]interface{}{},
 			utils.RefreshIntervalCfg: "5m0s",
 		},
 	}
@@ -360,9 +377,10 @@ func TestDiffRegistrarCJsonCfg(t *testing.T) {
 
 	expected := &RegistrarCJsonCfg{
 		Registrars_conns: &[]string{"*birpc"},
-		Hosts: map[string][]*RemoteHostJson{
-			"HOST_1": {
-				{
+		Hosts: []*RemoteHostJsonWithTenant{
+			{
+				Tenant: utils.StringPointer("HOST_1"),
+				RemoteHostJson: &RemoteHostJson{
 					Id:          utils.StringPointer("host2_ID"),
 					Address:     utils.StringPointer("0.0.0.0:8080"),
 					Transport:   utils.StringPointer("udp"),
@@ -381,9 +399,10 @@ func TestDiffRegistrarCJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &RegistrarCJsonCfg{
-		Hosts: map[string][]*RemoteHostJson{
-			"HOST_1": {
-				{
+		Hosts: []*RemoteHostJsonWithTenant{
+			{
+				Tenant: utils.StringPointer("HOST_1"),
+				RemoteHostJson: &RemoteHostJson{
 					Id:          utils.StringPointer("host2_ID"),
 					Address:     utils.StringPointer("0.0.0.0:8080"),
 					Transport:   utils.StringPointer("udp"),
@@ -471,9 +490,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 	expected := &RegistrarCJsonCfgs{
 		RPC: &RegistrarCJsonCfg{
 			Registrars_conns: &[]string{"*birpc"},
-			Hosts: map[string][]*RemoteHostJson{
-				"HOST_1": {
-					{
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+					Tenant: utils.StringPointer("HOST_1"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:          utils.StringPointer("host2_ID"),
 						Address:     utils.StringPointer("0.0.0.0:8080"),
 						Transport:   utils.StringPointer("udp"),
@@ -486,9 +506,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 		},
 		Dispatchers: &RegistrarCJsonCfg{
 			Registrars_conns: &[]string{"*birpc"},
-			Hosts: map[string][]*RemoteHostJson{
-				"HOST_1": {
-					{
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+					Tenant: utils.StringPointer("HOST_1"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:          utils.StringPointer("host2_ID"),
 						Address:     utils.StringPointer("0.0.0.0:8080"),
 						Transport:   utils.StringPointer("udp"),
@@ -510,9 +531,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 	v1 = v2
 	expected = &RegistrarCJsonCfgs{
 		RPC: &RegistrarCJsonCfg{
-			Hosts: map[string][]*RemoteHostJson{
-				"HOST_1": {
-					{
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+					Tenant: utils.StringPointer("HOST_1"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:          utils.StringPointer("host2_ID"),
 						Address:     utils.StringPointer("0.0.0.0:8080"),
 						Transport:   utils.StringPointer("udp"),
@@ -523,9 +545,10 @@ func TestDiffRegistrarCJsonCfgs(t *testing.T) {
 			},
 		},
 		Dispatchers: &RegistrarCJsonCfg{
-			Hosts: map[string][]*RemoteHostJson{
-				"HOST_1": {
-					{
+			Hosts: []*RemoteHostJsonWithTenant{
+				{
+					Tenant: utils.StringPointer("HOST_1"),
+					RemoteHostJson: &RemoteHostJson{
 						Id:          utils.StringPointer("host2_ID"),
 						Address:     utils.StringPointer("0.0.0.0:8080"),
 						Transport:   utils.StringPointer("udp"),
