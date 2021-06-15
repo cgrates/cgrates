@@ -69,7 +69,10 @@ var (
 		testV1FIdxSetActionProfileMoreFltrsMoreIndexing,
 		testV1FIdxActionProfileRemoveIndexes,
 		testV1FIdxActionProfileComputeIndexes,
-		//testV1FIdxActionMoreProfileForFilters,
+		testV1FIdxActionMoreProfileForFilters,
+		testV1FIdxActionSRemoveComputedIndexesIDs,
+		testV1FIdxActionSRemoveActionsNoIndexes,
+		testV1IndexClearCache,
 
 		testV1FIdxStopEngine,
 	}
@@ -1024,7 +1027,7 @@ func testV1FIdxAccountSRemoveComputedIndexesIDs(t *testing.T) {
 		}
 	}
 
-	// now we will ComputeFilterIndexes by IDs(2 of the 3 profiles)
+	// now we will ComputeFilterIndexes of the remain profile
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
 		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
 			AccountIDs: []string{"ACCOUNT_FILTER_INDEXES3"}},
@@ -1429,20 +1432,20 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 	}
 	var replyIdx []string
 	expectedIDx := []string{"*string:*req.Account:1001:SET_BAL",
+		"*string:*req.Account:1001:TOPUP_ACC",
 		"*string:*req.Account:1001:REM_ACC",
-		"*string:*req.Account:1001:ADD_BAL",
 		"*prefix:*req.AnswerTime:12:TOPUP_ACC",
 		"*prefix:*req.AnswerTime:33:TOPUP_ACC",
 		"*prefix:*req.AnswerTime:12:REM_ACC",
 		"*prefix:*req.AnswerTime:33:REM_ACC",
 		"*string:*req.Usage:123s:TOPUP_ACC",
-		"*string:*req.Usage:123s:ADD_BAL",
-		"*string:*req.Subject:1004:ADD_BAL",
-		"*string:*req.Subject:6774:ADD_BAL",
-		"*string:*req.Subject:22312:ADD_BAL",
-		"*string:*opts.Subsystems:*attributes:ADD_BAL",
-		"*prefix:*req.Destinations:+0775:ADD_BAL",
-		"*prefix:*req.Destinations:+442:ADD_BAL",
+		"*string:*req.Usage:123s:REM_ACC",
+		"*string:*req.Subject:1004:REM_ACC",
+		"*string:*req.Subject:6774:REM_ACC",
+		"*string:*req.Subject:22312:REM_ACC",
+		"*string:*opts.Subsystems:*attributes:REM_ACC",
+		"*prefix:*req.Destinations:+0775:REM_ACC",
+		"*prefix:*req.Destinations:+442:REM_ACC",
 		"*string:*req.Subject:1004:SET_BAL",
 		"*string:*req.Subject:6774:SET_BAL",
 		"*string:*req.Subject:22312:SET_BAL",
@@ -1458,6 +1461,141 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 		if !reflect.DeepEqual(expectedIDx, replyIdx) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
 		}
+	}
+}
+
+func testV1FIdxActionSRemoveComputedIndexesIDs(t *testing.T) {
+	//indexes will be removed again
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	//not found
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// now we will ComputeFilterIndexes by IDs(2 of the 3 profiles)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			ActionProfileIDs: []string{"TOPUP_ACC", "REM_ACC"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	expectedIDx := []string{"*string:*req.Account:1001:TOPUP_ACC",
+		"*string:*req.Account:1001:REM_ACC",
+		"*prefix:*req.AnswerTime:12:TOPUP_ACC",
+		"*prefix:*req.AnswerTime:33:TOPUP_ACC",
+		"*prefix:*req.AnswerTime:12:REM_ACC",
+		"*prefix:*req.AnswerTime:33:REM_ACC",
+		"*string:*req.Usage:123s:TOPUP_ACC",
+		"*string:*req.Usage:123s:REM_ACC",
+		"*string:*req.Subject:1004:REM_ACC",
+		"*string:*req.Subject:6774:REM_ACC",
+		"*string:*req.Subject:22312:REM_ACC",
+		"*string:*opts.Subsystems:*attributes:REM_ACC",
+		"*prefix:*req.Destinations:+0775:REM_ACC",
+		"*prefix:*req.Destinations:+442:REM_ACC"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// now we will ComputeFilterIndexes of the remain profile
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			ActionProfileIDs: []string{"SET_BAL"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	expectedIDx = []string{"*string:*req.Account:1001:SET_BAL",
+		"*string:*req.Account:1001:TOPUP_ACC",
+		"*string:*req.Account:1001:REM_ACC",
+		"*prefix:*req.AnswerTime:12:TOPUP_ACC",
+		"*prefix:*req.AnswerTime:33:TOPUP_ACC",
+		"*prefix:*req.AnswerTime:12:REM_ACC",
+		"*prefix:*req.AnswerTime:33:REM_ACC",
+		"*string:*req.Usage:123s:TOPUP_ACC",
+		"*string:*req.Usage:123s:REM_ACC",
+		"*string:*req.Subject:1004:REM_ACC",
+		"*string:*req.Subject:6774:REM_ACC",
+		"*string:*req.Subject:22312:REM_ACC",
+		"*string:*opts.Subsystems:*attributes:REM_ACC",
+		"*prefix:*req.Destinations:+0775:REM_ACC",
+		"*prefix:*req.Destinations:+442:REM_ACC",
+		"*string:*req.Subject:1004:SET_BAL",
+		"*string:*req.Subject:6774:SET_BAL",
+		"*string:*req.Subject:22312:SET_BAL",
+		"*string:*opts.Subsystems:*attributes:SET_BAL",
+		"*prefix:*req.Destinations:+0775:SET_BAL",
+		"*prefix:*req.Destinations:+442:SET_BAL"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+func testV1FIdxActionSRemoveActionsNoIndexes(t *testing.T) {
+	//as we delete our actions, indexes will  be deleted too
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveActionProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "SET_BAL",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveActionProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "REM_ACC",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveActionProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "TOPUP_ACC",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//not found as we removed profiles
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
