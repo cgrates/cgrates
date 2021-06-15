@@ -74,6 +74,15 @@ var (
 		testV1FIdxActionSRemoveActionsNoIndexes,
 		testV1IndexClearCache,
 
+		testV1FIdxSetChargerSProfileWithFltr,
+		testV1FIdxSetChargerProfileMoreFltrsMoreIndexing,
+		testV1FIdxChargerProfileRemoveIndexes,
+		testV1FIdxChargerProfileComputeIndexes,
+		testV1FIdxChargerMoreProfileForFilters,
+		testV1FIdxChargerSRemoveComputedIndexesIDs,
+		testV1FIdxChargerSRemoveActionsNoIndexes,
+		testV1IndexClearCache,
+
 		testV1FIdxStopEngine,
 	}
 	fltr = &engine.FilterWithAPIOpts{
@@ -108,6 +117,32 @@ var (
 					Type:    utils.MetaString,
 					Element: "~*req.CGRID",
 					Values:  []string{"QWEASDZXC", "IOPJKLBNM"},
+				},
+			},
+		},
+	}
+	fltr1 = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr2",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Usage",
+					Values:  []string{"123s"},
+				},
+			},
+		},
+	}
+	fltr2 = &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: utils.CGRateSorg,
+			ID:     "fltr_for_attr3",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaPrefix,
+					Element: "~*req.AnswerTime",
+					Values:  []string{"12", "33"},
 				},
 			},
 		},
@@ -277,32 +312,6 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 
 func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	// More filters for our AttributeProfile
-	fltr1 := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr2",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Usage",
-					Values:  []string{"123s"},
-				},
-			},
-		},
-	}
-	fltr2 := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr3",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.AnswerTime",
-					Values:  []string{"12", "33"},
-				},
-			},
-		},
-	}
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
 		fltr1, &reply); err != nil {
@@ -743,32 +752,6 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 
 func testVF1FIdxSetAccountMoreFltrsMoreIndexing(t *testing.T) {
 	// More filters for our AttributeProfile
-	fltr1 := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr2",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Usage",
-					Values:  []string{"123s"},
-				},
-			},
-		},
-	}
-	fltr2 := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr3",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.AnswerTime",
-					Values:  []string{"12", "33"},
-				},
-			},
-		},
-	}
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
 		fltr1, &reply); err != nil {
@@ -1218,32 +1201,6 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 
 func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 	// More filters for our ActionProfile
-	fltr1 := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr2",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Usage",
-					Values:  []string{"123s"},
-				},
-			},
-		},
-	}
-	fltr2 := &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			Tenant: utils.CGRateSorg,
-			ID:     "fltr_for_attr3",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaPrefix,
-					Element: "~*req.AnswerTime",
-					Values:  []string{"12", "33"},
-				},
-			},
-		},
-	}
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
 		fltr1, &reply); err != nil {
@@ -1595,6 +1552,418 @@ func testV1FIdxActionSRemoveActionsNoIndexes(t *testing.T) {
 	var replyIdx []string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaActions}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
+	// First we will set a filter usage
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// Get filter for checking it's existence
+	var resultFltr *engine.Filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{Tenant: utils.CGRateSorg, ID: "fltr_for_attr"}, &resultFltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resultFltr, fltr.Filter) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(fltr.Filter), utils.ToJSON(resultFltr))
+	}
+
+	//we will set a ChargerProfile with our filter and check the indexes
+	chg := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			ID:    "1001_Charger",
+			RunID: utils.MetaDefault,
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		APIOpts: nil,
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	//check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:1001_Charger",
+		"*string:*req.Subject:6774:1001_Charger",
+		"*string:*req.Account:1001:1001_Charger",
+		"*string:*req.Subject:22312:1001_Charger",
+		"*string:*opts.Subsystems:*attributes:1001_Charger",
+		"*prefix:*req.Destinations:+0775:1001_Charger",
+		"*prefix:*req.Destinations:+442:1001_Charger"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// update the filter for checking the indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrSameID, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// check the updated indexes
+	expectedIDx = []string{"*string:*req.Account:1001:1001_Charger",
+		"*string:*req.CGRID:QWEASDZXC:1001_Charger",
+		"*string:*req.CGRID:IOPJKLBNM:1001_Charger"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+
+	// back to our initial filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+}
+
+func testV1FIdxSetChargerProfileMoreFltrsMoreIndexing(t *testing.T) {
+	// More filters for our ChargerProfile
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// update our ChargerProfile with our filter
+	chg := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			ID:    "1001_Charger",
+			RunID: utils.MetaDefault,
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001",
+				"fltr_for_attr3", "fltr_for_attr2"},
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		APIOpts: nil,
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chg, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+
+	//check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:1001_Charger",
+		"*string:*req.Subject:6774:1001_Charger",
+		"*string:*req.Subject:22312:1001_Charger",
+		"*string:*opts.Subsystems:*attributes:1001_Charger",
+		"*prefix:*req.Destinations:+0775:1001_Charger",
+		"*prefix:*req.Destinations:+442:1001_Charger",
+		"*string:*req.Usage:123s:1001_Charger",
+		"*string:*req.Account:1001:1001_Charger",
+		"*prefix:*req.AnswerTime:12:1001_Charger",
+		"*prefix:*req.AnswerTime:33:1001_Charger"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxChargerProfileRemoveIndexes(t *testing.T) {
+	var reply string
+	var replyIdx []string
+	//indexes will be removed for this specific context
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
+	}
+}
+
+func testV1FIdxChargerProfileComputeIndexes(t *testing.T) {
+	// compute our indexes
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, ChargerS: true}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	var replyIdx []string
+
+	//matching for our context
+	expectedIDx := []string{"*string:*req.Subject:1004:1001_Charger",
+		"*string:*req.Subject:6774:1001_Charger",
+		"*string:*req.Subject:22312:1001_Charger",
+		"*string:*opts.Subsystems:*attributes:1001_Charger",
+		"*prefix:*req.Destinations:+0775:1001_Charger",
+		"*prefix:*req.Destinations:+442:1001_Charger",
+		"*string:*req.Usage:123s:1001_Charger",
+		"*string:*req.Account:1001:1001_Charger",
+		"*prefix:*req.AnswerTime:12:1001_Charger",
+		"*prefix:*req.AnswerTime:33:1001_Charger"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxChargerMoreProfileForFilters(t *testing.T) {
+	// we will add more charger profiles for indexing
+	chg1 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			ID:    "1001_Charger_2",
+			RunID: "NEW_ID",
+			FilterIDs: []string{"*string:~*req.Account:1001",
+				"fltr_for_attr3", "fltr_for_attr2"},
+			Weight: 40,
+		},
+		APIOpts: nil,
+	}
+	chg2 := &ChargerWithAPIOpts{
+		ChargerProfile: &engine.ChargerProfile{
+			ID:    "1001_Charger_3",
+			RunID: "NEW_ID2",
+			FilterIDs: []string{"*string:~*req.Account:1001",
+				"fltr_for_attr"},
+			Weight: 40,
+		},
+		APIOpts: nil,
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chg1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		chg2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error(err)
+	}
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Account:1001:1001_Charger_2",
+		"*string:*req.Account:1001:1001_Charger_3",
+		"*string:*req.Account:1001:1001_Charger",
+		"*prefix:*req.AnswerTime:12:1001_Charger_2",
+		"*prefix:*req.AnswerTime:33:1001_Charger_2",
+		"*prefix:*req.AnswerTime:12:1001_Charger",
+		"*prefix:*req.AnswerTime:33:1001_Charger",
+		"*string:*req.Usage:123s:1001_Charger_2",
+		"*string:*req.Usage:123s:1001_Charger",
+		"*string:*req.Subject:1004:1001_Charger",
+		"*string:*req.Subject:6774:1001_Charger",
+		"*string:*req.Subject:22312:1001_Charger",
+		"*string:*opts.Subsystems:*attributes:1001_Charger",
+		"*prefix:*req.Destinations:+0775:1001_Charger",
+		"*prefix:*req.Destinations:+442:1001_Charger",
+		"*string:*req.Subject:1004:1001_Charger_3",
+		"*string:*req.Subject:6774:1001_Charger_3",
+		"*string:*req.Subject:22312:1001_Charger_3",
+		"*string:*opts.Subsystems:*attributes:1001_Charger_3",
+		"*prefix:*req.Destinations:+0775:1001_Charger_3",
+		"*prefix:*req.Destinations:+442:1001_Charger_3"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
+	// indexes will be removed again
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	//not found
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// now we will ComputeFilterIndexes by IDs(2 of the 3 profiles)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			ChargerIDs: []string{"1001_Charger", "1001_Charger_2"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	expectedIDx := []string{"*string:*req.Account:1001:1001_Charger_2",
+		"*string:*req.Account:1001:1001_Charger",
+		"*prefix:*req.AnswerTime:12:1001_Charger_2",
+		"*prefix:*req.AnswerTime:33:1001_Charger_2",
+		"*prefix:*req.AnswerTime:12:1001_Charger",
+		"*prefix:*req.AnswerTime:33:1001_Charger",
+		"*string:*req.Usage:123s:1001_Charger_2",
+		"*string:*req.Usage:123s:1001_Charger",
+		"*string:*req.Subject:1004:1001_Charger",
+		"*string:*req.Subject:6774:1001_Charger",
+		"*string:*req.Subject:22312:1001_Charger",
+		"*string:*opts.Subsystems:*attributes:1001_Charger",
+		"*prefix:*req.Destinations:+0775:1001_Charger",
+		"*prefix:*req.Destinations:+442:1001_Charger"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// now we will ComputeFilterIndexes of the remain profile
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			ChargerIDs: []string{"1001_Charger_3"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+
+	expectedIDx = []string{"*string:*req.Account:1001:1001_Charger_2",
+		"*string:*req.Account:1001:1001_Charger_3",
+		"*string:*req.Account:1001:1001_Charger",
+		"*prefix:*req.AnswerTime:12:1001_Charger_2",
+		"*prefix:*req.AnswerTime:33:1001_Charger_2",
+		"*prefix:*req.AnswerTime:12:1001_Charger",
+		"*prefix:*req.AnswerTime:33:1001_Charger",
+		"*string:*req.Usage:123s:1001_Charger_2",
+		"*string:*req.Usage:123s:1001_Charger",
+		"*string:*req.Subject:1004:1001_Charger",
+		"*string:*req.Subject:6774:1001_Charger",
+		"*string:*req.Subject:22312:1001_Charger",
+		"*string:*opts.Subsystems:*attributes:1001_Charger",
+		"*prefix:*req.Destinations:+0775:1001_Charger",
+		"*prefix:*req.Destinations:+442:1001_Charger",
+		"*string:*req.Subject:1004:1001_Charger_3",
+		"*string:*req.Subject:6774:1001_Charger_3",
+		"*string:*req.Subject:22312:1001_Charger_3",
+		"*string:*opts.Subsystems:*attributes:1001_Charger_3",
+		"*prefix:*req.Destinations:+0775:1001_Charger_3",
+		"*prefix:*req.Destinations:+442:1001_Charger_3"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxChargerSRemoveActionsNoIndexes(t *testing.T) {
+	//as we delete our ChargerS, indexes will  be deleted too
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "1001_Charger",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "1001_Charger_2",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "1001_Charger_3",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//not found as we removed profiles
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaChargers}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
