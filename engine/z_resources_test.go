@@ -3231,31 +3231,55 @@ func TestResourcesStoreResourceOK(t *testing.T) {
 	}
 }
 
-// func TestResourcesStoreResource2(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
+func TestResourcesStoreResourceErrCache(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
 
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	rS := &ResourceService{
-// 		dm: NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil),
-// 	}
-// 	r := &Resource{
-// 		dirty: utils.BoolPointer(true),
-// 	}
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+	defer func() {
+		utils.Logger.SetLogLevel(0)
+	}()
 
-// 	err := rS.StoreResource(context.Background(),r)
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
 
-// 	if err != nil {
-// 		t.Errorf("\nexpected nil, received %+v", err)
-// 	}
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(&DataDBMock{
+		SetResourceDrvF: func(ctx *context.Context, r *Resource) error {
+			return nil
+		}}, cfg.CacheCfg(), nil)
+	rS := NewResourceService(dm, cfg, nil, nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	r := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		dirty:  utils.BoolPointer(true),
+	}
+	Cache.Set(context.Background(), utils.CacheResources, r.TenantID(), r, nil, true, "")
 
-// 	if *r.dirty != false {
-// 		t.Errorf("\nexpected false, received %+v", *r.dirty)
-// 	}
-// }
+	explog := `CGRateS <> [WARNING] <ResourceS> failed caching Resource with ID: cgrates.org:RES1, error: NOT_IMPLEMENTED
+`
+	if err := rS.StoreResource(context.Background(), r); err == nil ||
+		err.Error() != utils.ErrNotImplemented.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotImplemented, err)
+	}
+
+	if *r.dirty != true {
+		t.Errorf("\nexpected true, received %+v", *r.dirty)
+	}
+
+	rcvlog := buf.String()[20:]
+
+	if rcvlog != explog {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", explog, rcvlog)
+	}
+}
 
 func TestResourcesAllocateResourceEmptyKey(t *testing.T) {
 	rs := Resources{
@@ -3594,5 +3618,633 @@ func TestResourcesUpdateResource(t *testing.T) {
 
 	if _, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Fatal(err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
+func TestResourcesV1ResourcesForEventOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "ResourcesForEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID: "RU_TEST1",
+	}
+
+	exp := Resources{
+		{
+			rPrf:   rsPrf,
+			Tenant: "cgrates.org",
+			ID:     "RES1",
+			Usages: map[string]*ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  10,
+				},
+			},
+			dirty:  utils.BoolPointer(false),
+			tUsage: utils.Float64Pointer(10),
+			ttl:    utils.DurationPointer(time.Minute),
+			TTLIdx: []string{},
+		},
+	}
+	var reply Resources
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+
+func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	rsPrf := &ResourceProfile{
+		Tenant:       "cgrates.org",
+		ID:           "RES1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		ThresholdIDs: []string{utils.MetaNone},
+		Weight:       10,
+		Limit:        10,
+		UsageTTL:     time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+	}
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourcesForEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+			},
+		},
+		UsageID: "RU_TEST1",
+	}
+
+	var reply Resources
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	rsPrf := &ResourceProfile{
+		Tenant:       "cgrates.org",
+		ID:           "RES1",
+		FilterIDs:    []string{"*string:~*req.Account:1001"},
+		ThresholdIDs: []string{utils.MetaNone},
+		Weight:       10,
+		Limit:        10,
+		UsageTTL:     time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+	}
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		UsageID: "RU_TEST1",
+	}
+
+	experr := `MANDATORY_IE_MISSING: [Event]`
+	var reply Resources
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	args = utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID: "RU_TEST2",
+	}
+
+	experr = `MANDATORY_IE_MISSING: [ID]`
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	args = utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourcesForEventTest",
+		},
+		UsageID: "RU_TEST3",
+	}
+
+	experr = `MANDATORY_IE_MISSING: [Event]`
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	args = utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourcesForEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	experr = `MANDATORY_IE_MISSING: [UsageID]`
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
+		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "ResourcesForEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID: "RU_TEST1",
+	}
+
+	cacheReply := Resources{
+		{
+			rPrf:   rsPrf,
+			Tenant: "cgrates.org",
+			ID:     "RES1",
+			Usages: map[string]*ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  10,
+				},
+			},
+			dirty:  utils.BoolPointer(false),
+			tUsage: utils.Float64Pointer(10),
+			ttl:    utils.DurationPointer(time.Minute),
+			TTLIdx: []string{},
+		},
+	}
+	Cache.Set(context.Background(), utils.CacheRPCResponses, cacheKey,
+		&utils.CachedRPCResponse{Result: &cacheReply, Error: nil},
+		nil, true, utils.NonTransactional)
+	var reply Resources
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, cacheReply) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(cacheReply), utils.ToJSON(reply))
+	}
+
+	config.SetCgrConfig(config.NewDefaultCGRConfig())
+}
+
+func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
+	config.SetCgrConfig(cfg)
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
+		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "ResourcesForEventTest",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID: "RU_TEST1",
+	}
+
+	exp := Resources{
+		{
+			rPrf:   rsPrf,
+			Tenant: "cgrates.org",
+			ID:     "RES1",
+			Usages: map[string]*ResourceUsage{
+				"RU1": {
+					Tenant: "cgrates.org",
+					ID:     "RU1",
+					Units:  10,
+				},
+			},
+			dirty:  utils.BoolPointer(false),
+			tUsage: utils.Float64Pointer(10),
+			ttl:    utils.DurationPointer(time.Minute),
+			TTLIdx: []string{},
+		},
+	}
+	var reply Resources
+	if err := rS.V1ResourcesForEvent(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+
+	if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		resp := itm.(*utils.CachedRPCResponse)
+		if !reflect.DeepEqual(*resp.Result.(*Resources), exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, *resp.Result.(*Resources))
+		}
+	}
+
+	config.SetCgrConfig(config.NewDefaultCGRConfig())
+}
+
+func TestResourcesV1GetResourceOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+	err := dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	exp := Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "RES1",
+		},
+	}
+	var reply Resource
+	if err := rS.V1GetResource(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+
+func TestResourcesV1GetResourceNotFound(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+	err := dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "RES2",
+		},
+	}
+	var reply Resource
+	if err := rS.V1GetResource(context.Background(), args, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestResourcesV1GetResourceMissingParameters(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+	err := dm.SetResource(context.Background(), rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{},
+	}
+
+	experr := `MANDATORY_IE_MISSING: [ID]`
+	var reply Resource
+	if err := rS.V1GetResource(context.Background(), args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }

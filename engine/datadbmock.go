@@ -46,6 +46,7 @@ type DataDBMock struct {
 	SetResourceProfileDrvF     func(ctx *context.Context, rp *ResourceProfile) error
 	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
 	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
+	SetResourceDrvF            func(ctx *context.Context, r *Resource) error
 	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
@@ -128,7 +129,10 @@ func (dbM *DataDBMock) GetResourceDrv(*context.Context, string, string) (*Resour
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceDrv(*context.Context, *Resource) error {
+func (dbM *DataDBMock) SetResourceDrv(ctx *context.Context, r *Resource) error {
+	if dbM.SetResourceDrvF != nil {
+		return dbM.SetResourceDrvF(ctx, r)
+	}
 	return utils.ErrNotImplemented
 }
 
