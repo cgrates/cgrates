@@ -107,10 +107,10 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 	}
 
 	var ecCost *utils.EventCharges
-	if (costIcrm.FixedFee != nil &&
+	if costIcrm != nil && ((costIcrm.FixedFee != nil &&
 		costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0) ||
 		(costIcrm.RecurrentFee != nil &&
-			costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0) {
+			costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0)) {
 		// attempt to debit usage with cost
 		if ecCost, err = maxDebitAbstractsFromConcretes(ctx, usage,
 			aB.acntID, aB.cncrtBlncs,

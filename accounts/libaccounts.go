@@ -146,12 +146,6 @@ func costIncrement(ctx *context.Context, cfgCostIncrmts []*utils.CostIncrement,
 		costIcrm = cIcrm
 		break
 	}
-	if costIcrm == nil {
-		costIcrm = new(utils.CostIncrement)
-	}
-	if costIcrm.Increment == nil {
-		costIcrm.Increment = utils.NewDecimal(1, 0)
-	}
 	return
 }
 
@@ -225,6 +219,9 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement, dbtedAUnts *decimal.Big) (ec *utils.EventCharges, err error) {
 	// Init EventCharges
+	if costIcrm == nil {
+		costIcrm = &utils.CostIncrement{Increment: utils.NewDecimal(1, 0)}
+	}
 	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	//var attrIDs []string // will be populated if attributes are processed successfully
 	// process AttributeS if needed
