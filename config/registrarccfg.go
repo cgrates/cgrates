@@ -63,6 +63,11 @@ type RegistrarCCfg struct {
 	RefreshInterval time.Duration
 }
 
+type RemoteHostJsonWithTenant struct {
+	*RemoteHostJson
+	Tenant *string
+}
+
 func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
@@ -72,11 +77,13 @@ func (dps *RegistrarCCfg) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfg) (err error)
 		copy(dps.RegistrarSConns, *jsnCfg.Registrars_conns)
 	}
 	if jsnCfg.Hosts != nil {
-		for tnt, hosts := range jsnCfg.Hosts {
-			for _, hostJSON := range hosts {
-				conn := new(RemoteHost)
-				conn.loadFromJSONCfg(hostJSON)
-				dps.Hosts[tnt] = append(dps.Hosts[tnt], conn)
+		for _, hostJSON := range jsnCfg.Hosts {
+			conn := new(RemoteHost)
+			conn.loadFromJSONCfg(hostJSON.RemoteHostJson)
+			if hostJSON.Tenant == nil || *hostJSON.Tenant == "" {
+				dps.Hosts[utils.MetaDefault] = append(dps.Hosts[utils.MetaDefault], conn)
+			} else {
+				dps.Hosts[*hostJSON.Tenant] = append(dps.Hosts[*hostJSON.Tenant], conn)
 			}
 		}
 	}
@@ -98,12 +105,13 @@ func (dps *RegistrarCCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		initialMP[utils.RefreshIntervalCfg] = "0"
 	}
 	if dps.Hosts != nil {
-		hosts := make(map[string][]map[string]interface{})
+		hosts := []map[string]interface{}{}
 		for tnt, hs := range dps.Hosts {
 			for _, h := range hs {
 				mp := h.AsMapInterface()
 				delete(mp, utils.AddressCfg)
-				hosts[tnt] = append(hosts[tnt], mp)
+				mp[utils.Tenant] = tnt
+				hosts = append(hosts, mp)
 			}
 		}
 		initialMP[utils.HostsCfg] = hosts

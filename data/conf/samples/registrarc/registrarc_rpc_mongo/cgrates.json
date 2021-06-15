@@ -130,9 +130,14 @@
     "rpc":{
         "enabled": true,
         "registrars_conns": ["regConn"],
-        "hosts": {
-			"*default":[{"ID":"attributes", "transport": "*json"}]
-		},  
+        "hosts": [
+			{
+				"Tenant": "*default",
+				"ID":"attributes",
+				"transport": "*json",
+				"tls": false
+			},
+		],
         "refresh_interval": "1s",
     },
 },

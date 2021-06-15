@@ -538,7 +538,7 @@ type DispatcherSJsonCfg struct {
 
 type RegistrarCJsonCfg struct {
 	Registrars_conns *[]string
-	Hosts            map[string][]*RemoteHostJson
+	Hosts            []*RemoteHostJsonWithTenant
 	Refresh_interval *string
 }
 
