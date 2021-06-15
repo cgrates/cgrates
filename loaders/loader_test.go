@@ -1301,7 +1301,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 		},
 	}
 
-	rcv, err := ldr.dm.GetDispatcherHost("cgrates.org", "ALL1",
+	rcv, err := ldr.dm.GetDispatcherHost(context.TODO(), "cgrates.org", "ALL1",
 		true, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
@@ -3928,7 +3928,7 @@ cgrates.org,REM_DISPATCHERH_1
 			ID: "REM_DISPATCHERH_1",
 		},
 	}
-	if err := ldr.dm.SetDispatcherHost(expDispatchers); err != nil {
+	if err := ldr.dm.SetDispatcherHost(context.TODO(), expDispatchers); err != nil {
 		t.Error(err)
 	} else if err := ldr.removeContent(context.Background(), utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)

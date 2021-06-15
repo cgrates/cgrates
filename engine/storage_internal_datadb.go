@@ -327,7 +327,7 @@ func (iDB *InternalDB) SetFilterDrv(_ *context.Context, fltr *Filter) (err error
 	return
 }
 
-func (iDB *InternalDB) RemoveFilterDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveFilterDrv(_ *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheFilters, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
@@ -419,7 +419,7 @@ func (iDB *InternalDB) RemoveDispatcherProfileDrv(_ *context.Context, tenant, id
 	return
 }
 
-func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (iDB *InternalDB) GetItemLoadIDsDrv(_ *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	x, ok := Cache.Get(utils.CacheLoadIDs, utils.LoadIDs)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -437,7 +437,7 @@ func (iDB *InternalDB) SetLoadIDsDrv(_ *context.Context, loadIDs map[string]int6
 	return
 }
 
-func (iDB *InternalDB) GetDispatcherHostDrv(tenant, id string) (dpp *DispatcherHost, err error) {
+func (iDB *InternalDB) GetDispatcherHostDrv(_ *context.Context, tenant, id string) (dpp *DispatcherHost, err error) {
 	x, ok := Cache.Get(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -445,13 +445,13 @@ func (iDB *InternalDB) GetDispatcherHostDrv(tenant, id string) (dpp *DispatcherH
 	return x.(*DispatcherHost), nil
 }
 
-func (iDB *InternalDB) SetDispatcherHostDrv(dpp *DispatcherHost) (err error) {
+func (iDB *InternalDB) SetDispatcherHostDrv(_ *context.Context, dpp *DispatcherHost) (err error) {
 	Cache.SetWithoutReplicate(utils.CacheDispatcherHosts, dpp.TenantID(), dpp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveDispatcherHostDrv(_ *context.Context, tenant, id string) (err error) {
 	Cache.RemoveWithoutReplicate(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
@@ -569,7 +569,7 @@ func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx stri
 	return
 }
 
-func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
+func (iDB *InternalDB) RemoveIndexesDrv(_ *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
 	if idxKey == utils.EmptyString {
 		Cache.tCache.RemoveGroup(idxItmType, tntCtx, true, utils.EmptyString)
 		return

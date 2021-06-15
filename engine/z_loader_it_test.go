@@ -348,7 +348,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, dph := range loader.dispatcherHosts {
-		rcv, err := loader.dm.GetDispatcherHost(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		rcv, err := loader.dm.GetDispatcherHost(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetDispatcherHost, tenant: %s, id: %s,  error: %s ", dph.Tenant, dph.ID, err.Error())
 		}

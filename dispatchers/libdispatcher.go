@@ -183,7 +183,7 @@ func (sd *singleResultDispatcher) Dispatch(dm *engine.DataManager, flts *engine.
 	}
 	var called bool
 	for _, hostID := range hostIDs {
-		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
+		if dH, err = dm.GetDispatcherHost(ctx, tnt, hostID, true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
 					utils.DispatcherS, hostID))
@@ -229,7 +229,7 @@ func (b *broadcastDispatcher) Dispatch(dm *engine.DataManager, flts *engine.Filt
 	pool := rpcclient.NewRPCPool(b.strategy, config.CgrConfig().GeneralCfg().ReplyTimeout)
 	for _, hostID := range hostIDs {
 		var dH *engine.DispatcherHost
-		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
+		if dH, err = dm.GetDispatcherHost(ctx, tnt, hostID, true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
 					utils.DispatcherS, hostID))
@@ -290,7 +290,7 @@ func (ld *loadDispatcher) Dispatch(dm *engine.DataManager, flts *engine.FilterS,
 	}
 	var called bool
 	for _, hostID := range hostIDs {
-		if dH, err = dm.GetDispatcherHost(tnt, hostID, true, true, utils.NonTransactional); err != nil {
+		if dH, err = dm.GetDispatcherHost(ctx, tnt, hostID, true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				utils.Logger.Warning(fmt.Sprintf("<%s> could not find host with ID %q",
 					utils.DispatcherS, hostID))

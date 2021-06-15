@@ -100,7 +100,7 @@ func (adms *AdminSv1) SetThresholdProfile(ctx *context.Context, args *engine.Thr
 	}
 	//handle caching for ThresholdProfile and Threshold
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), args.Tenant, utils.CacheThresholdProfiles,
-		args.TenantID(), &args.FilterIDs, nil, args.APIOpts); err != nil {
+		args.TenantID(), &args.FilterIDs, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -121,7 +121,7 @@ func (adms *AdminSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.T
 	}
 	//handle caching for ThresholdProfile
 	if err := adms.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.CacheOpt]), tnt, utils.CacheThresholdProfiles,
-		utils.ConcatenatedKey(tnt, args.ID), nil, nil, args.APIOpts); err != nil {
+		utils.ConcatenatedKey(tnt, args.ID), nil, args.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database

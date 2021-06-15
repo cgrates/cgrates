@@ -41,7 +41,7 @@ func TestAttributeSCoverage(t *testing.T) {
 	attrRPC := make(chan birpc.ClientConnector, 1)
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, attrRPC, anz, srvDep)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, attrRPC, anz, &DispatcherService{srvsReload: map[string]chan struct{}{}}, srvDep)
 	if attrS == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(attrS))
 	}
@@ -54,6 +54,7 @@ func TestAttributeSCoverage(t *testing.T) {
 		server:      server,
 		anz:         anz,
 		srvDep:      srvDep,
+		dspS:        &DispatcherService{srvsReload: map[string]chan struct{}{}},
 	}
 	if attrS2.IsRunning() {
 		t.Errorf("Expected service to be down")

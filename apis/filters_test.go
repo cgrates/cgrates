@@ -1133,7 +1133,7 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotFound
 		},
-		RemoveFilterDrvF: func(str1 string, str2 string) error {
+		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -1183,7 +1183,7 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotFound
 		},
-		RemoveFilterDrvF: func(str1 string, str2 string) error {
+		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
