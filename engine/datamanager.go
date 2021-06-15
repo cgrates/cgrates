@@ -2062,10 +2062,15 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 				continue
 			}
 			if withIndex {
-
-				if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
-					tenant, id, rateID, oldRpp.Rates[rateID].FilterIDs); err != nil {
-					return
+				for key, rate := range oldRpp.Rates {
+					if err = removeIndexFiltersItem(ctx, dm, utils.CacheRateFilterIndexes,
+						tenant, utils.ConcatenatedKey(key, oldRpp.ID), rate.FilterIDs); err != nil {
+						return
+					}
+					if err = removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
+						tenant, id, rateID, rate.FilterIDs); err != nil {
+						return
+					}
 				}
 			}
 			delete(oldRpp.Rates, rateID)
