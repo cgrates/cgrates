@@ -110,9 +110,14 @@
 	"dispatchers":{
 		"enabled": true,
 		"registrars_conns": ["dispConn"],
-		"hosts": {
-			"*default":[{"ID":"ALL2", "transport": "*json", "tls": false}]
-		},  
+		"hosts": [
+			{
+				"Tenant": "*default",
+				"ID":"ALL2",
+				"transport": "*json",
+				"tls": false
+			},
+		],
 		"refresh_interval": "1s",
 	},
 }
