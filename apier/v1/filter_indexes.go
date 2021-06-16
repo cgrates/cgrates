@@ -19,13 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 type AttrGetFilterIndexes struct {
@@ -594,8 +592,8 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *IndexHealthArgs, reply *IndexHealthReply) error {
-	rp, err := getAccountActionPlanIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
+func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHealthArgs, reply *engine.IndexHealthReply) error {
+	rp, err := engine.GetAccountActionPlanIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
 		args.ObjectCacheTTL, args.IndexCacheTTL,
 		args.ObjectCacheStaticTTL, args.IndexCacheStaticTTL)
 	if err != nil {
@@ -603,127 +601,4 @@ func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *IndexHealthArgs
 	}
 	*reply = *rp
 	return nil
-}
-
-type IndexHealthArgs struct {
-	IndexCacheLimit     int
-	IndexCacheTTL       time.Duration
-	IndexCacheStaticTTL bool
-
-	ObjectCacheLimit     int
-	ObjectCacheTTL       time.Duration
-	ObjectCacheStaticTTL bool
-}
-type IndexHealthReply struct {
-	MissingObjects   []string            // list of object that are referenced in indexes but are not found in the dataDB
-	MissingIndexes   map[string][]string // list of missing indexes for each object (the map has the key as the objectID and a list of indexes)
-	BrokenReferences map[string][]string // list of broken references (the map has the key as the objectID and a list of indexes)
-}
-
-// add cache in args API
-func getAccountActionPlanIndexHealth(dm *engine.DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL bool) (rply *IndexHealthReply, err error) {
-	// posible errors
-	missingAP := utils.StringSet{}        // the index are present but the action plans are not //missing actionplans
-	brokenRef := map[string][]string{}    // the actionPlans match the index but they are missing the account // broken reference
-	missingIndex := map[string][]string{} // the indexes are not present but the action plans points to that account // misingAccounts
-
-	// local cache
-	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, nil)
-	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, nil)
-
-	getCachedIndex := func(acntID string) (apIDs []string, err error) {
-		if x, ok := indexesCache.Get(acntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-		if apIDs, err = dm.GetAccountActionPlans(acntID, true, false, utils.NonTransactional); err != nil { // read from cache but do not write if not there
-			if err == utils.ErrNotFound {
-				indexesCache.Set(acntID, nil, nil)
-			}
-			return
-		}
-		indexesCache.Set(acntID, apIDs, nil)
-		return
-	}
-
-	getCachedObject := func(apID string) (obj *engine.ActionPlan, err error) {
-		if x, ok := objectsCache.Get(apID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*engine.ActionPlan), nil
-		}
-		if obj, err = dm.GetActionPlan(apID, true, false, utils.NonTransactional); err != nil { // read from cache but do not write if not there
-			if err == utils.ErrNotFound {
-				objectsCache.Set(apID, nil, nil)
-			}
-			return
-		}
-		objectsCache.Set(apID, obj, nil)
-		return
-	}
-
-	var acntIDs []string // start with the indexes and check the references
-	if acntIDs, err = dm.DataDB().GetKeysForPrefix(utils.AccountActionPlansPrefix); err != nil {
-		err = fmt.Errorf("error <%s> querying keys for accountActionPlans", err.Error())
-		return
-	}
-
-	for _, acntID := range acntIDs {
-		acntID = strings.TrimPrefix(acntID, utils.AccountActionPlansPrefix) //
-		var apIDs []string
-		if apIDs, err = getCachedIndex(acntID); err != nil { // read from cache but do not write if not there
-			err = fmt.Errorf("error <%s> querying the accountActionPlan: <%v>", err.Error(), acntID)
-			return
-		}
-		for _, apID := range apIDs {
-			var ap *engine.ActionPlan
-			if ap, err = getCachedObject(apID); err != nil {
-				if err != utils.ErrNotFound {
-					err = fmt.Errorf("error <%s> querying the actionPlan: <%v>", err.Error(), apID)
-					return
-				}
-				missingAP.Add(apID) // not found
-				continue
-
-			}
-			if !ap.AccountIDs.HasKey(acntID) { // the action plan exists but doesn't point towards the account we have index
-				brokenRef[apID] = append(brokenRef[apID], acntID)
-			}
-		}
-	}
-
-	var apIDs []string // we have all the indexes in cache now do a reverse check
-	if apIDs, err = dm.DataDB().GetKeysForPrefix(utils.ActionPlanPrefix); err != nil {
-		err = fmt.Errorf("error <%s> querying keys for actionPlans", err.Error())
-		return
-	}
-
-	for _, apID := range apIDs {
-		apID = strings.TrimPrefix(apID, utils.ActionPlanPrefix) //
-		var ap *engine.ActionPlan
-		if ap, err = getCachedObject(apID); err != nil {
-			err = fmt.Errorf("error <%s> querying the actionPlan: <%v>", err.Error(), apID)
-			return
-		}
-		for acntID := range ap.AccountIDs {
-			var ids []string
-			if ids, err = getCachedIndex(acntID); err != nil { // read from cache but do not write if not there
-				err = fmt.Errorf("error <%s> querying the accountActionPlan: <%v>", err.Error(), acntID)
-				return
-			}
-			if !utils.IsSliceMember(ids, apID) { // the index doesn't exits for this actionPlan
-				missingIndex[apID] = append(missingIndex[apID], acntID)
-			}
-		}
-	}
-
-	rply = &IndexHealthReply{
-		MissingObjects:   missingAP.AsSlice(),
-		MissingIndexes:   missingIndex,
-		BrokenReferences: brokenRef,
-	}
-	return
 }
