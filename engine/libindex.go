@@ -934,7 +934,7 @@ func GetAccountActionPlanIndexHealth(dm *DataManager, objLimit, indexLimit int, 
 					return
 				}
 				err = nil
-				brokenRef[apID] = append(brokenRef[apID], acntID)
+				missingIndex[apID] = append(missingIndex[apID], acntID)
 				continue
 			}
 			if !utils.IsSliceMember(ids, apID) { // the index doesn't exits for this actionPlan
