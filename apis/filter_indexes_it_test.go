@@ -126,6 +126,15 @@ var (
 		testV1FIdxStatSMoreProfilesForFltrs,
 		testV1FIdxStatSRemoveComputedIndexesIDs,
 		testV1FIdxStatSRemoveStatSNoIndexes,
+		testV1IndexClearCache,
+
+		testV1FIdxSetThresholdProfileWithFltr,
+		testV1FIdxSetThresholdSMoreFltrsMoreIndexing,
+		testV1FIdxThresholdSProfileRemoveIndexes,
+		testV1FIdxThresholdSProfileComputeIndexes,
+		testV1FIdxThresholdsSMoreProfilesForFltrs,
+		testV1FIdxThresholdSRemoveThresholdsProfileNoINdexes,
+		testV1IndexClearCache,
 
 		testV1FIdxStopEngine,
 	}
@@ -4358,6 +4367,423 @@ func testV1FIdxStatSRemoveStatSNoIndexes(t *testing.T) {
 		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+}
+
+func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
+	// First we will set a filter for usage
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// Get filter for checking it's existence
+	var resultFltr *engine.Filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{Tenant: utils.CGRateSorg, ID: "fltr_for_attr"}, &resultFltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resultFltr, fltr.Filter) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(fltr.Filter), utils.ToJSON(resultFltr))
+	}
+
+	// we will set a ThresholdProfile with our filter and check the indexes
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: utils.CGRateSorg,
+			ID:     "THD_ACNT_1001",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Weight:           10,
+			MaxHits:          -1,
+			MinHits:          0,
+			ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+		thPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:THD_ACNT_1001",
+		"*string:*req.Subject:6774:THD_ACNT_1001",
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*string:*req.Subject:22312:THD_ACNT_1001",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1001"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// update the filter for checking the indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrSameID, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// check the updated indexes
+	expectedIDx = []string{"*string:*req.Account:1001:THD_ACNT_1001",
+		"*string:*req.CGRID:QWEASDZXC:THD_ACNT_1001",
+		"*string:*req.CGRID:IOPJKLBNM:THD_ACNT_1001"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+	// back to our initial filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+}
+
+func testV1FIdxSetThresholdSMoreFltrsMoreIndexing(t *testing.T) {
+	// more filters for our ThresholdsProfile
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// update our ThresholdsProfile with our filters
+	thPrf := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: utils.CGRateSorg,
+			ID:     "THD_ACNT_1001",
+			FilterIDs: []string{"fltr_for_attr",
+				"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			Weight:           10,
+			MaxHits:          -1,
+			MinHits:          0,
+			ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+		thPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:THD_ACNT_1001",
+		"*string:*req.Subject:6774:THD_ACNT_1001",
+		"*string:*req.Subject:22312:THD_ACNT_1001",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1001",
+		"*string:*req.Usage:123s:THD_ACNT_1001",
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1001"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxThresholdSProfileRemoveIndexes(t *testing.T) {
+	var reply string
+	var replyIdx []string
+	//indexes will be removed
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
+	}
+}
+
+func testV1FIdxThresholdSProfileComputeIndexes(t *testing.T) {
+	// compute our indexes
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, ThresholdS: true}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	var replyIdx []string
+
+	//matching indexes
+	expectedIDx := []string{"*string:*req.Subject:1004:THD_ACNT_1001",
+		"*string:*req.Subject:6774:THD_ACNT_1001",
+		"*string:*req.Subject:22312:THD_ACNT_1001",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1001",
+		"*string:*req.Usage:123s:THD_ACNT_1001",
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1001"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxThresholdsSMoreProfilesForFltrs(t *testing.T) {
+	// will add more thresholds profiles with our filters for matching indexes
+	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: utils.CGRateSorg,
+			ID:     "THD_ACNT_1002",
+			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			Weight:           20,
+			MaxHits:          4,
+			MinHits:          0,
+			ActionProfileIDs: []string{"ADDBAL"},
+		},
+	}
+	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: utils.CGRateSorg,
+			ID:     "THD_ACNT_1003",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Weight:           150,
+			MaxHits:          4,
+			MinHits:          2,
+			ActionProfileIDs: []string{"reset_Bal_10"},
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+		thPrf1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
+		thPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	// check indexes for all profiles
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Account:1001:THD_ACNT_1002",
+		"*string:*req.Account:1001:THD_ACNT_1003",
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1002",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1002",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1001",
+		"*string:*req.Usage:123s:THD_ACNT_1002",
+		"*string:*req.Usage:123s:THD_ACNT_1001",
+		"*string:*req.Subject:1004:THD_ACNT_1001",
+		"*string:*req.Subject:6774:THD_ACNT_1001",
+		"*string:*req.Subject:22312:THD_ACNT_1001",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1001",
+		"*string:*req.Subject:1004:THD_ACNT_1003",
+		"*string:*req.Subject:6774:THD_ACNT_1003",
+		"*string:*req.Subject:22312:THD_ACNT_1003",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1003",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1003",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1003"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxTThresholdSRemoveComputedIndexesIDs(t *testing.T) {
+	// indexes will be removed again
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	//not found
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	// now we will ComputeFilterIndexes by IDs(2 of the 3 profiles)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			ThresholdIDs: []string{"THD_ACNT_1001", "STHD_ACNT_1002"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expectedIDx := []string{"*string:*req.Account:1001:STHD_ACNT_1002",
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:12:STHD_ACNT_1002",
+		"*prefix:*req.AnswerTime:33:STHD_ACNT_1002",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1001",
+		"*string:*req.Usage:123s:STHD_ACNT_1002",
+		"*string:*req.Usage:123s:THD_ACNT_1001",
+		"*string:*req.Subject:1004:THD_ACNT_1001",
+		"*string:*req.Subject:6774:THD_ACNT_1001",
+		"*string:*req.Subject:22312:THD_ACNT_1001",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1001"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	//now we will ComputeFilterIndexes of the remain profile
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			ThresholdIDs: []string{"THD_ACNT_1003"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expectedIDx = []string{"*string:*req.Account:1001:THD_ACNT_1002",
+		"*string:*req.Account:1001:THD_ACNT_1003",
+		"*string:*req.Account:1001:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1002",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1002",
+		"*prefix:*req.AnswerTime:12:THD_ACNT_1001",
+		"*prefix:*req.AnswerTime:33:THD_ACNT_1001",
+		"*string:*req.Usage:123s:THD_ACNT_1002",
+		"*string:*req.Usage:123s:THD_ACNT_1001",
+		"*string:*req.Subject:1004:THD_ACNT_1001",
+		"*string:*req.Subject:6774:THD_ACNT_1001",
+		"*string:*req.Subject:22312:THD_ACNT_1001",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1001",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1001",
+		"*string:*req.Subject:1004:THD_ACNT_1003",
+		"*string:*req.Subject:6774:THD_ACNT_1003",
+		"*string:*req.Subject:22312:THD_ACNT_1003",
+		"*string:*opts.Subsystems:*attributes:THD_ACNT_1003",
+		"*prefix:*req.Destinations:+0775:THD_ACNT_1003",
+		"*prefix:*req.Destinations:+442:THD_ACNT_1003"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxThresholdSRemoveThresholdsProfileNoINdexes(t *testing.T) {
+	// as we delete our ThresholdS, indexes will be deleted too
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveThresholdProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_1001",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveThresholdProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_1002",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveThresholdProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "THD_ACNT_1003",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//not found as we removed profiles
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaThresholds},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
 }
 
 func testV1FIdxStopEngine(t *testing.T) {
