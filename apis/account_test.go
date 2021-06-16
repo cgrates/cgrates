@@ -1077,6 +1077,11 @@ func TestAccountMaxAbstracts(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment: utils.Float64Pointer(0.1),
+						},
+					},
 					Units: 0,
 				},
 			},
@@ -1089,16 +1094,14 @@ func TestAccountMaxAbstracts(t *testing.T) {
 	err := admS.SetAccount(context.Background(), ext, &setRply)
 	if err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(setRply, `OK`) {
+	} else if setRply != utils.OK {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
 	}
 	var getRply utils.Account
 	err = admS.GetAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
-				Tenant: "",
-				ID:     "test_ID1",
+				ID: "test_ID1",
 			},
 			APIOpts: nil,
 		}, &getRply)
@@ -1123,6 +1126,11 @@ func TestAccountMaxAbstracts(t *testing.T) {
 					"Destination": 10,
 				},
 				Units: utils.NewDecimal(0, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(1, 1),
+					},
+				},
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -1230,6 +1238,11 @@ func TestAccountMaxAbstracts(t *testing.T) {
 						Type: "*abstract",
 						Opts: map[string]interface{}{
 							"Destination": 10,
+						},
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								Increment: utils.Float64Pointer(0.1),
+							},
 						},
 						Units: utils.Float64Pointer(0),
 					},
