@@ -525,6 +525,26 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
+
+	pEv = utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.AccountField: "sip:12345678901234567@abcdefg"}}
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*regex:~*req.Account:.{29,}"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*regex:~*req.Account:^.{28}$"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.Pass(context.TODO(), "cgrates.org",
+		[]string{"*gte:~*req.Account{*len}:29"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
 }
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
@@ -1234,6 +1254,25 @@ func TestFilterPassCronExpParseExpErr(t *testing.T) {
 	ev := utils.MapStorage{
 		utils.MetaReq: utils.MapStorage{
 			utils.AnswerTime: "2021-05-05T12:00:01Z",
+		},
+	}
+
+	if passes, err := fltr.passCronExp(context.Background(), ev); err != nil {
+		t.Errorf("Expected nil, got %+v", err)
+	} else if passes {
+		t.Error("should not be passing")
+	}
+}
+
+func TestFiltersPassGreaterThanErrIncomparable(t *testing.T) {
+	fltr, err := NewFilterRule(utils.MetaGreaterThan, "~*req.Usage", []string{"10"})
+	fltr.rsrElement.Rules = "rules"
+	if err != nil {
+		t.Fatal(err)
+	}
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]interface{}{
+			utils.Usage: nil,
 		},
 	}
 
