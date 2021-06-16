@@ -1281,6 +1281,11 @@ func TestAccountDebitAbstracts(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment: utils.Float64Pointer(0.1),
+						},
+					},
 					Units: 0,
 				},
 			},
@@ -1327,6 +1332,11 @@ func TestAccountDebitAbstracts(t *testing.T) {
 					"Destination": 10,
 				},
 				Units: utils.NewDecimal(0, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(1, 1),
+					},
+				},
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -1434,6 +1444,11 @@ func TestAccountDebitAbstracts(t *testing.T) {
 						Type: "*abstract",
 						Opts: map[string]interface{}{
 							"Destination": 10,
+						},
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								Increment: utils.Float64Pointer(0.1),
+							},
 						},
 						Units: utils.Float64Pointer(0),
 					},
@@ -1472,6 +1487,11 @@ func TestAccountActionSetBalance(t *testing.T) {
 					Opts: map[string]interface{}{
 						"Destination": 10,
 					},
+					CostIncrements: []*utils.APICostIncrement{
+						{
+							Increment: utils.Float64Pointer(0.1),
+						},
+					},
 					Units: 0,
 				},
 			},
@@ -1516,6 +1536,11 @@ func TestAccountActionSetBalance(t *testing.T) {
 				Type: "*abstract",
 				Opts: map[string]interface{}{
 					"Destination": 10,
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment: utils.NewDecimal(1, 1),
+					},
 				},
 				Units: utils.NewDecimal(0, 0),
 			},
@@ -1625,6 +1650,11 @@ func TestAccountActionSetBalance(t *testing.T) {
 						Type: "*abstract",
 						Opts: map[string]interface{}{
 							"Destination": 10,
+						},
+						CostIncrements: []*utils.ExtCostIncrement{
+							{
+								Increment: utils.Float64Pointer(0.1),
+							},
 						},
 						Units: utils.Float64Pointer(0),
 					},
