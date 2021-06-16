@@ -91,6 +91,7 @@ func TestDispatcherHReload(t *testing.T) {
 	}
 	cfg.GetReloadChan(config.RegistrarCJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
+	srv.Shutdown()
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
