@@ -550,32 +550,22 @@ func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
-	path, err := fltr.rsrElement.CompileDynRule(dDP)
-	if err != nil {
-		return false, err
-	}
-	fldIf, err := utils.DPDynamicInterface(path, dDP)
+	fldStr, err := fltr.rsrElement.ParseDataProviderWithInterfaces(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
-		fldIf = utils.StringToInterface(fldStr)
-	}
+	fldIf := utils.StringToInterface(fldStr)
 	orEqual := fltr.Type == utils.MetaGreaterOrEqual ||
 		fltr.Type == utils.MetaLessThan
 	for _, val := range fltr.rsrValues {
-		valPath, err := val.CompileDynRule(dDP)
+		sval, err := val.ParseDataProviderWithInterfaces(dDP)
 		if err != nil {
 			continue
 		}
-		sval, err := utils.DPDynamicInterface(valPath, dDP)
-		if err != nil {
-			continue
-		}
-		if gte, err := utils.GreaterThan(fldIf, sval, orEqual); err != nil {
+		if gte, err := utils.GreaterThan(fldIf, utils.StringToInterface(sval), orEqual); err != nil {
 			return false, err
 		} else if (utils.MetaGreaterThan == fltr.Type || utils.MetaGreaterOrEqual == fltr.Type) && gte {
 			return true, nil
@@ -587,30 +577,20 @@ func (fltr *FilterRule) passGreaterThan(dDP utils.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passEqualTo(dDP utils.DataProvider) (bool, error) {
-	path, err := fltr.rsrElement.CompileDynRule(dDP)
-	if err != nil {
-		return false, err
-	}
-	fldIf, err := utils.DPDynamicInterface(path, dDP)
+	fldStr, err := fltr.rsrElement.ParseDataProviderWithInterfaces(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
-		fldIf = utils.StringToInterface(fldStr)
-	}
+	fldIf := utils.StringToInterface(fldStr)
 	for _, val := range fltr.rsrValues {
-		valPath, err := val.CompileDynRule(dDP)
-		if err != nil {
-			return false, err
-		}
-		sval, err := utils.DPDynamicInterface(valPath, dDP)
+		sval, err := val.ParseDataProviderWithInterfaces(dDP)
 		if err != nil {
 			continue
 		}
-		if eq, err := utils.EqualTo(fldIf, sval); err != nil {
+		if eq, err := utils.EqualTo(fldIf, utils.StringToInterface(sval)); err != nil {
 			return false, err
 		} else if eq {
 			return true, nil
@@ -663,49 +643,42 @@ func (fltr *FilterRule) passAPIBan(dDP utils.DataProvider) (bool, error) {
 	return dm.GetAPIBan(strVal, config.CgrConfig().APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
+func parseTime(rsr *config.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {
+	var str string
+	if str, err = rsr.ParseDataProvider(dDp); err != nil {
+		return
+	}
+	return utils.ParseTimeDetectLayout(str, config.CgrConfig().GeneralCfg().DefaultTimezone)
+}
+
 func (fltr *FilterRule) passActivationInterval(dDp utils.DataProvider) (bool, error) {
-	strVal, err := fltr.rsrElement.ParseDataProvider(dDp)
+	timeVal, err := parseTime(fltr.rsrElement, dDp)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	timeStrVal, err := utils.ParseTimeDetectLayout(strVal, config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return false, err
-	}
+
 	if len(fltr.rsrValues) == 2 {
-		val2, err := fltr.rsrValues[1].CompileDynRule(dDp)
-		if err != nil {
-			return false, err
-		}
-		endTime, err := utils.ParseTimeDetectLayout(val2, config.CgrConfig().GeneralCfg().DefaultTimezone)
+		endTime, err := parseTime(fltr.rsrValues[1], dDp)
 		if err != nil {
 			return false, err
 		}
 		if fltr.rsrValues[0] == nil {
-			return timeStrVal.Before(endTime), nil
+			return timeVal.Before(endTime), nil
 		}
-		val1, err := fltr.rsrValues[0].CompileDynRule(dDp)
+		startTime, err := parseTime(fltr.rsrValues[0], dDp)
 		if err != nil {
 			return false, err
 		}
-		startTime, err := utils.ParseTimeDetectLayout(val1, config.CgrConfig().GeneralCfg().DefaultTimezone)
-		if err != nil {
-			return false, err
-		}
-		return startTime.Before(timeStrVal) && timeStrVal.Before(endTime), nil
+		return startTime.Before(timeVal) && timeVal.Before(endTime), nil
 	}
-	val1, err := fltr.rsrValues[0].CompileDynRule(dDp)
+	startTime, err := parseTime(fltr.rsrValues[0], dDp)
 	if err != nil {
 		return false, err
 	}
-	startTime, err := utils.ParseTimeDetectLayout(val1, config.CgrConfig().GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return false, err
-	}
-	return startTime.Before(timeStrVal), nil
+	return startTime.Before(timeVal), nil
 }
 
 func verifyInlineFilterS(fltrs []string) (err error) {

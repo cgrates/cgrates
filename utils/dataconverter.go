@@ -20,6 +20,7 @@ package utils
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net"
@@ -87,6 +88,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(SIPURIMethodConverter), nil
 	case params == MetaUnixTime:
 		return new(UnixTimeConverter), nil
+	case params == MetaLen:
+		return new(LengthConverter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter(EmptyString)
@@ -445,4 +448,20 @@ func (rC *RandomConverter) Convert(in interface{}) (
 			return RandomInteger(rC.begin, rC.end), nil
 		}
 	}
+}
+
+// LengthConverter converts the interface in the unix time
+type LengthConverter struct{}
+
+// Convert implements DataConverter interface
+func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
+	src := IfaceAsString(in)
+	if strings.HasPrefix(src, IdxStart) &&
+		strings.HasSuffix(src, IdxEnd) { // it has a similar structure to a json marshaled slice
+		var slice []interface{}
+		if err := json.Unmarshal([]byte(src), &slice); err == nil { // no error when unmarshal safe to asume that this is a slice
+			return len(slice), nil
+		}
+	}
+	return len(src), nil
 }
