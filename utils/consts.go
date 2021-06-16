@@ -710,6 +710,7 @@ const (
 	MetaIP2Hex            = "*ip2hex"
 	MetaString2Hex        = "*string2hex"
 	MetaUnixTime          = "*unixtime"
+	MetaLen               = "*len"
 	MetaSIPURIMethod      = "*sipuri_method"
 	MetaSIPURIHost        = "*sipuri_host"
 	MetaSIPURIUser        = "*sipuri_user"
