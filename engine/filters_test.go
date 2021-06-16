@@ -1059,6 +1059,26 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
+
+	pEv = utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.AccountField: "sip:12345678901234567@abcdefg"}}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*regex:~*req.Account:.{29,}"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*regex:~*req.Account:^.{28}$"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:~*req.Account{*len}:29"}, pEv); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
 }
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
@@ -2199,7 +2219,7 @@ func TestFiltersPassGreaterThanErrIncomparable(t *testing.T) {
 	}
 	dtP := utils.MapStorage{
 		utils.MetaReq: map[string]interface{}{
-			utils.MetaUsage: "10",
+			utils.Usage: nil,
 		},
 	}
 
