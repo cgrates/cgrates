@@ -297,16 +297,11 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.AttributeFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheAttributeFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				ap, e := adms.dm.GetAttributeProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
+				attr, e := adms.dm.GetAttributeProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(ap.FilterIDs))
-				for i, fltrID := range ap.FilterIDs {
-					fltrIDs[i] = fltrID
-				}
-
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(attr.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -317,11 +312,11 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 		cacheIDs[utils.ChargerFilterIndexIDs] = []string{utils.MetaAny}
 		if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheChargerFilterIndexes,
 			nil, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-				ap, e := adms.dm.GetChargerProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
+				ch, e := adms.dm.GetChargerProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 				if e != nil {
 					return nil, e
 				}
-				return utils.SliceStringPointer(utils.CloneStringSlice(ap.FilterIDs)), nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(ch.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -336,11 +331,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(acnts.FilterIDs))
-				for i, fltr := range acnts.FilterIDs {
-					fltrIDs[i] = fltr
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(acnts.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -355,11 +346,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 				if e != nil {
 					return nil, e
 				}
-				fltrIDs := make([]string, len(act.FilterIDs))
-				for i, fltr := range act.FilterIDs {
-					fltrIDs[i] = fltr
-				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(act.FilterIDs)), nil
 			}, nil); err != nil && err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -375,28 +362,19 @@ func (adms *AdminSv1) ComputeFilterIndexes(cntxt *context.Context, args *utils.A
 					return nil, e
 				}
 				ratePrf = append(ratePrf, utils.ConcatenatedKey(tnt, id))
-				fltrIDs := make([]string, len(rtPrf.FilterIDs))
-				for i, fltr := range rtPrf.FilterIDs {
-					fltrIDs[i] = fltr
-				}
 				rtIds := make([]string, 0, len(rtPrf.Rates))
-
 				for key := range rtPrf.Rates {
 					rtIds = append(rtIds, key)
 				}
 				cacheIDs[utils.RateFilterIndexIDs] = rtIds
 				_, e = engine.ComputeIndexes(cntxt, adms.dm, tnt, id, utils.CacheRateFilterIndexes,
 					&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
-						rateFilters := make([]string, len(rtPrf.Rates[id].FilterIDs))
-						for i, fltrID := range rtPrf.Rates[id].FilterIDs {
-							rateFilters[i] = fltrID
-						}
-						return &rateFilters, nil
+						return utils.SliceStringPointer(utils.CloneStringSlice(rtPrf.Rates[id].FilterIDs)), nil
 					}, nil)
 				if e != nil {
 					return nil, e
 				}
-				return &fltrIDs, nil
+				return utils.SliceStringPointer(utils.CloneStringSlice(rtPrf.FilterIDs)), nil
 			}, nil); err != nil {
 			return utils.APIErrorHandler(err)
 		}
@@ -574,11 +552,11 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//AttributeProfile Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheAttributeFilterIndexes,
 		&args.AttributeIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			ap, e := adms.dm.GetAttributeProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
+			attr, e := adms.dm.GetAttributeProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(ap.FilterIDs)), nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(attr.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -588,11 +566,11 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 	//ChargerProfile  Indexes
 	if indexes, err = engine.ComputeIndexes(cntxt, adms.dm, tnt, utils.EmptyString, utils.CacheChargerFilterIndexes,
 		&args.ChargerIDs, transactionID, func(tnt, id, ctx string) (*[]string, error) {
-			ap, e := adms.dm.GetChargerProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
+			ch, e := adms.dm.GetChargerProfile(cntxt, tnt, id, true, false, utils.NonTransactional)
 			if e != nil {
 				return nil, e
 			}
-			return utils.SliceStringPointer(utils.CloneStringSlice(ap.FilterIDs)), nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(ch.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -606,11 +584,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 			if e != nil {
 				return nil, e
 			}
-			fltrIDs := make([]string, len(acc.FilterIDs))
-			for i, fltr := range acc.FilterIDs {
-				fltrIDs[i] = fltr
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(acc.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -624,11 +598,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 			if e != nil {
 				return nil, e
 			}
-			fltrIDs := make([]string, len(act.FilterIDs))
-			for i, fltr := range act.FilterIDs {
-				fltrIDs[i] = fltr
-			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(act.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -642,23 +612,13 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 			if e != nil {
 				return nil, e
 			}
-			fltrIDs := make([]string, len(rpr.FilterIDs))
-			for i, fltrID := range rpr.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-
 			rtIds := make([]string, 0, len(rpr.Rates))
-
 			for key := range rpr.Rates {
 				rtIds = append(rtIds, key)
 			}
 			indexesRate, e := engine.ComputeIndexes(cntxt, adms.dm, tnt, id, utils.CacheRateFilterIndexes,
 				&rtIds, transactionID, func(_, id, _ string) (*[]string, error) {
-					rateFilters := make([]string, len(rpr.Rates[id].FilterIDs))
-					for i, fltrID := range rpr.Rates[id].FilterIDs {
-						rateFilters[i] = fltrID
-					}
-					return &rateFilters, nil
+					return utils.SliceStringPointer(utils.CloneStringSlice(rpr.Rates[id].FilterIDs)), nil
 				}, nil)
 			if e != nil {
 				return nil, e
@@ -666,7 +626,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(cntxt *context.Context, args *utils.
 			if indexesRate.Size() != 0 {
 				cacheIDs[utils.RateFilterIndexIDs] = indexesRate.AsSlice()
 			}
-			return &fltrIDs, nil
+			return utils.SliceStringPointer(utils.CloneStringSlice(rpr.FilterIDs)), nil
 		}, nil); err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
