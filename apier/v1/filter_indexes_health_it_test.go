@@ -118,7 +118,11 @@ func testV1FIdxHAccountActionPlansHealth(t *testing.T) {
 	}, &reply); err != nil {
 		t.Error(err)
 	}
-	exp := engine.IndexHealthReply{}
+	exp := engine.IndexHealthReply{
+		MissingObjects:   []string{},
+		MissingIndexes:   map[string][]string{},
+		BrokenReferences: map[string][]string{},
+	}
 	if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
 	}

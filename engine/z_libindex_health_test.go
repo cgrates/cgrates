@@ -18,7 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-/*
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestHealthAccountAction(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -35,11 +42,116 @@ func TestHealthAccountAction(t *testing.T) {
 	}, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	}
+
+	exp := &IndexHealthReply{
+		MissingObjects:   []string{"AP1"},
+		MissingIndexes:   map[string][]string{"AP2": {"1002"}},
+		BrokenReferences: map[string][]string{"AP2": {"1001"}},
+	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
-	} else {
-		t.Error(utils.ToJSON(rply))
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthAccountAction2(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetAccountActionPlans("1001", []string{"AP1", "AP2"}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetActionPlan("AP2", &ActionPlan{
+		Id:            "AP2",
+		AccountIDs:    utils.NewStringMap("1001"),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
 	}
 
+	exp := &IndexHealthReply{
+		MissingObjects:   []string{"AP1"},
+		MissingIndexes:   map[string][]string{},
+		BrokenReferences: map[string][]string{},
+	}
+	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
 }
-*/
+
+func TestHealthAccountAction3(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetAccountActionPlans("1002", []string{"AP1"}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetActionPlan("AP1", &ActionPlan{
+		Id:            "AP1",
+		AccountIDs:    utils.NewStringMap("1002"),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetActionPlan("AP2", &ActionPlan{
+		Id:            "AP2",
+		AccountIDs:    utils.NewStringMap("1002"),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &IndexHealthReply{
+		MissingObjects:   []string{},
+		MissingIndexes:   map[string][]string{"AP2": {"1002"}},
+		BrokenReferences: map[string][]string{},
+	}
+	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthAccountAction4(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetAccountActionPlans("1002", []string{"AP2"}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetActionPlan("AP1", &ActionPlan{
+		Id:            "AP1",
+		AccountIDs:    utils.NewStringMap("1002"),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetActionPlan("AP2", &ActionPlan{
+		Id:            "AP2",
+		AccountIDs:    utils.NewStringMap("1001"),
+		ActionTimings: []*ActionTiming{{}},
+	}, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &IndexHealthReply{
+		MissingObjects:   []string{},
+		MissingIndexes:   map[string][]string{},
+		BrokenReferences: map[string][]string{"AP2": {"1001"}, "AP1": {"1002"}},
+	}
+	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
