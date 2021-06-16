@@ -80,7 +80,7 @@ var (
 		testV1FIdxChargerProfileComputeIndexes,
 		testV1FIdxChargerMoreProfileForFilters,
 		testV1FIdxChargerSRemoveComputedIndexesIDs,
-		testV1FIdxChargerSRemoveActionsNoIndexes,
+		testV1FIdxChargerSRemoveChargerNoIndexes,
 		testV1IndexClearCache,
 
 		testV1FIdxSetRateSProfileWithFltr,
@@ -111,6 +111,21 @@ var (
 		testV1IndexClearCache,
 
 		testV1FIdxSetRouteSProfileWithFltr,
+		testV1FIdxSetRouteSMoreFltrsMoreIndexing,
+		testV1FIdxRouteSProfileRemoveIndexes,
+		testV1FIdxRouteSProfileComputeIndexes,
+		testV1FIdxRouteSMoreProfilesForFltrs,
+		testV1FIdxRouteSRemoveComputedIndexesIDs,
+		testV1FIdxRouteSRemoveRouteSNoIndexes,
+		testV1IndexClearCache,
+
+		testV1FIdxSetStatSProfileWithFltr,
+		testV1FIdxSetStatSMoreFltrsMoreIndexing,
+		testV1FIdxStatSProfileRemoveIndexes,
+		testV1FIdxStatSProfileComputeIndexes,
+		testV1FIdxStatSMoreProfilesForFltrs,
+		testV1FIdxStatSRemoveComputedIndexesIDs,
+		testV1FIdxStatSRemoveStatSNoIndexes,
 
 		testV1FIdxStopEngine,
 	}
@@ -1958,7 +1973,7 @@ func testV1FIdxChargerSRemoveComputedIndexesIDs(t *testing.T) {
 	}
 }
 
-func testV1FIdxChargerSRemoveActionsNoIndexes(t *testing.T) {
+func testV1FIdxChargerSRemoveChargerNoIndexes(t *testing.T) {
 	//as we delete our ChargerS, indexes will  be deleted too
 	var reply string
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveChargerProfile,
@@ -3039,7 +3054,13 @@ func testV1FIdxRateProfileRatesRemoveRateProfileRatesNoIndexes(t *testing.T) {
 			ID: "fltr_for_attr"}}, &reply); err != nil {
 		t.Error(err)
 	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRateProfileRates,
+			Context: "RATE_1"}, &replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
+	}
 }
+
 func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 	// First we will set a filter for usage
 	var reply string
@@ -3455,7 +3476,888 @@ func testV1FIdxResourceSRemoveResourcesNoIndexes(t *testing.T) {
 }
 
 func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
+	// First we will set a filter for usage
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
 
+	// Get filter for checking it's existence
+	var resultFltr *engine.Filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{Tenant: utils.CGRateSorg, ID: "fltr_for_attr"}, &resultFltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resultFltr, fltr.Filter) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(fltr.Filter), utils.ToJSON(resultFltr))
+	}
+
+	//we will set a RouteProfile with our filter and check the indexes
+	rtPrf := &RouteWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_1",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Sorting: utils.MetaWeight,
+			Routes: []*engine.Route{
+				{
+					ID:            "local",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					Weight:        10,
+				},
+				{
+					ID:            "mobile",
+					RatingPlanIDs: []string{"RP_MOBILE"},
+					Weight:        30,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		rtPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:ROUTE_1",
+		"*string:*req.Subject:6774:ROUTE_1",
+		"*string:*req.Account:1001:ROUTE_1",
+		"*string:*req.Subject:22312:ROUTE_1",
+		"*string:*opts.Subsystems:*attributes:ROUTE_1",
+		"*prefix:*req.Destinations:+0775:ROUTE_1",
+		"*prefix:*req.Destinations:+442:ROUTE_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	// update the filter for checking the indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrSameID, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// check the updated indexes
+	expectedIDx = []string{"*string:*req.Account:1001:ROUTE_1",
+		"*string:*req.CGRID:QWEASDZXC:ROUTE_1",
+		"*string:*req.CGRID:IOPJKLBNM:ROUTE_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+	// back to our initial filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+}
+
+func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
+	// more filters for our ResourceProfile
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	// update our RoutesProfile with our filters
+	rtPrf := &RouteWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_1",
+			FilterIDs: []string{"fltr_for_attr",
+				"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			Sorting: utils.MetaWeight,
+			Routes: []*engine.Route{
+				{
+					ID:            "local",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					Weight:        10,
+				},
+				{
+					ID:            "mobile",
+					RatingPlanIDs: []string{"RP_MOBILE"},
+					Weight:        30,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		rtPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:ROUTE_1",
+		"*string:*req.Subject:6774:ROUTE_1",
+		"*string:*req.Subject:22312:ROUTE_1",
+		"*string:*opts.Subsystems:*attributes:ROUTE_1",
+		"*prefix:*req.Destinations:+0775:ROUTE_1",
+		"*prefix:*req.Destinations:+442:ROUTE_1",
+		"*string:*req.Usage:123s:ROUTE_1",
+		"*string:*req.Account:1001:ROUTE_1",
+		"*prefix:*req.AnswerTime:12:ROUTE_1",
+		"*prefix:*req.AnswerTime:33:ROUTE_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxRouteSProfileRemoveIndexes(t *testing.T) {
+	var reply string
+	var replyIdx []string
+	//indexes will be removed for this specific context
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
+	}
+}
+
+func testV1FIdxRouteSProfileComputeIndexes(t *testing.T) {
+	// compute our indexes
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, RouteS: true}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	var replyIdx []string
+
+	//matching
+	expectedIDx := []string{"*string:*req.Subject:1004:ROUTE_1",
+		"*string:*req.Subject:6774:ROUTE_1",
+		"*string:*req.Subject:22312:ROUTE_1",
+		"*string:*opts.Subsystems:*attributes:ROUTE_1",
+		"*prefix:*req.Destinations:+0775:ROUTE_1",
+		"*prefix:*req.Destinations:+442:ROUTE_1",
+		"*string:*req.Usage:123s:ROUTE_1",
+		"*string:*req.Account:1001:ROUTE_1",
+		"*prefix:*req.AnswerTime:12:ROUTE_1",
+		"*prefix:*req.AnswerTime:33:ROUTE_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
+	// will add more routes with our filters for matching indexes
+	rtPrf1 := &RouteWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_2",
+			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			Sorting: utils.MetaWeight,
+			Routes: []*engine.Route{
+				{
+					ID:            "route1",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					Weight:        10,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	rtPrf2 := &RouteWithAPIOpts{
+		RouteProfile: &engine.RouteProfile{
+			Tenant: "cgrates.org",
+			ID:     "ROUTE_3",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			Sorting: utils.MetaWeight,
+			Routes: []*engine.Route{
+				{
+					ID:            "route2",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					Weight:        10,
+				},
+			},
+			Weight: 10,
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		rtPrf1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		rtPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Account:1001:ROUTE_2",
+		"*string:*req.Account:1001:ROUTE_3",
+		"*string:*req.Account:1001:ROUTE_1",
+		"*prefix:*req.AnswerTime:12:ROUTE_2",
+		"*prefix:*req.AnswerTime:33:ROUTE_2",
+		"*prefix:*req.AnswerTime:12:ROUTE_1",
+		"*prefix:*req.AnswerTime:33:ROUTE_1",
+		"*string:*req.Usage:123s:ROUTE_2",
+		"*string:*req.Usage:123s:ROUTE_1",
+		"*string:*req.Subject:1004:ROUTE_1",
+		"*string:*req.Subject:6774:ROUTE_1",
+		"*string:*req.Subject:22312:ROUTE_1",
+		"*string:*opts.Subsystems:*attributes:ROUTE_1",
+		"*prefix:*req.Destinations:+0775:ROUTE_1",
+		"*prefix:*req.Destinations:+442:ROUTE_1",
+		"*string:*req.Subject:1004:ROUTE_3",
+		"*string:*req.Subject:6774:ROUTE_3",
+		"*string:*req.Subject:22312:ROUTE_3",
+		"*string:*opts.Subsystems:*attributes:ROUTE_3",
+		"*prefix:*req.Destinations:+0775:ROUTE_3",
+		"*prefix:*req.Destinations:+442:ROUTE_3"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxRouteSRemoveComputedIndexesIDs(t *testing.T) {
+	// indexes will be removed again
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	//not found
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	// now we will ComputeFilterIndexes by IDs(2 of the 3 profiles)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			RouteIDs: []string{"ROUTE_1", "ROUTE_2"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expectedIDx := []string{"*string:*req.Account:1001:ROUTE_2",
+		"*string:*req.Account:1001:ROUTE_1",
+		"*prefix:*req.AnswerTime:12:ROUTE_2",
+		"*prefix:*req.AnswerTime:33:ROUTE_2",
+		"*prefix:*req.AnswerTime:12:ROUTE_1",
+		"*prefix:*req.AnswerTime:33:ROUTE_1",
+		"*string:*req.Usage:123s:ROUTE_2",
+		"*string:*req.Usage:123s:ROUTE_1",
+		"*string:*req.Subject:1004:ROUTE_1",
+		"*string:*req.Subject:6774:ROUTE_1",
+		"*string:*req.Subject:22312:ROUTE_1",
+		"*string:*opts.Subsystems:*attributes:ROUTE_1",
+		"*prefix:*req.Destinations:+0775:ROUTE_1",
+		"*prefix:*req.Destinations:+442:ROUTE_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	//now we will ComputeFilterIndexes of the remain profile
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			RouteIDs: []string{"ROUTE_3"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expectedIDx = []string{"*string:*req.Account:1001:ROUTE_2",
+		"*string:*req.Account:1001:ROUTE_3",
+		"*string:*req.Account:1001:ROUTE_1",
+		"*prefix:*req.AnswerTime:12:ROUTE_2",
+		"*prefix:*req.AnswerTime:33:ROUTE_2",
+		"*prefix:*req.AnswerTime:12:ROUTE_1",
+		"*prefix:*req.AnswerTime:33:ROUTE_1",
+		"*string:*req.Usage:123s:ROUTE_2",
+		"*string:*req.Usage:123s:ROUTE_1",
+		"*string:*req.Subject:1004:ROUTE_1",
+		"*string:*req.Subject:6774:ROUTE_1",
+		"*string:*req.Subject:22312:ROUTE_1",
+		"*string:*opts.Subsystems:*attributes:ROUTE_1",
+		"*prefix:*req.Destinations:+0775:ROUTE_1",
+		"*prefix:*req.Destinations:+442:ROUTE_1",
+		"*string:*req.Subject:1004:ROUTE_3",
+		"*string:*req.Subject:6774:ROUTE_3",
+		"*string:*req.Subject:22312:ROUTE_3",
+		"*string:*opts.Subsystems:*attributes:ROUTE_3",
+		"*prefix:*req.Destinations:+0775:ROUTE_3",
+		"*prefix:*req.Destinations:+442:ROUTE_3"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxRouteSRemoveRouteSNoIndexes(t *testing.T) {
+	// as we delete our RouteS, indexes will be deleted too
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveRouteProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ROUTE_1",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveRouteProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ROUTE_2",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveRouteProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "ROUTE_3",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//not found as we removed profiles
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaRoutes},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
+	// First we will set a filter for usage
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// Get filter for checking it's existence
+	var resultFltr *engine.Filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantID{Tenant: utils.CGRateSorg, ID: "fltr_for_attr"}, &resultFltr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(resultFltr, fltr.Filter) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(fltr.Filter), utils.ToJSON(resultFltr))
+	}
+
+	//we will set a StatProfile with our filter and check the indexes
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stat_1",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			QueueLength: 100,
+			TTL:         10000000000,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+			Stored:       true,
+			Weight:       30,
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:Stat_1",
+		"*string:*req.Subject:6774:Stat_1",
+		"*string:*req.Account:1001:Stat_1",
+		"*string:*req.Subject:22312:Stat_1",
+		"*string:*opts.Subsystems:*attributes:Stat_1",
+		"*prefix:*req.Destinations:+0775:Stat_1",
+		"*prefix:*req.Destinations:+442:Stat_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+	// update the filter for checking the indexes
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltrSameID, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// check the updated indexes
+	expectedIDx = []string{"*string:*req.Account:1001:Stat_1",
+		"*string:*req.CGRID:QWEASDZXC:Stat_1",
+		"*string:*req.CGRID:IOPJKLBNM:Stat_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+	// back to our initial filter
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+}
+
+func testV1FIdxSetStatSMoreFltrsMoreIndexing(t *testing.T) {
+	// more filters for our StatsProfile
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
+		fltr2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply result", reply)
+	}
+
+	// update our StatsProfile with our filters
+	sqPrf := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stat_1",
+			FilterIDs: []string{"fltr_for_attr",
+				"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			QueueLength: 100,
+			TTL:         10000000000,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+				{
+					MetricID: utils.MetaASR,
+				},
+			},
+			Stored:       true,
+			Weight:       30,
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	// check indexes
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Subject:1004:Stat_1",
+		"*string:*req.Subject:6774:Stat_1",
+		"*string:*req.Subject:22312:Stat_1",
+		"*string:*opts.Subsystems:*attributes:Stat_1",
+		"*prefix:*req.Destinations:+0775:Stat_1",
+		"*prefix:*req.Destinations:+442:Stat_1",
+		"*string:*req.Usage:123s:Stat_1",
+		"*string:*req.Account:1001:Stat_1",
+		"*prefix:*req.AnswerTime:12:Stat_1",
+		"*prefix:*req.AnswerTime:33:Stat_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(replyIdx)
+		sort.Strings(expectedIDx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxStatSProfileRemoveIndexes(t *testing.T) {
+	var reply string
+	var replyIdx []string
+	//indexes will be removed
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected %T, received %T", utils.ErrNotFound, err)
+	}
+}
+
+func testV1FIdxStatSProfileComputeIndexes(t *testing.T) {
+	// compute our indexes
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexes,
+		&utils.ArgsComputeFilterIndexes{Tenant: utils.CGRateSorg, StatS: true}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	var replyIdx []string
+
+	//matching indexes
+	expectedIDx := []string{"*string:*req.Subject:1004:Stat_1",
+		"*string:*req.Subject:6774:Stat_1",
+		"*string:*req.Subject:22312:Stat_1",
+		"*string:*opts.Subsystems:*attributes:Stat_1",
+		"*prefix:*req.Destinations:+0775:Stat_1",
+		"*prefix:*req.Destinations:+442:Stat_1",
+		"*string:*req.Usage:123s:Stat_1",
+		"*string:*req.Account:1001:Stat_1",
+		"*prefix:*req.AnswerTime:12:Stat_1",
+		"*prefix:*req.AnswerTime:33:Stat_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", expectedIDx, replyIdx)
+		}
+	}
+}
+
+func testV1FIdxStatSMoreProfilesForFltrs(t *testing.T) {
+	// will add more stats with our filters for matching indexes
+	sqPrf1 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stat_2",
+			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
+				"*string:~*req.Account:1001"},
+			QueueLength: 100,
+			TTL:         10000000000,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaACD,
+				},
+			},
+			Stored:       true,
+			Weight:       30,
+			ThresholdIDs: []string{utils.MetaNone},
+		},
+	}
+	sqPrf2 := &engine.StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "Stat_3",
+			FilterIDs: []string{"fltr_for_attr",
+				"*string:~*req.Account:1001"},
+			QueueLength: 1000,
+			TTL:         0,
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID: utils.MetaTCC,
+				},
+			},
+		},
+	}
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf1, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetStatQueueProfile,
+		sqPrf2, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	var replyIdx []string
+	expectedIDx := []string{"*string:*req.Account:1001:Stat_2",
+		"*string:*req.Account:1001:Stat_3",
+		"*string:*req.Account:1001:Stat_1",
+		"*prefix:*req.AnswerTime:12:Stat_2",
+		"*prefix:*req.AnswerTime:33:Stat_2",
+		"*prefix:*req.AnswerTime:12:Stat_1",
+		"*prefix:*req.AnswerTime:33:Stat_1",
+		"*string:*req.Usage:123s:Stat_2",
+		"*string:*req.Usage:123s:Stat_1",
+		"*string:*req.Subject:1004:Stat_1",
+		"*string:*req.Subject:6774:Stat_1",
+		"*string:*req.Subject:22312:Stat_1",
+		"*string:*opts.Subsystems:*attributes:Stat_1",
+		"*prefix:*req.Destinations:+0775:Stat_1",
+		"*prefix:*req.Destinations:+442:Stat_1",
+		"*string:*req.Subject:1004:Stat_3",
+		"*string:*req.Subject:6774:Stat_3",
+		"*string:*req.Subject:22312:Stat_3",
+		"*string:*opts.Subsystems:*attributes:Stat_3",
+		"*prefix:*req.Destinations:+0775:Stat_3",
+		"*prefix:*req.Destinations:+442:Stat_3"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxStatSRemoveComputedIndexesIDs(t *testing.T) {
+	// indexes will be removed again
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilterIndexes,
+		&AttrRemFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("UNexpected reply returned")
+	}
+	//not found
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	// now we will ComputeFilterIndexes by IDs(2 of the 3 profiles)
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			StatIDs: []string{"Stat_1", "Stat_2"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expectedIDx := []string{"*string:*req.Account:1001:Stat_2",
+		"*string:*req.Account:1001:Stat_1",
+		"*prefix:*req.AnswerTime:12:Stat_2",
+		"*prefix:*req.AnswerTime:33:Stat_2",
+		"*prefix:*req.AnswerTime:12:Stat_1",
+		"*prefix:*req.AnswerTime:33:Stat_1",
+		"*string:*req.Usage:123s:Stat_2",
+		"*string:*req.Usage:123s:Stat_1",
+		"*string:*req.Subject:1004:Stat_1",
+		"*string:*req.Subject:6774:Stat_1",
+		"*string:*req.Subject:22312:Stat_1",
+		"*string:*opts.Subsystems:*attributes:Stat_1",
+		"*prefix:*req.Destinations:+0775:Stat_1",
+		"*prefix:*req.Destinations:+442:Stat_1"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+
+	//now we will ComputeFilterIndexes of the remain profile
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1ComputeFilterIndexIDs,
+		&utils.ArgsComputeFilterIndexIDs{Tenant: utils.CGRateSorg,
+			StatIDs: []string{"Stat_3"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned")
+	}
+	expectedIDx = []string{"*string:*req.Account:1001:Stat_2",
+		"*string:*req.Account:1001:Stat_3",
+		"*string:*req.Account:1001:Stat_1",
+		"*prefix:*req.AnswerTime:12:Stat_2",
+		"*prefix:*req.AnswerTime:33:Stat_2",
+		"*prefix:*req.AnswerTime:12:Stat_1",
+		"*prefix:*req.AnswerTime:33:Stat_1",
+		"*string:*req.Usage:123s:Stat_2",
+		"*string:*req.Usage:123s:Stat_1",
+		"*string:*req.Subject:1004:Stat_1",
+		"*string:*req.Subject:6774:Stat_1",
+		"*string:*req.Subject:22312:Stat_1",
+		"*string:*opts.Subsystems:*attributes:Stat_1",
+		"*prefix:*req.Destinations:+0775:Stat_1",
+		"*prefix:*req.Destinations:+442:Stat_1",
+		"*string:*req.Subject:1004:Stat_3",
+		"*string:*req.Subject:6774:Stat_3",
+		"*string:*req.Subject:22312:Stat_3",
+		"*string:*opts.Subsystems:*attributes:Stat_3",
+		"*prefix:*req.Destinations:+0775:Stat_3",
+		"*prefix:*req.Destinations:+442:Stat_3"}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats}, &replyIdx); err != nil {
+		t.Error(err)
+	} else {
+		sort.Strings(expectedIDx)
+		sort.Strings(replyIdx)
+		if !reflect.DeepEqual(expectedIDx, replyIdx) {
+			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedIDx), utils.ToJSON(replyIdx))
+		}
+	}
+}
+
+func testV1FIdxStatSRemoveStatSNoIndexes(t *testing.T) {
+	// as we delete our RouteS, indexes will be deleted too
+	var reply string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "Stat_1",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "Stat_2",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveStatQueueProfile,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{ID: "Stat_3",
+			Tenant: utils.CGRateSorg}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected %+v \n, received %+v", utils.OK, reply)
+	}
+
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1RemoveFilter,
+		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: utils.CGRateSorg,
+			ID: "fltr_for_attr"}}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	//not found as we removed profiles
+	var replyIdx []string
+	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
+		&AttrGetFilterIndexes{Tenant: utils.CGRateSorg, ItemType: utils.MetaStats},
+		&replyIdx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
 }
 
 func testV1FIdxStopEngine(t *testing.T) {
