@@ -103,11 +103,6 @@ func (dspS *RegistrarCService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (dspS *RegistrarCService) ShouldRun() bool {
-	if len(dspS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
-		return true
-	}
-	if len(dspS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
-		return true
-	}
-	return false
+	return len(dspS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 ||
+		len(dspS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0
 }
