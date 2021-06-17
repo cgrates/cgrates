@@ -107,18 +107,6 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.
 		ec.Rating[ratingID] = &utils.RateSInterval{
 			Increments: []*utils.RateSIncrement{
 				{
-					/*
-						Rate: &utils.Rate{
-							ID: utils.MetaCostIncrement,
-							IntervalRates: []*utils.IntervalRate{
-								{
-									FixedFee:     costIcrm.FixedFee,
-									RecurrentFee: costIcrm.RecurrentFee,
-								},
-							},
-						},
-
-					*/
 					RateID:         rateID,
 					CompressFactor: 1,
 				},

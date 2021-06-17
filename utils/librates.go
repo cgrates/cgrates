@@ -511,25 +511,13 @@ func (rI *RateSIncrement) Equals(rtIn *RateSIncrement, rIRef, rtInRef map[string
 
 // RateProfileCost is the cost returned by RateS at cost queries
 type RateProfileCost struct {
-	ID              string // RateProfileID
-	Cost            float64
-	MinCost         float64
-	MaxCost         float64
+	ID              string  // RateProfileID
+	Cost            float64 // fix here with Decimal
+	MinCost         float64 // move to decimal
+	MaxCost         float64 // move to decimal
 	MaxCostStrategy string
 	RateSIntervals  []*RateSInterval
 	Rates           map[string]*IntervalRate
-	Altered         []string
-}
-
-// RateProfileCost is the cost returned by RateS at cost queries
-type ExtRateProfileCost struct {
-	ID              string // RateProfileID
-	Cost            float64
-	MinCost         float64
-	MaxCost         float64
-	MaxCostStrategy string
-	RateSIntervals  []*ExtRateSInterval
-	Rates           map[string]*ExtIntervalRate
 	Altered         []string
 }
 
@@ -569,6 +557,37 @@ func (rpC *RateProfileCost) AsExtRateProfileCost() (exRt *ExtRateProfileCost, er
 		}
 	}
 	return
+}
+
+// RateProfileCost is the cost returned by RateS at cost queries
+type ExtRateProfileCost struct {
+	ID              string // RateProfileID
+	Cost            float64
+	MinCost         float64
+	MaxCost         float64
+	MaxCostStrategy string
+	RateSIntervals  []*ExtRateSInterval
+	CostIntervals   []*RateSIntervalCost // new
+	Rates           map[string]*ExtIntervalRate
+	Altered         []string
+}
+
+// RateSIntervalCost is used in the RateProfileCost to reflect the RateSInterval used
+type RateSIntervalCost struct {
+	Increments     []*RateSIncrementCost
+	CompressFactor int64
+
+	cost *decimal.Big // unexported total interval cost
+}
+
+// RateSIncrementCost is used in the RateProfileCost to reflect RateSIncremen
+type RateSIncrementCost struct {
+	Usage             *float64
+	RateID            string
+	IntervalRateIndex int
+	CompressFactor    int64
+
+	cost *decimal.Big // unexported total increment cost
 }
 
 /*

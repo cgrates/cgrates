@@ -167,6 +167,8 @@ func TestRateProfileCostForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expRpCostAfterV1), utils.ToJSON(expectedRPCost))
 	}
 
+	//fmt.Printf("received costV1: \n%s\n", utils.ToIJSON(expectedRPCost))
+
 	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
 		t.Error(err)
 	}
