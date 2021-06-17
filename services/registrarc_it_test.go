@@ -89,9 +89,10 @@ func TestDispatcherHReload(t *testing.T) {
 	if err != nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
+	cfg.RegistrarCCfg().RPC.RegistrarSConns = nil
+	cfg.RegistrarCCfg().Dispatchers.RegistrarSConns = nil
 	cfg.GetReloadChan(config.RegistrarCJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-	srv.Shutdown()
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
