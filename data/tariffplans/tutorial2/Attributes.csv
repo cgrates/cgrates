@@ -1,7 +1,8 @@
 # Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
 
 # CRG_RESELLER1 replaces Category->reseller1 and RequestType->*rated for *sessions and *cdrs events
-cgrates.org,ATTR_CRG_SUPPLIER1,*sessions;*cdrs,,,,*req.Category,*constant,reseller1,false,0
+cgrates.org,ATTR_CRG_SUPPLIER1,*sessions;*cdrs,,,,,,,false,0
+cgrates.org,ATTR_CRG_SUPPLIER1,,,,,*req.Category,*constant,reseller1,,
 cgrates.org,ATTR_CRG_SUPPLIER1,,,,,*req.RequestType,*constant,*rated,,
 
 # ATTR_1001_AUTH returns the Password value for the account 1001 in context <auth>
