@@ -44,9 +44,8 @@ func TestHealthAccountAction(t *testing.T) {
 	}
 
 	exp := &AccountActionPlanIHReply{
-		MissingActionPlans:        []string{"AP1"},
-		MissingAccountActionPlans: map[string][]string{"AP2": {"1002"}},
-		BrokenReferences:          map[string][]string{"AP2": {"1001"}},
+		MissingAccountActionPlans: map[string][]string{"1002": {"AP2"}},             // 1
+		BrokenReferences:          map[string][]string{"AP2": {"1001"}, "AP1": nil}, // 2
 	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
