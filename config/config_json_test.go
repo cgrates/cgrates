@@ -490,7 +490,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Enabled:                    utils.BoolPointer(false),
 		Thresholds_conns:           &[]string{},
 		Stats_conns:                &[]string{},
-		CacheS_conns:               &[]string{utils.MetaInternal},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{

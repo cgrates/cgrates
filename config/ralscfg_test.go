@@ -84,8 +84,7 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 	"rals": {
 		"enabled": false,						
 		"thresholds_conns": [],					
-		"stats_conns": [],						
-		"caches_conns":["*internal"],			
+		"stats_conns": [],									
 		"rp_subject_prefix_matching": false,	
 		"remove_expired":true,					
 		"max_computed_usage": {					
@@ -107,7 +106,6 @@ func TestRalsCfgAsMapInterface(t *testing.T) {
 		"enabled":                    false,
 		"thresholds_conns":           []string{},
 		"stats_conns":                []string{},
-		"caches_conns":               []string{"*internal"},
 		"rp_subject_prefix_matching": false,
 		"remove_expired":             true,
 		"max_computed_usage": map[string]interface{}{

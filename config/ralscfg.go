@@ -20,7 +20,6 @@ package config
 
 import (
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -31,7 +30,6 @@ type RalsCfg struct {
 	Enabled                 bool     // start standalone server (no balancer)
 	ThresholdSConns         []string // address where to reach ThresholdS config
 	StatSConns              []string
-	CacheSConns             []string
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
 	RemoveExpired           bool
 	MaxComputedUsage        map[string]time.Duration
@@ -66,17 +64,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
 			} else {
 				ralsCfg.StatSConns[idx] = conn
-			}
-		}
-	}
-	if jsnRALsCfg.CacheS_conns != nil {
-		ralsCfg.CacheSConns = make([]string, len(*jsnRALsCfg.CacheS_conns))
-		for idx, conn := range *jsnRALsCfg.CacheS_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			if conn == utils.MetaInternal {
-				ralsCfg.CacheSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-			} else {
-				ralsCfg.CacheSConns[idx] = conn
 			}
 		}
 	}
@@ -115,16 +102,6 @@ func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
 		}
 	}
 
-	cacheSConns := make([]string, len(ralsCfg.CacheSConns))
-	for i, item := range ralsCfg.CacheSConns {
-		buf := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
-		if item == buf {
-			cacheSConns[i] = strings.ReplaceAll(item, ":*caches", utils.EmptyString)
-		} else {
-			cacheSConns[i] = item
-		}
-	}
-
 	balanceRating := make(map[string]interface{})
 	for key, item := range ralsCfg.BalanceRatingSubject {
 		balanceRating[key] = item
@@ -134,7 +111,6 @@ func (ralsCfg *RalsCfg) AsMapInterface() map[string]interface{} {
 		utils.EnabledCfg:                 ralsCfg.Enabled,
 		utils.ThresholdSConnsCfg:         ralsCfg.ThresholdSConns,
 		utils.StatSConnsCfg:              ralsCfg.StatSConns,
-		utils.CacheSConnsCfg:             cacheSConns,
 		utils.RpSubjectPrefixMatchingCfg: ralsCfg.RpSubjectPrefixMatching,
 		utils.RemoveExpiredCfg:           ralsCfg.RemoveExpired,
 		utils.MaxComputedUsageCfg:        maxComputed,

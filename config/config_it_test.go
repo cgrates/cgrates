@@ -352,7 +352,6 @@ func testCGRConfigReloadRALs(t *testing.T) {
 		RemoveExpired:           true,
 		MaxComputedUsage:        maxComp,
 		BalanceRatingSubject:    blMap,
-		CacheSConns:             []string{utils.MetaInternal + utils.InInFieldSep + utils.MetaCaches},
 		ThresholdSConns:         []string{utils.MetaLocalHost},
 		StatSConns:              []string{utils.MetaLocalHost},
 		MaxIncrements:           1000000,
