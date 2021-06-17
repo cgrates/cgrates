@@ -126,7 +126,10 @@ func TestHealthAccountAction4(t *testing.T) {
 	db := NewInternalDB(nil, nil, true)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
-	if err := dm.SetAccountActionPlans("1002", []string{"AP2"}, true); err != nil {
+	if err := dm.SetAccountActionPlans("1002", []string{"AP2", "AP1"}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetAccountActionPlans("1001", []string{"AP2"}, true); err != nil {
 		t.Fatal(err)
 	}
 	if err := dm.SetActionPlan("AP1", &ActionPlan{
@@ -147,7 +150,7 @@ func TestHealthAccountAction4(t *testing.T) {
 	exp := &IndexHealthReply{
 		MissingObjects:   []string{},
 		MissingIndexes:   map[string][]string{},
-		BrokenReferences: map[string][]string{"AP2": {"1001"}, "AP1": {"1002"}},
+		BrokenReferences: map[string][]string{"AP2": {"1002"}},
 	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
