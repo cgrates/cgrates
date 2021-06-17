@@ -43,10 +43,10 @@ func TestHealthAccountAction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exp := &IndexHealthReply{
-		MissingObjects:   []string{"AP1"},
-		MissingIndexes:   map[string][]string{"AP2": {"1002"}},
-		BrokenReferences: map[string][]string{"AP2": {"1001"}},
+	exp := &AccountActionPlanIHReply{
+		MissingActionPlans:        []string{"AP1"},
+		MissingAccountActionPlans: map[string][]string{"AP2": {"1002"}},
+		BrokenReferences:          map[string][]string{"AP2": {"1001"}},
 	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
@@ -72,10 +72,10 @@ func TestHealthAccountAction2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exp := &IndexHealthReply{
-		MissingObjects:   []string{"AP1"},
-		MissingIndexes:   map[string][]string{},
-		BrokenReferences: map[string][]string{},
+	exp := &AccountActionPlanIHReply{
+		MissingActionPlans:        []string{"AP1"},
+		MissingAccountActionPlans: map[string][]string{},
+		BrokenReferences:          map[string][]string{},
 	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
@@ -108,10 +108,10 @@ func TestHealthAccountAction3(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exp := &IndexHealthReply{
-		MissingObjects:   []string{},
-		MissingIndexes:   map[string][]string{"AP2": {"1002"}},
-		BrokenReferences: map[string][]string{},
+	exp := &AccountActionPlanIHReply{
+		MissingActionPlans:        []string{},
+		MissingAccountActionPlans: map[string][]string{"AP2": {"1002"}},
+		BrokenReferences:          map[string][]string{},
 	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
@@ -147,10 +147,10 @@ func TestHealthAccountAction4(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exp := &IndexHealthReply{
-		MissingObjects:   []string{},
-		MissingIndexes:   map[string][]string{},
-		BrokenReferences: map[string][]string{"AP2": {"1002"}},
+	exp := &AccountActionPlanIHReply{
+		MissingActionPlans:        []string{},
+		MissingAccountActionPlans: map[string][]string{},
+		BrokenReferences:          map[string][]string{"AP2": {"1002"}},
 	}
 	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
