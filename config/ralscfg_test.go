@@ -30,7 +30,6 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		Enabled:                    utils.BoolPointer(true),
 		Thresholds_conns:           &[]string{utils.MetaInternal, "*conn1"},
 		Stats_conns:                &[]string{utils.MetaInternal, "*conn1"},
-		CacheS_conns:               &[]string{utils.MetaInternal, "*conn1"},
 		Rp_subject_prefix_matching: utils.BoolPointer(true),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
@@ -50,7 +49,6 @@ func TestRalsCfgFromJsonCfgCase1(t *testing.T) {
 		Enabled:                 true,
 		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
@@ -105,7 +103,6 @@ func TestRalsCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EnabledCfg:                 true,
 		utils.ThresholdSConnsCfg:         []string{utils.MetaInternal, "*conn1"},
 		utils.StatSConnsCfg:              []string{utils.MetaInternal, "*conn1"},
-		utils.CachesConnsCfg:             []string{utils.MetaInternal, "*conn1"},
 		utils.RpSubjectPrefixMatchingCfg: true,
 		utils.RemoveExpiredCfg:           true,
 		utils.MaxComputedUsageCfg: map[string]interface{}{
@@ -139,7 +136,6 @@ func TestRalsCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EnabledCfg:                 false,
 		utils.ThresholdSConnsCfg:         []string{},
 		utils.StatSConnsCfg:              []string{utils.MetaInternal},
-		utils.CachesConnsCfg:             []string{"*conn1"},
 		utils.RpSubjectPrefixMatchingCfg: false,
 		utils.RemoveExpiredCfg:           true,
 		utils.MaxComputedUsageCfg: map[string]interface{}{
@@ -167,7 +163,6 @@ func TestRalsCfgClone(t *testing.T) {
 		Enabled:                 true,
 		ThresholdSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		StatSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		CacheSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches), "*conn1"},
 		RpSubjectPrefixMatching: true,
 		RemoveExpired:           true,
 		MaxComputedUsage: map[string]time.Duration{
@@ -191,9 +186,6 @@ func TestRalsCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
-		t.Errorf("Expected clone to not modify the cloned")
-	}
-	if rcv.CacheSConns[1] = ""; ban.CacheSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.MaxComputedUsage[utils.MetaAny] = 0; ban.MaxComputedUsage[utils.MetaAny] != 189*time.Hour {

@@ -120,7 +120,6 @@ type RalsJsonCfg struct {
 	Enabled                    *bool
 	Thresholds_conns           *[]string
 	Stats_conns                *[]string
-	CacheS_conns               *[]string
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
