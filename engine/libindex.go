@@ -831,14 +831,14 @@ type IndexHealthArgs struct {
 	ObjectCacheStaticTTL bool
 }
 
-type IndexHealthReply struct {
-	MissingObjects   []string            // list of object that are referenced in indexes but are not found in the dataDB
-	MissingIndexes   map[string][]string // list of missing indexes for each object (the map has the key as the objectID and a list of indexes)
-	BrokenReferences map[string][]string // list of broken references (the map has the key as the objectID and a list of indexes)
+type AccountActionPlanIHReply struct {
+	MissingActionPlans        []string            // list of object that are referenced in indexes but are not found in the dataDB
+	MissingAccountActionPlans map[string][]string // list of missing indexes for each object (the map has the key as the objectID and a list of indexes)
+	BrokenReferences          map[string][]string // list of broken references (the map has the key as the objectID and a list of indexes)
 }
 
 // add cache in args API
-func GetAccountActionPlanIndexHealth(dm *DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL bool) (rply *IndexHealthReply, err error) {
+func GetAccountActionPlanIndexHealth(dm *DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL bool) (rply *AccountActionPlanIHReply, err error) {
 	// posible errors
 	missingAP := utils.StringSet{}        // the index are present but the action plans are not //missing actionplans
 	brokenRef := map[string][]string{}    // the actionPlans match the index but they are missing the account // broken reference
@@ -943,10 +943,10 @@ func GetAccountActionPlanIndexHealth(dm *DataManager, objLimit, indexLimit int, 
 		}
 	}
 
-	rply = &IndexHealthReply{
-		MissingObjects:   missingAP.AsSlice(),
-		MissingIndexes:   missingIndex,
-		BrokenReferences: brokenRef,
+	rply = &AccountActionPlanIHReply{
+		MissingActionPlans:        missingAP.AsSlice(),
+		MissingAccountActionPlans: missingIndex,
+		BrokenReferences:          brokenRef,
 	}
 	return
 }
