@@ -30,7 +30,6 @@ type RalsCfg struct {
 	Enabled                 bool     // start standalone server (no balancer)
 	ThresholdSConns         []string // address where to reach ThresholdS config
 	StatSConns              []string
-	CacheSConns             []string
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
 	RemoveExpired           bool
 	MaxComputedUsage        map[string]time.Duration
@@ -63,16 +62,6 @@ func (ralsCfg *RalsCfg) loadFromJSONCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 			ralsCfg.StatSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
-			}
-		}
-	}
-	if jsnRALsCfg.CacheS_conns != nil {
-		ralsCfg.CacheSConns = make([]string, len(*jsnRALsCfg.CacheS_conns))
-		for idx, conn := range *jsnRALsCfg.CacheS_conns {
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			ralsCfg.CacheSConns[idx] = conn
-			if conn == utils.MetaInternal {
-				ralsCfg.CacheSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
 			}
 		}
 	}
@@ -129,16 +118,6 @@ func (ralsCfg *RalsCfg) AsMapInterface() (initialMP map[string]interface{}) {
 		}
 		initialMP[utils.StatSConnsCfg] = statS
 	}
-	if ralsCfg.CacheSConns != nil {
-		cacheSConns := make([]string, len(ralsCfg.CacheSConns))
-		for i, item := range ralsCfg.CacheSConns {
-			cacheSConns[i] = item
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches) {
-				cacheSConns[i] = utils.MetaInternal
-			}
-		}
-		initialMP[utils.CachesConnsCfg] = cacheSConns
-	}
 	maxComputed := make(map[string]interface{})
 	for key, item := range ralsCfg.MaxComputedUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {
@@ -177,12 +156,6 @@ func (ralsCfg RalsCfg) Clone() (cln *RalsCfg) {
 		cln.StatSConns = make([]string, len(ralsCfg.StatSConns))
 		for i, con := range ralsCfg.StatSConns {
 			cln.StatSConns[i] = con
-		}
-	}
-	if ralsCfg.CacheSConns != nil {
-		cln.CacheSConns = make([]string, len(ralsCfg.CacheSConns))
-		for i, con := range ralsCfg.CacheSConns {
-			cln.CacheSConns[i] = con
 		}
 	}
 
