@@ -69,12 +69,16 @@ var (
 		testConsoleItResourcesProfileSet,
 		testConsoleItResourcesForEvent,
 		testConsoleItResourcesAllocate,
-
+		testConsoleItChargersProfile,
+		testConsoleItChargersForEvent,
+		testConsoleItChargersProfileIds,
+		// testConsoleItChargersProcessEvent,
 		testConsoleItResourcesAuthorize,
 		testConsoleItRouteProfileIds,
 		testConsoleItRoutesProfilesForEvent,
 		testConsoleItRoutesProfile,
 		testConsoleItRoutes,
+		testConsoleItComputeFilterIndexes,
 		testConsoleItCacheReload,
 		testConsoleItAttributesProfileIds,
 		testConsoleItAttributesProfileSet,
@@ -90,11 +94,22 @@ var (
 		testConsoleItStatsProcessEvent,
 		testConsoleItGetJsonSection,
 		testConsoleItStatus,
+		testConsoleItStordbVersions,
+		testConsoleItDataDbVersions,
 		testConsoleItCacheRemoveItem,
+		testConsoleItCacheHasGroup,
 		testConsoleItFilter,
 		testConsoleItPing,
+		testConsoleItLoadTpFromFolder,
+		testConsoleItImportTpFromFolder,
+		testConsoleItAccounts,
+		testConsoleItAccountRemove,
+		// testConsoleItGetLoadIds,
+		// testConsoleItSessionAuthorizeEvent,
+		testConsoleItCachePrecacheStatus,
 		testConsoleItSessionUpdate,
-		testConsoleItCacheStats,
+		testConsoleItCacheRemoveGroup,
+		// testConsoleItCacheStats,
 		testConsoleItReloadConfig,
 		testConsoleItKillEngine,
 	}
@@ -1526,6 +1541,598 @@ func testConsoleItSessionUpdate(t *testing.T) {
 	sort.Slice(rcv["Attributes"].(map[string]interface{})["AlteredFields"], func(i, j int) bool {
 		return utils.IfaceAsString(rcv["Attributes"].(map[string]interface{})["AlteredFields"].([]interface{})[i]) < utils.IfaceAsString(rcv["Attributes"].(map[string]interface{})["AlteredFields"].([]interface{})[j])
 	})
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItLoadTpFromFolder(t *testing.T) {
+	cmd := exec.Command("cgr-console", "load_tp_from_folder", `FolderPath="/usr/share/cgrates/tariffplans/tutorial"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItSessionAuthorizeEvent(t *testing.T) {
+	cmd := exec.Command("cgr-console", "session_authorize_event", `GetAttributes=true`, `Event={"Account":"1001"}`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"AttributesDigest":   "RequestType:*prepaid,LCRProfile:premium_cli,Password:CGRateS.org,PaypalAccount:cgrates@paypal.com",
+		"ResourceAllocation": nil,
+		"MaxUsage":           0.,
+		"RoutesDigest":       nil,
+		"Thresholds":         nil,
+		"StatQueues":         nil,
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItCacheRemoveGroup(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cache_remove_group", `Tenant="cgrates.org"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItChargersProfile(t *testing.T) {
+	cmd := exec.Command("cgr-console", "chargers_profile", `ID="DEFAULT"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"Tenant":             "cgrates.org",
+		"ID":                 "DEFAULT",
+		"FilterIDs":          []interface{}{},
+		"ActivationInterval": nil,
+		"RunID":              "*default",
+		"AttributeIDs":       []interface{}{"*none"},
+		"Weight":             0.,
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItComputeFilterIndexes(t *testing.T) {
+	cmd := exec.Command("cgr-console", "compute_filter_indexes", `AttributeS=true`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItStordbVersions(t *testing.T) {
+	cmd := exec.Command("cgr-console", "stordb_versions")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"CDRs":               2.,
+		"CostDetails":        2.,
+		"SessionSCosts":      3.,
+		"TpAccountActions":   1.,
+		"TpActionPlans":      1.,
+		"TpActionTriggers":   1.,
+		"TpActions":          1.,
+		"TpChargers":         1.,
+		"TpDestinationRates": 1.,
+		"TpDestinations":     1.,
+		"TpDispatchers":      1.,
+		"TpFilters":          1.,
+		"TpRates":            1.,
+		"TpRatingPlan":       1.,
+		"TpRatingPlans":      1.,
+		"TpRatingProfile":    1.,
+		"TpRatingProfiles":   1.,
+		"TpResource":         1.,
+		"TpResources":        1.,
+		"TpRoutes":           1.,
+		"TpSharedGroups":     1.,
+		"TpStats":            1.,
+		"TpThresholds":       1.,
+		"TpTiming":           1.,
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItImportTpFromFolder(t *testing.T) {
+	cmd := exec.Command("cgr-console", "import_tp_from_folder", `FolderPath="/usr/share/cgrates/tariffplans/tutorial"`, `TPid="1"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItGetLoadIds(t *testing.T) {
+	cmd := exec.Command("cgr-console", "get_load_ids")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"*account_action_plans":     1623999496901979465.,
+		"*action_plans":             1623999496901979465.,
+		"*actions":                  1623999496901979465.,
+		"*attribute_filter_indexes": 1624000368689311968.,
+		"*attribute_profiles":       1623999496901979465.,
+		"*charger_profiles":         1623999496901979465.,
+		"*destinations":             1623999496901979465.,
+		"*filters":                  1623999496901979465.,
+		"*rating_plans":             1623999496901979465.,
+		"*rating_profiles":          1623999496901979465.,
+		"*resource_profiles":        1623999496901979465.,
+		"*resources":                1623999496901979465.,
+		"*reverse_destinations":     1623999496901979465.,
+		"*route_profiles":           1623999496901979465.,
+		"*statqueue_profiles":       1623999496901979465.,
+		"*statqueues":               1623999496901979465.,
+		"*threshold_profiles":       1623999496901979465.,
+		"*thresholds":               1623999496901979465.,
+		"*timings":                  1623999496901979465.,
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItChargersForEvent(t *testing.T) {
+	cmd := exec.Command("cgr-console", "chargers_for_event")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		map[string]interface{}{
+			"Tenant":             "cgrates.org",
+			"ID":                 "DEFAULT",
+			"FilterIDs":          []interface{}{},
+			"ActivationInterval": nil,
+			"RunID":              "*default",
+			"AttributeIDs":       []interface{}{"*none"},
+			"Weight":             0.,
+		},
+		map[string]interface{}{
+			"Tenant":             "cgrates.org",
+			"ID":                 "Raw",
+			"FilterIDs":          []interface{}{},
+			"ActivationInterval": nil,
+			"RunID":              "*raw",
+			"AttributeIDs":       []interface{}{"*constant:*req.RequestType:*none"},
+			"Weight":             0.,
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return utils.IfaceAsString(rcv[i].(map[string]interface{})["ID"]) < utils.IfaceAsString(rcv[j].(map[string]interface{})["ID"])
+	})
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItAccounts(t *testing.T) {
+	cmd := exec.Command("cgr-console", "accounts", `AccountIDs=["1001"]`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		map[string]interface{}{
+			"ActionTriggers": nil,
+			"AllowNegative":  false,
+			"BalanceMap": map[string]interface{}{
+				"*monetary": []interface{}{
+					map[string]interface{}{
+						"Blocker":        false,
+						"Categories":     map[string]interface{}{},
+						"DestinationIDs": map[string]interface{}{},
+						"Disabled":       false,
+						"ExpirationDate": "0001-01-01T00:00:00Z",
+						"Factor":         nil,
+						"ID":             "test",
+						"RatingSubject":  "",
+						"SharedGroups":   map[string]interface{}{},
+						"TimingIDs":      map[string]interface{}{},
+						"Timings":        nil,
+						"Uuid":           "",
+						"Value":          10.,
+						"Weight":         10.,
+					},
+				},
+			},
+			"Disabled":     false,
+			"ID":           "cgrates.org:1001",
+			"UnitCounters": nil,
+			"UpdateTime":   "",
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	rcv[0].(map[string]interface{})["BalanceMap"].(map[string]interface{})["*monetary"].([]interface{})[0].(map[string]interface{})["Uuid"] = ""
+	rcv[0].(map[string]interface{})["UpdateTime"] = ""
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItAccountRemove(t *testing.T) {
+	cmd := exec.Command("cgr-console", "account_remove", `Account="1002"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItCacheHasGroup(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cache_has_group")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := false
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv bool
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", expected, rcv)
+	}
+}
+
+func testConsoleItDataDbVersions(t *testing.T) {
+	cmd := exec.Command("cgr-console", "datadb_versions")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"Accounts":            3.,
+		"ActionPlans":         3.,
+		"ActionTriggers":      2.,
+		"Actions":             2.,
+		"Attributes":          6.,
+		"Chargers":            2.,
+		"Destinations":        1.,
+		"Dispatchers":         2.,
+		"LoadIDs":             1.,
+		"RQF":                 5.,
+		"RatingPlan":          1.,
+		"RatingProfile":       1.,
+		"Resource":            1.,
+		"ReverseDestinations": 1.,
+		"Routes":              2.,
+		"SharedGroups":        2.,
+		"Stats":               4.,
+		"Subscribers":         1.,
+		"Thresholds":          4.,
+		"Timing":              1.,
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItSessionInitiate(t *testing.T) {
+	cmd := exec.Command("cgr-console", "session_initiate", `GetAttributes=true`, `Event={"Account":"1001"}`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"AttributesDigest":   "Password:CGRateS.org,PaypalAccount:cgrates@paypal.com,RequestType:*prepaid,LCRProfile:premium_cli",
+		"MaxUsage":           "0s",
+		"ResourceAllocation": nil,
+		"StatQueues":         nil,
+		"Thresholds":         nil,
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItCachePrecacheStatus(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cache_precache_status")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"*account_action_plans":      "*ready",
+		"*accounts":                  "*ready",
+		"*action_plans":              "*ready",
+		"*action_triggers":           "*ready",
+		"*actions":                   "*ready",
+		"*apiban":                    "*ready",
+		"*attribute_filter_indexes":  "*ready",
+		"*attribute_profiles":        "*ready",
+		"*caps_events":               "*ready",
+		"*cdr_ids":                   "*ready",
+		"*cdrs":                      "*ready",
+		"*charger_filter_indexes":    "*ready",
+		"*charger_profiles":          "*ready",
+		"*closed_sessions":           "*ready",
+		"*destinations":              "*ready",
+		"*diameter_messages":         "*ready",
+		"*dispatcher_filter_indexes": "*ready",
+		"*dispatcher_hosts":          "*ready",
+		"*dispatcher_loads":          "*ready",
+		"*dispatcher_profiles":       "*ready",
+		"*dispatcher_routes":         "*ready",
+		"*dispatchers":               "*ready",
+		"*event_charges":             "*ready",
+		"*event_resources":           "*ready",
+		"*filters":                   "*ready",
+		"*load_ids":                  "*ready",
+		"*rating_plans":              "*ready",
+		"*rating_profiles":           "*ready",
+		"*replication_hosts":         "*ready",
+		"*resource_filter_indexes":   "*ready",
+		"*resource_profiles":         "*ready",
+		"*resources":                 "*ready",
+		"*reverse_destinations":      "*ready",
+		"*reverse_filter_indexes":    "*ready",
+		"*route_filter_indexes":      "*ready",
+		"*route_profiles":            "*ready",
+		"*rpc_connections":           "*ready",
+		"*rpc_responses":             "*ready",
+		"*session_costs":             "*ready",
+		"*shared_groups":             "*ready",
+		"*stat_filter_indexes":       "*ready",
+		"*statqueue_profiles":        "*ready",
+		"*statqueues":                "*ready",
+		"*stir":                      "*ready",
+		"*threshold_filter_indexes":  "*ready",
+		"*threshold_profiles":        "*ready",
+		"*thresholds":                "*ready",
+		"*timings":                   "*ready",
+		"*tmp_rating_profiles":       "*ready",
+		"*tp_account_actions":        "*ready",
+		"*tp_action_plans":           "*ready",
+		"*tp_action_triggers":        "*ready",
+		"*tp_actions":                "*ready",
+		"*tp_attributes":             "*ready",
+		"*tp_chargers":               "*ready",
+		"*tp_destination_rates":      "*ready",
+		"*tp_destinations":           "*ready",
+		"*tp_dispatcher_hosts":       "*ready",
+		"*tp_dispatcher_profiles":    "*ready",
+		"*tp_filters":                "*ready",
+		"*tp_rates":                  "*ready",
+		"*tp_rating_plans":           "*ready",
+		"*tp_rating_profiles":        "*ready",
+		"*tp_resources":              "*ready",
+		"*tp_routes":                 "*ready",
+		"*tp_shared_groups":          "*ready",
+		"*tp_stats":                  "*ready",
+		"*tp_thresholds":             "*ready",
+		"*tp_timings":                "*ready",
+		"*uch":                       "*ready",
+		"*versions":                  "*ready",
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItChargersProfileIds(t *testing.T) {
+	cmd := exec.Command("cgr-console", "chargers_profile_ids")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{"DEFAULT", "Raw"}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].(string) < rcv[j].(string)
+	})
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItChargersProcessEvent(t *testing.T) {
+	cmd := exec.Command("cgr-console", "chargers_process_event", `Event={"Account":"1001"}`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		map[string]interface{}{
+			"ChargerSProfile":    "DEFAULT",
+			"AttributeSProfiles": nil,
+			"AlteredFields":      []interface{}{"*req.RunID"},
+			"CGREvent": map[string]interface{}{
+				"Tenant": "cgrates.org",
+				"ID":     "",
+				"Time":   "",
+				"Event": map[string]interface{}{
+					"Account": "1001",
+					"RunID":   "*default",
+				},
+			},
+			"APIOpts": map[string]interface{}{
+				"*subsys": "*chargers",
+			},
+		},
+		map[string]interface{}{
+			"ChargerSProfile":    "Raw",
+			"AttributeSProfiles": []interface{}{"*constant:*req.RequestType:*none"},
+			"AlteredFields":      []interface{}{"*req.RunID", "*req.RequestType"},
+			"CGREvent": map[string]interface{}{
+				"Tenant": "cgrates.org",
+				"ID":     "",
+				"Time":   "",
+				"Event": map[string]interface{}{
+					"Account":     "1001",
+					"RequestType": "*none",
+					"RunID":       "*raw",
+				},
+			},
+			"APIOpts": map[string]interface{}{
+				"*subsys": "*chargers",
+			},
+		},
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Log(output.String())
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return utils.IfaceAsString(rcv[i].(map[string]interface{})["ChargerSProfile"]) < utils.IfaceAsString(rcv[j].(map[string]interface{})["ChargerSProfile"])
+	})
+	rcv[0].(map[string]interface{})["CGREvent"].(map[string]interface{})["Time"] = ""
+	rcv[1].(map[string]interface{})["CGREvent"].(map[string]interface{})["Time"] = ""
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
