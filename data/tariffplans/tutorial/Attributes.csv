@@ -28,7 +28,7 @@ cgrates.org,ATTR_ACC_ALIAS,*any,*string:~*req.SubscriberId:1006,,,,,,false,10
 cgrates.org,ATTR_ACC_ALIAS,,,,,*req.Account,*constant,1001,,
 cgrates.org,ATTR_ACC_ALIAS,,,,,*req.RequestType,*constant,*prepaid,,
 
-cgrates.com,ATTR_TNT_ALIAS,*any,*string:~*req.SubscriberId:1006,,,,,false,10
+cgrates.com,ATTR_TNT_ALIAS,*any,*string:~*req.SubscriberId:1006,,,,,,false,10
 cgrates.com,ATTR_TNT_ALIAS,,,,,*req.Account,*constant,1001,,
 cgrates.com,ATTR_TNT_ALIAS,,,,,*req.RequestType,*constant,*prepaid,,
 cgrates.com,ATTR_TNT_ALIAS,,,,,*tenant,*constant,cgrates.org,,
