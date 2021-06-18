@@ -516,86 +516,25 @@ type RateProfileCost struct {
 	MinCost         *Decimal
 	MaxCost         *Decimal
 	MaxCostStrategy string
-	RateSIntervals  []*RateSInterval
-	Rates           map[string]*IntervalRate
-	Altered         []string
-}
-
-// AsExtRateProfileCost converts RateProfileCost to ExtRateProfileCost
-func (rpC *RateProfileCost) AsExtRateProfileCost() (exRt *ExtRateProfileCost, err error) {
-	exRt = &ExtRateProfileCost{
-		ID:              rpC.ID,
-		MaxCostStrategy: rpC.MaxCostStrategy,
-	}
-	var ok bool
-	if rpC.Cost != nil {
-		if exRt.Cost, ok = rpC.Cost.Float64(); !ok {
-			fmt.Errorf("Cannot convert Cost %v into float", rpC.Cost)
-		}
-	}
-	if rpC.MinCost != nil {
-		if exRt.MinCost, ok = rpC.MinCost.Float64(); !ok {
-			fmt.Errorf("Cannot convert MinCost %v into float", rpC.MinCost)
-		}
-	}
-	if rpC.MaxCost != nil {
-		if exRt.MaxCost, ok = rpC.MaxCost.Float64(); !ok {
-			fmt.Errorf("Cannot convert MaxCost %v into float", rpC.MaxCost)
-		}
-	}
-	if rpC.RateSIntervals != nil {
-		exRt.RateSIntervals = make([]*ExtRateSInterval, len(rpC.RateSIntervals))
-		for idx, val := range rpC.RateSIntervals {
-			if rcvRtIntv, err := val.AsExtRateSInterval(); err != nil {
-				return nil, err
-			} else {
-				exRt.RateSIntervals[idx] = rcvRtIntv
-			}
-		}
-	}
-	if rpC.Rates != nil {
-		exRt.Rates = make(map[string]*ExtIntervalRate, len(rpC.Rates))
-		for key, val := range rpC.Rates {
-			if rcvRts, err := val.AsExtIntervalRate(); err != nil {
-				return nil, err
-			} else {
-				exRt.Rates[key] = rcvRts
-			}
-		}
-	}
-	if rpC.Altered != nil {
-		exRt.Altered = make([]string, len(rpC.Altered))
-		for idx, val := range rpC.Altered {
-			exRt.Altered[idx] = val
-		}
-	}
-	return
-}
-
-// RateProfileCost is the cost returned by RateS at cost queries
-type ExtRateProfileCost struct {
-	ID              string // RateProfileID
-	Cost            float64
-	MinCost         float64
-	MaxCost         float64
-	MaxCostStrategy string
-	RateSIntervals  []*ExtRateSInterval
-	CostIntervals   []*RateSIntervalCost // new
-	Rates           map[string]*ExtIntervalRate
-	Altered         []string
+	// RateSIntervals  []*RateSInterval
+	CostIntervals []*RateSIntervalCost
+	Rates         map[string]*IntervalRate
+	Altered       []string
 }
 
 // RateSIntervalCost is used in the RateProfileCost to reflect the RateSInterval used
 type RateSIntervalCost struct {
+	IntervalStart  *Decimal
 	Increments     []*RateSIncrementCost
 	CompressFactor int64
 
 	cost *decimal.Big // unexported total interval cost
 }
 
-// RateSIncrementCost is used in the RateProfileCost to reflect RateSIncremen
+// RateSIncrementCost is used in the RateProfileCost to reflect RateSIncrement
 type RateSIncrementCost struct {
-	Usage             *float64
+	IncrementStart    *Decimal
+	Usage             *Decimal
 	RateID            string
 	IntervalRateIndex int
 	CompressFactor    int64
@@ -603,7 +542,35 @@ type RateSIncrementCost struct {
 	cost *decimal.Big // unexported total increment cost
 }
 
-/*
+// Equals returns the equality between two RateSIntervalCost
+func (rIC *RateSIntervalCost) Equals(nRIc *RateSIntervalCost, rIlRef, nRilRef map[string]*IntervalRate) (eq bool) {
+	if (rIC.Increments != nil && rIC.Increments == nil ||
+		rIC.Increments == nil && nRIc.Increments != nil ||
+		len(rIC.Increments) != len(nRIc.Increments)) || rIC.CompressFactor != nRIc.CompressFactor {
+		return
+	}
+	if rIC.Increments != nil && nRIc.Increments != nil {
+		for i, rtIn := range rIC.Increments {
+			if !rtIn.Equals(nRIc.Increments[i], rIlRef, nRilRef) {
+				return
+			}
+		}
+	}
+	return true
+}
+
+// Equals returns the equality between two RateSIncrementCost
+func (rIncrC *RateSIncrementCost) Equals(nRi *RateSIncrementCost, rIRef, rtInRef map[string]*IntervalRate) (eq bool) {
+	return !((rIncrC.Usage == nil && nRi.Usage != nil) ||
+		(rIncrC.Usage != nil && nRi.Usage == nil) ||
+		(rIncrC.Usage != nil && nRi.Usage != nil &&
+			rIncrC.Usage.Compare(nRi.Usage) != 0) ||
+		rIncrC.CompressFactor != nRi.CompressFactor ||
+		rIncrC.IntervalRateIndex != nRi.IntervalRateIndex ||
+		!rIRef[rIncrC.RateID].Equals(rtInRef[nRi.RateID]))
+}
+
+/*rIncrC
 func (rpC *RateProfileCost) SynchronizeRateKeys(nRpCt *RateProfileCost) {
 	rts := make(map[string]*IntervalRate)
 	reverse := make(map[string]string)
@@ -635,49 +602,9 @@ func (rpC *RateProfileCost) Equals(nRpCt *RateProfileCost) (eq bool) {
 		rpC.MinCost != nRpCt.MinCost ||
 		rpC.MaxCost != nRpCt.MaxCost ||
 		rpC.MaxCostStrategy != nRpCt.MaxCostStrategy ||
-		(rpC.RateSIntervals != nil && nRpCt.RateSIntervals == nil ||
-			rpC.RateSIntervals == nil && nRpCt.RateSIntervals != nil ||
-			len(rpC.RateSIntervals) != len(nRpCt.RateSIntervals)) ||
-		(rpC.Rates != nil && nRpCt.Rates == nil ||
-			rpC.Rates == nil && nRpCt.Rates != nil ||
-			len(rpC.Rates) != len(nRpCt.Rates)) ||
-		(rpC.Altered != nil && nRpCt.Altered == nil ||
-			rpC.Altered == nil && nRpCt.Altered != nil ||
-			len(rpC.Altered) != len(nRpCt.Altered)) {
-		fmt.Printf("%T and %T \n", rpC.Cost, nRpCt.Cost)
-		return
-	}
-	for idx, val := range rpC.RateSIntervals {
-		if ok := val.Equals(nRpCt.RateSIntervals[idx], rpC.Rates, nRpCt.Rates); !ok {
-			return
-		}
-	}
-	/*
-		for key, val := range rpC.Rates {
-			if ok := val.Equals(nRpCt.Rates[key]); !ok {
-				return
-			}
-		}
-
-	*/
-	for idx, val := range rpC.Altered {
-		if val != nRpCt.Altered[idx] {
-			return
-		}
-	}
-	return true
-}
-
-// Equals returns the equality between two ExtRateProfileCost
-func (rpC *ExtRateProfileCost) Equals(nRpCt *ExtRateProfileCost) (eq bool) {
-	if rpC.ID != nRpCt.ID ||
-		rpC.Cost != nRpCt.Cost ||
-		rpC.MinCost != nRpCt.MinCost ||
-		rpC.MaxCost != nRpCt.MaxCost ||
-		rpC.MaxCostStrategy != nRpCt.MaxCostStrategy ||
-		(rpC.RateSIntervals != nil && nRpCt.RateSIntervals == nil ||
-			rpC.RateSIntervals == nil && nRpCt.RateSIntervals != nil ||
-			len(rpC.RateSIntervals) != len(nRpCt.RateSIntervals)) ||
+		(rpC.CostIntervals != nil && nRpCt.CostIntervals == nil ||
+			rpC.CostIntervals == nil && nRpCt.CostIntervals != nil ||
+			len(rpC.CostIntervals) != len(nRpCt.CostIntervals)) ||
 		(rpC.Rates != nil && nRpCt.Rates == nil ||
 			rpC.Rates == nil && nRpCt.Rates != nil ||
 			len(rpC.Rates) != len(nRpCt.Rates)) ||
@@ -686,13 +613,8 @@ func (rpC *ExtRateProfileCost) Equals(nRpCt *ExtRateProfileCost) (eq bool) {
 			len(rpC.Altered) != len(nRpCt.Altered)) {
 		return
 	}
-	for idx, val := range rpC.RateSIntervals {
-		if ok := val.Equals(nRpCt.RateSIntervals[idx], rpC.Rates, nRpCt.Rates); !ok {
-			return
-		}
-	}
-	for key, val := range rpC.Rates {
-		if ok := val.Equals(nRpCt.Rates[key]); !ok {
+	for idx, val := range rpC.CostIntervals {
+		if ok := val.Equals(nRpCt.CostIntervals[idx], rpC.Rates, nRpCt.Rates); !ok {
 			return
 		}
 	}
@@ -743,7 +665,7 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 	return true
 }
 
-func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
+func (rIv *RateSIntervalCost) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIv.cost == nil {
 		rIv.cost = new(decimal.Big)
 		for _, incrm := range rIv.Increments {
@@ -761,7 +683,7 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 }
 
 // Cost computes the Cost on RateSIncrement
-func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
+func (rIcr *RateSIncrementCost) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIcr.cost == nil {
 		icrRt, has := rts[rIcr.RateID]
 		if !has {
@@ -787,7 +709,7 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 }
 
 // CostForIntervals sums the costs for all intervals
-func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (cost *decimal.Big) {
+func CostForIntervals(rtIvls []*RateSIntervalCost, rts map[string]*IntervalRate) (cost *decimal.Big) {
 	cost = new(decimal.Big)
 	for _, rtIvl := range rtIvls {
 		cost = SumBig(cost, rtIvl.Cost(rts))
