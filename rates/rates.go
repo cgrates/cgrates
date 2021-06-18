@@ -177,16 +177,11 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		ID:    rtPfl.ID,
 		Rates: make(map[string]*utils.IntervalRate),
 	}
-	var ok bool
 	if rtPfl.MinCost != nil {
-		if rpCost.MinCost, ok = rtPfl.MinCost.Float64(); !ok {
-			return nil, fmt.Errorf("<%s> cannot convert <%+v> min cost to Float64", utils.RateS, rtPfl.MinCost)
-		}
+		rpCost.MinCost = rtPfl.MinCost
 	}
 	if rtPfl.MaxCost != nil {
-		if rpCost.MaxCost, ok = rtPfl.MaxCost.Float64(); !ok {
-			return nil, fmt.Errorf("<%s> cannot convert <%+v> max cost to Float64", utils.RateS, rtPfl.MaxCost)
-		}
+		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
 	if ivalStart, err = args.IntervalStart(); err != nil {

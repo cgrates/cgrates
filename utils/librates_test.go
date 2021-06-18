@@ -202,16 +202,16 @@ func TestLibratesCorrectCost(t *testing.T) {
 
 	//CorrectCost does nothing
 	rPc := &RateProfileCost{
-		Cost:    1.234,
-		MinCost: 1,
-		MaxCost: 2,
+		Cost:    NewDecimal(1234, 3),
+		MinCost: NewDecimal(1, 0),
+		MaxCost: NewDecimal(2, 0),
 		Altered: []string{},
 	}
 
 	expected := &RateProfileCost{
-		Cost:    1.234,
-		MinCost: 1,
-		MaxCost: 2,
+		Cost:    NewDecimal(1234, 3),
+		MinCost: NewDecimal(1, 0),
+		MaxCost: NewDecimal(2, 0),
 		Altered: []string{},
 	}
 	rPc.CorrectCost(nil, "")
@@ -222,27 +222,27 @@ func TestLibratesCorrectCost(t *testing.T) {
 
 	//CorrectCost rounds the cost
 	expected = &RateProfileCost{
-		Cost:    1.24,
-		MinCost: 1,
-		MaxCost: 2,
+		Cost:    NewDecimal(124, 2),
+		MinCost: NewDecimal(1, 0),
+		MaxCost: NewDecimal(2, 0),
 		Altered: []string{RoundingDecimals},
 	}
 
 	rPc.CorrectCost(IntPointer(2), MetaRoundingUp)
 
 	if !reflect.DeepEqual(rPc, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, rPc)
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(rPc))
 	}
 
 	//CorrectCost assigns MaxCost to Cost when Cost > MaxCost
 
 	expected = &RateProfileCost{
-		Cost:    2,
-		MinCost: 1,
-		MaxCost: 2,
+		Cost:    NewDecimal(2, 0),
+		MinCost: NewDecimal(1, 0),
+		MaxCost: NewDecimal(2, 0),
 		Altered: []string{RoundingDecimals, MaxCost},
 	}
-	rPc.Cost = 2.34
+	rPc.Cost = NewDecimal(234, 2)
 	rPc.CorrectCost(nil, "")
 
 	if !reflect.DeepEqual(rPc, expected) {
@@ -252,12 +252,12 @@ func TestLibratesCorrectCost(t *testing.T) {
 	//CorrectCost assigns MinCost to Cost when Cost < MinCost
 
 	expected = &RateProfileCost{
-		Cost:    1,
-		MinCost: 1,
-		MaxCost: 2,
+		Cost:    NewDecimal(1, 0),
+		MinCost: NewDecimal(1, 0),
+		MaxCost: NewDecimal(2, 0),
 		Altered: []string{RoundingDecimals, MaxCost, MinCost},
 	}
-	rPc.Cost = 0.12
+	rPc.Cost = NewDecimal(12, 2)
 	rPc.CorrectCost(nil, "")
 
 	if !reflect.DeepEqual(rPc, expected) {
@@ -1000,10 +1000,10 @@ func TestCostForIntervalsWIthFixedFee(t *testing.T) {
 func TestRateProfileCostCorrectCost(t *testing.T) {
 	rPrfCost := &RateProfileCost{
 		ID:   "Test1",
-		Cost: 0.234,
+		Cost: NewDecimal(234, 3),
 	}
 	rPrfCost.CorrectCost(IntPointer(2), MetaRoundingUp)
-	if rPrfCost.Cost != 0.24 {
+	if rPrfCost.Cost != NewDecimal(24, 2) {
 		t.Errorf("Expected: %+v, received: %+v", 0.24, rPrfCost.Cost)
 	}
 	if !reflect.DeepEqual(rPrfCost.Altered, []string{RoundingDecimals}) {
@@ -1014,22 +1014,22 @@ func TestRateProfileCostCorrectCost(t *testing.T) {
 
 func TestRateProfileCostCorrectCostMinCost(t *testing.T) {
 	testRPC := &RateProfileCost{
-		Cost:    0.5,
-		MinCost: 1.5,
+		Cost:    NewDecimal(5, 1),
+		MinCost: NewDecimal(15, 1),
 	}
 	testRPC.CorrectCost(IntPointer(2), "")
-	if testRPC.Cost != 1.5 {
+	if testRPC.Cost != NewDecimal(15, 1) {
 		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
 	}
 }
 
 func TestRateProfileCostCorrectCostMaxCost(t *testing.T) {
 	testRPC := &RateProfileCost{
-		Cost:    2.5,
-		MaxCost: 1.5,
+		Cost:    NewDecimal(25, 1),
+		MaxCost: NewDecimal(15, 1),
 	}
 	testRPC.CorrectCost(IntPointer(2), "")
-	if testRPC.Cost != 1.5 {
+	if testRPC.Cost != NewDecimal(15, 1) {
 		t.Errorf("\nExpecting: <1.5>,\n Received: <%+v>", testRPC.Cost)
 	}
 }

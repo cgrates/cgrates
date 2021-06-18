@@ -183,7 +183,7 @@ func TestRateSCostForEvent2(t *testing.T) { // coverage purpose
 				}
 				customRply := &utils.RateProfileCost{
 					ID:   "test",
-					Cost: 1,
+					Cost: utils.NewDecimal(1, 0),
 				}
 				*rplCast = *customRply
 				return nil
@@ -305,7 +305,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 				}
 				customRply := &utils.RateProfileCost{
 					ID:   "test",
-					Cost: 100,
+					Cost: utils.NewDecimal(100, 0),
 				}
 				*rplCast = *customRply
 				return nil
