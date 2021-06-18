@@ -187,12 +187,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	if ivalStart, err = args.IntervalStart(); err != nil {
 		return
 	}
-	if rpCost.RateSIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage, rpCost.Rates); err != nil {
+	if rpCost.CostIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage, rpCost.Rates); err != nil {
 		return nil, err
 	}
 	// in case we have error it is returned in the function from above
 	// this came up in coverage tests
-	rpCost.Cost, _ = utils.CostForIntervals(rpCost.RateSIntervals, rpCost.Rates).Float64()
+	rpCost.Cost = &utils.Decimal{utils.CostForIntervals(rpCost.CostIntervals, rpCost.Rates)}
 	return
 }
 
