@@ -1,13 +1,15 @@
 #Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
 cgrates.org,FLTR_ACCOUNT_1001,*string,~*req.Account,1001,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE_MOBILE,2014-07-29T15:00:00Z
-cgrates.org,FLTR_1,*string,~*req.Account,1003;1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,,,,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*string,~*req.Account,1003;1002,
 cgrates.org,FLTR_1,*prefix,~*req.Destination,10;20,
 cgrates.org,FLTR_1,*rsr,~*req.Destination,1002,
 cgrates.org,FLTR_ACNT_1007,*string,~*req.Account,1007,2014-07-29T15:00:00Z
 cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
-cgrates.org,FLTR_SPP_2,*string,~*req.Account,1003,2014-07-29T15:00:00Z
+cgrates.org,FLTR_SPP_2,,,,2014-07-29T15:00:00Z
+cgrates.org,FLTR_SPP_2,*string,~*req.Account,1003,
 cgrates.org,FLTR_SPP_2,*prefix,~*req.Destination,10;20,
 cgrates.org,FLTR_SPP_2,*string,~*req.DistinctMatch,*highest_cost,
 cgrates.org,FLTR_SPP_3,*string,~*req.DistinctMatch,*qos,2014-07-29T15:00:00Z
@@ -19,7 +21,8 @@ cgrates.org,FLTR_SPP_5,*string,~*req.DistinctMatch,*qos3,2014-07-29T15:00:00Z
 cgrates.org,FLTR_STAT_1_1,*string,~*req.Stat,Stat1_1,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_6,*string,~*req.DistinctMatch,*qos_filtred,2014-07-29T15:00:00Z
 cgrates.org,FLTR_QOS_SP1,*gte,~*vars.*acd,10s,2014-07-29T15:00:00Z
-cgrates.org,FLTR_QOS_SP2,*gte,~*vars.*acd,10s,2014-07-29T15:00:00Z
+cgrates.org,FLTR_QOS_SP2,,,,2014-07-29T15:00:00Z
+cgrates.org,FLTR_QOS_SP2,*gte,~*vars.*acd,10s,
 cgrates.org,FLTR_QOS_SP2,*gte,~*vars.*tcd,11s,
 cgrates.org,FLTR_SPP_QOS_2,*string,~*req.DistinctMatch,*qos_filtred2,2014-07-29T15:00:00Z
 cgrates.org,FLTR_QOS_SP1_2,*gte,~*vars.Cost,0.1,2014-07-29T15:00:00Z
