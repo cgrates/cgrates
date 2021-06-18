@@ -191,3 +191,12 @@ func NewDecimalFromString(value string) (*Decimal, error) {
 	}
 	return &Decimal{z}, nil
 }
+
+// Round rounds d down to the Context's precision and returns Decimal. The result is
+// undefined if d is not finite. The result of Round will always be within the
+// interval [⌊10**x⌋, d] where x = the precision of d.
+func (d *Decimal) Round(rndDec int) *Decimal {
+	ctx := d.Big.Context
+	ctx.Precision = rndDec
+	return &Decimal{ctx.Round(d.Big)}
+}

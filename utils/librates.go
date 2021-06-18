@@ -511,10 +511,10 @@ func (rI *RateSIncrement) Equals(rtIn *RateSIncrement, rIRef, rtInRef map[string
 
 // RateProfileCost is the cost returned by RateS at cost queries
 type RateProfileCost struct {
-	ID              string  // RateProfileID
-	Cost            float64 // fix here with Decimal
-	MinCost         float64 // move to decimal
-	MaxCost         float64 // move to decimal
+	ID              string // RateProfileID
+	Cost            *Decimal
+	MinCost         *Decimal
+	MaxCost         *Decimal
 	MaxCostStrategy string
 	RateSIntervals  []*RateSInterval
 	Rates           map[string]*IntervalRate
@@ -525,10 +525,23 @@ type RateProfileCost struct {
 func (rpC *RateProfileCost) AsExtRateProfileCost() (exRt *ExtRateProfileCost, err error) {
 	exRt = &ExtRateProfileCost{
 		ID:              rpC.ID,
-		Cost:            rpC.Cost,
-		MinCost:         rpC.Cost,
-		MaxCost:         rpC.MaxCost,
 		MaxCostStrategy: rpC.MaxCostStrategy,
+	}
+	var ok bool
+	if rpC.Cost != nil {
+		if exRt.Cost, ok = rpC.Cost.Float64(); !ok {
+			fmt.Errorf("Cannot convert Cost %v into float", rpC.Cost)
+		}
+	}
+	if rpC.MinCost != nil {
+		if exRt.MinCost, ok = rpC.MinCost.Float64(); !ok {
+			fmt.Errorf("Cannot convert MinCost %v into float", rpC.MinCost)
+		}
+	}
+	if rpC.MaxCost != nil {
+		if exRt.MaxCost, ok = rpC.MaxCost.Float64(); !ok {
+			fmt.Errorf("Cannot convert MaxCost %v into float", rpC.MaxCost)
+		}
 	}
 	if rpC.RateSIntervals != nil {
 		exRt.RateSIntervals = make([]*ExtRateSInterval, len(rpC.RateSIntervals))
@@ -631,6 +644,7 @@ func (rpC *RateProfileCost) Equals(nRpCt *RateProfileCost) (eq bool) {
 		(rpC.Altered != nil && nRpCt.Altered == nil ||
 			rpC.Altered == nil && nRpCt.Altered != nil ||
 			len(rpC.Altered) != len(nRpCt.Altered)) {
+		fmt.Printf("%T and %T \n", rpC.Cost, nRpCt.Cost)
 		return
 	}
 	for idx, val := range rpC.RateSIntervals {
@@ -693,16 +707,16 @@ func (rpC *ExtRateProfileCost) Equals(nRpCt *ExtRateProfileCost) (eq bool) {
 // CorrectCost should be called in final phase of cost calculation
 // in order to apply further correction like Min/MaxCost or rounding
 func (rPc *RateProfileCost) CorrectCost(rndDec *int, rndMtd string) {
-	if rPc.MinCost != 0 && rPc.Cost < rPc.MinCost {
+	if rPc.MinCost != nil && rPc.Cost.Compare(rPc.MinCost) < 0 {
 		rPc.Cost = rPc.MinCost
 		rPc.Altered = append(rPc.Altered, MinCost)
 	}
-	if rPc.MaxCost != 0 && rPc.Cost > rPc.MaxCost {
+	if rPc.MaxCost != nil && rPc.Cost.Compare(rPc.MaxCost) > 0 {
 		rPc.Cost = rPc.MaxCost
 		rPc.Altered = append(rPc.Altered, MaxCost)
 	}
 	if rndDec != nil {
-		rPc.Cost = Round(rPc.Cost, *rndDec, rndMtd)
+		rPc.Cost = rPc.Cost.Round(*rndDec)
 		rPc.Altered = append(rPc.Altered, RoundingDecimals)
 	}
 }

@@ -115,7 +115,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 
 	expectedRPCost := &utils.RateProfileCost{
 		ID:   "RATE_1",
-		Cost: 0.20,
+		Cost: utils.NewDecimal(2, 1),
 		RateSIntervals: []*utils.RateSInterval{
 			{
 				IntervalStart: utils.NewDecimal(0, 0),
@@ -1016,7 +1016,7 @@ func TestRateSRateProfileCostForEventErrFltr(t *testing.T) {
 
 	expectedRPCost := &utils.RateProfileCost{
 		ID:   "RATE_1",
-		Cost: 0.20,
+		Cost: utils.NewDecimal(2, 20),
 		RateSIntervals: []*utils.RateSInterval{
 			{
 				IntervalStart: utils.NewDecimal(0, 0),
@@ -1099,7 +1099,7 @@ func TestRateSRateProfileCostForEventErrMinCost(t *testing.T) {
 	}
 	expectedRPCost := &utils.RateProfileCost{
 		ID:   "RATE_1",
-		Cost: 0.20,
+		Cost: utils.NewDecimal(2, 20),
 		RateSIntervals: []*utils.RateSInterval{
 			{
 				IntervalStart: utils.NewDecimal(0, 0),
@@ -1183,7 +1183,7 @@ func TestRateSRateProfileCostForEventErrMaxCost(t *testing.T) {
 	}
 	expectedRPCost := &utils.RateProfileCost{
 		ID:   "RATE_1",
-		Cost: 0.20,
+		Cost: utils.NewDecimal(2, 20),
 		RateSIntervals: []*utils.RateSInterval{
 			{
 				IntervalStart: utils.NewDecimal(0, 0),
@@ -1266,7 +1266,7 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 	}
 	expectedRPCost := &utils.RateProfileCost{
 		ID:   "RATE_1",
-		Cost: 0.20,
+		Cost: utils.NewDecimal(2, 20),
 		RateSIntervals: []*utils.RateSInterval{
 			{
 				IntervalStart: utils.NewDecimal(0, 0),

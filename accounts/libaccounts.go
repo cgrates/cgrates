@@ -264,7 +264,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			delete(cgrEv.APIOpts, utils.OptsRatesIntervalStart)
 			delete(cgrEv.APIOpts, utils.OptsRatesUsage)
 			costIcrm = costIcrm.Clone() // so we don't modify the original
-			costIcrm.FixedFee = utils.NewDecimalFromFloat64(rplyCost.Cost)
+			costIcrm.FixedFee = rplyCost.Cost
 		}
 		var cUnits *decimal.Big // concrete units to debit
 		if costIcrm.FixedFee != nil {
