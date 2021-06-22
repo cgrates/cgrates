@@ -187,12 +187,17 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	if ivalStart, err = args.IntervalStart(); err != nil {
 		return
 	}
-	if rpCost.CostIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage, rpCost.Rates); err != nil {
+	var costIntervals []*utils.RateSInterval
+	if costIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage, rpCost.Rates); err != nil {
 		return nil, err
 	}
-	// in case we have error it is returned in the function from above
-	// this came up in coverage tests
-	rpCost.Cost = &utils.Decimal{utils.CostForIntervals(rpCost.CostIntervals, rpCost.Rates)}
+	rpCost.CostIntervals = make([]*utils.RateSIntervalCost, len(costIntervals))
+	finalCost := new(decimal.Big)
+	for idx, costInt := range costIntervals {
+		finalCost = utils.SumBig(finalCost, costInt.Cost(rpCost.Rates)) // CostForIntervals sums the costs for all intervals
+		rpCost.CostIntervals[idx] = costInt.AsRatesIntervalsCost()      //this does not contains IncrementStart and IntervalStart so we convert in RatesIntervalCosts
+	}
+	rpCost.Cost = &utils.Decimal{finalCost}
 	return
 }
 
