@@ -360,6 +360,24 @@ type ExtRateSInterval struct {
 	cost *float64 // unexported total interval cost
 }
 
+// AsRatesIntervalsCost converts RateSInterval to RateSIntervalCost
+// The difference between this 2 is that RateSIntervalCost don't need IntervalStart
+func (rI *RateSInterval) AsRatesIntervalsCost() (rIc *RateSIntervalCost) {
+	rIc = &RateSIntervalCost{
+		CompressFactor: rI.CompressFactor,
+	}
+	if rI.cost != nil {
+		rIc.cost = rI.cost
+	}
+	if rI.Increments != nil {
+		rIc.Increments = make([]*RateSIncrementCost, len(rI.Increments))
+		for idx, incr := range rI.Increments {
+			rIc.Increments[idx] = incr.AsRateSIncrementCost()
+		}
+	}
+	return
+}
+
 // AsExtRateSInterval converts RateSInterval to ExtRateSInterval
 func (rI *RateSInterval) AsExtRateSInterval() (eRi *ExtRateSInterval, err error) {
 	eRi = &ExtRateSInterval{
@@ -430,7 +448,7 @@ type ExtRateSIncrement struct {
 	cost *float64 // unexported total increment cost
 }
 
-// AsExtRateSIncrement converts RateSIncrement to ExtRateSIncrement
+//AsExtRateSIncrement converts RateSIncrement to ExtRateSIncrement
 func (rI *RateSIncrement) AsExtRateSIncrement() (eRi *ExtRateSIncrement, err error) {
 	eRi = &ExtRateSIncrement{
 		IntervalRateIndex: rI.IntervalRateIndex,
@@ -524,7 +542,6 @@ type RateProfileCost struct {
 
 // RateSIntervalCost is used in the RateProfileCost to reflect the RateSInterval used
 type RateSIntervalCost struct {
-	IntervalStart  *Decimal
 	Increments     []*RateSIncrementCost
 	CompressFactor int64
 
@@ -533,13 +550,30 @@ type RateSIntervalCost struct {
 
 // RateSIncrementCost is used in the RateProfileCost to reflect RateSIncrement
 type RateSIncrementCost struct {
-	IncrementStart    *Decimal
 	Usage             *Decimal
 	RateID            string
 	IntervalRateIndex int
 	CompressFactor    int64
 
 	cost *decimal.Big // unexported total increment cost
+}
+
+// AsRateSIncrementCost converts RateSIncrement to RateSIncrementCost
+// The difference between this 2 is that RateSIncrementCost don't need IncrementStart
+func (rI *RateSIncrement) AsRateSIncrementCost() (rIc *RateSIncrementCost) {
+	rIc = &RateSIncrementCost{
+		IntervalRateIndex: rI.IntervalRateIndex,
+		CompressFactor:    rI.CompressFactor,
+		RateID:            rI.RateID,
+	}
+	if rI.Usage != nil {
+		rIc.Usage = rI.Usage
+	}
+	if rI.cost != nil {
+		rIc.cost = rI.cost
+	}
+	return
+
 }
 
 // Equals returns the equality between two RateSIntervalCost
@@ -598,9 +632,18 @@ func (rpC *RateProfileCost) SynchronizeRateKeys(nRpCt *RateProfileCost) {
 // Equals returns the equality between two RateProfileCost
 func (rpC *RateProfileCost) Equals(nRpCt *RateProfileCost) (eq bool) {
 	if rpC.ID != nRpCt.ID ||
-		rpC.Cost != nRpCt.Cost ||
-		rpC.MinCost != nRpCt.MinCost ||
-		rpC.MaxCost != nRpCt.MaxCost ||
+		(rpC.Cost == nil && nRpCt.Cost != nil) ||
+		(rpC.Cost != nil && nRpCt.Cost == nil) ||
+		(rpC.Cost != nil && nRpCt.Cost != nil &&
+			rpC.Cost.Compare(nRpCt.Cost) != 0) ||
+		(rpC.MinCost == nil && nRpCt.MinCost != nil) ||
+		(rpC.MinCost != nil && nRpCt.MinCost == nil) ||
+		(rpC.MinCost != nil && nRpCt.MinCost != nil &&
+			rpC.MinCost.Compare(nRpCt.MinCost) != 0) ||
+		(rpC.MaxCost == nil && nRpCt.MaxCost != nil) ||
+		(rpC.MaxCost != nil && nRpCt.MaxCost == nil) ||
+		(rpC.MaxCost != nil && nRpCt.MaxCost != nil &&
+			rpC.MaxCost.Compare(nRpCt.MaxCost) != 0) ||
 		rpC.MaxCostStrategy != nRpCt.MaxCostStrategy ||
 		(rpC.CostIntervals != nil && nRpCt.CostIntervals == nil ||
 			rpC.CostIntervals == nil && nRpCt.CostIntervals != nil ||
@@ -665,7 +708,7 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 	return true
 }
 
-func (rIv *RateSIntervalCost) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
+func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIv.cost == nil {
 		rIv.cost = new(decimal.Big)
 		for _, incrm := range rIv.Increments {
@@ -683,7 +726,7 @@ func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 }
 
 // Cost computes the Cost on RateSIncrement
-func (rIcr *RateSIncrementCost) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
+func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
 	if rIcr.cost == nil {
 		icrRt, has := rts[rIcr.RateID]
 		if !has {
@@ -709,7 +752,7 @@ func (rIcr *RateSIncrementCost) Cost(rts map[string]*IntervalRate) (cost *decima
 }
 
 // CostForIntervals sums the costs for all intervals
-func CostForIntervals(rtIvls []*RateSIntervalCost, rts map[string]*IntervalRate) (cost *decimal.Big) {
+func CostForIntervals(rtIvls []*RateSInterval, rts map[string]*IntervalRate) (cost *decimal.Big) {
 	cost = new(decimal.Big)
 	for _, rtIvl := range rtIvls {
 		cost = SumBig(cost, rtIvl.Cost(rts))

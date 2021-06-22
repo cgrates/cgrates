@@ -203,7 +203,7 @@ func getRateIntervalIDFromIncrement(cstRts map[string]*utils.IntervalRate, intRt
 
 // computeRateSIntervals will give out the cost projection for the given orderedRates and usage
 func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big,
-	cstRts map[string]*utils.IntervalRate) (rtIvls []*utils.RateSIntervalCost, err error) {
+	cstRts map[string]*utils.IntervalRate) (rtIvls []*utils.RateSInterval, err error) {
 	totalUsage := usage
 	if intervalStart.Cmp(decimal.New(0, 0)) != 0 {
 		totalUsage = utils.SumBig(usage, intervalStart)
@@ -216,7 +216,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 		} else {
 			rtUsageEIdx = totalUsage
 		}
-		var rIcmts []*utils.RateSIncrementCost
+		var rIcmts []*utils.RateSIncrement
 		iRtUsageSIdx := intervalStart
 		iRtUsageEIdx := rtUsageEIdx
 		for j, iRt := range rt.IntervalRates {
@@ -238,7 +238,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
 			if rt.IntervalRates[j].FixedFee != nil && rt.IntervalRates[j].FixedFee.Cmp(decimal.New(0, 0)) != 0 { // Add FixedFee
-				rIcmts = append(rIcmts, &utils.RateSIncrementCost{
+				rIcmts = append(rIcmts, &utils.RateSIncrement{
 					IncrementStart:    &utils.Decimal{iRtUsageSIdx},
 					IntervalRateIndex: j,
 					RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
@@ -268,7 +268,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			if !ok {
 				return nil, fmt.Errorf("<%s> cannot convert <%+v> increment to Int64", utils.RateS, cmpFactor)
 			}
-			rIcmts = append(rIcmts, &utils.RateSIncrementCost{
+			rIcmts = append(rIcmts, &utils.RateSIncrement{
 				IncrementStart:    &utils.Decimal{iRtUsageSIdx},
 				RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 				CompressFactor:    cmpFactorInt,
@@ -283,7 +283,7 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 		if len(rIcmts) == 0 {       // no match found
 			continue
 		}
-		rtIvls = append(rtIvls, &utils.RateSIntervalCost{
+		rtIvls = append(rtIvls, &utils.RateSInterval{
 			IntervalStart:  &utils.Decimal{usageStart},
 			Increments:     rIcmts,
 			CompressFactor: 1,
