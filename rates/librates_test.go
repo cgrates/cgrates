@@ -1897,10 +1897,10 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 
-	eRtIvls := []*utils.RateSIntervalCost{
+	eRtIvls := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -1920,7 +1920,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(90*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -1989,10 +1989,10 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 
-	eRtIvls = []*utils.RateSIntervalCost{
+	eRtIvls = []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2005,7 +2005,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(90*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2129,10 +2129,10 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		},
 	}
 
-	eRtIvls := []*utils.RateSIntervalCost{
+	eRtIvls := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
@@ -2145,7 +2145,7 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
@@ -2272,10 +2272,10 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 
-	eRtIvls := []*utils.RateSIntervalCost{
+	eRtIvls := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -2302,7 +2302,7 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					IntervalRateIndex: 0,
@@ -2432,10 +2432,10 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		},
 	}
 
-	eRtIvls := []*utils.RateSIntervalCost{
+	eRtIvls := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -2448,7 +2448,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -2461,7 +2461,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(50*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(50*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -2609,10 +2609,10 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 	}
 
-	expOrdRates := []*utils.RateSIntervalCost{
+	expOrdRates := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -2625,7 +2625,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(30*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					IntervalRateIndex: 0,
@@ -2638,7 +2638,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -2651,7 +2651,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 1,
@@ -2664,7 +2664,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 2,
@@ -2677,7 +2677,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 2,
@@ -2875,10 +2875,10 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 			rt1,
 		},
 	}
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -3036,10 +3036,10 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -3059,7 +3059,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(35*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(35*time.Second), 0),
 					IntervalRateIndex: 0,
@@ -3072,7 +3072,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(46*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(46*time.Second), 0),
 					IntervalRateIndex: 0,
@@ -3092,7 +3092,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -3260,10 +3260,10 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			rt1,
 		},
 	}
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -3276,7 +3276,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 0,
@@ -3289,7 +3289,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -3302,7 +3302,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 					IntervalRateIndex: 1,
@@ -3315,7 +3315,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(3*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(3*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -3479,10 +3479,10 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -3502,7 +3502,7 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(6*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(6*time.Hour), 0),
 					IntervalRateIndex: 1,
@@ -3515,7 +3515,7 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
 					IntervalRateIndex: 0,
@@ -3535,7 +3535,7 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(13*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
 					IntervalRateIndex: 0,
@@ -3705,10 +3705,10 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -3721,7 +3721,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Second), 0),
 					IntervalRateIndex: 0,
@@ -3734,7 +3734,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Second), 0),
 					IntervalRateIndex: 0,
@@ -3747,7 +3747,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(3*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(3*time.Second), 0),
 					IntervalRateIndex: 1,
@@ -3760,7 +3760,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(5*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(5*time.Second), 0),
 					IntervalRateIndex: 1,
@@ -3773,7 +3773,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(7*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(7*time.Second), 0),
 					IntervalRateIndex: 2,
@@ -3926,10 +3926,10 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -3942,7 +3942,7 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -3969,7 +3969,7 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Hour+time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -4096,10 +4096,10 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -4112,7 +4112,7 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(25*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(25*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4275,10 +4275,10 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4291,7 +4291,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(80*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4304,7 +4304,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(140*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4317,7 +4317,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(200*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4452,10 +4452,10 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			rt1,
 		},
 	}
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4475,7 +4475,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(80*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -4495,7 +4495,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(140*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					IntervalRateIndex: 2,
@@ -4515,7 +4515,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(200*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					IntervalRateIndex: 3,
@@ -4566,10 +4566,10 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		}
 	}
 
-	expOrdRts = []*utils.RateSIntervalCost{
+	expOrdRts = []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -4589,7 +4589,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(80*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -4609,7 +4609,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(140*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
 					IntervalRateIndex: 2,
@@ -4629,7 +4629,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(200*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
 					IntervalRateIndex: 3,
@@ -4770,10 +4770,10 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -4786,7 +4786,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -4806,7 +4806,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(12*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
 					IntervalRateIndex: 0,
@@ -4819,7 +4819,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(13*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
 					IntervalRateIndex: 1,
@@ -4846,7 +4846,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(24*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(24*time.Hour), 0),
 					IntervalRateIndex: 1,
@@ -4999,10 +4999,10 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(int64(15*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(15*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -5022,7 +5022,7 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(45*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5159,10 +5159,10 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -5182,7 +5182,7 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(39*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(39*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5195,7 +5195,7 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
 					IntervalRateIndex: 2,
@@ -5351,10 +5351,10 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -5367,7 +5367,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(20*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5380,7 +5380,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(21*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(21*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5393,7 +5393,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(40*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(40*time.Minute), 0),
 					IntervalRateIndex: 1,
@@ -5406,7 +5406,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(41*time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(41*time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5419,7 +5419,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					IntervalRateIndex: 2,
@@ -5432,7 +5432,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Hour+time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5445,7 +5445,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Hour), 0),
 					IntervalRateIndex: 3,
@@ -5458,7 +5458,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
 					IntervalRateIndex: 0,
@@ -5566,10 +5566,10 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -5582,7 +5582,7 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(168*time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(168*time.Hour), 0),
 					IntervalRateIndex: 0,
@@ -5686,10 +5686,10 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 		},
 	}
 
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,
@@ -5709,7 +5709,7 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 		},
 		{
 			IntervalStart: utils.NewDecimal(int64(time.Hour), 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
 					IntervalRateIndex: 1,
@@ -5809,10 +5809,10 @@ func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 			rt1,
 		},
 	}
-	expOrdRts := []*utils.RateSIntervalCost{
+	expOrdRts := []*utils.RateSInterval{
 		{
 			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrementCost{
+			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					IntervalRateIndex: 0,

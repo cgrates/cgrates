@@ -118,11 +118,9 @@ func testDspRPrfCostForEvent(t *testing.T) {
 
 	exp := &utils.RateProfileCost{
 		ID:   "DefaultRate",
-		Cost: 0.12,
-		RateSIntervals: []*utils.RateSInterval{{
-			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrement{{
-				IncrementStart:    utils.NewDecimal(0, 0),
+		Cost: utils.NewDecimal(12, 2),
+		CostIntervals: []*utils.RateSIntervalCost{{
+			Increments: []*utils.RateSIncrementCost{{
 				Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				IntervalRateIndex: 0,
 				CompressFactor:    1,
@@ -186,11 +184,9 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 
 	exp := &utils.RateProfileCost{
 		ID:   "ID_RP",
-		Cost: 0.25,
-		RateSIntervals: []*utils.RateSInterval{{
-			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrement{{
-				IncrementStart:    utils.NewDecimal(0, 0),
+		Cost: utils.NewDecimal(25, 2),
+		CostIntervals: []*utils.RateSIntervalCost{{
+			Increments: []*utils.RateSIncrementCost{{
 				Usage:             utils.NewDecimal(int64(time.Minute), 0),
 				IntervalRateIndex: 0,
 				CompressFactor:    60,
