@@ -984,3 +984,57 @@ func TestDCrCConvert(t *testing.T) {
 		t.Errorf("\nExpected 0 or 1, \nReceived: <%+v>", received)
 	}
 }
+
+func TestLenTimeConverter(t *testing.T) {
+	exp := new(LengthConverter)
+	cnv, err := NewDataConverter(MetaLen)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+
+	expected := 20
+	if rcv, err := cnv.Convert("2015-07-07T14:52:08Z"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestLenTimeConverter2(t *testing.T) {
+	exp := new(LengthConverter)
+	cnv, err := NewDataConverter(MetaLen)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+
+	expected := 7
+	if rcv, err := cnv.Convert("[slice]"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestLenTimeConverter3(t *testing.T) {
+	exp := new(LengthConverter)
+	cnv, err := NewDataConverter(MetaLen)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+
+	expected := 0
+	if rcv, err := cnv.Convert("[]"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
