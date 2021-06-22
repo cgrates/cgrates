@@ -29,6 +29,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -60,8 +61,12 @@ var (
 		testConsoleItThresholdsProfile,
 		testConsoleItThresholdsProcessEvent,
 		testConsoleItThresholdsForEvent,
+		testConsoleItTriggersSet,
+		testConsoleItTriggers,
+		testConsoleItAccountTriggersReset,
 		testConsoleItRatingProfileSet,
 		testConsoleItRatingProfileIds,
+		testConsoleItRatingProfile,
 		testConsoleItResources,
 		testConsoleItResourcesProfileIds,
 		testConsoleItResourcesProfile,
@@ -72,7 +77,7 @@ var (
 		testConsoleItChargersProfile,
 		testConsoleItChargersForEvent,
 		testConsoleItChargersProfileIds,
-		// testConsoleItChargersProcessEvent,
+		testConsoleItChargersProcessEvent,
 		testConsoleItResourcesAuthorize,
 		testConsoleItRouteProfileIds,
 		testConsoleItRoutesProfilesForEvent,
@@ -105,8 +110,10 @@ var (
 		testConsoleItAccounts,
 		testConsoleItAccountRemove,
 		// testConsoleItGetLoadIds,
-		// testConsoleItSessionAuthorizeEvent,
+		testConsoleItSessionAuthorizeEvent,
 		testConsoleItCachePrecacheStatus,
+		testConsoleItSessionInitiate,
+		testConsoleItSessionProcessMessage,
 		testConsoleItSessionUpdate,
 		testConsoleItCacheRemoveGroup,
 		// testConsoleItCacheStats,
@@ -1571,7 +1578,7 @@ func testConsoleItSessionAuthorizeEvent(t *testing.T) {
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	expected := map[string]interface{}{
-		"AttributesDigest":   "RequestType:*prepaid,LCRProfile:premium_cli,Password:CGRateS.org,PaypalAccount:cgrates@paypal.com",
+		"AttributesDigest":   "LCRProfile:premium_cli,Password:CGRateS.org,PaypalAccount:cgrates@paypal.com,RequestType:*prepaid",
 		"ResourceAllocation": nil,
 		"MaxUsage":           0.,
 		"RoutesDigest":       nil,
@@ -1588,6 +1595,9 @@ func testConsoleItSessionAuthorizeEvent(t *testing.T) {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
+	s := strings.Split(rcv["AttributesDigest"].(string), ",")
+	sort.Strings(s)
+	rcv["AttributesDigest"] = strings.Join(s, ",")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1945,7 +1955,7 @@ func testConsoleItSessionInitiate(t *testing.T) {
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	expected := map[string]interface{}{
-		"AttributesDigest":   "Password:CGRateS.org,PaypalAccount:cgrates@paypal.com,RequestType:*prepaid,LCRProfile:premium_cli",
+		"AttributesDigest":   "LCRProfile:premium_cli,Password:CGRateS.org,PaypalAccount:cgrates@paypal.com,RequestType:*prepaid",
 		"MaxUsage":           "0s",
 		"ResourceAllocation": nil,
 		"StatQueues":         nil,
@@ -1961,6 +1971,9 @@ func testConsoleItSessionInitiate(t *testing.T) {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
+	s := strings.Split(rcv["AttributesDigest"].(string), ",")
+	sort.Strings(s)
+	rcv["AttributesDigest"] = strings.Join(s, ",")
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -2091,6 +2104,9 @@ func testConsoleItChargersProcessEvent(t *testing.T) {
 			"AttributeSProfiles": nil,
 			"AlteredFields":      []interface{}{"*req.RunID"},
 			"CGREvent": map[string]interface{}{
+				"APIOpts": map[string]interface{}{
+					"*subsys": "*chargers",
+				},
 				"Tenant": "cgrates.org",
 				"ID":     "",
 				"Time":   "",
@@ -2099,15 +2115,15 @@ func testConsoleItChargersProcessEvent(t *testing.T) {
 					"RunID":   "*default",
 				},
 			},
-			"APIOpts": map[string]interface{}{
-				"*subsys": "*chargers",
-			},
 		},
 		map[string]interface{}{
 			"ChargerSProfile":    "Raw",
 			"AttributeSProfiles": []interface{}{"*constant:*req.RequestType:*none"},
 			"AlteredFields":      []interface{}{"*req.RunID", "*req.RequestType"},
 			"CGREvent": map[string]interface{}{
+				"APIOpts": map[string]interface{}{
+					"*subsys": "*chargers",
+				},
 				"Tenant": "cgrates.org",
 				"ID":     "",
 				"Time":   "",
@@ -2117,10 +2133,12 @@ func testConsoleItChargersProcessEvent(t *testing.T) {
 					"RunID":       "*raw",
 				},
 			},
-			"APIOpts": map[string]interface{}{
-				"*subsys": "*chargers",
-			},
 		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
 	}
 	var rcv []interface{}
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
@@ -2135,6 +2153,173 @@ func testConsoleItChargersProcessEvent(t *testing.T) {
 	rcv[1].(map[string]interface{})["CGREvent"].(map[string]interface{})["Time"] = ""
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItSessionProcessMessage(t *testing.T) {
+	cmd := exec.Command("cgr-console", "session_process_message", `GetAttributes=true`, `Event={"Account":"1001"}`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"Attributes": map[string]interface{}{
+			"APIOpts": map[string]interface{}{
+				"*subsys": "*sessions",
+			},
+			"AlteredFields": []interface{}{"*req.LCRProfile", "*req.Password", "*req.PaypalAccount", "*req.RequestType"},
+			"Event": map[string]interface{}{
+				"Account":       "1001",
+				"LCRProfile":    "premium_cli",
+				"Password":      "CGRateS.org",
+				"PaypalAccount": "cgrates@paypal.com",
+				"RequestType":   "*prepaid",
+			},
+			"ID":              "",
+			"MatchedProfiles": []interface{}{"ATTR_1001_SESSIONAUTH"},
+			"Tenant":          "cgrates.org",
+			"Time":            "",
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Log(output.String())
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv["Attributes"].(map[string]interface{})["AlteredFields"], func(i, j int) bool {
+		return utils.IfaceAsString(rcv["Attributes"].(map[string]interface{})["AlteredFields"].([]interface{})[i]) < utils.IfaceAsString(rcv["Attributes"].(map[string]interface{})["AlteredFields"].([]interface{})[j])
+	})
+	rcv["Attributes"].(map[string]interface{})["ID"] = ""
+	rcv["Attributes"].(map[string]interface{})["Time"] = ""
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItTriggersSet(t *testing.T) {
+	cmd := exec.Command("cgr-console", "triggers_set", `GroupID="123"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItTriggers(t *testing.T) {
+	cmd := exec.Command("cgr-console", "triggers")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		map[string]interface{}{
+			"ActionsID":      "",
+			"ActivationDate": "0001-01-01T00:00:00Z",
+			"Balance": map[string]interface{}{
+				"Blocker":        nil,
+				"Categories":     nil,
+				"DestinationIDs": nil,
+				"Disabled":       nil,
+				"ExpirationDate": nil,
+				"Factor":         nil,
+				"ID":             nil,
+				"RatingSubject":  nil,
+				"SharedGroups":   nil,
+				"TimingIDs":      nil,
+				"Timings":        nil,
+				"Type":           nil,
+				"Uuid":           nil,
+				"Value":          nil,
+				"Weight":         nil,
+			},
+			"Executed":          false,
+			"ExpirationDate":    "0001-01-01T00:00:00Z",
+			"ID":                "123",
+			"LastExecutionTime": "0001-01-01T00:00:00Z",
+			"MinQueuedItems":    0.,
+			"MinSleep":          "0s",
+			"Recurrent":         false,
+			"ThresholdType":     "",
+			"ThresholdValue":    0.,
+			"UniqueID":          "",
+			"Weight":            0.,
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	rcv[0].(map[string]interface{})["UniqueID"] = ""
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItRatingProfile(t *testing.T) {
+	cmd := exec.Command("cgr-console", "ratingprofile", `Category="call"`, `Subject="1001"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"Id": "*out:cgrates.org:call:1001",
+		"RatingPlanActivations": []interface{}{
+			map[string]interface{}{
+				"ActivationTime": "2014-01-14T00:00:00Z",
+				"RatingPlanId":   "RP_1001",
+				"FallbackKeys":   nil,
+			},
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItAccountTriggersReset(t *testing.T) {
+	cmd := exec.Command("cgr-console", "account_triggers_reset", `Account="1001"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
 	}
 }
 
