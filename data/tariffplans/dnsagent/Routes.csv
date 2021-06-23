@@ -1,4 +1,5 @@
 #Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,RouteID,RouteFilterIDs,RouteAccountIDs,RouteRatingPlanIDs,RouteResourceIDs,RouteStatIDs,RouteWeight,RouteBlocker,RouteParameters,Weight
-cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,,*weight,,route1,,,,,,10,,!^(.*)$!sip:\1@172.16.1.11!,10
-cgrates.org,ROUTE_ACNT_1001,,,,,route2,,,,,,5,,!^(.*)$!sip:\1@172.16.1.12!,10
+cgrates.org,ROUTE_ACNT_1001,*string:~*req.Account:1001,,*weight,,,,,,,,,,,10
+cgrates.org,ROUTE_ACNT_1001,,,,,route1,,,,,,10,,!^(.*)$!sip:\1@172.16.1.11!,
+cgrates.org,ROUTE_ACNT_1001,,,,,route2,,,,,,5,,!^(.*)$!sip:\1@172.16.1.12!,
 
