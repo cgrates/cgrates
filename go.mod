@@ -38,11 +38,12 @@ require (
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/ishidawataru/sctp v0.0.0-20191218070446-00ab2ac2db07 // indirect
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
-	github.com/klauspost/compress v1.11.6 // indirect
 	github.com/lib/pq v1.8.0 // indirect
 	github.com/mattn/go-runewidth v0.0.10 // indirect
 	github.com/mediocregopher/radix/v3 v3.7.0
 	github.com/miekg/dns v1.1.35
+	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
+	github.com/nats-io/nats.go v1.11.0
 	github.com/nyaruka/phonenumbers v1.0.60
 	github.com/peterh/liner v1.2.1
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
@@ -53,8 +54,8 @@ require (
 	github.com/willf/bitset v1.1.11 // indirect
 	github.com/xdg/stringprep v1.0.1-0.20180714160509-73f8eece6fdc // indirect
 	go.mongodb.org/mongo-driver v1.4.4
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
+	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
 	golang.org/x/sys v0.0.0-20210112091331-59c308dcf3cc // indirect
