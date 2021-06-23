@@ -20,7 +20,9 @@ package cores
 
 import (
 	"fmt"
+	"os"
 	"runtime"
+	"runtime/pprof"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -65,5 +67,35 @@ func (cS *CoreService) Status(arg *utils.TenantWithAPIOpts, reply *map[string]in
 	response[utils.RunningSince] = utils.GetStartTime()
 	response[utils.GoVersion] = runtime.Version()
 	*reply = response
+	return
+}
+
+// StartCPUProfiling is used to start CPUProfiling in the given path
+func (cS *CoreService) StartCPUProfiling(argPath *string) (err error) {
+	if *argPath == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing("Path")
+	}
+	f, err := os.Create(*argPath)
+	if err != nil {
+		return fmt.Errorf("could not create CPU profile: %v", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		return fmt.Errorf("could not create CPU profile: %v", err)
+	}
+	defer f.Close()
+	return
+}
+
+// StopCPUProfiling is used to stop CPUProfiling in the given path
+func (cS *CoreService) StopCPUProfiling(argPath *string) (err error) {
+	f, err := os.Create(*argPath)
+	if err != nil {
+		return fmt.Errorf("could not create CPU profile: %v", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		// this means CPUProfiling is already active,so we can shut down now
+		pprof.StopCPUProfile()
+		return nil
+	}
 	return
 }

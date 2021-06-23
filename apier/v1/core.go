@@ -56,3 +56,21 @@ func (cS *CoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error {
 	*reply = utils.OK
 	return nil
 }
+
+// StartCPUProfiling is used to start CPUProfiling in the given path
+func (cS *CoreSv1) StartCPUProfiling(args, reply *string) error {
+	if err := cS.cS.StartCPUProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StopCPUProfiling is used to stop CPUProfiling in the given path
+func (cS *CoreSv1) StopCPUProfiling(args, reply *string) error {
+	if err := cS.cS.StopCPUProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
