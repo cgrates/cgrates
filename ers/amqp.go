@@ -158,9 +158,6 @@ func (rdr *AMQPER) readLoop(msgChan <-chan amqp.Delivery) {
 			rdr.close()
 			return
 		case msg := <-msgChan:
-			if len(msg.Body) == 0 {
-				continue
-			}
 			go func(msg amqp.Delivery) {
 				if err := rdr.processMessage(msg.Body); err != nil {
 					utils.Logger.Warning(
