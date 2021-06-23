@@ -5,7 +5,7 @@
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.16.3'
+    golang_version: '1.16.5'
     go_version_target: "go version go{{ golang_version }} linux/amd64"
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
@@ -38,7 +38,6 @@
       - autoconf
       - openssl
       - libssl-dev
-      - libsrtp-dev
       - libxml2-dev
       - libncurses5-dev
       - uuid-dev
@@ -77,27 +76,15 @@
     include: cgrates.yaml
 
 # Configure Asterisk
-  - name: Download files for asterisk
-    become: yes
-    shell: "sudo wget --no-check-certificate https://raw.githubusercontent.com/asterisk/third-party/master/pjproject/2.7.2/pjproject-2.7.2.tar.bz2"
-    args:
-      chdir: '/tmp'
-
-  - name: Download files for asterisk
-    become: yes
-    shell: "sudo wget --no-check-certificate https://raw.githubusercontent.com/asterisk/third-party/master/jansson/2.11/jansson-2.11.tar.bz2"
-    args:
-      chdir: '/tmp'
-
   - name: Download Asterisk
     become: yes
-    shell: "sudo wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-16-current.tar.gz"
+    shell: "sudo wget https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-18-current.tar.gz"
     args:
       chdir: '/tmp'
 
   - name: Unzip Asterisk
     become: yes
-    shell: "sudo tar xzvf asterisk-16-current.tar.gz"
+    shell: "sudo tar xzvf asterisk-18-current.tar.gz"
     args:
       chdir: '/tmp'
 
@@ -105,23 +92,47 @@
     become: yes
     shell: "sudo ./configure --with-jansson-bundled"
     args:
-      chdir: '/tmp/asterisk-16.5.1'
+      chdir: '/tmp/asterisk-18.4.0'
 
   - name: Make Asterisk
     become: yes
     shell: "sudo make"
     args:
-      chdir: '/tmp/asterisk-16.5.1'
+      chdir: '/tmp/asterisk-18.4.0'
+
+  - name: Make all Asterisk
+    become: yes
+    shell: "make all"
+    args:
+      chdir: '/tmp/asterisk-18.4.0'
 
   - name: Make install Asterisk
     become: yes
     shell: "sudo make install"
     args:
-      chdir: '/tmp/asterisk-16.5.1'
+      chdir: '/tmp/asterisk-18.4.0'
+
+  - name: Make samples Asterisk
+    become: yes
+    shell: "sudo make samples"
+    args:
+      chdir: '/tmp/asterisk-18.4.0'
+
+  - name: Make config Asterisk
+    become: yes
+    shell: "sudo make config"
+    args:
+      chdir: '/tmp/asterisk-18.4.0'
 
   - name: Add user for Asterisk
     become: yes
     shell: 'sudo adduser --quiet --system --group --disabled-password --shell /bin/false --gecos "Asterisk" asterisk || true'
+
+  - name: Add user for CGRateS
+    become: yes
+    shell: 'sudo useradd cgrates'
+
+
 
 # Configure PJSUA
   - name: Config PJSUA
