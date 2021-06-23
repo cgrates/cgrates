@@ -119,7 +119,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 			{
 				Increments: []*utils.RateSIncrementCost{
 					{
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE1",
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -150,7 +150,7 @@ func TestRateProfileCostForEvent(t *testing.T) {
 			{
 				Increments: []*utils.RateSIncrement{
 					{
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE1",
 						CompressFactor:    1,
 						Usage:             utils.NewDecimal(int64(time.Minute), 0),

@@ -1904,14 +1904,14 @@ func TestComputeRateSIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    1,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    30,
 				},
@@ -1924,14 +1924,14 @@ func TestComputeRateSIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    10,
 				},
@@ -1996,7 +1996,7 @@ func TestComputeRateSIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    30,
 				},
@@ -2009,14 +2009,14 @@ func TestComputeRateSIntervals(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(90*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    10,
 				},
@@ -2136,7 +2136,7 @@ func TestComputeRateSIntervals1(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    40,
 				},
@@ -2149,14 +2149,14 @@ func TestComputeRateSIntervals1(t *testing.T) {
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    50,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
 					Usage:             utils.NewDecimal(int64(90*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    90,
 				},
@@ -2278,21 +2278,21 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(-1, 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    40,
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
@@ -2305,21 +2305,21 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(-1, 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    50,
 					Usage:             utils.NewDecimal(int64(50*time.Second), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(60*time.Second), 0),
@@ -2438,7 +2438,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    45,
 					Usage:             utils.NewDecimal(int64(45*time.Minute), 0),
@@ -2451,7 +2451,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID10",
 					CompressFactor:    5,
 					Usage:             utils.NewDecimal(int64(5*time.Minute), 0),
@@ -2464,7 +2464,7 @@ func TestComputeRateSIntervals2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(50*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    10,
 					Usage:             utils.NewDecimal(int64(10*time.Minute), 0),
@@ -2615,7 +2615,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2628,7 +2628,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2641,7 +2641,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2654,7 +2654,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2667,7 +2667,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2680,7 +2680,7 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID12",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
@@ -2881,14 +2881,14 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(40*time.Second), 0),
 					CompressFactor:    6,
@@ -3042,14 +3042,14 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(25*time.Second), 0),
 					CompressFactor:    25,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(25*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					CompressFactor:    2,
@@ -3062,7 +3062,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(35*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID30",
 					Usage:             utils.NewDecimal(int64(11*time.Second), 0),
 					CompressFactor:    3,
@@ -3075,14 +3075,14 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(46*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID20",
 					Usage:             utils.NewDecimal(int64(9*time.Second), 0),
 					CompressFactor:    9,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(55*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID21",
 					Usage:             utils.NewDecimal(int64(5*time.Second), 0),
 					CompressFactor:    1,
@@ -3095,7 +3095,7 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID31",
 					Usage:             utils.NewDecimal(int64(10*time.Second), 0),
 					CompressFactor:    2,
@@ -3266,7 +3266,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
@@ -3279,7 +3279,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    30,
@@ -3292,7 +3292,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID20",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    1,
@@ -3305,7 +3305,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					Usage:             utils.NewDecimal(int64(30*time.Second), 0),
 					CompressFactor:    5,
@@ -3318,7 +3318,7 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(3*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(4*time.Minute), 0),
 					CompressFactor:    35,
@@ -3485,14 +3485,14 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					Usage:             utils.NewDecimal(int64(4*time.Hour), 0),
 					CompressFactor:    80,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(4*time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(2*time.Hour), 0),
 					CompressFactor:    40,
@@ -3505,7 +3505,7 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(6*time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					Usage:             utils.NewDecimal(int64(6*time.Hour), 0),
 					CompressFactor:    120,
@@ -3518,14 +3518,14 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUIDGH0",
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 					CompressFactor:    15,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour+30*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUIDGH1",
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
 					CompressFactor:    6,
@@ -3538,14 +3538,14 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					Usage:             utils.NewDecimal(int64(3*time.Hour), 0),
 					CompressFactor:    60,
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(16*time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					Usage:             utils.NewDecimal(int64(9*time.Hour), 0),
 					CompressFactor:    180,
@@ -3711,7 +3711,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Second), 0),
@@ -3724,7 +3724,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Second), 0),
@@ -3737,7 +3737,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Second), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID01",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Second), 0),
@@ -3750,7 +3750,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(3*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(2*time.Second), 0),
@@ -3763,7 +3763,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(5*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID02",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(2*time.Second), 0),
@@ -3776,7 +3776,7 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(7*time.Second), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID12",
 					CompressFactor:    3,
 					Usage:             utils.NewDecimal(int64(3*time.Second), 0),
@@ -3932,7 +3932,7 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -3945,21 +3945,21 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    10,
 					Usage:             utils.NewDecimal(int64(10*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    15,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID12",
 					CompressFactor:    16,
 					Usage:             utils.NewDecimal(int64(16*time.Minute), 0),
@@ -3972,7 +3972,7 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    6,
 					Usage:             utils.NewDecimal(int64(9*time.Minute), 0),
@@ -4102,7 +4102,7 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    50,
 					Usage:             utils.NewDecimal(int64(25*time.Minute), 0),
@@ -4115,14 +4115,14 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(25*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    10,
 					Usage:             utils.NewDecimal(int64(5*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
@@ -4281,7 +4281,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
@@ -4294,7 +4294,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    360,
 					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
@@ -4307,7 +4307,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID20",
 					CompressFactor:    180,
 					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
@@ -4320,7 +4320,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID30",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
@@ -4458,14 +4458,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    2400,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(60*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -4478,14 +4478,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    240,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(120*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -4498,14 +4498,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(180*time.Minute), 0),
-					IntervalRateIndex: 3,
+					RateIntervalIndex: 3,
 					RateID:            "UUID03",
 					CompressFactor:    40,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -4518,7 +4518,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
-					IntervalRateIndex: 3,
+					RateIntervalIndex: 3,
 					RateID:            "UUID03",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
@@ -4572,14 +4572,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(60*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(60*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -4592,14 +4592,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(80*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    240,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(120*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -4612,14 +4612,14 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(140*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    120,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(180*time.Minute), 0),
-					IntervalRateIndex: 3,
+					RateIntervalIndex: 3,
 					RateID:            "UUID03",
 					CompressFactor:    40,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -4632,7 +4632,7 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(200*time.Minute), 0),
-					IntervalRateIndex: 3,
+					RateIntervalIndex: 3,
 					RateID:            "UUID03",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
@@ -4776,7 +4776,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    271,
 					Usage:             utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
@@ -4789,14 +4789,14 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    27,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+59*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(8*time.Hour+30*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    24,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
@@ -4809,7 +4809,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Hour), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID_SPECIAL",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
@@ -4822,21 +4822,21 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(13*time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    24,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(16*time.Hour+30*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID12",
 					CompressFactor:    27,
 					Usage:             utils.NewDecimal(int64(4*time.Hour), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Hour+30*time.Minute), 0),
-					IntervalRateIndex: 3,
+					RateIntervalIndex: 3,
 					RateID:            "UUID13",
 					CompressFactor:    24,
 					Usage:             utils.NewDecimal(int64(3*time.Hour+30*time.Minute), 0),
@@ -4849,7 +4849,7 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(24*time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    3600,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
@@ -5005,14 +5005,14 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(15*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(30*time.Minute), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    2,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
@@ -5025,14 +5025,14 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(45*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    3,
 					Usage:             utils.NewDecimal(int64(15*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    6,
 					Usage:             utils.NewDecimal(int64(30*time.Minute), 0),
@@ -5165,14 +5165,14 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    378,
 					Usage:             utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(12*time.Minute+35*time.Second), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    1585,
 					Usage:             utils.NewDecimal(int64(26*time.Minute+25*time.Second), 0),
@@ -5185,7 +5185,7 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(39*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    3499,
 					Usage:             utils.NewDecimal(int64(58*time.Minute+19*time.Second), 0),
@@ -5198,7 +5198,7 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID02",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(41*time.Second), 0),
@@ -5357,7 +5357,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    600,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -5370,7 +5370,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -5383,7 +5383,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(21*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    570,
 					Usage:             utils.NewDecimal(int64(19*time.Minute), 0),
@@ -5396,7 +5396,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(40*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID11",
 					CompressFactor:    15,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -5409,7 +5409,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(41*time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    570,
 					Usage:             utils.NewDecimal(int64(19*time.Minute), 0),
@@ -5422,7 +5422,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
-					IntervalRateIndex: 2,
+					RateIntervalIndex: 2,
 					RateID:            "UUID12",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -5435,7 +5435,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour+time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    1770,
 					Usage:             utils.NewDecimal(int64(59*time.Minute), 0),
@@ -5448,7 +5448,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Hour), 0),
-					IntervalRateIndex: 3,
+					RateIntervalIndex: 3,
 					RateID:            "UUID13",
 					CompressFactor:    1,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -5461,7 +5461,7 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    30,
 					Usage:             utils.NewDecimal(int64(time.Minute), 0),
@@ -5572,7 +5572,7 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    593,
 					Usage:             utils.NewDecimal(int64(168*time.Hour), 0),
@@ -5585,7 +5585,7 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(168*time.Hour), 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID10",
 					CompressFactor:    60,
 					Usage:             utils.NewDecimal(int64(time.Hour), 0),
@@ -5692,14 +5692,14 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    20,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
 				},
 				{
 					IncrementStart:    utils.NewDecimal(int64(20*time.Minute), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID01",
 					CompressFactor:    2400,
 					Usage:             utils.NewDecimal(int64(40*time.Minute), 0),
@@ -5712,7 +5712,7 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(int64(time.Hour), 0),
-					IntervalRateIndex: 1,
+					RateIntervalIndex: 1,
 					RateID:            "UUID10",
 					CompressFactor:    1200,
 					Usage:             utils.NewDecimal(int64(20*time.Minute), 0),
@@ -5815,7 +5815,7 @@ func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 			Increments: []*utils.RateSIncrement{
 				{
 					IncrementStart:    utils.NewDecimal(0, 0),
-					IntervalRateIndex: 0,
+					RateIntervalIndex: 0,
 					RateID:            "UUID00",
 					CompressFactor:    20,
 					Usage:             utils.NewDecimal(int64(time.Minute+10*time.Second), 0),

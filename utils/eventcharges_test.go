@@ -640,7 +640,7 @@ func TestEventChargesEquals(t *testing.T) {
 				Increments: []*RateSIncrement{
 					{
 						Usage:             NewDecimal(int64(time.Minute), 0),
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
@@ -653,7 +653,7 @@ func TestEventChargesEquals(t *testing.T) {
 					{
 						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
@@ -817,7 +817,7 @@ func TestEventChargesEquals(t *testing.T) {
 				Increments: []*RateSIncrement{
 					{
 						Usage:             NewDecimal(int64(time.Minute), 0),
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
@@ -830,7 +830,7 @@ func TestEventChargesEquals(t *testing.T) {
 					{
 						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE1",
 						CompressFactor:    1,
 					},
@@ -1000,7 +1000,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 				Increments: []*RateSIncrement{
 					{
 						Usage:             NewDecimal(int64(time.Minute), 0),
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE_2",
 						CompressFactor:    1,
 					},
@@ -1013,7 +1013,7 @@ func TestEqualsExtEventCharges(t *testing.T) {
 					{
 						IncrementStart:    NewDecimal(4, 2),
 						Usage:             NewDecimal(int64(30*time.Second), 0),
-						IntervalRateIndex: 0,
+						RateIntervalIndex: 0,
 						RateID:            "RATE_1",
 						CompressFactor:    1,
 					},
