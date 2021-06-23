@@ -32,14 +32,21 @@
     dest: "/usr/share/cgrates"
     state: link
 
-- name: symbol link
+- name: symbol link 2
   become: yes
   file:
     src: "{{ golang_gopath }}/bin/cgr-engine"
     dest: "/usr/bin/cgr-engine"
     state: link
   # post install
-- name:  post install mysql
+
+- name:  post install for ers mysql
+  become: yes
+  command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_ers_db.sh root CGRateS.org localhost'
+  args:
+    chdir: '{{ cgrates_dir }}/data/storage/mysql/'
+
+- name: post install mysql
   become: yes
   command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_cgr_db.sh root CGRateS.org localhost'
   args:
@@ -50,3 +57,20 @@
   command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
   args:
     chdir: '{{ cgrates_dir }}/data/storage/postgres/'
+
+- name:  post install for ers postgres
+  become: yes
+  command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_ers_db.sh'
+  args:
+    chdir: '{{ cgrates_dir }}/data/storage/postgres/'
+
+- name:  post install mongo
+  become: yes
+  command: 'sh {{ cgrates_dir }}/data/storage/mongo/setup_cgr_db.sh'
+  args:
+    chdir: '{{ cgrates_dir }}/data/storage/mongo/'
+
+- name:  set versions
+  command: 'cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/conf/samples/tutmysql'
+  environment:
+    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
