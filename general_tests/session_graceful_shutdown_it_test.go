@@ -28,7 +28,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/engine"
