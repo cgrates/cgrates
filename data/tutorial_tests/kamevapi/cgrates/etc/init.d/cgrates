@@ -72,7 +72,7 @@ do_start()
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test\
                 || return 1
  	start-stop-daemon --start --quiet --chuid $USER:$GROUP --make-pidfile --pidfile $PIDFILE --background\
-		--startas /bin/bash -- -c "exec $DAEMON $DAEMON_OPTS >> $STACKTRACE 2>&1" \
+		--startas /usr/bin/bash -- -c "exec $DAEMON $DAEMON_OPTS >> $STACKTRACE 2>&1" \
 		|| return 2
 }
 
