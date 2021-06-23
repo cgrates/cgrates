@@ -430,7 +430,7 @@ func (rIl *ExtRateSInterval) Equals(nRil *ExtRateSInterval, exInRt, exInRtRef ma
 
 type RateSIncrement struct {
 	IncrementStart    *Decimal
-	IntervalRateIndex int
+	RateIntervalIndex int
 	RateID            string
 	CompressFactor    int64
 	Usage             *Decimal
@@ -451,7 +451,7 @@ type ExtRateSIncrement struct {
 //AsExtRateSIncrement converts RateSIncrement to ExtRateSIncrement
 func (rI *RateSIncrement) AsExtRateSIncrement() (eRi *ExtRateSIncrement, err error) {
 	eRi = &ExtRateSIncrement{
-		IntervalRateIndex: rI.IntervalRateIndex,
+		IntervalRateIndex: rI.RateIntervalIndex,
 		CompressFactor:    rI.CompressFactor,
 		RateID:            rI.RateID,
 	}
@@ -523,7 +523,7 @@ func (rI *RateSIncrement) Equals(rtIn *RateSIncrement, rIRef, rtInRef map[string
 			(rI.IncrementStart != nil && rtIn.IncrementStart != nil &&
 				rI.IncrementStart.Compare(rtIn.IncrementStart) != 0)) ||
 		rI.CompressFactor != rtIn.CompressFactor ||
-		rI.IntervalRateIndex != rtIn.IntervalRateIndex ||
+		rI.RateIntervalIndex != rtIn.RateIntervalIndex ||
 		!rIRef[rI.RateID].Equals(rtInRef[rtIn.RateID]))
 }
 
@@ -552,7 +552,7 @@ type RateSIntervalCost struct {
 type RateSIncrementCost struct {
 	Usage             *Decimal
 	RateID            string
-	IntervalRateIndex int
+	RateIntervalIndex int
 	CompressFactor    int64
 
 	cost *decimal.Big // unexported total increment cost
@@ -562,7 +562,7 @@ type RateSIncrementCost struct {
 // The difference between this 2 is that RateSIncrementCost don't need IncrementStart
 func (rI *RateSIncrement) AsRateSIncrementCost() (rIc *RateSIncrementCost) {
 	rIc = &RateSIncrementCost{
-		IntervalRateIndex: rI.IntervalRateIndex,
+		RateIntervalIndex: rI.RateIntervalIndex,
 		CompressFactor:    rI.CompressFactor,
 		RateID:            rI.RateID,
 	}
@@ -600,7 +600,7 @@ func (rIncrC *RateSIncrementCost) Equals(nRi *RateSIncrementCost, rIRef, rtInRef
 		(rIncrC.Usage != nil && nRi.Usage != nil &&
 			rIncrC.Usage.Compare(nRi.Usage) != 0) ||
 		rIncrC.CompressFactor != nRi.CompressFactor ||
-		rIncrC.IntervalRateIndex != nRi.IntervalRateIndex ||
+		rIncrC.RateIntervalIndex != nRi.RateIntervalIndex ||
 		(rIRef == nil && rtInRef != nil) ||
 		(rIRef != nil && rtInRef == nil) ||
 		(rIRef != nil && rtInRef != nil &&
@@ -724,7 +724,7 @@ func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big)
 // CompressEquals compares two RateSIncrement for Compress function
 func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 	return rIcr.RateID == rIcr2.RateID &&
-		rIcr.IntervalRateIndex == rIcr2.IntervalRateIndex &&
+		rIcr.RateIntervalIndex == rIcr2.RateIntervalIndex &&
 		rIcr.Usage.Big.Cmp(rIcr2.Usage.Big) == 0
 }
 
