@@ -601,7 +601,10 @@ func (rIncrC *RateSIncrementCost) Equals(nRi *RateSIncrementCost, rIRef, rtInRef
 			rIncrC.Usage.Compare(nRi.Usage) != 0) ||
 		rIncrC.CompressFactor != nRi.CompressFactor ||
 		rIncrC.IntervalRateIndex != nRi.IntervalRateIndex ||
-		!rIRef[rIncrC.RateID].Equals(rtInRef[nRi.RateID]))
+		(rIRef == nil && rtInRef != nil) ||
+		(rIRef != nil && rtInRef == nil) ||
+		(rIRef != nil && rtInRef != nil &&
+			!rIRef[rIncrC.RateID].Equals(rtInRef[nRi.RateID])))
 }
 
 /*rIncrC
