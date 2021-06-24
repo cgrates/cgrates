@@ -377,6 +377,24 @@ const CGRATES_CFG_JSON = `
 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
 				
 				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
+
+				// nats
+				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
+				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
+				// "natsQueueID": "",							// the queue id the consumer listen to
+				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
+				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
+				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
+				// "natsClientKey": "",							// the path to a client key( used by tls)
+
+				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
+				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
+				// "natsJWTFileProcessed": "",					// the path to the JWT file( can be the chained file or the user file)
+				// "natsSeedFileProcessed": "",					// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
+				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
+				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
 			},
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -467,6 +485,14 @@ const CGRATES_CFG_JSON = `
 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
 				// "s3FolderPath": "",							// S3FolderPath 
 
+				// Nats
+				// "natsJetStream": false,						// controls if the nats poster uses the JetStream
+				// "natsSubject": "cgrates_cdrs",				// the subject were the events are exported
+				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
+				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
+				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
+				// "natsClientKey": "",							// the path to a client key( used by tls)
 			},													// extra options for exporter
 			"tenant": "",										// tenant used in filterS.Pass
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
