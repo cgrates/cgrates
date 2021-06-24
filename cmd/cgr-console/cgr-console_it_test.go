@@ -31,8 +31,10 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -112,6 +114,8 @@ var (
 		testConsoleItStatus,
 		testConsoleItSharedGroup,
 		testConsoleItDatacost,
+		testConsoleItCost,
+		testConsoleItRatingPlanCost,
 		testConsoleItDebit,
 		testConsoleItDestinations,
 		testConsoleItDestinationSet,
@@ -2961,6 +2965,270 @@ func testConsoleItBalanceDebit(t *testing.T) {
 	}
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func reverseFormatting(i interface{}, s utils.StringSet) (_ interface{}, err error) {
+	switch v := i.(type) {
+	case map[string]interface{}:
+		for key, value := range v {
+			if s.Has(key) {
+				tmval, err := utils.IfaceAsDuration(value)
+				if err != nil {
+					return nil, err
+				}
+				v[key] = tmval
+				continue
+			}
+			if v[key], err = reverseFormatting(value, s); err != nil {
+				return nil, err
+			}
+		}
+		return v, nil
+	case []interface{}:
+		for i, value := range v {
+			if v[i], err = reverseFormatting(value, s); err != nil {
+				return
+			}
+		}
+		return v, nil
+	default:
+		return i, nil
+	}
+}
+
+func testConsoleItCost(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cost", `Tenant="cgrates.org"`, `Category="call"`, `Subject="1001"`, `AnswerTime="*now"`, `Destination="1002"`, `Usage="2m"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var tmp map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&tmp); err != nil {
+		t.Log(output.String())
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	reverseMap, err := reverseFormatting(tmp, utils.StringSet{
+		utils.Usage:              {},
+		utils.GroupIntervalStart: {},
+		utils.RateIncrement:      {},
+		utils.RateUnit:           {},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rcv engine.EventCost
+	if err := json.Unmarshal([]byte(utils.ToJSON(reverseMap)), &rcv); err != nil {
+		t.Log(output.String())
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	usage := 2 * time.Minute
+	// expected := new(engine.EventCost)
+	expected := engine.EventCost{
+		CGRID:     "",
+		RunID:     "",
+		StartTime: time.Time{},
+		Usage:     &usage,
+		Cost:      utils.Float64Pointer(0.7002),
+		Charges: []*engine.ChargingInterval{
+			{
+				RatingID: rcv.Charges[0].RatingID,
+				Increments: []*engine.ChargingIncrement{
+					{
+						Usage:          0 * time.Second,
+						Cost:           0.4,
+						AccountingID:   "",
+						CompressFactor: 1.,
+					},
+					{
+						Usage:          60 * time.Second,
+						Cost:           0.2,
+						AccountingID:   "",
+						CompressFactor: 1.,
+					},
+				},
+				CompressFactor: 1.,
+			},
+			{
+				RatingID: rcv.Charges[0].RatingID,
+				Increments: []*engine.ChargingIncrement{
+
+					{
+						Usage:          1 * time.Second,
+						Cost:           0.00167,
+						AccountingID:   "",
+						CompressFactor: 60.,
+					},
+				},
+				CompressFactor: 1.,
+			},
+		},
+		Accounting:     engine.Accounting{},
+		AccountSummary: nil,
+		Rating: engine.Rating{
+			rcv.Charges[0].RatingID: {
+				ConnectFee:       0.4,
+				MaxCost:          0.,
+				MaxCostStrategy:  "",
+				RatesID:          rcv.Rating[rcv.Charges[0].RatingID].RatesID,
+				RatingFiltersID:  rcv.Rating[rcv.Charges[0].RatingID].RatingFiltersID,
+				RoundingDecimals: 4.,
+				RoundingMethod:   "*up",
+				TimingID:         rcv.Rating[rcv.Charges[0].RatingID].TimingID,
+			},
+		},
+		RatingFilters: engine.RatingFilters{
+			rcv.Rating[rcv.Charges[0].RatingID].RatingFiltersID: engine.RatingMatchedFilters{
+				"DestinationID":     "DST_1002",
+				"DestinationPrefix": "1002",
+				"RatingPlanID":      "RP_1001",
+				"Subject":           "*out:cgrates.org:call:1001",
+			},
+		},
+		Rates: engine.ChargedRates{
+			rcv.Rating[rcv.Charges[0].RatingID].RatesID: {
+				{
+					GroupIntervalStart: 0 * time.Second,
+					RateIncrement:      1 * time.Minute,
+					RateUnit:           1 * time.Minute,
+					Value:              0.2,
+				},
+				{
+					GroupIntervalStart: 1 * time.Minute,
+					RateIncrement:      1 * time.Second,
+					RateUnit:           60 * time.Second,
+					Value:              0.1,
+				},
+			},
+		},
+		Timings: engine.ChargedTimings{
+			rcv.Rating[rcv.Charges[0].RatingID].TimingID: {
+				MonthDays: utils.MonthDays{},
+				Months:    utils.Months{},
+				StartTime: "00:00:00",
+				WeekDays:  utils.WeekDays{},
+				Years:     utils.Years{},
+			},
+		},
+	}
+	rcv.StartTime = time.Time{}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItRatingPlanCost(t *testing.T) {
+	cmd := exec.Command("cgr-console", "ratingplan_cost", `RatingPlanIDs=["RP_1001"]`, `SetupTime="*now"`, `Destination="1002"`, `Usage="2m0s"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv dispatchers.RatingPlanCost
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Fatal(err)
+	}
+	usage := 2 * time.Minute
+	expected := dispatchers.RatingPlanCost{
+		EventCost: &engine.EventCost{
+			CGRID:     "",
+			RunID:     "",
+			StartTime: time.Time{},
+			Usage:     &usage,
+			Cost:      utils.Float64Pointer(0.7002),
+			Charges: []*engine.ChargingInterval{
+				{
+					RatingID: rcv.EventCost.Charges[0].RatingID,
+					Increments: []*engine.ChargingIncrement{
+						{
+							Usage:          0 * time.Second,
+							Cost:           0.4,
+							AccountingID:   "",
+							CompressFactor: 1.,
+						},
+						{
+							Usage:          60 * time.Second,
+							Cost:           0.2,
+							AccountingID:   "",
+							CompressFactor: 1.,
+						},
+					},
+					CompressFactor: 1.,
+				},
+				{
+					RatingID: rcv.EventCost.Charges[0].RatingID,
+					Increments: []*engine.ChargingIncrement{
+
+						{
+							Usage:          1 * time.Second,
+							Cost:           0.00167,
+							AccountingID:   "",
+							CompressFactor: 60.,
+						},
+					},
+					CompressFactor: 1.,
+				},
+			},
+			Accounting:     engine.Accounting{},
+			AccountSummary: nil,
+			Rating: engine.Rating{
+				rcv.EventCost.Charges[0].RatingID: {
+					ConnectFee:       0.4,
+					MaxCost:          0.,
+					MaxCostStrategy:  "",
+					RatesID:          rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].RatesID,
+					RatingFiltersID:  rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].RatingFiltersID,
+					RoundingDecimals: 4.,
+					RoundingMethod:   "*up",
+					TimingID:         rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].TimingID,
+				},
+			},
+			RatingFilters: engine.RatingFilters{
+				rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].RatingFiltersID: engine.RatingMatchedFilters{
+					"DestinationID":     "DST_1002",
+					"DestinationPrefix": "1002",
+					"RatingPlanID":      "RP_1001",
+					"Subject":           "*out:cgrates.org:call:1001",
+				},
+			},
+			Rates: engine.ChargedRates{
+				rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].RatesID: {
+					{
+						GroupIntervalStart: 0 * time.Second,
+						RateIncrement:      1 * time.Minute,
+						RateUnit:           1 * time.Minute,
+						Value:              0.2,
+					},
+					{
+						GroupIntervalStart: 1 * time.Minute,
+						RateIncrement:      1 * time.Second,
+						RateUnit:           60 * time.Second,
+						Value:              0.1,
+					},
+				},
+			},
+			Timings: engine.ChargedTimings{
+				rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].TimingID: {
+					MonthDays: utils.MonthDays{},
+					Months:    utils.Months{},
+					StartTime: "00:00:00",
+					WeekDays:  utils.WeekDays{},
+					Years:     utils.Years{},
+				},
+			},
+		},
+		RatingPlanID: "RP_1001",
+	}
+	rcv.EventCost.StartTime = time.Time{}
+	if !reflect.DeepEqual(rcv, expected) && !strings.Contains(rcv.EventCost.RatingFilters[rcv.EventCost.Rating[rcv.EventCost.Charges[0].RatingID].RatingFiltersID]["Subject"].(string), "rating_plan_cost") {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
