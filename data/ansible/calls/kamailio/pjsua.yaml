@@ -1,13 +1,13 @@
 ---
 - name:  Download PJSUA
   become: yes
-  shell: 'sudo wget https://www.pjsip.org/release/2.9/pjproject-2.9.tar.bz2'
+  shell: 'sudo wget https://github.com/pjsip/pjproject/archive/refs/tags/2.9.tar.gz'
   args:
     chdir: '/tmp'
 
 - name:  Unzip PJSUA
   become: yes
-  shell: 'sudo tar -xvf pjproject-2.9.tar.bz2'
+  shell: 'sudo tar -xvf 2.9.tar.gz'
   args:
     chdir: '/tmp'
 
@@ -26,3 +26,4 @@
   shell: 'sudo mv pjsua-x86_64-unknown-linux-gnu /usr/bin/pjsua'
   args:
     chdir: '/tmp/pjproject-2.9/pjsip-apps/bin'
+ 
