@@ -52,7 +52,7 @@
     become: yes
     apt: name={{ dependencies }} state=present
 
-  # Install FreeSwitch
+  # Install Kamailio
   - name: Install Kamailio
     become: yes
     apt: name={{ kamailio_package }} state=latest
@@ -77,6 +77,10 @@
     include: cgrates.yaml
 
 
+  - name: Add user for CGRateS
+    become: yes
+    shell: 'sudo useradd cgrates'
+    
 # Configure PJSUA
   - name: Config PJSUA
     include: pjsua.yaml
