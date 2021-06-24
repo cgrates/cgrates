@@ -1807,6 +1807,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},

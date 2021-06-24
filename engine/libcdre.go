@@ -189,6 +189,12 @@ func (expEv *ExportEvents) ReplayFailedPosts(attempts int) (failedEvents *Export
 	case utils.MetaS3jsonMap:
 		pstr = NewS3Poster(expEv.Path, attempts, expEv.Opts)
 		keyFunc = utils.UUIDSha1Prefix
+	case utils.MetaNatsjsonMap:
+		if pstr, err = NewNatsPoster(expEv.Path, attempts, expEv.Opts,
+			config.CgrConfig().GeneralCfg().NodeID,
+			config.CgrConfig().GeneralCfg().ConnectTimeout); err != nil {
+			return expEv, err
+		}
 	}
 	for _, ev := range expEv.Events {
 		if err = pstr.Post(ev.([]byte), keyFunc()); err != nil {

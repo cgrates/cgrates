@@ -32,7 +32,7 @@ import (
 // NewNatsER return a new amqp event reader
 func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}) (_ EventReader, err error) {
 	rdr := &NatsER{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
@@ -48,7 +48,12 @@ func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 			rdr.cap <- struct{}{}
 		}
 	}
-	rdr.dialURL = rdr.Config().SourcePath
+	if err = rdr.processOpts(); err != nil {
+		return
+	}
+	if err = rdr.createPoster(); err != nil {
+		return
+	}
 	return rdr, nil
 }
 
@@ -59,22 +64,18 @@ type NatsER struct {
 	cfgIdx int // index of config instance within ERsCfg.Readers
 	fltrS  *engine.FilterS
 
-	dialURL string
-	queueID string
-	subject string
-
-	jetStream bool
-
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
 	rdrExit       chan struct{}
 	rdrErr        chan error
 	cap           chan struct{}
 
-	poster   *nats.Conn
-	posterJS nats.JetStream
+	subject   string
+	queueID   string
+	jetStream bool
+	opts      []nats.Option
 
-	posterSubject string
+	poster *engine.NatsPoster
 }
 
 // Config returns the curent configuration
@@ -86,19 +87,19 @@ func (rdr *NatsER) Config() *config.EventReaderCfg {
 func (rdr *NatsER) Serve() (err error) {
 	// Connect to a server
 	var nc *nats.Conn
-	if nc, err = nats.Connect(rdr.dialURL); err != nil {
+	var js nats.JetStreamContext
+
+	if nc, err = nats.Connect(rdr.Config().SourcePath, rdr.opts...); err != nil {
 		return
 	}
-
 	ch := make(chan *nats.Msg)
 	if !rdr.jetStream {
 		if _, err = nc.ChanQueueSubscribe(rdr.subject, rdr.queueID, ch); err != nil {
 			return
 		}
 	} else {
-		// Create JetStream Context
-		var js nats.JetStreamContext
-		if js, err = nc.JetStream(); err != nil {
+		js, err = nc.JetStream()
+		if err != nil {
 			return
 		}
 		if _, err = js.QueueSubscribe(rdr.subject, rdr.queueID, func(msg *nats.Msg) {
@@ -115,7 +116,7 @@ func (rdr *NatsER) Serve() (err error) {
 		case <-rdr.rdrExit:
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> stop monitoring nats path <%s>",
-					utils.ERs, rdr.dialURL))
+					utils.ERs, rdr.Config().SourcePath))
 			nc.Drain()
 			return
 		case msg := <-ch:
@@ -131,7 +132,7 @@ func (rdr *NatsER) Serve() (err error) {
 							utils.ERs, string(msg.Data), err.Error()))
 				}
 				if rdr.poster != nil { // post it
-					if err := rdr.postMessage(msg.Data); err != nil {
+					if err := rdr.poster.Post(msg.Data, utils.EmptyString); err != nil {
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> writing message %s error: %s",
 								utils.ERs, string(msg.Data), err.Error()))
@@ -177,28 +178,31 @@ func (rdr *NatsER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *NatsER) postMessage(msg []byte) (err error) {
-	if rdr.posterJS != nil {
-		_, err = rdr.posterJS.Publish(rdr.posterSubject, msg)
+func (rdr *NatsER) createPoster() (err error) {
+	processedOpt := getProcessOptions(rdr.Config().Opts)
+	if len(processedOpt) == 0 &&
+		len(rdr.Config().ProcessedPath) == 0 {
 		return
 	}
-	return rdr.poster.Publish(rdr.posterSubject, msg)
+	rdr.poster, err = engine.NewNatsPoster(utils.FirstNonEmpty(
+		rdr.Config().ProcessedPath, rdr.Config().SourcePath),
+		rdr.cgrCfg.GeneralCfg().PosterAttempts,
+		processedOpt, rdr.cgrCfg.GeneralCfg().NodeID,
+		rdr.cgrCfg.GeneralCfg().ConnectTimeout)
+	return
 }
 
-func (rdr *NatsER) createPoster(opts map[string]interface{}) (err error) {
-	if rdr.poster, err = nats.Connect(utils.FirstNonEmpty(rdr.Config().ProcessedPath, rdr.Config().SourcePath)); err != nil {
-		return
-	}
-	jsOpt := rdr.jetStream
-	if jsOptVal, has := opts["natsJetStreamProcessed"]; has {
-		if jsOpt, err = utils.IfaceAsBool(jsOptVal); err != nil {
+func (rdr *NatsER) processOpts() (err error) {
+	rdr.subject = utils.IfaceAsString(rdr.Config().Opts[utils.NatsSubject])
+	rdr.queueID = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsQueueID]),
+		rdr.cgrCfg.GeneralCfg().NodeID)
+	if useJetStreamVal, has := rdr.Config().Opts[utils.NatsJetStream]; has {
+		if rdr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
 			return
 		}
 	}
-
-	if jsOpt {
-		// Create JetStream Context
-		rdr.posterJS, err = rdr.poster.JetStream()
-	}
+	rdr.opts, err = engine.GetNatsOpts(rdr.Config().Opts,
+		rdr.cgrCfg.GeneralCfg().NodeID,
+		rdr.cgrCfg.GeneralCfg().ConnectTimeout)
 	return
 }

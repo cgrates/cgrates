@@ -40,6 +40,7 @@ var (
 		MetaSQSjsonMap:    ContentJSON,
 		MetaKafkajsonMap:  ContentJSON,
 		MetaS3jsonMap:     ContentJSON,
+		MetaNatsjsonMap:   ContentJSON,
 	}
 
 	extraDBPartition = NewStringSet([]string{CacheDispatchers,
@@ -392,6 +393,7 @@ const (
 	MetaAMQPV1jsonMap         = "*amqpv1_json_map"
 	MetaSQSjsonMap            = "*sqs_json_map"
 	MetaKafkajsonMap          = "*kafka_json_map"
+	MetaNatsjsonMap           = "*nats_json_map"
 	MetaSQL                   = "*sql"
 	MetaMySQL                 = "*mysql"
 	MetaS3jsonMap             = "*s3_json_map"
@@ -2597,6 +2599,15 @@ const (
 	ElsVersionLow          = "elsVersion"
 	ElsVersionType         = "elsVersionType"
 	ElsWaitForActiveShards = "elsWaitForActiveShards"
+	// nats
+	NatsSubject              = "natsSubject"
+	NatsQueueID              = "natsQueueID"
+	NatsJWTFile              = "natsJWTFile"
+	NatsSeedFile             = "natsSeedFile"
+	NatsClientCertificate    = "natsClientCertificate"
+	NatsClientKey            = "natsClientKey"
+	NatsCertificateAuthority = "natsCertificateAuthority"
+	NatsJetStream            = "natsJetStream"
 )
 
 // Analyzers constants
