@@ -322,11 +322,11 @@ var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
 	utils.MetaFileJSON, utils.MetaNone, utils.MetaAMQPjsonMap, utils.MetaS3jsonMap,
-	utils.MetaSQSjsonMap, utils.MetaAMQPV1jsonMap})
+	utils.MetaSQSjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaNatsjsonMap})
 
 var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaNone, utils.MetaFileFWV,
 	utils.MetaHTTPPost, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
-	utils.MetaKafkajsonMap, utils.MetaS3jsonMap, utils.MetaElastic, utils.MetaVirt, utils.MetaSQL})
+	utils.MetaKafkajsonMap, utils.MetaS3jsonMap, utils.MetaElastic, utils.MetaVirt, utils.MetaSQL, utils.MetaNatsjsonMap})
 
 // LazySanityCheck used after check config sanity to display warnings related to the config
 func (cfg *CGRConfig) LazySanityCheck() {
