@@ -22,6 +22,7 @@ package v1
 
 import (
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -44,6 +45,7 @@ var (
 		testFilterResetDataDB,
 		testFilterStartEngine,
 		testFilterRpcConn,
+		testFilterStartCPUProfiling,
 		testFilterGetFilterBeforeSet,
 		testFilterSetFilter,
 		testFilterGetFilterAfterSet,
@@ -54,6 +56,7 @@ var (
 		testFilterGetFilterAfterRemove,
 		testFilterSetFilterWithoutTenant,
 		testFilterRemoveFilterWithoutTenant,
+		testFilterStopCPUProfiling,
 		testFilterKillEngine,
 	}
 )
@@ -106,6 +109,15 @@ func testFilterRpcConn(t *testing.T) {
 	filterRPC, err = newRPCClient(filterCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testFilterStartCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := filterRPC.Call(utils.CoreSv1StartCPUProfiling,
+		argPath, &reply); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -271,6 +283,32 @@ func testFilterRemoveFilterWithoutTenant(t *testing.T) {
 	if err := filterRPC.Call(utils.APIerSv1GetFilter,
 		&utils.TenantID{ID: "FilterWithoutTenant"},
 		&result); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testFilterStopCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := filterRPC.Call(utils.CoreSv1StopCPUProfiling,
+		utils.EmptyString, &reply); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Open(argPath)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(argPath); err != nil {
 		t.Error(err)
 	}
 }

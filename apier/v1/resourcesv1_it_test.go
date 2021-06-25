@@ -21,6 +21,7 @@ package v1
 
 import (
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"sort"
@@ -45,6 +46,7 @@ var (
 		testV1RsResetStorDb,
 		testV1RsStartEngine,
 		testV1RsRpcConn,
+		testV1ResourceStartCPUProfiling,
 		testV1RsCacheResourceBeforeLoad,
 		testV1RsFromFolder,
 		testV1RsCacheResourceAfterLoad,
@@ -53,6 +55,7 @@ var (
 		testV1RsAllocateResource,
 		testV1RsAuthorizeResources,
 		testV1RsReleaseResource,
+		testV1ResourceStopCPUProfiling,
 		testV1RsDBStore,
 		testV1RsGetResourceProfileBeforeSet,
 		testV1RsSetResourceProfile,
@@ -152,6 +155,15 @@ func testV1RsRpcConn(t *testing.T) {
 	rlsV1Rpc, err = newRPCClient(rlsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func testV1ResourceStartCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := rlsV1Rpc.Call(utils.CoreSv1StartCPUProfiling,
+		argPath, &reply); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -1089,6 +1101,32 @@ func testV1RsCheckAuthorizeResourcesAfterRestart(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expRes), utils.ToJSON(rplyRes))
 	}
 
+}
+
+func testV1ResourceStopCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := rlsV1Rpc.Call(utils.CoreSv1StopCPUProfiling,
+		utils.EmptyString, &reply); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Open(argPath)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(argPath); err != nil {
+		t.Error(err)
+	}
 }
 
 func testResourceSCacheTestGetNotFound(t *testing.T) {

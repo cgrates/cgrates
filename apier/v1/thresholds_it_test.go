@@ -21,6 +21,7 @@ package v1
 
 import (
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"sort"
@@ -209,12 +210,14 @@ var (
 		testV1TSResetStorDb,
 		testV1TSStartEngine,
 		testV1TSRpcConn,
+		testV1ThresholdStartCPUProfiling,
 		testV1TSCacheThresholdBeforeLoad,
 		testV1TSFromFolder,
 		testV1TSCacheThresholdAfterLoad,
 		testV1TSGetThresholds,
 		testV1TSProcessEvent,
 		testV1TSGetThresholdsAfterProcess,
+		testV1ThresholdStopCPUProfiling,
 		testV1TSGetThresholdsAfterRestart,
 		testv1TSGetThresholdProfileIDs,
 		testv1TSGetThresholdProfileIDsCount,
@@ -300,6 +303,15 @@ func testV1TSRpcConn(t *testing.T) {
 	tSv1Rpc, err = newRPCClient(tSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func testV1ThresholdStartCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := tSv1Rpc.Call(utils.CoreSv1StartCPUProfiling,
+		argPath, &reply); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -988,6 +1000,32 @@ func testV1TSResetThresholdsWithoutTenant(t *testing.T) {
 	reply.Snooze = expectedThreshold.Snooze
 	if !reflect.DeepEqual(expectedThreshold, reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedThreshold), utils.ToJSON(reply))
+	}
+}
+
+func testV1ThresholdStopCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := tSv1Rpc.Call(utils.CoreSv1StopCPUProfiling,
+		utils.EmptyString, &reply); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Open(argPath)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(argPath); err != nil {
+		t.Error(err)
 	}
 }
 

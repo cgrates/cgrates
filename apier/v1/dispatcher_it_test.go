@@ -22,6 +22,7 @@ package v1
 
 import (
 	"net/rpc"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -48,6 +49,7 @@ var (
 		testDispatcherSResetStorDb,
 		testDispatcherSStartEngine,
 		testDispatcherSRPCConn,
+		testDispatcherStartCPUProfiling,
 
 		testDispatcherSSetDispatcherProfile,
 		testDispatcherSGetDispatcherProfileIDs,
@@ -65,6 +67,7 @@ var (
 		testDispatcherSSetDispatcherHostWithoutTenant,
 		testDispatcherSRemDispatcherHostWithoutTenant,
 
+		testV1DispatcherStopCPUProfiling,
 		testDispatcherSKillEngine,
 
 		//cache test
@@ -140,6 +143,15 @@ func testDispatcherSRPCConn(t *testing.T) {
 	dispatcherRPC, err = newRPCClient(dispatcherCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testDispatcherStartCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := dispatcherRPC.Call(utils.CoreSv1StartCPUProfiling,
+		argPath, &reply); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -382,6 +394,32 @@ func testDispatcherSRemDispatcherHost(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "DspHst1"}},
 		&result); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v received: %v", utils.ErrNotFound, err)
+	}
+}
+
+func testV1DispatcherStopCPUProfiling(t *testing.T) {
+	argPath := "/tmp/cpu.prof"
+	var reply string
+	if err := dispatcherRPC.Call(utils.CoreSv1StopCPUProfiling,
+		utils.EmptyString, &reply); err != nil {
+		t.Error(err)
+	}
+	file, err := os.Open(argPath)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(argPath); err != nil {
+		t.Error(err)
 	}
 }
 
