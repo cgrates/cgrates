@@ -77,6 +77,11 @@
       name: postgresql-contrib
 
 ###########################################################################################################################
+  - name: Install nats
+    become: yes
+    apt:
+      deb: https://github.com/nats-io/nats-server/releases/download/v2.3.0/nats-server-v2.3.0-amd64.deb
+
   - name: Install mongo
     include: mongo.yaml
 
