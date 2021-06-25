@@ -99,6 +99,12 @@
       args:
         chdir: '{{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc'
 
+    - name:  Unzip FreeSWITCH config 2
+      become: yes
+      shell: 'sudo tar -xvf freeswitch_conf.tar.gz'
+      args:
+        chdir: '{{ cgrates_dir }}/data/tutorials/fs_evsock/freeswitch/etc'
+
     - name:  Remove FreeSWITCH default config from /etc/freeswitch
       become: yes
       shell: 'sudo rm -rf *'
@@ -110,6 +116,10 @@
       shell: 'sudo cp -r {{ cgrates_dir }}/data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/* /etc/freeswitch'
       args:
         chdir: '/etc/freeswitch'
+
+    - name: Add user for CGRateS
+      become: yes
+      shell: 'sudo useradd cgrates'
 
     # Configure PJSUA
     - name: Config PJSUA
