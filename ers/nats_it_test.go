@@ -22,6 +22,7 @@ package ers
 
 import (
 	"fmt"
+	"os/exec"
 	"reflect"
 	"runtime"
 	"testing"
@@ -33,7 +34,18 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func TestNatsER(t *testing.T) {
+func TestNatsERJetStream(t *testing.T) {
+	// start the nats-server
+	exec.Command("pkill", "nats-server")
+
+	cmd := exec.Command("nats-server", "-js")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err) // most probably not installed
+	}
+	time.Sleep(50 * time.Millisecond)
+	defer cmd.Process.Kill()
+	//
+
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
@@ -45,13 +57,171 @@ func TestNatsER(t *testing.T) {
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
-			// "processed_path": "/var/spool/cgrates/ers/out",	
+			"processed_path": "",	
 			"tenant": "cgrates.org",							
 			"filters": [],										
 			"flags": [],										
 			"fields":[									
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
 			],
+			"opts": {
+				"natsJetStream": true,
+				"natsSubjectProcessed": "processed_cdrs",
+			}
+		},
+	],
+},
+}`)
+	utils.Logger.SetLogLevel(7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cfg.CheckConfigSanity(); err != nil {
+		t.Fatal(err)
+	}
+	rdrEvents = make(chan *erEvent, 1)
+	rdrErr = make(chan error, 1)
+	rdrExit = make(chan struct{}, 1)
+
+	if rdr, err = NewNatsER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
+		rdrErr, new(engine.FilterS), rdrExit); err != nil {
+		t.Fatal(err)
+	}
+	nc, err := nats.Connect(rdr.Config().SourcePath, nats.Timeout(time.Second),
+		nats.DrainTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Drain()
+
+	js, err := nc.JetStream()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name := range js.StreamNames() {
+		if name == "test" {
+			if err = js.DeleteStream("test"); err != nil {
+				t.Fatal(err)
+			}
+			break
+		}
+		if name == "test2" {
+			if err = js.DeleteStream("test2"); err != nil {
+				t.Fatal(err)
+			}
+			break
+		}
+	}
+	if _, err = js.AddStream(&nats.StreamConfig{
+		Name:     "test",
+		Subjects: []string{utils.DefaultQueueID},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = js.PurgeStream("test"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err = js.AddStream(&nats.StreamConfig{
+		Name:     "test2",
+		Subjects: []string{"processed_cdrs"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = js.PurgeStream("test2"); err != nil {
+		t.Fatal(err)
+	}
+	ch := make(chan *nats.Msg, 3)
+	_, err = js.QueueSubscribe("processed_cdrs", "test3", func(msg *nats.Msg) {
+		ch <- msg
+	}, nats.Durable("test4"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	go rdr.Serve()
+	runtime.Gosched()
+	time.Sleep(10 * time.Nanosecond)
+
+	for i := 0; i < 3; i++ {
+		randomCGRID := utils.UUIDSha1Prefix()
+		expData := fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)
+		if _, err = js.Publish(utils.DefaultQueueID, []byte(expData)); err != nil {
+			t.Fatal(err)
+		}
+
+		nc.FlushTimeout(time.Second)
+		nc.Flush()
+
+		select {
+		case err = <-rdrErr:
+			t.Fatal(err)
+		case ev := <-rdrEvents:
+			if ev.rdrCfg.ID != "nats" {
+				t.Fatalf("Expected 'nats' received `%s`", ev.rdrCfg.ID)
+			}
+			expected := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     ev.cgrEvent.ID,
+				Time:   ev.cgrEvent.Time,
+				Event: map[string]interface{}{
+					"CGRID": randomCGRID,
+				},
+				APIOpts: map[string]interface{}{},
+			}
+			if !reflect.DeepEqual(ev.cgrEvent, expected) {
+				t.Fatalf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
+			}
+			select {
+			case msg := <-ch:
+				if expData != string(msg.Data) {
+					t.Errorf("Expected %q ,received %q", expData, string(msg.Data))
+				}
+			case <-time.After(10 * time.Second):
+				t.Fatal("Timeout")
+			}
+		case <-time.After(10 * time.Second):
+			t.Fatal("Timeout")
+		}
+	}
+	close(rdrExit)
+}
+
+func TestNatsER(t *testing.T) {
+	// start the nats-server
+	exec.Command("pkill", "nats-server")
+
+	cmd := exec.Command("nats-server")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err) // most probably not installed
+	}
+	time.Sleep(10 * time.Millisecond)
+	defer cmd.Process.Kill()
+	//
+
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
+"ers": {									// EventReaderService
+	"enabled": true,						// starts the EventReader service: <true|false>
+	"sessions_conns":["*localhost"],
+	"readers": [
+		{
+			"id": "nats",										
+			"type": "*nats_json_map",							
+			"run_delay":  "-1",									
+			"concurrent_requests": 1024,						
+			"source_path": "nats://localhost:4222",				
+			"processed_path": "",	
+			"tenant": "cgrates.org",							
+			"filters": [],										
+			"flags": [],										
+			"fields":[									
+				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "path": "*cgreq.CGRID"},
+			],
+			"opts": {
+				"natsSubjectProcessed": "processed_cdrs",
+			}
 		},
 	],
 },
@@ -75,46 +245,56 @@ func TestNatsER(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// js, err := nc.JetStream()
-	// if err != nil {
-	// t.Fatal(err)
-	// }
-	go rdr.Serve()
-	runtime.Gosched()
-	time.Sleep(time.Second)
-	randomCGRID := utils.UUIDSha1Prefix()
-	if err = nc.Publish(utils.DefaultQueueID, []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID))); err != nil {
+	ch := make(chan *nats.Msg, 3)
+	_, err = nc.ChanQueueSubscribe("processed_cdrs", "test3", ch)
+	if err != nil {
 		t.Fatal(err)
 	}
-	// if _, err = js.Publish(utils.DefaultQueueID, []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID))); err != nil {
-	// t.Fatal(err)
-	// }
 
-	nc.FlushTimeout(time.Second)
-	nc.Flush()
-	nc.Drain()
+	defer nc.Drain()
+	go rdr.Serve()
+	runtime.Gosched()
+	time.Sleep(100 * time.Millisecond)
+	for i := 0; i < 3; i++ {
+		randomCGRID := utils.UUIDSha1Prefix()
+		expData := fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)
+		if err = nc.Publish(utils.DefaultQueueID, []byte(expData)); err != nil {
+			t.Fatal(err)
+		}
 
-	select {
-	case err = <-rdrErr:
-		t.Error(err)
-	case ev := <-rdrEvents:
-		if ev.rdrCfg.ID != "nats" {
-			t.Errorf("Expected 'kakfa' received `%s`", ev.rdrCfg.ID)
+		nc.FlushTimeout(time.Second)
+		nc.Flush()
+
+		select {
+		case err = <-rdrErr:
+			t.Fatal(err)
+		case ev := <-rdrEvents:
+			if ev.rdrCfg.ID != "nats" {
+				t.Fatalf("Expected 'nats' received `%s`", ev.rdrCfg.ID)
+			}
+			expected := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     ev.cgrEvent.ID,
+				Time:   ev.cgrEvent.Time,
+				Event: map[string]interface{}{
+					"CGRID": randomCGRID,
+				},
+				APIOpts: map[string]interface{}{},
+			}
+			if !reflect.DeepEqual(ev.cgrEvent, expected) {
+				t.Fatalf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
+			}
+			select {
+			case msg := <-ch:
+				if expData != string(msg.Data) {
+					t.Errorf("Expected %q ,received %q", expData, string(msg.Data))
+				}
+			case <-time.After(10 * time.Second):
+				t.Fatal("Timeout")
+			}
+		case <-time.After(10 * time.Second):
+			t.Fatal("Timeout")
 		}
-		expected := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     ev.cgrEvent.ID,
-			Time:   ev.cgrEvent.Time,
-			Event: map[string]interface{}{
-				"CGRID": randomCGRID,
-			},
-			APIOpts: map[string]interface{}{},
-		}
-		if !reflect.DeepEqual(ev.cgrEvent, expected) {
-			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
-		}
-	case <-time.After(10 * time.Second):
-		t.Fatal("Timeout")
 	}
 	close(rdrExit)
 }

@@ -2602,6 +2602,7 @@ const (
 	// nats
 	NatsSubject              = "natsSubject"
 	NatsQueueID              = "natsQueueID"
+	NatsConsumerName         = "natsConsumerName"
 	NatsJWTFile              = "natsJWTFile"
 	NatsSeedFile             = "natsSeedFile"
 	NatsClientCertificate    = "natsClientCertificate"
