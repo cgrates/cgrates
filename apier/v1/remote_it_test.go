@@ -251,7 +251,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
+	if *encoding == utils.MetaGOB { // in gob empty slice is encoded as nil
 		alsPrf.AttributeProfile.Attributes[0].FilterIDs = nil
 	}
 	reply.Compile()
