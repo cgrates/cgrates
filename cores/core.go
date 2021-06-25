@@ -20,16 +20,18 @@ package cores
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, stopChan chan struct{}) *CoreService {
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, file io.Closer, stopChan chan struct{}) *CoreService {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
@@ -37,12 +39,15 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, stopChan chan stru
 	return &CoreService{
 		cfg:       cfg,
 		CapsStats: st,
+		file:      file,
 	}
 }
 
 type CoreService struct {
 	cfg       *config.CGRConfig
 	CapsStats *engine.CapsStats
+	file      io.Closer
+	fileMx    sync.Mutex
 }
 
 // Shutdown is called to shutdown the service
@@ -71,31 +76,37 @@ func (cS *CoreService) Status(arg *utils.TenantWithAPIOpts, reply *map[string]in
 }
 
 // StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreService) StartCPUProfiling(argPath *string) (err error) {
-	if *argPath == utils.EmptyString {
+func (cS *CoreService) StartCPUProfiling(argPath string) (err error) {
+	cS.fileMx.Lock()
+	defer cS.fileMx.Unlock()
+	if cS.file != nil {
+		return fmt.Errorf("CPU profiling already started")
+	}
+	if argPath == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("Path")
 	}
-	f, err := os.Create(*argPath)
-	if err != nil {
-		return fmt.Errorf("could not create CPU profile: %v", err)
-	}
-	if err := pprof.StartCPUProfile(f); err != nil {
-		return fmt.Errorf("could not create CPU profile: %v", err)
-	}
-	defer f.Close()
+	cS.file, err = StartCPUProfiling(argPath)
 	return
 }
 
 // StopCPUProfiling is used to stop CPUProfiling in the given path
-func (cS *CoreService) StopCPUProfiling(argPath *string) (err error) {
-	f, err := os.Create(*argPath)
-	if err != nil {
-		return fmt.Errorf("could not create CPU profile: %v", err)
-	}
-	if err := pprof.StartCPUProfile(f); err != nil {
-		// this means CPUProfiling is already active,so we can shut down now
+func (cS *CoreService) StopCPUProfiling() (err error) {
+	cS.fileMx.Lock()
+	defer cS.fileMx.Unlock()
+	if cS.file != nil {
 		pprof.StopCPUProfile()
-		return nil
+		err = cS.file.Close()
+		cS.file = nil
+		return
 	}
+	return fmt.Errorf(" cannot stop because CPUProfiling is not active")
+}
+
+func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
+	file, err = os.Create(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not create CPU profile: %v", err)
+	}
+	err = pprof.StartCPUProfile(file)
 	return
 }
