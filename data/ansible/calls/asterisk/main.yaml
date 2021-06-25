@@ -92,37 +92,37 @@
     become: yes
     shell: "sudo ./configure --with-jansson-bundled"
     args:
-      chdir: '/tmp/asterisk-18.4.0'
+      chdir: '/tmp/asterisk-18.5.0'
 
   - name: Make Asterisk
     become: yes
     shell: "sudo make"
     args:
-      chdir: '/tmp/asterisk-18.4.0'
+      chdir: '/tmp/asterisk-18.5.0'
 
   - name: Make all Asterisk
     become: yes
     shell: "make all"
     args:
-      chdir: '/tmp/asterisk-18.4.0'
+      chdir: '/tmp/asterisk-18.5.0'
 
   - name: Make install Asterisk
     become: yes
     shell: "sudo make install"
     args:
-      chdir: '/tmp/asterisk-18.4.0'
+      chdir: '/tmp/asterisk-18.5.0'
 
   - name: Make samples Asterisk
     become: yes
     shell: "sudo make samples"
     args:
-      chdir: '/tmp/asterisk-18.4.0'
+      chdir: '/tmp/asterisk-18.5.0'
 
   - name: Make config Asterisk
     become: yes
     shell: "sudo make config"
     args:
-      chdir: '/tmp/asterisk-18.4.0'
+      chdir: '/tmp/asterisk-18.5.0'
 
   - name: Add user for Asterisk
     become: yes
