@@ -53,7 +53,8 @@
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
-	"apiers_conns": ["*localhost"]
+	"apiers_conns": ["*localhost"],
+	//"indexed_selects": false,
 },
 
 
