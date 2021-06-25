@@ -1583,6 +1583,9 @@ func testV1STSGetStatQueueWithoutExpired(t *testing.T) {
 }
 
 func testV1STSGetStatQueueWithoutStored(t *testing.T) {
+	if *dbType == utils.MetaInternal {
+		t.SkipNow()
+	}
 	var result string
 	var reply *engine.StatQueueProfile
 	statConfig = &engine.StatQueueProfileWithAPIOpts{
