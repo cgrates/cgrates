@@ -71,10 +71,11 @@ type NatsER struct {
 	rdrErr        chan error
 	cap           chan struct{}
 
-	subject   string
-	queueID   string
-	jetStream bool
-	opts      []nats.Option
+	subject      string
+	queueID      string
+	jetStream    bool
+	consumerName string
+	opts         []nats.Option
 
 	poster *engine.NatsPoster
 }
@@ -105,7 +106,7 @@ func (rdr *NatsER) Serve() (err error) {
 		}
 		if _, err = js.QueueSubscribe(rdr.subject, rdr.queueID, func(msg *nats.Msg) {
 			ch <- msg
-		}); err != nil {
+		}, nats.Durable(rdr.consumerName)); err != nil {
 			return
 		}
 	}
@@ -119,13 +120,11 @@ func (rdr *NatsER) Serve() (err error) {
 				fmt.Sprintf("<%s> stop monitoring nats path <%s>",
 					utils.ERs, rdr.Config().SourcePath))
 			nc.Drain()
+			if rdr.poster != nil {
+				rdr.poster.Close()
+			}
 			return
 		case msg := <-ch:
-			if err = rdr.processMessage(msg.Data); err != nil {
-				nc.Drain() // ignore this error(if any) in favor of the error processMessage
-				return
-			}
-
 			go func(msg *nats.Msg) {
 				if err := rdr.processMessage(msg.Data); err != nil {
 					utils.Logger.Warning(
@@ -197,6 +196,8 @@ func (rdr *NatsER) processOpts() (err error) {
 	rdr.subject = utils.IfaceAsString(rdr.Config().Opts[utils.NatsSubject])
 	rdr.queueID = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsQueueID]),
 		rdr.cgrCfg.GeneralCfg().NodeID)
+	rdr.consumerName = utils.FirstNonEmpty(utils.IfaceAsString(rdr.Config().Opts[utils.NatsConsumerName]),
+		utils.CGRateSLwr)
 	if useJetStreamVal, has := rdr.Config().Opts[utils.NatsJetStream]; has {
 		if rdr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
 			return
