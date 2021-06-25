@@ -31,10 +31,6 @@
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
 	},
-	"rplConn": {
-		"strategy": "*broadcast_sync",
-		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}],
-	}
 },
 
 

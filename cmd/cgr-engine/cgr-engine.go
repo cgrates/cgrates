@@ -296,21 +296,6 @@ func memProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 	}
 }
 
-func startCPUProfiling(cpuProfDir string) (f io.WriteCloser, err error) {
-	cpuPath := path.Join(cpuProfDir, utils.CpuPathCgr)
-	if f, err = os.Create(cpuPath); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<cpuProfiling>could not create cpu profile file: %s", err))
-		return
-	}
-	pprof.StartCPUProfile(f)
-	return
-}
-
-func stopCPUProfiling(f io.Closer) {
-	pprof.StopCPUProfile()
-	f.Close()
-}
-
 func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 	shutdownSignal := make(chan os.Signal, 1)
 	reloadSignal := make(chan os.Signal, 1)
@@ -399,13 +384,25 @@ func main() {
 		shdWg.Add(1)
 		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, shdChan)
 	}
+	var cpuProfileFile io.Closer
+	var cS *cores.CoreService
 	if *cpuProfDir != utils.EmptyString {
-		f, err := startCPUProfiling(*cpuProfDir)
+		cpuPath := path.Join(*cpuProfDir, utils.CpuPathCgr)
+		cpuProfileFile, err = cores.StartCPUProfiling(cpuPath)
 		if err != nil {
 			return
 		}
-		defer stopCPUProfiling(f)
 	}
+	defer func() {
+		if cS != nil {
+			cS.StopCPUProfiling()
+			return
+		}
+		if cpuProfileFile != nil {
+			pprof.StopCPUProfile()
+			cpuProfileFile.Close()
+		}
+	}()
 
 	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
@@ -600,12 +597,13 @@ func main() {
 	}
 
 	// init CoreSv1
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, srvDep)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)
 		return
 	}
+	cS = coreS.GetCoreS()
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), shdChan, anz, coreS.GetCoreS().CapsStats)
