@@ -315,22 +315,22 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 		t.Error(err)
 	} else {
 		rcv := cfgCgr.loaderCfg.AsMapInterface(cfgCgr.generalCfg.RSRSep)
-		if len(cfgCgr.loaderCfg) != 2 {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", 2, len(cfgCgr.loaderCfg))
+		if len(cfgCgr.loaderCfg) != 1 {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", 1, len(cfgCgr.loaderCfg))
 		} else if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0],
-			rcv[1][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]) {
+			rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]) {
 			t.Errorf("Expected %+v,\n received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]),
-				utils.ToJSON(rcv[1][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]))
-		} else if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1],
-			rcv[1][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]) {
-			t.Errorf("Expected %+v,\n received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]),
-				utils.ToJSON(rcv[1][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[1]))
-		} else if !reflect.DeepEqual(eMap[0][utils.CachesConnsCfg], rcv[1][utils.CachesConnsCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[0][utils.CachesConnsCfg], rcv[1][utils.CachesConnsCfg])
-		} else if !reflect.DeepEqual(eMap[0][utils.TpInDirCfg], rcv[1][utils.TpInDirCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[0][utils.TpInDirCfg], rcv[1][utils.TpInDirCfg])
-		} else if !reflect.DeepEqual(eMap[0][utils.LockFileNameCfg], rcv[1][utils.LockFileNameCfg]) {
-			t.Errorf("Expected %+v, received %+v", eMap[0][utils.LockFileNameCfg], rcv[1][utils.LockFileNameCfg])
+				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]))
+		} else if !reflect.DeepEqual(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0],
+			rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]) {
+			t.Errorf("Expected %+v,\n received %+v", utils.ToJSON(eMap[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]),
+				utils.ToJSON(rcv[0][utils.DataCfg].([]map[string]interface{})[0][utils.FieldsCfg].([]map[string]interface{})[0]))
+		} else if !reflect.DeepEqual(eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[0][utils.CachesConnsCfg], rcv[0][utils.CachesConnsCfg])
+		} else if !reflect.DeepEqual(eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[0][utils.TpInDirCfg], rcv[0][utils.TpInDirCfg])
+		} else if !reflect.DeepEqual(eMap[0][utils.LockFileNameCfg], rcv[0][utils.LockFileNameCfg]) {
+			t.Errorf("Expected %+v, received %+v", eMap[0][utils.LockFileNameCfg], rcv[0][utils.LockFileNameCfg])
 		}
 	}
 }

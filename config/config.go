@@ -609,11 +609,23 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg ConfigDB) (err error) {
 	}
 	// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 	for _, profile := range jsnLoaderCfg {
-		loadSCfgp := NewDfltLoaderSCfg()
-		if err = loadSCfgp.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
+		var ldr *LoaderSCfg
+		if profile.ID != nil {
+			for _, loader := range cfg.LoaderCfg() {
+				if loader.ID == *profile.ID {
+					ldr = loader
+					break
+				}
+			}
+		}
+		if ldr == nil {
+			ldr = NewDfltLoaderSCfg()
+			cfg.loaderCfg = append(cfg.loaderCfg, ldr) // use append so the loaderS profile to be loaded from multiple files
+		}
+
+		if err = ldr.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
 			return
 		}
-		cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use append so the loaderS profile to be loaded from multiple files
 	}
 	return
 }
