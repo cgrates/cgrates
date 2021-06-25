@@ -26,3 +26,4 @@
   shell: 'sudo mv pjsua-x86_64-unknown-linux-gnu /usr/bin/pjsua'
   args:
     chdir: '/tmp/pjproject-2.9/pjsip-apps/bin'
+ 
