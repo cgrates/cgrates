@@ -105,6 +105,7 @@ func (pstr *NatsPoster) parseOpt(opts map[string]interface{}, nodeID string, con
 			return
 		}
 	}
+	pstr.subject = utils.DefaultQueueID
 	if vals, has := opts[utils.NatsSubject]; has {
 		pstr.subject = utils.IfaceAsString(vals)
 	}
