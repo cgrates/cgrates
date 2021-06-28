@@ -151,14 +151,24 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 		l.TpOutDir = *jsnCfg.Tp_out_dir
 	}
 	if jsnCfg.Data != nil {
-		data := make([]*LoaderDataType, len(*jsnCfg.Data))
-		for idx, jsnLoCfg := range *jsnCfg.Data {
-			data[idx] = new(LoaderDataType)
-			if err := data[idx].loadFromJSONCfg(jsnLoCfg, msgTemplates, separator); err != nil {
+		for _, jsnLoCfg := range *jsnCfg.Data {
+			var ldrDataType *LoaderDataType
+			if jsnLoCfg.Type != nil {
+				for _, ldrDT := range l.Data {
+					if ldrDT.Type == *jsnLoCfg.Type {
+						ldrDataType = ldrDT
+						break
+					}
+				}
+			}
+			if ldrDataType == nil {
+				ldrDataType = new(LoaderDataType)
+				l.Data = append(l.Data, ldrDataType) // use append so the loaderS profile to be loaded from multiple files
+			}
+			if err := ldrDataType.loadFromJSONCfg(jsnLoCfg, msgTemplates, separator); err != nil {
 				return err
 			}
 		}
-		l.Data = data
 	}
 
 	return nil
