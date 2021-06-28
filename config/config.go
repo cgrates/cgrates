@@ -611,7 +611,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg ConfigDB) (err error) {
 	for _, profile := range jsnLoaderCfg {
 		var ldr *LoaderSCfg
 		if profile.ID != nil {
-			for _, loader := range cfg.LoaderCfg() {
+			for _, loader := range cfg.loaderCfg {
 				if loader.ID == *profile.ID {
 					ldr = loader
 					break
