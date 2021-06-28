@@ -147,6 +147,9 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 	if _, has := mp[utils.Source]; !has {
 		mp[utils.Source] = utils.KamailioAgent
 	}
+	if _, has := mp[utils.RequestType]; !has {
+		mp[utils.RequestType] = config.CgrConfig().GeneralCfg().DefaultReqType
+	}
 	return
 }
 

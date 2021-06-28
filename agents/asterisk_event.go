@@ -144,7 +144,7 @@ func (smaEv *SMAsteriskEvent) Destination() string {
 }
 
 func (smaEv *SMAsteriskEvent) RequestType() string {
-	return smaEv.cachedFields[utils.CGRReqType]
+	return utils.FirstNonEmpty(smaEv.cachedFields[utils.CGRReqType], config.CgrConfig().GeneralCfg().DefaultReqType)
 }
 
 func (smaEv *SMAsteriskEvent) Tenant() string {

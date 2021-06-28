@@ -211,7 +211,7 @@ func TestSMAEventRequestType(t *testing.T) {
 	}
 	ev = make(map[string]interface{}) // Clear previous data
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
-	if smaEv.RequestType() != "" {
+	if smaEv.RequestType() != config.CgrConfig().GeneralCfg().DefaultReqType {
 		t.Error("Received:", smaEv.RequestType())
 	}
 }
@@ -457,5 +457,21 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 	cgrEv.Event[utils.CGRFlags] = "*resources+*accounts+*stats"
 	if rcv := smaEv.V1TerminateSessionArgs(*cgrEv); !reflect.DeepEqual(exp2, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
+	}
+}
+
+func TestRequestType(t *testing.T) {
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1", "")
+	if smaEv.RequestType() != "*prepaid" {
+		t.Error("Received:", smaEv.RequestType())
+	}
+	ev = make(map[string]interface{}) // Clear previous data
+	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1", "")
+	if smaEv.RequestType() != config.CgrConfig().GeneralCfg().DefaultReqType {
+		t.Error("Received:", smaEv.RequestType())
 	}
 }
