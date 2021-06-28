@@ -402,13 +402,25 @@ func main() {
 		shdWg.Add(1)
 		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, shdChan)
 	}
+	var cpuProfileFile io.Closer
+	var cS *cores.CoreService
 	if *cpuProfDir != utils.EmptyString {
-		f, err := startCPUProfiling(*cpuProfDir)
+		cpuPath := path.Join(*cpuProfDir, utils.CpuPathCgr)
+		cpuProfileFile, err = cores.StartCPUProfiling(cpuPath)
 		if err != nil {
 			return
 		}
-		defer stopCPUProfiling(f)
 	}
+	defer func() {
+		if cS != nil {
+			cS.StopCPUProfiling()
+			return
+		}
+		if cpuProfileFile != nil {
+			pprof.StopCPUProfile()
+			cpuProfileFile.Close()
+		}
+	}()
 
 	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
@@ -622,6 +634,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	cS = coreS.GetCoreS()
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), shdChan, anz, coreS.GetCoreS().CapsStats)

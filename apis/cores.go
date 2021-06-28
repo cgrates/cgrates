@@ -49,3 +49,21 @@ func (cS *CoreSv1) Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string
 	*reply = utils.OK
 	return nil
 }
+
+// StartCPUProfiling is used to start CPUProfiling in the given path
+func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, args string, reply *string) error {
+	if err := cS.cS.StartCPUProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StopCPUProfiling is used to stop CPUProfiling in the given path
+func (cS *CoreSv1) StopCPUProfiling(_ *context.Context, _ string, reply *string) error {
+	if err := cS.cS.StopCPUProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
