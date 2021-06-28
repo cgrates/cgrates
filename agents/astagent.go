@@ -202,7 +202,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		}
 		//  Set absolute timeout for non-postpaid calls
 		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
-			strconv.Itoa(int(authReply.MaxUsage.Seconds()*1000))) {
+			strconv.Itoa(int(authReply.MaxUsage.Milliseconds()))) {
 			return
 		}
 	}
