@@ -103,6 +103,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	expMp["to_tag"] = "7351fecf"
 	expMp["cgr_reqtype"] = utils.MetaPostpaid
 	expMp[utils.Source] = utils.KamailioAgent
+	expMp[utils.RequestType] = utils.MetaRated
 	rcv := kamEv.AsMapStringInterface()
 	if !reflect.DeepEqual(expMp, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expMp, rcv)
