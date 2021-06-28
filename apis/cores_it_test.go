@@ -21,11 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"os"
+	"os/exec"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,20 +38,32 @@ import (
 var (
 	coreItCfgPath string
 	coreItDirPath string
+	argPath       string
 	coreItCfg     *config.CGRConfig
 	coreItBiRPC   *birpc.Client
 	coreItTests   = []func(t *testing.T){
 		testCoreItLoadConfig,
 		testCoreItInitDataDb,
 		testCoreItInitStorDb,
+		testCoreItStartEngineByExecWithCPUProfiling,
+		testCoreItRpcConn,
+		testCoreItStartCPUProfilingErrorAlreadyStarted,
+		testCoreItSleep,
+		testCoreItStopCPUProfiling,
+		testCoreItKillEngine,
 		testCoreItStartEngine,
 		testCoreItRpcConn,
+		testCoreItStopCPUProfilingBeforeStart,
+		testCoreItStartCPUProfiling,
+		testCoreItSleep,
+		testCoreItStopCPUProfiling,
 		testCoreItStatus,
 		testCoreItKillEngine,
 	}
 )
 
 func TestCoreItTests(t *testing.T) {
+	argPath = "/tmp/cpu.prof"
 	switch *dbType {
 	case utils.MetaInternal:
 		coreItDirPath = "all2"
@@ -83,6 +99,27 @@ func testCoreItInitStorDb(t *testing.T) {
 	}
 }
 
+func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
+	engine := exec.Command("cgr-engine", "-config_path", coreItCfgPath, "-cpuprof_dir", "/tmp")
+	if err := engine.Start(); err != nil {
+		t.Error(err)
+	}
+	fib := utils.Fib()
+	var connected bool
+	for i := 0; i < 200; i++ {
+		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		if _, err := jsonrpc.Dial(utils.TCP, coreItCfg.ListenCfg().RPCJSONListen); err != nil {
+			t.Log(err)
+		} else {
+			connected = true
+			break
+		}
+	}
+	if !connected {
+		t.Errorf("engine did not open port <%s>", coreItCfg.ListenCfg().RPCJSONListen)
+	}
+}
+
 func testCoreItStartEngine(t *testing.T) {
 	if _, err := engine.StartEngine(coreItCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
@@ -93,6 +130,74 @@ func testCoreItRpcConn(t *testing.T) {
 	var err error
 	if coreItBiRPC, err = newRPCClient(coreItCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testCoreItStartCPUProfilingErrorAlreadyStarted(t *testing.T) {
+	var reply string
+	expectedErr := "CPU profiling already started"
+	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+		argPath, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func testCoreItSleep(t *testing.T) {
+	args := &utils.DurationArgs{
+		Duration: 500 * time.Millisecond,
+	}
+	var reply string
+	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1Sleep,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+}
+
+func testCoreItStopCPUProfiling(t *testing.T) {
+	var reply string
+	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+		utils.EmptyString, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	file, err := os.Open(argPath)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(argPath); err != nil {
+		t.Error(err)
+	}
+}
+
+func testCoreItStopCPUProfilingBeforeStart(t *testing.T) {
+	var reply string
+	expectedErr := " cannot stop because CPUProfiling is not active"
+	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+		utils.EmptyString, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	}
+}
+
+func testCoreItStartCPUProfiling(t *testing.T) {
+	var reply string
+	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+		argPath, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
 	}
 }
 

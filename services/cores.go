@@ -33,10 +33,11 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
-	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
+	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService, file io.Closer,
 	srvDep map[string]*sync.WaitGroup, shdEngine *utils.SyncedChan) *CoreService {
 	return &CoreService{
 		connChan:  internalCoreSChan,
+		fileCpu:   file,
 		cfg:       cfg,
 		caps:      caps,
 		server:    server,

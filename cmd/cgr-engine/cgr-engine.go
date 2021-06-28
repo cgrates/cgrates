@@ -303,21 +303,6 @@ func memProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg 
 	}
 }
 
-func startCPUProfiling(cpuProfDir string) (f io.WriteCloser, err error) {
-	cpuPath := path.Join(cpuProfDir, utils.CpuPathCgr)
-	if f, err = os.Create(cpuPath); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<cpuProfiling>could not create cpu profile file: %s", err))
-		return
-	}
-	pprof.StartCPUProfile(f)
-	return
-}
-
-func stopCPUProfiling(f io.Closer) {
-	pprof.StopCPUProfile()
-	f.Close()
-}
-
 func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 	shutdownSignal := make(chan os.Signal, 1)
 	reloadSignal := make(chan os.Signal, 1)
@@ -628,7 +613,7 @@ func main() {
 	}
 
 	// init CoreSv1
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, srvDep, shdChan)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, srvDep, shdChan)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)
