@@ -30,8 +30,6 @@ import (
 	"github.com/cgrates/fsock"
 )
 
-// ToDo: Introduce support for RSRFields
-
 const (
 	varPrefix = "variable_"
 	// Freswitch event proprities names
