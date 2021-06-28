@@ -257,45 +257,6 @@ func writePid() {
 	}
 }
 
-func memProfFile(memProfPath string) bool {
-	f, err := os.Create(memProfPath)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not create memory profile file: %s", err))
-		return false
-	}
-	runtime.GC() // get up-to-date statistics
-	if err := pprof.WriteHeapProfile(f); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not write memory profile: %s", err))
-		f.Close()
-		return false
-	}
-	f.Close()
-	return true
-}
-
-func memProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
-	tm := time.NewTimer(interval)
-	for i := 1; ; i++ {
-		select {
-		case <-shdChan.Done():
-			tm.Stop()
-			shdWg.Done()
-			return
-		case <-tm.C:
-		}
-		memPath := path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))
-		if !memProfFile(memPath) {
-			shdChan.CloseOnce()
-			shdWg.Done()
-			return
-		}
-		if i%nrFiles == 0 {
-			i = 0 // reset the counting
-		}
-		tm.Reset(interval)
-	}
-}
-
 func singnalHandler(shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
 	shutdownSignal := make(chan os.Signal, 1)
 	reloadSignal := make(chan os.Signal, 1)
@@ -382,7 +343,7 @@ func main() {
 
 	if *memProfDir != utils.EmptyString {
 		shdWg.Add(1)
-		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, shdChan)
+		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, shdChan)
 	}
 	var cpuProfileFile io.Closer
 	var cS *cores.CoreService
@@ -723,7 +684,7 @@ func main() {
 	}
 
 	if *memProfDir != utils.EmptyString { // write last memory profiling
-		memProfFile(path.Join(*memProfDir, utils.MemProfFileCgr))
+		cores.MemProfFile(path.Join(*memProfDir, utils.MemProfFileCgr))
 	}
 	if *pidFile != utils.EmptyString {
 		if err := os.Remove(*pidFile); err != nil {

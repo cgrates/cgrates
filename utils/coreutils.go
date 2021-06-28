@@ -741,6 +741,12 @@ type TenantWithAPIOpts struct {
 	APIOpts map[string]interface{}
 }
 
+type MemoryPrf struct {
+	DirPath  string
+	Interval time.Duration
+	NrFiles  int
+}
+
 type TenantID struct {
 	Tenant string
 	ID     string

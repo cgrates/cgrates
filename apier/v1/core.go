@@ -74,3 +74,12 @@ func (cS *CoreSv1) StopCPUProfiling(_ string, reply *string) error {
 	*reply = utils.OK
 	return nil
 }
+
+// StartMemoryProfiling is used to start MemoryProfiling in the given path
+func (cS *CoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *string) error {
+	if err := cS.cS.StartMemoryProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
