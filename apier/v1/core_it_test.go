@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"bytes"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -47,10 +46,14 @@ var (
 		testCoreSv1LoadCofig,
 		testCoreSv1InitDataDB,
 		testCoreSv1InitStorDB,
-		testCoreSv1StartEngine,
-		//	testCoreSv1StartEngineByExecWithCPUProfiling,
+		testCoreSv1StartEngineByExecWithCPUProfiling,
 		testCoreSv1RPCConn,
-		//testCoreSv1StartCPUProfilingErrorAlreadyStarted,
+		testCoreSv1StartCPUProfilingErrorAlreadyStarted,
+		testCoreSv1Sleep,
+		testCoreSv1StopCPUProfiling,
+		testCoreSv1KillEngine,
+		testCoreSv1StartEngine,
+		testCoreSv1RPCConn,
 		testCoreSv1StopCPUProfilingBeforeStart,
 		testCoreSv1StartCPUProfiling,
 		testCoreSv1Sleep,
@@ -97,15 +100,8 @@ func testCoreSv1InitStorDB(t *testing.T) {
 }
 
 func testCoreSv1StartEngineByExecWithCPUProfiling(t *testing.T) {
-	engine := exec.Command("cgr-engine", "-config_path", coreV1CfgPath, "cpuprof_dir", "/tmp")
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	engine.Stdout = output
-	engine.Stderr = outerr
+	engine := exec.Command("cgr-engine", "-config_path", coreV1CfgPath, "-cpuprof_dir", "/tmp")
 	if err := engine.Start(); err != nil {
-		t.Log(engine.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
 		t.Error(err)
 	}
 	fib := utils.Fib()
@@ -113,7 +109,7 @@ func testCoreSv1StartEngineByExecWithCPUProfiling(t *testing.T) {
 	for i := 0; i < 200; i++ {
 		time.Sleep(time.Duration(fib()) * time.Millisecond)
 		if _, err := jsonrpc.Dial(utils.TCP, coreV1Cfg.ListenCfg().RPCJSONListen); err != nil {
-			t.Error(err)
+			t.Log(err)
 		} else {
 			connected = true
 			break
@@ -133,7 +129,7 @@ func testCoreSv1RPCConn(t *testing.T) {
 
 func testCoreSv1StartCPUProfilingErrorAlreadyStarted(t *testing.T) {
 	var reply string
-	expectedErr := ""
+	expectedErr := "CPU profiling already started"
 	if err := coreV1Rpc.Call(utils.CoreSv1StartCPUProfiling,
 		argPath, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
