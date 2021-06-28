@@ -102,6 +102,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	expMp["from_tag"] = "bf71ad59"
 	expMp["to_tag"] = "7351fecf"
 	expMp["cgr_reqtype"] = utils.MetaPostpaid
+	expMp[utils.RequestType] = utils.MetaRated
 	expMp[utils.Source] = utils.KamailioAgent
 	rcv := kamEv.AsMapStringInterface()
 	if !reflect.DeepEqual(expMp, rcv) {

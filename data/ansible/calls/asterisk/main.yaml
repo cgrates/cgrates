@@ -74,7 +74,7 @@
 # Install and config CGRateS
   - name: Install and config CGRateS
     include: cgrates.yaml
-
+    
 # Configure Asterisk
   - name: Download Asterisk
     become: yes
