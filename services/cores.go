@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"io"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -53,6 +54,7 @@ type CoreService struct {
 	caps      *engine.Caps
 	stopChan  chan struct{}
 	shdEngine *utils.SyncedChan
+	fileCpu   io.Closer
 
 	cS       *cores.CoreService
 	rpc      *apis.CoreSv1
@@ -71,7 +73,7 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.stopChan, cS.shdEngine)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.stopChan, cS.shdEngine)
 	cS.rpc = apis.NewCoreSv1(cS.cS)
 	srv, _ := birpc.NewService(cS.rpc, utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {

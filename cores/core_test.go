@@ -42,7 +42,7 @@ func TestNewCoreService(t *testing.T) {
 		shdEngine: shdChan,
 	}
 
-	rcv := NewCoreService(cfgDflt, caps, stopchan, shdChan)
+	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, shdChan)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -58,7 +58,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	stopChan := make(chan struct{}, 1)
 
-	cores := NewCoreService(cfgDflt, caps, stopChan, nil)
+	cores := NewCoreService(cfgDflt, caps, nil, stopChan, nil)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
