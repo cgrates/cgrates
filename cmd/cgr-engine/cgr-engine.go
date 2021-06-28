@@ -163,8 +163,8 @@ func startRPC(server *cores.Server, internalAdminSChan,
 			internalAdminSChan <- admS
 		case attrS := <-internalAttrSChan:
 			internalAttrSChan <- attrS
-		// case chrgS := <-internalChargerSChan:
-		// 	internalChargerSChan <- chrgS
+		case chrgS := <-internalChargerSChan:
+			internalChargerSChan <- chrgS
 		case thS := <-internalThdSChan:
 			internalThdSChan <- thS
 		case rtS := <-internalRouteSChan:
