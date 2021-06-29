@@ -30,6 +30,8 @@ import (
 	"github.com/cgrates/fsock"
 )
 
+// ToDo: Introduce support for RSRFields
+
 const (
 	varPrefix = "variable_"
 	// Freswitch event proprities names
@@ -407,6 +409,8 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.FreeSWITCHAgent))
 		args.GetMaxUsage = true
 		return
 	}

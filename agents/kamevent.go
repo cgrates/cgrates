@@ -20,6 +20,7 @@ package agents
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -213,6 +214,8 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.KamailioAgent))
 		args.GetMaxUsage = true
 		return
 	}
