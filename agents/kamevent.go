@@ -20,6 +20,7 @@ package agents
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -180,6 +181,8 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.KamailioAgent))
 		args.GetMaxUsage = true
 		return
 	}
@@ -240,6 +243,8 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.KamailioAgent))
 		args.InitSession = true
 		return
 	}
@@ -248,7 +253,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 }
 
 // V1ProcessMessageArgs returns the arguments used in SessionSv1.ProcessMessage
-func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {
+func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {-
 	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
@@ -259,6 +264,8 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.KamailioAgent))
 		return
 	}
 	args.ParseFlags(subsystems, utils.InfieldSep)
