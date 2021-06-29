@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cores
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -33,29 +34,39 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, file io.Closer, stopChan chan struct{}) *CoreService {
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, file io.Closer, stopChan chan struct{},
+	shdWg *sync.WaitGroup, stopMemPrf chan struct{}, shdChan *utils.SyncedChan) *CoreService {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
 	}
 	return &CoreService{
-		cfg:       cfg,
-		CapsStats: st,
-		fileCPU:   file,
+		shdWg:      shdWg,
+		stopMemPrf: stopMemPrf,
+		shdChan:    shdChan,
+		cfg:        cfg,
+		CapsStats:  st,
+		fileCPU:    file,
 	}
 }
 
 type CoreService struct {
-	cfg       *config.CGRConfig
-	CapsStats *engine.CapsStats
-	fileCPU   io.Closer
-	fileMem   io.Closer
-	fileMx    sync.Mutex
+	cfg        *config.CGRConfig
+	CapsStats  *engine.CapsStats
+	shdWg      *sync.WaitGroup
+	stopMemPrf chan struct{}
+	shdChan    *utils.SyncedChan
+	fileCPU    io.Closer
+	fileMem    io.Closer
+	fileMx     sync.Mutex
 }
 
 // Shutdown is called to shutdown the service
 func (cS *CoreService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
+	if cS.stopMemPrf != nil {
+		close(cS.stopMemPrf)
+	}
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 	return
 }
@@ -114,14 +125,23 @@ func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
 	return
 }
 
+// StartMemoryProfiling is used to start MemoryProfiling in the given path
 func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 	if args.DirPath == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("Path")
 	}
-	shdWg := new(sync.WaitGroup)
-	shdChan := utils.NewSyncedChan()
-	shdWg.Add(1)
-	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, shdWg, shdChan)
+	cS.shdWg.Add(1)
+	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shdChan)
+	return
+}
+
+// StopMemoryProfiling is used to stop MemoryProfiling
+func (cS *CoreService) StopMemoryProfiling() (err error) {
+	if cS.stopMemPrf == nil {
+		return errors.New(" Memory Profiling is not started")
+	}
+	close(cS.stopMemPrf)
+	cS.stopMemPrf = nil
 	return
 }
 
@@ -141,11 +161,11 @@ func MemProfFile(memProfPath string) bool {
 	return true
 }
 
-func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, shdChan *utils.SyncedChan) {
+func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, stopChan chan struct{}, shdChan *utils.SyncedChan) {
 	tm := time.NewTimer(interval)
 	for i := 1; ; i++ {
 		select {
-		case <-shdChan.Done():
+		case <-stopChan:
 			tm.Stop()
 			shdWg.Done()
 			return

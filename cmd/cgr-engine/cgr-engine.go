@@ -341,12 +341,20 @@ func main() {
 	shdWg.Add(1)
 	go singnalHandler(shdWg, shdChan)
 
+	var cS *cores.CoreService
+	var stopMemProf chan struct{}
 	if *memProfDir != utils.EmptyString {
 		shdWg.Add(1)
-		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, shdChan)
+		stopMemProf = make(chan struct{})
+		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, stopMemProf, shdChan)
 	}
+	defer func() {
+		if stopMemProf != nil {
+			cS.StopMemoryProfiling()
+		}
+	}()
+
 	var cpuProfileFile io.Closer
-	var cS *cores.CoreService
 	if *cpuProfDir != utils.EmptyString {
 		cpuPath := path.Join(*cpuProfDir, utils.CpuPathCgr)
 		cpuProfileFile, err = cores.StartCPUProfiling(cpuPath)
@@ -558,7 +566,7 @@ func main() {
 	}
 
 	// init CoreSv1
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, srvDep)
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, shdWg, stopMemProf, shdChan, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)

@@ -85,3 +85,13 @@ func (cS *CoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *string) er
 	*reply = utils.OK
 	return nil
 }
+
+// StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
+// where the MemoryProfiling already started
+func (cS *CoreSv1) StopMemoryProfiling(_ *utils.MemoryPrf, reply *string) error {
+	if err := cS.cS.StopMemoryProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
