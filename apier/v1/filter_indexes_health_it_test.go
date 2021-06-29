@@ -42,6 +42,7 @@ var (
 		testV1FIdxHRpcConn,
 		testV1FIdxHLoadFromFolder,
 		testV1FIdxHAccountActionPlansHealth,
+		testV1FIdxHReverseDestinationHealth,
 
 		testV1FIdxHStopEngine,
 	}
@@ -111,17 +112,33 @@ func testV1FIdxHLoadFromFolder(t *testing.T) {
 }
 
 func testV1FIdxHAccountActionPlansHealth(t *testing.T) {
-	var reply engine.IndexHealthReply
+	var reply engine.AccountActionPlanIHReply
 	if err := tFIdxHRpc.Call(utils.APIerSv1GetAccountActionPlansIndexHealth, engine.IndexHealthArgs{
 		IndexCacheLimit:  -1,
 		ObjectCacheLimit: -1,
 	}, &reply); err != nil {
 		t.Error(err)
 	}
-	exp := engine.IndexHealthReply{
-		MissingObjects:   []string{},
-		MissingIndexes:   map[string][]string{},
-		BrokenReferences: map[string][]string{},
+	exp := engine.AccountActionPlanIHReply{
+		MissingAccountActionPlans: map[string][]string{},
+		BrokenReferences:          map[string][]string{},
+	}
+	if !reflect.DeepEqual(exp, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+
+func testV1FIdxHReverseDestinationHealth(t *testing.T) {
+	var reply engine.ReverseDestinationsIHReply
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetReverseDestinationsIndexHealth, engine.IndexHealthArgs{
+		IndexCacheLimit:  -1,
+		ObjectCacheLimit: -1,
+	}, &reply); err != nil {
+		t.Error(err)
+	}
+	exp := engine.ReverseDestinationsIHReply{
+		MissingReverseDestinations: map[string][]string{},
+		BrokenReferences:           map[string][]string{},
 	}
 	if !reflect.DeepEqual(exp, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(reply))
