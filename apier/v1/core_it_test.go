@@ -63,7 +63,7 @@ var (
 )
 
 func TestITCoreSv1(t *testing.T) {
-	argPath = "/tmp/cpu.prof"
+	argPath = "/tmp"
 	switch *dbType {
 	case utils.MetaInternal:
 		coreV1ConfDIR = "tutinternal"
@@ -182,7 +182,7 @@ func testCoreSv1StopCPUProfiling(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
 	}
-	file, err := os.Open(argPath)
+	file, err := os.Open(path.Join(argPath, utils.CpuPathCgr))
 	if err != nil {
 		t.Error(err)
 	}
@@ -196,7 +196,7 @@ func testCoreSv1StopCPUProfiling(t *testing.T) {
 		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
 	}
 	//after we checked that CPUProfile was made successfully, can delete it
-	if err := os.Remove(argPath); err != nil {
+	if err := os.Remove(path.Join(argPath, utils.CpuPathCgr)); err != nil {
 		t.Error(err)
 	}
 }

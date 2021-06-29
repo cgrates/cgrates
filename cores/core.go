@@ -120,6 +120,7 @@ func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 	}
 	shdWg := new(sync.WaitGroup)
 	shdChan := utils.NewSyncedChan()
+	shdWg.Add(1)
 	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, shdWg, shdChan)
 	return
 }
