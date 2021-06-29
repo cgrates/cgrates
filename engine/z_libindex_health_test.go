@@ -44,10 +44,10 @@ func TestHealthAccountAction(t *testing.T) {
 	}
 
 	exp := &AccountActionPlanIHReply{
-		MissingAccountActionPlans: map[string][]string{"1002": {"AP2"}},             // 1
-		BrokenReferences:          map[string][]string{"AP2": {"1001"}, "AP1": nil}, // 2
+		MissingAccountActionPlans: map[string][]string{"1002": {"AP2"}},
+		BrokenReferences:          map[string][]string{"AP2": {"1001"}, "AP1": nil},
 	}
-	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+	if rply, err := GetAccountActionPlansIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
@@ -72,11 +72,10 @@ func TestHealthAccountAction2(t *testing.T) {
 	}
 
 	exp := &AccountActionPlanIHReply{
-		MissingActionPlans:        []string{"AP1"},
 		MissingAccountActionPlans: map[string][]string{},
-		BrokenReferences:          map[string][]string{},
+		BrokenReferences:          map[string][]string{"AP1": nil},
 	}
-	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+	if rply, err := GetAccountActionPlansIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
@@ -108,11 +107,10 @@ func TestHealthAccountAction3(t *testing.T) {
 	}
 
 	exp := &AccountActionPlanIHReply{
-		MissingActionPlans:        []string{},
-		MissingAccountActionPlans: map[string][]string{"AP2": {"1002"}},
+		MissingAccountActionPlans: map[string][]string{"1002": {"AP2"}},
 		BrokenReferences:          map[string][]string{},
 	}
-	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+	if rply, err := GetAccountActionPlansIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
@@ -147,11 +145,139 @@ func TestHealthAccountAction4(t *testing.T) {
 	}
 
 	exp := &AccountActionPlanIHReply{
-		MissingActionPlans:        []string{},
 		MissingAccountActionPlans: map[string][]string{},
 		BrokenReferences:          map[string][]string{"AP2": {"1002"}},
 	}
-	if rply, err := GetAccountActionPlanIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+	if rply, err := GetAccountActionPlansIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthReverseDestination(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetReverseDestination("DST1", []string{"1001", "1002"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetReverseDestination("DST2", []string{"1001"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetDestination(&Destination{
+		Id:       "DST2",
+		Prefixes: []string{"1002"},
+	}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &ReverseDestinationsIHReply{
+		MissingReverseDestinations: map[string][]string{"1002": {"DST2"}},
+		BrokenReferences:           map[string][]string{"DST1": nil, "DST2": {"1001"}},
+	}
+	if rply, err := GetReverseDestinationsIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthReverseDestination2(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetReverseDestination("DST1", []string{"1001"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetReverseDestination("DST2", []string{"1001"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetDestination(&Destination{
+		Id:       "DST2",
+		Prefixes: []string{"1001"},
+	}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &ReverseDestinationsIHReply{
+		MissingReverseDestinations: map[string][]string{},
+		BrokenReferences:           map[string][]string{"DST1": nil},
+	}
+	if rply, err := GetReverseDestinationsIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthReverseDestination3(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetReverseDestination("DST1", []string{"1002"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetDestination(&Destination{
+		Id:       "DST1",
+		Prefixes: []string{"1002"},
+	}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetDestination(&Destination{
+		Id:       "DST2",
+		Prefixes: []string{"1002"},
+	}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &ReverseDestinationsIHReply{
+		MissingReverseDestinations: map[string][]string{"1002": {"DST2"}},
+		BrokenReferences:           map[string][]string{},
+	}
+	if rply, err := GetReverseDestinationsIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthReverseDestination4(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetReverseDestination("DST1", []string{"1002"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetReverseDestination("DST2", []string{"1001", "1002"}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetDestination(&Destination{
+		Id:       "DST1",
+		Prefixes: []string{"1002"},
+	}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetDestination(&Destination{
+		Id:       "DST2",
+		Prefixes: []string{"1001"},
+	}, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	exp := &ReverseDestinationsIHReply{
+		MissingReverseDestinations: map[string][]string{},
+		BrokenReferences:           map[string][]string{"DST2": {"1002"}},
+	}
+	if rply, err := GetReverseDestinationsIndexHealth(dm, -1, -1, -1, -1, false, false); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))

@@ -592,8 +592,19 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHealthArgs, reply *engine.IndexHealthReply) error {
-	rp, err := engine.GetAccountActionPlanIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
+func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHealthArgs, reply *engine.AccountActionPlanIHReply) error {
+	rp, err := engine.GetAccountActionPlansIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
+		args.ObjectCacheTTL, args.IndexCacheTTL,
+		args.ObjectCacheStaticTTL, args.IndexCacheStaticTTL)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetReverseDestinationsIndexHealth(args *engine.IndexHealthArgs, reply *engine.ReverseDestinationsIHReply) error {
+	rp, err := engine.GetReverseDestinationsIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
 		args.ObjectCacheTTL, args.IndexCacheTTL,
 		args.ObjectCacheStaticTTL, args.IndexCacheStaticTTL)
 	if err != nil {
