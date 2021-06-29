@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"path"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -51,15 +52,16 @@ func (cS *CoreSv1) Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string
 }
 
 // StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, args string, reply *string) error {
-	if err := cS.cS.StartCPUProfiling(args); err != nil {
+func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, dirPath string, reply *string) error {
+	if err := cS.cS.StartCPUProfiling(path.Join(dirPath, utils.CpuPathCgr)); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// StopCPUProfiling is used to stop CPUProfiling in the given path
+// StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
+// where the CPUProfiling already started
 func (cS *CoreSv1) StopCPUProfiling(_ *context.Context, _ string, reply *string) error {
 	if err := cS.cS.StopCPUProfiling(); err != nil {
 		return err
