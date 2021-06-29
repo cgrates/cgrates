@@ -1460,14 +1460,7 @@ func (apierSv1 *APIerSv1) GetLoadTimes(args *LoadTimeArgs, reply *map[string]str
 }
 
 func (apierSv1 *APIerSv1) ComputeActionPlanIndexes(_ string, reply *string) (err error) {
-	if apierSv1.DataManager.DataDB().GetStorageType() != utils.Redis {
-		return utils.ErrNotImplemented
-	}
-	redisDB, can := apierSv1.DataManager.DataDB().(*engine.RedisStorage)
-	if !can {
-		return fmt.Errorf("Storage type %s could not be cated to <*engine.RedisStorage>", apierSv1.DataManager.DataDB().GetStorageType())
-	}
-	if err = redisDB.RebbuildActionPlanKeys(); err != nil {
+	if err = apierSv1.DataManager.RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return err
 	}
 	*reply = utils.OK
