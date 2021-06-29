@@ -61,13 +61,6 @@
         state: present
         filename: 'freeswitch'
 
-    - name: Add FreeSwitch apt repository (1.8) (Debian 8/Jessie)
-      become: yes
-      apt_repository:
-        repo: deb-src http://files.freeswitch.org/repo/deb/debian-release/ buster main
-        state: present
-        filename: 'freeswitch'
-
     # Install FreeSwitch
     - name: Install FreeSwitch
       become: yes
@@ -89,8 +82,8 @@
 
     ###########################################################################################################################
     # Install and config CGRateS
-    - name: Install and config CGRateS
-      include: cgrates.yaml
+    #- name: Install and config CGRateS
+    #  include: cgrates.yaml
 
     # Configure FreeSwitch
     - name:  Unzip FreeSWITCH config
