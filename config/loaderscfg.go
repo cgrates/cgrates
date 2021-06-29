@@ -152,6 +152,9 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 	}
 	if jsnCfg.Data != nil {
 		for _, jsnLoCfg := range *jsnCfg.Data {
+			if jsnLoCfg == nil {
+				continue
+			}
 			var ldrDataType *LoaderDataType
 			if jsnLoCfg.Type != nil {
 				for _, ldrDT := range l.Data {
