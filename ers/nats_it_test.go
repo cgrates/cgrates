@@ -482,7 +482,7 @@ func TestNatsERToken(t *testing.T) {
 
 func TestNatsERNkey(t *testing.T) {
 	// prepare
-	basePath := "/tmp/nkey"
+	basePath := "/tmp/natsCfg"
 	if err := os.MkdirAll(basePath, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -550,7 +550,7 @@ func TestNatsERNkey(t *testing.T) {
 
 func TestNatsERJetStreamNKey(t *testing.T) {
 	// prepare
-	basePath := "/tmp/nkey"
+	basePath := "/tmp/natsCfg"
 	if err := os.MkdirAll(basePath, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -620,7 +620,7 @@ users: [
 
 func TestNatsERJWT(t *testing.T) {
 	// prepare
-	basePath := "/tmp/nkey"
+	basePath := "/tmp/natsCfg"
 	if err := os.MkdirAll(basePath, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -705,7 +705,7 @@ resolver_preload: {
 
 func TestNatsERJetStreamJWT(t *testing.T) {
 	// prepare
-	basePath := "/tmp/nkey"
+	basePath := "/tmp/natsCfg"
 	if err := os.MkdirAll(basePath, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -713,7 +713,7 @@ func TestNatsERJetStreamJWT(t *testing.T) {
 	defer os.RemoveAll(basePath)
 	seedFilePath := path.Join(basePath, "jwt.txt")
 	if err := os.WriteFile(seedFilePath, []byte(`-----BEGIN NATS USER JWT-----
-eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJETFRGNFpLVVdNNFRPRkVNQko0UEUzTVFFVlhIUkJJN0xZNDdZNEMzNTNMWlJKSU5CUkJRIiwiaWF0IjoxNjI0ODg1NzMwLCJpc3MiOiJBQVlKRFZMWkdXTjdZM0ZCUENWWENSVlFaREZNWUdIVTRZWExHU1hYN1UyNTRLSDVTQzNSNVFLTSIsIm5hbWUiOiJ1c2VyIiwic3ViIjoiVUQzQkdXSUJQVTNDV0w0SE9VVTRWSkVRV1RVQVNBRUc2T0ozWEhNM0VFSk5BMlBBM1VWTllUWk4iLCJuYXRzIjp7InB1YiI6e30sInN1YiI6e30sInN1YnMiOi0xLCJkYXRhIjotMSwicGF5bG9hZCI6LTEsInR5cGUiOiJ1c2VyIiwidmVyc2lvbiI6Mn19.YmFL5nRMkEOXe77sQJPPRv_vwi89tzhVVl0AVjE4sXWyoWIHiCepNw28DbpJ0p_MlT8Qf0SY2cjAhIm-Qi7lDw
+eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJXTUUyUkhMWEU1R0FZS0hITk5aNkhLSDQ2Q0VSUFNEUExPN1BMT0ZEWTZaNUdZM09aVkFRIiwiaWF0IjoxNjI0OTUzNTE5LCJpc3MiOiJBQVlKRFZMWkdXTjdZM0ZCUENWWENSVlFaREZNWUdIVTRZWExHU1hYN1UyNTRLSDVTQzNSNVFLTSIsIm5hbWUiOiJ1c2VyMiIsInN1YiI6IlVERVJVRElMMlZORVNKUzVGNUpDQVJHWUNSUVM1M0NWSUVBSllHU0hFR0dZSEI2R01BQ1AzM1VDIiwibmF0cyI6eyJwdWIiOnt9LCJzdWIiOnt9LCJzdWJzIjotMSwiZGF0YSI6LTEsInBheWxvYWQiOi0xLCJ0eXBlIjoidXNlciIsInZlcnNpb24iOjJ9fQ.YitrKhIlU45Q1m6A_HFsaxDgUUiIyjLJuHNKnG1cjzj5H6n697Iv3pDsIZVTh6pBYROg1aRV42bD3PpEZna2AA
 ------END NATS USER JWT------
 
 ************************* IMPORTANT *************************
@@ -721,7 +721,7 @@ NKEY Seed printed below can be used to sign and prove identity.
 NKEYs are sensitive and should be treated as secrets.
 
 -----BEGIN USER NKEY SEED-----
-SUADIH32XQYWC2MI2YGM4AUQ3NMKZSZ5V2BZXQ237XXMLO7FFHDF5CTUDE
+SUAGM22ETPOJNZGYSGJL3HRLZ6R35FSVOYNINYN5Z5UPLP5K4SQJ753WU4
 ------END USER NKEY SEED------
 
 *************************************************************`), 0664); err != nil {
@@ -734,10 +734,14 @@ operator: eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJFRk5ERUdSNU1
 resolver: MEMORY
 
 resolver_preload: {
+	// Account "js"
+	AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F: eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJQNEZOWllRQkNKWERZT09ITzRNVU5BQTRHR0w2UTVIRkxKQUJXVEc3WVFIRFVNUVlHUldRIiwiaWF0IjoxNjI0OTU0MjQ0LCJpc3MiOiJPQ0VSUlQ2WFNEQ1dBWTNFWVNTTjQ2UUxGQko3RFJHNTIzU1hIMkg0UjQ3WFZVWFYyUlJCSVNMSyIsIm5hbWUiOiJqcyIsInN1YiI6IkFBRklCQjZDNTZST1U1WFJWSkxKWVIzQlRHR1lLM0hKR0hFSFFWN0w3UVpNVFQzWlJCTEhCUzdGIiwibmF0cyI6eyJsaW1pdHMiOnsic3VicyI6LTEsImRhdGEiOi0xLCJwYXlsb2FkIjotMSwiaW1wb3J0cyI6LTEsImV4cG9ydHMiOi0xLCJ3aWxkY2FyZHMiOnRydWUsImNvbm4iOi0xLCJsZWFmIjotMX0sImRlZmF1bHRfcGVybWlzc2lvbnMiOnsicHViIjp7fSwic3ViIjp7fX0sInR5cGUiOiJhY2NvdW50IiwidmVyc2lvbiI6Mn19.tGaVbpNXuSFxk3RDxicbi62nupiTv_-vTgps0t-LmvxKoNuzjvrnhyARwdh3qknMP54pDqzlUfldqubmEYLFBg
+
 	// Account "account"
-	AAYJDVLZGWN7Y3FBPCVXCRVQZDFMYGHU4YXLGSXX7U254KH5SC3R5QKM: eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJUNUFINlFUUEJIQlYyV1ZGWEkzMlFOT0RCVkI2Vkg3WTNJNzVQTjJBRzNPV0xESVc3TFFRIiwiaWF0IjoxNjI0ODc1ODEwLCJpc3MiOiJPQ0VSUlQ2WFNEQ1dBWTNFWVNTTjQ2UUxGQko3RFJHNTIzU1hIMkg0UjQ3WFZVWFYyUlJCSVNMSyIsIm5hbWUiOiJhY2NvdW50Iiwic3ViIjoiQUFZSkRWTFpHV043WTNGQlBDVlhDUlZRWkRGTVlHSFU0WVhMR1NYWDdVMjU0S0g1U0MzUjVRS00iLCJuYXRzIjp7ImxpbWl0cyI6eyJzdWJzIjotMSwiZGF0YSI6LTEsInBheWxvYWQiOi0xLCJpbXBvcnRzIjotMSwiZXhwb3J0cyI6LTEsIndpbGRjYXJkcyI6dHJ1ZSwiY29ubiI6LTEsImxlYWYiOi0xfSwiZGVmYXVsdF9wZXJtaXNzaW9ucyI6eyJwdWIiOnt9LCJzdWIiOnt9fSwidHlwZSI6ImFjY291bnQiLCJ2ZXJzaW9uIjoyfX0.unslgXhO_ui9NpYkq5CuEmaU0rz5B1dbxr0bM98kXi2E-TB7RnTXPRGJpqTX16DKCdYhklfIVnI0zPMWHkaJCg
+	AAYJDVLZGWN7Y3FBPCVXCRVQZDFMYGHU4YXLGSXX7U254KH5SC3R5QKM: eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJTUkVHMkdLUVg1RlJKQ0lTUlFITVlNUU9CU09DSkRYMjVaUUpGTllDMkxMQkZBRlNOQU9BIiwiaWF0IjoxNjI0OTUzNzIzLCJpc3MiOiJPQ0VSUlQ2WFNEQ1dBWTNFWVNTTjQ2UUxGQko3RFJHNTIzU1hIMkg0UjQ3WFZVWFYyUlJCSVNMSyIsIm5hbWUiOiJhY2NvdW50Iiwic3ViIjoiQUFZSkRWTFpHV043WTNGQlBDVlhDUlZRWkRGTVlHSFU0WVhMR1NYWDdVMjU0S0g1U0MzUjVRS00iLCJuYXRzIjp7ImxpbWl0cyI6eyJzdWJzIjotMSwiZGF0YSI6LTEsInBheWxvYWQiOi0xLCJpbXBvcnRzIjotMSwiZXhwb3J0cyI6LTEsIndpbGRjYXJkcyI6dHJ1ZSwiY29ubiI6LTEsImxlYWYiOi0xLCJtZW1fc3RvcmFnZSI6LTEsInN0cmVhbXMiOi0xLCJjb25zdW1lciI6LTF9LCJkZWZhdWx0X3Blcm1pc3Npb25zIjp7InB1YiI6e30sInN1YiI6e319LCJ0eXBlIjoiYWNjb3VudCIsInZlcnNpb24iOjJ9fQ.rcOqLmWL77kgoDS4GPK5qs-rpG1mQCkQ5FoCzT3VGqsIXNdpn72d38jbCeV40_6l8dI49IRtRHySv8k7VwaaAA
 
 }
+system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 `), 0664); err != nil {
 		t.Fatal(err)
 	}
@@ -751,7 +755,6 @@ resolver_preload: {
 	time.Sleep(100 * time.Millisecond)
 	defer cmd.Process.Kill()
 	//
-
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(fmt.Sprintf(`{
 "ers": {									// EventReaderService
 	"enabled": true,						// starts the EventReader service: <true|false>
