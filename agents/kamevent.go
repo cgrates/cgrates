@@ -253,7 +253,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 }
 
 // V1ProcessMessageArgs returns the arguments used in SessionSv1.ProcessMessage
-func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {-
+func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {
 	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
