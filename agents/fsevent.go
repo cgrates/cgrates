@@ -429,6 +429,8 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.FreeSWITCHAgent))
 		args.InitSession = true
 		return
 	}
@@ -447,6 +449,8 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags variable is not set, using defaults",
+			utils.FreeSWITCHAgent))
 		args.TerminateSession = true
 		return
 	}

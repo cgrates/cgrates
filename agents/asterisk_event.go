@@ -311,7 +311,7 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args 
 	}
 	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
+		utils.Logger.Warning(fmt.Sprintf("<%s> event: %s don't have %s variable",
 			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp), utils.CGRFlags))
 		args.InitSession = true
 		return
@@ -326,7 +326,7 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREvent) (
 	}
 	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
+		utils.Logger.Warning(fmt.Sprintf("<%s> event: %s don't have %s variable",
 			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp), utils.CGRFlags))
 		args.TerminateSession = true
 		return

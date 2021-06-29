@@ -276,6 +276,8 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags is not set, using defaults",
+			utils.FreeSWITCHAgent))
 		args.InitSession = true
 		return
 	}
@@ -295,6 +297,8 @@ func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs)
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags is not set, using defaults",
+			utils.FreeSWITCHAgent))
 		return
 	}
 	args.ParseFlags(subsystems, utils.InfieldSep)
@@ -391,6 +395,8 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		utils.Logger.Warning(fmt.Sprintf("<%s> cgr_flags is not set, using defaults",
+			utils.FreeSWITCHAgent))
 		return
 	}
 	args.ParseFlags(subsystems, utils.InfieldSep)
