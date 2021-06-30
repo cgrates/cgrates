@@ -51,7 +51,7 @@ const CGRATES_CFG_JSON = `
 	"digest_separator": ",",								// separator to use in replies containing data digests
 	"digest_equal": ":",									// equal symbol used in case of digests
 	"rsr_separator": ";",									// separator used within RSR fields
-	"max_parralel_conns": 100,								// the maximum number of connection used by the *parallel strategy
+	"max_parallel_conns": 100,								// the maximum number of connection used by the *parallel strategy
 	"concurrent_requests": 0,								// number of active concurrent requests 
 	"concurrent_strategy": "*busy",							// strategy for limit active concurrent requests
 },

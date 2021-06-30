@@ -61,7 +61,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
 		Rsr_separator:        utils.StringPointer(";"),
-		Max_parralel_conns:   utils.IntPointer(100),
+		Max_parallel_conns:   utils.IntPointer(100),
 		Concurrent_requests:  utils.IntPointer(0),
 		Concurrent_strategy:  utils.StringPointer(utils.MetaBusy),
 	}
