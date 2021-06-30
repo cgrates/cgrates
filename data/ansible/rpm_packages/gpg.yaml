@@ -1,4 +1,8 @@
 ---
+- name: Restart gpg-agent
+  become: true
+  shell: "gpgconf --kill all"
+
 - name: Ensure .gnupg config directory exists with right permissions
   become: true
   file: dest={{ gpg_home }}/.gnupg state=directory mode=0700 owner="{{ rootUser }}"
@@ -11,6 +15,19 @@
   become: yes
   become_user: "{{ rootUser }}"
   register: gpgkeys
+  
+- name: Check expired keys
+  become: yes
+  shell: "gpg2 --list-keys {{ gpg_realname }} | grep 'expired'"
+  ignore_errors: yes
+  failed_when: false
+  register: gpgExpKeys
+  when:  gpgkeys.stdout_lines|length > 0
+
+- name: Update expired
+  become: yes
+  shell: 'printf "expire\n{{ gpg_expire }}\nsave\n" | gpg --batch --command-fd 0 --status-fd=2 --edit-key {{ gpg_realname }}'
+  when: gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0
 
 - include: gpg-gen-key.yaml
   when: gpgkeys.stdout_lines|length < 1
