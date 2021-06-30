@@ -51,7 +51,7 @@ func TestCoreSReload(t *testing.T) {
 	coreRPC := make(chan birpc.ClientConnector, 1)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	caps := engine.NewCaps(1, "test_caps")
-	coreS := NewCoreService(cfg, caps, server, coreRPC, anz, srvDep, shdChan)
+	coreS := NewCoreService(cfg, caps, server, coreRPC, anz, nil, srvDep, shdChan)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(coreS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)

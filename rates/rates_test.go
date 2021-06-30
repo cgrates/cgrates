@@ -1079,7 +1079,6 @@ func TestRateSRateProfileCostForEventErrInterval(t *testing.T) {
 	if err := rateS.dm.SetRateProfile(context.Background(), rPrf, true); err != nil {
 		t.Error(err)
 	}
-
 	expected := "can't convert <wrongValue> to decimal"
 	if _, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, &utils.ArgsCostForEvent{
 		CGREvent: &utils.CGREvent{
