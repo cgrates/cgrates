@@ -131,6 +131,9 @@ func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 		return utils.NewErrMandatoryIeMissing("Path")
 	}
 	cS.shdWg.Add(1)
+	if cS.stopMemPrf == nil {
+		cS.stopMemPrf = make(chan struct{})
+	}
 	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shdChan)
 	return
 }
