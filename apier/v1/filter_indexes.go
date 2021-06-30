@@ -438,7 +438,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 	if tnt == utils.EmptyString {
 		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	indexes := make(utils.StringSet)
+	var indexes utils.StringSet
 	cacheIDs := make(map[string][]string)
 	//ThresholdProfile Indexes
 	if indexes, err = engine.ComputeIndexes(apierSv1.DataManager, tnt, args.Context, utils.CacheThresholdFilterIndexes,
