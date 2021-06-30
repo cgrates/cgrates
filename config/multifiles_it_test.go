@@ -103,7 +103,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DigestSeparator:    ",",
 		DigestEqual:        ":",
 		RSRSep:             ";",
-		MaxParralelConns:   100,
+		MaxParallelConns:   100,
 		FailedPostsTTL:     5 * time.Second,
 		ConcurrentStrategy: utils.MetaBusy,
 	}

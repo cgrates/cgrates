@@ -80,14 +80,14 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 			return
 		}
 	case connCfg.Strategy == rpcclient.PoolParallel:
-		rpcConnCfg := connCfg.Conns[0] // for parrallel we need only the first connection
+		rpcConnCfg := connCfg.Conns[0] // for parallel we need only the first connection
 		var conPool *rpcclient.RPCParallelClientPool
 		if rpcConnCfg.Address == utils.MetaInternal {
 			conPool, err = rpcclient.NewRPCParallelClientPool("", "", rpcConnCfg.TLS,
 				cM.cfg.TlsCfg().ClientKey, cM.cfg.TlsCfg().ClientCerificate,
 				cM.cfg.TlsCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
 				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
-				cM.cfg.GeneralCfg().ReplyTimeout, rpcclient.InternalRPC, intChan, int64(cM.cfg.GeneralCfg().MaxParralelConns), false)
+				cM.cfg.GeneralCfg().ReplyTimeout, rpcclient.InternalRPC, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false)
 		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
 			codec := rpcclient.GOBrpc
 			if rpcConnCfg.Transport != "" {
@@ -97,7 +97,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 				cM.cfg.TlsCfg().ClientKey, cM.cfg.TlsCfg().ClientCerificate,
 				cM.cfg.TlsCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
 				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
-				cM.cfg.GeneralCfg().ReplyTimeout, codec, nil, int64(cM.cfg.GeneralCfg().MaxParralelConns), false)
+				cM.cfg.GeneralCfg().ReplyTimeout, codec, nil, int64(cM.cfg.GeneralCfg().MaxParallelConns), false)
 		} else {
 			err = fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
 		}

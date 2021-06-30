@@ -50,7 +50,7 @@ type GeneralCfg struct {
 	DigestSeparator    string        //
 	DigestEqual        string        //
 	RSRSep             string        // separator used to split RSRParser (by degault is used ";")
-	MaxParralelConns   int           // the maximum number of connection used by the *parallel strategy
+	MaxParallelConns   int           // the maximum number of connections used by the *parallel strategy
 	ConcurrentRequests int
 	ConcurrentStrategy string
 }
@@ -138,8 +138,8 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Rsr_separator != nil {
 		gencfg.RSRSep = *jsnGeneralCfg.Rsr_separator
 	}
-	if jsnGeneralCfg.Max_parralel_conns != nil {
-		gencfg.MaxParralelConns = *jsnGeneralCfg.Max_parralel_conns
+	if jsnGeneralCfg.Max_parallel_conns != nil {
+		gencfg.MaxParallelConns = *jsnGeneralCfg.Max_parallel_conns
 	}
 	if jsnGeneralCfg.Concurrent_requests != nil {
 		gencfg.ConcurrentRequests = *jsnGeneralCfg.Concurrent_requests
@@ -193,7 +193,7 @@ func (gencfg *GeneralCfg) AsMapInterface() map[string]interface{} {
 		utils.DigestSeparatorCfg:    gencfg.DigestSeparator,
 		utils.DigestEqualCfg:        gencfg.DigestEqual,
 		utils.RSRSepCfg:             gencfg.RSRSep,
-		utils.MaxParralelConnsCfg:   gencfg.MaxParralelConns,
+		utils.MaxParallelConnsCfg:   gencfg.MaxParallelConns,
 		utils.ConcurrentRequestsCfg: gencfg.ConcurrentRequests,
 		utils.ConcurrentStrategyCfg: gencfg.ConcurrentStrategy,
 	}

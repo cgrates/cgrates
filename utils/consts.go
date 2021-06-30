@@ -1595,7 +1595,7 @@ const (
 	DigestSeparatorCfg    = "digest_separator"
 	DigestEqualCfg        = "digest_equal"
 	RSRSepCfg             = "rsr_separator"
-	MaxParralelConnsCfg   = "max_parralel_conns"
+	MaxParallelConnsCfg   = "max_parallel_conns"
 	ConcurrentRequestsCfg = "concurrent_requests"
 	ConcurrentStrategyCfg = "concurrent_strategy"
 )

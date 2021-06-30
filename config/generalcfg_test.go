@@ -125,7 +125,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"digest_separator": ",",								
 			"digest_equal": ":",									
 			"rsr_separator": ";",									
-			"max_parralel_conns": 100,	
+			"max_parallel_conns": 100,	
 			"concurrent_requests":  0,
 			"concurrent_strategy":  "",
 		},
@@ -154,7 +154,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		"digest_separator":     ",",
 		"digest_equal":         ":",
 		"rsr_separator":        ";",
-		"max_parralel_conns":   100,
+		"max_parallel_conns":   100,
 		"concurrent_requests":  0,
 		"concurrent_strategy":  "",
 	}
