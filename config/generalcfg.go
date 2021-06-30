@@ -49,7 +49,7 @@ type GeneralCfg struct {
 	DigestSeparator  string        //
 	DigestEqual      string        //
 	RSRSep           string        // separator used to split RSRParser (by default is used ";")
-	MaxParallelConns int           // the maximum number of connection used by the *parallel strategy
+	MaxParallelConns int           // the maximum number of connections used by the *parallel strategy
 }
 
 // loadFromJSONCfg loads General config from JsonCfg
