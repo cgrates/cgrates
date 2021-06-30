@@ -21,6 +21,7 @@ package cores
 import (
 	"reflect"
 	"runtime"
+	"sync"
 	"testing"
 	"time"
 
@@ -35,12 +36,18 @@ func TestNewCoreService(t *testing.T) {
 	stopchan := make(chan struct{}, 1)
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
+	shdWg := new(sync.WaitGroup)
+	shdChan := utils.NewSyncedChan()
+	stopMemPrf := make(chan struct{})
 	expected := &CoreService{
-		cfg:       cfgDflt,
-		CapsStats: sts,
+		shdWg:      shdWg,
+		shdChan:    shdChan,
+		stopMemPrf: stopMemPrf,
+		cfg:        cfgDflt,
+		CapsStats:  sts,
 	}
 
-	rcv := NewCoreService(cfgDflt, caps, nil, stopchan)
+	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, shdWg, stopMemPrf, shdChan)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -55,7 +62,7 @@ func TestCoreServiceStatus(t *testing.T) {
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	stopChan := make(chan struct{}, 1)
 
-	cores := NewCoreService(cfgDflt, caps, nil, stopChan)
+	cores := NewCoreService(cfgDflt, caps, nil, stopChan, nil, nil, nil)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]interface{}{},
