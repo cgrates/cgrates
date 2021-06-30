@@ -1519,6 +1519,7 @@ const (
 	CoreSv1StartCPUProfiling    = "CoreSv1.StartCPUProfiling"
 	CoreSv1StopCPUProfiling     = "CoreSv1.StopCPUProfiling"
 	CoreSv1StartMemoryProfiling = "CoreSv1.StartMemoryProfiling"
+	CoreSv1StopMemoryProfiling  = "CoreSv1.StopMemoryProfiling"
 )
 
 // RouteS APIs

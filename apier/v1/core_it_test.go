@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -46,18 +47,27 @@ var (
 		testCoreSv1LoadCofig,
 		testCoreSv1InitDataDB,
 		testCoreSv1InitStorDB,
-		testCoreSv1StartEngineByExecWithCPUProfiling,
-		testCoreSv1RPCConn,
-		testCoreSv1StartCPUProfilingErrorAlreadyStarted,
-		testCoreSv1Sleep,
-		testCoreSv1StopCPUProfiling,
-		testCoreSv1KillEngine,
+		/*
+			testCoreSv1StartEngineByExecWithCPUProfiling,
+			testCoreSv1RPCConn,
+			testCoreSv1StartCPUProfilingErrorAlreadyStarted,
+			testCoreSv1Sleep,
+			testCoreSv1StopCPUProfiling,
+			testCoreSv1KillEngine,
+
+		*/
 		testCoreSv1StartEngine,
 		testCoreSv1RPCConn,
-		testCoreSv1StopCPUProfilingBeforeStart,
-		testCoreSv1StartCPUProfiling,
+		/*
+			testCoreSv1StopCPUProfilingBeforeStart,
+			testCoreSv1StartCPUProfiling,
+			testCoreSv1Sleep,
+			testCoreSv1StopCPUProfiling,
+
+		*/
+		testCoreSv1StartMemoryProfiling,
 		testCoreSv1Sleep,
-		testCoreSv1StopCPUProfiling,
+		testCoreSv1StopMemoryProfiling,
 		testCoreSv1KillEngine,
 	}
 )
@@ -198,6 +208,51 @@ func testCoreSv1StopCPUProfiling(t *testing.T) {
 	//after we checked that CPUProfile was made successfully, can delete it
 	if err := os.Remove(path.Join(argPath, utils.CpuPathCgr)); err != nil {
 		t.Error(err)
+	}
+}
+
+func testCoreSv1StartMemoryProfiling(t *testing.T) {
+	var reply string
+	args := &utils.MemoryPrf{
+		DirPath:  argPath,
+		Interval: 100 * time.Millisecond,
+		NrFiles:  2,
+	}
+	if err := coreV1Rpc.Call(utils.CoreSv1StartMemoryProfiling,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+}
+
+func testCoreSv1StopMemoryProfiling(t *testing.T) {
+	var reply string
+	if err := coreV1Rpc.Call(utils.CoreSv1StopMemoryProfiling,
+		new(utils.MemoryPrf), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	for i := 1; i <= 2; i++ {
+		file, err := os.Open(path.Join(argPath, fmt.Sprintf("mem%v.prof", i)))
+		if err != nil {
+			t.Error(err)
+		}
+		defer file.Close()
+
+		//compare the size
+		size, err := file.Stat()
+		if err != nil {
+			t.Error(err)
+		} else if size.Size() < int64(415) {
+			t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
+		}
+		//after we checked that CPUProfile was made successfully, can delete it
+		if err := os.Remove(path.Join(argPath, fmt.Sprintf("mem%v.prof", i))); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
