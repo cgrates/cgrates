@@ -69,7 +69,7 @@ var (
 		testConsoleItTriggers,
 		// testConsoleItSessionInitiate,
 		// testConsoleItActiveSessions,
-		// testConsoleItSchedulerQueue,
+
 		testConsoleItSchedulerReload,
 		testConsoleItSchedulerExecute,
 		testConsoleItActionExecute,
@@ -102,7 +102,7 @@ var (
 		testConsoleItRoutesProfileSet,
 		testConsoleItRoutesProfileRemove,
 		testConsoleItComputeFilterIndexes,
-		// testConsoleItFilterIndexes,
+		testConsoleItFilterIndexes,
 		testConsoleItCacheReload,
 		testConsoleItAttributesForEvent,
 		testConsoleItAttributesProcessEvent,
@@ -168,12 +168,14 @@ var (
 		testConsoleItDispatchersHostIds,
 		testConsoleItDispatchersHost,
 		testConsoleItDispatchersHostRemove,
-
-		// testConsoleItDispatchersHost,
+		testConsoleItAccountActionPlanGet,
+		testConsoleItCacheItemIds,
+		// testConsoleItCacheItemExpiryTime,
 		testConsoleItSessionProcessMessage,
 		testConsoleItSessionUpdate,
 		testConsoleItSleep,
 		testConsoleItCacheRemoveGroup,
+		testConsoleItSchedulerQueue,
 		// testConsoleItCacheStats,
 		testConsoleItReloadConfig,
 		testConsoleItKillEngine,
@@ -3427,23 +3429,33 @@ func testConsoleItSchedulerQueue(t *testing.T) {
 	cmd.Stdout = output
 	expected := []interface{}{
 		map[string]interface{}{
-			"NextRunTime":      "2021-07-01T00:00:00+03:00",
+			"NextRunTime":      "",
 			"Accounts":         0.,
 			"ActionPlanID":     "AP_TEST",
-			"ActionTimingUUID": "edcfa0a3-f3b3-4bd4-b5f3-c838f80e9699",
+			"ActionTimingUUID": "",
 			"ActionsID":        "ACT_TOPUP_RST_10",
+		},
+		map[string]interface{}{
+			"NextRunTime":      "",
+			"Accounts":         3.,
+			"ActionPlanID":     "STANDARD_PLAN",
+			"ActionTimingUUID": "",
+			"ActionsID":        "TOPUP_RST_1024_DATA",
 		},
 	}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
-
+		t.Log(output.String())
 		t.Fatal(err)
 	}
-	t.Log(output.String())
 	var rcv []interface{}
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
+	}
+	for i := range rcv {
+		rcv[i].(map[string]interface{})["NextRunTime"] = ""
+		rcv[i].(map[string]interface{})["ActionTimingUUID"] = ""
 	}
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
@@ -4180,6 +4192,127 @@ func testConsoleItAccountTriggersSet(t *testing.T) {
 	}
 }
 
+func testConsoleItAccountActionPlanGet(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial2"))
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	cmd = exec.Command("cgr-console", "account_actionplan_get", `Account="1001"`)
+	output = bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		map[string]interface{}{
+			"ActionPlanId": "STANDARD_PLAN",
+			"ActionsId":    "TOPUP_RST_MONETARY_10",
+			"NextExecTime": "",
+			"Uuid":         "",
+		},
+		map[string]interface{}{
+			"ActionPlanId": "STANDARD_PLAN",
+			"ActionsId":    "TOPUP_RST_5M_VOICE",
+			"NextExecTime": "",
+			"Uuid":         "",
+		},
+		map[string]interface{}{
+			"ActionPlanId": "STANDARD_PLAN",
+			"ActionsId":    "TOPUP_RST_10M_VOICE",
+			"NextExecTime": "",
+			"Uuid":         "",
+		},
+		map[string]interface{}{
+			"ActionPlanId": "STANDARD_PLAN",
+			"ActionsId":    "TOPUP_RST_100_SMS",
+			"NextExecTime": "",
+			"Uuid":         "",
+		},
+		map[string]interface{}{
+			"ActionPlanId": "STANDARD_PLAN",
+			"ActionsId":    "TOPUP_RST_1024_DATA",
+			"NextExecTime": "",
+			"Uuid":         "",
+		},
+		map[string]interface{}{
+			"ActionPlanId": "STANDARD_PLAN",
+			"ActionsId":    "TOPUP_RST_1024_DATA",
+			"NextExecTime": "",
+			"Uuid":         "",
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	for i := range rcv {
+		rcv[i].(map[string]interface{})["Uuid"] = ""
+		rcv[i].(map[string]interface{})["NextExecTime"] = ""
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+	cmd = exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"))
+	output = bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+}
+
+func testConsoleItCacheItemIds(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cache_item_ids", `CacheID="*threshold_profiles"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{"cgrates.org:123", "cgrates.org:THD_ACNT_1001"}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].(string) < rcv[j].(string)
+	})
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItCacheItemExpiryTime(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cache_item_expiry_time", `CacheID="*threshold_profiles"`, `RunID="cgrates.org:THD_ACNT_1001"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := time.Time{}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+
+		t.Fatal(err)
+	}
+	t.Log(output.String())
+	var rcv time.Time
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
 func testConsoleItDispatchersProfileRemove(t *testing.T) {
 	cmd := exec.Command("cgr-console", "dispatchers_profile_remove", `ID="dps"`)
 	output := bytes.NewBuffer(nil)
@@ -4191,6 +4324,30 @@ func testConsoleItDispatchersProfileRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItFilterIndexes(t *testing.T) {
+	cmd := exec.Command("cgr-console", "filter_indexes", `ItemType="*attributes"`, `FilterType="*string"`, `Tenant="cgrates.org"`, `Context="*sessions"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		"*string:*req.Account:1002:ATTR_1002_SESSIONAUTH",
+		"*string:*req.Account:1001:ATTR_1001_SESSIONAUTH",
+		"*string:*req.Account:1003:ATTR_1003_SESSIONAUTH",
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
 		t.Fatal(err)
