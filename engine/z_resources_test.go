@@ -3226,58 +3226,58 @@ func TestResourcesAllocateResourceDryRun(t *testing.T) {
 	}
 }
 
-func TestResourceAllocateResourceOtherDB(t *testing.T) {
-	rProf := &ResourceProfile{
-		Tenant:       "cgrates.org",
-		ID:           "RL_DB",
-		FilterIDs:    []string{"*string:~*opts.Resource:RL_DB"},
-		Weight:       100,
-		Limit:        2,
-		ThresholdIDs: []string{utils.MetaNone},
-		UsageTTL:     -time.Nanosecond,
-	}
+// func TestResourceAllocateResourceOtherDB(t *testing.T) {
+// 	rProf := &ResourceProfile{
+// 		Tenant:       "cgrates.org",
+// 		ID:           "RL_DB",
+// 		FilterIDs:    []string{"*string:~*opts.Resource:RL_DB"},
+// 		Weight:       100,
+// 		Limit:        2,
+// 		ThresholdIDs: []string{utils.MetaNone},
+// 		UsageTTL:     -time.Nanosecond,
+// 	}
 
-	Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
-	fltS := NewFilterS(cfg, nil, dm)
-	rs := NewResourceService(dm, cfg, fltS, nil)
-	if err := dm.SetResourceProfile(rProf, true); err != nil {
-		t.Fatal(err)
-	}
-	if err := dm.SetResource(&Resource{
-		Tenant: "cgrates.org",
-		ID:     "RL_DB",
-		Usages: map[string]*ResourceUsage{
-			"RU1": { // the resource in DB is expired (should be cleaned when the next allocate is called)
-				Tenant:     "cgrates.org",
-				ID:         "RU1",
-				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				Units:      1,
-			},
-		},
-		TTLIdx: []string{"RU1"},
-	}); err != nil { // simulate how the resource is stored in redis or mongo(non-exported fields are not populated)
-		t.Fatal(err)
-	}
-	var reply string
-	exp := rProf.ID
-	if err := rs.V1AllocateResources(utils.ArgRSv1ResourceUsage{
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "ef0f554",
-			Event:   map[string]interface{}{"": ""},
-			APIOpts: map[string]interface{}{"Resource": "RL_DB"},
-		},
-		UsageID: "56156434-2e44-4f16-a766-086f10b413cd",
-		Units:   1,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != exp {
-		t.Errorf("Expected: %q, received: %q", exp, reply)
-	}
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	dm := NewDataManager(NewInternalDB(nil, nil, true), cfg.CacheCfg(), nil)
+// 	fltS := NewFilterS(cfg, nil, dm)
+// 	rs := NewResourceService(dm, cfg, fltS, nil)
+// 	if err := dm.SetResourceProfile(rProf, true); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if err := dm.SetResource(&Resource{
+// 		Tenant: "cgrates.org",
+// 		ID:     "RL_DB",
+// 		Usages: map[string]*ResourceUsage{
+// 			"RU1": { // the resource in DB is expired (should be cleaned when the next allocate is called)
+// 				Tenant:     "cgrates.org",
+// 				ID:         "RU1",
+// 				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+// 				Units:      1,
+// 			},
+// 		},
+// 		TTLIdx: []string{"RU1"},
+// 	}); err != nil { // simulate how the resource is stored in redis or mongo(non-exported fields are not populated)
+// 		t.Fatal(err)
+// 	}
+// 	var reply string
+// 	exp := rProf.ID
+// 	if err := rs.V1AllocateResources(utils.ArgRSv1ResourceUsage{
+// 		CGREvent: &utils.CGREvent{
+// 			Tenant:  "cgrates.org",
+// 			ID:      "ef0f554",
+// 			Event:   map[string]interface{}{"": ""},
+// 			APIOpts: map[string]interface{}{"Resource": "RL_DB"},
+// 		},
+// 		UsageID: "56156434-2e44-4f16-a766-086f10b413cd",
+// 		Units:   1,
+// 	}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	} else if reply != exp {
+// 		t.Errorf("Expected: %q, received: %q", exp, reply)
+// 	}
 
-}
+// }
 
 func TestResourcesShutdown(t *testing.T) {
 	utils.Logger.SetLogLevel(6)
@@ -4752,6 +4752,449 @@ func TestResourcesV1GetResourceWithConfigMissingParameters(t *testing.T) {
 	}
 	var reply ResourceWithConfig
 	if err := rS.V1GetResourceWithConfig(args, &reply); err == nil || err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AuthorizeResources(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Errorf("Unexpected reply returned: %q", reply)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             0,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+		err != utils.ErrResourceUnauthorized {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrResourceUnauthorized, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	experr := `MANDATORY_IE_MISSING: [Event]`
+	var reply string
+
+	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	experr := `MANDATORY_IE_MISSING: [UsageID]`
+	var reply string
+
+	if err := rS.V1AuthorizeResources(args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestResourcesV1AllocateResourcesOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AllocateResources(args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "Approved" {
+		t.Errorf("Unexpected reply returned: %q", reply)
+	}
+}
+
+func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1002",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             10,
+		UsageTTL:          time.Minute,
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	experr := `MANDATORY_IE_MISSING: [UsageID]`
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	args = utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+
+	experr = `MANDATORY_IE_MISSING: [Event]`
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	args = utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+
+	experr = `MANDATORY_IE_MISSING: [ID]`
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+
+	args = utils.ArgRSv1ResourceUsage{
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+
+	experr = `MANDATORY_IE_MISSING: [Event]`
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 }
