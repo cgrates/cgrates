@@ -87,7 +87,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, connCfg *config.RPCConn, intChan chan birpc.ClientConnector,
 	isInternalRPC bool) (conn birpc.ClientConnector, err error) {
 	if connCfg.Strategy == rpcclient.PoolParallel {
-		rpcConnCfg := connCfg.Conns[0] // for parrallel we need only the first connection
+		rpcConnCfg := connCfg.Conns[0] // for parallel we need only the first connection
 		codec := rpcclient.GOBrpc
 		switch {
 		case rpcConnCfg.Address == rpcclient.InternalRPC:
