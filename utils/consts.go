@@ -422,6 +422,7 @@ const (
 	MetaDifference           = "*difference"
 	MetaVariable             = "*variable"
 	MetaCCUsage              = "*cc_usage"
+	MetaSIPCID               = "*sipcid"
 	MetaValueExponent        = "*value_exponent"
 	NegativePrefix           = "!"
 	MatchStartPrefix         = "^"
@@ -2714,6 +2715,7 @@ var StringTmplType = StringSet{
 	MetaUsageDifference: struct{}{},
 	MetaPrefix:          struct{}{},
 	MetaSuffix:          struct{}{},
+	MetaSIPCID:          struct{}{},
 }
 
 // Time duration suffix

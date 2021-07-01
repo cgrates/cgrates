@@ -781,7 +781,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					field.Type == utils.MetaMultiply ||
 					field.Type == utils.MetaDivide ||
 					field.Type == utils.MetaValueExponent ||
-					field.Type == utils.MetaUnixTimestamp {
+					field.Type == utils.MetaUnixTimestamp ||
+					field.Type == utils.MetaSIPCID {
 					for _, val := range field.Value {
 						if err := utils.IsPathValidForExporters(val.path); err != nil {
 							return fmt.Errorf("<%s> %s for %s at %s of %s", utils.ERs, err, val.path, utils.Values, utils.CacheDumpFieldsCfg)
@@ -809,7 +810,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					field.Type == utils.MetaMultiply ||
 					field.Type == utils.MetaDivide ||
 					field.Type == utils.MetaValueExponent ||
-					field.Type == utils.MetaUnixTimestamp {
+					field.Type == utils.MetaUnixTimestamp ||
+					field.Type == utils.MetaSIPCID {
 					for _, val := range field.Value {
 						if err := utils.IsPathValidForExporters(val.path); err != nil {
 							return fmt.Errorf("<%s> %s for %s at %s of %s", utils.ERs, err, val.path, utils.Values, utils.FieldsCfg)
@@ -879,7 +881,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					field.Type == utils.MetaMultiply ||
 					field.Type == utils.MetaDivide ||
 					field.Type == utils.MetaValueExponent ||
-					field.Type == utils.MetaUnixTimestamp {
+					field.Type == utils.MetaUnixTimestamp ||
+					field.Type == utils.MetaSIPCID {
 					for _, val := range field.Value {
 						if err := utils.IsPathValidForExporters(val.path); err != nil {
 							return fmt.Errorf("<%s> %s for %s at %s of %s", utils.EEs, err, val.path, utils.Values, utils.FieldsCfg)

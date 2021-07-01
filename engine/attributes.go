@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -542,6 +543,15 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 			reqNr = 0
 		}
 		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
+	case utils.MetaSIPCID:
+		values := make([]string, len(value))
+		for i, val := range value {
+			if values[i], err = val.ParseDataProvider(dp); err != nil {
+				return
+			}
+		}
+		sort.Strings(values[1:])
+		out = strings.Join(values, utils.InfieldSep)
 	default:
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", attrType)
 	}

@@ -1169,3 +1169,75 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, rcv)
 	}
 }
+
+func TestAttributesParseAttributeSIPCID(t *testing.T) {
+	exp := "12345;1001;1002"
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if exp != out {
+		t.Errorf("Expected %q, Received %q", exp, out)
+	}
+
+	dp = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1002",
+			"from": "1001",
+		},
+	}
+	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
+		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if exp != out {
+		t.Errorf("Expected %q, Received %q", exp, out)
+	}
+
+	exp = "12345;1001;1002;1003"
+	dp = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":   "12345",
+			"to":    "1001",
+			"from":  "1002",
+			"extra": "1003",
+		},
+	}
+	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.extra;~*req.from",
+		utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if exp != out {
+		t.Errorf("Expected %q, Received %q", exp, out)
+	}
+
+	dp = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":   "12345",
+			"to":    "1002",
+			"from":  "1001",
+			"extra": "1003",
+		},
+	}
+	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from",
+		utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		t.Fatal(err)
+	} else if exp != out {
+		t.Errorf("Expected %q, Received %q", exp, out)
+	}
+
+	dp = utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid": "12345",
+		},
+	}
+	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != utils.ErrNotFound {
+		t.Errorf("Expected <%+v>, received <%+v>", utils.ErrNotFound, err)
+	}
+}
