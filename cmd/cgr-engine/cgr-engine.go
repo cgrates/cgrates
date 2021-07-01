@@ -347,12 +347,12 @@ func main() {
 		shdWg.Add(1)
 		stopMemProf = make(chan struct{})
 		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, stopMemProf, shdChan)
+		defer func() {
+			if cS == nil {
+				close(stopMemProf)
+			}
+		}()
 	}
-	defer func() {
-		if stopMemProf != nil {
-			cS.StopMemoryProfiling()
-		}
-	}()
 
 	var cpuProfileFile io.Closer
 	if *cpuProfDir != utils.EmptyString {
@@ -361,17 +361,17 @@ func main() {
 		if err != nil {
 			return
 		}
+		defer func() {
+			if cS != nil {
+				cS.StopCPUProfiling()
+				return
+			}
+			if cpuProfileFile != nil {
+				pprof.StopCPUProfile()
+				cpuProfileFile.Close()
+			}
+		}()
 	}
-	defer func() {
-		if cS != nil {
-			cS.StopCPUProfiling()
-			return
-		}
-		if cpuProfileFile != nil {
-			pprof.StopCPUProfile()
-			cpuProfileFile.Close()
-		}
-	}()
 
 	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
