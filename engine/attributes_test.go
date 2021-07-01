@@ -1852,3 +1852,98 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
 	}
 }
+
+func TestAttributesProcessEventSIPCID(t *testing.T) {
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+	attrPrf1 := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       "ATTR_1",
+		Contexts: []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "OriginID",
+				Type:  utils.MetaSIPCID,
+				Value: config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", true, utils.INFIELD_SEP),
+			},
+		},
+		Blocker: true,
+		Weight:  10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"cid":  "12345",
+				"to":   "1001",
+				"from": "1002",
+			},
+		},
+	}
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "OriginID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"cid":      "12345",
+				"to":       "1001",
+				"from":     "1002",
+				"OriginID": "12345;1001;1002",
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+	}
+	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
+	}
+	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+
+	attrArgs.CGREvent.Event = map[string]interface{}{
+		"cid":  "12345",
+		"to":   "1002",
+		"from": "1001",
+	}
+	eRply.CGREvent.Event = map[string]interface{}{
+		"cid":      "12345",
+		"to":       "1002",
+		"from":     "1001",
+		"OriginID": "12345;1001;1002",
+	}
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+	}
+	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
+	}
+	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+}
