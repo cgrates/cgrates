@@ -54,7 +54,7 @@
 				{
 					"tag": "Usage",
 					"path": "*cgreq.Usage",
-					"type": "*value_exponent",
+					"type": "*valueExponent",
 					"mandatory": true, 
 					"value": "~*req.Requested-Service-Unit.CC-Money.Unit-Value.Value-Digits;~*req.Requested-Service-Unit.CC-Money.Unit-Value.Exponent"
 				},

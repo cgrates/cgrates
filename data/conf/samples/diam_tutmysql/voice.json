@@ -255,7 +255,7 @@
 				{
 					"tag": "Usage", "path": "*cgreq.Usage",
 					"filters": ["*exists:~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Response-Timestamp:"],
-					"type": "*usage_difference", "mandatory": true,
+					"type": "*usageDifference", "mandatory": true,
 					"value": "~*req.Event-Timestamp;~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Response-Timestamp"},
 				{
 					"tag": "Usage", "path": "*cgreq.Usage",

@@ -64,7 +64,7 @@
 						"value": "*pseudoprepaid", "mandatory": true},	
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 						"value": "~*req.CDR_ID", "mandatory": true},
-					{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",
+					{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remoteHost",
 						"mandatory": true},
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
 						"value": "~*req.msisdn", "mandatory": true},

@@ -224,7 +224,7 @@
 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.calledNumber", "mandatory": true},
 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference", "value": "~*req.broadWorksCDR.cdrData.basicModule.releaseTime;~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true}
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference", "value": "~*req.broadWorksCDR.cdrData.basicModule.releaseTime;~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true}
 			],
 		},
 		{
@@ -279,7 +279,7 @@
 				{"tag": "AccId3", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.1"},
 				{"tag": "AccId4", "path": "*cgreq.OriginID", "type": "*composed", "value": "_"},
 				{"tag": "AccId5", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.4"},
-				{"tag": "OrderID", "path": "*cgreq.OrderID", "type": "*unix_timestamp", "value": "~*req.3"},
+				{"tag": "OrderID", "path": "*cgreq.OrderID", "type": "*unixTimestamp", "value": "~*req.3"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant", "value": "127.0.0.1", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*constant", "value": "cgrates.org", "mandatory": true},
@@ -324,7 +324,7 @@
 				{"tag": "AccId3", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.1"},
 				{"tag": "AccId4", "path": "*cgreq.OriginID", "type": "*composed", "value": "_"},
 				{"tag": "AccId5", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.4"},
-				{"tag": "OrderID", "path": "*cgreq.OrderID", "type": "*unix_timestamp", "value": "~*req.3"},
+				{"tag": "OrderID", "path": "*cgreq.OrderID", "type": "*unixTimestamp", "value": "~*req.3"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant", "value": "127.0.0.1", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*constant", "value": "cgrates.org", "mandatory": true},
@@ -375,7 +375,7 @@
 			],
 			"partial_commit_fields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.FileName:missed_calls"]},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:"]}, 
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:"]}, 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:"]},
 			],
 			"cache_dump_fields": [
@@ -432,7 +432,7 @@
 			],
 			"partial_commit_fields": [
 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*constant","value": "0", "mandatory": true, "filters": ["*prefix:~*vars.FileName:missed_calls"]},
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*notprefix:~*vars.FileName:missed_calls","*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]},
 			],
 			"cache_dump_fields": [
@@ -523,7 +523,7 @@
 
 			],
 			"partial_commit_fields": [
-				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usage_difference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*usageDifference","value": "~*req.EndTime;~*req.AnswerTime", "mandatory": true, "filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]}, 
 				{"tag": "Partial", "path": "*opts.*partial", "type": "*constant", "value": "false","filters": ["*exists:~*opts.invite:","*exists:~*opts.bye:","*exists:~*opts.ack:"]},
 			],
 			"cache_dump_fields": [

@@ -28,7 +28,7 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host",
+					"type": "*remoteHost",
 					"mandatory": true
 				},
 				{
@@ -127,7 +127,7 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host", 
+					"type": "*remoteHost", 
 					"mandatory": true
 				},
 				{
@@ -210,7 +210,7 @@
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",
+				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remoteHost",
 					"mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*attributes"},
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
@@ -255,7 +255,7 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host", 
+					"type": "*remoteHost", 
 					"mandatory": true
 				},
 				{
@@ -360,7 +360,7 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host", 
+					"type": "*remoteHost", 
 					"mandatory": true
 				},
 				{
@@ -392,7 +392,7 @@
 				{
 					"tag": "Usage",
 					"path": "*cgreq.Usage",
-					"type": "*cc_usage",
+					"type": "*ccUsage",
 					"mandatory": true, 
 					"value":  "~*req.CC-Request-Number;~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/;5m"
 				},
