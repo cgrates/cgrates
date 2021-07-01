@@ -323,7 +323,7 @@ type
 	**\*constant**
 		Writes out a constant
 
-	**\*remote_host**
+	**\*remoteHost**
 		Writes out the Address of the remote *DiameterClient* sending us the request
 
 	**\*variable**
@@ -335,10 +335,10 @@ type
 	**\*group**
 		Writes out the variable value, postpending to the list of variables with the same path
 
-	**\*usage_difference**
+	**\*usageDifference**
 		Calculates the usage difference between two arguments passed in the *value*. Requires 2 arguments: *$stopTime;$startTime*
 
-	**\*cc_usage**
+	**\*ccUsage**
 		Calculates the usage out of *CallControl* message. Requires 3 arguments: *$reqNumber;$usedCCTime;$debitInterval*
 
 	**\*sum**
@@ -347,7 +347,7 @@ type
 	**\*difference**
 		Calculates the difference between all arguments passed within *value*. Possible value types are (in this order): duration, time, float, int.
 
-	**\*value_exponent**
+	**\*valueExponent**
 		Calculates the exponent of a value. It requires two values: *$val;$exp*
 
 	**\*template**

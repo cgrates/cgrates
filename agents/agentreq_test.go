@@ -1139,7 +1139,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	tplFlds[0].ComputePath()
 
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *cc_usage` {
+		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *ccUsage` {
 		t.Error(err)
 	}
 
@@ -1151,7 +1151,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	}
 	tplFlds[0].ComputePath()
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid requestNumber <simuhuawei;1449573472;00002> to *cc_usage` {
+		err.Error() != `invalid requestNumber <simuhuawei;1449573472;00002> to *ccUsage` {
 		t.Error(err)
 	}
 
@@ -1163,7 +1163,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	}
 	tplFlds[0].ComputePath()
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid usedCCTime <simuhuawei;1449573472;00002> to *cc_usage` {
+		err.Error() != `invalid usedCCTime <simuhuawei;1449573472;00002> to *ccUsage` {
 		t.Error(err)
 	}
 
@@ -1175,7 +1175,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	}
 	tplFlds[0].ComputePath()
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid debitInterval <simuhuawei;1449573472;00002> to *cc_usage` {
+		err.Error() != `invalid debitInterval <simuhuawei;1449573472;00002> to *ccUsage` {
 		t.Error(err)
 	}
 
@@ -1221,7 +1221,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 			Mandatory: true},
 	}
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *usage_difference` {
+		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *usageDifference` {
 		t.Error(err)
 	}
 
@@ -1463,7 +1463,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 			Mandatory: true},
 	}
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *value_exponent` {
+		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *valueExponent` {
 		t.Error(err)
 	}
 
@@ -1485,7 +1485,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 			Mandatory: true},
 	}
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid value <simuhuawei;1449573472;00002> to *value_exponent` {
+		err.Error() != `invalid value <simuhuawei;1449573472;00002> to *valueExponent` {
 		t.Error(err)
 	}
 	tplFlds = []*config.FCTemplate{

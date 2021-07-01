@@ -266,7 +266,7 @@ type
 	**\*constant**
 		Writes out a constant
 
-	**\*remote_host**
+	**\*remoteHost**
 		Writes out the Address of the remote host sending us the Event
 
 	**\*variable**
@@ -275,7 +275,7 @@ type
 	**\*composed**
 		Writes out the variable value, postpending to previous value set
 
-	**\*usage_difference**
+	**\*usageDifference**
 		Calculates the usage difference between two arguments passed in the *value*. Requires 2 arguments: *$stopTime;$startTime*
 
 	**\*sum**
@@ -284,7 +284,7 @@ type
 	**\*difference**
 		Calculates the difference between all arguments passed within *value*. Possible value types are (in this order): duration, time, float, int.
 
-	**\*value_exponent**
+	**\*valueExponent**
 		Calculates the exponent of a value. It requires two values: *$val;$exp*
 
 	**\*template**

@@ -94,13 +94,13 @@ Type
   	**\*composed** 
   		Same as *\*variable* but instead of overwriting *Path*, it will append to it.
 
-  	**\*usage_difference**
+  	**\*usageDifference**
   		Will calculate the duration difference between two field names defined in the *Value*. If the number of fields in the *Value* are different than 2, it will error.
 
   	**\*sum** 
   		Will sum up the values in the *Value*.
 
-  	**\*value_exponent**
+  	**\*valueExponent**
   		Will compute the exponent of the first field in the *Value*.
 
 Value
