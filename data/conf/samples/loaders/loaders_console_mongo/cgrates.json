@@ -1,0 +1,163 @@
+{
+    // CGRateS Configuration file
+
+
+"general": {
+    "log_level": 7,
+    "reply_timeout": "30s",
+},
+
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080",
+},
+
+
+"data_db": {
+    "db_type": "mongo",
+    "db_name": "10",
+    "db_port": 27017,
+},
+
+
+"stor_db": {
+    "db_type": "mongo",
+    "db_name": "cgrates",
+    "db_port": 27017,
+},
+
+
+"rals": {
+    "enabled": true,
+    "thresholds_conns": ["*internal"],
+},
+
+
+"schedulers": {
+    "enabled": true,
+    "cdrs_conns": ["*localhost"],
+},
+
+
+"cdrs": {
+    "enabled": true,
+},
+
+
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+    "enabled": true,
+    "store_interval": "1s",
+    "thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+    "enabled": true,
+    "store_interval": "1s",
+    "thresholds_conns": ["*internal"],
+},
+
+
+"thresholds": {
+    "enabled": true,
+    "store_interval": "1s",
+},
+
+
+"routes": {
+    "enabled": true,
+    "stats_conns": ["*localhost"],
+    "resources_conns": ["*localhost"],
+},
+
+
+"attributes": {							// Attribute service
+    "enabled": true,				// starts Attribute service: <true|false>.
+},
+
+
+"loaders": [
+    {
+        "id": "CustomLoader",									
+        "enabled": true,									
+        "dry_run": false,									
+        "run_delay": "0",										
+        "lock_filename": ".cgr.lock",						
+        "caches_conns": ["*internal"],
+        "field_separator": ",",								
+        "tp_in_dir": "/tmp/In",		
+        "tp_out_dir": "/tmp/Out",	
+        "data":[	
+            {
+                "type": "*attributes",						
+                "file_name": "Attributes.csv",				
+                "fields": [
+                    {"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                    {"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+                    {"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+                    {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+                    {"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+                    {"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.5"},
+                    {"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.6"},
+                    {"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.7"},
+                    {"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.8"},
+                    {"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+                    {"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.10"},
+                ],
+            },
+        ],
+    },
+],
+
+
+"sessions": {
+    "enabled": true,
+    "rals_conns": ["*internal"],
+    "cdrs_conns": ["*internal"],
+    "chargers_conns": ["*internal"],
+},
+
+
+"migrator": {
+    "out_datadb_type": "mongo",
+    "out_datadb_port": "27017",
+    "out_datadb_name": "10",
+    "out_stordb_type": "mongo",
+    "out_stordb_port": "27017",
+    "out_stordb_name": "cgrates",
+    "users_filters":["Account"],
+},
+
+
+"templates": {
+    "attrTemplateLoader": [
+        {"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+        {"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+        {"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+        {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+        {"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+        {"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.5"},
+        {"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.6"},
+        {"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.7"},
+        {"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.8"},
+        {"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+        {"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.10"},
+    ],
+},
+
+
+
+    "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"],
+},
+}
+    

@@ -23,8 +23,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os"
 	"os/exec"
 	"path"
 	"reflect"
@@ -36,6 +40,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -43,7 +48,8 @@ var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 	waitRater = flag.Int("wait_rater", 100, "Number of milliseconds to wait for rater to start and cache")
-	// encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
+	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+	cnslRPC   *rpc.Client
 )
 
 var (
@@ -55,6 +61,7 @@ var (
 		testConsoleItInitDataDB,
 		testConsoleItInitStorDB,
 		testConsoleItStartEngine,
+		testConsoleItRPCConn,
 		testConsoleItLoadTP,
 		testConsoleItCacheClear,
 		// testConsoleItDebitMax,
@@ -62,13 +69,12 @@ var (
 		testConsoleItThresholdsProfileIds,
 		testConsoleItThresholdsProfileSet,
 		testConsoleItThresholdsProfile,
+		testConsoleItCacheItemExpiryTime,
 		testConsoleItThresholdsProcessEvent,
 		testConsoleItThresholdsForEvent,
 		testConsoleItThresholdsProfileRemove,
 		testConsoleItTriggersSet,
 		testConsoleItTriggers,
-		// testConsoleItSessionInitiate,
-		// testConsoleItActiveSessions,
 
 		testConsoleItSchedulerReload,
 		testConsoleItSchedulerExecute,
@@ -102,6 +108,7 @@ var (
 		testConsoleItRoutesProfileSet,
 		testConsoleItRoutesProfileRemove,
 		testConsoleItComputeFilterIndexes,
+		testConsoleItComputeActionplanIndexes,
 		testConsoleItFilterIndexes,
 		testConsoleItCacheReload,
 		testConsoleItAttributesForEvent,
@@ -132,6 +139,7 @@ var (
 		testConsoleItCost,
 		testConsoleItMaxUsage,
 		testConsoleItSessionProcessCdr,
+		testConsoleItCostDetails,
 		testConsoleItCdrs,
 		testConsoleItRatingPlanCost,
 		testConsoleItRatingProfileRemove,
@@ -146,6 +154,7 @@ var (
 		testConsoleItCacheHasGroup,
 		testConsoleItFilter,
 		testConsoleItFilterRemove,
+		testConsoleItCacheGroupItemIds,
 		testConsoleItPing,
 		testConsoleItLoadTpFromFolder,
 		testConsoleItImportTpFromFolder,
@@ -154,6 +163,7 @@ var (
 		testConsoleItMaxDuration,
 		testConsoleItAccountRemove,
 		testConsoleItBalanceAdd,
+		testconsoleItBalanceSet,
 		testConsoleItBalanceRemove,
 		testConsoleItBalanceDebit,
 		testConsoleItGetLoadTimes,
@@ -173,12 +183,35 @@ var (
 		// testConsoleItCacheItemExpiryTime,
 		testConsoleItSessionProcessMessage,
 		testConsoleItSessionUpdate,
+		testConsoleItSessionInitiate,
+		testConsoleItActiveSessions,
+		testConsoleItPassiveSessions,
 		testConsoleItSleep,
 		testConsoleItCacheRemoveGroup,
+		testConsoleItParse,
 		testConsoleItSchedulerQueue,
 		// testConsoleItCacheStats,
 		testConsoleItReloadConfig,
 		testConsoleItKillEngine,
+	}
+	cnslItDispatchersTests = []func(t *testing.T){
+		testConsoleItLoadConfig,
+		testConsoleItInitDataDB,
+		testConsoleItInitStorDB,
+		testConsoleItStartEngine,
+		testConsoleItDispatchersLoadTP,
+		testConsoleItDispatchesForEvent,
+		testConsoleItKillEngine,
+	}
+	cnslItLoadersTests = []func(t *testing.T){
+		testConsoleItLoadersLoadConfig,
+		testConsoleItInitDataDB,
+		testConsoleItInitStorDB,
+		testConsoleItLoadersStartEngine,
+		testConsoleItLoadTP,
+		testConsoleItLoaderLoad,
+		testConsoleItLoaderRemove,
+		testConsoleItLoadersKillEngine,
 	}
 )
 
@@ -200,7 +233,60 @@ func TestConsoleItTests(t *testing.T) {
 	}
 }
 
+func TestConsoleItDispatchersTests(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+		cnslItDirPath = path.Join("dispatchers", "dispatchers_mysql")
+	case utils.MetaMongo:
+		cnslItDirPath = path.Join("dispatchers", "dispatchers_mongo")
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown database type")
+	}
+	for _, test := range cnslItDispatchersTests {
+		t.Run("TestConsoleItDispatchersTests", test)
+	}
+}
+
+func TestConsoleItLoadersTests(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+		cnslItDirPath = path.Join("loaders", "loaders_console_mysql")
+	case utils.MetaMongo:
+		cnslItDirPath = path.Join("loaders", "loaders_console_mongo")
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown database type")
+	}
+	for _, test := range cnslItLoadersTests {
+		t.Run("TestConsoleItLoadersTests", test)
+	}
+}
+
 func testConsoleItLoadConfig(t *testing.T) {
+	var err error
+	cnslItCfgPath = path.Join(*dataDir, "conf", "samples", cnslItDirPath)
+	if cnslItCfg, err = config.NewCGRConfigFromPath(cnslItCfgPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testConsoleItLoadersLoadConfig(t *testing.T) {
+	fldPathIn := "/tmp/In"
+	fldPathOut := "/tmp/Out"
+	if err := os.MkdirAll(fldPathIn, 0777); err != nil {
+		t.Error(err)
+	}
+	if err := os.MkdirAll(fldPathOut, 0777); err != nil {
+		t.Error(err)
+	}
+
 	var err error
 	cnslItCfgPath = path.Join(*dataDir, "conf", "samples", cnslItDirPath)
 	if cnslItCfg, err = config.NewCGRConfigFromPath(cnslItCfgPath); err != nil {
@@ -226,10 +312,55 @@ func testConsoleItStartEngine(t *testing.T) {
 	}
 }
 
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
+
+// make rpc
+func testConsoleItRPCConn(t *testing.T) {
+	var err error
+	if cnslRPC, err = newRPCClient(cnslItCfg.ListenCfg()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testConsoleItLoadersStartEngine(t *testing.T) {
+	fldPathIn := "/tmp/In"
+	fldPathOut := "/tmp/Out"
+	if err := os.MkdirAll(fldPathIn, 0777); err != nil {
+		t.Error(err)
+	}
+	if err := os.MkdirAll(fldPathOut, 0777); err != nil {
+		t.Error(err)
+	}
+	if _, err := engine.StartEngine(cnslItCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testConsoleItLoadTP(t *testing.T) {
 	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "tutorial"))
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+}
+
+func testConsoleItDispatchersLoadTP(t *testing.T) {
+	cmd := exec.Command("cgr-loader", "-config_path="+cnslItCfgPath, "-path="+path.Join(*dataDir, "tariffplans", "dispatchers"), `-caches_address=`, `-scheduler_address=`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
@@ -2043,18 +2174,18 @@ func testConsoleItSessionInitiate(t *testing.T) {
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	expected := map[string]interface{}{
-		"AttributesDigest":   "LCRProfile:premium_cli,Password:CGRateS.org,PaypalAccount:cgrates@paypal.com,RequestType:*prepaid",
-		"MaxUsage":           "0s",
+		"AttributesDigest":   nil,
+		"MaxUsage":           "10.8µs",
 		"ResourceAllocation": nil,
 		"StatQueues":         nil,
 		"Thresholds":         nil,
 	}
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
-
+		t.Log(output.String())
 		t.Fatal(err)
 	}
-	t.Log(output.String())
+
 	var rcv map[string]interface{}
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(output.String())
@@ -3305,11 +3436,7 @@ func testConsoleItActiveSessions(t *testing.T) {
 			"DebitInterval": "0s",
 			"Destination":   "",
 			"DurationIndex": "0s",
-			"ExtraFields": map[string]interface{}{
-				"LCRProfile":    "premium_cli",
-				"Password":      "CGRateS.org",
-				"PaypalAccount": "cgrates@paypal.com",
-			},
+			"ExtraFields":   map[string]interface{}{},
 			"LoopIndex":     0.,
 			"MaxCostSoFar":  0.,
 			"MaxRate":       0.,
@@ -3318,7 +3445,33 @@ func testConsoleItActiveSessions(t *testing.T) {
 			"NodeID":        "",
 			"OriginHost":    "",
 			"OriginID":      "",
-			"RequestType":   "*prepaid",
+			"RequestType":   "",
+			"RunID":         "",
+			"SetupTime":     "0001-01-01T00:00:00Z",
+			"Source":        "SessionS_",
+			"Subject":       "",
+			"Tenant":        "cgrates.org",
+			"ToR":           "",
+			"Usage":         "0s",
+		},
+		map[string]interface{}{
+			"Account":       "1001",
+			"AnswerTime":    "0001-01-01T00:00:00Z",
+			"CGRID":         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			"Category":      "",
+			"DebitInterval": "0s",
+			"Destination":   "",
+			"DurationIndex": "0s",
+			"ExtraFields":   map[string]interface{}{},
+			"LoopIndex":     0.,
+			"MaxCostSoFar":  0.,
+			"MaxRate":       0.,
+			"MaxRateUnit":   "0s",
+			"NextAutoDebit": "0001-01-01T00:00:00Z",
+			"NodeID":        "",
+			"OriginHost":    "",
+			"OriginID":      "",
+			"RequestType":   "",
 			"RunID":         "*default",
 			"SetupTime":     "0001-01-01T00:00:00Z",
 			"Source":        "SessionS_",
@@ -3335,11 +3488,33 @@ func testConsoleItActiveSessions(t *testing.T) {
 			"DebitInterval": "0s",
 			"Destination":   "",
 			"DurationIndex": "0s",
-			"ExtraFields": map[string]interface{}{
-				"LCRProfile":    "premium_cli",
-				"Password":      "CGRateS.org",
-				"PaypalAccount": "cgrates@paypal.com",
-			},
+			"ExtraFields":   map[string]interface{}{},
+			"LoopIndex":     0.,
+			"MaxCostSoFar":  0.,
+			"MaxRate":       0.,
+			"MaxRateUnit":   "0s",
+			"NextAutoDebit": "0001-01-01T00:00:00Z",
+			"NodeID":        "",
+			"OriginHost":    "",
+			"OriginID":      "",
+			"RequestType":   "",
+			"RunID":         "*default",
+			"SetupTime":     "0001-01-01T00:00:00Z",
+			"Source":        "SessionS_",
+			"Subject":       "",
+			"Tenant":        "cgrates.org",
+			"ToR":           "",
+			"Usage":         "0s",
+		},
+		map[string]interface{}{
+			"Account":       "1001",
+			"AnswerTime":    "0001-01-01T00:00:00Z",
+			"CGRID":         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			"Category":      "",
+			"DebitInterval": "0s",
+			"Destination":   "",
+			"DurationIndex": "0s",
+			"ExtraFields":   map[string]interface{}{},
 			"LoopIndex":     0.,
 			"MaxCostSoFar":  0.,
 			"MaxRate":       0.,
@@ -3350,6 +3525,32 @@ func testConsoleItActiveSessions(t *testing.T) {
 			"OriginID":      "",
 			"RequestType":   "*none",
 			"RunID":         "*raw",
+			"SetupTime":     "0001-01-01T00:00:00Z",
+			"Source":        "SessionS_",
+			"Subject":       "",
+			"Tenant":        "cgrates.org",
+			"ToR":           "",
+			"Usage":         "0s",
+		},
+		map[string]interface{}{
+			"Account":       "1001",
+			"AnswerTime":    "0001-01-01T00:00:00Z",
+			"CGRID":         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			"Category":      "",
+			"DebitInterval": "0s",
+			"Destination":   "",
+			"DurationIndex": "0s",
+			"ExtraFields":   map[string]interface{}{},
+			"LoopIndex":     0.,
+			"MaxCostSoFar":  0.,
+			"MaxRate":       0.,
+			"MaxRateUnit":   "0s",
+			"NextAutoDebit": "0001-01-01T00:00:00Z",
+			"NodeID":        "",
+			"OriginHost":    "",
+			"OriginID":      "",
+			"RequestType":   "",
+			"RunID":         "reseller1",
 			"SetupTime":     "0001-01-01T00:00:00Z",
 			"Source":        "SessionS_",
 			"Subject":       "",
@@ -3369,17 +3570,174 @@ func testConsoleItActiveSessions(t *testing.T) {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
-	rcv[0].(map[string]interface{})["NodeID"] = ""
-	rcv[1].(map[string]interface{})["NodeID"] = ""
-
-	rcv[0].(map[string]interface{})["DurationIndex"] = "0s"
-	rcv[1].(map[string]interface{})["DurationIndex"] = "0s"
-
+	for i := range rcv {
+		rcv[i].(map[string]interface{})["NodeID"] = ""
+		rcv[i].(map[string]interface{})["DurationIndex"] = "0s"
+	}
 	sort.Slice(rcv, func(i, j int) bool {
 		return utils.IfaceAsString(rcv[i].(map[string]interface{})["RunID"]) < utils.IfaceAsString(rcv[j].(map[string]interface{})["RunID"])
 	})
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItPassiveSessions(t *testing.T) {
+	var reply string
+	err := cnslRPC.Call(utils.SessionSv1DeactivateSessions, &utils.SessionIDsWithArgsDispatcher{}, &reply)
+	if err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: OK, received : %+v", reply)
+	}
+	args := &utils.SessionFilter{
+		APIOpts: make(map[string]interface{}),
+	}
+	var reply2 []*sessions.ExternalSession
+	if err := cnslRPC.Call(utils.SessionSv1GetPassiveSessions, args, &reply2); err != nil {
+		t.Error(err)
+	}
+	expected := []*sessions.ExternalSession{
+		{
+			Account:       "1001",
+			AnswerTime:    time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			CGRID:         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			Category:      "",
+			DebitInterval: 0 * time.Second,
+			Destination:   "",
+			DurationIndex: 0 * time.Second,
+			ExtraFields:   map[string]string{},
+			LoopIndex:     0.,
+			MaxCostSoFar:  0.,
+			MaxRate:       0.,
+			MaxRateUnit:   0 * time.Second,
+			NextAutoDebit: time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			NodeID:        "",
+			OriginHost:    "",
+			OriginID:      "",
+			RequestType:   "",
+			RunID:         "",
+			SetupTime:     time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			Source:        "SessionS_",
+			Subject:       "",
+			Tenant:        "cgrates.org",
+			ToR:           "",
+			Usage:         0 * time.Second,
+		},
+		{
+			Account:       "1001",
+			AnswerTime:    time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			CGRID:         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			Category:      "",
+			DebitInterval: 0 * time.Second,
+			Destination:   "",
+			DurationIndex: 0 * time.Second,
+			ExtraFields:   map[string]string{},
+			LoopIndex:     0.,
+			MaxCostSoFar:  0.,
+			MaxRate:       0.,
+			MaxRateUnit:   0 * time.Second,
+			NextAutoDebit: time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			NodeID:        "",
+			OriginHost:    "",
+			OriginID:      "",
+			RequestType:   "",
+			RunID:         "*default",
+			SetupTime:     time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			Source:        "SessionS_",
+			Subject:       "",
+			Tenant:        "cgrates.org",
+			ToR:           "",
+			Usage:         0 * time.Second,
+		},
+		{
+			Account:       "1001",
+			AnswerTime:    time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			CGRID:         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			Category:      "",
+			DebitInterval: 0 * time.Second,
+			Destination:   "",
+			DurationIndex: 0 * time.Second,
+			ExtraFields:   map[string]string{},
+			LoopIndex:     0.,
+			MaxCostSoFar:  0.,
+			MaxRate:       0.,
+			MaxRateUnit:   0 * time.Second,
+			NextAutoDebit: time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			NodeID:        "",
+			OriginHost:    "",
+			OriginID:      "",
+			RequestType:   "",
+			RunID:         "*default",
+			SetupTime:     time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			Source:        "SessionS_",
+			Subject:       "",
+			Tenant:        "cgrates.org",
+			ToR:           "",
+			Usage:         0 * time.Second,
+		},
+		{
+			Account:       "1001",
+			AnswerTime:    time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			CGRID:         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			Category:      "",
+			DebitInterval: 0 * time.Second,
+			Destination:   "",
+			DurationIndex: 0 * time.Second,
+			ExtraFields:   map[string]string{},
+			LoopIndex:     0.,
+			MaxCostSoFar:  0.,
+			MaxRate:       0.,
+			MaxRateUnit:   0 * time.Second,
+			NextAutoDebit: time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			NodeID:        "",
+			OriginHost:    "",
+			OriginID:      "",
+			RequestType:   "*none",
+			RunID:         "*raw",
+			SetupTime:     time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			Source:        "SessionS_",
+			Subject:       "",
+			Tenant:        "cgrates.org",
+			ToR:           "",
+			Usage:         0 * time.Second,
+		},
+		{
+			Account:       "1001",
+			AnswerTime:    time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			CGRID:         "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			Category:      "",
+			DebitInterval: 0 * time.Second,
+			Destination:   "",
+			DurationIndex: 0 * time.Second,
+			ExtraFields:   map[string]string{},
+			LoopIndex:     0.,
+			MaxCostSoFar:  0.,
+			MaxRate:       0.,
+			MaxRateUnit:   0 * time.Second,
+			NextAutoDebit: time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			NodeID:        "",
+			OriginHost:    "",
+			OriginID:      "",
+			RequestType:   "",
+			RunID:         "reseller1",
+			SetupTime:     time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC),
+			Source:        "SessionS_",
+			Subject:       "",
+			Tenant:        "cgrates.org",
+			ToR:           "",
+			Usage:         0 * time.Second,
+		},
+	}
+	for i := range reply2 {
+		reply2[i].NodeID = ""
+		reply2[i].DurationIndex = 0 * time.Second
+	}
+	sort.Slice(reply2, func(i, j int) bool {
+		return reply2[i].RunID < reply2[j].RunID
+	})
+	if !reflect.DeepEqual(reply2, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(reply2))
 	}
 }
 
@@ -3457,8 +3815,11 @@ func testConsoleItSchedulerQueue(t *testing.T) {
 		rcv[i].(map[string]interface{})["NextRunTime"] = ""
 		rcv[i].(map[string]interface{})["ActionTimingUUID"] = ""
 	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].(map[string]interface{})["ActionPlanID"].(string) < rcv[j].(map[string]interface{})["ActionPlanID"].(string)
+	})
 	if !reflect.DeepEqual(rcv, expected) {
-		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
 
@@ -3888,22 +4249,18 @@ func testConsoleItAttributesProfileRemove(t *testing.T) {
 }
 
 func testConsoleItFilterRemove(t *testing.T) {
-	cmd := exec.Command("cgr-console", "filter_remove", `ID="123"`)
+	cmd := exec.Command("cgr-console", "filter_remove", `ID="FLTR_ACNT_1001"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := "OK"
+	expected := "Error executing command: SERVER_ERROR: cannot remove filter <cgrates.org:FLTR_ACNT_1001> because will broken the reference to following items: {\"*route_filter_indexes\":{\"ROUTE_ACNT_1001\":{}},\"*threshold_filter_indexes\":{\"THD_ACNT_1001\":{}}}\n"
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv string
-	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
-		t.Error(output.String())
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(rcv, expected) {
-		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	if !reflect.DeepEqual(output.String(), expected) {
+		fmt.Printf("%T and %T", output.String(), expected)
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, output.String())
 	}
 }
 
@@ -3928,7 +4285,7 @@ func testConsoleItMaxUsage(t *testing.T) {
 }
 
 func testConsoleItSessionProcessCdr(t *testing.T) {
-	cmd := exec.Command("cgr-console", "session_process_cdr", `Event={"Account":"1001", "Source":"*sessions"}`)
+	cmd := exec.Command("cgr-console", "session_process_cdr", `Event={"Account":"1001", "Source":"*sessions", "Usage":"2m30s", "CostDetails":{"CGRID":"2", "RunID":"*test"}, "OriginID":"169"}`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	expected := "OK"
@@ -3953,19 +4310,32 @@ func testConsoleItCdrs(t *testing.T) {
 	cmd.Stdout = output
 	expected := []interface{}{
 		map[string]interface{}{
-			"Account":     "1001",
-			"AnswerTime":  "0001-01-01T00:00:00Z",
-			"CGRID":       "",
-			"Category":    "call",
-			"Cost":        -1.,
-			"CostDetails": nil,
+			"Account":    "1001",
+			"AnswerTime": "0001-01-01T00:00:00Z",
+			"CGRID":      "2659fc519890c924f82b4475ddd71b058178d02b",
+			"Category":   "call",
+			"Cost":       -1.,
+			"CostDetails": map[string]interface{}{
+				"AccountSummary": nil,
+				"Accounting":     nil,
+				"CGRID":          "2",
+				"Charges":        nil,
+				"Cost":           nil,
+				"Rates":          nil,
+				"Rating":         nil,
+				"RatingFilters":  nil,
+				"RunID":          "*test",
+				"StartTime":      "0001-01-01T00:00:00Z",
+				"Timings":        nil,
+				"Usage":          0.,
+			},
 			"CostSource":  "",
 			"Destination": "",
 			"ExtraFields": map[string]interface{}{},
 			"ExtraInfo":   "NOT_CONNECTED: RALs",
 			"OrderID":     nil,
 			"OriginHost":  "",
-			"OriginID":    "",
+			"OriginID":    "169",
 			"Partial":     false,
 			"PreRated":    false,
 			"RequestType": "*rated",
@@ -3975,22 +4345,35 @@ func testConsoleItCdrs(t *testing.T) {
 			"Subject":     "1001",
 			"Tenant":      "cgrates.org",
 			"ToR":         "*voice",
-			"Usage":       0.,
+			"Usage":       150000000000.,
 		},
 		map[string]interface{}{
-			"Account":     "1001",
-			"AnswerTime":  "0001-01-01T00:00:00Z",
-			"CGRID":       "",
-			"Category":    "call",
-			"Cost":        -1.,
-			"CostDetails": nil,
+			"Account":    "1001",
+			"AnswerTime": "0001-01-01T00:00:00Z",
+			"CGRID":      "2659fc519890c924f82b4475ddd71b058178d02b",
+			"Category":   "call",
+			"Cost":       -1.,
+			"CostDetails": map[string]interface{}{
+				"AccountSummary": nil,
+				"Accounting":     nil,
+				"CGRID":          "2",
+				"Charges":        nil,
+				"Cost":           nil,
+				"Rates":          nil,
+				"Rating":         nil,
+				"RatingFilters":  nil,
+				"RunID":          "*test",
+				"StartTime":      "0001-01-01T00:00:00Z",
+				"Timings":        nil,
+				"Usage":          nil,
+			},
 			"CostSource":  "",
 			"Destination": "",
 			"ExtraFields": map[string]interface{}{},
 			"ExtraInfo":   "",
 			"OrderID":     nil,
 			"OriginHost":  "",
-			"OriginID":    "",
+			"OriginID":    "169",
 			"Partial":     false,
 			"PreRated":    false,
 			"RequestType": "*none",
@@ -4000,7 +4383,7 @@ func testConsoleItCdrs(t *testing.T) {
 			"Subject":     "1001",
 			"Tenant":      "cgrates.org",
 			"ToR":         "*voice",
-			"Usage":       0.,
+			"Usage":       150000000000.,
 		},
 	}
 	if err := cmd.Run(); err != nil {
@@ -4013,9 +4396,9 @@ func testConsoleItCdrs(t *testing.T) {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
-	rcv[0].(map[string]interface{})["CGRID"] = ""
+	// // rcv[0].(map[string]interface{})["CGRID"] = ""
 	rcv[0].(map[string]interface{})["OrderID"] = nil
-	rcv[1].(map[string]interface{})["CGRID"] = ""
+	// // rcv[1].(map[string]interface{})["CGRID"] = ""
 	rcv[1].(map[string]interface{})["OrderID"] = nil
 	sort.Slice(rcv, func(i, j int) bool {
 		return utils.IfaceAsString(rcv[i].(map[string]interface{})["RunID"]) < utils.IfaceAsString(rcv[j].(map[string]interface{})["RunID"])
@@ -4293,10 +4676,10 @@ func testConsoleItCacheItemIds(t *testing.T) {
 }
 
 func testConsoleItCacheItemExpiryTime(t *testing.T) {
-	cmd := exec.Command("cgr-console", "cache_item_expiry_time", `CacheID="*threshold_profiles"`, `RunID="cgrates.org:THD_ACNT_1001"`)
+	cmd := exec.Command("cgr-console", "cache_item_expiry_time", `CacheID="*threshold_profiles"`, `ItemID="cgrates.org:THD_ACNT_1001"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := time.Time{}
+	expected := time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC)
 	if err := cmd.Run(); err != nil {
 		t.Log(cmd.Args)
 
@@ -4338,8 +4721,8 @@ func testConsoleItFilterIndexes(t *testing.T) {
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
 	expected := []interface{}{
-		"*string:*req.Account:1002:ATTR_1002_SESSIONAUTH",
 		"*string:*req.Account:1001:ATTR_1001_SESSIONAUTH",
+		"*string:*req.Account:1002:ATTR_1002_SESSIONAUTH",
 		"*string:*req.Account:1003:ATTR_1003_SESSIONAUTH",
 	}
 	if err := cmd.Run(); err != nil {
@@ -4352,12 +4735,263 @@ func testConsoleItFilterIndexes(t *testing.T) {
 		t.Error(output.String())
 		t.Fatal(err)
 	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].(string) < rcv[j].(string)
+	})
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItDispatchesForEvent(t *testing.T) {
+	cmd := exec.Command("cgr-console", "dispatches_for_event", `Tenant="cgrates.org"`, `Event={"EventName":"Event1"}`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		map[string]interface{}{
+			"Tenant":             "cgrates.org",
+			"ID":                 "EVENT1",
+			"Subsystems":         []interface{}{"*any"},
+			"FilterIDs":          []interface{}{"*string:~*req.EventName:Event1"},
+			"ActivationInterval": nil,
+			"Strategy":           "*weight",
+			"StrategyParams":     map[string]interface{}{},
+			"Weight":             30.,
+			"Hosts": []interface{}{
+				map[string]interface{}{
+					"ID":        "ALL2",
+					"FilterIDs": []interface{}{},
+					"Weight":    20.,
+					"Params":    map[string]interface{}{},
+					"Blocker":   false,
+				},
+				map[string]interface{}{
+					"ID":        "ALL",
+					"FilterIDs": []interface{}{},
+					"Weight":    10.,
+					"Params":    map[string]interface{}{},
+					"Blocker":   false,
+				},
+			},
+		},
+		map[string]interface{}{
+			"Tenant":             "cgrates.org",
+			"ID":                 "PING1",
+			"Subsystems":         []interface{}{"*any"},
+			"FilterIDs":          []interface{}{},
+			"ActivationInterval": nil,
+			"Strategy":           "*weight",
+			"StrategyParams":     map[string]interface{}{},
+			"Weight":             10.,
+			"Hosts": []interface{}{
+				map[string]interface{}{
+					"ID":        "ALL",
+					"FilterIDs": []interface{}{},
+					"Weight":    20.,
+					"Params":    map[string]interface{}{},
+					"Blocker":   false,
+				},
+				map[string]interface{}{
+					"ID":        "ALL2",
+					"FilterIDs": []interface{}{},
+					"Weight":    10.,
+					"Params":    map[string]interface{}{},
+					"Blocker":   false,
+				},
+			},
+		},
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].(map[string]interface{})["ID"].(string) < rcv[j].(map[string]interface{})["ID"].(string)
+	})
+	// sort.Slice(rcv[])
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func testConsoleItLoaderLoad(t *testing.T) {
+	cmd := exec.Command("cgr-console", "loader_load", `LoaderID="CustomLoader"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItLoaderRemove(t *testing.T) {
+	cmd := exec.Command("cgr-console", "loader_remove", `LoaderID="CustomLoader"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItComputeActionplanIndexes(t *testing.T) {
+	cmd := exec.Command("cgr-console", "compute_actionplan_indexes")
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItParse(t *testing.T) {
+	cmd := exec.Command("cgr-console", "parse", `Expression="~1:s/intra_(.*)/super_${1}/"`, `Value="intra_33"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "super_33\n"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+
+		t.Fatal(err)
+	}
+	t.Log(output.String())
+	if !reflect.DeepEqual(output.String(), expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, output.String())
+	}
+}
+
+func testconsoleItBalanceSet(t *testing.T) {
+	cmd := exec.Command("cgr-console", "balance_set", `Account="1001"`, `Value=10`, `Balance={"ID":"2"}`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := "OK"
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv string
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItCacheGroupItemIds(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cache_group_item_ids", `CacheID="*reverse_filter_indexes"`, `GroupID="cgrates.org:FLTR_ACNT_1001"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := []interface{}{
+		"cgrates.org:FLTR_ACNT_1001:*route_filter_indexes",
+		"cgrates.org:FLTR_ACNT_1001:*threshold_filter_indexes",
+		// "cgrates.org:FLTR_ACNT_1001:fii_cgrates.org:FLTR_ACNT_1001_1002:*stat_filter_indexes",
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	var rcv []interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
+	sort.Slice(rcv, func(i, j int) bool {
+		return rcv[i].(string) < rcv[j].(string)
+	})
+	if !reflect.DeepEqual(rcv, expected) {
+		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
+	}
+}
+
+func testConsoleItCostDetails(t *testing.T) {
+	cmd := exec.Command("cgr-console", "cost_details", `CgrId="2659fc519890c924f82b4475ddd71b058178d02b"`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	expected := map[string]interface{}{
+		"AccountSummary": nil,
+		"Accounting":     nil,
+		"CGRID":          "2",
+		"Charges":        nil,
+		"Cost":           nil,
+		"Rates":          nil,
+		"Rating":         nil,
+		"RatingFilters":  nil,
+		"RunID":          "*test",
+		"StartTime":      "0001-01-01T00:00:00Z",
+		"Timings":        nil,
+		"Usage":          "0s",
+	}
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+
+		t.Fatal(err)
+	}
+	t.Log(output.String())
+	var rcv map[string]interface{}
+	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
+		t.Error(output.String())
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %+q \n but received \n %+q", expected, rcv)
 	}
 }
 
 func testConsoleItKillEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testConsoleItLoadersKillEngine(t *testing.T) {
+	fldPathIn := "/tmp/In"
+	fldPathOut := "/tmp/Out"
+	if err := os.Remove(fldPathIn); err != nil {
+		t.Error(err)
+	}
+	if err := os.Remove(fldPathOut); err != nil {
+		t.Error(err)
+	}
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Fatal(err)
 	}

@@ -1,0 +1,161 @@
+{
+    // CGRateS Configuration file
+    //
+
+
+"general": {
+    "log_level": 7,
+    "reply_timeout": "50s",
+},
+
+
+"listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+    "db_type": "redis",						// data_db type: <redis|mongo>
+    "db_port": 6379, 						// data_db port to reach the database
+    "db_name": "10", 						// data_db database name to connect to
+},
+
+"stor_db": {
+    "db_password": "CGRateS.org",
+},
+
+
+"rals": {
+    "enabled": true,
+    "thresholds_conns": ["*internal"],
+},
+
+
+"schedulers": {
+    "enabled": true,
+    "cdrs_conns": ["*internal"],
+},
+
+
+"cdrs": {
+    "enabled": true,
+    "chargers_conns":["*internal"],
+},
+
+
+"loaders": [
+    {
+        "id": "CustomLoader",									
+        "enabled": true,									
+        "dry_run": false,									
+        "tenant": "cgrates.org",
+        "run_delay": "0",										
+        "lock_filename": ".cgr.lock",						
+        "caches_conns": ["*internal"],
+        "field_separator": ",",								
+        "tp_in_dir": "/tmp/In",		
+        "tp_out_dir": "/tmp/Out",	
+        "data":[	
+            {
+                "type": "*attributes",						
+                "file_name": "Attributes.csv",				
+                "fields": [
+                    {"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                    {"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+                    {"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+                    {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+                    {"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+                    {"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.5"},
+                    {"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.6"},
+                    {"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.7"},
+                    {"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.8"},
+                    {"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+                    {"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.10"},
+                ],
+            },
+        ],
+    },
+],
+
+
+
+"attributes": {
+    "enabled": true,
+    "prefix_indexed_fields":["*req.Destination"],
+},
+
+
+"chargers": {
+    "enabled": true,
+    "attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+    "enabled": true,
+    "store_interval": "1s",
+    "thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+    "enabled": true,
+    "store_interval": "1s",
+    "thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+    "enabled": true,
+    "store_interval": "1s",
+},
+
+
+"routes": {
+    "enabled": true,
+    "prefix_indexed_fields":["*req.Destination"],
+    "stats_conns": ["*internal"],
+    "resources_conns": ["*internal"],
+},
+
+
+"sessions": {
+    "enabled": true,
+    "routes_conns": ["*internal"],
+    "resources_conns": ["*internal"],
+    "attributes_conns": ["*internal"],
+    "rals_conns": ["*internal"],
+    "cdrs_conns": ["*internal"],
+    "chargers_conns": ["*internal"],
+},
+
+
+"migrator":{
+    "out_stordb_password": "CGRateS.org",
+    "users_filters":["Account"],
+},
+
+
+"templates": {
+    "attrTemplateLoader": [
+        {"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+        {"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+        {"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~*req.2"},
+        {"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.3"},
+        {"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.4"},
+        {"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~*req.5"},
+        {"tag": "Path", "path": "Path", "type": "*variable", "value": "~*req.6"},
+        {"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.7"},
+        {"tag": "Value", "path": "Value", "type": "*variable", "value": "~*req.8"},
+        {"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.9"},
+        {"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.10"},
+    ],
+},
+
+
+
+    "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"],
+},    
+}
