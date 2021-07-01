@@ -49,7 +49,7 @@ func TestAMQPERv1(t *testing.T) {
 	"readers": [
 		{
 			"id": "amqpv1",										// identifier of the EventReader profile
-			"type": "*amqpv1_json_map",							// reader type <*file_csv>
+			"type": "*amqpv1JSONMap",							// reader type <*fileCSV>
 			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "amqps://RootManageSharedAccessKey:Je8l%2Bt9tyOgZbdA%2B5SmGIJEsEzhZ9VdIO7yRke5EYtM%3D@test0123456y.servicebus.windows.net",// read data from this path

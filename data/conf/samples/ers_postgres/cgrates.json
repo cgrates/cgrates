@@ -79,7 +79,7 @@
 		{
 			"id": "file_reader1",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"flags": ["*dryrun"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
@@ -90,7 +90,7 @@
 			"opts": {
 				"csvFieldSeparator":";"
 			},
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/ers2/in",
 			"flags": ["*dryrun"],
 			"processed_path": "/tmp/ers2/out",
@@ -114,7 +114,7 @@
 		{
 			"id": "init_session",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
 			"processed_path": "/tmp/init_session/out",
@@ -135,7 +135,7 @@
 		{
 			"id": "terminate_session",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
 			"processed_path": "/tmp/terminate_session/out",
@@ -149,7 +149,7 @@
 		{
 			"id": "create_cdr",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/cdrs/out",
@@ -172,7 +172,7 @@
 		{
 			"id": "file_reader_with_filters",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":";"
 			},
@@ -201,7 +201,7 @@
 		{
 			"id": "XmlDryRun",
 			"run_delay":  "-1",
-			"type": "*file_xml",
+			"type": "*fileXML",
 			"source_path": "/tmp/xmlErs/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/xmlErs/out",
@@ -224,7 +224,7 @@
 		{
 			"id": "FWV1",
 			"run_delay":  "-1",
-			"type": "*file_fwv",
+			"type": "*fileFWV",
 			"source_path": "/tmp/fwvErs/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/fwvErs/out",
@@ -257,7 +257,7 @@
 			"id": "PartialCSV1",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/partErs1/in",
 			"flags": ["*cdrs"],
 			"processed_path": "",
@@ -302,7 +302,7 @@
 			"id": "PartialCSV_PostExpiry",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/partErs2/in",
 			"processed_path": "",
 			"flags": ["*cdrs"],
@@ -337,7 +337,7 @@
 			"id": "FlatstoreOsips",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":"|",
 				"partialcsvFieldSeparator": "|",
@@ -391,7 +391,7 @@
 			"id": "FlatstoreOsipsWithACK",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":"|",
 				"partialcsvFieldSeparator": "|",
@@ -447,7 +447,7 @@
 		{
 			"id": "JSONReader",
 			"run_delay":  "-1",
-			"type": "*file_json",
+			"type": "*fileJSON",
 			"source_path": "/tmp/ErsJSON/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/ErsJSON/out",
@@ -468,7 +468,7 @@
 		{
 			"id": "readerWithTemplate",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/readerWithTemplate/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/readerWithTemplate/out",
@@ -482,7 +482,7 @@
 			"id": "PartialWithMultipleMethods",
 			"enabled": true,
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"opts": {
 				"csvFieldSeparator":",",
 				"partialcsvFieldSeparator": ",",

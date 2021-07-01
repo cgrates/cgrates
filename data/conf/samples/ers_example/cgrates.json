@@ -71,7 +71,7 @@
 		{
 			"id": "file_reader1",
 			"run_delay": "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"flags": ["*dryrun"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",

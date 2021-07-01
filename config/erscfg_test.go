@@ -34,7 +34,7 @@ func TestERSClone(t *testing.T) {
          {
             "id": "file_reader1",
 			"run_delay": "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"flags": ["*dryrun"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
@@ -119,7 +119,7 @@ func TestERSClone(t *testing.T) {
 			},
 			{
 				ID:             "file_reader1",
-				Type:           "*file_csv",
+				Type:           "*fileCSV",
 				RunDelay:       -1,
 				ConcurrentReqs: 1024,
 				SourcePath:     "/tmp/ers/in",
@@ -347,7 +347,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 		{
 			"id": "file_reader1",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
 			"cache_dump_fields": [],
@@ -893,7 +893,7 @@ func TestEventReaderSameID(t *testing.T) {
 		{
 			"id": "file_reader1",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"row_length" : 5,
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
@@ -905,7 +905,7 @@ func TestEventReaderSameID(t *testing.T) {
 		{
 			"id": "file_reader1",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
 			"fields":[
@@ -935,7 +935,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				"id": "file_reader1",
 				"run_delay":  "-1",
                 "tenant": "~*req.Destination1",
-				"type": "*file_csv",
+				"type": "*fileCSV",
 				"source_path": "/tmp/ers/in",
 				"processed_path": "/tmp/ers/out",
 				"cache_dump_fields": [],
@@ -986,7 +986,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.CacheDumpFieldsCfg:     []map[string]interface{}{},
 				utils.PartialCommitFieldsCfg: []map[string]interface{}{},
 				utils.ConcurrentRequestsCfg:  1024,
-				utils.TypeCfg:                "*file_csv",
+				utils.TypeCfg:                "*fileCSV",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},
@@ -1039,7 +1039,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
                 "id": "file_reader1",
 				"run_delay":  "10s",
                 "tenant": "~*req.Destination1",
-				"type": "*file_csv",
+				"type": "*fileCSV",
                 "flags": ["randomFlag"],
                 "filters": ["randomFilter"],
 				"source_path": "/tmp/ers/in",
@@ -1115,7 +1115,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					},
 				},
 				utils.ConcurrentRequestsCfg: 1024,
-				utils.TypeCfg:               "*file_csv",
+				utils.TypeCfg:               "*fileCSV",
 				utils.FieldsCfg: []map[string]interface{}{
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.ToR", utils.TagCfg: "ToR", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.2"},
 					{utils.MandatoryCfg: true, utils.PathCfg: "*cgreq.OriginID", utils.TagCfg: "OriginID", utils.TypeCfg: "*variable", utils.ValueCfg: "~*req.3"},

@@ -58,7 +58,7 @@
 	"exporters": [
 		{
 			"id": "amqp_localhost",
-			"type": "*amqp_json_map",
+			"type": "*amqpJSONMap",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
 				"amqpQueueID":"cgrates_cdrs",

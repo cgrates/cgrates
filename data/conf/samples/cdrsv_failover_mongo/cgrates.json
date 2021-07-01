@@ -6,7 +6,7 @@
 
 "general": {
     "log_level": 7,
-	"poster_attempts": 1,									// number of attempts before considering post request failed (eg: *http_post, CDR exports)
+	"poster_attempts": 1,									// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
 	"failed_posts_ttl": "1s",				// time to wait before writing the failed posts in a single file
 	"failed_posts_dir": "/tmp/failed_posts"	// directory path where we store failed requests
 },
@@ -77,7 +77,7 @@
 	"exporters": [
 		{
 			"id": "s3_test_file",
-			"type": "*s3_json_map",
+			"type": "*s3JSONMap",
 			// export_path for s3:  "endpoint"
 			"export_path": "http://s3.us-east-2.amazonaws.com/",
 			"opts": {

@@ -48,7 +48,7 @@ func TestKafkaER(t *testing.T) {
 	"readers": [
 		{
 			"id": "kafka",										// identifier of the EventReader profile
-			"type": "*kafka_json_map",							// reader type <*file_csv>
+			"type": "*kafkaJSONMap",							// reader type <*fileCSV>
 			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "localhost:9092",					// read data from this path

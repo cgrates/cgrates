@@ -92,7 +92,7 @@ func testSQLInitConfig(t *testing.T) {
 			"readers": [
 				{
 					"id": "mysql",										// identifier of the EventReader profile
-					"type": "*sql",							// reader type <*file_csv>
+					"type": "*sql",							// reader type <*fileCSV>
 					"run_delay": "1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 					"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					// read data from this path
@@ -370,7 +370,7 @@ func testSQLInitConfig2(t *testing.T) {
 			"readers": [
 				{
 					"id": "mysql",										// identifier of the EventReader profile
-					"type": "*sql",							// reader type <*file_csv>
+					"type": "*sql",							// reader type <*fileCSV>
 					"run_delay": "1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 					"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					// read data from this path

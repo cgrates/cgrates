@@ -398,7 +398,7 @@ ActionType
 	**\*disable_account**
 		Set the :ref:`Account` *Disabled* flag.
 
-	**\*http_post**
+	**\*httpPost**
 		Post data over HTTP protocol to configured HTTP URL.
 
 	**\*http_post_async**

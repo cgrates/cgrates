@@ -58,13 +58,13 @@
 	"enabled": true,
 	"attributes_conns":["*internal"],
 	"cache": {
-		"*file_csv": {"limit": -1, "ttl": "500ms", "static_ttl": false},
-		"*file_fwv": {"limit": -1, "ttl": "500ms", "static_ttl": false}
+		"*fileCSV": {"limit": -1, "ttl": "500ms", "static_ttl": false},
+		"*fileFWV": {"limit": -1, "ttl": "500ms", "static_ttl": false}
 	},
 	"exporters": [
 		{
 			"id": "CSVExporter",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSV",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -74,7 +74,7 @@
 		},
 		{
 			"id": "CSVExporterComposed",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testComposedCSV",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -123,7 +123,7 @@
 		},
 		{
 			"id": "FwvExporter",
-			"type": "*file_fwv",
+			"type": "*fileFWV",
 			"export_path": "/tmp/testFWV",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -197,7 +197,7 @@
 		},
 		{
 			"id": "HTTPPostExporter",
-			"type": "*http_post",
+			"type": "*httpPost",
 			"export_path": "http://127.0.0.1:12080/event_http",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -223,7 +223,7 @@
 		},
 		{
 			"id": "HTTPJsonMapExporter",
-			"type": "*http_json_map",
+			"type": "*httpJSONMap",
 			"export_path": "http://127.0.0.1:12081/event_json_map_http",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -250,7 +250,7 @@
 		},
 		{
 			"id": "CSVMaskedDestination",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSVMasked",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -291,7 +291,7 @@
 		},
 		{
 			"id": "CSVExporterFromVirt",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSVfromVirt",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -315,7 +315,7 @@
 		},
 		{
 			"id": "CSVExporterWIthTemplate",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSVExpTemp",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -364,7 +364,7 @@
 		},
 		{
 			"id": "HTTPJsonMapExporterWithNoFields",
-			"type": "*http_json_map",
+			"type": "*httpJSONMap",
 			"export_path": "http://127.0.0.1:12081/event_json_map_http",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
@@ -380,7 +380,7 @@
 		},		
 		{
 			"id": "HTTPPostExporterWithNoFields",
-			"type": "*http_post",
+			"type": "*httpPost",
 			"export_path": "http://127.0.0.1:12080/event_http",
 			"tenant": "cgrates.org",
 			"flags": ["*attributes"],

@@ -32,7 +32,7 @@ func TestEESClone(t *testing.T) {
      "enabled": true,						
 	"attributes_conns":["*internal", "*conn1"],					
 	"cache": {
-		"*file_csv": {"limit": -2, "ttl": "3s", "static_ttl": true},
+		"*fileCSV": {"limit": -2, "ttl": "3s", "static_ttl": true},
 	},
 	"exporters": [
 		{
@@ -348,14 +348,14 @@ func TestEventExporterSameID(t *testing.T) {
 	"exporters": [
 		{
 			"id": "file_exporter1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"fields":[
 				{"tag": "CustomTag1", "path": "*exp.CustomPath1", "type": "*variable", "value": "CustomValue1", "mandatory": true},
 			],
 		},
 		{
 			"id": "file_exporter1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"fields":[
 				{"tag": "CustomTag2", "path": "*exp.CustomPath2", "type": "*variable", "value": "CustomValue2", "mandatory": true},
 			],
@@ -384,7 +384,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Id:            utils.StringPointer("CSVExporter"),
-				Type:          utils.StringPointer("*file_csv"),
+				Type:          utils.StringPointer("*fileCSV"),
 				Filters:       &[]string{},
 				Attribute_ids: &[]string{},
 				Flags:         &[]string{"*dryrun"},
@@ -433,7 +433,7 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 			{
 				ID:            "CSVExporter",
-				Type:          "*file_csv",
+				Type:          "*fileCSV",
 				Filters:       []string{},
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
@@ -492,7 +492,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		Exporters: &[]*EventExporterJsonCfg{
 			{
 				Id:            utils.StringPointer("CSVExporter"),
-				Type:          utils.StringPointer("*file_csv"),
+				Type:          utils.StringPointer("*fileCSV"),
 				Filters:       &[]string{},
 				Attribute_ids: &[]string{},
 				Flags:         &[]string{"*dryrun"},
@@ -547,7 +547,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 			},
 			{
 				ID:            "CSVExporter",
-				Type:          "*file_csv",
+				Type:          "*fileCSV",
 				Filters:       []string{},
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
@@ -623,12 +623,12 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	        "enabled": true,						
             "attributes_conns":["*internal","*conn2"],					
             "cache": {
-		          "*file_csv": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "static_ttl": false}
+		          "*fileCSV": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "static_ttl": false}
             },
             "exporters": [
             {
                   "id": "CSVExporter",									
-			      "type": "*file_csv",									
+			      "type": "*fileCSV",									
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
 					"kafkaGroupID": "test",
@@ -663,7 +663,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 		utils.ExportersCfg: []map[string]interface{}{
 			{
 				utils.IDCfg:         "CSVExporter",
-				utils.TypeCfg:       "*file_csv",
+				utils.TypeCfg:       "*fileCSV",
 				utils.ExportPathCfg: "/tmp/testCSV",
 				utils.OptsCfg: map[string]interface{}{
 					utils.KafkaGroupID: "test",

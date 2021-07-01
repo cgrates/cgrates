@@ -152,7 +152,7 @@ func TestV1ProcessEvent(t *testing.T) {
 		t.Error(err)
 	}
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[0].Type = "*fileCSV"
 	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = filePath
 	newIDb := engine.NewInternalDB(nil, nil, true)
@@ -201,7 +201,7 @@ func TestV1ProcessEvent(t *testing.T) {
 
 func TestV1ProcessEvent2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[0].Type = "*fileCSV"
 	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cgrCfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
 	cgrCfg.EEsCfg().Exporters[0].Tenant = config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)
@@ -239,7 +239,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 
 func TestV1ProcessEvent3(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgrCfg.EEsCfg().Exporters[0].Type = "*file_csv"
+	cgrCfg.EEsCfg().Exporters[0].Type = "*fileCSV"
 	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cgrCfg.EEsCfg().Exporters[0].Flags = utils.FlagsWithParams{
 		utils.MetaAttributes: utils.FlagParams{},

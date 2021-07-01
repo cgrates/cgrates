@@ -38,7 +38,7 @@ With explanations in the comments:
 			"id": "file_reader2",		// file_reader2 reader
 			"run_delay":  "-1",			// reading of events it is triggered outside of ERs
 			"field_separator": ";",		// field separator definition
-			"type": "*file_csv",		// type of reader, *file_csv can read .csv files
+			"type": "*fileCSV",		// type of reader, *fileCSV can read .csv files
 			"row_length" : 0,			// Number of fields from csv file
 			"flags": [					// influence processing logic within CGRateS workflow
 				"*cdrs",				//   *cdrs will create CDRs
@@ -131,16 +131,16 @@ id
 type
 	Reader type. Following types are implemented:
 
-	**\*file_csv**
+	**\*fileCSV**
 		Reader for *comma separated* files.
 
-	**\*file_xml**
+	**\*fileXML**
 		Reader for *.xml* formatted files.
 
-	**\*file_fwv**
+	**\*fileFWV**
 		Reader for *fixed width value* formatted files.
 
-	**\*kafka_json_map**
+	**\*kafkaJSONMap**
 		Reader for hashmaps within Kafka_ database.
 
 	**\*sql**
@@ -180,10 +180,10 @@ filters
 		Request read from the source. In case of file content without field name, the index will be passed instead of field source path.
 
 	**\*hdr**
-		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+		Header values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
 
 	**\*trl**
-		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+		Trailer values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
 
 flags
 	Special tags enforcing the actions/verbs done on an event. There are two types of flags: **main** and **auxiliary**. 
@@ -248,10 +248,10 @@ path
 		Write the value in the request object which will be sent to CGRateS side.
 
 	**\*hdr**
-		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+		Header values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
 
 	**\*trl**
-		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
+		Trailer values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
 
 
 type

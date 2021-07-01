@@ -59,12 +59,12 @@
 	"enabled": true,
 	"attributes_conns":["*internal"],
 	"cache": {
-		"*file_csv": {"limit": -1, "ttl": "1s", "static_ttl": false},
+		"*fileCSV": {"limit": -1, "ttl": "1s", "static_ttl": false},
 	},
 	"exporters": [
 		{
 			"id": "CSVExporter",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSV",
 			"tenant": "cgrates.org",
 			"timezone": "UTC",
@@ -90,7 +90,7 @@
 		},
 		{
 			"id": "CSVExporter2",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSV2",
 			"tenant": "cgrates.org",
 			"timezone": "UTC",
@@ -117,7 +117,7 @@
 		},
 		{
 			"id": "CSVExporter3",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"export_path": "/tmp/testCSV3",
 			"tenant": "cgrates.org",
 			"timezone": "UTC",

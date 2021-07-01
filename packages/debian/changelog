@@ -11,8 +11,8 @@ cgrates (1.0) UNRELEASED; urgency=medium
   * [FilterS] Added *regex filter
   * [DispatcherS] Removed Subsystems field in favor of filters
   * [RSRParsers] Added *len dataconverter   
-  * [ERs] Added *nats_json_map
-  * [EEs] Added *nats_json_map
+  * [ERs] Added *natsJSONMap
+  * [EEs] Added *natsJSONMap
   
  -- DanB <danb@cgrates.org>  Thu, 4 May 2021 12:05:00 +0200
 
@@ -113,7 +113,7 @@ cgrates (0.11.0) UNRELEASED; urgency=medium
   * [CGR-CONSOLE] Uniformize the commands between profile and subsystem
   * [StatS] Add rounding operation for duration metric (e.g. acd, tcd, etc...)
   * [DispatcherH] Added DispatcherH subsystem
-  * [ERs] Added support for *amqp_json_map type
+  * [ERs] Added support for *amqpJSONMap type
   * [DataDB] Moved all specific DB options in opts 
   * [Config] Add new section "template"
   * [LoaderS] Add support for *template type
@@ -130,9 +130,9 @@ cgrates (0.11.0) UNRELEASED; urgency=medium
   * [AttributeS] Add support for *prefix and *suffix type
   * [ConfigS] Add "redis_" prefix to "dataDB" option for redis
   * [DataDB] Add support for redis with TLS connection ( + integration test )
-  * [ERs] Added support for *s3_json_map type
-  * [ERs] Added support for *sqs_json_map type
-  * [ERs] Added support for *amqpv1_json_map type
+  * [ERs] Added support for *s3JSONMap type
+  * [ERs] Added support for *sqsJSONMap type
+  * [ERs] Added support for *amqpv1JSONMap type
   * [RALs] Send balance update event from rals to threshold ( in case of negative) only once
   * [SessionS] Use rals_conns when sending refund rounding
   * [General] Made tenant optional for all API calls
