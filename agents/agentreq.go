@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -429,6 +430,16 @@ func (ar *AgentRequest) ParseField(
 			return nil, err
 		}
 		out = strconv.Itoa(int(t.Unix()))
+	case utils.MetaSIPCID:
+		isString = true
+		values := make([]string, len(cfgFld.Value))
+		for i, val := range cfgFld.Value {
+			if values[i], err = val.ParseDataProvider(ar, utils.NestingSep); err != nil {
+				return nil, err
+			}
+		}
+		sort.Strings(values[1:])
+		out = strings.Join(values, utils.INFIELD_SEP)
 	}
 
 	if err != nil &&

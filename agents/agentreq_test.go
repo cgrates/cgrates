@@ -1734,3 +1734,45 @@ func BenchmarkAgReqSetField(b *testing.B) {
 		}
 	}
 }
+
+func TestAgReqSetFieldsSIPCID(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "cid", PathItems: utils.PathItems{{Field: "cid"}}}, utils.NewNMData("12345"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "to", PathItems: utils.PathItems{{Field: "to"}}}, utils.NewNMData("1001"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "from", PathItems: utils.PathItems{{Field: "from"}}}, utils.NewNMData("1002"))
+
+	tplFlds := []*config.FCTemplate{
+		{Tag: "OriginID",
+			Path: utils.MetaVars + utils.NestingSep + "OriginID", Type: utils.MetaSIPCID,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.cid;~*cgreq.to;~*cgreq.from", true, utils.INFIELD_SEP)},
+	}
+	for _, v := range tplFlds {
+		v.ComputePath()
+	}
+	eMp := utils.NavigableMap2{}
+	eMp.Set(utils.PathItems{{Field: utils.NodeID}}, utils.NewNMData(config.CgrConfig().GeneralCfg().NodeID))
+	eMp.Set(utils.PathItems{{Field: "OriginID"}}, &utils.NMSlice{
+		&config.NMItem{Data: "12345;1001;1002", Path: []string{"OriginID"},
+			Config: tplFlds[0]}})
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.Vars, eMp) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.Vars)
+	}
+
+	agReq = NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "cid", PathItems: utils.PathItems{{Field: "cid"}}}, utils.NewNMData("12345"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "to", PathItems: utils.PathItems{{Field: "to"}}}, utils.NewNMData("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "from", PathItems: utils.PathItems{{Field: "from"}}}, utils.NewNMData("1001"))
+
+	if err := agReq.SetFields(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(agReq.Vars, eMp) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.Vars)
+	}
+}

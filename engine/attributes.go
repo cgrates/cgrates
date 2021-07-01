@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -246,6 +247,15 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+		case utils.MetaSIPCID:
+			values := make([]string, len(attribute.Value))
+			for i, val := range attribute.Value {
+				if values[i], err = val.ParseDataProvider(evNm, utils.NestingSep); err != nil {
+					return nil, err
+				}
+			}
+			sort.Strings(values[1:])
+			substitute = strings.Join(values, utils.INFIELD_SEP)
 		default: // backwards compatible in case that Type is empty
 			substitute, err = attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
 		}

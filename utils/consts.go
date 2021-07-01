@@ -309,6 +309,7 @@ const (
 	HIERARCHY_SEP               = ">"
 	META_COMPOSED               = "*composed"
 	META_USAGE_DIFFERENCE       = "*usage_difference"
+	MetaSIPCID                  = "*sipcid"
 	MetaDifference              = "*difference"
 	MetaVariable                = "*variable"
 	MetaCCUsage                 = "*cc_usage"
