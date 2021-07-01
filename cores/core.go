@@ -57,18 +57,73 @@ type CoreService struct {
 	stopMemPrf chan struct{}
 	shdChan    *utils.SyncedChan
 	fileCPU    io.Closer
-	fileMem    io.Closer
 	fileMx     sync.Mutex
 }
 
 // Shutdown is called to shutdown the service
 func (cS *CoreService) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
-	if cS.stopMemPrf != nil {
-		close(cS.stopMemPrf)
-	}
+	cS.StopChanMemProf()
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 	return
+}
+
+// StopChanMemProf will stop the MemoryProfiling Channel in order to create
+// the final MemoryProfiling when CoreS subsystem will stop.
+func (cS *CoreService) StopChanMemProf() bool {
+	if cS.stopMemPrf != nil {
+		close(cS.stopMemPrf)
+		cS.stopMemPrf = nil
+		return true
+	}
+	return false
+}
+
+func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
+	file, err = os.Create(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not create CPU profile: %v", err)
+	}
+	err = pprof.StartCPUProfile(file)
+	return
+}
+
+func MemProfFile(memProfPath string) bool {
+	f, err := os.Create(memProfPath)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not create memory profile file: %s", err))
+		return false
+	}
+	runtime.GC() // get up-to-date statistics
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not write memory profile: %s", err))
+		f.Close()
+		return false
+	}
+	f.Close()
+	return true
+}
+
+func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, stopChan chan struct{}, shdChan *utils.SyncedChan) {
+	tm := time.NewTimer(interval)
+	for i := 1; ; i++ {
+		select {
+		case <-stopChan:
+			tm.Stop()
+			shdWg.Done()
+			return
+		case <-tm.C:
+		}
+		if !MemProfFile(path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))) {
+			shdChan.CloseOnce()
+			shdWg.Done()
+			return
+		}
+		if i%nrFiles == 0 {
+			i = 0 // reset the counting
+		}
+		tm.Reset(interval)
+	}
 }
 
 // Status returns the status of the engine
@@ -116,24 +171,22 @@ func (cS *CoreService) StopCPUProfiling() (err error) {
 	return fmt.Errorf(" cannot stop because CPUProfiling is not active")
 }
 
-func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
-	file, err = os.Create(path)
-	if err != nil {
-		return nil, fmt.Errorf("could not create CPU profile: %v", err)
-	}
-	err = pprof.StartCPUProfile(file)
-	return
-}
-
 // StartMemoryProfiling is used to start MemoryProfiling in the given path
 func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 	if args.DirPath == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("Path")
 	}
-	cS.shdWg.Add(1)
-	if cS.stopMemPrf == nil {
-		cS.stopMemPrf = make(chan struct{})
+	if cS.stopMemPrf != nil {
+		return errors.New("Memory Profiling already started")
 	}
+	if args.Interval <= 0 {
+		args.Interval = 5 * time.Second
+	}
+	if args.NrFiles == 0 {
+		args.NrFiles = 1
+	}
+	cS.shdWg.Add(1)
+	cS.stopMemPrf = make(chan struct{})
 	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shdChan)
 	return
 }
@@ -146,43 +199,4 @@ func (cS *CoreService) StopMemoryProfiling() (err error) {
 	close(cS.stopMemPrf)
 	cS.stopMemPrf = nil
 	return
-}
-
-func MemProfFile(memProfPath string) bool {
-	f, err := os.Create(memProfPath)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not create memory profile file: %s", err))
-		return false
-	}
-	runtime.GC() // get up-to-date statistics
-	if err := pprof.WriteHeapProfile(f); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not write memory profile: %s", err))
-		f.Close()
-		return false
-	}
-	f.Close()
-	return true
-}
-
-func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, stopChan chan struct{}, shdChan *utils.SyncedChan) {
-	tm := time.NewTimer(interval)
-	for i := 1; ; i++ {
-		select {
-		case <-stopChan:
-			tm.Stop()
-			shdWg.Done()
-			return
-		case <-tm.C:
-		}
-		memPath := path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))
-		if !MemProfFile(memPath) {
-			shdChan.CloseOnce()
-			shdWg.Done()
-			return
-		}
-		if i%nrFiles == 0 {
-			i = 0 // reset the counting
-		}
-		tm.Reset(interval)
-	}
 }
