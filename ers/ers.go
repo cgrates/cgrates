@@ -333,13 +333,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 				utils.ERs, utils.ToJSON(ev)))
 		return
 	}
-	orgHost, err := ev.FieldAsString(utils.OriginHost)
-	if err == utils.ErrNotFound { // the field is missing ignore the event
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> Missing <OriginHost> field for partial event <%s>",
-				utils.ERs, utils.ToJSON(ev)))
-		return
-	}
+	orgHost := utils.IfaceAsString(ev.Event[utils.OriginHost])
 	cgrID := utils.Sha1(orgID, orgHost)
 
 	evs, has := erS.partialCache.Get(cgrID) // get the existing events from cache
