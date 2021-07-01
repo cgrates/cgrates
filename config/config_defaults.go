@@ -34,7 +34,7 @@ const CGRATES_CFG_JSON = `
 	"rounding_decimals": 5,									// system level precision for floats
 	"dbdata_encoding": "*msgpack",							// encoding used to store object data in strings: <*msgpack|*json>
 	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline TariffPlans
-	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *http_post, CDR exports)
+	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
 	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 	"failed_posts_ttl": "5s",								// time to wait before writing the failed posts in a single file
 	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
@@ -304,7 +304,7 @@ const CGRATES_CFG_JSON = `
 	"readers": [
 		{
 			"id": "*default",									// identifier of the EventReader profile
-			"type": "*none",									// reader type <*file_csv>
+			"type": "*none",									// reader type <*fileCSV>
 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
@@ -425,7 +425,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts the EventReader service: <true|false>
 	"attributes_conns":[],					// RPC Connections IDs
 	"cache": {
-		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
+		"*fileCSV": {"limit": -1, "ttl": "5s", "static_ttl": false},
 	},
 	"exporters": [
 		{

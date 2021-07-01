@@ -52,7 +52,7 @@ func TestS3ER(t *testing.T) {
 	"readers": [
 		{
 			"id": "s3",										// identifier of the EventReader profile
-			"type": "*s3_json_map",							// reader type <*file_csv>
+			"type": "*s3JSONMap",							// reader type <*fileCSV>
 			"run_delay":  "-1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "s3.us-east-2.amazonaws.com",		// read data from this path

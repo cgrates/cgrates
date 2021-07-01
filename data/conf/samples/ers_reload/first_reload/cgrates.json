@@ -71,7 +71,7 @@
 		{
 			"id": "file_reader1",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"flags": ["*cdrs","*log"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
@@ -79,7 +79,7 @@
 		{
 			"id": "file_reader2",
 			"run_delay":  "-1",
-			"type": "*file_csv",
+			"type": "*fileCSV",
 			"source_path": "/tmp/ers2/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/ers2/out",

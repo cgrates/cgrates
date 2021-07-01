@@ -53,7 +53,7 @@
 	"exporters": [
 		{
 			"id": "http_localhost",
-			"type": "*http_post",
+			"type": "*httpPost",
 			"export_path": "http://127.0.0.1:12081/cdr_http",
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -63,7 +63,7 @@
 		},
 		{
 			"id": "amqp_localhost",
-			"type": "*amqp_json_map",
+			"type": "*amqpJSONMap",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
@@ -79,7 +79,7 @@
 		},
 		{
 			"id": "aws_test_file",
-			"type": "*amqpv1_json_map",
+			"type": "*amqpv1JSONMap",
 			"export_path": "amqps://guest:guest@localhost:95672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
@@ -92,7 +92,7 @@
 		},
 		{
 			"id": "sqs_test_file",
-			"type": "*sqs_json_map",
+			"type": "*sqsJSONMap",
 			// export_path for sqs:  "endpoint"
 			"export_path": "http://sqs.eu-west-2.amazonaws.com/",
 			"opts": {
@@ -109,7 +109,7 @@
 		},
 		{
 			"id": "kafka_localhost",
-			"type": "*kafka_json_map",
+			"type": "*kafkaJSONMap",
 			"export_path": "127.0.0.1:9092",
 			"opts": {
 				"kafkaTopic": "cgrates_cdrs",
@@ -122,7 +122,7 @@
 		},
 		{
 			"id": "s3_test_file",
-			"type": "*s3_json_map",
+			"type": "*s3JSONMap",
 			// export_path for s3:  "endpoint"
 			"export_path": "http://s3.us-east-2.amazonaws.com/",
 			"opts": {

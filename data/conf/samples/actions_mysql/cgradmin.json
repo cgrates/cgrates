@@ -64,7 +64,7 @@
 	"exporters": [
 		{
 			"id": "sqs_fail",
-			"type": "*sqs_json_map",
+			"type": "*sqsJSONMap",
 			// export_path for sqs:  "endpoint"
 			"export_path": "notAValidURL",
 			"tenant": "cgrates.org",
@@ -75,7 +75,7 @@
 		},
 		{
 			"id": "kafka_fail",
-			"type": "*kafka_json_map",
+			"type": "*kafkaJSONMap",
 			"export_path": "notAValidURL",
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -85,7 +85,7 @@
 		},
 		{
 			"id": "amqp_fail",
-			"type": "*amqp_json_map",
+			"type": "*amqpJSONMap",
 			"export_path": "notAValidURL",
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -95,7 +95,7 @@
 		},
 		{
 			"id": "s3_fail",
-			"type": "*s3_json_map",
+			"type": "*s3JSONMap",
 			"export_path": "notAValidURL",
 			"tenant": "cgrates.org",
 			"attempts": 1,
@@ -105,7 +105,7 @@
 		},
 		{
 			"id": "aws_fail",
-			"type": "*amqpv1_json_map",
+			"type": "*amqpv1JSONMap",
 			"export_path": "notAValidURL",
 			"tenant": "cgrates.org",
 			"attempts": 1,

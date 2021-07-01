@@ -48,7 +48,7 @@
 	"exporters": [
 		{
 			"id": "http_localhost",
-			"type": "*http_post",
+			"type": "*httpPost",
 			"export_path": "http://127.0.0.1:12080/cdr_http",
 			"tenant": "cgrates.org",
 			"synchronous": true,
@@ -73,7 +73,7 @@
 		},
 		{
 			"id": "amqp_localhost",
-			"type": "*amqp_json_map",
+			"type": "*amqpJSONMap",
 			"export_path": "amqp://guest:guest@localhost:5672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
@@ -102,7 +102,7 @@
 		},
 		{
 			"id": "http_test_file",
-			"type": "*http_post",
+			"type": "*httpPost",
 			"export_path": "http://127.0.0.1:12080/invalid",
 			"tenant": "cgrates.org",
 			"synchronous": true,
@@ -113,7 +113,7 @@
 		},
 		{
 			"id": "kafka_localhost",
-			"type": "*kafka_json_map",
+			"type": "*kafkaJSONMap",
 			"export_path": "localhost:9092",
 			"opts": {
 				"kafkaTopic": "cgrates_cdrs",
@@ -127,7 +127,7 @@
 		},
 		{
 			"id": "eventcost_filter",
-			"type": "*amqp_json_map",
+			"type": "*amqpJSONMap",
 			"export_path": "amqp://guest:guest@wrongurl:25672/",
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",

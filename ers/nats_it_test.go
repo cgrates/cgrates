@@ -217,7 +217,7 @@ func TestNatsERJetStream(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
@@ -265,7 +265,7 @@ func TestNatsER(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
@@ -311,7 +311,7 @@ func TestNatsERJetStreamUser(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://user:password@localhost:4222",				
@@ -359,7 +359,7 @@ func TestNatsERUser(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://user:password@localhost:4222",				
@@ -405,7 +405,7 @@ func TestNatsERJetStreamToken(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://token@localhost:4222",				
@@ -453,7 +453,7 @@ func TestNatsERToken(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://token@localhost:4222",				
@@ -519,7 +519,7 @@ func TestNatsERNkey(t *testing.T) {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
@@ -587,7 +587,7 @@ users: [
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
@@ -674,7 +674,7 @@ resolver_preload: {
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				
@@ -762,7 +762,7 @@ system_account:AAFIBB6C56ROU5XRVJLJYR3BTGGYK3HJGHEHQV7L7QZMTT3ZRBLHBS7F
 	"readers": [
 		{
 			"id": "nats",										
-			"type": "*nats_json_map",							
+			"type": "*natsJSONMap",							
 			"run_delay":  "-1",									
 			"concurrent_requests": 1024,						
 			"source_path": "nats://localhost:4222",				

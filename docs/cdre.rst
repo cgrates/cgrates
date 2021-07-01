@@ -49,64 +49,64 @@ One **export profile** includes the following parameters:
 export_format
 	Specify the type of export which will run. Possible values are:
 
-	**\*file_csv**
+	**\*fileCSV**
 		Exports into a comma separated file format.
 
-	**\*file_fwv**
+	**\*fileFWV**
 		Exports into a fixed width file format.
 
-	**\*http_post**
+	**\*httpPost**
 		Will post the CDR to a HTTP server. The export content will be a HTTP form encoded representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_.
 
 	**\*http_json_cdr**
 		Will post the CDR to a HTTP server. The export content will be a JSON serialized representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_.
 
-	**\*http_json_map**
+	**\*httpJSONMap**
 		Will post the CDR to a HTTP server. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
 
 	**\*amqp_json_cdr**
 		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized representation of the `internal CDR object <https://godoc.org/github.com/cgrates/cgrates/engine#CDR>`_. Uses AMQP_ protocol version 0.9.1.
 
-	**\*amqp_json_map**
+	**\*amqpJSONMap**
 		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template. Uses AMQP_ protocol version 1.0.
 
-	**\*amqpv1_json_map**
+	**\*amqpv1JSONMap**
 		Will post the CDR to an AMQP_ queue. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template. Uses AMQP_ protocol version 1.0.
 
-	**\*sqs_json_map**
+	**\*sqsJSONMap**
 		Will post the CDR to an `Amazon SQS queue <SQS>`_. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
 
-	**\*s3_json_map**
+	**\*s3JSONMap**
 		Will post the CDR to `Amazon S3 storage <S3>`_. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
 
-	**\*kafka_json_map**
+	**\*kafkaJSONMap**
 		Will post the CDR to an `Apache Kafka <Kafka>`_. The export content will be a JSON serialized hmap with fields defined within the *fields* section of the template.
 
 export_path
 	Specify the export path. It has special format depending of the export type.
 
-	**\*file_csv**, **\*file_fwv**
+	**\*fileCSV**, **\*fileFWV**
 		Standard unix-like filesystem path.
 
-	**\*http_post**, **\*http_json_cdr**, **\*http_json_map**
+	**\*httpPost**, **\*http_json_cdr**, **\*httpJSONMap**
 		Full HTTP URL
 
-	**\*amqp_json_map**, **\*amqpv1_json_map**
+	**\*amqpJSONMap**, **\*amqpv1JSONMap**
 		AMQP URL with extra parameters. 
 
 		Sample: *amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&exchange=exchangename&exchange_type=fanout&routing_key=cgr_cdrs*
 
-	**\*sqs_json_map**
+	**\*sqsJSONMap**
 		SQS URL with extra parameters.
 
 		Sample: *http://sqs.eu-west-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs*
 
-	**\*s3_json_map**
+	**\*s3JSONMap**
 		S3 URL with extra parameters.
 
 		Sample: *http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs*
 
-	**\*kafka_json_map**
+	**\*kafkaJSONMap**
 		Kafka URL with extra parameters.
 
 		Sample: *localhost:9092?topic=cgrates_cdrs*
@@ -131,7 +131,7 @@ attempts
 	Number of attempts before giving up on the export and writing the failed request to file. The failed request will be written to *failed_posts_dir* defined in *general* section.
 
 field_separator
-	Field separator to be used in some export types (ie. *\*file_csv*).
+	Field separator to be used in some export types (ie. *\*fileCSV*).
 
 attributes_context
 	The context used when sending the CDR event to :ref:`AttributeS` for modifications. If empty, there will be no event sent to :ref:`AttributeS`.
@@ -149,10 +149,10 @@ path
 		Reference to the exported record.
 
 	*\*hdr*
-		Reference to the header content. Available in case of **\*file_csv** and **\*file_fwv** export types.
+		Reference to the header content. Available in case of **\*fileCSV** and **\*fileFWV** export types.
 
 	*\*trl*
-		Reference to the trailer content. Available in case of **\*file_csv** and **\*file_fwv** export types.
+		Reference to the trailer content. Available in case of **\*fileCSV** and **\*fileFWV** export types.
 
 type
 	The field type will give out the logic for generating the value. Values used depend on the type of prefix used in path.
@@ -180,7 +180,7 @@ type
 	**\*masked_destination**
 		Masks the destination using *\** as suffix. Matches the destination field against the list defined via *mask_destinationd_id* field.
 
-	**\*http_post**
+	**\*httpPost**
 		Uses a HTTP server as datasource for the value exported.
 
 	For *\*hdr* and *\*trl*, following field types are possible:

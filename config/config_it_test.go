@@ -681,7 +681,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"source_path":         "/tmp/ers/in",
 				"tenant":              "",
 				"timezone":            "",
-				"type":                "*file_csv",
+				"type":                "*fileCSV",
 				"fields":              content,
 				"opts": map[string]interface{}{
 					"csvFieldSeparator":   ",",
