@@ -95,7 +95,7 @@
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
+	"cdrs_conns": ["*localhost"],
 	"chargers_conns": ["*internal"],
 },
 
