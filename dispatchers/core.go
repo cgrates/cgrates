@@ -73,3 +73,75 @@ func (dS *DispatcherService) CoreSv1Sleep(args *utils.DurationArgs,
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
 }
+
+func (dS *DispatcherService) CoreSv1StartCPUProfiling(args *utils.DirectoryArgs,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1StartCPUProfiling, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1StartCPUProfiling, args, reply)
+}
+
+func (dS *DispatcherService) CoreSv1StopCPUProfiling(args *utils.DirectoryArgs,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1StopCPUProfiling, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1StopCPUProfiling, args, reply)
+}
+
+func (dS *DispatcherService) CoreSv1StartMemoryProfiling(args *utils.MemoryPrf,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1StartMemoryProfiling, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
+}
+
+func (dS *DispatcherService) CoreSv1StopMemoryProfiling(args *utils.MemoryPrf,
+	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1StopMemoryProfiling, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1StopMemoryProfiling, args, reply)
+}

@@ -21,7 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"fmt"
 	"net/rpc"
+	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -30,6 +33,8 @@ import (
 
 var sTestsDspCore = []func(t *testing.T){
 	testDspCoreLoad,
+	testDspCoreCPUProfile,
+	testDspCoreMemoryProfile,
 }
 
 //Test start here
@@ -102,6 +107,143 @@ func testDspCoreLoad(t *testing.T) {
 		t.Fatal(ans.Error)
 	} else if rply != utils.OK {
 		t.Errorf("Expected: %q ,received: %q", utils.OK, rply)
+	}
+}
+
+func testDspCoreCPUProfile(t *testing.T) {
+	var reply string
+	args := &utils.DirectoryArgs{
+		DirPath: "/tmp",
+	}
+	//apikey is missing
+	expectedErr := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err := dispEngine.RPC.Call(utils.CoreSv1StartCPUProfiling,
+		args, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+
+	args = &utils.DirectoryArgs{
+		DirPath: "/tmp",
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "core12345",
+		},
+	}
+	if err := dispEngine.RPC.Call(utils.CoreSv1StartCPUProfiling,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	args = &utils.DirectoryArgs{
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "core12345",
+		},
+	}
+	if err := dispEngine.RPC.Call(utils.CoreSv1StopCPUProfiling,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+	file, err := os.Open(path.Join("/tmp", utils.CpuPathCgr))
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(path.Join("/tmp", utils.CpuPathCgr)); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDspCoreMemoryProfile(t *testing.T) {
+	var reply string
+	args := &utils.MemoryPrf{
+		DirPath:  "/tmp",
+		Interval: 100 * time.Millisecond,
+		NrFiles:  2,
+	}
+	//missing apiKey
+	expectedErr := "MANDATORY_IE_MISSING: [ApiKey]"
+	if err := dispEngine.RPC.Call(utils.CoreSv1StartMemoryProfiling,
+		args, &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+	args = &utils.MemoryPrf{
+		DirPath:  "/tmp",
+		Interval: 100 * time.Millisecond,
+		NrFiles:  2,
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "core12345",
+		},
+	}
+	if err := dispEngine.RPC.Call(utils.CoreSv1StartMemoryProfiling,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	dur := &utils.DurationArgs{
+		Duration: 500 * time.Millisecond,
+		Tenant:   "cgrates.org",
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey:  "core12345",
+			utils.OptsRouteID: "core1",
+			"EventType":       "LoadDispatcher",
+		},
+	}
+
+	if err := dispEngine.RPC.Call(utils.CoreSv1Sleep,
+		dur, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	args = &utils.MemoryPrf{
+		DirPath:  "/tmp",
+		Interval: 100 * time.Millisecond,
+		NrFiles:  2,
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "core12345",
+		},
+	}
+	if err := dispEngine.RPC.Call(utils.CoreSv1StopMemoryProfiling,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	//mem_prof1, mem_prof2
+	for i := 1; i <= 2; i++ {
+		file, err := os.Open(path.Join("/tmp", fmt.Sprintf("mem%v.prof", i)))
+		if err != nil {
+			t.Error(err)
+		}
+		defer file.Close()
+
+		//compare the size
+		size, err := file.Stat()
+		if err != nil {
+			t.Error(err)
+		} else if size.Size() < int64(415) {
+			t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
+		}
+		//after we checked that CPUProfile was made successfully, can delete it
+		if err := os.Remove(path.Join("/tmp", fmt.Sprintf("mem%v.prof", i))); err != nil {
+			t.Error(err)
+		}
 	}
 
 }
