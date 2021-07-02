@@ -72,7 +72,7 @@
 			"id": "file_reader1",
 			"run_delay":  "-1",
 			"type": "*fileCSV",
-			"flags": ["*dryrun"],
+			"flags": ["*dryRun"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
 		},
@@ -81,7 +81,7 @@
 			"run_delay":  "-1",
 			"type": "*fileCSV",
 			"source_path": "/tmp/ers2/in",
-			"flags": ["*dryrun"],
+			"flags": ["*dryRun"],
 			"processed_path": "/tmp/ers2/out",
 			"opts": {
 				"csvFieldSeparator":";"

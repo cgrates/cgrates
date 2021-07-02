@@ -417,7 +417,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	flags := utils.FlagsWithParamsFromSlice([]string{"*dryrun"})
+	flags := utils.FlagsWithParamsFromSlice([]string{"*dryRun"})
 	flagsDefault := utils.FlagsWithParamsFromSlice([]string{})
 	content := []*FCTemplate{
 		{Tag: utils.ToR, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR, Type: utils.MetaVariable, Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
@@ -674,7 +674,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"cache_dump_fields":   []interface{}{},
 				"concurrent_requests": 1024,
 				"filters":             []string{},
-				"flags":               []string{"*dryrun"},
+				"flags":               []string{"*dryRun"},
 				"id":                  "file_reader1",
 				"processed_path":      "/tmp/ers/out",
 				"run_delay":           "-1",

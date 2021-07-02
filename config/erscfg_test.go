@@ -35,7 +35,7 @@ func TestERSClone(t *testing.T) {
             "id": "file_reader1",
 			"run_delay": "-1",
 			"type": "*fileCSV",
-			"flags": ["*dryrun"],
+			"flags": ["*dryRun"],
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
 			"opts": {

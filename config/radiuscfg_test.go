@@ -161,7 +161,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
-				"flags": ["*dryrun"],
+				"flags": ["*dryRun"],
 				"request_fields":[],
 				"reply_fields":[
 					{"tag": "Allow", "path": "*rep.response.Allow", "type": "*constant", 
@@ -187,7 +187,7 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 				utils.IDCfg:            "OutboundAUTHDryRun",
 				utils.FiltersCfg:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				utils.TenantCfg:        "cgrates.org",
-				utils.FlagsCfg:         []string{"*dryrun"},
+				utils.FlagsCfg:         []string{"*dryRun"},
 				utils.TimezoneCfg:      "",
 				utils.RequestFieldsCfg: []map[string]interface{}{},
 				utils.ReplyFieldsCfg: []map[string]interface{}{

@@ -98,7 +98,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:            "OutboundAUTHDryRun",
 					Filters:       []string{},
 					Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
-					Flags:         utils.FlagsWithParams{"*dryrun": {}},
+					Flags:         utils.FlagsWithParams{"*dryRun": {}},
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
