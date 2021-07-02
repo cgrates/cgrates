@@ -59,8 +59,8 @@ func (cS *CoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error {
 }
 
 // StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreSv1) StartCPUProfiling(dirPath *utils.DirectoryArgs, reply *string) error {
-	if err := cS.cS.StartCPUProfiling(path.Join(dirPath.DirPath, utils.CpuPathCgr)); err != nil {
+func (cS *CoreSv1) StartCPUProfiling(args *utils.DirectoryArgs, reply *string) error {
+	if err := cS.cS.StartCPUProfiling(path.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
 		return err
 	}
 	*reply = utils.OK
