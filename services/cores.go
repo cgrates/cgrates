@@ -33,35 +33,39 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
-	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService, file io.Closer,
-	srvDep map[string]*sync.WaitGroup, shdEngine *utils.SyncedChan) *CoreService {
+	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
+	fileCpu io.Closer, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
+	shdChan *utils.SyncedChan, srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
-		connChan:  internalCoreSChan,
-		fileCpu:   file,
-		cfg:       cfg,
-		caps:      caps,
-		server:    server,
-		anz:       anz,
-		srvDep:    srvDep,
-		shdEngine: shdEngine,
+		shdChan:    shdChan,
+		shdWg:      shdWg,
+		stopMemPrf: stopMemPrf,
+		connChan:   internalCoreSChan,
+		cfg:        cfg,
+		caps:       caps,
+		fileCpu:    fileCpu,
+		server:     server,
+		anz:        anz,
+		srvDep:     srvDep,
 	}
 }
 
 // CoreService implements Service interface
 type CoreService struct {
 	sync.RWMutex
-	cfg       *config.CGRConfig
-	server    *cores.Server
-	caps      *engine.Caps
-	stopChan  chan struct{}
-	shdEngine *utils.SyncedChan
-	fileCpu   io.Closer
-
-	cS       *cores.CoreService
-	rpc      *apis.CoreSv1
-	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
-	srvDep   map[string]*sync.WaitGroup
+	cfg        *config.CGRConfig
+	server     *cores.Server
+	caps       *engine.Caps
+	stopChan   chan struct{}
+	shdWg      *sync.WaitGroup
+	stopMemPrf chan struct{}
+	shdChan    *utils.SyncedChan
+	fileCpu    io.Closer
+	cS         *cores.CoreService
+	rpc        *apis.CoreSv1
+	connChan   chan birpc.ClientConnector
+	anz        *AnalyzerService
+	srvDep     map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
@@ -74,7 +78,7 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.stopChan, cS.shdEngine)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
 	cS.rpc = apis.NewCoreSv1(cS.cS)
 	srv, _ := birpc.NewService(cS.rpc, utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
