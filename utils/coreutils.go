@@ -748,6 +748,14 @@ type GetIndexesArg struct {
 	APIOpts    map[string]interface{}
 }
 
+type MemoryPrf struct {
+	Tenant   string
+	DirPath  string
+	Interval time.Duration
+	NrFiles  int
+	APIOpts  map[string]interface{}
+}
+
 // SetIndexesArg the API arguments needed for seting an index
 type SetIndexesArg struct {
 	IdxItmType string
@@ -761,6 +769,12 @@ type DurationArgs struct {
 	Duration time.Duration
 	APIOpts  map[string]interface{}
 	Tenant   string
+}
+
+type DirectoryArgs struct {
+	DirPath string
+	APIOpts map[string]interface{}
+	Tenant  string
 }
 
 // AESEncrypt will encrypt the provided txt using the encKey and AES algorithm

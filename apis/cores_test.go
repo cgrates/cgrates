@@ -29,7 +29,7 @@ import (
 func TestCoreSStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -44,7 +44,7 @@ func TestCoreSStatus(t *testing.T) {
 func TestCoreSSleep(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
 		Duration: 3 * time.Second,
@@ -61,7 +61,7 @@ func TestCoreSShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
 	shdChan := utils.NewSyncedChan()
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), shdChan)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, shdChan)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.CGREvent{}
 	var reply string

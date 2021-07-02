@@ -1291,13 +1291,15 @@ const (
 )
 
 const (
-	CoreS                    = "CoreS"
-	CoreSv1                  = "CoreSv1"
-	CoreSv1Status            = "CoreSv1.Status"
-	CoreSv1Ping              = "CoreSv1.Ping"
-	CoreSv1Sleep             = "CoreSv1.Sleep"
-	CoreSv1StartCPUProfiling = "CoreSv1.StartCPUProfiling"
-	CoreSv1StopCPUProfiling  = "CoreSv1.StopCPUProfiling"
+	CoreS                       = "CoreS"
+	CoreSv1                     = "CoreSv1"
+	CoreSv1Status               = "CoreSv1.Status"
+	CoreSv1Ping                 = "CoreSv1.Ping"
+	CoreSv1Sleep                = "CoreSv1.Sleep"
+	CoreSv1StartCPUProfiling    = "CoreSv1.StartCPUProfiling"
+	CoreSv1StopCPUProfiling     = "CoreSv1.StopCPUProfiling"
+	CoreSv1StartMemoryProfiling = "CoreSv1.StartMemoryProfiling"
+	CoreSv1StopMemoryProfiling  = "CoreSv1.StopMemoryProfiling"
 )
 
 // RouteS APIs
