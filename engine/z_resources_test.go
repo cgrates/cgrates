@@ -5531,6 +5531,241 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 	config.SetCgrConfig(config.NewDefaultCGRConfig())
 }
 
+func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.MetaNone},
+		AllocationMessage: "",
+		Weight:            10,
+		Limit:             -1,
+		UsageTTL:          time.Minute,
+	}
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err != utils.ErrResourceUnavailable {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrResourceUnavailable, err)
+	}
+}
+
+// func TestResourcesV1AllocateResourcesResStoreErr(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.ResourceSCfg().StoreInterval = -1
+// 	data := &DataDBMock{
+// 		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+// 			return map[string]utils.StringSet{
+// 				"*string": {
+// 					"*req.Account": {},
+// 				},
+// 			}, nil
+// 		},
+// 		GetResourceProfileDrvF: func(tnt, id string) (*ResourceProfile, error) {
+// 			return &ResourceProfile{
+// 				Tenant:            "cgrates.org",
+// 				ID:                "RES1",
+// 				FilterIDs:         []string{"*string:~*req.Account:1001"},
+// 				ThresholdIDs:      []string{utils.MetaNone},
+// 				AllocationMessage: "Approved",
+// 				Weight:            10,
+// 				Limit:             -1,
+// 				UsageTTL:          time.Minute,
+// 			}, nil
+// 		},
+// 		SetResourceProfileDrvF: func(rp *ResourceProfile) error {
+// 			return nil
+// 		},
+// 		SetResourceDrvF: func(r *Resource) error {
+// 			return nil
+// 		},
+// 		GetKeysForPrefixF: func(s string) ([]string, error) {
+// 			return []string{"index"}, nil
+// 		},
+// 	}
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	Cache = NewCacheS(cfg, dm, nil)
+
+// 	rsPrf := &ResourceProfile{
+// 		Tenant:            "cgrates.org",
+// 		ID:                "RES1",
+// 		FilterIDs:         []string{"*string:~*req.Account:1001"},
+// 		ThresholdIDs:      []string{utils.MetaNone},
+// 		AllocationMessage: "Approved",
+// 		Weight:            10,
+// 		Limit:             -1,
+// 		UsageTTL:          time.Minute,
+// 	}
+// 	rs := &Resource{
+// 		rPrf:   rsPrf,
+// 		Tenant: "cgrates.org",
+// 		ID:     "RES1",
+// 		Usages: map[string]*ResourceUsage{
+// 			"RU1": {
+// 				Tenant: "cgrates.org",
+// 				ID:     "RU1",
+// 				Units:  10,
+// 			},
+// 		},
+// 		dirty:  utils.BoolPointer(false),
+// 		tUsage: utils.Float64Pointer(10),
+// 		ttl:    utils.DurationPointer(time.Minute),
+// 		TTLIdx: []string{},
+// 	}
+
+// 	err := dm.SetResourceProfile(rsPrf, true)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	err = dm.SetResource(rs)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	fltrs := NewFilterS(cfg, nil, dm)
+// 	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+// 	args := utils.ArgRSv1ResourceUsage{
+// 		CGREvent: &utils.CGREvent{
+// 			ID: "EventAuthorizeResource",
+// 			Event: map[string]interface{}{
+// 				utils.AccountField: "1001",
+// 			},
+// 		},
+// 		UsageID:  "RU_Test",
+// 		UsageTTL: utils.DurationPointer(time.Minute),
+// 		Units:    5,
+// 	}
+// 	var reply string
+
+// 	if err := rS.V1AllocateResources(args, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != "Approved" {
+// 		t.Errorf("Unexpected reply returned: %q", reply)
+// 	}
+// }
+
+func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ResourceSCfg().StoreInterval = 2
+	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	Cache = NewCacheS(cfg, dm, nil)
+
+	rsPrf := &ResourceProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RES1",
+		FilterIDs:         []string{"*string:~*req.Account:1001"},
+		ThresholdIDs:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		AllocationMessage: "Approved",
+		Weight:            10,
+		Limit:             -1,
+		UsageTTL:          time.Minute,
+	}
+	rs := &Resource{
+		rPrf:   rsPrf,
+		Tenant: "cgrates.org",
+		ID:     "RES1",
+		Usages: map[string]*ResourceUsage{
+			"RU1": {
+				Tenant: "cgrates.org",
+				ID:     "RU1",
+				Units:  10,
+			},
+		},
+		dirty:  utils.BoolPointer(false),
+		tUsage: utils.Float64Pointer(10),
+		ttl:    utils.DurationPointer(time.Minute),
+		TTLIdx: []string{},
+	}
+
+	err := dm.SetResourceProfile(rsPrf, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetResource(rs)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ccM := &ccMock{
+		calls: map[string]func(args interface{}, reply interface{}) error{
+			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+				return utils.ErrExists
+			},
+		},
+	}
+	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+	rpcInternal <- ccM
+	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+	})
+	fltrs := NewFilterS(cfg, nil, dm)
+	rS := NewResourceService(dm, cfg, fltrs, cM)
+
+	args := utils.ArgRSv1ResourceUsage{
+		CGREvent: &utils.CGREvent{
+			ID: "EventAuthorizeResource",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+		UsageID:  "RU_Test",
+		UsageTTL: utils.DurationPointer(time.Minute),
+		Units:    5,
+	}
+	var reply string
+
+	if err := rS.V1AllocateResources(args, &reply); err == nil ||
+		err != utils.ErrExists {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrExists, err)
+	}
+	dm.DataDB().Flush(utils.EmptyString)
+}
+
 func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -5964,3 +6199,111 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 
 	config.SetCgrConfig(config.NewDefaultCGRConfig())
 }
+
+// func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
+// 	tmp := Cache
+// 	defer func() {
+// 		Cache = tmp
+// 	}()
+
+// 	Cache.Clear(nil)
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.ResourceSCfg().StoreInterval = 2
+// 	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
+// 	data := NewInternalDB(nil, nil, true)
+// 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 	Cache = NewCacheS(cfg, dm, nil)
+
+// 	rsPrf := &ResourceProfile{
+// 		Tenant:            "cgrates.org",
+// 		ID:                "RES1",
+// 		FilterIDs:         []string{"*string:~*req.Account:1001"},
+// 		ThresholdIDs:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+// 		AllocationMessage: "Approved",
+// 		Weight:            10,
+// 		Limit:             -1,
+// 		UsageTTL:          time.Minute,
+// 	}
+// 	rs := &Resource{
+// 		rPrf:   rsPrf,
+// 		Tenant: "cgrates.org",
+// 		ID:     "RES1",
+// 		Usages: map[string]*ResourceUsage{
+// 			"RU1": {
+// 				Tenant: "cgrates.org",
+// 				ID:     "RU1",
+// 				Units:  4,
+// 			},
+// 		},
+// 		dirty:  utils.BoolPointer(false),
+// 		tUsage: utils.Float64Pointer(10),
+// 		ttl:    utils.DurationPointer(time.Minute),
+// 		TTLIdx: []string{},
+// 	}
+
+// 	err := dm.SetResourceProfile(rsPrf, true)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	err = dm.SetResource(rs)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	fltrs := NewFilterS(cfg, nil, dm)
+// 	rS := NewResourceService(dm, cfg, fltrs, nil)
+
+// 	args := utils.ArgRSv1ResourceUsage{
+// 		CGREvent: &utils.CGREvent{
+// 			ID: "EventAuthorizeResource",
+// 			Event: map[string]interface{}{
+// 				utils.AccountField: "1001",
+// 			},
+// 		},
+// 		UsageID:  "RU_Test",
+// 		UsageTTL: utils.DurationPointer(time.Minute),
+// 		Units:    5,
+// 	}
+
+// 	ccM := &ccMock{
+// 		calls: map[string]func(args interface{}, reply interface{}) error{
+// 			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+// 				return nil
+// 			},
+// 		},
+// 	}
+// 	rpcInternal := make(chan rpcclient.ClientConnector, 1)
+// 	rpcInternal <- ccM
+// 	cM := NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+// 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+// 	})
+// 	rS.connMgr = cM
+
+// 	var reply string
+// 	if err := rS.V1AllocateResources(args, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != "Approved" {
+// 		t.Errorf("Unexpected reply returned: %q", reply)
+// 	}
+
+// 	ccM = &ccMock{
+// 		calls: map[string]func(args interface{}, reply interface{}) error{
+// 			utils.ThresholdSv1ProcessEvent: func(args, reply interface{}) error {
+// 				return utils.ErrExists
+// 			},
+// 		},
+// 	}
+// 	rpcInternal = make(chan rpcclient.ClientConnector, 1)
+// 	rpcInternal <- ccM
+// 	cM = NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+// 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds): rpcInternal,
+// 	})
+// 	rS.connMgr = cM
+
+// 	if err := rS.V1ReleaseResources(args, &reply); err != nil {
+// 		t.Error(err)
+// 	} else if reply != utils.OK {
+// 		t.Errorf("Unexpected reply returned: %q", reply)
+// 	}
+// 	dm.DataDB().Flush(utils.EmptyString)
+// }
