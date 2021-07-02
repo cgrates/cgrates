@@ -4,6 +4,7 @@
 
 
 "general": {
+	"node_id": "ALL2",
 	"log_level": 7,
 	"reply_timeout": "50s"
 },
