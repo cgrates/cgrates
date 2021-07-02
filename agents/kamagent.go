@@ -231,7 +231,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 		// no return here since we want CDR anyhow
 	}
-	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRFlags], utils.MetaCDRs) != -1 {
+	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRs], utils.MetaCDRs) != -1 {
 		if err := ka.connMgr.Call(ka.ctx, ka.cfg.SessionSConns, utils.SessionSv1ProcessCDR,
 			tsArgs.CGREvent, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",

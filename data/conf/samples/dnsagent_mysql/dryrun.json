@@ -5,7 +5,7 @@
 		{
 			"id": "DryRunNAPTR",
 			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174963"],
-			"flags": ["*dryrun","*log"],
+			"flags": ["*dryRun","*log"],
 			"request_fields":[
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"},
 			],

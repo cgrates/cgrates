@@ -972,7 +972,7 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*fd;*resources;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*fd;*resources;*routes;*routesIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -998,7 +998,7 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routesIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -1022,7 +1022,7 @@ func TestV1AuthorizeArgsParseFlags1(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routes_ignore_errors;*routes_maxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*fd;*resources;;*dispatchers;*routes;*routesIgnoreErrors;*routesMaxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1authArgs = new(V1AuthorizeArgs)
 	v1authArgs.CGREvent = new(utils.CGREvent)
 	v1authArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -2037,7 +2037,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		CGREvent:           eOut.CGREvent,
 	}
 
-	strArg = "*accounts;*resources;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*resources;*routes;*routesIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -2062,7 +2062,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		ForceDuration:      true,
 	}
 
-	strArg = "*accounts;*resources;*dispatchers;*routes;*routes_ignore_errors;*routes_event_cost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
+	strArg = "*accounts;*resources;*dispatchers;*routes;*routesIgnoreErrors;*routesEventCost;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3;*fd"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)
@@ -2085,7 +2085,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		CGREvent:           eOut.CGREvent,
 	}
 
-	strArg = "*accounts;*resources;*dispatchers;*routes;*routes_ignore_errors;*routes_maxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
+	strArg = "*accounts;*resources;*dispatchers;*routes;*routesIgnoreErrors;*routesMaxcost:100;*attributes:Attr1&Attr2;*thresholds:tr1&tr2&tr3;*stats:st1&st2&st3"
 	v1ProcessMsgArgs = new(V1ProcessMessageArgs)
 	v1ProcessMsgArgs.CGREvent = new(utils.CGREvent)
 	v1ProcessMsgArgs.ParseFlags(strArg, utils.InfieldSep)

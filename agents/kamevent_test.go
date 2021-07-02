@@ -144,7 +144,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGRRoute:           "supplier2",
 		utils.CGRDisconnectCause: "200",
-		utils.CGRFlags:           "*accounts;*routes;*routes_event_cost;*routes_ignore_errors"}
+		utils.CGRFlags:           "*accounts;*routes;*routesEventCost;*routesIgnoreErrors"}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent: &utils.CGREvent{
@@ -186,7 +186,7 @@ func TestKamEvV1AuthorizeArgs2(t *testing.T) {
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGRRoute:           "supplier2",
 		utils.CGRDisconnectCause: "200",
-		utils.CGRFlags:           "*accounts;*routes;*routes_maxcost:100;*routes_ignore_errors"}
+		utils.CGRFlags:           "*accounts;*routes;*routesMaxcost:100;*routesIgnoreErrors"}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent: &utils.CGREvent{
