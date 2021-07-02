@@ -21,86 +21,112 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
+	"fmt"
+	"net/rpc/jsonrpc"
 	"os"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
-	"github.com/cgrates/cgrates/config"
+
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/utils"
+
+	"github.com/cgrates/cgrates/config"
 )
 
 var (
-	coreItCfgPath string
-	coreItDirPath string
-	argPath       string
-	coreItCfg     *config.CGRConfig
-	coreItBiRPC   *birpc.Client
-	coreItTests   = []func(t *testing.T){
-		testCoreItLoadConfig,
-		testCoreItInitDataDb,
-		testCoreItInitStorDb,
+	coreSCfgPath string
+	coreSCfg     *config.CGRConfig
+	coreSBiRpc   *birpc.Client
+	coreSConfDIR string //run tests for specific configuration
+	argPath      string
+	sTestCoreIt  = []func(t *testing.T){
+		testCoreItLoadCofig,
+		testCoreItInitDataDB,
+		testCoreItInitStorDB,
+
+		//engine separate with cpu
 		testCoreItStartEngineByExecWithCPUProfiling,
-		testCoreItRpcConn,
+		testCoreItRPCConn,
 		testCoreItStartCPUProfilingErrorAlreadyStarted,
 		testCoreItSleep,
 		testCoreItStopCPUProfiling,
+		//status api
+		testCoreItStatus,
+
 		testCoreItKillEngine,
+
+		//engine separate with memory
+		testCoreItStartEngineByExecWIthMemProfiling,
+		testCoreItRPCConn,
+		testCoreItStartMemProfilingErrorAlreadyStarted,
+		testCoreItSleep,
+		testCoreItStopMemoryProfiling,
+		testCoreItKillEngine,
+		testCoreItCheckFinalMemProfiling,
+		// test CPU and Memory just by APIs
 		testCoreItStartEngine,
-		testCoreItRpcConn,
+		testCoreItRPCConn,
+
+		//CPUProfiles apis
 		testCoreItStopCPUProfilingBeforeStart,
 		testCoreItStartCPUProfiling,
 		testCoreItSleep,
 		testCoreItStopCPUProfiling,
-		testCoreItStatus,
+
+		//MemoryProfiles apis
+		testCoreItStopMemProfilingBeforeStart,
+		testCoreItStartMemoryProfiling,
+		testCoreItSleep,
+		testCoreItStopMemoryProfiling,
 		testCoreItKillEngine,
 	}
 )
 
-func TestCoreItTests(t *testing.T) {
+func TestITCoreIt(t *testing.T) {
 	argPath = "/tmp"
 	switch *dbType {
 	case utils.MetaInternal:
-		coreItDirPath = "all2"
-	case utils.MetaMongo:
-		coreItDirPath = "all2_mongo"
+		coreSConfDIR = "tutinternal"
 	case utils.MetaMySQL:
-		coreItDirPath = "all2_mysql"
-	default:
-		t.Fatalf("Unsupported database")
+		coreSConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		coreSConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	}
-	for _, test := range coreItTests {
-		t.Run("Running integration tests", test)
+	for _, test := range sTestCoreIt {
+		t.Run("CoreIt integration tests", test)
 	}
 }
 
-func testCoreItLoadConfig(t *testing.T) {
+func testCoreItLoadCofig(t *testing.T) {
+	coreSCfgPath = path.Join(*dataDir, "conf", "samples", coreSConfDIR)
 	var err error
-	coreItCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", coreItDirPath)
-	if coreItCfg, err = config.NewCGRConfigFromPath(coreItCfgPath); err != nil {
-		t.Fatal(err)
+	if coreSCfg, err = config.NewCGRConfigFromPath(coreSCfgPath); err != nil {
+		t.Error(err)
 	}
 }
 
-func testCoreItInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(coreItCfg); err != nil {
-		t.Fatal(err)
+func testCoreItInitDataDB(t *testing.T) {
+	if err := engine.InitDataDB(coreSCfg); err != nil {
+		t.Error(err)
 	}
 }
 
-func testCoreItInitStorDb(t *testing.T) {
-	if err := engine.InitStorDB(coreItCfg); err != nil {
-		t.Fatal(err)
+func testCoreItInitStorDB(t *testing.T) {
+	if err := engine.InitStorDB(coreSCfg); err != nil {
+		t.Error(err)
 	}
 }
 
 func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
-	engine := exec.Command("cgr-engine", "-config_path", coreItCfgPath, "-cpuprof_dir", "/tmp")
+	engine := exec.Command("cgr-engine", "-config_path", coreSCfgPath, "-cpuprof_dir", argPath)
 	if err := engine.Start(); err != nil {
 		t.Error(err)
 	}
@@ -108,7 +134,7 @@ func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(time.Duration(fib()) * time.Millisecond)
-		if _, err := jsonrpc.Dial(utils.TCP, coreItCfg.ListenCfg().RPCJSONListen); err != nil {
+		if _, err := jsonrpc.Dial(utils.TCP, coreSCfg.ListenCfg().RPCJSONListen); err != nil {
 			t.Log(err)
 		} else {
 			connected = true
@@ -116,29 +142,151 @@ func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
 		}
 	}
 	if !connected {
-		t.Errorf("engine did not open port <%s>", coreItCfg.ListenCfg().RPCJSONListen)
+		t.Errorf("engine did not open port <%s>", coreSCfg.ListenCfg().RPCJSONListen)
 	}
 }
 
-func testCoreItStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(coreItCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testCoreItRpcConn(t *testing.T) {
+func testCoreItRPCConn(t *testing.T) {
 	var err error
-	if coreItBiRPC, err = newRPCClient(coreItCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
+	if coreSBiRpc, err = newRPCClient(coreSCfg.ListenCfg()); err != nil {
+		t.Error(err)
 	}
 }
 
 func testCoreItStartCPUProfilingErrorAlreadyStarted(t *testing.T) {
 	var reply string
+	dirPath := &utils.DirectoryArgs{
+		DirPath: argPath,
+	}
 	expectedErr := "CPU profiling already started"
-	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
-		argPath, &reply); err == nil || err.Error() != expectedErr {
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+		dirPath, &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
+	}
+}
+
+func testCoreItStartEngine(t *testing.T) {
+	if _, err := engine.StartEngine(coreSCfgPath, *waitRater); err != nil {
+		t.Error(err)
+	}
+}
+
+func testCoreItStopMemProfilingBeforeStart(t *testing.T) {
+	var reply string
+	expectedErr := " Memory Profiling is not started"
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
+		new(utils.MemoryPrf), &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	}
+}
+
+func testCoreItStartEngineByExecWIthMemProfiling(t *testing.T) {
+	engine := exec.Command("cgr-engine", "-config_path", coreSCfgPath,
+		"-memprof_dir", argPath, "-memprof_interval", "100ms", "-memprof_nrfiles", "2")
+	if err := engine.Start(); err != nil {
+		t.Error(err)
+	}
+	fib := utils.Fib()
+	var connected bool
+	for i := 0; i < 200; i++ {
+		time.Sleep(time.Duration(fib()) * time.Millisecond)
+		if _, err := jsonrpc.Dial(utils.TCP, coreSCfg.ListenCfg().RPCJSONListen); err != nil {
+			t.Log(err)
+		} else {
+			connected = true
+			break
+		}
+	}
+	if !connected {
+		t.Errorf("engine did not open port <%s>", coreSCfg.ListenCfg().RPCJSONListen)
+	}
+}
+
+func testCoreItStopMemoryProfiling(t *testing.T) {
+	var reply string
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
+		new(utils.MemoryPrf), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
+	}
+
+	//mem_prof1, mem_prof2
+	for i := 1; i <= 2; i++ {
+		file, err := os.Open(path.Join(argPath, fmt.Sprintf("mem%v.prof", i)))
+		if err != nil {
+			t.Error(err)
+		}
+		defer file.Close()
+
+		//compare the size
+		size, err := file.Stat()
+		if err != nil {
+			t.Error(err)
+		} else if size.Size() < int64(415) {
+			t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
+		}
+		//after we checked that CPUProfile was made successfully, can delete it
+		if err := os.Remove(path.Join(argPath, fmt.Sprintf("mem%v.prof", i))); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func testCoreItCheckFinalMemProfiling(t *testing.T) {
+	// as the engine was killed, mem_final.prof was created and we must check it
+	file, err := os.Open(path.Join(argPath, fmt.Sprintf(utils.MemProfFileCgr)))
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//compare the size
+	size, err := file.Stat()
+	if err != nil {
+		t.Error(err)
+	} else if size.Size() < int64(415) {
+		t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
+	}
+	//after we checked that CPUProfile was made successfully, can delete it
+	if err := os.Remove(path.Join(argPath, fmt.Sprintf(utils.MemProfFileCgr))); err != nil {
+		t.Error(err)
+	}
+}
+
+func testCoreItStartMemProfilingErrorAlreadyStarted(t *testing.T) {
+	var reply string
+	args := &utils.MemoryPrf{
+		DirPath:  argPath,
+		Interval: 100 * time.Millisecond,
+		NrFiles:  2,
+	}
+	expErr := "Memory Profiling already started"
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
+		args, &reply); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %+v, received %+v", expErr, err)
+	}
+}
+
+func testCoreItStopCPUProfilingBeforeStart(t *testing.T) {
+	var reply string
+	expectedErr := " cannot stop because CPUProfiling is not active"
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+		new(utils.DirectoryArgs), &reply); err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	}
+}
+
+func testCoreItStartCPUProfiling(t *testing.T) {
+	var reply string
+	dirPath := &utils.DirectoryArgs{
+		DirPath: argPath,
+	}
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+		dirPath, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned")
 	}
 }
 
@@ -147,7 +295,7 @@ func testCoreItSleep(t *testing.T) {
 		Duration: 500 * time.Millisecond,
 	}
 	var reply string
-	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1Sleep,
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Sleep,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -157,8 +305,8 @@ func testCoreItSleep(t *testing.T) {
 
 func testCoreItStopCPUProfiling(t *testing.T) {
 	var reply string
-	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
-		utils.EmptyString, &reply); err != nil {
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+		new(utils.DirectoryArgs), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -182,19 +330,15 @@ func testCoreItStopCPUProfiling(t *testing.T) {
 	}
 }
 
-func testCoreItStopCPUProfilingBeforeStart(t *testing.T) {
+func testCoreItStartMemoryProfiling(t *testing.T) {
 	var reply string
-	expectedErr := " cannot stop because CPUProfiling is not active"
-	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
-		utils.EmptyString, &reply); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	args := &utils.MemoryPrf{
+		DirPath:  argPath,
+		Interval: 100 * time.Millisecond,
+		NrFiles:  2,
 	}
-}
-
-func testCoreItStartCPUProfiling(t *testing.T) {
-	var reply string
-	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
-		argPath, &reply); err != nil {
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
+		args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -204,7 +348,7 @@ func testCoreItStartCPUProfiling(t *testing.T) {
 func testCoreItStatus(t *testing.T) {
 	args := &utils.TenantIDWithAPIOpts{}
 	var reply map[string]interface{}
-	if err := coreItBiRPC.Call(context.Background(), utils.CoreSv1Status,
+	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Status,
 		args, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply[utils.NodeID] != "ALL2" {

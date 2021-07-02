@@ -52,8 +52,8 @@ func (cS *CoreSv1) Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string
 }
 
 // StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, dirPath string, reply *string) error {
-	if err := cS.cS.StartCPUProfiling(path.Join(dirPath, utils.CpuPathCgr)); err != nil {
+func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, args *utils.DirectoryArgs, reply *string) error {
+	if err := cS.cS.StartCPUProfiling(path.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -62,8 +62,27 @@ func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, dirPath string, reply *
 
 // StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
 // where the CPUProfiling already started
-func (cS *CoreSv1) StopCPUProfiling(_ *context.Context, _ string, reply *string) error {
+func (cS *CoreSv1) StopCPUProfiling(_ *context.Context, _ *utils.DirectoryArgs, reply *string) error {
 	if err := cS.cS.StopCPUProfiling(); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StartMemoryProfiling is used to start MemoryProfiling in the given path
+func (cS *CoreSv1) StartMemoryProfiling(_ *context.Context, args *utils.MemoryPrf, reply *string) error {
+	if err := cS.cS.StartMemoryProfiling(args); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
+// where the MemoryProfiling already started
+func (cS *CoreSv1) StopMemoryProfiling(_ *context.Context, _ *utils.MemoryPrf, reply *string) error {
+	if err := cS.cS.StopMemoryProfiling(); err != nil {
 		return err
 	}
 	*reply = utils.OK
