@@ -20,8 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"log"
+	"os/exec"
 	"path"
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,6 +42,27 @@ var (
 		testVersionsFlush,
 		testVersion,
 		testVersionsFlush,
+		testVersionsWithEngine,
+		testUpdateVersionsAccounts,
+		testUpdateVersionsActionPlans,
+		testUpdateVersionsActionTriggers,
+		testUpdateVersionsActions,
+		testUpdateVersionsAttributes,
+		testUpdateVersionsChargers,
+		testUpdateVersionsDestinations,
+		testUpdateVersionsDispatchers,
+		testUpdateVersionsLoadIDs,
+		testUpdateVersionsRQF,
+		testUpdateVersionsRatingPlan,
+		testUpdateVersionsRatingProfile,
+		testUpdateVersionsResource,
+		testUpdateVersionsReverseDestinations,
+		testUpdateVersionsRoutes,
+		testUpdateVersionsSharedGroups,
+		testUpdateVersionsStats,
+		testUpdateVersionsSubscribers,
+		testUpdateVersionsThresholds,
+		testUpdateVersionsTiming,
 	}
 )
 
@@ -196,4 +220,493 @@ func testVersion(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func testVersionsWithEngine(t *testing.T) {
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	if output.String() != utils.EmptyString {
+		t.Fatalf("Expected empty but received: %q", output.String())
+	}
+	dataDbQueryVersions, err := dm3.DataDB().GetVersions("")
+	if err != nil {
+		t.Error(err)
+	}
+	storDbQueryVersions, err := storageDb.GetVersions("")
+	if err != nil {
+		t.Error(err)
+	}
+	expectDataDb := Versions{
+		"Accounts":       3,
+		"ActionProfiles": 1,
+		"Actions":        2,
+		"Attributes":     7,
+		"Chargers":       2,
+		"Dispatchers":    2,
+		"LoadIDs":        1,
+		"RQF":            5,
+		"RateProfiles":   1,
+		"Resource":       1,
+		"Routes":         2,
+		"Stats":          4,
+		"Subscribers":    1,
+		"Thresholds":     4,
+	}
+	expectStorDb := Versions{
+		"CDRs":               2,
+		"CostDetails":        2,
+		"SessionSCosts":      3,
+		"TpAccountActions":   1,
+		"TpActionPlans":      1,
+		"TpActionTriggers":   1,
+		"TpActions":          1,
+		"TpChargers":         1,
+		"TpDestinationRates": 1,
+		"TpDestinations":     1,
+		"TpDispatchers":      1,
+		"TpFilters":          1,
+		"TpRates":            1,
+		"TpRatingPlan":       1,
+		"TpRatingPlans":      1,
+		"TpRatingProfile":    1,
+		"TpRatingProfiles":   1,
+		"TpResource":         1,
+		"TpResources":        1,
+		"TpRoutes":           1,
+		"TpSharedGroups":     1,
+		"TpStats":            1,
+		"TpThresholds":       1,
+		"TpTiming":           1,
+	}
+	if !reflect.DeepEqual(dataDbQueryVersions, expectDataDb) {
+		t.Fatalf("Expected %v \n  but received \n %v", utils.ToJSON(expectDataDb), utils.ToJSON(dataDbQueryVersions))
+	} else if !reflect.DeepEqual(storDbQueryVersions, expectStorDb) {
+		t.Fatalf("Expected %v \n  but received \n %v", utils.ToJSON(expectStorDb), utils.ToJSON(storDbQueryVersions))
+	}
+}
+
+func testUpdateVersionsAccounts(t *testing.T) {
+	newVersions := Versions{
+		"Accounts": 2.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsActionPlans(t *testing.T) {
+	newVersions := Versions{
+		"ActionPlans": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_plans>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsActionTriggers(t *testing.T) {
+	newVersions := Versions{
+		"ActionTriggers": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*action_triggers>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsActions(t *testing.T) {
+	newVersions := Versions{
+		"Actions": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*actions>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsChargers(t *testing.T) {
+	newVersions := Versions{
+		"Chargers": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*chargers>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsDestinations(t *testing.T) {
+	newVersions := Versions{
+		"Destinations": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*destinations>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsDispatchers(t *testing.T) {
+	newVersions := Versions{
+		"Dispatchers": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*dispatchers>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsLoadIDs(t *testing.T) {
+	newVersions := Versions{
+		"LoadIDs": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*load_ids>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsAttributes(t *testing.T) {
+	newVersions := Versions{
+		"Attributes": 2.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsRQF(t *testing.T) {
+	newVersions := Versions{
+		"RQF": 8.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*filters>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsRatingPlan(t *testing.T) {
+	newVersions := Versions{
+		"RatingPlan": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*rating_plan>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsRatingProfile(t *testing.T) {
+	newVersions := Versions{
+		"RatingProfile": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*rating_profile>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsResource(t *testing.T) {
+	newVersions := Versions{
+		"Resource": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*resource>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsReverseDestinations(t *testing.T) {
+	newVersions := Versions{
+		"ReverseDestinations": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*reverse_destinations>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsRoutes(t *testing.T) {
+	newVersions := Versions{
+		"Routes": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*routes>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsSharedGroups(t *testing.T) {
+	newVersions := Versions{
+		"SharedGroups": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*shared_groups>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsStats(t *testing.T) {
+	newVersions := Versions{
+		"Stats": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*stats>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsSubscribers(t *testing.T) {
+	newVersions := Versions{
+		"Subscribers": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*subscribers>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsThresholds(t *testing.T) {
+	newVersions := Versions{
+		"Thresholds": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*thresholds>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsTiming(t *testing.T) {
+	newVersions := Versions{
+		"Timing": 5.,
+	}
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*timing>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
 }
