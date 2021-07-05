@@ -92,13 +92,6 @@ func TestSafEventFieldAsString(t *testing.T) {
 	}
 }
 
-func TestSafEventRemoteHost(t *testing.T) {
-	data := utils.DataProvider(safEv)
-	if rply, expected := data.RemoteHost(), utils.LocalAddr(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
 func TestSafEventClone(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		t.Run("clone", func(t *testing.T) {

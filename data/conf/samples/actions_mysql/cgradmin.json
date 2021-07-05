@@ -67,7 +67,6 @@
 			"type": "*sqs_json_map",
 			// export_path for sqs:  "endpoint"
 			"export_path": "notAValidURL",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
@@ -77,7 +76,6 @@
 			"id": "kafka_fail",
 			"type": "*kafka_json_map",
 			"export_path": "notAValidURL",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
@@ -87,7 +85,6 @@
 			"id": "amqp_fail",
 			"type": "*amqp_json_map",
 			"export_path": "notAValidURL",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
@@ -97,7 +94,6 @@
 			"id": "s3_fail",
 			"type": "*s3_json_map",
 			"export_path": "notAValidURL",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
@@ -107,7 +103,6 @@
 			"id": "aws_fail",
 			"type": "*amqpv1_json_map",
 			"export_path": "notAValidURL",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},

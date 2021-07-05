@@ -52,7 +52,6 @@
 			"id": "http_localhost",
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12080/cdr_http",
-			"tenant": "cgrates.org",
 			"synchronous": true,
 			"attempts": 1,
 			"filters":["*string:~*opts.ExporterID:http_localhost"],
@@ -83,7 +82,6 @@
 				"amqpExchangeType": "fanout",
 				"amqpRoutingKey": "cgr_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 3,
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},
@@ -106,7 +104,6 @@
 			"id": "http_test_file",
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12080/invalid",
-			"tenant": "cgrates.org",
 			"synchronous": true,
 			"attempts": 1,
 			"fields":[
@@ -120,7 +117,6 @@
 			"opts": {
 				"kafkaTopic": "cgrates_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"synchronous": true,
 			"attempts": 1,
 			"fields":[
@@ -134,7 +130,6 @@
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"filters":["*string:~*ec.Cost:100"],
 			"synchronous": true,
 			"attempts": 1,

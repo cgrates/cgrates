@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"net"
 	"strconv"
 	"strings"
 )
@@ -150,11 +149,6 @@ func (onm *OrderedNavigableMap) FieldAsString(fldPath []string) (str string, err
 // FieldAsInterface returns the interface at the path
 func (onm *OrderedNavigableMap) FieldAsInterface(fldPath []string) (iface interface{}, err error) {
 	return onm.nm.FieldAsInterface(fldPath)
-}
-
-// RemoteHost is part of dataStorage interface
-func (OrderedNavigableMap) RemoteHost() net.Addr {
-	return LocalAddr()
 }
 
 // GetOrder returns the elements order as a slice

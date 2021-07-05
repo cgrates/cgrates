@@ -3366,13 +3366,6 @@ func TestEventCostFieldAsString(t *testing.T) {
 	}
 }
 
-func TestEventCostRemoteHost(t *testing.T) {
-	eventCost := &EventCost{}
-	eOut := utils.LocalAddr()
-	if rcv := eventCost.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
 func TestECAsCallCost3(t *testing.T) {
 	eCC := &CallCost{
 		Category:    "call",

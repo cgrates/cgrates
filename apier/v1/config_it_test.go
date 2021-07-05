@@ -380,7 +380,6 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		"flags":             []interface{}{},
 		"id":                "*default",
 		"synchronous":       false,
-		"tenant":            "",
 		"timezone":          "",
 		"type":              "*none",
 		"opts":              map[string]interface{}{},

@@ -502,8 +502,6 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 			return
 		}
 		out = pathVal + val
-	case utils.MetaRemoteHost:
-		out = dp.RemoteHost().String()
 	case utils.MetaCCUsage:
 		if len(value) != 3 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",

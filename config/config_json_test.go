@@ -1842,7 +1842,6 @@ func TestDfEventExporterCfg(t *testing.T) {
 				Type:              utils.StringPointer(utils.MetaNone),
 				Export_path:       utils.StringPointer("/var/spool/cgrates/ees"),
 				Attribute_context: utils.StringPointer(utils.EmptyString),
-				Tenant:            utils.StringPointer(utils.EmptyString),
 				Timezone:          utils.StringPointer(utils.EmptyString),
 				Filters:           &[]string{},
 				Attribute_ids:     &[]string{},

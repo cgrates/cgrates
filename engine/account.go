@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
 	"strings"
 	"time"
 
@@ -1250,11 +1249,6 @@ func (as *AccountSummary) FieldAsString(fldPath []string) (val string, err error
 // String implements utils.DataProvider
 func (as *AccountSummary) String() string {
 	return utils.ToIJSON(as)
-}
-
-// RemoteHost implements utils.DataProvider
-func (ar *AccountSummary) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 func (as *AccountSummary) AsMapInterface() map[string]interface{} {

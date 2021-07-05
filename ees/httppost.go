@@ -82,19 +82,19 @@ func (httpPost *HTTPPost) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		req := utils.MapStorage(cgrEv.Event)
-		eeReq := engine.NewEventRequest(req, httpPost.dc, cgrEv.APIOpts,
-			httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
-			httpPost.cgrCfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
-				httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
+		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+			utils.MetaReq:  cgrEv.Event,
+			utils.MetaDC:   httpPost.dc,
+			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaCfg:  httpPost.cgrCfg.GetDataProvider(),
+		}, utils.FirstNonEmpty(cgrEv.Tenant, httpPost.cgrCfg.GeneralCfg().DefaultTenant),
 			httpPost.filterS, oNm)
 		if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			path := el.Value
-			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(path)
+			nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(path)
 			path = path[:len(path)-1] // remove the last index
 			urlVals.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 		}
@@ -129,18 +129,17 @@ func (httpPost *HTTPPost) composeHeader() (hdr http.Header, err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaHdr: utils.NewOrderedNavigableMap(),
 	}
-	eeReq := engine.NewEventRequest(nil, httpPost.dc, nil,
-		httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Tenant,
-		httpPost.cgrCfg.GeneralCfg().DefaultTenant,
-		utils.FirstNonEmpty(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].Timezone,
-			httpPost.cgrCfg.GeneralCfg().DefaultTimezone),
+	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+		utils.MetaDC:  httpPost.dc,
+		utils.MetaCfg: httpPost.cgrCfg.GetDataProvider(),
+	}, httpPost.cgrCfg.GeneralCfg().DefaultTenant,
 		httpPost.filterS, oNm)
 	if err = eeReq.SetFields(httpPost.cgrCfg.EEsCfg().Exporters[httpPost.cfgIdx].HeaderFields()); err != nil {
 		return
 	}
-	for el := eeReq.OrdNavMP[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
+	for el := eeReq.ExpData[utils.MetaHdr].GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
-		nmIt, _ := eeReq.OrdNavMP[utils.MetaHdr].Field(path)
+		nmIt, _ := eeReq.ExpData[utils.MetaHdr].Field(path)
 		path = path[:len(path)-1] // remove the last index
 		hdr.Set(strings.Join(path, utils.NestingSep), nmIt.String())
 	}

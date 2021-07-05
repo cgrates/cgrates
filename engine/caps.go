@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"net"
 	"strconv"
 	"sync"
 	"time"
@@ -135,4 +134,3 @@ type floatDP float64
 func (f floatDP) String() string                                         { return strconv.FormatFloat(float64(f), 'f', -1, 64) }
 func (f floatDP) FieldAsInterface(fldPath []string) (interface{}, error) { return float64(f), nil }
 func (f floatDP) FieldAsString(fldPath []string) (string, error)         { return f.String(), nil }
-func (f floatDP) RemoteHost() net.Addr                                   { return nil }

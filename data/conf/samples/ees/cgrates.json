@@ -66,7 +66,6 @@
 			"id": "CSVExporter",
 			"type": "*file_csv",
 			"export_path": "/tmp/testCSV",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -76,7 +75,6 @@
 			"id": "CSVExporterComposed",
 			"type": "*file_csv",
 			"export_path": "/tmp/testComposedCSV",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -125,7 +123,6 @@
 			"id": "FwvExporter",
 			"type": "*file_fwv",
 			"export_path": "/tmp/testFWV",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -199,7 +196,6 @@
 			"id": "HTTPPostExporter",
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12080/event_http",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -225,7 +221,6 @@
 			"id": "HTTPJsonMapExporter",
 			"type": "*http_json_map",
 			"export_path": "http://127.0.0.1:12081/event_json_map_http",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -252,7 +247,6 @@
 			"id": "CSVMaskedDestination",
 			"type": "*file_csv",
 			"export_path": "/tmp/testCSVMasked",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -278,7 +272,6 @@
 		{
 			"id": "RouteExporter", // this exporter will set the Cost Account and RunID in cache so we can use it in other exports
 			"type": "*virt",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "Cost", "path": "*uch.<~*req.CGRID;~*req.RunID;-Cost>", "type": "*variable",
@@ -293,7 +286,6 @@
 			"id": "CSVExporterFromVirt",
 			"type": "*file_csv",
 			"export_path": "/tmp/testCSVfromVirt",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -317,7 +309,6 @@
 			"id": "CSVExporterWIthTemplate",
 			"type": "*file_csv",
 			"export_path": "/tmp/testCSVExpTemp",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -330,7 +321,6 @@
 			"id": "ElasticsearchExporter",
 			"type": "*els",
 			"export_path": "http://localhost:9200",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"opts": {
 					"elsIndex": "cdrs",
@@ -366,7 +356,6 @@
 			"id": "HTTPJsonMapExporterWithNoFields",
 			"type": "*http_json_map",
 			"export_path": "http://127.0.0.1:12081/event_json_map_http",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -375,14 +364,12 @@
 			"id": "ElasticExporterWithNoFields",
 			"type": "*els",
 			"export_path": "http://localhost:9200",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 		},		
 		{
 			"id": "HTTPPostExporterWithNoFields",
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12080/event_http",
-			"tenant": "cgrates.org",
 			"flags": ["*attributes"],
 			"attribute_context": "customContext",
 			"attempts": 1,
@@ -390,7 +377,6 @@
 		{
 			"id": "SQLExporterFull",
 			"type": "*sql",
-			"tenant": "cgrates.org",
 			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
@@ -411,7 +397,6 @@
 		{
 			"id": "SQLExporterPartial",
 			"type": "*sql",
-			"tenant": "cgrates.org",
 			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
