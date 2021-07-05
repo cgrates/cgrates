@@ -147,7 +147,9 @@ func testDispatcherSRPCConn(t *testing.T) {
 }
 
 func testDispatcherStartCPUProfiling(t *testing.T) {
-	argPath := "/tmp/cpu.prof"
+	argPath := utils.DirectoryArgs{
+		DirPath: "/tmp",
+	}
 	var reply string
 	if err := dispatcherRPC.Call(utils.CoreSv1StartCPUProfiling,
 		argPath, &reply); err != nil {
@@ -401,7 +403,7 @@ func testV1DispatcherStopCPUProfiling(t *testing.T) {
 	argPath := "/tmp/cpu.prof"
 	var reply string
 	if err := dispatcherRPC.Call(utils.CoreSv1StopCPUProfiling,
-		utils.EmptyString, &reply); err != nil {
+		new(utils.DirectoryArgs), &reply); err != nil {
 		t.Error(err)
 	}
 	file, err := os.Open(argPath)

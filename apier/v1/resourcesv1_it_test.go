@@ -159,7 +159,9 @@ func testV1RsRpcConn(t *testing.T) {
 }
 
 func testV1ResourceStartCPUProfiling(t *testing.T) {
-	argPath := "/tmp/cpu.prof"
+	argPath := &utils.DirectoryArgs{
+		DirPath: "/tmp",
+	}
 	var reply string
 	if err := rlsV1Rpc.Call(utils.CoreSv1StartCPUProfiling,
 		argPath, &reply); err != nil {
@@ -1107,7 +1109,7 @@ func testV1ResourceStopCPUProfiling(t *testing.T) {
 	argPath := "/tmp/cpu.prof"
 	var reply string
 	if err := rlsV1Rpc.Call(utils.CoreSv1StopCPUProfiling,
-		utils.EmptyString, &reply); err != nil {
+		new(utils.DirectoryArgs), &reply); err != nil {
 		t.Error(err)
 	}
 	file, err := os.Open(argPath)
