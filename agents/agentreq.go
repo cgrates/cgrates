@@ -106,19 +106,47 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		}
 		val, err = dp.FieldAsInterface(fldPath[1:])
 	case utils.MetaReq:
-		val, err = ar.Request.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.Request.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.Request
+		}
 	case utils.MetaVars:
-		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.Vars.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.Vars
+		}
 	case utils.MetaCgreq:
-		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.CGRRequest
+		}
 	case utils.MetaCgrep:
-		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.CGRReply
+		}
 	case utils.MetaDiamreq:
-		val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.diamreq
+		}
 	case utils.MetaRep:
-		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.Reply.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.Reply
+		}
 	case utils.MetaTmp:
-		val, err = ar.tmp.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.tmp.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.tmp
+		}
 	case utils.MetaUCH:
 		if cacheVal, ok := engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			err = utils.ErrNotFound
@@ -126,9 +154,17 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 			val = cacheVal
 		}
 	case utils.MetaOpts:
-		val, err = ar.Opts.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.Opts.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.Opts
+		}
 	case utils.MetaCfg:
-		val, err = ar.Cfg.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = ar.Cfg.FieldAsInterface(fldPath[1:])
+		} else {
+			val = ar.Cfg
+		}
 	}
 	if err != nil {
 		return
