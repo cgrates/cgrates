@@ -554,7 +554,6 @@ const CGRATES_CFG_JSON = `
 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
 				// "natsClientKey": "",							// the path to a client key( used by tls)
 			},													// extra options for exporter
-			"tenant": "",										// tenant used in filterS.Pass
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing

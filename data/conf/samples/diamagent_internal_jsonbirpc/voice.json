@@ -28,7 +28,8 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host",
+					"type": "*variable",
+					"value": "~*vars.RemoteHost",
 					"mandatory": true
 				},
 				{
@@ -127,7 +128,8 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host", 
+					"type": "*variable",
+					"value": "~*vars.RemoteHost", 
 					"mandatory": true
 				},
 				{
@@ -210,8 +212,8 @@
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*remote_host",
-					"mandatory": true},
+				{"tag": "OriginHost", "path": "*cgreq.OriginHost",  "type": "*variable",
+					"value": "~*vars.RemoteHost", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*attributes"},
 				{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 				{"tag": "Account", "path": "*cgreq.Account", "type": "*constant", "value": "*attributes"},
@@ -255,7 +257,8 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host", 
+					"type": "*variable",
+					"value": "~*vars.RemoteHost", 
 					"mandatory": true
 				},
 				{
@@ -360,7 +363,8 @@
 				{
 					"tag": "OriginHost",
 					"path": "*cgreq.OriginHost",
-					"type": "*remote_host", 
+					"type": "*variable",
+					"value": "~*vars.RemoteHost", 
 					"mandatory": true
 				},
 				{

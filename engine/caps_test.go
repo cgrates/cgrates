@@ -135,9 +135,6 @@ func TestFloatDP(t *testing.T) {
 	} else if s != expStr {
 		t.Errorf("Expected: %v ,received:%v", expStr, s)
 	}
-	if r := f.RemoteHost(); r != nil {
-		t.Errorf("Expected remote host to be nil received:%v", r)
-	}
 	exp := 10.
 	if s, err := f.FieldAsInterface(nil); err != nil {
 		t.Error(err)

@@ -20,79 +20,58 @@ package engine
 
 import (
 	"fmt"
-	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewEventRequest returns a new EventRequest
-func NewEventRequest(req utils.DataProvider, dc, opts utils.MapStorage,
-	tntTpl config.RSRParsers, dfltTenant, timezone string,
-	filterS *FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *EventRequest) {
-	eeR = &EventRequest{
-		req:      req,
-		Tenant:   dfltTenant,
-		Timezone: timezone,
-		filterS:  filterS,
-		dc:       dc,
-		opts:     opts,
-		OrdNavMP: oNM,
-		Cfg:      config.CgrConfig().GetDataProvider(),
-	}
-	if tnt, err := tntTpl.ParseDataProvider(eeR); err == nil && tnt != utils.EmptyString {
-		eeR.Tenant = tnt
+// NewExportRequest returns a new EventRequest
+func NewExportRequest(inData map[string]utils.MapStorage,
+	tnt string,
+	filterS *FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *ExportRequest) {
+	eeR = &ExportRequest{
+		inData:  inData,
+		filterS: filterS,
+		tnt:     tnt,
+		ExpData: oNM,
 	}
 	return
 }
 
-// EventRequest represents data related to one request towards agent
+// ExportRequest represents data related to one request towards agent
 // implements utils.DataProvider so we can pass it to filters
-type EventRequest struct {
-	req      utils.DataProvider // request
-	Tenant   string
-	Timezone string
-	OrdNavMP map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
-	dc       utils.MapStorage
-	opts     utils.MapStorage
-	Cfg      utils.DataProvider
-
+type ExportRequest struct {
+	inData  map[string]utils.MapStorage           // request
+	ExpData map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
+	tnt     string
 	filterS *FilterS
 }
 
 // String implements utils.DataProvider
-func (eeR *EventRequest) String() string {
+func (eeR *ExportRequest) String() string {
 	return utils.ToIJSON(eeR)
 }
 
-// RemoteHost implements utils.DataProvider
-func (eeR *EventRequest) RemoteHost() net.Addr {
-	return eeR.req.RemoteHost()
-}
-
 // FieldAsInterface implements utils.DataProvider
-func (eeR *EventRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
+func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
 	default:
-		dp, has := eeR.OrdNavMP[fldPath[0]]
-		if !has {
-			return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+		var dp utils.DataProvider
+		var has bool
+		if dp, has = eeR.ExpData[fldPath[0]]; !has {
+			if dp, has = eeR.inData[fldPath[0]]; !has {
+				return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
+			}
 		}
 		val, err = dp.FieldAsInterface(fldPath[1:])
-	case utils.MetaReq:
-		val, err = eeR.req.FieldAsInterface(fldPath[1:])
 	case utils.MetaUCH:
 		var ok bool
 		if val, ok = Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			return nil, utils.ErrNotFound
 		}
-	case utils.MetaDC:
-		val, err = eeR.dc.FieldAsInterface(fldPath[1:])
-	case utils.MetaOpts:
-		val, err = eeR.opts.FieldAsInterface(fldPath[1:])
-	case utils.MetaCfg:
-		val, err = eeR.Cfg.FieldAsInterface(fldPath[1:])
+	case utils.MetaTenant:
+		return eeR.tnt, nil
 	}
 	if err != nil {
 		return
@@ -107,7 +86,7 @@ func (eeR *EventRequest) FieldAsInterface(fldPath []string) (val interface{}, er
 }
 
 // FieldAsString implements utils.DataProvider
-func (eeR *EventRequest) FieldAsString(fldPath []string) (val string, err error) {
+func (eeR *ExportRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
 	if iface, err = eeR.FieldAsInterface(fldPath); err != nil {
 		return
@@ -116,9 +95,9 @@ func (eeR *EventRequest) FieldAsString(fldPath []string) (val string, err error)
 }
 
 //SetFields will populate fields of AgentRequest out of templates
-func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
+func (eeR *ExportRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
-		if pass, err := eeR.filterS.Pass(eeR.Tenant,
+		if pass, err := eeR.filterS.Pass(eeR.tnt,
 			tplFld.Filters, eeR); err != nil {
 			return err
 		} else if !pass {
@@ -167,14 +146,14 @@ func (eeR *EventRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 }
 
 // Set implements utils.NMInterface
-func (eeR *EventRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+func (eeR *ExportRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
-		return eeR.opts.Set(fullPath.PathSlice[1:], val.Data)
+		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
 	default:
-		oNM, has := eeR.OrdNavMP[prfx]
+		oNM, has := eeR.ExpData[prfx]
 		if !has {
 			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
 		}
@@ -186,14 +165,14 @@ func (eeR *EventRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLea
 }
 
 // ParseField outputs the value based on the template item
-func (eeR *EventRequest) ParseField(
+func (eeR *ExportRequest) ParseField(
 	cfgFld *config.FCTemplate) (out interface{}, err error) {
 	tmpType := cfgFld.Type
 	switch tmpType {
 	case utils.MetaMaskedDestination:
 		//check if we have destination in the event
 		var dst string
-		if dst, err = eeR.req.FieldAsString([]string{utils.Destination}); err != nil {
+		if dst, err = eeR.inData[utils.MetaReq].FieldAsString([]string{utils.Destination}); err != nil {
 			err = fmt.Errorf("error <%s> getting destination for %s",
 				err, utils.ToJSON(cfgFld))
 			return
@@ -224,14 +203,14 @@ func (eeR *EventRequest) ParseField(
 
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (eeR *EventRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+func (eeR *ExportRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		return Cache.Set(utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
-		return eeR.opts.Set(fullPath.PathSlice[1:], val.Data)
+		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
 	default:
-		oNM, has := eeR.OrdNavMP[prfx]
+		oNM, has := eeR.ExpData[prfx]
 		if !has {
 			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
 		}
@@ -244,7 +223,7 @@ func (eeR *EventRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (
 
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
+func (eeR *ExportRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
@@ -257,7 +236,7 @@ func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) 
 		return Cache.Set(utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		var prv interface{}
-		if prv, err = eeR.opts.FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
+		if prv, err = eeR.inData[utils.MetaOpts].FieldAsInterface(fullPath.PathSlice[1:]); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -265,9 +244,9 @@ func (eeR *EventRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) 
 		} else {
 			prv = utils.IfaceAsString(prv) + utils.IfaceAsString(val.Data)
 		}
-		return eeR.opts.Set(fullPath.PathSlice[1:], prv)
+		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], prv)
 	default:
-		oNM, has := eeR.OrdNavMP[prfx]
+		oNM, has := eeR.ExpData[prfx]
 		if !has {
 			return fmt.Errorf("unsupported field prefix: <%s> when set field", prfx)
 		}

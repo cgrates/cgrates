@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"net"
 	"net/http"
 	"net/smtp"
 	"reflect"
@@ -888,11 +887,6 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of utils.DataProvider interface
-func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) error { // FiltersID;inlineFilter

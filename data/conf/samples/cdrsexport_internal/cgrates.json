@@ -53,7 +53,6 @@
 			"id": "http_localhost",
 			"type": "*http_post",
 			"export_path": "http://127.0.0.1:12081/cdr_http",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -69,7 +68,6 @@
 				"amqpExchangeType": "fanout",
 				"amqpRoutingKey": "cgr_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 20,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -82,7 +80,6 @@
 			"opts": {
 				"amqpQueueID": "cgrates_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -100,7 +97,6 @@
 				"awsSecret": "testsecret",
 				"sqsQueueID": "cgrates-cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -113,7 +109,6 @@
 			"opts":{
 				"kafkaTopic": "cgrates_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 10,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}
@@ -131,7 +126,6 @@
 				"awsSecret": "testsecret",
 				"s3BucketID": "cgrates-cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "RequiredTemplate","type": "*template", "value": "requiredFields"}

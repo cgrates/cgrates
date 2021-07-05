@@ -21,7 +21,6 @@ package agents
 import (
 	"errors"
 	"fmt"
-	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -86,11 +85,6 @@ func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of utils.DataProvider interface
-func (dP *dnsDP) RemoteHost() net.Addr {
-	return utils.NewNetAddr(dP.w.RemoteAddr().Network(), dP.w.RemoteAddr().String())
 }
 
 // FieldAsInterface is part of utils.DataProvider interface

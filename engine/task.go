@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -73,9 +72,4 @@ func (t *Task) FieldAsString(fldPath []string) (s string, err error) {
 	default:
 		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
 	}
-}
-
-// RemoteHost implements utils.DataProvider
-func (t *Task) RemoteHost() (rh net.Addr) {
-	return
 }

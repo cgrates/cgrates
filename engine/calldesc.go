@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"net"
 	"sync"
 	"time"
 
@@ -1036,11 +1035,6 @@ func (cd *CallDescriptor) FieldAsString(fldPath []string) (fldVal string, err er
 // String is part of utils.DataProvider
 func (cd *CallDescriptor) String() string {
 	return utils.ToJSON(cd)
-}
-
-// RemoteHost is part of utils.DataProvider
-func (cd *CallDescriptor) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 type CallDescriptorWithAPIOpts struct {

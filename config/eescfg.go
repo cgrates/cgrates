@@ -157,7 +157,6 @@ type EventExporterCfg struct {
 	Type          string
 	ExportPath    string
 	Opts          map[string]interface{}
-	Tenant        RSRParsers
 	Timezone      string
 	Filters       []string
 	Flags         utils.FlagsWithParams
@@ -183,11 +182,6 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Export_path != nil {
 		eeC.ExportPath = *jsnEec.Export_path
-	}
-	if jsnEec.Tenant != nil {
-		if eeC.Tenant, err = NewRSRParsers(*jsnEec.Tenant, separator); err != nil {
-			return err
-		}
 	}
 	if jsnEec.Timezone != nil {
 		eeC.Timezone = *jsnEec.Timezone
@@ -275,7 +269,6 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		ID:            eeC.ID,
 		Type:          eeC.Type,
 		ExportPath:    eeC.ExportPath,
-		Tenant:        eeC.Tenant.Clone(),
 		Timezone:      eeC.Timezone,
 		Flags:         eeC.Flags.Clone(),
 		AttributeSCtx: eeC.AttributeSCtx,
@@ -329,7 +322,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.IDCfg:               eeC.ID,
 		utils.TypeCfg:             eeC.Type,
 		utils.ExportPathCfg:       eeC.ExportPath,
-		utils.TenantCfg:           eeC.Tenant.GetRule(separator),
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
 		utils.FlagsCfg:            flgs,

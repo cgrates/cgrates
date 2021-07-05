@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"net"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -1193,9 +1192,4 @@ func (ec *EventCost) FieldAsString(fldPath []string) (string, error) {
 		return utils.EmptyString, err
 	}
 	return utils.IfaceAsString(ival), nil
-}
-
-// RemoteHost to implement Dataprovider
-func (ec *EventCost) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }

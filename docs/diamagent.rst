@@ -323,9 +323,6 @@ type
 	**\*constant**
 		Writes out a constant
 
-	**\*remote_host**
-		Writes out the Address of the remote *DiameterClient* sending us the request
-
 	**\*variable**
 		Writes out the variable value, overwriting previous one set
 

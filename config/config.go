@@ -1963,7 +1963,7 @@ func (cfg *CGRConfig) reloadDPCache(sections ...string) {
 }
 
 // GetDataProvider returns the config as a data provider interface
-func (cfg *CGRConfig) GetDataProvider() utils.DataProvider {
+func (cfg *CGRConfig) GetDataProvider() utils.MapStorage {
 	cfg.cacheDPMux.RLock()
 	val, has := cfg.cacheDP[utils.MetaAll]
 	cfg.cacheDPMux.RUnlock()

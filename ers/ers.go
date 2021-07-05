@@ -414,10 +414,11 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 			return
 		}
 		// convert the event to record
-		eeReq := engine.NewEventRequest(utils.MapStorage(cgrEv.Event),
-			utils.MapStorage{}, cgrEv.APIOpts,
-			eEvs.rdrCfg.Tenant, erS.cfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(eEvs.rdrCfg.Timezone, erS.cfg.GeneralCfg().DefaultTimezone),
+		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+			utils.MetaReq:  cgrEv.Event,
+			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaCfg:  erS.cfg.GetDataProvider(),
+		}, utils.FirstNonEmpty(cgrEv.Tenant, erS.cfg.GeneralCfg().DefaultTenant),
 			erS.filterS, map[string]*utils.OrderedNavigableMap{
 				utils.MetaExp: utils.NewOrderedNavigableMap(),
 			})
@@ -429,7 +430,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 			return
 		}
 
-		record := eeReq.OrdNavMP[utils.MetaExp].OrderedFieldsAsStrings()
+		record := eeReq.ExpData[utils.MetaExp].OrderedFieldsAsStrings()
 
 		// open the file and write the record
 		dumpFilePath := path.Join(expPath, fmt.Sprintf("%s.%d%s",

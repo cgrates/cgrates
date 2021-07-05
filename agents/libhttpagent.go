@@ -22,7 +22,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"strconv"
@@ -91,11 +90,6 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of utils.DataProvider interface
-func (hU *httpUrlDP) RemoteHost() net.Addr {
-	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
 }
 
 func newHTTPXmlDP(req *http.Request) (dP utils.DataProvider, err error) {
@@ -177,11 +171,6 @@ func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of utils.DataProvider interface
-func (hU *httpXmlDP) RemoteHost() net.Addr {
-	return utils.NewNetAddr("TCP", hU.addr)
 }
 
 // httpAgentReplyEncoder will encode  []*engine.NMElement
