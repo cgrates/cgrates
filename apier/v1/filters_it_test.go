@@ -113,7 +113,9 @@ func testFilterRpcConn(t *testing.T) {
 }
 
 func testFilterStartCPUProfiling(t *testing.T) {
-	argPath := "/tmp/cpu.prof"
+	argPath := &utils.DirectoryArgs{
+		DirPath: "/tmp",
+	}
 	var reply string
 	if err := filterRPC.Call(utils.CoreSv1StartCPUProfiling,
 		argPath, &reply); err != nil {
@@ -288,13 +290,12 @@ func testFilterRemoveFilterWithoutTenant(t *testing.T) {
 }
 
 func testFilterStopCPUProfiling(t *testing.T) {
-	argPath := "/tmp/cpu.prof"
 	var reply string
 	if err := filterRPC.Call(utils.CoreSv1StopCPUProfiling,
-		utils.EmptyString, &reply); err != nil {
+		new(utils.DirectoryArgs), &reply); err != nil {
 		t.Error(err)
 	}
-	file, err := os.Open(argPath)
+	file, err := os.Open("/tmp/cpu.prof")
 	if err != nil {
 		t.Error(err)
 	}
@@ -308,7 +309,7 @@ func testFilterStopCPUProfiling(t *testing.T) {
 		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
 	}
 	//after we checked that CPUProfile was made successfully, can delete it
-	if err := os.Remove(argPath); err != nil {
+	if err := os.Remove("/tmp/cpu.prof"); err != nil {
 		t.Error(err)
 	}
 }
