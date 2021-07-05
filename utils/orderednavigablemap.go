@@ -204,7 +204,7 @@ func (onm *OrderedNavigableMap) Append(fullPath *FullPath, val *DataLeaf) (err e
 	return
 }
 
-// Compose comose the value of the leaf at the given path
+// Compose compose the value of the leaf at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (onm *OrderedNavigableMap) Compose(fullPath *FullPath, val *DataLeaf) (err error) {
 	if fullPath == nil || len(fullPath.PathSlice) == 0 {
