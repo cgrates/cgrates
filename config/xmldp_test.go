@@ -453,14 +453,6 @@ func TestFieldAsStringXMLEmptyPath(t *testing.T) {
 	}
 }
 
-func TestRemoteHostXML(t *testing.T) {
-	expected := utils.LocalAddr()
-	dp := new(XMLProvider)
-	if received := dp.RemoteHost(); !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expected %+v, received %+v", expected, received)
-	}
-}
-
 func TestStringXML(t *testing.T) {
 	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
 	if err != nil {

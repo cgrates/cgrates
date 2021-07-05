@@ -21,7 +21,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"net"
 	"strings"
 )
 
@@ -40,7 +39,6 @@ type DataProvider interface {
 	String() string // printable version of data
 	FieldAsInterface(fldPath []string) (interface{}, error)
 	FieldAsString(fldPath []string) (string, error) // remove this
-	RemoteHost() net.Addr
 }
 
 // RWDataProvider is a DataProvider with write methods on it

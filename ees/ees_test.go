@@ -204,7 +204,6 @@ func TestV1ProcessEvent2(t *testing.T) {
 	cgrCfg.EEsCfg().Exporters[0].Type = "*fileCSV"
 	cgrCfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cgrCfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
-	cgrCfg.EEsCfg().Exporters[0].Tenant = config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep)
 	newIDb := engine.NewInternalDB(nil, nil, true)
 	newDM := engine.NewDataManager(newIDb, cgrCfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cgrCfg, nil, newDM)

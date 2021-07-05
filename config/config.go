@@ -1578,7 +1578,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 }
 
 // GetDataProvider returns the config as a data provider interface
-func (cfg *CGRConfig) GetDataProvider() utils.DataProvider {
+func (cfg *CGRConfig) GetDataProvider() utils.MapStorage {
 	cfg.cacheDPMux.RLock()
 	if len(cfg.cacheDP) < len(sortedCfgSections) {
 		cfg.cacheDP = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)

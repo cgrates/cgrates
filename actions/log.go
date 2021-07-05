@@ -79,8 +79,12 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 		utils.MetaCDR: utils.NewOrderedNavigableMap(),
 	}
 	// construct an AgentRequest so we can build the reply and send it to CDRServer
-	cdrLogReq := engine.NewEventRequest(reqNm, nil, optsMS, nil, aL.config.GeneralCfg().DefaultTenant,
-		aL.config.GeneralCfg().DefaultTimezone, aL.filterS, oNm)
+	cdrLogReq := engine.NewExportRequest(map[string]utils.MapStorage{
+		utils.MetaReq:  reqNm,
+		utils.MetaOpts: optsMS,
+		utils.MetaCfg:  aL.config.GetDataProvider(),
+	}, aL.config.GeneralCfg().DefaultTenant,
+		aL.filterS, oNm)
 
 	if err = cdrLogReq.SetFields(template); err != nil {
 		return
@@ -90,7 +94,7 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for cdrlog
-			CGREvent: *utils.NMAsCGREvent(cdrLogReq.OrdNavMP[utils.MetaCDR], cdrLogReq.Tenant,
+			CGREvent: *utils.NMAsCGREvent(cdrLogReq.ExpData[utils.MetaCDR], aL.config.GeneralCfg().DefaultTenant,
 				utils.NestingSep, optsMS),
 		}, &rply)
 }

@@ -21,8 +21,6 @@ package config
 import (
 	"reflect"
 	"testing"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewObjectDP(t *testing.T) {
@@ -33,17 +31,6 @@ func TestNewObjectDP(t *testing.T) {
 	}
 	if received := NewObjectDP(object); !reflect.DeepEqual(objDp, received) {
 		t.Errorf("Expected %+v, received %+v", objDp, received)
-	}
-}
-
-func TestRemoteHostObjDP(t *testing.T) {
-	expected := utils.LocalAddr()
-	objDp := &ObjectDP{
-		obj:   "cgrates.org",
-		cache: make(map[string]interface{}),
-	}
-	if received := objDp.RemoteHost(); !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expected %+v, received %+v", expected, received)
 	}
 }
 

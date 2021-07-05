@@ -21,7 +21,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"net"
 	"reflect"
 	"strconv"
 	"strings"
@@ -314,11 +313,6 @@ func (ms MapStorage) Remove(fldPath []string) (err error) {
 
 	}
 
-}
-
-// RemoteHost is part of dataStorage interface
-func (ms MapStorage) RemoteHost() net.Addr {
-	return LocalAddr()
 }
 
 func (ms MapStorage) Clone() (msClone MapStorage) {

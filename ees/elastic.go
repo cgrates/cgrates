@@ -142,19 +142,19 @@ func (eEe *ElasticEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 		oNm := map[string]*utils.OrderedNavigableMap{
 			utils.MetaExp: utils.NewOrderedNavigableMap(),
 		}
-		req := utils.MapStorage(cgrEv.Event)
-		eeReq := engine.NewEventRequest(req, eEe.dc, cgrEv.APIOpts,
-			eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Tenant,
-			eEe.cgrCfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].Timezone,
-				eEe.cgrCfg.GeneralCfg().DefaultTimezone),
+		eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+			utils.MetaReq:  cgrEv.Event,
+			utils.MetaDC:   eEe.dc,
+			utils.MetaOpts: cgrEv.APIOpts,
+			utils.MetaCfg:  eEe.cgrCfg.GetDataProvider(),
+		}, utils.FirstNonEmpty(cgrEv.Tenant, eEe.cgrCfg.GeneralCfg().DefaultTenant),
 			eEe.filterS, oNm)
 		if err = eeReq.SetFields(eEe.cgrCfg.EEsCfg().Exporters[eEe.cfgIdx].ContentFields()); err != nil {
 			return
 		}
-		for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
+		for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
 			path := el.Value
-			nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(path)
+			nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(path)
 			path = path[:len(path)-1] // remove the last index
 			valMp[strings.Join(path, utils.NestingSep)] = nmIt.String()
 		}

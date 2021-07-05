@@ -48,14 +48,6 @@ func TestStringReqFWV(t *testing.T) {
 	}
 }
 
-func TestRemoteHostFWV(t *testing.T) {
-	dP := new(FWVProvider)
-	expected := utils.LocalAddr()
-	if received := dP.RemoteHost(); !reflect.DeepEqual(expected, received) {
-		t.Errorf("Expected %+v, received %+v", expected, received)
-	}
-}
-
 func TestFieldAsInterfaceFWV(t *testing.T) {
 	pth := []string{"1-12"}
 	record := `"cgrates.org", "ATTR_1"`

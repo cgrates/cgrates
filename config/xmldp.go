@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"net"
 	"strconv"
 	"strings"
 
@@ -93,11 +92,6 @@ func (xP *XMLProvider) FieldAsString(fldPath []string) (data string, err error) 
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of engine.utils.DataProvider interface
-func (xP *XMLProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 // ElementText will process the node to extract the elementName's text out of it (only first one found)

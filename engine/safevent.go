@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"net"
 	"sync"
 	"time"
 
@@ -66,13 +65,6 @@ func (se *SafEvent) FieldAsInterface(fldPath []string) (out interface{}, err err
 func (se *SafEvent) FieldAsString(fldPath []string) (out string, err error) {
 	se.RLock()
 	out, err = se.Me.FieldAsString(fldPath)
-	se.RUnlock()
-	return
-}
-
-func (se *SafEvent) RemoteHost() (out net.Addr) {
-	se.RLock()
-	out = se.Me.RemoteHost()
 	se.RUnlock()
 	return
 }

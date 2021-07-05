@@ -17,7 +17,6 @@ package engine
 
 import (
 	"fmt"
-	"net"
 
 	"github.com/nyaruka/phonenumbers"
 
@@ -58,10 +57,6 @@ func (dDP *dynamicDP) FieldAsString(fldPath []string) (string, error) {
 		return "", err
 	}
 	return utils.IfaceAsString(val), nil
-}
-
-func (dDP *dynamicDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 var initialDPPrefixes = utils.NewStringSet([]string{
@@ -163,10 +158,6 @@ func (dDP *libphonenumberDP) FieldAsString(fldPath []string) (string, error) {
 		return "", err
 	}
 	return utils.IfaceAsString(val), nil
-}
-
-func (dDP *libphonenumberDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 func (dDP *libphonenumberDP) FieldAsInterface(fldPath []string) (val interface{}, err error) {

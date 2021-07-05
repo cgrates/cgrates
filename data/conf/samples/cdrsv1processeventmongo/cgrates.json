@@ -39,7 +39,6 @@
 			"id": "amqp_test_file",
 			"type": "*amqpJSONMap",
 			"export_path": "amqps://guest:guest@localhost:256733/",
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"synchronous": true,
 			"fields":[

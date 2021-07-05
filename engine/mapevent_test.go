@@ -94,13 +94,6 @@ func TestMapEventFieldAsString(t *testing.T) {
 	}
 }
 
-func TestMapEventRemoteHost(t *testing.T) {
-	data := utils.DataProvider(mapEv)
-	if rply, expected := data.RemoteHost(), utils.LocalAddr(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
 func TestMapEventString(t *testing.T) {
 	me := NewMapEvent(nil)
 	if rply, expected := me.String(), utils.ToJSON(me); !reflect.DeepEqual(expected, rply) {

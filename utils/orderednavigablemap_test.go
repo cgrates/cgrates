@@ -637,14 +637,6 @@ func TestOrderedNavigableMapRemove(t *testing.T) {
 	}
 }
 
-func TestOrderedNavigableRemote(t *testing.T) {
-	nm := &OrderedNavigableMap{nm: &DataNode{Type: NMMapType, Map: map[string]*DataNode{"Field1": NewLeafNode("1001")}}}
-	eOut := LocalAddr()
-	if rcv := nm.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
 /*
 func BenchmarkOrderdNavigableMapSet(b *testing.B) {
 	nm := NewOrderedNavigableMap()

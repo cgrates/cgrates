@@ -20,7 +20,6 @@ package agents
 
 import (
 	"fmt"
-	"net"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -95,11 +94,6 @@ type AgentRequest struct {
 // String implements utils.DataProvider
 func (ar *AgentRequest) String() string {
 	return utils.ToIJSON(ar)
-}
-
-// RemoteHost implements utils.DataProvider
-func (ar *AgentRequest) RemoteHost() net.Addr {
-	return ar.Request.RemoteHost()
 }
 
 // FieldAsInterface implements utils.DataProvider

@@ -436,14 +436,6 @@ func TestNavMapFieldAsInterface2(t *testing.T) {
 	}
 }
 
-func TestMapStorageRemote(t *testing.T) {
-	nm := MapStorage{}
-	eOut := LocalAddr()
-	if rcv := nm.RemoteHost(); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
 func TestNavMapGetField2(t *testing.T) {
 	nM := MapStorage{
 		"FirstLevel": MapStorage{
