@@ -391,6 +391,7 @@ const (
 	MetaDifference         = "*difference"
 	MetaVariable           = "*variable"
 	MetaCCUsage            = "*ccUsage"
+	MetaSIPCID             = "*sipcid"
 	MetaValueExponent      = "*valueExponent"
 	//rsrparser consts
 	NegativePrefix          = "!"
@@ -2455,6 +2456,7 @@ var StringTmplType = StringSet{
 	MetaUsageDifference: struct{}{},
 	MetaPrefix:          struct{}{},
 	MetaSuffix:          struct{}{},
+	MetaSIPCID:          struct{}{},
 }
 
 // Time duration suffix
