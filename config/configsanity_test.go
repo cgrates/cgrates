@@ -1206,9 +1206,8 @@ func TestConfigSanityScheduler(t *testing.T) {
 func TestConfigSanityEventReader(t *testing.T) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ersCfg = &ERsCfg{
-		Enabled:            true,
-		SessionSConns:      []string{"unexistedConn"},
-		PartialCacheAction: utils.MetaNone,
+		Enabled:       true,
+		SessionSConns: []string{"unexistedConn"},
 	}
 	expected := "<ERs> connection with id: <unexistedConn> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1299,7 +1298,6 @@ func TestConfigSanityEventReader(t *testing.T) {
 				},
 			},
 		},
-		PartialCacheAction: utils.MetaNone,
 	}
 
 	//CacheDumpFields

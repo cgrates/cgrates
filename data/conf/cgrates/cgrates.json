@@ -337,8 +337,6 @@
 // 	"enabled": false,											// starts the EventReader service: <true|false>
 // 	"sessions_conns":["*internal"],								// RPC Connections IDs
 // 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
-// 	"partial_cache_action": "*none",							// the action that will be executed for the partial CSVs that are not matched<*post_cdr|*dump_to_file>
-// 	// "partial_path": "/var/spool/cgrates/ers/partial",		// the path were the partial events will be sent
 // 	"readers": [
 // 		{
 // 			"id": "*default",									// identifier of the EventReader profile

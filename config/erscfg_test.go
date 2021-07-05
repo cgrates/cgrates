@@ -107,6 +107,7 @@ func TestERSClone(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -139,12 +140,12 @@ func TestERSClone(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	for _, profile := range expectedERsCfg.Readers {
 		for _, v := range profile.Fields {
@@ -251,6 +252,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -297,12 +299,12 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	for _, profile := range expectedERsCfg.Readers {
 		for _, v := range profile.Fields {
@@ -477,6 +479,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -507,13 +510,13 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
 
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	msgTemplates := map[string][]*FCTemplate{
 		"randomTemplate": {
@@ -611,6 +614,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -641,13 +645,13 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
 
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	msgTemplates := map[string][]*FCTemplate{
 		"randomTemplate": {
@@ -740,6 +744,7 @@ func TestEventReaderSameID(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -766,13 +771,13 @@ func TestEventReaderSameID(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
 
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	for _, profile := range expectedERsCfg.Readers {
 		for _, v := range profile.Fields {
@@ -873,6 +878,7 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -908,13 +914,12 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		utils.PartialCacheTTLCfg:    "1s",
-		utils.PartialCacheActionCfg: utils.MetaNone,
-		utils.PartialPathCfg:        "",
+		utils.PartialCacheTTLCfg: "1s",
 	}
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -985,6 +990,7 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -1023,13 +1029,12 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		utils.PartialCacheTTLCfg:    "1s",
-		utils.PartialCacheActionCfg: utils.MetaNone,
-		utils.PartialPathCfg:        "",
+		utils.PartialCacheTTLCfg: "1s",
 	}
 	if cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -1114,6 +1119,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
@@ -1146,12 +1152,12 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	for _, profile := range expectedERsCfg.Readers {
 		for _, v := range profile.Fields {

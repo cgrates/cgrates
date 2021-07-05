@@ -155,12 +155,10 @@ type CdrsJsonCfg struct {
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled              *bool
-	Sessions_conns       *[]string
-	Readers              *[]*EventReaderJsonCfg
-	Partial_cache_ttl    *string
-	Partial_cache_action *string
-	Partial_path         *string
+	Enabled           *bool
+	Sessions_conns    *[]string
+	Readers           *[]*EventReaderJsonCfg
+	Partial_cache_ttl *string
 }
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
