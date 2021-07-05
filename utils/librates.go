@@ -657,7 +657,6 @@ func (rpC *RateProfileCost) Equals(nRpCt *RateProfileCost) (eq bool) {
 		(rpC.Altered != nil && nRpCt.Altered == nil ||
 			rpC.Altered == nil && nRpCt.Altered != nil ||
 			len(rpC.Altered) != len(nRpCt.Altered)) {
-		fmt.Printf("%T and %T \n", rpC.Cost, nRpCt.Cost)
 		return
 	}
 	for idx, val := range rpC.CostIntervals {
