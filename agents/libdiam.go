@@ -317,11 +317,6 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	return utils.IfaceAsString(valIface), nil
 }
 
-// RemoteHost is part of utils.DataProvider interface
-func (dP *diameterDP) RemoteHost() net.Addr {
-	return utils.NewNetAddr(dP.c.RemoteAddr().Network(), dP.c.RemoteAddr().String())
-}
-
 // FieldAsInterface is part of utils.DataProvider interface
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {

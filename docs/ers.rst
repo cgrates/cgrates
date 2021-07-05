@@ -266,9 +266,6 @@ type
 	**\*constant**
 		Writes out a constant
 
-	**\*remoteHost**
-		Writes out the Address of the remote host sending us the Event
-
 	**\*variable**
 		Writes out the variable value, overwriting previous one set
 

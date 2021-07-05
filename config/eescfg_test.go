@@ -42,7 +42,6 @@ func TestEESClone(t *testing.T) {
 			"opts": {
               "*default": "randomVal"
              },											
-			"tenant": "~*req.Destination1",										
 			"timezone": "local",										
 			"filters": ["randomFiletrs"],										
 			"flags": [],										
@@ -78,7 +77,6 @@ func TestEESClone(t *testing.T) {
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
 				Synchronous:   false,
-				Tenant:        NewRSRParsersMustCompile("", utils.InfieldSep),
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
 				Timezone:      utils.EmptyString,
@@ -96,7 +94,6 @@ func TestEESClone(t *testing.T) {
 				ID:            utils.CGRateSLwr,
 				Type:          utils.MetaNone,
 				Synchronous:   false,
-				Tenant:        NewRSRParsersMustCompile("~*req.Destination1", utils.InfieldSep),
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      2,
 				Timezone:      "local",
@@ -259,28 +256,6 @@ func TestEESCacheloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestEESExportersloadFromJsonCfg(t *testing.T) {
-	eesCfg := &EEsJsonCfg{
-		Exporters: &[]*EventExporterJsonCfg{
-			{
-				Tenant: utils.StringPointer("a{*"),
-			},
-		},
-	}
-	expected := "invalid converter terminator in rule: <a{*>"
-	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-	eesCfgExporter := &EEsJsonCfg{
-		Exporters: nil,
-	}
-	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.eesCfg.loadFromJSONCfg(eesCfgExporter, jsonCfg.templates, jsonCfg.generalCfg.RSRSep, jsonCfg.dfltEvExp); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestEventExporterSameID(t *testing.T) {
 	expectedEEsCfg := &EEsCfg{
 		Enabled:         true,
@@ -296,7 +271,6 @@ func TestEventExporterSameID(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
 				Timezone:      utils.EmptyString,
@@ -312,7 +286,6 @@ func TestEventExporterSameID(t *testing.T) {
 			{
 				ID:            "file_exporter1",
 				Type:          utils.MetaFileCSV,
-				Tenant:        nil,
 				Timezone:      utils.EmptyString,
 				Filters:       []string{},
 				AttributeSIDs: []string{},
@@ -389,7 +362,6 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				Attribute_ids: &[]string{},
 				Flags:         &[]string{"*dryRun"},
 				Export_path:   utils.StringPointer("/tmp/testCSV"),
-				Tenant:        nil,
 				Timezone:      utils.StringPointer("UTC"),
 				Synchronous:   utils.BoolPointer(true),
 				Attempts:      utils.IntPointer(1),
@@ -418,7 +390,6 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
 				Timezone:      utils.EmptyString,
@@ -438,7 +409,6 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
 				ExportPath:    "/tmp/testCSV",
-				Tenant:        nil,
 				Timezone:      "UTC",
 				Synchronous:   true,
 				Attempts:      1,
@@ -497,7 +467,6 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				Attribute_ids: &[]string{},
 				Flags:         &[]string{"*dryRun"},
 				Export_path:   utils.StringPointer("/tmp/testCSV"),
-				Tenant:        nil,
 				Timezone:      utils.StringPointer("UTC"),
 				Synchronous:   utils.BoolPointer(true),
 				Attempts:      utils.IntPointer(1),
@@ -532,7 +501,6 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 			{
 				ID:            utils.MetaDefault,
 				Type:          utils.MetaNone,
-				Tenant:        nil,
 				ExportPath:    "/var/spool/cgrates/ees",
 				Attempts:      1,
 				Timezone:      utils.EmptyString,
@@ -552,7 +520,6 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 				AttributeSIDs: []string{},
 				Flags:         utils.FlagsWithParamsFromSlice([]string{utils.MetaDryRun}),
 				ExportPath:    "/tmp/testCSV",
-				Tenant:        nil,
 				Timezone:      "UTC",
 				Synchronous:   true,
 				Attempts:      1,
@@ -633,7 +600,6 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 			      "opts": {
 					"kafkaGroupID": "test",
 				  },											
-			      "tenant": "~*req.Destination1",										
 			      "timezone": "UTC",										
 			      "filters": [],										
 			      "flags": ["randomFlag"],										
@@ -668,7 +634,6 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.OptsCfg: map[string]interface{}{
 					utils.KafkaGroupID: "test",
 				},
-				utils.TenantCfg:           "~*req.Destination1",
 				utils.TimezoneCfg:         "UTC",
 				utils.FiltersCfg:          []string{},
 				utils.FlagsCfg:            []string{"randomFlag"},
@@ -721,14 +686,8 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Type:       "xml",
 		ExportPath: "/tmp/ees",
 		Opts:       map[string]interface{}{},
-		Tenant: RSRParsers{
-			{
-				Rules: "Rule1",
-			},
-		},
-
-		Timezone: "UTC",
-		Filters:  []string{"Filter1"},
+		Timezone:   "UTC",
+		Filters:    []string{"Filter1"},
 		Flags: utils.FlagsWithParams{
 			"FLAG_1": {
 				"PARAM_1": []string{"param1"},
@@ -766,11 +725,6 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		ExportPath: "/var/tmp/ees",
 		Opts: map[string]interface{}{
 			"OPT": "opt",
-		},
-		Tenant: RSRParsers{
-			{
-				Rules: "cgrates.org",
-			},
 		},
 
 		Timezone: "EEST",
@@ -813,7 +767,6 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Opts: map[string]interface{}{
 			"OPT": "opt",
 		},
-		Tenant:            utils.StringPointer("cgrates.org"),
 		Timezone:          utils.StringPointer("EEST"),
 		Filters:           &[]string{"Filter2"},
 		Flags:             &[]string{"FLAG_2:PARAM_2:param2"},
@@ -934,11 +887,6 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			Type:       "xml",
 			ExportPath: "/tmp/ees",
 			Opts:       map[string]interface{}{},
-			Tenant: RSRParsers{
-				{
-					Rules: "Rule1",
-				},
-			},
 
 			Timezone: "UTC",
 			Filters:  []string{"Filter1"},
@@ -981,11 +929,6 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			ExportPath: "/var/tmp/ees",
 			Opts: map[string]interface{}{
 				"OPT": "opt",
-			},
-			Tenant: RSRParsers{
-				{
-					Rules: "cgrates.org",
-				},
 			},
 
 			Timezone: "EEST",
@@ -1030,7 +973,6 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			Opts: map[string]interface{}{
 				"OPT": "opt",
 			},
-			Tenant:            utils.StringPointer("cgrates.org"),
 			Timezone:          utils.StringPointer("EEST"),
 			Filters:           &[]string{"Filter2"},
 			Flags:             &[]string{"FLAG_2:PARAM_2:param2"},

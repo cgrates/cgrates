@@ -79,7 +79,6 @@
 				"s3BucketID": "cgrates-cdrs",
 				// "awsToken": "sessionToken",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},

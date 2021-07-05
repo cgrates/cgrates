@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"net"
 	"strconv"
 
 	"github.com/cgrates/cgrates/utils"
@@ -81,11 +80,6 @@ func (cP *SliceDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of engine.utils.DataProvider interface
-func (cP *SliceDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 // getIndex returns the index from index alias map or if not found try to convert it to int

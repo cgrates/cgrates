@@ -262,18 +262,6 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	}
 }
 
-func TestRemoteHostLoaderData(t *testing.T) {
-	record := []string{"ignored", "ignored", "Subject", "*any", "1001"}
-	fNmae := "File1.csv"
-	csvProv := newCsvProvider(record, fNmae)
-	exp := "local"
-	rcv := csvProv.RemoteHost()
-	rcvStr := rcv.String()
-	if !reflect.DeepEqual(exp, rcvStr) {
-		t.Errorf("Expected %+v, received %+v", exp, rcv)
-	}
-}
-
 func TestGetRateIDsLoaderData(t *testing.T) {
 	ldrData := LoaderData{
 		"File1.csv": []string{"Subject", "*any", "1001"},

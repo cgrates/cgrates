@@ -160,19 +160,19 @@ func (sqlEe *SQLEe) ExportEvent(cgrEv *utils.CGREvent) (err error) {
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaExp: utils.NewOrderedNavigableMap(),
 	}
-	req := utils.MapStorage(cgrEv.Event)
-	eeReq := engine.NewEventRequest(req, sqlEe.dc, cgrEv.APIOpts,
-		sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Tenant,
-		sqlEe.cgrCfg.GeneralCfg().DefaultTenant,
-		utils.FirstNonEmpty(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].Timezone,
-			sqlEe.cgrCfg.GeneralCfg().DefaultTimezone),
+	eeReq := engine.NewExportRequest(map[string]utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaDC:   sqlEe.dc,
+		utils.MetaOpts: cgrEv.APIOpts,
+		utils.MetaCfg:  sqlEe.cgrCfg.GetDataProvider(),
+	}, utils.FirstNonEmpty(cgrEv.Tenant, sqlEe.cgrCfg.GeneralCfg().DefaultTenant),
 		sqlEe.filterS, oNm)
 	if err = eeReq.SetFields(sqlEe.cgrCfg.EEsCfg().Exporters[sqlEe.cfgIdx].ContentFields()); err != nil {
 		return
 	}
 
-	for el := eeReq.OrdNavMP[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
-		nmIt, _ := eeReq.OrdNavMP[utils.MetaExp].Field(el.Value)
+	for el := eeReq.ExpData[utils.MetaExp].GetFirstElement(); el != nil; el = el.Next() {
+		nmIt, _ := eeReq.ExpData[utils.MetaExp].Field(el.Value)
 		pathWithoutIndex := strings.Join(el.Value[:len(el.Value)-1], utils.NestingSep) // remove the index path.index
 		if pathWithoutIndex != utils.MetaRow {
 			colNames = append(colNames, pathWithoutIndex)

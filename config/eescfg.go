@@ -140,7 +140,6 @@ type EventExporterCfg struct {
 	Type          string
 	ExportPath    string
 	Opts          map[string]interface{}
-	Tenant        RSRParsers
 	Timezone      string
 	Filters       []string
 	Flags         utils.FlagsWithParams
@@ -166,11 +165,6 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Export_path != nil {
 		eeC.ExportPath = *jsnEec.Export_path
-	}
-	if jsnEec.Tenant != nil {
-		if eeC.Tenant, err = NewRSRParsers(*jsnEec.Tenant, separator); err != nil {
-			return err
-		}
 	}
 	if jsnEec.Timezone != nil {
 		eeC.Timezone = *jsnEec.Timezone
@@ -252,7 +246,6 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 		ID:            eeC.ID,
 		Type:          eeC.Type,
 		ExportPath:    eeC.ExportPath,
-		Tenant:        eeC.Tenant.Clone(),
 		Timezone:      eeC.Timezone,
 		Flags:         eeC.Flags.Clone(),
 		AttributeSCtx: eeC.AttributeSCtx,
@@ -300,7 +293,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		utils.IDCfg:               eeC.ID,
 		utils.TypeCfg:             eeC.Type,
 		utils.ExportPathCfg:       eeC.ExportPath,
-		utils.TenantCfg:           eeC.Tenant.GetRule(separator),
 		utils.TimezoneCfg:         eeC.Timezone,
 		utils.FiltersCfg:          eeC.Filters,
 		utils.FlagsCfg:            flgs,
@@ -331,7 +323,6 @@ type EventExporterJsonCfg struct {
 	Type              *string
 	Export_path       *string
 	Opts              map[string]interface{}
-	Tenant            *string
 	Timezone          *string
 	Filters           *[]string
 	Flags             *[]string
@@ -356,11 +347,6 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 		d.Export_path = utils.StringPointer(v2.ExportPath)
 	}
 	d.Opts = diffMap(d.Opts, v1.Opts, v2.Opts)
-	tnt1 := v1.Tenant.GetRule(separator)
-	tnt2 := v2.Tenant.GetRule(separator)
-	if tnt1 != tnt2 {
-		d.Tenant = utils.StringPointer(tnt2)
-	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}

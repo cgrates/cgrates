@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"net"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -58,10 +57,6 @@ func (me MapEvent) FieldAsString(fldPath []string) (string, error) {
 		return "", utils.ErrNotFound
 	}
 	return me.GetString(fldPath[0])
-}
-
-func (me MapEvent) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
 
 func (me MapEvent) HasField(fldName string) (has bool) {

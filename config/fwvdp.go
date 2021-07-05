@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"net"
 	"strconv"
 	"strings"
 
@@ -90,9 +89,4 @@ func (fP *FWVProvider) FieldAsString(fldPath []string) (data string, err error) 
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of engine.utils.DataProvider interface
-func (fP *FWVProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }

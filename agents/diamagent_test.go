@@ -79,7 +79,8 @@ func TestProcessRequest(t *testing.T) {
 				Type: utils.MetaComposed, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID,
 				Value: config.NewRSRParsersMustCompile("~*req.SessionId", utils.InfieldSep), Mandatory: true},
 			{Tag: utils.OriginHost,
-				Type: utils.MetaRemoteHost, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginHost, Mandatory: true},
+				Type: utils.MetaVariable, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginHost,
+				Value: config.NewRSRParsersMustCompile("~*vars.RemoteHost", utils.InfieldSep), Mandatory: true},
 			{Tag: utils.Category,
 				Type: utils.MetaConstant, Path: utils.MetaCgreq + utils.NestingSep + utils.Category,
 				Value: config.NewRSRParsersMustCompile(utils.Call, utils.InfieldSep)},
@@ -116,6 +117,7 @@ func TestProcessRequest(t *testing.T) {
 		utils.MetaApp:     utils.NewLeafNode("appName"),
 		utils.MetaAppID:   utils.NewLeafNode("appID"),
 		utils.MetaCmd:     utils.NewLeafNode("cmdR"),
+		utils.RemoteHost:  utils.NewLeafNode(utils.LocalAddr().String()),
 	}}
 
 	sS := &testMockSessionConn{calls: map[string]func(_ *context.Context, _, _ interface{}) error{

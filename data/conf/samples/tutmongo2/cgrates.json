@@ -63,7 +63,6 @@
 			"opts": {
 				"amqpQueueID":"cgrates_cdrs",
 			},
-			"tenant": "cgrates.org",
 			"attempts": 1,
 			"fields":[
 				{"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"},

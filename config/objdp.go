@@ -20,7 +20,6 @@ package config
 
 import (
 	"fmt"
-	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -125,9 +124,4 @@ func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) 
 		return
 	}
 	return utils.IfaceAsString(valIface), nil
-}
-
-// RemoteHost is part of engine.utils.DataProvider interface
-func (objDP *ObjectDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
