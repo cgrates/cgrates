@@ -396,9 +396,9 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		}
 		erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: eEvs.rdrCfg}
 	case utils.MetaDumpToFile: // apply the cacheDumpFields to the united events and write the record to file
-		var expPath string
-		if path, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
-			expPath = utils.IfaceAsString(path)
+		expPath := eEvs.rdrCfg.ProcessedPath
+		if pathVal, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
+			expPath = utils.IfaceAsString(pathVal)
 		}
 		if expPath == utils.EmptyString { // do not write the partial event to file
 			return
