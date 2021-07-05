@@ -577,6 +577,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0.,
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"xmlRootPath":         "",
 					"natsSubject":         "cgrates_cdrs",
 				},
@@ -598,13 +599,13 @@ func testCGRConfigReloadERs(t *testing.T) {
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0.,
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"xmlRootPath":         "",
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ERsCfg()) {
 		t.Errorf("Expected %s,\n received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ERsCfg()))
@@ -763,10 +764,8 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		},
 	}
 	expected := map[string]interface{}{
-		"enabled":              true,
-		"partial_cache_action": "*none",
-		"partial_cache_ttl":    "1s",
-		"partial_path":         "",
+		"enabled":           true,
+		"partial_cache_ttl": "1s",
 		"readers": []interface{}{
 			map[string]interface{}{
 				"id":                  utils.MetaDefault,
@@ -786,6 +785,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0.,
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"xmlRootPath":         "",
 					"natsSubject":         "cgrates_cdrs",
 				},
@@ -809,6 +809,7 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 					"csvHeaderDefineChar": ":",
 					"csvRowLength":        0.,
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"xmlRootPath":         "",
 					"natsSubject":         "cgrates_cdrs",
 				},

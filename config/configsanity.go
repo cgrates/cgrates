@@ -681,17 +681,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// EventReader sanity checks
 	if cfg.ersCfg.Enabled {
-		//	check the global partial options
-		if cfg.ersCfg.PartialCacheAction != utils.MetaNone &&
-			cfg.ersCfg.PartialCacheAction != utils.MetaDumpToFile &&
-			cfg.ersCfg.PartialCacheAction != utils.MetaPostCDR {
-			return fmt.Errorf("<%s> wrong partial expiry action", utils.ERs)
-		}
-		if cfg.ersCfg.PartialPath != utils.EmptyString {
-			if _, err := os.Stat(cfg.ersCfg.PartialPath); err != nil && os.IsNotExist(err) {
-				return fmt.Errorf("<%s> nonexistent partial folder: %s", utils.ERs, cfg.ersCfg.PartialPath)
-			}
-		}
 		for _, connID := range cfg.ersCfg.SessionSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.ERs)
@@ -703,30 +692,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		for _, rdr := range cfg.ersCfg.Readers {
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
-			}
-			pAct := cfg.ersCfg.PartialCacheAction
-			if act, has := rdr.Opts[utils.PartialCacheActionOpt]; has { // check the action from opts
-				if pAct = utils.IfaceAsString(act); pAct != utils.MetaDumpToFile &&
-					pAct != utils.MetaNone &&
-					pAct != utils.MetaPostCDR {
-					return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
-				}
-			}
-			if pAct != utils.MetaNone { // if is *none we do not process the evicted events
-				if fldSep, has := rdr.Opts[utils.PartialOrderFieldOpt]; has && // the field we order after must not be empty
-					utils.IfaceAsString(fldSep) == utils.EmptyString {
-					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialOrderFieldOpt, rdr.ID)
-				}
-			} else if pAct == utils.MetaDumpToFile { // only if the action is *dump_to_file
-				if path, has := rdr.Opts[utils.PartialPathOpt]; has { // the path from options needs to exists if overwriten by reader
-					if _, err := os.Stat(utils.IfaceAsString(path)); err != nil && os.IsNotExist(err) {
-						return fmt.Errorf("<%s> nonexistent partial folder: %s for reader with ID: %s", utils.ERs, path, rdr.ID)
-					}
-				}
-				if fldSep, has := rdr.Opts[utils.PartialCSVFieldSepartorOpt]; has && // the separtor must not be empty
-					utils.IfaceAsString(fldSep) == utils.EmptyString {
-					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialCSVFieldSepartorOpt, rdr.ID)
-				}
 			}
 			switch rdr.Type {
 			case utils.MetaFileCSV:

@@ -26,12 +26,10 @@ import (
 
 // ERsCfg the config for ERs
 type ERsCfg struct {
-	Enabled            bool
-	SessionSConns      []string
-	Readers            []*EventReaderCfg
-	PartialCacheTTL    time.Duration
-	PartialCacheAction string
-	PartialPath        string
+	Enabled         bool
+	SessionSConns   []string
+	Readers         []*EventReaderCfg
+	PartialCacheTTL time.Duration
 }
 
 func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
@@ -55,12 +53,6 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_cache_ttl); err != nil {
 			return
 		}
-	}
-	if jsnCfg.Partial_cache_action != nil {
-		erS.PartialCacheAction = *jsnCfg.Partial_cache_action
-	}
-	if jsnCfg.Partial_path != nil {
-		erS.PartialPath = *jsnCfg.Partial_path
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
 }
@@ -100,12 +92,10 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 // Clone returns a deep copy of ERsCfg
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
-		Enabled:            erS.Enabled,
-		SessionSConns:      make([]string, len(erS.SessionSConns)),
-		Readers:            make([]*EventReaderCfg, len(erS.Readers)),
-		PartialCacheTTL:    erS.PartialCacheTTL,
-		PartialCacheAction: erS.PartialCacheAction,
-		PartialPath:        erS.PartialPath,
+		Enabled:         erS.Enabled,
+		SessionSConns:   make([]string, len(erS.SessionSConns)),
+		Readers:         make([]*EventReaderCfg, len(erS.Readers)),
+		PartialCacheTTL: erS.PartialCacheTTL,
 	}
 	for idx, sConn := range erS.SessionSConns {
 		cln.SessionSConns[idx] = sConn
@@ -119,10 +109,8 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:            erS.Enabled,
-		utils.PartialCacheTTLCfg:    "0",
-		utils.PartialCacheActionCfg: erS.PartialCacheAction,
-		utils.PartialPathCfg:        erS.PartialPath,
+		utils.EnabledCfg:         erS.Enabled,
+		utils.PartialCacheTTLCfg: "0",
 	}
 	if erS.PartialCacheTTL != 0 {
 		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()

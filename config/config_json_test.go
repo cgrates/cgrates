@@ -1807,12 +1807,12 @@ func TestDfEventReaderCfg(t *testing.T) {
 					"csvRowLength":        0.,
 					"xmlRootPath":         "",
 					"partialOrderField":   "~*req.AnswerTime",
+					"partialCacheAction":  utils.MetaNone,
 					"natsSubject":         "cgrates_cdrs",
 				},
 			},
 		},
-		Partial_cache_ttl:    utils.StringPointer("1s"),
-		Partial_cache_action: utils.StringPointer(utils.MetaNone),
+		Partial_cache_ttl: utils.StringPointer("1s"),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
