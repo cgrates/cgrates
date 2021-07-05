@@ -178,7 +178,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 		for _, dr := range drs.DestinationRates {
 			rate, exists := tpr.rates[dr.RateId]
 			if !exists {
-				return fmt.Errorf("could not find rate for tag %v", dr.RateId)
+				return fmt.Errorf("could not find rate for tag %q", dr.RateId)
 			}
 			dr.Rate = rate
 			destinationExists := dr.DestinationId == utils.MetaAny
@@ -191,7 +191,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				}
 			}
 			if !destinationExists {
-				return fmt.Errorf("could not get destination for tag %v", dr.DestinationId)
+				return fmt.Errorf("could not get destination for tag %q", dr.DestinationId)
 			}
 		}
 	}
@@ -217,7 +217,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 			if !exists {
 				tptm, err := tpr.lr.GetTPTimings(tpr.tpid, rp.TimingId)
 				if err != nil || len(tptm) == 0 {
-					return false, fmt.Errorf("no timing with id %s: %v", rp.TimingId, err)
+					return false, fmt.Errorf("no timing with id %q: %v", rp.TimingId, err)
 				}
 				tm, err = MapTPTimings(tptm)
 				if err != nil {
@@ -228,7 +228,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 			rp.SetTiming(tm[rp.TimingId])
 			tpdrm, err := tpr.lr.GetTPDestinationRates(tpr.tpid, rp.DestinationRatesId, nil)
 			if err != nil || len(tpdrm) == 0 {
-				return false, fmt.Errorf("no DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
+				return false, fmt.Errorf("no DestinationRates profile with id %q: %v", rp.DestinationRatesId, err)
 			}
 			drm, err := MapTPDestinationRates(tpdrm)
 			if err != nil {
@@ -237,7 +237,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 			for _, drate := range drm[rp.DestinationRatesId].DestinationRates {
 				tprt, err := tpr.lr.GetTPRates(tpr.tpid, drate.RateId)
 				if err != nil || len(tprt) == 0 {
-					return false, fmt.Errorf("no Rates profile with id %s: %v", drate.RateId, err)
+					return false, fmt.Errorf("no Rates profile with id %q: %v", drate.RateId, err)
 				}
 				rt, err := MapTPRates(tprt)
 				if err != nil {
@@ -259,7 +259,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 							} else if dbExists {
 								continue
 							} else if !dbExists { // if the error doesn't exists in datadb return error
-								return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
+								return false, fmt.Errorf("could not get destination for tag %q", drate.DestinationId)
 							}
 						}
 					} else {
@@ -291,12 +291,12 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 		for _, rplBnd := range rplBnds {
 			t, exists := tpr.timings[rplBnd.TimingId]
 			if !exists {
-				return fmt.Errorf("could not get timing for tag %v", rplBnd.TimingId)
+				return fmt.Errorf("could not get timing for tag %q", rplBnd.TimingId)
 			}
 			rplBnd.SetTiming(t)
 			drs, exists := tpr.destinationRates[rplBnd.DestinationRatesId]
 			if !exists {
-				return fmt.Errorf("could not find destination rate for tag %v", rplBnd.DestinationRatesId)
+				return fmt.Errorf("could not find destination rate for tag %q", rplBnd.DestinationRatesId)
 			}
 			plan, exists := tpr.ratingPlans[tag]
 			if !exists {
@@ -336,7 +336,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 				}
 			}
 			if !exists {
-				return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
+				return fmt.Errorf("could not load rating plans for tag: %q", tpRa.RatingPlanId)
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
 				&RatingPlanActivation{
@@ -377,7 +377,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 				}
 			}
 			if !exists {
-				return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
+				return fmt.Errorf("could not load rating plans for tag: %q", tpRa.RatingPlanId)
 			}
 			rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
 				&RatingPlanActivation{
@@ -515,7 +515,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 					if !found {
 						if timing, err = tpr.dm.GetTiming(timingID, false,
 							utils.NonTransactional); err != nil {
-							return fmt.Errorf("error: <%s> querying timing with id: <%s>",
+							return fmt.Errorf("error: %v querying timing with id: %q",
 								err.Error(), timingID)
 						}
 					}
@@ -548,15 +548,15 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 			_, exists := tpr.actions[at.ActionsId]
 			if !exists && tpr.dm.dataDB != nil {
 				if exists, err = tpr.dm.HasData(utils.ActionPrefix, at.ActionsId, ""); err != nil {
-					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
+					return fmt.Errorf("[ActionPlans] Error querying actions: %q - %s", at.ActionsId, err.Error())
 				}
 			}
 			if !exists {
-				return fmt.Errorf("[ActionPlans] Could not load the action for tag: %v", at.ActionsId)
+				return fmt.Errorf("[ActionPlans] Could not load the action for tag: %q", at.ActionsId)
 			}
 			t, exists := tpr.timings[at.TimingId]
 			if !exists {
-				return fmt.Errorf("[ActionPlans] Could not load the timing for tag: %v", at.TimingId)
+				return fmt.Errorf("[ActionPlans] Could not load the timing for tag: %q", at.TimingId)
 			}
 			var actPln *ActionPlan
 			if actPln, exists = tpr.actionPlans[atID]; !exists {
@@ -707,7 +707,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			if err != nil {
 				return errors.New(err.Error() + " (ActionPlan): " + accountAction.ActionPlanId)
 			} else if len(tpap) == 0 {
-				return fmt.Errorf("no action plan with id <%s>", accountAction.ActionPlanId)
+				return fmt.Errorf("no action plan with id %q", accountAction.ActionPlanId)
 			}
 			aps := MapTPActionTimings(tpap)
 			var actionPlan *ActionPlan
@@ -718,7 +718,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				if actions, err := tpr.lr.GetTPActions(tpr.tpid, at.ActionsId); err != nil {
 					return errors.New(err.Error() + " (Actions): " + at.ActionsId)
 				} else if len(actions) == 0 {
-					return fmt.Errorf("no action with id <%s>", at.ActionsId)
+					return fmt.Errorf("no action with id %q", at.ActionsId)
 				}
 				var t *utils.TPTiming
 				if at.TimingId != utils.MetaASAP {
@@ -726,7 +726,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					if err != nil {
 						return errors.New(err.Error() + " (Timing): " + at.TimingId)
 					} else if len(tptm) == 0 {
-						return fmt.Errorf("no timing with id <%s>", at.TimingId)
+						return fmt.Errorf("no timing with id %q", at.TimingId)
 					}
 					tm, err := MapTPTimings(tptm)
 					if err != nil {
@@ -996,7 +996,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 									EndTime:   timing.EndTime,
 								})
 							} else {
-								return fmt.Errorf("could not find timing: %v", timingID)
+								return fmt.Errorf("could not find timing: %q", timingID)
 							}
 						}
 					}
@@ -1048,13 +1048,13 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 	for _, aa := range storAts {
 		aaKeyID := aa.KeyId()
 		if _, alreadyDefined := tpr.accountActions[aa.KeyId()]; alreadyDefined {
-			return fmt.Errorf("duplicate account action found: %s", aaKeyID)
+			return fmt.Errorf("duplicate account action found: %q", aaKeyID)
 		}
 		var aTriggers ActionTriggers
 		if aa.ActionTriggersId != "" {
 			var exists bool
 			if aTriggers, exists = tpr.actionsTriggers[aa.ActionTriggersId]; !exists {
-				return fmt.Errorf("could not get action triggers for tag %s", aa.ActionTriggersId)
+				return fmt.Errorf("could not get action triggers for tag %q", aa.ActionTriggersId)
 			}
 		}
 		ub := &Account{
@@ -1071,7 +1071,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 				if tpr.dm.dataDB != nil {
 					if actionPlan, err = tpr.dm.GetActionPlan(aa.ActionPlanId, false, true, utils.NonTransactional); err != nil {
 						if err.Error() == utils.ErrNotFound.Error() {
-							return fmt.Errorf("could not get action plan for tag %v", aa.ActionPlanId)
+							return fmt.Errorf("could not get action plan for tag %q", aa.ActionPlanId)
 						}
 						return err
 					}
@@ -1079,7 +1079,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 					tpr.actionPlans[aa.ActionPlanId] = actionPlan
 				}
 				if !exists {
-					return fmt.Errorf("could not get action plan for tag %v", aa.ActionPlanId)
+					return fmt.Errorf("could not get action plan for tag %q", aa.ActionPlanId)
 				}
 			}
 			if actionPlan.AccountIDs == nil {
@@ -1205,7 +1205,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		}
 		for _, at := range attr.Attributes {
 			if at.Path == utils.EmptyString { // we do not suppot empty Path in Attributes
-				err = fmt.Errorf("empty path in AttributeProfile <%s>", utils.ConcatenatedKey(attr.Tenant, attr.ID))
+				err = fmt.Errorf("empty path in AttributeProfile %q", utils.ConcatenatedKey(attr.Tenant, attr.ID))
 				return
 			}
 		}

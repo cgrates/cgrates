@@ -64,7 +64,7 @@ var (
 		testConsoleItRPCConn,
 		testConsoleItLoadTP,
 		testConsoleItCacheClear,
-		// testConsoleItDebitMax,
+		testConsoleItDebitMax,
 		testConsoleItThreshold,
 		testConsoleItThresholdsProfileIds,
 		testConsoleItThresholdsProfileSet,
@@ -75,7 +75,6 @@ var (
 		testConsoleItThresholdsProfileRemove,
 		testConsoleItTriggersSet,
 		testConsoleItTriggers,
-
 		testConsoleItSchedulerReload,
 		testConsoleItSchedulerExecute,
 		testConsoleItActionExecute,
@@ -180,7 +179,7 @@ var (
 		testConsoleItDispatchersHostRemove,
 		testConsoleItAccountActionPlanGet,
 		testConsoleItCacheItemIds,
-		// testConsoleItCacheItemExpiryTime,
+		testConsoleItCacheItemExpiryTime,
 		testConsoleItSessionProcessMessage,
 		testConsoleItSessionUpdate,
 		testConsoleItSessionInitiate,
@@ -190,7 +189,7 @@ var (
 		testConsoleItCacheRemoveGroup,
 		testConsoleItParse,
 		testConsoleItSchedulerQueue,
-		// testConsoleItCacheStats,
+		testConsoleItCacheStats,
 		testConsoleItReloadConfig,
 		testConsoleItKillEngine,
 	}
@@ -4550,7 +4549,7 @@ func testConsoleItDebitMax(t *testing.T) {
 	rcv.Timespans[0].Increments[0].BalanceInfo.Monetary.UUID = ""
 	rcv.Timespans[0].Increments[1].BalanceInfo.Monetary.UUID = ""
 	rcv.AccountSummary.BalanceSummaries[0].UUID = ""
-	if !reflect.DeepEqual(&rcv, expected) {
+	if !reflect.DeepEqual(rcv, expected) {
 		t.Fatalf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
