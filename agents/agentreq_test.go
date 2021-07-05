@@ -939,7 +939,21 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest = utils.NewOrderedNavigableMap()
-	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Usage, PathSlice: []string{utils.Usage}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: 3 * time.Minute}}}})
+	agReq.CGRRequest.Set(&utils.FullPath{
+		Path:      utils.Usage,
+		PathSlice: []string{utils.Usage},
+	},
+		&utils.DataNode{
+			Type: utils.NMSliceType,
+			Slice: []*utils.DataNode{
+				{
+					Type: utils.NMDataType,
+					Value: &utils.DataLeaf{
+						Data: 3 * time.Minute,
+					},
+				},
+			},
+		})
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: utils.MetaVoice}}}})
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
@@ -976,6 +990,149 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	} else if !reflect.DeepEqual(rply, expVal) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}}, utils.NewLeafNode("CGRATES_ID1"))
+	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
+	aqReq.CGRRequest.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
+
+	path := []string{utils.MetaCgreq}
+	expVal := utils.NewOrderedNavigableMap()
+	expVal.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}}, &utils.DataLeaf{Data: "CGRATES_ID1"})
+	expVal.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, &utils.DataLeaf{Data: "1002"})
+	expVal.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)})
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rply) {
+		t.Errorf("Expected %+v, received %+v", expVal, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	dP := &utils.MapStorage{
+		utils.CGRID:        "CGRATES_ID1",
+		utils.AccountField: "1002",
+		utils.AnswerTime:   time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC),
+	}
+	aqReq := NewAgentRequest(dP, nil, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+
+	path := []string{utils.MetaReq}
+
+	expVal := &utils.MapStorage{
+		utils.CGRID:        "CGRATES_ID1",
+		utils.AccountField: "1002",
+		utils.AnswerTime:   time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC),
+	}
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rply) {
+		t.Errorf("Expected %+v, received %+v", expVal, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathDiamReq(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+	aqReq.diamreq.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}}, utils.NewLeafNode("CGRATES_ID1"))
+	aqReq.diamreq.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
+	aqReq.diamreq.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
+
+	path := []string{utils.MetaDiamreq}
+	expVal := utils.NewOrderedNavigableMap()
+	expVal.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}}, &utils.DataLeaf{Data: "CGRATES_ID1"})
+	expVal.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, &utils.DataLeaf{Data: "1002"})
+	expVal.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)})
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rply) {
+		t.Errorf("Expected %+v, received %+v", expVal, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathReply(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+	aqReq.Reply.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}}, utils.NewLeafNode("CGRATES_ID1"))
+	aqReq.Reply.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1002"))
+	aqReq.Reply.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, utils.NewLeafNode(time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)))
+
+	path := []string{utils.MetaRep}
+	expVal := utils.NewOrderedNavigableMap()
+	expVal.Set(&utils.FullPath{Path: utils.CGRID, PathSlice: []string{utils.CGRID}}, &utils.DataLeaf{Data: "CGRATES_ID1"})
+	expVal.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, &utils.DataLeaf{Data: "1002"})
+	expVal.Set(&utils.FullPath{Path: utils.AnswerTime, PathSlice: []string{utils.AnswerTime}}, &utils.DataLeaf{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC)})
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rply) {
+		t.Errorf("Expected %+v, received %+v", expVal, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	opts := utils.MapStorage{
+		utils.AccountField: "1002",
+		utils.Usage:        "30m",
+	}
+	aqReq := NewAgentRequest(nil, nil, nil, nil, opts, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+
+	path := []string{utils.MetaOpts}
+	expOpts := utils.MapStorage{
+		utils.AccountField: "1002",
+		utils.Usage:        "30m",
+	}
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOpts, rply) {
+		t.Errorf("Expected %+v, received %+v", expOpts, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathCfg(t *testing.T) {
+	tmp := config.CgrConfig()
+
+	cfg := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+
+	path := []string{utils.MetaCfg}
+
+	expVal := config.CgrConfig().GetDataProvider()
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rply) {
+		t.Errorf("Expected %+v \n, received %+v", expVal, rply)
+	}
+
+	config.SetCgrConfig(tmp)
 }
 
 func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
