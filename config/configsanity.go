@@ -635,10 +635,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 			if pAct == utils.MetaDumpToFile { // only if the action is *dump_to_file
-				if path, has := rdr.Opts[utils.PartialPathOpt]; has { // the path from options needs to exists if overwriten by reader
-					if _, err := os.Stat(utils.IfaceAsString(path)); err != nil && os.IsNotExist(err) {
-						return fmt.Errorf("<%s> nonexistent partial folder: %s for reader with ID: %s", utils.ERs, path, rdr.ID)
-					}
+				path := rdr.ProcessedPath
+				if pathVal, has := rdr.Opts[utils.PartialPathOpt]; has { // the path from options needs to exists if overwriten by reader
+					path = utils.IfaceAsString(pathVal)
+				}
+				if _, err := os.Stat(utils.IfaceAsString(path)); err != nil && os.IsNotExist(err) {
+					return fmt.Errorf("<%s> nonexistent partial folder: %s for reader with ID: %s", utils.ERs, path, rdr.ID)
 				}
 				if fldSep, has := rdr.Opts[utils.PartialCSVFieldSepartorOpt]; has && // the separtor must not be empty
 					utils.IfaceAsString(fldSep) == utils.EmptyString {
