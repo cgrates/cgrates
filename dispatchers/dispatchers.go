@@ -227,3 +227,21 @@ func (dS *DispatcherService) ping(ctx *context.Context, subsys, method string, a
 	}
 	return dS.Dispatch(ctx, args, subsys, method, args, reply)
 }
+
+func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPIOpts,
+	reply *map[string]interface{}) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1Status, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(context.Background(), &utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
+}

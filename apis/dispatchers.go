@@ -261,3 +261,7 @@ func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CG
 	dPrfl *engine.DispatcherProfiles) error {
 	return dSv1.dS.V1GetProfilesForEvent(ctx, ev, dPrfl)
 }
+
+func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
+}
