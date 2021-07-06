@@ -1015,6 +1015,91 @@ func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
 	}
 }
 
+func TestAgReqFieldAsInterfaceForOneFldPathVars(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	dN := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			"Name": utils.NewLeafNode("1001"),
+			"ExtraFields": {
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					"Usage": utils.NewLeafNode("20m"),
+				},
+			},
+		},
+	}
+	aqReq := NewAgentRequest(nil, dN, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+
+	path := []string{utils.MetaVars}
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dN, rply) {
+		t.Errorf("Expected %+v, received %+v", dN, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathCgrReply(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	dN := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			"Name": utils.NewLeafNode("1001"),
+			"ExtraFields": {
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					"Usage": utils.NewLeafNode("20m"),
+				},
+			},
+		},
+	}
+	aqReq := NewAgentRequest(nil, nil, dN, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+
+	path := []string{utils.MetaCgrep}
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dN, rply) {
+		t.Errorf("Expected %+v, received %+v", dN, rply)
+	}
+}
+
+func TestAgReqFieldAsInterfaceForOneFldPathTmp(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
+		config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	dN := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			"Name": utils.NewLeafNode("1001"),
+			"ExtraFields": {
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					"Usage": utils.NewLeafNode("20m"),
+				},
+			},
+		},
+	}
+	aqReq := NewAgentRequest(nil, nil, nil, nil, nil, nil,
+		"cgrates.org", utils.EmptyString, filterS, nil)
+	aqReq.tmp = dN
+
+	path := []string{utils.MetaTmp}
+	if rply, err := aqReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dN, rply) {
+		t.Errorf("Expected %+v, received %+v", dN, rply)
+	}
+}
+
 func TestAgReqFieldAsInterfaceForOneFldPathReq(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true),
