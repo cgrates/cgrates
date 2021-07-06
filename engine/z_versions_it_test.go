@@ -48,7 +48,7 @@ var (
 		testUpdateVersionsActionTriggers,
 		testUpdateVersionsActions,
 		testUpdateVersionsAttributes,
-		testUpdateVersionsChargers,
+		testUpdateVersionsChargers, // ??
 		testUpdateVersionsDestinations,
 		testUpdateVersionsDispatchers,
 		testUpdateVersionsLoadIDs,
@@ -59,7 +59,7 @@ var (
 		testUpdateVersionsReverseDestinations,
 		testUpdateVersionsRoutes,
 		testUpdateVersionsSharedGroups,
-		testUpdateVersionsStats,
+		testUpdateVersionsStats, // ??
 		testUpdateVersionsSubscribers,
 		testUpdateVersionsThresholds,
 		testUpdateVersionsTiming,
@@ -242,48 +242,8 @@ func testVersionsWithEngine(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectDataDb := Versions{
-		"Accounts":       3,
-		"ActionProfiles": 1,
-		"Actions":        2,
-		"Attributes":     7,
-		"Chargers":       2,
-		"Dispatchers":    2,
-		"LoadIDs":        1,
-		"RQF":            5,
-		"RateProfiles":   1,
-		"Resource":       1,
-		"Routes":         2,
-		"Stats":          4,
-		"Subscribers":    1,
-		"Thresholds":     4,
-	}
-	expectStorDb := Versions{
-		"CDRs":               2,
-		"CostDetails":        2,
-		"SessionSCosts":      3,
-		"TpAccountActions":   1,
-		"TpActionPlans":      1,
-		"TpActionTriggers":   1,
-		"TpActions":          1,
-		"TpChargers":         1,
-		"TpDestinationRates": 1,
-		"TpDestinations":     1,
-		"TpDispatchers":      1,
-		"TpFilters":          1,
-		"TpRates":            1,
-		"TpRatingPlan":       1,
-		"TpRatingPlans":      1,
-		"TpRatingProfile":    1,
-		"TpRatingProfiles":   1,
-		"TpResource":         1,
-		"TpResources":        1,
-		"TpRoutes":           1,
-		"TpSharedGroups":     1,
-		"TpStats":            1,
-		"TpThresholds":       1,
-		"TpTiming":           1,
-	}
+	expectDataDb := CurrentDataDBVersions()
+	expectStorDb := CurrentStorDBVersions()
 	if !reflect.DeepEqual(dataDbQueryVersions, expectDataDb) {
 		t.Fatalf("Expected %v \n  but received \n %v", utils.ToJSON(expectDataDb), utils.ToJSON(dataDbQueryVersions))
 	} else if !reflect.DeepEqual(storDbQueryVersions, expectStorDb) {
@@ -292,9 +252,8 @@ func testVersionsWithEngine(t *testing.T) {
 }
 
 func testUpdateVersionsAccounts(t *testing.T) {
-	newVersions := Versions{
-		"Accounts": 2.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Accounts"] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -313,9 +272,8 @@ func testUpdateVersionsAccounts(t *testing.T) {
 }
 
 func testUpdateVersionsActionPlans(t *testing.T) {
-	newVersions := Versions{
-		"ActionPlans": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["ActionPlans"] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -334,9 +292,8 @@ func testUpdateVersionsActionPlans(t *testing.T) {
 }
 
 func testUpdateVersionsActionTriggers(t *testing.T) {
-	newVersions := Versions{
-		"ActionTriggers": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["ActionTriggers"] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -355,9 +312,8 @@ func testUpdateVersionsActionTriggers(t *testing.T) {
 }
 
 func testUpdateVersionsActions(t *testing.T) {
-	newVersions := Versions{
-		"Actions": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Actions"] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -376,9 +332,8 @@ func testUpdateVersionsActions(t *testing.T) {
 }
 
 func testUpdateVersionsChargers(t *testing.T) {
-	newVersions := Versions{
-		"Chargers": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Chargers"] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -397,9 +352,8 @@ func testUpdateVersionsChargers(t *testing.T) {
 }
 
 func testUpdateVersionsDestinations(t *testing.T) {
-	newVersions := Versions{
-		"Destinations": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Destinations"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -411,16 +365,34 @@ func testUpdateVersionsDestinations(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*destinations>\n"
+	errExpect := utils.EmptyString
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+func testUpdateVersionsAttributes(t *testing.T) {
+	newVersions := CurrentDataDBVersions()
+	newVersions["Attributes"] = 3
+	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsDispatchers(t *testing.T) {
-	newVersions := Versions{
-		"Dispatchers": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions[utils.Dispatchers] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -439,9 +411,8 @@ func testUpdateVersionsDispatchers(t *testing.T) {
 }
 
 func testUpdateVersionsLoadIDs(t *testing.T) {
-	newVersions := Versions{
-		"LoadIDs": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	delete(newVersions, "LoadIDs")
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -453,37 +424,15 @@ func testUpdateVersionsLoadIDs(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*load_ids>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
-func testUpdateVersionsAttributes(t *testing.T) {
-	newVersions := Versions{
-		"Attributes": 2.,
-	}
-	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsRQF(t *testing.T) {
-	newVersions := Versions{
-		"RQF": 8.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["RQF"] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -502,9 +451,8 @@ func testUpdateVersionsRQF(t *testing.T) {
 }
 
 func testUpdateVersionsRatingPlan(t *testing.T) {
-	newVersions := Versions{
-		"RatingPlan": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["RatingPlan"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -516,16 +464,15 @@ func testUpdateVersionsRatingPlan(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*rating_plan>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsRatingProfile(t *testing.T) {
-	newVersions := Versions{
-		"RatingProfile": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["RatingProfile"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -537,16 +484,15 @@ func testUpdateVersionsRatingProfile(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*rating_profile>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsResource(t *testing.T) {
-	newVersions := Versions{
-		"Resource": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Resource"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -558,16 +504,15 @@ func testUpdateVersionsResource(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*resource>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsReverseDestinations(t *testing.T) {
-	newVersions := Versions{
-		"ReverseDestinations": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["ReverseDestinations"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -579,16 +524,15 @@ func testUpdateVersionsReverseDestinations(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*reverse_destinations>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsRoutes(t *testing.T) {
-	newVersions := Versions{
-		"Routes": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Routes"] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -607,9 +551,8 @@ func testUpdateVersionsRoutes(t *testing.T) {
 }
 
 func testUpdateVersionsSharedGroups(t *testing.T) {
-	newVersions := Versions{
-		"SharedGroups": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["SharedGroups"] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -628,9 +571,8 @@ func testUpdateVersionsSharedGroups(t *testing.T) {
 }
 
 func testUpdateVersionsStats(t *testing.T) {
-	newVersions := Versions{
-		"Stats": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Stats"] = 3
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -649,9 +591,8 @@ func testUpdateVersionsStats(t *testing.T) {
 }
 
 func testUpdateVersionsSubscribers(t *testing.T) {
-	newVersions := Versions{
-		"Subscribers": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Subscribers"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -663,16 +604,15 @@ func testUpdateVersionsSubscribers(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*subscribers>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
 }
 
 func testUpdateVersionsThresholds(t *testing.T) {
-	newVersions := Versions{
-		"Thresholds": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Thresholds"] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -691,9 +631,8 @@ func testUpdateVersionsThresholds(t *testing.T) {
 }
 
 func testUpdateVersionsTiming(t *testing.T) {
-	newVersions := Versions{
-		"Timing": 5.,
-	}
+	newVersions := CurrentDataDBVersions()
+	newVersions["Timing"] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -705,7 +644,7 @@ func testUpdateVersionsTiming(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*timing>\n"
+	errExpect := utils.EmptyString
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
