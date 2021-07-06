@@ -1232,6 +1232,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ID:            "test2",
 		Type:          utils.MetaFileCSV,
 		ProcessedPath: "not/a/path",
+		Opts: map[string]interface{}{
+			utils.PartialCacheActionOpt: utils.MetaNone,
+		},
 	}}
 	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test2"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1243,7 +1246,10 @@ func TestConfigSanityEventReader(t *testing.T) {
 		Type:          utils.MetaFileCSV,
 		ProcessedPath: "/",
 		SourcePath:    "/",
-		Opts:          map[string]interface{}{"csvFieldSeparator": ""},
+		Opts: map[string]interface{}{
+			"csvFieldSeparator":         "",
+			utils.PartialCacheActionOpt: utils.MetaNone,
+		},
 	}}
 	expected = "<ERs> empty csvFieldSeparator for reader with ID: test3"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1253,7 +1259,10 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ID:       "test4",
 		Type:     utils.MetaKafkajsonMap,
 		RunDelay: 1,
-		Opts:     map[string]interface{}{"csvFieldSeparator": ","},
+		Opts: map[string]interface{}{
+			"csvFieldSeparator":         ",",
+			utils.PartialCacheActionOpt: utils.MetaNone,
+		},
 	}
 	expected = "<ERs> the RunDelay field can not be bigger than zero for reader with ID: test4"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1265,6 +1274,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 		RunDelay:      0,
 		ProcessedPath: "not/a/path",
 		SourcePath:    "not/a/path",
+		Opts: map[string]interface{}{
+			utils.PartialCacheActionOpt: utils.MetaNone,
+		},
 	}
 	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test5"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1277,6 +1289,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 		RunDelay:      0,
 		ProcessedPath: "not/a/path",
 		SourcePath:    "not/a/path",
+		Opts: map[string]interface{}{
+			utils.PartialCacheActionOpt: utils.MetaNone,
+		},
 	}
 	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test5"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -1295,6 +1310,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 				Fields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
 						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+				},
+				Opts: map[string]interface{}{
+					utils.PartialCacheActionOpt: utils.MetaNone,
 				},
 			},
 		},
@@ -1954,5 +1972,92 @@ func TestCheckConfigSanity(t *testing.T) {
 	expected = "<ThresholdS> not enabled but requested by <CDRs> component"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+
+func TestConfigSanityErs(t *testing.T) {
+	cfg = NewDefaultCGRConfig()
+	cfg.ersCfg.Enabled = true
+
+	cfg.ersCfg.SessionSConns = []string{}
+	cfg.ersCfg.Readers = []*EventReaderCfg{
+		{
+			Type: utils.MetaNone,
+			ID:   "rdrID",
+			Opts: map[string]interface{}{
+				utils.PartialCacheActionOpt: utils.MetaPostCDR,
+			},
+		},
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialOrderFieldOpt:  utils.EmptyString,
+		utils.PartialCacheActionOpt: "invalid",
+	}
+	expected := "<ERs> wrong partial expiry action for reader with ID: rdrID"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialOrderFieldOpt:  utils.EmptyString,
+		utils.PartialCacheActionOpt: utils.MetaPostCDR,
+	}
+	expected = "<ERs> empty partialOrderField for reader with ID: rdrID"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
+		utils.PartialCSVFieldSepartorOpt: utils.EmptyString,
+	}
+	cfg.ersCfg.Readers[0].ProcessedPath = "/tmp"
+	expected = "<ERs> empty partialcsvFieldSeparator for reader with ID: rdrID"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
+		utils.PartialCSVFieldSepartorOpt: utils.FieldsSep,
+	}
+	expected = "<ERs> empty cache_dump_fields for reader with ID: rdrID"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialOrderFieldOpt:  "non_empty",
+		utils.PartialCacheActionOpt: utils.MetaDumpToFile,
+		utils.PartialPathOpt:        "path",
+	}
+	expected = "<ERs> nonexistent partial folder: path for reader with ID: rdrID"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialCSVFieldSepartorOpt: utils.EmptyString,
+	}
+
+	cfg.ersCfg.Readers[0].Type = utils.MetaFileCSV
+	cfg.ersCfg.Readers[0].ProcessedPath = utils.EmptyString
+	cfg.ersCfg.Readers[0].SourcePath = "/tmp"
+	cfg.ersCfg.Readers[0].ID = utils.MetaDefault
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.CSVRowLengthOpt:       "can't convert",
+		utils.CSVLazyQuotes:         "can't convert",
+		utils.PartialCacheActionOpt: utils.MetaNone,
+	}
+	expected = `<ERs> error when converting csvRowLength: <strconv.ParseInt: parsing "can't convert": invalid syntax> for reader with ID: *default`
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts[utils.CSVRowLengthOpt] = "2"
+	expected = `<ERs> error when converting csvLazyQuotes: <strconv.ParseBool: parsing "can't convert": invalid syntax> for reader with ID: *default`
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
 	}
 }
