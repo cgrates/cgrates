@@ -113,7 +113,7 @@ func testV1FIdxHLoadFromFolder(t *testing.T) {
 
 func testV1FIdxHAccountActionPlansHealth(t *testing.T) {
 	var reply engine.AccountActionPlanIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetAccountActionPlansIndexHealth, engine.IndexHealthArgs{
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetAccountActionPlansIndexHealth, engine.IndexHealthArgsWith2Ch{
 		IndexCacheLimit:  -1,
 		ObjectCacheLimit: -1,
 	}, &reply); err != nil {
@@ -130,7 +130,7 @@ func testV1FIdxHAccountActionPlansHealth(t *testing.T) {
 
 func testV1FIdxHReverseDestinationHealth(t *testing.T) {
 	var reply engine.ReverseDestinationsIHReply
-	if err := tFIdxHRpc.Call(utils.APIerSv1GetReverseDestinationsIndexHealth, engine.IndexHealthArgs{
+	if err := tFIdxHRpc.Call(utils.APIerSv1GetReverseDestinationsIndexHealth, engine.IndexHealthArgsWith2Ch{
 		IndexCacheLimit:  -1,
 		ObjectCacheLimit: -1,
 	}, &reply); err != nil {
