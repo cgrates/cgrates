@@ -265,3 +265,11 @@ func (dSv1 DispatcherSv1) GetProfilesForEvent(ctx *context.Context, ev *utils.CG
 func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
 	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
 }
+
+func (dS *DispatcherSv1) RemotePing(args *utils.CGREvent, reply *string) (err error) {
+	return dS.dS.DispatcherSv1RemotePing(args, reply)
+}
+
+func (dS *DispatcherSv1) RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
+	return dS.dS.DispatcherSv1RemoteSleep(args, reply)
+}

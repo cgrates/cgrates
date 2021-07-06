@@ -245,3 +245,34 @@ func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPI
 		APIOpts: args.APIOpts,
 	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
 }
+
+func (dS *DispatcherService) DispatcherSv1RemoteSleep(args *utils.DurationArgs, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1Sleep, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(context.Background(), &utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1Sleep, args, reply)
+}
+
+func (dS *DispatcherService) DispatcherSv1RemotePing(args *utils.CGREvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args != nil && args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1Ping, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(context.Background(), args, utils.MetaCore, utils.CoreSv1Ping, args, reply)
+}
