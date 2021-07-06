@@ -33,9 +33,12 @@ var (
 		utils.ActionPlans:    "cgr-migrator -exec=*action_plans",
 		utils.SharedGroups:   "cgr-migrator -exec=*shared_groups",
 		utils.Thresholds:     "cgr-migrator -exec=*thresholds",
-		utils.LoadIDsVrs:     "cgr-migrator -exec=*load_ids",
-		utils.RQF:            "cgr-migrator -exec=*filters",
-		utils.Routes:         "cgr-migrator -exec=*routes",
+		// utils.LoadIDsVrs:     "cgr-migrator -exec=*load_ids",
+		utils.RQF:         "cgr-migrator -exec=*filters",
+		utils.Routes:      "cgr-migrator -exec=*routes",
+		utils.Dispatchers: "cgr-migrator -exec=*dispatchers",
+		utils.Chargers:    "cgr-migrator -exec=*chargers",
+		utils.StatS:       "cgr-migrator -exec=*stats",
 	}
 	storDBVers = map[string]string{
 		utils.CostDetails:   "cgr-migrator -exec=*cost_details",
