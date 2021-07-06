@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type AttrGetFilterIndexes struct {
@@ -592,7 +593,7 @@ func (apierSv1 *APIerSv1) ComputeFilterIndexIDs(args *utils.ArgsComputeFilterInd
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHealthArgs, reply *engine.AccountActionPlanIHReply) error {
+func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHealthArgsWith2Ch, reply *engine.AccountActionPlanIHReply) error {
 	rp, err := engine.GetAccountActionPlansIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
 		args.ObjectCacheTTL, args.IndexCacheTTL,
 		args.ObjectCacheStaticTTL, args.IndexCacheStaticTTL)
@@ -603,10 +604,117 @@ func (apierSv1 *APIerSv1) GetAccountActionPlansIndexHealth(args *engine.IndexHea
 	return nil
 }
 
-func (apierSv1 *APIerSv1) GetReverseDestinationsIndexHealth(args *engine.IndexHealthArgs, reply *engine.ReverseDestinationsIHReply) error {
+func (apierSv1 *APIerSv1) GetReverseDestinationsIndexHealth(args *engine.IndexHealthArgsWith2Ch, reply *engine.ReverseDestinationsIHReply) error {
 	rp, err := engine.GetReverseDestinationsIndexHealth(apierSv1.DataManager, args.ObjectCacheLimit, args.IndexCacheLimit,
 		args.ObjectCacheTTL, args.IndexCacheTTL,
 		args.ObjectCacheStaticTTL, args.IndexCacheStaticTTL)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetReverseFilterHealth(args *engine.IndexHealthArgsWith3Ch, reply *map[string]*engine.ReverseFilterIHReply) (err error) {
+	*reply, err = engine.GetRevFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+	)
+	return
+}
+
+func (apierSv1 *APIerSv1) GetThresholdsIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheThresholdFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetResourcesIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheResourceFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetStatsIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheStatFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetRoutesIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheRouteFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetAttributesIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheAttributeFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetChargersIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheChargerFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *rp
+	return nil
+}
+
+func (apierSv1 *APIerSv1) GetDispatchersIndexesHealth(args *engine.IndexHealthArgsWith3Ch, reply *engine.FilterIHReply) error {
+	rp, err := engine.GetFltrIdxHealth(apierSv1.DataManager,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		utils.CacheDispatcherFilterIndexes,
+	)
 	if err != nil {
 		return err
 	}

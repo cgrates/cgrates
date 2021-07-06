@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestHealthAccountAction(t *testing.T) {
@@ -281,5 +282,96 @@ func TestHealthReverseDestination4(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthFilter(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetAttributeProfile(&AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:~*req.Account:1001", "Fltr1"},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetIndexes(utils.CacheAttributeFilterIndexes, "cgrates.org:*any",
+		map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}},
+		true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	exp := &FilterIHReply{
+		MissingIndexes: map[string][]string{
+			"cgrates.org:*any:*string:*req.Account:1001": {"cgrates.org:ATTR1"},
+			"cgrates.org:*any:*string:*req.Account:1002": {"ATTR1"},
+		},
+		MissingFilters: map[string][]string{
+			"Fltr1": {"cgrates.org:ATTR1"},
+		},
+		MissingObjects: []string{"cgrates.org:ATTR2"},
+	}
+
+	if rply, err := GetFltrIdxHealth(dm,
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil),
+		utils.CacheAttributeFilterIndexes); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+}
+
+func TestHealthReverseFilter(t *testing.T) {
+	Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	db := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+
+	if err := dm.SetAttributeProfile(&AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR1",
+		Contexts:  []string{utils.MetaAny},
+		FilterIDs: []string{"*string:~*req.Account:1001", "Fltr1"},
+	}, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetIndexes(utils.CacheReverseFilterIndexes, "cgrates.org:Fltr2",
+		map[string]utils.StringSet{utils.CacheAttributeFilterIndexes: {"ATTR1:*cdrs": {}, "ATTR2:*any": {}}},
+		true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetIndexes(utils.CacheReverseFilterIndexes, "cgrates.org:Fltr1",
+		map[string]utils.StringSet{utils.CacheAttributeFilterIndexes: {"ATTR1:*cdrs": {}}},
+		true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	exp := map[string]*ReverseFilterIHReply{
+		utils.CacheAttributeFilterIndexes: {
+			MissingReverseIndexes: map[string][]string{
+				"cgrates.org:ATTR1": {"Fltr1:*any"},
+			},
+			MissingFilters: map[string][]string{
+				"cgrates.org:Fltr2": {"ATTR1"},
+				"cgrates.org:Fltr1": {"ATTR1:*cdrs"},
+			},
+			MissingObjects: []string{"cgrates.org:ATTR2"},
+		},
+	}
+
+	if rply, err := GetRevFltrIdxHealth(dm,
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, nil)); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 }
