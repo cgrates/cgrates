@@ -644,6 +644,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 					utils.IfaceAsString(fldSep) == utils.EmptyString {
 					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialCSVFieldSepartorOpt, rdr.ID)
 				}
+				if len(rdr.CacheDumpFields) == 0 {
+					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.CacheDumpFieldsCfg, rdr.ID)
+				}
 			}
 			switch rdr.Type {
 			case utils.MetaFileCSV:

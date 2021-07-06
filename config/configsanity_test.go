@@ -1819,6 +1819,15 @@ func TestConfigSanityErs(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
+		utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
+		utils.PartialCSVFieldSepartorOpt: utils.FieldsSep,
+	}
+	expected = "<ERs> empty cache_dump_fields for reader with ID: rdrID"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
 		utils.PartialOrderFieldOpt:  "non_empty",
 		utils.PartialCacheActionOpt: utils.MetaDumpToFile,
 		utils.PartialPathOpt:        "path",
