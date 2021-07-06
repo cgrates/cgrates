@@ -1809,6 +1809,7 @@ func TestConfigSanityErs(t *testing.T) {
 		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
 	}
 
+	cfg.ersCfg.Readers[0].ProcessedPath = "/tmp"
 	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
 		utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
 		utils.PartialCSVFieldSepartorOpt: utils.EmptyString,
@@ -1818,6 +1819,7 @@ func TestConfigSanityErs(t *testing.T) {
 		t.Errorf("expected: <%v>,\n received: <%v>", expected, err)
 	}
 
+	cfg.ersCfg.Readers[0].ProcessedPath = "/tmp"
 	cfg.ersCfg.Readers[0].Opts = map[string]interface{}{
 		utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
 		utils.PartialCSVFieldSepartorOpt: utils.FieldsSep,
