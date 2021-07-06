@@ -26,12 +26,10 @@ import (
 
 // ERsCfg the config for ERs
 type ERsCfg struct {
-	Enabled            bool
-	SessionSConns      []string
-	Readers            []*EventReaderCfg
-	PartialCacheTTL    time.Duration
-	PartialCacheAction string
-	PartialPath        string
+	Enabled         bool
+	SessionSConns   []string
+	Readers         []*EventReaderCfg
+	PartialCacheTTL time.Duration
 }
 
 func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
@@ -48,12 +46,6 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_cache_ttl); err != nil {
 			return
 		}
-	}
-	if jsnCfg.Partial_cache_action != nil {
-		erS.PartialCacheAction = *jsnCfg.Partial_cache_action
-	}
-	if jsnCfg.Partial_path != nil {
-		erS.PartialPath = *jsnCfg.Partial_path
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
 }
@@ -93,12 +85,10 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 // Clone returns a deep copy of ERsCfg
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = &ERsCfg{
-		Enabled:            erS.Enabled,
-		SessionSConns:      make([]string, len(erS.SessionSConns)),
-		Readers:            make([]*EventReaderCfg, len(erS.Readers)),
-		PartialCacheTTL:    erS.PartialCacheTTL,
-		PartialCacheAction: erS.PartialCacheAction,
-		PartialPath:        erS.PartialPath,
+		Enabled:         erS.Enabled,
+		SessionSConns:   make([]string, len(erS.SessionSConns)),
+		Readers:         make([]*EventReaderCfg, len(erS.Readers)),
+		PartialCacheTTL: erS.PartialCacheTTL,
 	}
 	if erS.SessionSConns != nil {
 		cln.SessionSConns = utils.CloneStringSlice(erS.SessionSConns)
@@ -112,10 +102,8 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 // AsMapInterface returns the config as a map[string]interface{}
 func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]interface{}) {
 	initialMP = map[string]interface{}{
-		utils.EnabledCfg:            erS.Enabled,
-		utils.PartialCacheTTLCfg:    "0",
-		utils.PartialCacheActionCfg: erS.PartialCacheAction,
-		utils.PartialPathCfg:        erS.PartialPath,
+		utils.EnabledCfg:         erS.Enabled,
+		utils.PartialCacheTTLCfg: "0",
 	}
 	if erS.PartialCacheTTL != 0 {
 		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
@@ -447,12 +435,10 @@ func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg,
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled              *bool
-	Sessions_conns       *[]string
-	Readers              *[]*EventReaderJsonCfg
-	Partial_cache_ttl    *string
-	Partial_cache_action *string
-	Partial_path         *string
+	Enabled           *bool
+	Sessions_conns    *[]string
+	Readers           *[]*EventReaderJsonCfg
+	Partial_cache_ttl *string
 }
 
 func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg {
@@ -467,12 +453,6 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
 		d.Partial_cache_ttl = utils.StringPointer(v2.PartialCacheTTL.String())
-	}
-	if v1.PartialCacheAction != v2.PartialCacheAction {
-		d.Partial_cache_action = utils.StringPointer(v2.PartialCacheAction)
-	}
-	if v1.PartialPath != v2.PartialPath {
-		d.Partial_path = utils.StringPointer(v2.PartialPath)
 	}
 	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers, separator)
 	return d

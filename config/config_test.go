@@ -2208,17 +2208,17 @@ func TestERSConfig(t *testing.T) {
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
 				Opts: map[string]interface{}{
-					"csvFieldSeparator":   ",",
-					"csvHeaderDefineChar": ":",
-					"csvRowLength":        0.,
-					"xmlRootPath":         "",
-					"partialOrderField":   "~*req.AnswerTime",
-					"natsSubject":         "cgrates_cdrs",
+					"csvFieldSeparator":         ",",
+					"csvHeaderDefineChar":       ":",
+					"csvRowLength":              0.,
+					"xmlRootPath":               "",
+					"partialOrderField":         "~*req.AnswerTime",
+					utils.PartialCacheActionOpt: utils.MetaNone,
+					"natsSubject":               "cgrates_cdrs",
 				},
 			},
 		},
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	cgrConfig := NewDefaultCGRConfig()
 	if err != nil {
@@ -4477,18 +4477,17 @@ func TestV1GetConfigSectionERS(t *testing.T) {
 					utils.TypeCfg:                utils.MetaNone,
 					utils.FieldsCfg:              []string{},
 					utils.OptsCfg: map[string]interface{}{
-						"csvFieldSeparator":   ",",
-						"csvHeaderDefineChar": ":",
-						"csvRowLength":        0.,
-						"xmlRootPath":         "",
-						"partialOrderField":   "~*req.AnswerTime",
-						"natsSubject":         "cgrates_cdrs",
+						"csvFieldSeparator":         ",",
+						"csvHeaderDefineChar":       ":",
+						"csvRowLength":              0.,
+						"xmlRootPath":               "",
+						"partialOrderField":         "~*req.AnswerTime",
+						utils.PartialCacheActionOpt: utils.MetaNone,
+						"natsSubject":               "cgrates_cdrs",
 					},
 				},
 			},
-			utils.PartialCacheTTLCfg:    "1s",
-			utils.PartialCacheActionCfg: utils.MetaNone,
-			utils.PartialPathCfg:        utils.EmptyString,
+			utils.PartialCacheTTLCfg: "1s",
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -5119,7 +5118,7 @@ func TestV1GetConfigAsJSONCfgEES(t *testing.T) {
 
 func TestV1GetConfigAsJSONCfgERS(t *testing.T) {
 	var reply string
-	expected := `{"ers":{"enabled":false,"partial_cache_action":"*none","partial_cache_ttl":"1s","partial_path":"","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialOrderField":"~*req.AnswerTime","xmlRootPath":""},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","run_delay":"0","source_path":"/var/spool/cgrates/ers/in","tenant":"","timezone":"","type":"*none"}],"sessions_conns":["*internal"]}}`
+	expected := `{"ers":{"enabled":false,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime","xmlRootPath":""},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","run_delay":"0","source_path":"/var/spool/cgrates/ers/in","tenant":"","timezone":"","type":"*none"}],"sessions_conns":["*internal"]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{ERsJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5373,17 +5372,17 @@ func TestCgrCdfEventReader(t *testing.T) {
 				CacheDumpFields:     []*FCTemplate{},
 				PartialCommitFields: []*FCTemplate{},
 				Opts: map[string]interface{}{
-					"csvFieldSeparator":   ",",
-					"csvHeaderDefineChar": ":",
-					"csvRowLength":        0.,
-					"xmlRootPath":         "",
-					"partialOrderField":   "~*req.AnswerTime",
-					"natsSubject":         "cgrates_cdrs",
+					"csvFieldSeparator":         ",",
+					"csvHeaderDefineChar":       ":",
+					"csvRowLength":              0.,
+					"xmlRootPath":               "",
+					"partialOrderField":         "~*req.AnswerTime",
+					utils.PartialCacheActionOpt: utils.MetaNone,
+					"natsSubject":               "cgrates_cdrs",
 				},
 			},
 		},
-		PartialCacheTTL:    time.Second,
-		PartialCacheAction: utils.MetaNone,
+		PartialCacheTTL: time.Second,
 	}
 	for _, profile := range eCfg.Readers {
 		for _, v := range profile.Fields {
@@ -5468,12 +5467,13 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 		CacheDumpFields:     make([]*FCTemplate, 0),
 		PartialCommitFields: make([]*FCTemplate, 0),
 		Opts: map[string]interface{}{
-			"csvFieldSeparator":   ",",
-			"csvHeaderDefineChar": ":",
-			"csvRowLength":        0.,
-			"xmlRootPath":         "",
-			"partialOrderField":   "~*req.AnswerTime",
-			"natsSubject":         "cgrates_cdrs",
+			"csvFieldSeparator":         ",",
+			"csvHeaderDefineChar":       ":",
+			"csvRowLength":              0.,
+			"xmlRootPath":               "",
+			"partialOrderField":         "~*req.AnswerTime",
+			utils.PartialCacheActionOpt: utils.MetaNone,
+			"natsSubject":               "cgrates_cdrs",
 		},
 	}
 	for _, v := range eCfg.Fields {

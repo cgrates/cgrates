@@ -2105,8 +2105,6 @@ const (
 	CacheDumpFieldsCfg     = "cache_dump_fields"
 	PartialCommitFieldsCfg = "partial_commit_fields"
 	PartialCacheTTLCfg     = "partial_cache_ttl"
-	PartialCacheActionCfg  = "partial_cache_action"
-	PartialPathCfg         = "partial_path"
 )
 
 // RegistrarCCfg

@@ -610,17 +610,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// EventReader sanity checks
 	if cfg.ersCfg.Enabled {
-		//	check the global partial options
-		if cfg.ersCfg.PartialCacheAction != utils.MetaNone &&
-			cfg.ersCfg.PartialCacheAction != utils.MetaDumpToFile &&
-			cfg.ersCfg.PartialCacheAction != utils.MetaPostCDR {
-			return fmt.Errorf("<%s> wrong partial expiry action", utils.ERs)
-		}
-		if cfg.ersCfg.PartialPath != utils.EmptyString {
-			if _, err := os.Stat(cfg.ersCfg.PartialPath); err != nil && os.IsNotExist(err) {
-				return fmt.Errorf("<%s> nonexistent partial folder: %s", utils.ERs, cfg.ersCfg.PartialPath)
-			}
-		}
 		for _, connID := range cfg.ersCfg.SessionSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.SessionS, utils.ERs)
@@ -633,13 +622,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}
-			pAct := cfg.ersCfg.PartialCacheAction
-			if act, has := rdr.Opts[utils.PartialCacheActionOpt]; has { // check the action from opts
-				if pAct = utils.IfaceAsString(act); pAct != utils.MetaDumpToFile &&
-					pAct != utils.MetaNone &&
-					pAct != utils.MetaPostCDR {
-					return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
-				}
+			pAct := utils.IfaceAsString(rdr.Opts[utils.PartialCacheActionOpt])
+			if pAct != utils.MetaDumpToFile &&
+				pAct != utils.MetaNone &&
+				pAct != utils.MetaPostCDR {
+				return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
 			}
 			if pAct != utils.MetaNone { // if is *none we do not process the evicted events
 				if fldSep, has := rdr.Opts[utils.PartialOrderFieldOpt]; has && // the field we order after must not be empty
