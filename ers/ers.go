@@ -379,7 +379,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		return
 	}
 	eEvs := value.(*erEvents)
-	action := erS.cfg.ERsCfg().PartialCacheAction
+	var action string
 	if cAct, has := eEvs.rdrCfg.Opts[utils.PartialCacheActionOpt]; has { // if the option is present overwrite the global cache action
 		action = utils.IfaceAsString(cAct)
 	}
@@ -398,7 +398,7 @@ func (erS *ERService) onEvicted(id string, value interface{}) {
 		}
 		erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: eEvs.rdrCfg}
 	case utils.MetaDumpToFile: // apply the cacheDumpFields to the united events and write the record to file
-		expPath := erS.cfg.ERsCfg().PartialPath
+		var expPath string
 		if path, has := eEvs.rdrCfg.Opts[utils.PartialPathOpt]; has {
 			expPath = utils.IfaceAsString(path)
 		}

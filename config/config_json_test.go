@@ -1807,17 +1807,17 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Cache_dump_fields:     &[]*FcTemplateJsonCfg{},
 				Partial_commit_fields: &[]*FcTemplateJsonCfg{},
 				Opts: map[string]interface{}{
-					"csvFieldSeparator":   ",",
-					"csvHeaderDefineChar": ":",
-					"csvRowLength":        0.,
-					"xmlRootPath":         "",
-					"partialOrderField":   "~*req.AnswerTime",
-					"natsSubject":         "cgrates_cdrs",
+					"csvFieldSeparator":         ",",
+					"csvHeaderDefineChar":       ":",
+					"csvRowLength":              0.,
+					"xmlRootPath":               "",
+					utils.PartialCacheActionOpt: utils.MetaNone,
+					"partialOrderField":         "~*req.AnswerTime",
+					"natsSubject":               "cgrates_cdrs",
 				},
 			},
 		},
-		Partial_cache_ttl:    utils.StringPointer("1s"),
-		Partial_cache_action: utils.StringPointer(utils.MetaNone),
+		Partial_cache_ttl: utils.StringPointer("1s"),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
