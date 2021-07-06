@@ -754,6 +754,10 @@ func (dSv1 DispatcherSv1) GetProfilesForEvent(ev *utils.CGREvent,
 	return dSv1.dS.V1GetProfilesForEvent(ev, dPrfl)
 }
 
+func (dS *DispatcherSv1) RemoteStatus(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) (err error) {
+	return dS.dS.DispatcherSv1RemoteStatus(args, reply)
+}
+
 /*
 func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *interface{}) (err error) {
 	return dSv1.dS.V1Apier(new(APIerSv1), args, reply)

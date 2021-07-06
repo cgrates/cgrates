@@ -1660,6 +1660,7 @@ const (
 	DispatcherSv1GetProfilesForEvent = "DispatcherSv1.GetProfilesForEvent"
 	DispatcherSv1Apier               = "DispatcherSv1.Apier"
 	DispatcherServicePing            = "DispatcherService.Ping"
+	DispatcherSv1RemoteStatus        = "DispatcherSv1.RemoteStatus"
 )
 
 // RegistrarS APIs

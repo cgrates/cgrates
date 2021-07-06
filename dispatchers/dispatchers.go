@@ -361,3 +361,21 @@ func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must 
 	}
 	return err
 }
+
+func (dS *DispatcherService) DispatcherSv1RemoteStatus(args *utils.TenantWithAPIOpts,
+	reply *map[string]interface{}) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
+		if err = dS.authorize(utils.CoreSv1Status, tnt,
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant:  tnt,
+		APIOpts: args.APIOpts,
+	}, utils.MetaCore, utils.CoreSv1Status, args, reply)
+}
