@@ -47,13 +47,13 @@ func TestCoreSSleep(t *testing.T) {
 	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
-		Duration: 3 * time.Second,
+		Duration: 1 * time.Millisecond,
 	}
 	var reply string
 	if err := cS.Sleep(context.Background(), arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
-		t.Errorf("Expected OK, reveived %+v", reply)
+		t.Errorf("Expected OK, received %+v", reply)
 	}
 }
 
