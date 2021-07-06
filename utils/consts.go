@@ -1662,6 +1662,8 @@ const (
 	DispatcherSv1Apier               = "DispatcherSv1.Apier"
 	DispatcherServicePing            = "DispatcherService.Ping"
 	DispatcherSv1RemoteStatus        = "DispatcherSv1.RemoteStatus"
+	DispatcherSv1RemoteSleep         = "DispatcherSv1.RemoteSleep"
+	DispatcherSv1RemotePing          = "DispatcherSv1.RemotePing"
 )
 
 // RegistrarS APIs
