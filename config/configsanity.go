@@ -693,20 +693,19 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}
-			var pAct string
-			if act, has := rdr.Opts[utils.PartialCacheActionOpt]; has { // check the action from opts
-				if pAct = utils.IfaceAsString(act); pAct != utils.MetaDumpToFile &&
-					pAct != utils.MetaNone &&
-					pAct != utils.MetaPostCDR {
-					return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
-				}
+			pAct := utils.IfaceAsString(rdr.Opts[utils.PartialCacheActionOpt])
+			if pAct != utils.MetaDumpToFile &&
+				pAct != utils.MetaNone &&
+				pAct != utils.MetaPostCDR {
+				return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
 			}
 			if pAct != utils.MetaNone { // if is *none we do not process the evicted events
 				if fldSep, has := rdr.Opts[utils.PartialOrderFieldOpt]; has && // the field we order after must not be empty
 					utils.IfaceAsString(fldSep) == utils.EmptyString {
 					return fmt.Errorf("<%s> empty %s for reader with ID: %s", utils.ERs, utils.PartialOrderFieldOpt, rdr.ID)
 				}
-			} else if pAct == utils.MetaDumpToFile { // only if the action is *dump_to_file
+			}
+			if pAct == utils.MetaDumpToFile { // only if the action is *dump_to_file
 				path := rdr.ProcessedPath
 				if pathVal, has := rdr.Opts[utils.PartialPathOpt]; has { // the path from options needs to exists if overwriten by reader
 					path = utils.IfaceAsString(pathVal)
