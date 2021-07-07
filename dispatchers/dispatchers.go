@@ -270,7 +270,7 @@ func (dS *DispatcherService) DispatcherSv1RemotePing(args *utils.CGREvent, reply
 	}
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.CoreSv1Ping, tnt,
-			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
+			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey])); err != nil {
 			return
 		}
 	}
