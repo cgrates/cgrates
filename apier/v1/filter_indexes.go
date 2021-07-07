@@ -616,10 +616,14 @@ func (apierSv1 *APIerSv1) GetReverseDestinationsIndexHealth(args *engine.IndexHe
 }
 
 func (apierSv1 *APIerSv1) GetReverseFilterHealth(args *engine.IndexHealthArgsWith3Ch, reply *map[string]*engine.ReverseFilterIHReply) (err error) {
+	objCaches := make(map[string]*ltcache.Cache)
+	for indxType := range utils.CacheIndexesToPrefix {
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+	}
 	*reply, err = engine.GetRevFltrIdxHealth(apierSv1.DataManager,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		objCaches,
 	)
 	return
 }
