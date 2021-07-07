@@ -64,7 +64,11 @@ func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val interface{}, e
 				return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 			}
 		}
-		val, err = dp.FieldAsInterface(fldPath[1:])
+		if len(fldPath) != 1 {
+			val, err = dp.FieldAsInterface(fldPath[1:])
+		} else {
+			val = dp
+		}
 	case utils.MetaUCH:
 		var ok bool
 		if val, ok = Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
