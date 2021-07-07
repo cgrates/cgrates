@@ -55,13 +55,13 @@ func (alS *AttributeService) Shutdown() {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, tnt string, attrsIDs []string,
+func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt string, attrsIDs []string,
 	evNm utils.MapStorage, lastID string) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	if len(attrsIDs) != 0 {
 		attrIDs = attrsIDs
 	} else {
-		aPrflIDs, err := MatchingItemIDsForEvent(apiCtx, evNm,
+		aPrflIDs, err := MatchingItemIDsForEvent(ctx, evNm,
 			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 			alS.cgrcfg.AttributeSCfg().SuffixIndexedFields,
@@ -75,14 +75,14 @@ func (alS *AttributeService) attributeProfileForEvent(apiCtx *context.Context, t
 		attrIDs = aPrflIDs.AsSlice()
 	}
 	for _, apID := range attrIDs {
-		aPrfl, err := alS.dm.GetAttributeProfile(apiCtx, tnt, apID, true, true, utils.NonTransactional)
+		aPrfl, err := alS.dm.GetAttributeProfile(ctx, tnt, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if pass, err := alS.filterS.Pass(apiCtx, tnt, aPrfl.FilterIDs,
+		if pass, err := alS.filterS.Pass(ctx, tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
 		} else if !pass {

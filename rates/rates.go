@@ -129,18 +129,24 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		utils.MetaOpts: args.APIOpts,
 	}
 	var rtIDs utils.StringSet
-	if rtIDs, err = engine.MatchingItemIDsForEvent(ctx,
-		evNm,
-		rS.cfg.RateSCfg().RateStringIndexedFields,
-		rS.cfg.RateSCfg().RatePrefixIndexedFields,
-		rS.cfg.RateSCfg().RateSuffixIndexedFields,
-		rS.dm,
-		utils.CacheRateFilterIndexes,
-		utils.ConcatenatedKey(args.CGREvent.Tenant, rtPfl.ID),
-		rS.cfg.RateSCfg().RateIndexedSelects,
-		rS.cfg.RateSCfg().RateNestedFields,
-	); err != nil {
-		return
+	if rS.cfg.RateSCfg().RateIndexedSelects {
+		if rtIDs, err = engine.MatchingItemIDsForEvent(ctx,
+			evNm,
+			rS.cfg.RateSCfg().RateStringIndexedFields,
+			rS.cfg.RateSCfg().RatePrefixIndexedFields,
+			rS.cfg.RateSCfg().RateSuffixIndexedFields,
+			rS.dm,
+			utils.CacheRateFilterIndexes,
+			utils.ConcatenatedKey(args.CGREvent.Tenant, rtPfl.ID),
+			rS.cfg.RateSCfg().RateIndexedSelects,
+			rS.cfg.RateSCfg().RateNestedFields,
+		); err != nil {
+			return
+		}
+	} else {
+		for id := range rtPfl.Rates {
+			rtIDs.Add(id)
+		}
 	}
 	aRates := make([]*utils.Rate, 0, len(rtIDs))
 	for rtID := range rtIDs {

@@ -40,16 +40,16 @@ var (
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
 // is used to update the mentioned index
-func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string, newFlt *Filter) (indexes map[string]utils.StringSet, err error) {
-	tntCtx := tnt
-	if ctx != utils.EmptyString {
-		tntCtx = utils.ConcatenatedKey(tnt, ctx)
+func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string, newFlt *Filter) (indexes map[string]utils.StringSet, err error) {
+	tntGrp := tnt
+	if grp != utils.EmptyString {
+		tntGrp = utils.ConcatenatedKey(tnt, grp)
 	}
 	indexes = make(map[string]utils.StringSet)
 	if len(filterIDs) == 0 { // in case of None
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx map[string]utils.StringSet
-		if rcvIndx, err = dm.GetIndexes(apiCtx, idxItmType, tntCtx,
+		if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
 			idxKey,
 			true, false); err != nil {
 			if err != utils.ErrNotFound {
@@ -70,7 +70,7 @@ func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 		var fltr *Filter
 		if newFlt != nil && newFlt.Tenant == tnt && newFlt.ID == fltrID {
 			fltr = newFlt
-		} else if fltr, err = dm.GetFilter(apiCtx, tnt, fltrID,
+		} else if fltr, err = dm.GetFilter(ctx, tnt, fltrID,
 			true, false, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
@@ -102,7 +102,7 @@ func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 				}
 				var rcvIndx map[string]utils.StringSet
 				// only read from cache in case if we do not find the index to not cache the negative response
-				if rcvIndx, err = dm.GetIndexes(apiCtx, idxItmType, tntCtx,
+				if rcvIndx, err = dm.GetIndexes(ctx, idxItmType, tntGrp,
 					idxKey, true, false); err != nil {
 					if err != utils.ErrNotFound {
 						return
@@ -121,19 +121,19 @@ func newFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 }
 
 // addItemToFilterIndex will add the itemID to the existing/created index and set it in the DataDB
-func addItemToFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string) (err error) {
-	tntCtx := tnt
-	if ctx != utils.EmptyString {
-		tntCtx = utils.ConcatenatedKey(tnt, ctx)
+func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
+	tntGrp := tnt
+	if grp != utils.EmptyString {
+		tntGrp = utils.ConcatenatedKey(tnt, grp)
 	}
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
+		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	var indexes map[string]utils.StringSet
-	if indexes, err = newFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, filterIDs, nil); err != nil {
+	if indexes, err = newFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, filterIDs, nil); err != nil {
 		return
 	}
 	// in case we have a profile with only non indexable filters(e.g. only *gt)
@@ -144,27 +144,27 @@ func addItemToFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, 
 	for indxKey, index := range indexes {
 		index.Add(itemID)
 		// remove from cache in order to corectly update the index
-		if err = Cache.Remove(apiCtx, idxItmType, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+		if err = Cache.Remove(ctx, idxItmType, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
 			return
 		}
 	}
-	return dm.SetIndexes(apiCtx, idxItmType, tntCtx, indexes, true, utils.NonTransactional)
+	return dm.SetIndexes(ctx, idxItmType, tntGrp, indexes, true, utils.NonTransactional)
 }
 
 // removeItemFromFilterIndex will remove the itemID from the existing/created index and set it in the DataDB
-func removeItemFromFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string) (err error) {
-	tntCtx := tnt
-	if ctx != utils.EmptyString {
-		tntCtx = utils.ConcatenatedKey(tnt, ctx)
+func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
+	tntGrp := tnt
+	if grp != utils.EmptyString {
+		tntGrp = utils.ConcatenatedKey(tnt, grp)
 	}
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
+		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 	defer guardian.Guardian.UnguardIDs(refID)
 
 	var indexes map[string]utils.StringSet
-	if indexes, err = newFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, filterIDs, nil); err != nil {
+	if indexes, err = newFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, filterIDs, nil); err != nil {
 		return
 	}
 	if len(indexes) == 0 { // in case we have a profile with only non indexable filters(e.g. only *gt)
@@ -176,32 +176,32 @@ func removeItemFromFilterIndex(apiCtx *context.Context, dm *DataManager, idxItmT
 			indexes[idxKey] = nil // this will not be set in DB(handled by driver)
 		}
 		// remove from cache in order to corectly update the index
-		if err = Cache.Remove(apiCtx, idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), true, utils.NonTransactional); err != nil {
+		if err = Cache.Remove(ctx, idxItmType, utils.ConcatenatedKey(tntGrp, idxKey), true, utils.NonTransactional); err != nil {
 			return
 		}
 	}
-	return dm.SetIndexes(apiCtx, idxItmType, tntCtx, indexes, true, utils.NonTransactional)
+	return dm.SetIndexes(ctx, idxItmType, tntGrp, indexes, true, utils.NonTransactional)
 }
 
 // updatedIndexes will compare the old filtersIDs with the new ones and only update the filters indexes that are added/removed
 // idxItmType - the index object type(e.g.*attribute_filter_indexes, *rate_filter_indexes, *threshold_filter_indexes)
 // tnt - the tenant of the object
-// ctx - the rate profile id for rate from RateProfile(sub indexes); for all the rest the ctx is ""(AttributePrf and DispatcherPrf have a separate function)
+// grp - the rate profile id for rate from RateProfile(sub indexes); for all the rest the grp is ""(AttributePrf and DispatcherPrf have a separate function)
 // itemID - the object id
 // oldFilterIds - the filtersIDs that the old object had; this is optional if the object did not exist
 // newFilterIDs - the filtersIDs for the object that will be set
-// useCtx - in case of subindexes(e.g. Rate from RateProfiles) need to add the ctx to the itemID when reverse filter indexes are set
+// useGrp - in case of subindexes(e.g. Rate from RateProfiles) need to add the grp to the itemID when reverse filter indexes are set
 // 			used when updating the filters
-func updatedIndexes(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, ctx, itemID string, oldFilterIds *[]string, newFilterIDs []string, useCtx bool) (err error) {
-	itmCtx := itemID
-	if useCtx {
-		itmCtx = utils.ConcatenatedKey(itemID, ctx)
+func updatedIndexes(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, oldFilterIds *[]string, newFilterIDs []string, useGrp bool) (err error) {
+	itmGrp := itemID
+	if useGrp {
+		itmGrp = utils.ConcatenatedKey(itemID, grp)
 	}
 	if oldFilterIds == nil { // nothing to remove so just create the new indexes
-		if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
+		if err = addIndexFiltersItem(ctx, dm, idxItmType, tnt, itmGrp, newFilterIDs); err != nil {
 			return
 		}
-		return addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs)
+		return addItemToFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, newFilterIDs)
 	}
 	if len(*oldFilterIds) == 0 && len(newFilterIDs) == 0 { // nothing to update
 		return
@@ -229,10 +229,10 @@ func updatedIndexes(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 	if len(oldFilterIDs) != 0 || oldFltrs.Size() == 0 {
 		// has some indexes to remove or
 		// the old profile doesn't have filters but the new one has so remove the *none index
-		if err = removeIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itmCtx, oldFilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, idxItmType, tnt, itmGrp, oldFilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, oldFilterIDs); err != nil {
+		if err = removeItemFromFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, oldFilterIDs); err != nil {
 			return
 		}
 	}
@@ -240,10 +240,10 @@ func updatedIndexes(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 	if len(newFilterIDs) != 0 || newFltrs.Size() == 0 {
 		// has some indexes to add or
 		// the old profile has filters but the new one does not so add the *none index
-		if err = addIndexFiltersItem(apiCtx, dm, idxItmType, tnt, itmCtx, newFilterIDs); err != nil {
+		if err = addIndexFiltersItem(ctx, dm, idxItmType, tnt, itmGrp, newFilterIDs); err != nil {
 			return
 		}
-		if err = addItemToFilterIndex(apiCtx, dm, idxItmType, tnt, ctx, itemID, newFilterIDs); err != nil {
+		if err = addItemToFilterIndex(ctx, dm, idxItmType, tnt, grp, itemID, newFilterIDs); err != nil {
 			return
 		}
 	}
@@ -251,27 +251,27 @@ func updatedIndexes(apiCtx *context.Context, dm *DataManager, idxItmType, tnt, c
 }
 
 // splitFilterIndex splits the cache key so it can be used to recache the indexes
-func splitFilterIndex(tntCtxIdxKey string) (tntCtx, idxKey string, err error) {
-	splt := utils.SplitConcatenatedKey(tntCtxIdxKey) // tntCtx:filterType:fieldName:fieldVal
+func splitFilterIndex(tntGrpIdxKey string) (tntGrp, idxKey string, err error) {
+	splt := utils.SplitConcatenatedKey(tntGrpIdxKey) // tntCtx:filterType:fieldName:fieldVal
 	lsplt := len(splt)
 	if lsplt < 4 {
-		err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntCtxIdxKey)
+		err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", tntGrpIdxKey)
 		return
 	}
-	tntCtx = utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
+	tntGrp = utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
 	idxKey = utils.ConcatenatedKey(splt[lsplt-3:]...)
 	return
 }
 
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
 // getFilters returns a list of filters IDs for the given profile id
-func ComputeIndexes(cntxt *context.Context, dm *DataManager, tnt, ctx, idxItmType string, IDs *[]string,
-	transactionID string, getFilters func(tnt, id, ctx string) (*[]string, error), newFltr *Filter) (indexes utils.StringSet, err error) {
+func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType string, IDs *[]string,
+	transactionID string, getFilters func(tnt, id, grp string) (*[]string, error), newFltr *Filter) (indexes utils.StringSet, err error) {
 	indexes = make(utils.StringSet)
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		var ids []string
-		if ids, err = dm.DataDB().GetKeysForPrefix(cntxt, utils.CacheIndexesToPrefix[idxItmType]); err != nil {
+		if ids, err = dm.DataDB().GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType]); err != nil {
 			return
 		}
 		for _, id := range ids {
@@ -280,34 +280,34 @@ func ComputeIndexes(cntxt *context.Context, dm *DataManager, tnt, ctx, idxItmTyp
 	} else {
 		profilesIDs = *IDs
 	}
-	tntCtx := tnt
-	if ctx != utils.EmptyString {
-		tntCtx = utils.ConcatenatedKey(tnt, ctx)
+	tntGrp := tnt
+	if grp != utils.EmptyString {
+		tntGrp = utils.ConcatenatedKey(tnt, grp)
 	}
 	// early lock to be sure that until we do not write back the indexes
 	// another goroutine can't create new indexes
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
+		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 	defer guardian.Guardian.UnguardIDs(refID)
 	for _, id := range profilesIDs {
 		var filterIDs *[]string
-		if filterIDs, err = getFilters(tnt, id, ctx); err != nil {
+		if filterIDs, err = getFilters(tnt, id, grp); err != nil {
 			return
 		}
 		if filterIDs == nil {
 			continue
 		}
 		var index map[string]utils.StringSet
-		if index, err = newFilterIndex(cntxt, dm, idxItmType,
-			tnt, ctx, id, *filterIDs, newFltr); err != nil {
+		if index, err = newFilterIndex(ctx, dm, idxItmType,
+			tnt, grp, id, *filterIDs, newFltr); err != nil {
 			return
 		}
 		// ensure that the item is in the index set
 		for key, idx := range index {
 			idx.Add(id)
-			indexes.Add(utils.ConcatenatedKey(tntCtx, key))
+			indexes.Add(utils.ConcatenatedKey(tntGrp, key))
 		}
-		if err = dm.SetIndexes(cntxt, idxItmType, tntCtx, index, cacheCommit(transactionID), transactionID); err != nil {
+		if err = dm.SetIndexes(ctx, idxItmType, tntGrp, index, cacheCommit(transactionID), transactionID); err != nil {
 			return
 		}
 	}
@@ -320,11 +320,11 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 		if strings.HasPrefix(ID, utils.Meta) { // skip inline
 			continue
 		}
-		tntCtx := utils.ConcatenatedKey(tnt, ID)
+		tntGrp := utils.ConcatenatedKey(tnt, ID)
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
+			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
 		var indexes map[string]utils.StringSet
-		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntCtx,
+		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
 			idxItmType, true, false); err != nil {
 			if err != utils.ErrNotFound {
 				guardian.Guardian.UnguardIDs(refID)
@@ -337,12 +337,12 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 		}
 		indexes[idxItmType].Add(itemID)
 		for indxKey := range indexes {
-			if err = Cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+			if err = Cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
 				guardian.Guardian.UnguardIDs(refID)
 				return
 			}
 		}
-		if err = dm.SetIndexes(ctx, utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+		if err = dm.SetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp, indexes, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			return
 		}
@@ -357,11 +357,11 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 		if strings.HasPrefix(ID, utils.Meta) { // skip inline
 			continue
 		}
-		tntCtx := utils.ConcatenatedKey(tnt, ID)
+		tntGrp := utils.ConcatenatedKey(tnt, ID)
 		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
+			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntGrp)
 		var indexes map[string]utils.StringSet
-		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntCtx,
+		if indexes, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp,
 			idxItmType, true, false); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err != utils.ErrNotFound {
@@ -373,12 +373,12 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 		indexes[idxItmType].Remove(itemID)
 
 		for indxKey := range indexes {
-			if err = Cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntCtx, indxKey), true, utils.NonTransactional); err != nil {
+			if err = Cache.Remove(ctx, utils.CacheReverseFilterIndexes, utils.ConcatenatedKey(tntGrp, indxKey), true, utils.NonTransactional); err != nil {
 				guardian.Guardian.UnguardIDs(refID)
 				return
 			}
 		}
-		if err = dm.SetIndexes(ctx, utils.CacheReverseFilterIndexes, tntCtx, indexes, true, utils.NonTransactional); err != nil {
+		if err = dm.SetIndexes(ctx, utils.CacheReverseFilterIndexes, tntGrp, indexes, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			return
 		}
@@ -390,7 +390,7 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 // UpdateFilterIndex  will update the indexes for the new Filter
 // we do not care what is added
 // exported for the migrator
-func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt *Filter) (err error) {
+func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	if oldFlt == nil { // no filter before so no index to update
 		return // nothing to update
 	}
@@ -471,7 +471,7 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 	defer guardian.Guardian.UnguardIDs(refID)
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
-	if rcvIndx, err = dm.GetIndexes(apiCtx, utils.CacheReverseFilterIndexes, tntID,
+	if rcvIndx, err = dm.GetIndexes(ctx, utils.CacheReverseFilterIndexes, tntID,
 		utils.EmptyString, true, false); err != nil {
 		if err != utils.ErrNotFound {
 			return
@@ -485,14 +485,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 	for idxItmType, indx := range rcvIndx {
 		switch idxItmType {
 		case utils.CacheThresholdFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					th, e := dm.GetThresholdProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					th, e := dm.GetThresholdProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -505,14 +505,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheStatFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					sq, e := dm.GetStatQueueProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					sq, e := dm.GetStatQueueProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -525,14 +525,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheResourceFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					rs, e := dm.GetResourceProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					rs, e := dm.GetResourceProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -545,14 +545,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheRouteFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					rt, e := dm.GetRouteProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					rt, e := dm.GetRouteProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -565,14 +565,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheChargerFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					ch, e := dm.GetChargerProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					ch, e := dm.GetChargerProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -585,13 +585,13 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheAccountsFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
 					ap, e := dm.GetAccount(context.Background(), tnt, id)
 					if e != nil {
 						return nil, e
@@ -605,14 +605,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheActionProfilesFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					acp, e := dm.GetActionProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					acp, e := dm.GetActionProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -625,14 +625,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheRateProfilesFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, //remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, ctx string) (*[]string, error) {
-					rp, e := dm.GetRateProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					rp, e := dm.GetRateProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -658,13 +658,13 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				itemIDs[idSplit[1]].Add(idSplit[0])
 			}
 			for rpID, ids := range itemIDs {
-				tntCtx := utils.ConcatenatedKey(newFlt.Tenant, rpID)
-				if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, tntCtx,
+				tntGrp := utils.ConcatenatedKey(newFlt.Tenant, rpID)
+				if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, tntGrp,
 					removeIndexKeys, ids); err != nil {
 					return
 				}
 				var rp *utils.RateProfile
-				if rp, err = dm.GetRateProfile(apiCtx, newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
+				if rp, err = dm.GetRateProfile(ctx, newFlt.Tenant, rpID, true, false, utils.NonTransactional); err != nil {
 					return
 				}
 				for itemID := range ids {
@@ -673,9 +673,9 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 						return utils.ErrNotFound
 					}
 					refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntCtx)
+						config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tntGrp)
 					var updIdx map[string]utils.StringSet
-					if updIdx, err = newFilterIndex(apiCtx, dm, idxItmType,
+					if updIdx, err = newFilterIndex(ctx, dm, idxItmType,
 						newFlt.Tenant, rpID, itemID, rate.FilterIDs, newFlt); err != nil {
 						guardian.Guardian.UnguardIDs(refID)
 						return
@@ -683,7 +683,7 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 					for _, idx := range updIdx {
 						idx.Add(itemID)
 					}
-					if err = dm.SetIndexes(apiCtx, idxItmType, tntCtx,
+					if err = dm.SetIndexes(ctx, idxItmType, tntGrp,
 						updIdx, false, utils.NonTransactional); err != nil {
 						guardian.Guardian.UnguardIDs(refID)
 						return
@@ -692,14 +692,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				}
 			}
 		case utils.CacheAttributeFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, _ string) (*[]string, error) {
-					ap, e := dm.GetAttributeProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+					ap, e := dm.GetAttributeProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
@@ -712,14 +712,14 @@ func UpdateFilterIndex(apiCtx *context.Context, dm *DataManager, oldFlt, newFlt 
 				return utils.APIErrorHandler(err)
 			}
 		case utils.CacheDispatcherFilterIndexes:
-			if err = removeFilterIndexesForFilter(apiCtx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {
 				return
 			}
 			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(apiCtx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
 				&idxSlice, utils.NonTransactional, func(tnt, id, _ string) (*[]string, error) {
-					dp, e := dm.GetDispatcherProfile(apiCtx, tnt, id, true, false, utils.NonTransactional)
+					dp, e := dm.GetDispatcherProfile(ctx, tnt, id, true, false, utils.NonTransactional)
 					if e != nil {
 						return nil, e
 					}
