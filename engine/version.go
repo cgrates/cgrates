@@ -43,6 +43,7 @@ var (
 	storDBVers = map[string]string{
 		utils.CostDetails:   "cgr-migrator -exec=*cost_details",
 		utils.SessionSCosts: "cgr-migrator -exec=*sessions_costs",
+		utils.CDRs:          "cgr-migrator -exec=*cdrs",
 	}
 	allVers map[string]string // init will fill this with a merge of data+stor
 )
