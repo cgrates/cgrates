@@ -63,6 +63,9 @@ var (
 		testUpdateVersionsSubscribers,
 		testUpdateVersionsThresholds,
 		testUpdateVersionsTiming,
+		testUpdateVersionsCostDetails,
+		testUpdateVersionsSessionSCosts,
+		testUpdateVersionsCDRs,
 	}
 )
 
@@ -251,6 +254,8 @@ func testVersionsWithEngine(t *testing.T) {
 	}
 }
 
+//Tests for DataDB
+//We do a test for each version field in order to test them as a unit and not at as a whole.
 func testUpdateVersionsAccounts(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	newVersions[utils.Accounts] = 2
@@ -645,6 +650,67 @@ func testUpdateVersionsTiming(t *testing.T) {
 		t.Fatal(err)
 	}
 	errExpect := utils.EmptyString
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+//Tests for StorDB
+func testUpdateVersionsCostDetails(t *testing.T) {
+	newVersions := CurrentStorDBVersions()
+	newVersions[utils.CostDetails] = 1
+	if err := storageDb.SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsSessionSCosts(t *testing.T) {
+	newVersions := CurrentStorDBVersions()
+	newVersions[utils.SessionSCosts] = 2
+	if err := storageDb.SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*sessions_costs>\n"
+	if output.String() != errExpect {
+		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
+	}
+}
+
+func testUpdateVersionsCDRs(t *testing.T) {
+	newVersions := CurrentStorDBVersions()
+	newVersions[utils.CDRs] = 1
+	if err := storageDb.SetVersions(newVersions, true); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("cgr-engine", `-config_path=/usr/share/cgrates/conf/samples/tutmysql`, `-scheduled_shutdown=4ms`)
+	output := bytes.NewBuffer(nil)
+	cmd.Stdout = output
+	if err := cmd.Run(); err != nil {
+		t.Log(cmd.Args)
+		t.Log(output.String())
+		t.Fatal(err)
+	}
+	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cdrs>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
