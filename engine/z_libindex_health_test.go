@@ -20,6 +20,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -307,11 +308,12 @@ func TestHealthFilter(t *testing.T) {
 	}
 	exp := &FilterIHReply{
 		MissingIndexes: map[string][]string{
-			"cgrates.org:*any:*string:*req.Account:1001": {"cgrates.org:ATTR1"},
+			"cgrates.org:*any:*string:*req.Account:1001": {"ATTR1"},
 			"cgrates.org:*any:*string:*req.Account:1002": {"ATTR1"},
 		},
+		BrokenIndexes: make(map[string][]string),
 		MissingFilters: map[string][]string{
-			"Fltr1": {"cgrates.org:ATTR1"},
+			"cgrates.org:Fltr1": {"ATTR1"},
 		},
 		MissingObjects: []string{"cgrates.org:ATTR2"},
 	}
@@ -358,20 +360,27 @@ func TestHealthReverseFilter(t *testing.T) {
 			MissingReverseIndexes: map[string][]string{
 				"cgrates.org:ATTR1": {"Fltr1:*any"},
 			},
-			MissingFilters: map[string][]string{
-				"cgrates.org:Fltr2": {"ATTR1"},
-				"cgrates.org:Fltr1": {"ATTR1:*cdrs"},
+			MissingFilters: make(map[string][]string),
+			BrokenReverseIndexes: map[string][]string{
+				"cgrates.org:ATTR1:*cdrs": {"Fltr1", "Fltr2"},
 			},
 			MissingObjects: []string{"cgrates.org:ATTR2"},
 		},
 	}
 
+	objCaches := make(map[string]*ltcache.Cache)
+	for indxType := range utils.CacheIndexesToPrefix {
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+	}
 	if rply, err := GetRevFltrIdxHealth(dm,
 		ltcache.NewCache(-1, 0, false, nil),
 		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil)); err != nil {
+		objCaches); err != nil {
 		t.Fatal(err)
-	} else if !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+	} else {
+		sort.Strings(rply[utils.CacheAttributeFilterIndexes].BrokenReverseIndexes["cgrates.org:ATTR1:*cdrs"])
+		if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
 	}
 }
