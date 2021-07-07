@@ -266,79 +266,22 @@ func TestEventReqParseFieldDateTimeError2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	EventReq := NewEventRequest(utils.MapStorage{}, nil, nil, prsr, "", "", nil, nil)
-	fctTemp := &config.FCTemplate{Type: utils.MetaDateTime,
+	mS := map[string]utils.MapStorage{
+		utils.MetaOpts: {
+			utils.AccountField: "1002",
+			utils.Usage: "20m",
+		},
+	}
+	EventReq := NewExportRequest(mS, "", nil, nil)
+	fctTemp := &config.FCTemplate{
+		Type: utils.MetaDateTime,
 		Value:    prsr,
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "/",
 	}
-
-	_, err = EventReq.ParseField(fctTemp)
 	expected := utils.ErrNotFound
-	if err == nil || err != expected {
+	if _, err = EventReq.ParseField(fctTemp); err == nil || err != expected {
 		t.Errorf("Expected <%+v> but received <%+v>", expected, err)
 	}
 }
 
-func TestEventRequestFieldAsInterfaceOnePathReq(t *testing.T) {
-	dP := &utils.MapStorage{
-		"Account": "1002",
-		"Usage": "20m",
-	}
-	evReq := NewEventRequest(dP, nil, nil, nil, "", "", nil, nil)
-
-	path := []string{utils.MetaReq}
-	if val, err := evReq.FieldAsInterface(path); err != nil {
-			t.Error(err)
-	} else if !reflect.DeepEqual(val, dP) {
-			t.Errorf("Expected %+v, received %+v", dP, val)
-	}
-}
-
-func TestEventRequestFieldAsInterfaceOnePathDC(t *testing.T) {
-	dP := utils.MapStorage{
-		"Account": "1002",
-		"Usage": "20m",
-	}
-	evReq := NewEventRequest(nil, dP, nil, nil, "", "", nil, nil)
-
-	path := []string{utils.MetaDC}
-	if val, err := evReq.FieldAsInterface(path); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, dP) {
-		t.Errorf("Expected %+v, received %+v", dP, val)
-	}
-}
-
-func TestEventRequestFieldAsInterfaceOnePathOpts(t *testing.T) {
-	dP := utils.MapStorage{
-		"Account": "1002",
-		"Usage": "20m",
-	}
-	evReq := NewEventRequest(nil, nil, dP, nil, "", "", nil, nil)
-
-	path := []string{utils.MetaOpts}
-	if val, err := evReq.FieldAsInterface(path); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, dP) {
-		t.Errorf("Expected %+v, received %+v", dP, val)
-	}
-}
-
-func TestEventRequestFieldAsInterfaceOnePathCfg(t *testing.T) {
-	tmp := config.CgrConfig()
-
-	cfg := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
-	evReq := NewEventRequest(nil, nil, nil, nil, "", "", nil, nil)
-
-	expVal := config.CgrConfig().GetDataProvider()
-	path := []string{utils.MetaCfg}
-	if val, err := evReq.FieldAsInterface(path); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(val, expVal) {
-		t.Errorf("Expected %+v \n, received %+v", expVal, val)
-	}
-
-	config.SetCgrConfig(tmp)
-}
