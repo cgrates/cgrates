@@ -133,9 +133,6 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.server.RpcRegisterName(utils.ConfigSv1,
 		v1.NewDispatcherConfigSv1(dspS.dspS))
 
-	dspS.server.RpcRegisterName(utils.CoreSv1,
-		v1.NewDispatcherCoreSv1(dspS.dspS))
-
 	dspS.server.RpcRegisterName(utils.RALsV1,
 		v1.NewDispatcherRALsV1(dspS.dspS))
 

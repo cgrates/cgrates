@@ -100,7 +100,6 @@ func TestConfigSv1Interface(t *testing.T) {
 }
 
 func TestCoreSv1Interface(t *testing.T) {
-	_ = CoreSv1Interface(NewDispatcherCoreSv1(nil))
 	_ = CoreSv1Interface(NewCoreSv1(nil))
 }
 

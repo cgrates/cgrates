@@ -870,44 +870,6 @@ func (dS *DispatcherConfigSv1) GetConfigAsJSON(args *config.SectionWithAPIOpts, 
 	return dS.dS.ConfigSv1GetConfigAsJSON(args, reply)
 }
 
-func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1 {
-	return &DispatcherCoreSv1{dS: dps}
-}
-
-// Exports RPC from RLs
-type DispatcherCoreSv1 struct {
-	dS *dispatchers.DispatcherService
-}
-
-func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithAPIOpts, reply *map[string]interface{}) error {
-	return dS.dS.CoreSv1Status(args, reply)
-}
-
-// Ping used to detreminate if component is active
-func (dS *DispatcherCoreSv1) Ping(args *utils.CGREvent, reply *string) error {
-	return dS.dS.CoreSv1Ping(args, reply)
-}
-
-func (dS *DispatcherCoreSv1) Sleep(arg *utils.DurationArgs, reply *string) error {
-	return dS.dS.CoreSv1Sleep(arg, reply)
-}
-
-func (dS *DispatcherCoreSv1) StartCPUProfiling(args *utils.DirectoryArgs, reply *string) error {
-	return dS.dS.CoreSv1StartCPUProfiling(args, reply)
-}
-
-func (dS *DispatcherCoreSv1) StopCPUProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.CoreSv1StopCPUProfiling(args, reply)
-}
-
-func (dS *DispatcherCoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *string) error {
-	return dS.dS.CoreSv1StartMemoryProfiling(args, reply)
-}
-
-func (dS *DispatcherCoreSv1) StopMemoryProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
-	return dS.dS.CoreSv1StopMemoryProfiling(args, reply)
-}
-
 func NewDispatcherRALsV1(dps *dispatchers.DispatcherService) *DispatcherRALsV1 {
 	return &DispatcherRALsV1{dS: dps}
 }
