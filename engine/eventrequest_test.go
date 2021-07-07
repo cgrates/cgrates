@@ -269,12 +269,12 @@ func TestEventReqParseFieldDateTimeError2(t *testing.T) {
 	mS := map[string]utils.MapStorage{
 		utils.MetaOpts: {
 			utils.AccountField: "1002",
-			utils.Usage: "20m",
+			utils.Usage:        "20m",
 		},
 	}
 	EventReq := NewExportRequest(mS, "", nil, nil)
 	fctTemp := &config.FCTemplate{
-		Type: utils.MetaDateTime,
+		Type:     utils.MetaDateTime,
 		Value:    prsr,
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "/",
@@ -285,3 +285,58 @@ func TestEventReqParseFieldDateTimeError2(t *testing.T) {
 	}
 }
 
+func TestEventReqFieldAsInterface(t *testing.T) {
+	inData := map[string]utils.MapStorage{
+		utils.MetaReq: {
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	fldPath := []string{utils.MetaReq, "Usage"}
+	expVal := "10m"
+	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expVal) {
+		t.Errorf("Expected %+v \n but received \n %+v", expVal, rcv)
+	}
+
+	expVal = "cgrates.org"
+	fldPath = []string{utils.MetaTenant}
+	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expVal) {
+		t.Errorf("Expected %+v \n but received \n %+v", expVal, rcv)
+	}
+}
+
+func TestEventReqNewEventExporter(t *testing.T) {
+	inData := map[string]utils.MapStorage{
+		utils.MetaReq: {
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+	expected := &ExportRequest{
+		inData:  inData,
+		filterS: nil,
+		tnt:     "cgrates.org",
+		ExpData: expData,
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, expData)
+	if !reflect.DeepEqual(expected, eventReq) {
+		t.Errorf("Expected %v \n but received \n %v", expected, eventReq)
+	}
+}
