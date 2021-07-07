@@ -21,8 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"bytes"
 	"errors"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -752,4 +756,166 @@ func TestERsProcessEvent11(t *testing.T) {
 	if err == nil || err.Error() != "RALS_ERROR" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "RALS_ERROR", err)
 	}
+}
+
+func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
+	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
+	err := os.Mkdir(dirPath, 0755)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(dirPath)
+
+	value := &erEvents{
+		events: []*utils.CGREvent{
+			{
+				Tenant: "cgrates.org",
+				ID:     "EventErsOnEvicted",
+				Event: map[string]interface{}{
+					utils.AccountField: "1001",
+				},
+			},
+		},
+		rdrCfg: &config.EventReaderCfg{
+			ID:   "ER1",
+			Type: utils.MetaNone,
+			Opts: map[string]interface{}{
+				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
+				utils.PartialPathOpt:        dirPath,
+			},
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	erS := &ERService{
+		cfg:       cfg,
+		rdrEvents: make(chan *erEvent, 1),
+		filterS:   fltrS,
+	}
+	erS.onEvicted("ID", value)
+
+	// rcv, err := os.ReadFile(filepath.Join(dirPath, "ID.*.*"))
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// fmt.Println(rcv)
+}
+
+func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
+	err := os.Mkdir(dirPath, 0755)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(dirPath)
+
+	value := &erEvents{
+		events: []*utils.CGREvent{
+			{
+				Tenant: "cgrates.org",
+				ID:     "EventErsOnEvicted",
+				Event: map[string]interface{}{
+					utils.AccountField: "1001",
+				},
+			},
+		},
+		rdrCfg: &config.EventReaderCfg{
+			ID:   "ER1",
+			Type: utils.MetaNone,
+			Opts: map[string]interface{}{
+				utils.PartialCacheActionOpt:      utils.MetaDumpToFile,
+				utils.PartialPathOpt:             dirPath,
+				utils.PartialCSVFieldSepartorOpt: "\"",
+			},
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	erS := &ERService{
+		cfg:       cfg,
+		rdrEvents: make(chan *erEvent, 1),
+		filterS:   fltrS,
+	}
+
+	erS.onEvicted("ID", value)
+
+	rcvLog := buf.String()[20:]
+	if !strings.Contains(rcvLog, "error: csv: invalid field or comment delimiter") {
+		t.Errorf("expected: <%s> to be included in log message: <%s>",
+			"error: csv: invalid field or comment delimiter", rcvLog)
+	}
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
+	utils.Logger.SetLogLevel(3)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	dirPath := "/tmp/TestErsOnEvictedMetaDumpToFile"
+	err := os.Mkdir(dirPath, 0755)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(dirPath)
+
+	value := &erEvents{
+		events: []*utils.CGREvent{
+			{
+				Tenant: "cgrates.org",
+				ID:     "EventErsOnEvicted",
+				Event: map[string]interface{}{
+					utils.AccountField: "1001",
+				},
+			},
+		},
+		rdrCfg: &config.EventReaderCfg{
+			ID:   "ER1",
+			Type: utils.MetaNone,
+			Opts: map[string]interface{}{
+				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
+				utils.PartialPathOpt:        dirPath + "/non-existent",
+			},
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	erS := &ERService{
+		cfg:       cfg,
+		rdrEvents: make(chan *erEvent, 1),
+		filterS:   fltrS,
+	}
+
+	erS.onEvicted("ID", value)
+
+	rcvLog := buf.String()[20:]
+	if !strings.Contains(rcvLog, "CGRateS <> [ERROR] <ERs> Failed creating /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.") &&
+		!strings.Contains(rcvLog, "error: open /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.") {
+		t.Errorf("expected: <%s> and <%s> to be included in log message: <%s>",
+			"CGRateS <> [ERROR] <ERs> Failed creating /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.",
+			"error: open /tmp/TestErsOnEvictedMetaDumpToFile/non-existent/ID.",
+			rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
 }
