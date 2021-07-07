@@ -266,14 +266,14 @@ func TestExportReqFieldAsINterfaceOnePath(t *testing.T) {
 		utils.MetaReq: {
 			utils.AccountField: "1004",
 			utils.Usage:        "20m",
-			utils.AnswerTime: time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 		},
 		utils.MetaOpts: {
 			utils.APIKey: "attr12345",
 		},
 		utils.MetaVars: {
 			utils.RequestType: utils.MetaRated,
-			utils.Subsystems: utils.MetaChargers,
+			utils.Subsystems:  utils.MetaChargers,
 		},
 	}
 	eventReq := NewExportRequest(mS, "", nil, nil)
@@ -296,5 +296,60 @@ func TestExportReqFieldAsINterfaceOnePath(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(val, mS[utils.MetaVars]) {
 		t.Errorf("Expected %+v \n, received %+v", val, mS[utils.MetaVars])
+	}
+}
+func TestEventReqFieldAsInterface(t *testing.T) {
+	inData := map[string]utils.MapStorage{
+		utils.MetaReq: {
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, nil)
+	fldPath := []string{utils.MetaReq, "Usage"}
+	expVal := "10m"
+	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expVal) {
+		t.Errorf("Expected %+v \n but received \n %+v", expVal, rcv)
+	}
+
+	expVal = "cgrates.org"
+	fldPath = []string{utils.MetaTenant}
+	if rcv, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, expVal) {
+		t.Errorf("Expected %+v \n but received \n %+v", expVal, rcv)
+	}
+}
+
+func TestEventReqNewEventExporter(t *testing.T) {
+	inData := map[string]utils.MapStorage{
+		utils.MetaReq: {
+			"Account": "1001",
+			"Usage":   "10m",
+		},
+	}
+	onm := utils.NewOrderedNavigableMap()
+	fullPath := &utils.FullPath{
+		PathSlice: []string{utils.MetaReq, utils.MetaTenant},
+		Path:      utils.MetaTenant,
+	}
+	val := &utils.DataLeaf{
+		Data: "value1",
+	}
+	onm.Append(fullPath, val)
+	expData := map[string]*utils.OrderedNavigableMap{
+		utils.MetaReq: onm,
+	}
+	expected := &ExportRequest{
+		inData:  inData,
+		filterS: nil,
+		tnt:     "cgrates.org",
+		ExpData: expData,
+	}
+	eventReq := NewExportRequest(inData, "cgrates.org", nil, expData)
+	if !reflect.DeepEqual(expected, eventReq) {
+		t.Errorf("Expected %v \n but received \n %v", expected, eventReq)
 	}
 }
