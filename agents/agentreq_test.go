@@ -990,6 +990,14 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	} else if !reflect.DeepEqual(rply, expVal) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
 	}
+
+	path = []string{utils.MetaTenant}
+	expVal = "cgrates.org"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error()
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
 }
 
 func TestAgReqFieldAsInterfaceForOneFldPathCgrReq(t *testing.T) {
