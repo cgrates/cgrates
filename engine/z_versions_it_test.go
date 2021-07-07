@@ -48,7 +48,7 @@ var (
 		testUpdateVersionsActionTriggers,
 		testUpdateVersionsActions,
 		testUpdateVersionsAttributes,
-		testUpdateVersionsChargers, // ??
+		testUpdateVersionsChargers,
 		testUpdateVersionsDestinations,
 		testUpdateVersionsDispatchers,
 		testUpdateVersionsLoadIDs,
@@ -59,7 +59,7 @@ var (
 		testUpdateVersionsReverseDestinations,
 		testUpdateVersionsRoutes,
 		testUpdateVersionsSharedGroups,
-		testUpdateVersionsStats, // ??
+		testUpdateVersionsStats,
 		testUpdateVersionsSubscribers,
 		testUpdateVersionsThresholds,
 		testUpdateVersionsTiming,
@@ -253,7 +253,7 @@ func testVersionsWithEngine(t *testing.T) {
 
 func testUpdateVersionsAccounts(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Accounts"] = 2
+	newVersions[utils.Accounts] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +273,7 @@ func testUpdateVersionsAccounts(t *testing.T) {
 
 func testUpdateVersionsActionPlans(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["ActionPlans"] = 2
+	newVersions[utils.ActionPlans] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -293,7 +293,7 @@ func testUpdateVersionsActionPlans(t *testing.T) {
 
 func testUpdateVersionsActionTriggers(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["ActionTriggers"] = 1
+	newVersions[utils.ActionTriggers] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -313,7 +313,7 @@ func testUpdateVersionsActionTriggers(t *testing.T) {
 
 func testUpdateVersionsActions(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Actions"] = 1
+	newVersions[utils.Actions] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -333,7 +333,7 @@ func testUpdateVersionsActions(t *testing.T) {
 
 func testUpdateVersionsChargers(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Chargers"] = 1
+	newVersions[utils.Chargers] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +353,7 @@ func testUpdateVersionsChargers(t *testing.T) {
 
 func testUpdateVersionsDestinations(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Destinations"] = 0
+	newVersions[utils.Destination] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -372,7 +372,7 @@ func testUpdateVersionsDestinations(t *testing.T) {
 }
 func testUpdateVersionsAttributes(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Attributes"] = 3
+	newVersions[utils.Attributes] = 3
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -412,7 +412,7 @@ func testUpdateVersionsDispatchers(t *testing.T) {
 
 func testUpdateVersionsLoadIDs(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	delete(newVersions, "LoadIDs")
+	delete(newVersions, utils.LoadIDsVrs)
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -432,7 +432,7 @@ func testUpdateVersionsLoadIDs(t *testing.T) {
 
 func testUpdateVersionsRQF(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["RQF"] = 2
+	newVersions[utils.RQF] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -452,7 +452,7 @@ func testUpdateVersionsRQF(t *testing.T) {
 
 func testUpdateVersionsRatingPlan(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["RatingPlan"] = 0
+	newVersions[utils.RatingPlan] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -472,7 +472,7 @@ func testUpdateVersionsRatingPlan(t *testing.T) {
 
 func testUpdateVersionsRatingProfile(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["RatingProfile"] = 0
+	newVersions[utils.RatingProfile] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -492,7 +492,7 @@ func testUpdateVersionsRatingProfile(t *testing.T) {
 
 func testUpdateVersionsResource(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Resource"] = 0
+	newVersions[utils.Resource] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -512,7 +512,7 @@ func testUpdateVersionsResource(t *testing.T) {
 
 func testUpdateVersionsReverseDestinations(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["ReverseDestinations"] = 0
+	newVersions[utils.ReverseDestinations] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -532,7 +532,7 @@ func testUpdateVersionsReverseDestinations(t *testing.T) {
 
 func testUpdateVersionsRoutes(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Routes"] = 1
+	newVersions[utils.Routes] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -552,7 +552,7 @@ func testUpdateVersionsRoutes(t *testing.T) {
 
 func testUpdateVersionsSharedGroups(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["SharedGroups"] = 1
+	newVersions[utils.SharedGroups] = 1
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -572,7 +572,7 @@ func testUpdateVersionsSharedGroups(t *testing.T) {
 
 func testUpdateVersionsStats(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Stats"] = 3
+	newVersions[utils.StatS] = 3
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -592,7 +592,7 @@ func testUpdateVersionsStats(t *testing.T) {
 
 func testUpdateVersionsSubscribers(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Subscribers"] = 0
+	newVersions[utils.Subscribers] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -612,7 +612,7 @@ func testUpdateVersionsSubscribers(t *testing.T) {
 
 func testUpdateVersionsThresholds(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Thresholds"] = 2
+	newVersions[utils.Thresholds] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
@@ -632,7 +632,7 @@ func testUpdateVersionsThresholds(t *testing.T) {
 
 func testUpdateVersionsTiming(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions["Timing"] = 0
+	newVersions[utils.Timing] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}
