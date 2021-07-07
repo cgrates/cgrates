@@ -92,7 +92,7 @@ func (dS *DispatcherService) CoreSv1StartCPUProfiling(args *utils.DirectoryArgs,
 	}, utils.MetaCore, utils.CoreSv1StartCPUProfiling, args, reply)
 }
 
-func (dS *DispatcherService) CoreSv1StopCPUProfiling(args *utils.DirectoryArgs,
+func (dS *DispatcherService) CoreSv1StopCPUProfiling(args *utils.TenantWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {
@@ -128,7 +128,7 @@ func (dS *DispatcherService) CoreSv1StartMemoryProfiling(args *utils.MemoryPrf,
 	}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
 }
 
-func (dS *DispatcherService) CoreSv1StopMemoryProfiling(args *utils.MemoryPrf,
+func (dS *DispatcherService) CoreSv1StopMemoryProfiling(args *utils.TenantWithAPIOpts,
 	reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.Tenant != utils.EmptyString {

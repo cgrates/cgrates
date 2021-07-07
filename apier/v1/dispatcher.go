@@ -896,7 +896,7 @@ func (dS *DispatcherCoreSv1) StartCPUProfiling(args *utils.DirectoryArgs, reply 
 	return dS.dS.CoreSv1StartCPUProfiling(args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StopCPUProfiling(args *utils.DirectoryArgs, reply *string) error {
+func (dS *DispatcherCoreSv1) StopCPUProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
 	return dS.dS.CoreSv1StopCPUProfiling(args, reply)
 }
 
@@ -904,7 +904,7 @@ func (dS *DispatcherCoreSv1) StartMemoryProfiling(args *utils.MemoryPrf, reply *
 	return dS.dS.CoreSv1StartMemoryProfiling(args, reply)
 }
 
-func (dS *DispatcherCoreSv1) StopMemoryProfiling(args *utils.MemoryPrf, reply *string) error {
+func (dS *DispatcherCoreSv1) StopMemoryProfiling(args *utils.TenantWithAPIOpts, reply *string) error {
 	return dS.dS.CoreSv1StopMemoryProfiling(args, reply)
 }
 
