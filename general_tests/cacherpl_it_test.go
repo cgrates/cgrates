@@ -313,7 +313,7 @@ func testCacheRplPing(t *testing.T) {
 			utils.OptsRouteID: "testRoute123",
 		},
 	}
-	if err := dspEngine1RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := dspEngine1RPC.Call(utils.DispatcherSv1RemoteStatus, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "Engine1" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
@@ -338,7 +338,7 @@ func testCacheRplCheckReplication(t *testing.T) {
 	ev := utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",
 	}
-	if err := dspEngine2RPC.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
+	if err := dspEngine2RPC.Call(utils.DispatcherSv1RemoteStatus, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "DispatcherEngine2" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
