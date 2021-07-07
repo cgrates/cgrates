@@ -1404,31 +1404,31 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(apiCtx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	oldAttr, err := dm.GetAttributeProfile(apiCtx, tenant, id, true, false, utils.NonTransactional)
+	oldAttr, err := dm.GetAttributeProfile(ctx, tenant, id, true, false, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
-	if err = dm.DataDB().RemoveAttributeProfileDrv(apiCtx, tenant, id); err != nil {
+	if err = dm.DataDB().RemoveAttributeProfileDrv(ctx, tenant, id); err != nil {
 		return
 	}
 	if oldAttr == nil {
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		if err = removeIndexFiltersItem(apiCtx, dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
+		if err = removeIndexFiltersItem(ctx, dm, utils.CacheAttributeFilterIndexes, tenant, id, oldAttr.FilterIDs); err != nil {
 			return
 		}
-		if err = removeItemFromFilterIndex(apiCtx, dm, utils.CacheAttributeFilterIndexes,
+		if err = removeItemFromFilterIndex(ctx, dm, utils.CacheAttributeFilterIndexes,
 			tenant, utils.EmptyString, id, oldAttr.FilterIDs); err != nil {
 			return
 		}
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
-		replicate(apiCtx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		replicate(ctx, dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveAttributeProfile,

@@ -108,7 +108,6 @@ var (
 		CacheChargerFilterIndexes:        ChargerProfilePrefix,
 		CacheDispatcherFilterIndexes:     DispatcherProfilePrefix,
 		CacheRateProfilesFilterIndexes:   RateProfilePrefix,
-		CacheRateFilterIndexes:           RatePrefix,
 		CacheActionProfilesFilterIndexes: ActionProfilePrefix,
 		CacheAccountsFilterIndexes:       AccountPrefix,
 		CacheReverseFilterIndexes:        FilterPrefix,
@@ -340,7 +339,6 @@ const (
 	VersionPrefix             = "ver_"
 	StatQueueProfilePrefix    = "sqp_"
 	RouteProfilePrefix        = "rpp_"
-	RatePrefix                = "rep_"
 	AttributeProfilePrefix    = "alp_"
 	ChargerProfilePrefix      = "cpp_"
 	DispatcherProfilePrefix   = "dpp_"
