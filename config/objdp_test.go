@@ -21,6 +21,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewObjectDP(t *testing.T) {
