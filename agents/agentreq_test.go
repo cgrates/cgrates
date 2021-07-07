@@ -957,6 +957,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.ToR, PathSlice: []string{utils.ToR}}, &utils.DataNode{Type: utils.NMSliceType, Slice: []*utils.DataNode{{Type: utils.NMDataType, Value: &utils.DataLeaf{Data: utils.MetaVoice}}}})
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Destination, PathSlice: []string{utils.Destination}}, utils.NewLeafNode("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.Tenant, PathSlice: []string{utils.Tenant}}, utils.NewLeafNode("cgrates.org"))
 
 	path := []string{utils.MetaCgreq, utils.Usage}
 	var expVal interface{}
@@ -985,6 +986,14 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 
 	path = []string{utils.MetaCgreq, utils.Destination}
 	expVal = "1002"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+
+	path = []string{utils.MetaTenant}
+	expVal = "cgrates.org"
 	if rply, err := agReq.FieldAsInterface(path); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
