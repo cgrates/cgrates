@@ -135,13 +135,13 @@ func testDspCoreCPUProfile(t *testing.T) {
 		t.Errorf("Unexpected reply returned")
 	}
 
-	args = &utils.DirectoryArgs{
+	argsStop := &utils.TenantWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "core12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CoreSv1StopCPUProfiling,
-		args, &reply); err != nil {
+		argsStop, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -210,16 +210,13 @@ func testDspCoreMemoryProfile(t *testing.T) {
 		t.Errorf("Unexpected reply returned")
 	}
 
-	args = &utils.MemoryPrf{
-		DirPath:  "/tmp",
-		Interval: 100 * time.Millisecond,
-		NrFiles:  2,
+	argsStop := &utils.TenantWithAPIOpts{
 		APIOpts: map[string]interface{}{
 			utils.OptsAPIKey: "core12345",
 		},
 	}
 	if err := dispEngine.RPC.Call(utils.CoreSv1StopMemoryProfiling,
-		args, &reply); err != nil {
+		argsStop , &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
