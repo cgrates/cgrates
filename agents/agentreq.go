@@ -165,6 +165,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		} else {
 			val = ar.Cfg
 		}
+	case utils.MetaTenant:
+		return ar.Tenant, nil
 	}
 	if err != nil {
 		return
