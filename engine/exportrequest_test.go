@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestEventRequestParseFieldDateTimeDaily(t *testing.T) {
+func TestExportReqParseFieldDateTimeDaily(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -56,7 +56,7 @@ func TestEventRequestParseFieldDateTimeDaily(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeTimeZone(t *testing.T) {
+func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -84,7 +84,7 @@ func TestEventReqParseFieldDateTimeTimeZone(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeMonthly(t *testing.T) {
+func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -111,7 +111,7 @@ func TestEventReqParseFieldDateTimeMonthly(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
+func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -138,7 +138,7 @@ func TestEventReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeYearly(t *testing.T) {
+func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -165,7 +165,7 @@ func TestEventReqParseFieldDateTimeYearly(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
+func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -192,7 +192,7 @@ func TestEventReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeEmpty(t *testing.T) {
+func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -219,7 +219,7 @@ func TestEventReqParseFieldDateTimeEmpty(t *testing.T) {
 	}
 }
 
-func TestEventReqParseFieldDateTimeMonthEnd(t *testing.T) {
+func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -246,7 +246,7 @@ func TestEventReqParseFieldDateTimeMonthEnd(t *testing.T) {
 	}
 }
 
-func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
+func TestExportReqParseFieldDateTimeError(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.MapStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -258,5 +258,43 @@ func TestAgentRequestParseFieldDateTimeError(t *testing.T) {
 	expected := "time: invalid location name"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected <%+v> but received <%+v>", expected, err)
+	}
+}
+
+func TestExportReqFieldAsINterfaceOnePath(t *testing.T) {
+	mS := map[string]utils.MapStorage{
+		utils.MetaReq: {
+			utils.AccountField: "1004",
+			utils.Usage:        "20m",
+			utils.AnswerTime: time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+		},
+		utils.MetaOpts: {
+			utils.APIKey: "attr12345",
+		},
+		utils.MetaVars: {
+			utils.RequestType: utils.MetaRated,
+			utils.Subsystems: utils.MetaChargers,
+		},
+	}
+	eventReq := NewExportRequest(mS, "", nil, nil)
+	fldPath := []string{utils.MetaReq}
+	if val, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, mS[utils.MetaReq]) {
+		t.Errorf("Expected %+v \n, received %+v", val, mS[utils.MetaReq])
+	}
+
+	fldPath = []string{utils.MetaOpts}
+	if val, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, mS[utils.MetaOpts]) {
+		t.Errorf("Expected %+v \n, received %+v", val, mS[utils.MetaOpts])
+	}
+
+	fldPath = []string{utils.MetaVars}
+	if val, err := eventReq.FieldAsInterface(fldPath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(val, mS[utils.MetaVars]) {
+		t.Errorf("Expected %+v \n, received %+v", val, mS[utils.MetaVars])
 	}
 }
