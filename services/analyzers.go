@@ -154,3 +154,11 @@ func (anz *AnalyzerService) GetInternalCodec(c rpcclient.ClientConnector, to str
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
 }
+
+// GetInternalCodec returns the connection wrapped in analyzer connector
+func (anz *AnalyzerService) GetInternalBiRPCCodec(c rpcclient.BiRPCConector, to string) rpcclient.BiRPCConector {
+	if !anz.IsRunning() {
+		return c
+	}
+	return anz.anz.NewAnalyzerBiRPCConnector(c, rpcclient.BiRPCInternal, utils.EmptyString, to)
+}
