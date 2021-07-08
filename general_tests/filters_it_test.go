@@ -1030,7 +1030,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 
 	processedEv := &engine.AttrSProcessEventReply{
 		AlteredFields:   []string{"*req.CustomField"},
-		MatchedProfiles: []string{"ATTR_1001"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1001"},
 
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.new",
@@ -1138,7 +1138,7 @@ func testV1FltrPopulateTimings(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"FltrTest"},
+		MatchedProfiles: []string{"cgrates.org:FltrTest"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.AnswerTime},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

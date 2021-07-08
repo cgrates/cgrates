@@ -72,6 +72,14 @@ func (ap *AttributeProfile) TenantID() string {
 	return utils.ConcatenatedKey(ap.Tenant, ap.ID)
 }
 
+// TenantIDInline returns the id for inline
+func (ap *AttributeProfile) TenantIDInline() string {
+	if strings.HasPrefix(ap.ID, utils.Meta) {
+		return ap.ID
+	}
+	return ap.TenantID()
+}
+
 // AttributeProfiles is a sortable list of Attribute profiles
 type AttributeProfiles []*AttributeProfile
 

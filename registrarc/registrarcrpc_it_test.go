@@ -181,7 +181,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			},
 		}, {
 			ChargerSProfile:    "SupplierCharges",
-			AttributeSProfiles: []string{"ATTR_SUPPLIER1"},
+			AttributeSProfiles: []string{"cgrates.org:ATTR_SUPPLIER1"},
 			AlteredFields:      []string{"*req.RunID", "*req.Subject"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",

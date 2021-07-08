@@ -319,7 +319,7 @@ func testChargerSProcessEvent(t *testing.T) {
 	processedEv := []*engine.ChrgSProcessEventReply{
 		{
 			ChargerSProfile:    "Charger1",
-			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+			AttributeSProfiles: []string{"cgrates.org:ATTR_1001_SIMPLEAUTH"},
 			AlteredFields:      []string{utils.MetaReqRunID, "*req.Password"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",

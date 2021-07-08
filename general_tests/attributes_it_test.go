@@ -139,7 +139,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		},
 	}
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_VARIABLE"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_VARIABLE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + utils.Category},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -222,7 +222,7 @@ func testAttributeSProcessEventWithAccount(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_ACCOUNT"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_ACCOUNT"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Balance"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -304,7 +304,7 @@ func testAttributeSProcessEventWithAccountFull(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_ACCOUNT2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_ACCOUNT2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "FullAccount"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -436,7 +436,7 @@ func testAttributeSProcessEventWithStat(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_STATS"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_STATS"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "AcdMetric"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -518,7 +518,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_STATS2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_STATS2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "AllMetrics"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -664,7 +664,7 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_RESOURCE"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_RESOURCE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "ResourceTotalUsages"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -745,7 +745,7 @@ func testAttributeSProcessEventWithResourceFull(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_RESOURCE2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_RESOURCE2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "FullResource"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -838,7 +838,7 @@ func testAttributeSProcessEventWithLibPhoneNumber(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_LIBPHONENUMBER2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationCarrier"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -940,7 +940,7 @@ func testAttributeSProcessEventWithLibPhoneNumberComposed(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER_COMPOSED"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_LIBPHONENUMBER_COMPOSED"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationCarrier"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -1024,7 +1024,7 @@ func testAttributeSProcessEventWithLibPhoneNumberFull(t *testing.T) {
 	}
 
 	eRply := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_LIBPHONENUMBER"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_LIBPHONENUMBER"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "DestinationDetails"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

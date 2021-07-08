@@ -251,7 +251,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	}
 	rply := &AttrSProcessEventReply{}
 	expected := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_CHANGE_TENANT_FROM_USER", "ATTR_MATCH_TENANT"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_CHANGE_TENANT_FROM_USER", "adrian.itsyscom.com.co.uk:ATTR_MATCH_TENANT"},
 		AlteredFields:   []string{"*req.Account", "*req.Password", "*tenant"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "adrian.itsyscom.com.co.uk",
@@ -592,6 +592,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -602,7 +603,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", ap2, rcv)
 	}
 
-	lastID = "ATTR_2"
+	lastID = "cgrates.org:ATTR_2"
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, nil, nil, evNm,
 		lastID); err == nil || err != utils.ErrNotFound {
@@ -677,6 +678,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -752,6 +754,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -840,6 +843,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -923,6 +927,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -998,6 +1003,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 	alS.dm = nil
@@ -1038,6 +1044,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -1159,7 +1166,8 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	lastID := ""
 
 	evNm = utils.MapStorage{
-		utils.MetaReq: 1,
+		utils.MetaReq:  1,
+		utils.MetaVars: utils.MapStorage{},
 	}
 
 	if rcv, err := alS.attributeProfileForEvent(tnt, ctx, []string{"ATTR_1"}, nil, evNm,
