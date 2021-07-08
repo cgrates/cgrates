@@ -231,7 +231,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaReq:  attrEvs[0].CGREvent.Event,
 			utils.MetaOpts: attrEvs[0].APIOpts,
 			utils.MetaVars: utils.MapStorage{
-				utils.ProcessRuns: 0,
+				utils.OptsAttributesProcessRuns: 0,
 			},
 		}, utils.EmptyString)
 	if err != nil {
@@ -245,7 +245,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaReq:  attrEvs[1].CGREvent.Event,
 			utils.MetaOpts: attrEvs[1].APIOpts,
 			utils.MetaVars: utils.MapStorage{
-				utils.ProcessRuns: 0,
+				utils.OptsAttributesProcessRuns: 0,
 			},
 		}, utils.EmptyString)
 	if err != nil {
@@ -260,7 +260,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaReq:  attrEvs[2].CGREvent.Event,
 			utils.MetaOpts: attrEvs[2].APIOpts,
 			utils.MetaVars: utils.MapStorage{
-				utils.ProcessRuns: 0,
+				utils.OptsAttributesProcessRuns: 0,
 			},
 		}, utils.EmptyString)
 	if err != nil {
@@ -282,7 +282,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 		utils.MetaReq:  attrEvs[0].CGREvent.Event,
 		utils.MetaOpts: attrEvs[0].APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -300,7 +300,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
 		utils.MetaOpts: attrEvs[3].APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	if _, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM,
@@ -321,7 +321,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
 		utils.MetaOpts: attrEvs[3].APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	if atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
@@ -1847,7 +1847,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -1907,7 +1907,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -1974,7 +1974,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2036,7 +2036,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2098,7 +2098,7 @@ func TestProcessAttributeSum(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2160,7 +2160,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2222,7 +2222,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2284,7 +2284,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2346,7 +2346,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2408,7 +2408,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2469,7 +2469,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2530,7 +2530,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(context.TODO(), ev.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)

@@ -519,7 +519,8 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	lastID := ""
 
 	evNm = utils.MapStorage{
-		utils.MetaReq: 1,
+		utils.MetaReq:  1,
+		utils.MetaVars: utils.MapStorage{},
 	}
 
 	if rcv, err := alS.attributeProfileForEvent(context.Background(), tnt, []string{"ATTR_1"}, evNm, lastID); err == nil || err != utils.ErrWrongPath {
