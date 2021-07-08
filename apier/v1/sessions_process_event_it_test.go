@@ -226,7 +226,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.RouteProfiles[utils.MetaRaw]))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 
 		CGREvent: &utils.CGREvent{
@@ -300,7 +300,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -363,7 +363,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_ACNT_1001"},
 		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -540,8 +540,8 @@ func testSSv1ItProcessEventWithGetCost(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"ATTR_SUBJECT_CASE1"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE1"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"cgrates.org:ATTR_SUBJECT_CASE1"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"cgrates.org:ATTR_SUBJECT_CASE1"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
 	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].AlteredFields, []string{"*req.Subject"}) {
 		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes[utils.MetaRaw].AlteredFields)
 	}
@@ -579,8 +579,8 @@ func testSSv1ItProcessEventWithGetCost2(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"ATTR_SUBJECT_CASE2"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE2"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"cgrates.org:ATTR_SUBJECT_CASE2"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"cgrates.org:ATTR_SUBJECT_CASE2"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
 	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].AlteredFields, []string{"*req.Subject"}) {
 		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes[utils.MetaRaw].AlteredFields)
 	}
@@ -620,8 +620,8 @@ func testSSv1ItProcessEventWithGetCost3(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"ATTR_SUBJECT_CASE3"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE3"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].MatchedProfiles, []string{"cgrates.org:ATTR_SUBJECT_CASE3"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"cgrates.org:ATTR_SUBJECT_CASE3"}, rply.Attributes[utils.MetaRaw].MatchedProfiles)
 	} else if !reflect.DeepEqual(rply.Attributes[utils.MetaRaw].AlteredFields, []string{"*req.Subject"}) {
 		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes[utils.MetaRaw].AlteredFields)
 	}
@@ -686,8 +686,8 @@ func testSSv1ItGetCost(t *testing.T) {
 	}
 	if rply.Attributes == nil {
 		t.Error("Received nil Attributes")
-	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"ATTR_SUBJECT_CASE1"}) {
-		t.Errorf("Expected: %+v,received: %+v", []string{"ATTR_SUBJECT_CASE1"}, rply.Attributes.MatchedProfiles)
+	} else if !reflect.DeepEqual(rply.Attributes.MatchedProfiles, []string{"cgrates.org:ATTR_SUBJECT_CASE1"}) {
+		t.Errorf("Expected: %+v,received: %+v", []string{"cgrates.org:ATTR_SUBJECT_CASE1"}, rply.Attributes.MatchedProfiles)
 	} else if !reflect.DeepEqual(rply.Attributes.AlteredFields, []string{"*req.Subject"}) {
 		t.Errorf("Expected: %+v,received: %+v", []string{"*req.Subject"}, rply.Attributes.AlteredFields)
 	}

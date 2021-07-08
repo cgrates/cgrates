@@ -242,7 +242,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaReq:  attrEvs[0].CGREvent.Event,
 			utils.MetaOpts: attrEvs[0].APIOpts,
 			utils.MetaVars: utils.MapStorage{
-				utils.MetaProcessRuns: 0,
+				utils.OptsAttributesProcessRuns: 0,
 			},
 		}, utils.EmptyString)
 	if err != nil {
@@ -256,7 +256,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaReq:  attrEvs[1].CGREvent.Event,
 			utils.MetaOpts: attrEvs[1].APIOpts,
 			utils.MetaVars: utils.MapStorage{
-				utils.MetaProcessRuns: 0,
+				utils.OptsAttributesProcessRuns: 0,
 			},
 		}, utils.EmptyString)
 	if err != nil {
@@ -271,7 +271,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 			utils.MetaReq:  attrEvs[2].CGREvent.Event,
 			utils.MetaOpts: attrEvs[2].APIOpts,
 			utils.MetaVars: utils.MapStorage{
-				utils.MetaProcessRuns: 0,
+				utils.OptsAttributesProcessRuns: 0,
 			},
 		}, utils.EmptyString)
 	if err != nil {
@@ -285,7 +285,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 func TestAttributeProcessEvent(t *testing.T) {
 	attrEvs[0].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeProfile1"},
+		MatchedProfiles: []string{"cgrates.org:AttributeProfile1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Account"},
 		CGREvent:        attrEvs[0].CGREvent,
 	}
@@ -293,7 +293,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 		utils.MetaReq:  attrEvs[0].CGREvent.Event,
 		utils.MetaOpts: attrEvs[0].APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[0], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -311,7 +311,7 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
 		utils.MetaOpts: attrEvs[3].APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	if _, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM,
@@ -324,7 +324,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 	attrEvs[3].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	attrEvs[3].AttributeIDs = []string{"AttributeIDMatch"}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeIDMatch"},
+		MatchedProfiles: []string{"cgrates.org:AttributeIDMatch"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Account"},
 		CGREvent:        attrEvs[3].CGREvent,
 	}
@@ -332,7 +332,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 		utils.MetaReq:  attrEvs[3].CGREvent.Event,
 		utils.MetaOpts: attrEvs[3].APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	if atrp, err := attrS.processEvent(attrEvs[0].Tenant, attrEvs[3], eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString); err != nil {
@@ -343,7 +343,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 
 func TestAttributeEventReplyDigest(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.AccountField, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -364,7 +364,7 @@ func TestAttributeEventReplyDigest(t *testing.T) {
 
 func TestAttributeEventReplyDigest2(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -385,7 +385,7 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 
 func TestAttributeEventReplyDigest3(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{"*req.Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -406,7 +406,7 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 
 func TestAttributeEventReplyDigest4(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{"*req.Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -569,7 +569,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_3", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{
 			utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2",
@@ -682,7 +682,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -791,7 +791,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -881,7 +881,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -993,7 +993,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -1104,7 +1104,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field1"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1174,7 +1174,7 @@ func TestAttributeProcessValue(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1253,7 +1253,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "PassField",
 			utils.MetaReq + utils.NestingSep + "RandomField"},
 		CGREvent: &utils.CGREvent{
@@ -1326,7 +1326,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1403,7 +1403,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1486,7 +1486,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1560,7 +1560,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1636,7 +1636,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1713,7 +1713,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1928,7 +1928,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -1937,7 +1937,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 	}
 	ev.CGREvent.Event["Field2"] = "Val2"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_CONSTANT"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_CONSTANT"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        ev.CGREvent,
 	}
@@ -1988,7 +1988,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -1998,7 +1998,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "Val2"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_VARIABLE"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_VARIABLE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2055,7 +2055,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2065,7 +2065,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "Val2Concatenated"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_COMPOSED"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_COMPOSED"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2117,7 +2117,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2127,7 +2127,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "1h0m0s"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_USAGE_DIFF"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_USAGE_DIFF"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2179,7 +2179,7 @@ func TestProcessAttributeSum(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2189,7 +2189,7 @@ func TestProcessAttributeSum(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "16"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_SUM"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_SUM"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2241,7 +2241,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2251,7 +2251,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "39"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_DIFF"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_DIFF"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2303,7 +2303,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2313,7 +2313,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "2750"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_MULTIPLY"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_MULTIPLY"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2365,7 +2365,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2375,7 +2375,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "2.75"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_DIVIDE"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_DIVIDE"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2427,7 +2427,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2437,7 +2437,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "50000"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_VAL_EXP"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_VAL_EXP"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2489,7 +2489,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2499,7 +2499,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "1388415601"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_UNIX_TIMESTAMP"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_UNIX_TIMESTAMP"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2550,7 +2550,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2560,7 +2560,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "abc_Val2"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_PREFIX"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_PREFIX"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2611,7 +2611,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 		utils.MetaReq:  ev.CGREvent.Event,
 		utils.MetaOpts: ev.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
 	rcv, err := attrS.processEvent(ev.Tenant, ev, eNM, newDynamicDP(nil, nil, nil, "cgrates.org", eNM), utils.EmptyString)
@@ -2621,7 +2621,7 @@ func TestProcessAttributeSuffix(t *testing.T) {
 	clnEv := ev.CGREvent.Clone()
 	clnEv.Event["Field2"] = "Val2_abc"
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_SUFFIX"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_SUFFIX"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent:        clnEv,
 	}
@@ -2753,7 +2753,7 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 	clnEv.Event["Field2"] = "1"
 	clnEv.Event["Field3"] = "1"
 	eRply := AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2", utils.MetaReq + utils.NestingSep + "Field3"},
 		CGREvent:        clnEv,
 	}
@@ -2829,7 +2829,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1_EXISTS", "ATTR_2_EXISTS", "ATTR_1_EXISTS", "ATTR_2_EXISTS"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1_EXISTS", "cgrates.org:ATTR_2_EXISTS", "cgrates.org:ATTR_1_EXISTS", "cgrates.org:ATTR_2_EXISTS"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -2923,7 +2923,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 		},
 	}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1_NOTEMPTY", "ATTR_2_NOTEMPTY", "ATTR_1_NOTEMPTY", "ATTR_2_NOTEMPTY"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1_NOTEMPTY", "cgrates.org:ATTR_2_NOTEMPTY", "cgrates.org:ATTR_1_NOTEMPTY", "cgrates.org:ATTR_2_NOTEMPTY"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
 			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
@@ -2987,7 +2987,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 		},
 	}
 	eRply := AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_TNT"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_TNT"},
 		AlteredFields:   []string{utils.MetaTenant},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "prfx_" + config.CgrConfig().GeneralCfg().DefaultTenant,

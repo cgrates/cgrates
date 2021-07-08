@@ -222,7 +222,7 @@ func testAttributeSetFltr2(t *testing.T) {
 		},
 	}
 	exp := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ApierTest"},
+		MatchedProfiles: []string{"cgrates.org:ApierTest"},
 		AlteredFields:   []string{"*req.FL1"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

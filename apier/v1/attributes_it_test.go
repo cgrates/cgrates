@@ -366,7 +366,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.AccountField,
 			utils.MetaReq + utils.NestingSep + utils.Subject},
 		CGREvent: &utils.CGREvent{
@@ -496,7 +496,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		MatchedProfiles: []string{"cgrates.org:AttributeWithNonSubstitute"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.AccountField,
 			utils.MetaReq + utils.NestingSep + utils.Subject},
 		CGREvent: &utils.CGREvent{
@@ -566,7 +566,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		MatchedProfiles: []string{"cgrates.org:AttributeWithNonSubstitute"},
 		AlteredFields:   []string{"*req.Account", "*req.Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -579,7 +579,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		MatchedProfiles: []string{"cgrates.org:AttributeWithNonSubstitute"},
 		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Subject,
 			utils.MetaReq + utils.NestingSep + utils.AccountField},
 		CGREvent: &utils.CGREvent{
@@ -648,7 +648,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		MatchedProfiles: []string{"cgrates.org:AttributeWithNonSubstitute"},
 		AlteredFields:   []string{"*req.Account"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -709,7 +709,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_Header"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_Header"},
 		AlteredFields:   []string{"*req.Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1033,7 +1033,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_Search_and_replace"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_Search_and_replace"},
 		AlteredFields:   []string{"*req.Category"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1138,7 +1138,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -1250,7 +1250,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_3", "cgrates.org:ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,

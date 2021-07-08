@@ -114,6 +114,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			!aPrfl.ActivationInterval.IsActiveAtTime(*actTime) { // not active
 			continue
 		}
+		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = aPrfl.TenantIDInline()
 		if pass, err := alS.filterS.Pass(tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
@@ -121,7 +122,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 			continue
 		}
 		if (matchAttrPrfl == nil || matchAttrPrfl.Weight < aPrfl.Weight) &&
-			apID != lastID {
+			aPrfl.TenantIDInline() != lastID {
 			matchAttrPrfl = aPrfl
 		}
 	}
@@ -129,6 +130,7 @@ func (alS *AttributeService) attributeProfileForEvent(tnt string, ctx *string, a
 	if matchAttrPrfl == nil {
 		return nil, utils.ErrNotFound
 	}
+	(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = matchAttrPrfl.TenantIDInline()
 	return
 }
 
@@ -213,7 +215,7 @@ func (alS *AttributeService) processEvent(tnt string, args *AttrArgsProcessEvent
 		return
 	}
 	rply = &AttrSProcessEventReply{
-		MatchedProfiles: []string{attrPrf.ID},
+		MatchedProfiles: []string{attrPrf.TenantIDInline()},
 		CGREvent:        args.CGREvent,
 		blocker:         attrPrf.Blocker,
 	}
@@ -282,7 +284,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns: 0,
+			utils.OptsAttributesProcessRuns: 0,
 		},
 	}, utils.EmptyString)
 	if err != nil {
@@ -319,8 +321,8 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 		utils.MetaVars: utils.MapStorage{
-			utils.MetaProcessRuns:         0,
-			utils.MetaProcessedProfileIDs: processedPrf,
+			utils.OptsAttributesProcessRuns: 0,
+			utils.MetaProcessedProfileIDs:   processedPrf,
 		},
 		utils.MetaTenant: tnt,
 	}
@@ -330,7 +332,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	dynDP := newDynamicDP(alS.cgrcfg.AttributeSCfg().ResourceSConns,
 		alS.cgrcfg.AttributeSCfg().StatSConns, alS.cgrcfg.AttributeSCfg().ApierSConns, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
-		(eNV[utils.MetaVars].(utils.MapStorage))[utils.MetaProcessRuns] = i + 1
+		(eNV[utils.MetaVars].(utils.MapStorage))[utils.OptsAttributesProcessRuns] = i + 1
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(tnt, args, eNV, dynDP, lastID)
 
