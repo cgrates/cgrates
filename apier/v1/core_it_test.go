@@ -64,6 +64,7 @@ var (
 		testCoreSv1StopMemoryProfiling,
 		testCoreSv1KillEngine,
 		testCoreSv1CheckFinalMemProfiling,
+
 		// test CPU and Memory just by APIs
 		testCoreSv1StartEngine,
 		testCoreSv1RPCConn,
@@ -80,6 +81,7 @@ var (
 		testCoreSv1Sleep,
 		testCoreSv1StopMemoryProfiling,
 		testCoreSv1KillEngine,
+		testCoreSv1CheckFinalMemProfiling,
 	}
 )
 
@@ -287,7 +289,7 @@ func testCoreSv1StartCPUProfiling(t *testing.T) {
 
 func testCoreSv1Sleep(t *testing.T) {
 	args := &utils.DurationArgs{
-		Duration: 500 * time.Millisecond,
+		Duration: 600 * time.Millisecond,
 	}
 	var reply string
 	if err := coreV1Rpc.Call(utils.CoreSv1Sleep,

@@ -34,7 +34,7 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan rpcclient.ClientConnector, anz *AnalyzerService,
-	fileCpu io.Closer, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
+	fileCpu io.Closer, fileMEM string, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
 	shdChan *utils.SyncedChan, srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
 		shdChan:    shdChan,
@@ -44,6 +44,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Serv
 		cfg:        cfg,
 		caps:       caps,
 		fileCpu:    fileCpu,
+		fileMem:    fileMEM,
 		server:     server,
 		anz:        anz,
 		srvDep:     srvDep,
@@ -61,6 +62,7 @@ type CoreService struct {
 	stopMemPrf chan struct{}
 	shdChan    *utils.SyncedChan
 	fileCpu    io.Closer
+	fileMem    string
 	cS         *cores.CoreService
 	rpc        *v1.CoreSv1
 	connChan   chan rpcclient.ClientConnector
@@ -78,7 +80,7 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
 	cS.rpc = v1.NewCoreSv1(cS.cS)
 	if !cS.cfg.DispatcherSCfg().Enabled {
 		cS.server.RpcRegister(cS.rpc)
