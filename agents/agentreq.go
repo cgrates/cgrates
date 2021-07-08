@@ -432,10 +432,21 @@ func (ar *AgentRequest) ParseField(
 		out = strconv.Itoa(int(t.Unix()))
 	case utils.MetaSIPCID:
 		isString = true
-		values := make([]string, len(cfgFld.Value))
-		for i, val := range cfgFld.Value {
-			if values[i], err = val.ParseDataProvider(ar, utils.NestingSep); err != nil {
-				return nil, err
+		values := make([]string, 1, len(cfgFld.Value))
+		if len(cfgFld.Value) < 1 {
+			return nil, fmt.Errorf("invalid number of arguments <%s> to %s",
+				utils.ToJSON(cfgFld.Value), utils.MetaSIPCID)
+		}
+		if values[0], err = cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep); err != nil {
+			return
+		}
+		for _, val := range cfgFld.Value[1:] {
+			var valStr string
+			if valStr, err = val.ParseDataProvider(ar, utils.NestingSep); err != nil && err != utils.ErrNotFound {
+				return
+			}
+			if len(valStr) != 0 && err != utils.ErrNotFound {
+				values = append(values, valStr)
 			}
 		}
 		sort.Strings(values[1:])
