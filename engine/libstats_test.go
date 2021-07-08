@@ -1160,7 +1160,7 @@ func TestLibstatsaddStatEventPassErr(t *testing.T) {
 		},
 		utils.MetaOpts: nil,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.MetaProcessRuns: 0,
 		},
 	}
 
@@ -1199,7 +1199,7 @@ func TestLibstatsaddStatEventNoPass(t *testing.T) {
 		},
 		utils.MetaOpts: nil,
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.MetaProcessRuns: 0,
 		},
 	}
 
