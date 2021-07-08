@@ -58,7 +58,6 @@ var (
 		testCoreItStopCPUProfiling,
 		//status api
 		testCoreItStatus,
-
 		testCoreItKillEngine,
 
 		//engine separate with memory
@@ -85,6 +84,7 @@ var (
 		testCoreItSleep,
 		testCoreItStopMemoryProfiling,
 		testCoreItKillEngine,
+		testCoreItCheckFinalMemProfiling,
 	}
 )
 
