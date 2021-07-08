@@ -533,7 +533,6 @@ func GetFltrIdxHealth(dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcach
 		splt := utils.SplitConcatenatedKey(dataID) // tntCtx:filterType:fieldName:fieldVal
 		lsplt := len(splt)
 		if lsplt < 4 {
-			fmt.Println(idxPrfx)
 			err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", dataID)
 			return
 		}

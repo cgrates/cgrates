@@ -795,7 +795,6 @@ func (iDB *InternalDB) RemAccountActionPlansDrv(acntID string) (err error) {
 	iDB.db.Remove(utils.CacheAccountActionPlans, acntID,
 		true, utils.NonTransactional)
 	return
-	return
 }
 
 func (iDB *InternalDB) PushTask(t *Task) (err error) {
@@ -928,7 +927,7 @@ func (iDB *InternalDB) GetFilterIndexesDrv(cacheID, tntCtx, filterType string,
 			if !ok || x == nil {
 				continue
 			}
-			dbKey = strings.TrimPrefix(dbKey, utils.CacheInstanceToPrefix[cacheID]+tntCtx+utils.CONCATENATED_KEY_SEP)
+			dbKey = strings.TrimPrefix(dbKey, tntCtx+utils.CONCATENATED_KEY_SEP)
 			indexes[dbKey] = x.(utils.StringMap).Clone()
 		}
 		if len(indexes) == 0 {
@@ -939,7 +938,7 @@ func (iDB *InternalDB) GetFilterIndexesDrv(cacheID, tntCtx, filterType string,
 	indexes = make(map[string]utils.StringMap)
 	for fldName, fldVal := range fldNameVal {
 		idxKey := utils.ConcatenatedKey(filterType, fldName, fldVal)
-		dbKey := utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID]+tntCtx, idxKey)
+		dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
 		x, ok := iDB.db.Get(cacheID, dbKey)
 		if !ok || x == nil {
 			return nil, utils.ErrNotFound
@@ -977,7 +976,7 @@ func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, tntCtx string,
 		return
 	}
 	for idxKey, indx := range indexes {
-		dbKey := utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID]+tntCtx, idxKey)
+		dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
 		if transactionID != utils.EmptyString {
 			dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 		}
@@ -1004,7 +1003,7 @@ func (iDB *InternalDB) RemoveFilterIndexesDrv(cacheID, tntCtx string) (err error
 
 func (iDB *InternalDB) MatchFilterIndexDrv(cacheID, tntCtx,
 	filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
-	dbKey := utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID]+tntCtx, filterType, fieldName, fieldVal)
+	dbKey := utils.ConcatenatedKey(tntCtx, filterType, fieldName, fieldVal)
 	x, ok := iDB.db.Get(cacheID, dbKey)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
