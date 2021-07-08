@@ -248,10 +248,21 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 		case utils.MetaSIPCID:
-			values := make([]string, len(attribute.Value))
-			for i, val := range attribute.Value {
-				if values[i], err = val.ParseDataProvider(evNm, utils.NestingSep); err != nil {
+			values := make([]string, 1, len(attribute.Value))
+			if len(attribute.Value) < 1 {
+				return nil, fmt.Errorf("invalid number of arguments <%s> to %s",
+					utils.ToJSON(attribute.Value), utils.MetaSIPCID)
+			}
+			if values[0], err = attribute.Value[0].ParseDataProvider(evNm, utils.NestingSep); err != nil {
+				return nil, err
+			}
+			for _, val := range attribute.Value[1:] {
+				var valStr string
+				if valStr, err = val.ParseDataProvider(evNm, utils.NestingSep); err != nil && err != utils.ErrNotFound {
 					return nil, err
+				}
+				if len(valStr) != 0 && err != utils.ErrNotFound {
+					values = append(values, valStr)
 				}
 			}
 			sort.Strings(values[1:])
