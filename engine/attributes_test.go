@@ -100,7 +100,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	}
 	rply := &AttrSProcessEventReply{}
 	expected := &AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_CHANGE_TENANT_FROM_USER", "ATTR_MATCH_TENANT"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_CHANGE_TENANT_FROM_USER", "adrian.itsyscom.com.co.uk:ATTR_MATCH_TENANT"},
 		AlteredFields:   []string{"*req.Account", "*req.Password", "*tenant"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "adrian.itsyscom.com.co.uk",
@@ -424,6 +424,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 	alS.dm = nil
@@ -462,6 +463,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 
@@ -515,6 +517,7 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 		utils.MetaReq: utils.MapStorage{
 			utils.AccountField: "1001",
 		},
+		utils.MetaVars: utils.MapStorage{},
 	}
 	lastID := ""
 

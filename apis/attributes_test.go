@@ -520,7 +520,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 	args.Event[utils.RequestType] = utils.MetaPseudoPrepaid
 	//now we will process the event for our attr
 	expectedEv := engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"TestGetAttributeProfile"},
+		MatchedProfiles: []string{"cgrates.org:TestGetAttributeProfile"},
 		AlteredFields:   []string{"*req.RequestType"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",

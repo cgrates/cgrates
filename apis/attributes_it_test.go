@@ -627,7 +627,7 @@ func testAttributeProcessEvent(t *testing.T) {
 		},
 	}
 	expEvReply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"TEST_ATTRIBUTES_IT_TEST"},
+		MatchedProfiles: []string{"cgrates.org:TEST_ATTRIBUTES_IT_TEST"},
 		AlteredFields:   []string{"*tenant", utils.AccountField},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.itsyscom",
@@ -690,7 +690,7 @@ func testAttributeProcessEventWithSearchAndReplace(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_Search_and_replace"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_Search_and_replace"},
 		AlteredFields:   []string{"*req.Category"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -790,7 +790,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_1", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_1", "cgrates.org:ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -895,7 +895,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3", "ATTR_2"},
+		MatchedProfiles: []string{"cgrates.org:ATTR_1", "cgrates.org:ATTR_2", "cgrates.org:ATTR_3", "cgrates.org:ATTR_2"},
 		AlteredFields:   []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,

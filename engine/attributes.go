@@ -82,7 +82,7 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 			}
 			return nil, err
 		}
-		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = aPrfl.TenantID()
+		(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = aPrfl.TenantIDInline()
 		if pass, err := alS.filterS.Pass(ctx, tnt, aPrfl.FilterIDs,
 			evNm); err != nil {
 			return nil, err
@@ -90,7 +90,7 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 			continue
 		}
 		if (matchAttrPrfl == nil || matchAttrPrfl.Weight < aPrfl.Weight) &&
-			apID != lastID {
+			aPrfl.TenantIDInline() != lastID {
 			matchAttrPrfl = aPrfl
 		}
 	}
@@ -98,6 +98,7 @@ func (alS *AttributeService) attributeProfileForEvent(ctx *context.Context, tnt 
 	if matchAttrPrfl == nil {
 		return nil, utils.ErrNotFound
 	}
+	(evNm[utils.MetaVars].(utils.MapStorage))[utils.MetaAttrPrfTenantID] = matchAttrPrfl.TenantIDInline()
 	return
 }
 
@@ -176,7 +177,7 @@ func (alS *AttributeService) processEvent(ctx *context.Context, tnt string, args
 		return
 	}
 	rply = &AttrSProcessEventReply{
-		MatchedProfiles: []string{attrPrf.ID},
+		MatchedProfiles: []string{attrPrf.TenantIDInline()},
 		CGREvent:        args.CGREvent,
 		blocker:         attrPrf.Blocker,
 	}
