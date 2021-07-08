@@ -505,12 +505,24 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 		}
 		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
 	case utils.MetaSIPCID:
-		values := make([]string, len(value))
-		for i, val := range value {
-			if values[i], err = val.ParseDataProvider(dp); err != nil {
+		values := make([]string, 1, len(value))
+		if len(value) < 1 {
+			return nil, fmt.Errorf("invalid number of arguments <%s> to %s",
+				utils.ToJSON(value), utils.MetaSIPCID)
+		}
+		if values[0], err = value[0].ParseDataProvider(dp); err != nil {
+			return
+		}
+		for _, val := range value[1:] {
+			var valStr string
+			if valStr, err = val.ParseDataProvider(dp); err != nil && err != utils.ErrNotFound {
 				return
 			}
+			if len(valStr) != 0 && err != utils.ErrNotFound {
+				values = append(values, valStr)
+			}
 		}
+
 		sort.Strings(values[1:])
 		out = strings.Join(values, utils.InfieldSep)
 	default:
