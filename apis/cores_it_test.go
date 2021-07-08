@@ -292,7 +292,7 @@ func testCoreItStartCPUProfiling(t *testing.T) {
 
 func testCoreItSleep(t *testing.T) {
 	args := &utils.DurationArgs{
-		Duration: 500 * time.Millisecond,
+		Duration: 600 * time.Millisecond,
 	}
 	var reply string
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Sleep,
