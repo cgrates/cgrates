@@ -125,3 +125,28 @@ func JoinStringSet(s ...StringSet) (conc StringSet) {
 	}
 	return
 }
+
+// added this to implement DataProvieder interface avoid reflect usage in MapStorage
+
+// String returns the set as a json string ( the fields are not ordered)
+func (s StringSet) String() string { return ToJSON(s.AsSlice()) }
+
+// FieldAsInterface returns an empty structure if the path exists else ErrNotFound
+func (s StringSet) FieldAsInterface(fldPath []string) (interface{}, error) {
+	if len(fldPath) != 1 {
+		return nil, ErrNotFound
+	}
+	val, has := s[fldPath[0]]
+	if !has {
+		return nil, ErrNotFound
+	}
+	return val, nil
+}
+
+// FieldAsString returns an empty structure as a json string if the path exists else ErrNotFound
+func (s StringSet) FieldAsString(fldPath []string) (_ string, err error) {
+	if _, err = s.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return "{}", nil // noting in it as is a empty structure
+}
