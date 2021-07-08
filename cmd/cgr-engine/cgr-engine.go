@@ -343,9 +343,11 @@ func main() {
 
 	var cS *cores.CoreService
 	var stopMemProf chan struct{}
+	var memPrfDirForCores string
 	if *memProfDir != utils.EmptyString {
 		shdWg.Add(1)
 		stopMemProf = make(chan struct{})
+		memPrfDirForCores = *memProfDir
 		go cores.MemProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, shdWg, stopMemProf, shdChan)
 		defer func() {
 			if cS == nil {
@@ -566,7 +568,8 @@ func main() {
 	}
 
 	// init CoreSv1
-	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, shdWg, stopMemProf, shdChan, srvDep)
+
+	coreS := services.NewCoreService(cfg, caps, server, internalCoreSv1Chan, anz, cpuProfileFile, memPrfDirForCores, shdWg, stopMemProf, shdChan, srvDep)
 	shdWg.Add(1)
 	if err := coreS.Start(); err != nil {
 		fmt.Println(err)
