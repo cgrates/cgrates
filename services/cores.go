@@ -34,7 +34,7 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
-	fileCpu io.Closer, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
+	fileCpu io.Closer, fileMEM string, shdWg *sync.WaitGroup, stopMemPrf chan struct{},
 	shdChan *utils.SyncedChan, srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
 		shdChan:    shdChan,
@@ -80,7 +80,7 @@ func (cS *CoreService) Start() (err error) {
 	defer cS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.shdWg, cS.stopMemPrf, cS.shdChan)
 	cS.rpc = apis.NewCoreSv1(cS.cS)
 	srv, _ := birpc.NewService(cS.rpc, utils.EmptyString, false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
