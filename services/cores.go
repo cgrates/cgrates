@@ -44,6 +44,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Serv
 		cfg:        cfg,
 		caps:       caps,
 		fileCpu:    fileCpu,
+		fileMem:    fileMEM,
 		server:     server,
 		anz:        anz,
 		srvDep:     srvDep,
@@ -61,6 +62,7 @@ type CoreService struct {
 	stopMemPrf chan struct{}
 	shdChan    *utils.SyncedChan
 	fileCpu    io.Closer
+	fileMem    string
 	cS         *cores.CoreService
 	rpc        *apis.CoreSv1
 	connChan   chan birpc.ClientConnector

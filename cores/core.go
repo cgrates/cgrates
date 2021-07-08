@@ -34,7 +34,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, file io.Closer, stopChan chan struct{},
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer, fileMem string, stopChan chan struct{},
 	shdWg *sync.WaitGroup, stopMemPrf chan struct{}, shdChan *utils.SyncedChan) *CoreService {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
@@ -46,7 +46,8 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, file io.Closer, st
 		shdChan:    shdChan,
 		cfg:        cfg,
 		CapsStats:  st,
-		fileCPU:    file,
+		fileCPU:    fileCPU,
+		fileMEM:    fileMem,
 	}
 }
 
@@ -56,6 +57,7 @@ type CoreService struct {
 	shdWg      *sync.WaitGroup
 	stopMemPrf chan struct{}
 	shdChan    *utils.SyncedChan
+	fileMEM string
 	fileCPU    io.Closer
 	fileMx     sync.Mutex
 }
@@ -73,13 +75,12 @@ func (cS *CoreService) Shutdown() {
 
 // StopChanMemProf will stop the MemoryProfiling Channel in order to create
 // the final MemoryProfiling when CoreS subsystem will stop.
-func (cS *CoreService) StopChanMemProf() bool {
+func (cS *CoreService) StopChanMemProf() {
 	if cS.stopMemPrf != nil {
+		MemProfFile(cS.fileMEM)
 		close(cS.stopMemPrf)
 		cS.stopMemPrf = nil
-		return true
 	}
-	return false
 }
 
 func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
@@ -190,6 +191,7 @@ func (cS *CoreService) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
 	}
 	cS.shdWg.Add(1)
 	cS.stopMemPrf = make(chan struct{})
+	cS.fileMEM = args.DirPath
 	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shdChan)
 	return
 }
@@ -199,7 +201,7 @@ func (cS *CoreService) StopMemoryProfiling() (err error) {
 	if cS.stopMemPrf == nil {
 		return errors.New(" Memory Profiling is not started")
 	}
-	close(cS.stopMemPrf)
-	cS.stopMemPrf = nil
+	cS.fileMEM = path.Join(cS.fileMEM, utils.MemProfFileCgr)
+	cS.StopChanMemProf()
 	return
 }
