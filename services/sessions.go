@@ -94,7 +94,7 @@ func (smg *SessionService) Start() (err error) {
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
 	// Pass internal connection via BiRPCClient
-	smg.connChan <- smg.anz.GetInternalCodec(smg.sm, utils.SessionS)
+	smg.connChan <- smg.anz.GetInternalBiRPCCodec(smg.sm, utils.SessionS)
 	// Register RPC handler
 	smg.rpc = v1.NewSMGenericV1(smg.sm, smg.caps)
 
