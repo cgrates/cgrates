@@ -273,9 +273,11 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		processRuns = *args.ProcessRuns
 	}
 	args.CGREvent = args.CGREvent.Clone()
+	processedPrf := make(utils.StringSet)
 	eNV := utils.MapStorage{
 		utils.MetaVars: utils.MapStorage{
-			utils.ProcessRuns: 0,
+			utils.ProcessRuns:         0,
+			utils.ProcessedProfileIDs: processedPrf,
 		},
 		utils.MetaTenant: tnt,
 	}
@@ -307,6 +309,7 @@ func (alS *AttributeService) V1ProcessEvent(ctx *context.Context, args *AttrArgs
 		tnt = evRply.CGREvent.Tenant
 		lastID = evRply.MatchedProfiles[0]
 		matchedIDs = append(matchedIDs, lastID)
+		processedPrf.Add(lastID)
 		for _, fldName := range evRply.AlteredFields {
 			alteredFields.Add(fldName)
 		}

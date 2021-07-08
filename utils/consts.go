@@ -807,6 +807,7 @@ const (
 	RouteID               = "RouteID"
 	MetaMonthlyEstimated  = "*monthly_estimated"
 	ProcessRuns           = "ProcessRuns"
+	ProcessedProfileIDs   = "ProcessedProfileIDs"
 	HashtagSep            = "#"
 	MetaRounding          = "*rounding"
 	StatsNA               = -1.0
