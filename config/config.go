@@ -620,6 +620,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg ConfigDB) (err error) {
 		}
 		if ldr == nil {
 			ldr = NewDfltLoaderSCfg()
+			ldr.Data = nil
 			cfg.loaderCfg = append(cfg.loaderCfg, ldr) // use append so the loaderS profile to be loaded from multiple files
 		}
 
