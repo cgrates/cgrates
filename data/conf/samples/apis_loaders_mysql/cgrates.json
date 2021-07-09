@@ -17,6 +17,7 @@
 
     "loaders": [
         {
+            "id": "*default",
             "enabled": true,
             "tenant": "cgrates.org",
             "tp_in_dir": "/tmp/TestLoadersIT/in",
