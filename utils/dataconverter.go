@@ -90,6 +90,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(UnixTimeConverter), nil
 	case params == MetaLen:
 		return new(LengthConverter), nil
+	case params == MetaFloat64:
+		return new(Float64Converter), nil
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
 		if len(params) == len(MetaLibPhoneNumber) {
 			return NewPhoneNumberConverter(EmptyString)
@@ -464,4 +466,11 @@ func (LengthConverter) Convert(in interface{}) (out interface{}, err error) {
 		}
 	}
 	return len(src), nil
+}
+
+type Float64Converter struct{}
+
+// Convert implements DataConverter interface
+func (Float64Converter) Convert(in interface{}) (interface{}, error) {
+	return IfaceAsFloat64(in)
 }

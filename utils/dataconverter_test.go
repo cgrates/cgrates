@@ -1037,3 +1037,28 @@ func TestLenTimeConverter3(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
+
+func TestFloat64Converter(t *testing.T) {
+	exp := new(Float64Converter)
+	cnv, err := NewDataConverter(MetaFloat64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(exp, cnv) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, cnv)
+	}
+
+	expected := 21.7
+	if rcv, err := cnv.Convert("21.7"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+
+	expected2 := "strconv.ParseFloat: parsing \"invalid_input\": invalid syntax"
+	if _, err := cnv.Convert("invalid_input"); err == nil {
+		t.Error("Expected error")
+	} else if !reflect.DeepEqual(expected2, err.Error()) {
+		t.Errorf("Expecting: %+v, received: %+v", expected2, err.Error())
+	}
+}
