@@ -782,3 +782,43 @@ func TestMapEventData(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", expStruct, result)
 	}
 }
+
+func TestGetBoolOrDefaultFalse(t *testing.T) {
+	mapEv := &MapEvent{
+		"fieldNameFalse": true,
+	}
+	fldName := "fieldName"
+	dflt := true
+	result := mapEv.GetBoolOrDefault(fldName, dflt)
+	expected := true
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected: %+v, received: %+v", expected, result)
+	}
+}
+
+func TestGetBoolOrDefaultTrue(t *testing.T) {
+	mapEv := &MapEvent{
+		"fieldName": true,
+	}
+	fldName := "fieldName"
+	dflt := true
+	result := mapEv.GetBoolOrDefault(fldName, dflt)
+	expected := true
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected: %+v, received: %+v", expected, result)
+	}
+}
+
+func TestGetBoolOrDefaultNotBool(t *testing.T) {
+	var test uint64 = 2147483647
+	mapEv := &MapEvent{
+		"fieldName": test,
+	}
+	fldName := "fieldName"
+	dflt := true
+	result := mapEv.GetBoolOrDefault(fldName, dflt)
+	expected := true
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected: %+v, received: %+v", expected, result)
+	}
+}
