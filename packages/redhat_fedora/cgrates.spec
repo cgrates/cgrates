@@ -89,7 +89,6 @@ mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/fwv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/history
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
 install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 %if 0%{?fedora} > 16 || 0%{?rhel} > 6
