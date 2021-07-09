@@ -1264,15 +1264,10 @@ func TestLoaderSCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 	}
-	newCfg := new(CGRConfig)
-	newCfg.generalCfg = new(GeneralCfg)
-	newCfg.generalCfg.RSRSep = ";"
-	if jsonCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
+	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = newCfg.loadLoaderSCfg(jsonCfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, newCfg.loaderCfg) {
-		t.Errorf("expected: %+v,\nreceived: %+v", utils.ToJSON(expected), utils.ToJSON(newCfg.loaderCfg))
+	} else if !reflect.DeepEqual(expected, jsonCfg.loaderCfg) {
+		t.Errorf("expected: %+v,\nreceived: %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.loaderCfg))
 	}
 }
 
