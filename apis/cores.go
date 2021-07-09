@@ -62,7 +62,7 @@ func (cS *CoreSv1) StartCPUProfiling(_ *context.Context, args *utils.DirectoryAr
 
 // StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
 // where the CPUProfiling already started
-func (cS *CoreSv1) StopCPUProfiling(_ *context.Context, _ *utils.DirectoryArgs, reply *string) error {
+func (cS *CoreSv1) StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
 	if err := cS.cS.StopCPUProfiling(); err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (cS *CoreSv1) StartMemoryProfiling(_ *context.Context, args *utils.MemoryPr
 
 // StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
 // where the MemoryProfiling already started
-func (cS *CoreSv1) StopMemoryProfiling(_ *context.Context, _ *utils.MemoryPrf, reply *string) error {
+func (cS *CoreSv1) StopMemoryProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
 	if err := cS.cS.StopMemoryProfiling(); err != nil {
 		return err
 	}
