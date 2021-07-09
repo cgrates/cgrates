@@ -175,7 +175,7 @@ func testCoreItStopMemProfilingBeforeStart(t *testing.T) {
 	var reply string
 	expectedErr := " Memory Profiling is not started"
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
-		new(utils.MemoryPrf), &reply); err == nil || err.Error() != expectedErr {
+		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
 	}
 }
@@ -205,7 +205,7 @@ func testCoreItStartEngineByExecWIthMemProfiling(t *testing.T) {
 func testCoreItStopMemoryProfiling(t *testing.T) {
 	var reply string
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
-		new(utils.MemoryPrf), &reply); err != nil {
+		new(utils.TenantWithAPIOpts), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -272,7 +272,7 @@ func testCoreItStopCPUProfilingBeforeStart(t *testing.T) {
 	var reply string
 	expectedErr := " cannot stop because CPUProfiling is not active"
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
-		new(utils.DirectoryArgs), &reply); err == nil || err.Error() != expectedErr {
+		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+q, received %+q", expectedErr, err)
 	}
 }
@@ -306,7 +306,7 @@ func testCoreItSleep(t *testing.T) {
 func testCoreItStopCPUProfiling(t *testing.T) {
 	var reply string
 	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
-		new(utils.DirectoryArgs), &reply); err != nil {
+		new(utils.TenantIDWithAPIOpts), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply returned")
@@ -356,8 +356,10 @@ func testCoreItStatus(t *testing.T) {
 	}
 }
 
+
 func testCoreItKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(500*time.Millisecond)
 }
