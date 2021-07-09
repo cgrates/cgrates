@@ -94,12 +94,8 @@ var (
 
 func TestLoadersIT(t *testing.T) {
 	switch *dbType {
-	case utils.MetaInternal:
-		ldrConfigDIR = "apis_loaders_internal"
-	case utils.MetaMongo:
-		ldrConfigDIR = "apis_loaders_mongo"
-	case utils.MetaMySQL:
-		ldrConfigDIR = "apis_loaders_mysql"
+	case utils.MetaInternal, utils.MetaMongo, utils.MetaMySQL:
+		ldrConfigDIR = "core_it_test"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

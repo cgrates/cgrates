@@ -1,0 +1,20 @@
+{
+  // CGRateS Configuration file
+  // will be used in apis/cores_it_test.go
+  "general": {
+    "node_id": "Cores_apis_test",
+    "log_level": 7,
+  },
+
+  "data_db": {
+    "db_type": "*internal",
+  },
+
+  "stor_db": {
+    "db_type": "*internal",
+  },
+
+  "admins": {
+    "enabled": true,
+  }
+}
