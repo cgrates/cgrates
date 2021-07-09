@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1174,5 +1178,310 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 	}
 	if _, err := dm.GetThreshold(thp.Tenant, thp.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
 		t.Fatal(err)
+	}
+}
+
+func TestThresholdsProcessEventAccountUpdateErrPartExec(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		ActionIDs: []string{"actPrf"},
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+		tPrfl:  thPrf,
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThresholdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
+		},
+	}
+	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
+	if err := th.ProcessEvent(args, dm); err == nil ||
+		err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
+	}
+
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
+	}
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   2,
+		MaxHits:   5,
+		Weight:    10,
+		ActionIDs: []string{"actPrf"},
+		Async:     true,
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+		tPrfl:  thPrf,
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThresholdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
+	if err := th.ProcessEvent(args, dm); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestThresholdsProcessEvent3(t *testing.T) {
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		MinHits:   3,
+		MaxHits:   5,
+		Weight:    10,
+		ActionIDs: []string{"actPrf"},
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+		tPrfl:  thPrf,
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThresholdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]interface{}{
+				utils.MetaEventType: utils.AccountUpdate,
+			},
+		},
+	}
+	if err := th.ProcessEvent(args, dm); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestThresholdsShutdown(t *testing.T) {
+	utils.Logger.SetLogLevel(6)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tS := NewThresholdService(dm, cfg, nil)
+
+	expLog1 := `[INFO] <ThresholdS> shutdown initialized`
+	expLog2 := `[INFO] <ThresholdS> shutdown complete`
+	tS.Shutdown()
+
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
+		!strings.Contains(rcvLog, expLog2) {
+		t.Errorf("expected logs <%+v> and <%+v> \n to be included in <%+v>",
+			expLog1, expLog2, rcvLog)
+	}
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestThresholdsStoreThresholdsOK(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tS := NewThresholdService(dm, cfg, nil)
+
+	value := &Threshold{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH1", value, nil, true,
+		utils.NonTransactional)
+	tS.storedTdIDs.Add("TH1")
+	exp := &Threshold{
+		dirty:  utils.BoolPointer(false),
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+	tS.storeThresholds()
+
+	if rcv, err := tS.dm.GetThreshold("cgrates.org", "TH1", true, false,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	Cache.Remove(utils.CacheThresholds, "TH1", true, utils.NonTransactional)
+}
+
+func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	tS := NewThresholdService(nil, cfg, nil)
+
+	value := &Threshold{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH1", value, nil, true,
+		utils.NonTransactional)
+	tS.storedTdIDs.Add("TH1")
+	exp := utils.StringSet{
+		"TH1": struct{}{},
+	}
+	expLog := `[WARNING] <ThresholdS> failed saving Threshold with tenant: cgrates.org and ID: TH1, error: NO_DATABASE_CONNECTION`
+	tS.storeThresholds()
+
+	if !reflect.DeepEqual(tS.storedTdIDs, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, tS.storedTdIDs)
+	}
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected log <%+v>\n to be in included in: <%+v>", expLog, rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+	Cache.Remove(utils.CacheThresholds, "TH1", true, utils.NonTransactional)
+}
+
+func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
+	tmp := Cache
+	defer func() {
+		Cache = tmp
+	}()
+
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tS := NewThresholdService(dm, cfg, nil)
+
+	value := &Threshold{
+		dirty:  utils.BoolPointer(true),
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+
+	Cache.SetWithoutReplicate(utils.CacheThresholds, "TH2", value, nil, true,
+		utils.NonTransactional)
+	tS.storedTdIDs.Add("TH1")
+	expLog := `[WARNING] <ThresholdS> failed retrieving from cache treshold with ID: TH1`
+	tS.storeThresholds()
+
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
+		t.Errorf("expected <%+v> \nto be included in: <%+v>", expLog, rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+	Cache.Remove(utils.CacheThresholds, "TH2", true, utils.NonTransactional)
+}
+
+func TestThresholdsStoreThresholdNilDirtyField(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tS := NewThresholdService(dm, cfg, nil)
+
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+	}
+
+	if err := tS.StoreThreshold(th); err != nil {
+		t.Error(err)
 	}
 }
