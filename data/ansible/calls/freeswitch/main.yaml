@@ -54,16 +54,16 @@
       become: yes
       apt_key: url=https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc state=present
 
-    - name: Add FreeSwitch apt repository (1.8) (Debian 8/Jessie)
+    - name: Add FreeSwitch apt repository 
       become: yes
       apt_repository:
-        repo: deb http://files.freeswitch.org/repo/deb/debian-release/ buster main
+        repo: deb [ allow-insecure=yes ] http://files.freeswitch.org/repo/deb/debian-release/ buster main
         state: present
         filename: 'freeswitch'
 
     # Install FreeSwitch
     - name: Install FreeSwitch
-      become: yes
+      become: yes 
       apt: name={{ freeswitch_packages }} state=latest
 
     ###########################################################################################################################
