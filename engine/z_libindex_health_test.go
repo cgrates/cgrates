@@ -358,9 +358,9 @@ func TestHealthReverseFilter(t *testing.T) {
 	exp := map[string]*ReverseFilterIHReply{
 		utils.CacheAttributeFilterIndexes: {
 			MissingReverseIndexes: map[string][]string{
-				"cgrates.org:ATTR1": {"Fltr1:*any"},
+				// "cgrates.org:ATTR1": {"Fltr1:*any"},
 			},
-			MissingFilters: make(map[string][]string),
+			MissingFilters: map[string][]string{"cgrates.org:Fltr1": {"ATTR1"}},
 			BrokenReverseIndexes: map[string][]string{
 				"cgrates.org:ATTR1:*cdrs": {"Fltr1", "Fltr2"},
 			},
