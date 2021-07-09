@@ -24,6 +24,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -771,6 +772,9 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 	}
 	defer os.RemoveAll(dirPath)
 
+	val1 := config.NewRSRParsersMustCompile("TestTenant", ",")
+	val2 := config.NewRSRParsersMustCompile("1001", ",")
+	val3 := config.NewRSRParsersMustCompile("1002", ",")
 	value := &erEvents{
 		events: []*utils.CGREvent{
 			{
@@ -788,7 +792,30 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 				utils.PartialCacheActionOpt: utils.MetaDumpToFile,
 				utils.PartialPathOpt:        dirPath,
 			},
+			CacheDumpFields: []*config.FCTemplate{
+				{
+					Tag:   "Tenant",
+					Type:  utils.MetaConstant,
+					Path:  "*exp.Tenant",
+					Value: val1,
+				},
+				{
+					Tag:   "Account",
+					Type:  utils.MetaConstant,
+					Path:  "*exp.Account",
+					Value: val2,
+				},
+				{
+					Tag:   "Destination",
+					Type:  utils.MetaConstant,
+					Path:  "*exp.Destination",
+					Value: val3,
+				},
+			},
 		},
+	}
+	for _, field := range value.rdrCfg.CacheDumpFields {
+		field.ComputePath()
 	}
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, true)
@@ -799,13 +826,19 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		filterS:   fltrS,
 	}
-	erS.onEvicted("ID", value)
+	expBody := "TestTenant,1001,1002\n"
+	erS.onEvicted("FileID", value)
 
-	// rcv, err := os.ReadFile(filepath.Join(dirPath, "ID.*.*"))
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// fmt.Println(rcv)
+	path := filepath.Join(dirPath, "FileID.*.tmp")
+	if match, err := filepath.Glob(path); err != nil {
+		t.Error(err)
+	} else if len(match) != 1 {
+		t.Error("expected exactly one file")
+	} else if body, err := os.ReadFile(match[0]); err != nil {
+		t.Error(err)
+	} else if expBody != string(body) {
+		t.Errorf("expected: %q\nreceived: %q", expBody, string(body))
+	}
 }
 
 func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
