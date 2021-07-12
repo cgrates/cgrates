@@ -445,6 +445,7 @@ const CGRATES_CFG_JSON = `
 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
 				// "natsClientKey": "",							// the path to a client key( used by tls)
+				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
 
 				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
 				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
@@ -453,6 +454,7 @@ const CGRATES_CFG_JSON = `
 				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
 				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
 				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
+				// "natsJetStreamMaxWaitProcessed": "5s	",		// the maximum amount of time to wait for a response
 			},
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -551,6 +553,7 @@ const CGRATES_CFG_JSON = `
 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
 				// "natsClientKey": "",							// the path to a client key( used by tls)
+				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
 			},													// extra options for exporter
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
