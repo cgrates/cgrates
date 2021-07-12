@@ -716,6 +716,7 @@ const (
 	MetaSIPURIUser          = "*sipuri_user"
 	MetaReload              = "*reload"
 	MetaLoad                = "*load"
+	MetaFloat64             = "*float64"
 	MetaRemove              = "*remove"
 	MetaRemoveAll           = "*removeall"
 	MetaStore               = "*store"
