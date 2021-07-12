@@ -1947,3 +1947,171 @@ func TestAttributesProcessEventSIPCID(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
 	}
 }
+
+func TestAttributesProcessEventSIPCIDNotFoundErr(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	if empty, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if !empty {
+		t.Error("expected DataDB to be empty")
+	}
+	attrPrf := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       "ATTR_ID",
+		Contexts: []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "OriginID",
+				Type:  utils.MetaSIPCID,
+				Value: config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", true, utils.INFIELD_SEP),
+			},
+		},
+		Blocker: true,
+		Weight:  10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event:  map[string]interface{}{},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestAttributesProcessEventSIPCIDWrongPathErr(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	if empty, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if !empty {
+		t.Error("expected DataDB to be empty")
+	}
+	attrPrf := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       "ATTR_ID",
+		Contexts: []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "OriginID",
+				Type:  utils.MetaSIPCID,
+				Value: config.NewRSRParsersMustCompile("~*req.cid;~*req.123.a", true, utils.INFIELD_SEP),
+			},
+		},
+		Blocker: true,
+		Weight:  10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"cid": "12345",
+				"123": struct{}{},
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	experr := `SERVER_ERROR: WRONG_PATH`
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestAttributesProcessEventSIPCIDInvalidArgs(t *testing.T) {
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	Cache.Clear(nil)
+	if empty, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if !empty {
+		t.Error("expected DataDB to be empty")
+	}
+	attrPrf := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       "ATTR_ID",
+		Contexts: []string{utils.MetaSessionS},
+		Attributes: []*Attribute{
+			{
+				Path:  utils.MetaReq + utils.NestingSep + "OriginID",
+				Type:  utils.MetaSIPCID,
+				Value: config.RSRParsers{},
+			},
+		},
+		Blocker: true,
+		Weight:  10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"cid":  "12345",
+				"to":   "1001",
+				"from": "1002",
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	experr := `SERVER_ERROR: invalid number of arguments <[]> to *sipcid`
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
