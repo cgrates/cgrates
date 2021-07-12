@@ -128,7 +128,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		utils.MetaReq:  args.CGREvent.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	var rtIDs utils.StringSet
+	rtIDs := utils.StringSet{}
 	if rS.cfg.RateSCfg().RateIndexedSelects {
 		if rtIDs, err = engine.MatchingItemIDsForEvent(ctx,
 			evNm,
