@@ -1776,3 +1776,72 @@ func TestAgReqSetFieldsSIPCID(t *testing.T) {
 		t.Errorf("expecting: %+v,\n received: %+v", eMp, agReq.Vars)
 	}
 }
+
+func TestAgReqParseFieldMetaSIPCIDNotFoundErr(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	tplFld := &config.FCTemplate{
+		Tag:  "OriginID",
+		Path: utils.MetaVars + utils.NestingSep + "OriginID", Type: utils.MetaSIPCID,
+		Value: config.NewRSRParsersMustCompile("~*cgreq.cid;~*cgreq.to;~*cgreq.from", true, utils.INFIELD_SEP),
+	}
+	tplFld.ComputePath()
+
+	if _, err := agReq.ParseField(tplFld); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestAgReqParseFieldMetaSIPCIDWrongPath(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(utils.MapStorage{
+		"cid": "12345",
+		"123": struct{}{},
+	}, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	tplFld := &config.FCTemplate{
+		Tag:   "OriginID",
+		Path:  utils.MetaVars + utils.NestingSep + "OriginID",
+		Type:  utils.MetaSIPCID,
+		Value: config.NewRSRParsersMustCompile("~*req.cid;~*req.123.a", true, utils.INFIELD_SEP),
+	}
+	tplFld.ComputePath()
+
+	if _, err := agReq.ParseField(tplFld); err == nil ||
+		err.Error() != utils.ErrWrongPath.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrWrongPath, err)
+	}
+}
+
+func TestAgReqParseFieldMetaSIPCIDInvalidArgs(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
+
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "cid", PathItems: utils.PathItems{{Field: "cid"}}}, utils.NewNMData("12345"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "to", PathItems: utils.PathItems{{Field: "to"}}}, utils.NewNMData("1002"))
+	agReq.CGRRequest.Set(&utils.FullPath{Path: "from", PathItems: utils.PathItems{{Field: "from"}}}, utils.NewNMData("1001"))
+
+	tplFld := &config.FCTemplate{
+		Tag:  "OriginID",
+		Path: utils.MetaVars + utils.NestingSep + "OriginID", Type: utils.MetaSIPCID,
+		Value: config.NewRSRParsersMustCompile("", true, utils.INFIELD_SEP),
+	}
+	tplFld.ComputePath()
+
+	experr := `invalid number of arguments <null> to *sipcid`
+	if _, err := agReq.ParseField(tplFld); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
