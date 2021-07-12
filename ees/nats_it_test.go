@@ -31,16 +31,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-// Start nats
-// Start consumer
-// Load config
-// New EventExporter
-// Check event, deserialize from nats
-
-// EventReader so we can read the event from nats and then EventExporter
-// which reads the event from EventReader in order to export it.
-
-func TestNatsER(t *testing.T) {
+func TestNatsEE(t *testing.T) {
 	var err error
 	cmd := exec.Command("nats-server", "-js") // Start the nats-server.
 	if err := cmd.Start(); err != nil {
@@ -119,8 +110,8 @@ func TestNatsER(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			"Account":    "1001",
-			"Informatie": "Noua",
+			"Account":     "1001",
+			"Destination": "1002",
 		},
 	}
 	if err := evExp.ExportEvent(cgrEv); err != nil {
