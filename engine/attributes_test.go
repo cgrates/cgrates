@@ -1249,3 +1249,51 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		t.Errorf("Expected <%+v>, received <%+v>", utils.ErrNotFound, err)
 	}
 }
+
+func TestAttributesParseAttributeSIPCIDWrongPathErr(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"cid":  "12345",
+			"to":   "1001",
+			"from": "1002",
+		},
+		utils.MetaOpts: 13,
+	}
+	value := config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from;~*opts.WrongPath", utils.InfieldSep)
+	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, value,
+		0, time.UTC.String(), utils.EmptyString, utils.InfieldSep); err == nil ||
+		err.Error() != utils.ErrWrongPath.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrWrongPath, err)
+	}
+}
+
+func TestAttributesParseAttributeSIPCIDNotFoundErr(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	value := config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep)
+	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, value,
+		0, time.UTC.String(), utils.EmptyString, utils.InfieldSep); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+}
+
+func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
+	dp := utils.MapStorage{
+		utils.MetaReq: utils.MapStorage{
+			"to":   "1001",
+			"from": "1002",
+		},
+	}
+	value := config.RSRParsers{}
+	experr := `invalid number of arguments <[]> to *sipcid`
+	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, value,
+		0, time.UTC.String(), utils.EmptyString, utils.InfieldSep); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}

@@ -1845,7 +1845,7 @@ func TestFiltersPassTimingsErrParseNotFound(t *testing.T) {
 	rcv, err := fltr.passTimings(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != false {
@@ -1972,7 +1972,7 @@ func TestFiltersPassTimingsCallSuccessful(t *testing.T) {
 	rcv, err := fltr.passTimings(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != true {
@@ -1994,7 +1994,7 @@ func TestFiltersPassTimingsCallErr(t *testing.T) {
 	rcv, err := fltr.passTimings(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != false {
@@ -2011,7 +2011,7 @@ func TestFiltersPassDestinationsErrParseNotFound(t *testing.T) {
 	rcv, err := fltr.passDestinations(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != false {
@@ -2054,7 +2054,7 @@ func TestFiltersPassDestinationsCallErr(t *testing.T) {
 	rcv, err := fltr.passDestinations(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != false {
@@ -2108,7 +2108,7 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 	rcv, err := fltr.passDestinations(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != true {
@@ -2161,7 +2161,7 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 	rcv, err := fltr.passDestinations(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != false {
@@ -2249,7 +2249,7 @@ func TestFiltersPassGreaterThanErrParseValues(t *testing.T) {
 	rcv, err := fltr.passGreaterThan(dtP)
 
 	if err != nil {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
+		t.Error(err)
 	}
 
 	if rcv != false {
