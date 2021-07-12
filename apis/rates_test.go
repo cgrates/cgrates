@@ -1732,3 +1732,124 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 	engine.Cache = cacheInit
 }
+
+func TestRatesCostForEventRateIDxSelects(t *testing.T) {
+	jsonCfg := `{
+"rates": {
+    "enabled": true,
+    "rate_indexed_selects": true,
+  },
+}
+`
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(jsonCfg)
+	if err != nil {
+		t.Error(err)
+	}
+	db := engine.NewInternalDB(nil, nil, true)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rts := rates.NewRateS(cfg, fltrs, dm)
+
+	rtPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RATE_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_ALWAYS": {
+				ID: "RT_ALWAYS",
+				FilterIDs: []string{
+					"*string:~*req.ToR:*voice"},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Increment:     utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(2, 0),
+						//FixedFee:      utils.Float64Pointer(0.3),
+					},
+				},
+			},
+			"RT_CHRISTMAS": {
+				ID: "RT_CHRISTMAS",
+				FilterIDs: []string{"*prefix:~*req.Destination:+332",
+					"*string:~*req.RequestType:*postpaid"},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(4, 1),
+						Increment:     utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(3, 1),
+						//FixedFee:      utils.Float64Pointer(0.5),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rtPrf,
+		true); err != nil {
+		t.Error(err)
+	}
+
+	//math the rates with true rates index selects from config
+	args := &utils.ArgsCostForEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+				utils.RequestType:  "*postpaid",
+				utils.Usage:        "1m24s",
+				utils.Destination:  "+332145",
+			},
+		},
+	}
+	usg, err := utils.NewDecimalFromUsage("1m24s")
+	if err != nil {
+		t.Error(err)
+	}
+	var rpCost utils.RateProfileCost
+	expRpCost := &utils.RateProfileCost{
+		ID:   "RATE_1",
+		Cost: utils.NewDecimal(1120000000000000, 4),
+		CostIntervals: []*utils.RateSIntervalCost{
+			{
+				Increments: []*utils.RateSIncrementCost{
+					{
+						Usage:             usg,
+						RateID:            "random",
+						RateIntervalIndex: 0,
+						CompressFactor:    840000000000,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"random": {
+				IntervalStart: utils.NewDecimal(0, 0),
+				RecurrentFee:  utils.NewDecimal(4, 1),
+				Increment:     utils.NewDecimal(1, 1),
+				Unit:          utils.NewDecimal(3, 1),
+				//	FixedFee:      utils.NewDecimal(5, 1),
+			},
+		},
+	}
+
+	if err := rts.V1CostForEvent(context.Background(), args,
+		&rpCost); err != nil {
+		t.Error(err)
+	} else if !rpCost.Equals(expRpCost) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRpCost), utils.ToJSON(rpCost))
+	}
+
+	cfg.RateSCfg().RateIndexedSelects = false
+	rts = rates.NewRateS(cfg, fltrs, dm)
+	if err := rts.V1CostForEvent(context.Background(), args,
+		&rpCost); err != nil {
+		t.Error(err)
+	} else if !rpCost.Equals(expRpCost) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expRpCost), utils.ToJSON(rpCost))
+	}
+}
+
