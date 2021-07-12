@@ -2639,6 +2639,9 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	if cgrEvWithArgDisp.ID == "" {
 		cgrEvWithArgDisp.ID = utils.GenUUID()
 	}
+	if cgrEvWithArgDisp.Tenant == utils.EmptyString {
+		cgrEvWithArgDisp.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
+	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {

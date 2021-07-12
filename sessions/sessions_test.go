@@ -2368,3 +2368,64 @@ func TestInitSession(t *testing.T) {
 		t.Errorf("Expected %v , received: %s", utils.ToJSON(exp), utils.ToJSON(s))
 	}
 }
+
+func TestBiRPCv1ProcessCDRNoTenant(t *testing.T) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	cfg.CdrsCfg().Enabled = true
+	cfg.SessionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
+	clMock := clMock(func(_ string, args interface{}, reply interface{}) error {
+		rply, cancast := reply.(*string)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		newArgs, cancast := args.(*engine.ArgV1ProcessEvent)
+		if !cancast {
+			return fmt.Errorf("can't cast")
+		}
+		if newArgs.Tenant == utils.EmptyString {
+			return fmt.Errorf("Tenant is missing")
+		} else if newArgs.Tenant == "cgrates.org" {
+			*rply = utils.OK
+		}
+		return nil
+	})
+	chanClnt := make(chan rpcclient.ClientConnector, 1)
+	chanClnt <- clMock
+	connMngr := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): chanClnt,
+	})
+	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
+	ss := NewSessionS(cfg, dm, connMngr)
+
+	args := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			ID: "TestBiRPCv1ProcessCDRNoTenant",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:       "TerminateEvent",
+				utils.ToR:              utils.VOICE,
+				utils.OriginID:         "123451",
+				utils.Account:          "1001",
+				utils.Subject:          "1001",
+				utils.Destination:      "1002",
+				utils.Category:         "call",
+				utils.Tenant:           "cgrates.org",
+				utils.RequestType:      utils.META_PREPAID,
+				utils.SetupTime:        time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:       time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:            "1m10s",
+				utils.CGRDebitInterval: "10s",
+			},
+		},
+	}
+	var reply string
+	if err := ss.BiRPCv1ProcessCDR(nil, args,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply returned %v", reply)
+	}
+}
