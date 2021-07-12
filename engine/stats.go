@@ -287,8 +287,8 @@ func (sS *StatService) processEvent(ctx *context.Context, tnt string, args *Stat
 	var withErrors bool
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
-		guardian.Guardian.Guard(ctx, func(*context.Context) (_ interface{}, _ error) {
-			err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
+		guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ interface{}, _ error) {
+			err = sq.ProcessEvent(ctx, tnt, args.ID, sS.filterS, evNm)
 			return
 		}, sS.cgrcfg.GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
 		if err != nil {
