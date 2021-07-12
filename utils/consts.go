@@ -2348,6 +2348,7 @@ const (
 	NatsClientKey            = "natsClientKey"
 	NatsCertificateAuthority = "natsCertificateAuthority"
 	NatsJetStream            = "natsJetStream"
+	NatsJetStreamMaxWait     = "natsJetStreamMaxWait"
 )
 
 // Analyzers constants
