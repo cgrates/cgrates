@@ -3,17 +3,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -22,6 +19,7 @@ package ees
 
 import (
 	"os/exec"
+	"path"
 	"testing"
 	"time"
 
@@ -32,6 +30,7 @@ import (
 )
 
 func TestNatsEE(t *testing.T) {
+	testCreateDirectory(t)
 	var err error
 	cmd := exec.Command("nats-server", "-js") // Start the nats-server.
 	if err := cmd.Start(); err != nil {
@@ -39,34 +38,17 @@ func TestNatsEE(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	defer cmd.Process.Kill()
-
-	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
-"ees": {
-	"enabled": true,
-	"attributes_conns":["*internal"],
-	"exporters": [
-		{
-			"id": "HTTPJsonMapExporter",
-			"type": "*nats_json_map",
-			"export_path": "nats://localhost:4222",
-			"attempts": 1,
-			"opts": {
-				"natsJetStream": true,
-				"natsSubject": "processed_cdrs",
-			}
-		}],
-		}
-	}`)
+	cfgPath := path.Join(*dataDir, "conf", "samples", "ees")
+	cfg, err := config.NewCGRConfigFromPath(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	evExp, err := NewEventExporter(cfg, 5, new(engine.FilterS))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	evExp, err := NewEventExporter(cfg, 1, new(engine.FilterS))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nop, err := engine.GetNatsOpts(cfg.EEsCfg().Exporters[0].Opts, "natsTest", time.Second)
+	nop, err := engine.GetNatsOpts(cfg.EEsCfg().Exporters[5].Opts, "natsTest", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,5 +99,6 @@ func TestNatsEE(t *testing.T) {
 	if err := evExp.ExportEvent(cgrEv); err != nil {
 		t.Fatal(err)
 	}
+	testCleanDirectory(t)
 	// fmt.Println(string((<-ch).Data))
 }
