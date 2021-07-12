@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"sync"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -181,14 +183,14 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) ProcessEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
 	if _, err = sq.remExpired(); err != nil {
 		return
 	}
 	if err = sq.remOnQueueLength(); err != nil {
 		return
 	}
-	return sq.addStatEvent(tnt, evID, filterS, evNm)
+	return sq.addStatEvent(ctx, tnt, evID, filterS, evNm)
 }
 
 // remStatEvent removes an event from metrics
@@ -245,7 +247,7 @@ func (sq *StatQueue) remOnQueueLength() (err error) {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
 	var expTime *time.Time
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
@@ -253,10 +255,10 @@ func (sq *StatQueue) addStatEvent(tnt, evID string, filterS *FilterS, evNm utils
 	sq.SQItems = append(sq.SQItems, SQItem{EventID: evID, ExpiryTime: expTime})
 	var pass bool
 	// recreate the request without *opts
-	dDP := newDynamicDP(context.TODO(), config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
+	dDP := newDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
 		config.CgrConfig().FilterSCfg().AdminSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq]})
 	for metricID, metric := range sq.SQMetrics {
-		if pass, err = filterS.Pass(context.TODO(), tnt, metric.GetFilterIDs(),
+		if pass, err = filterS.Pass(ctx, tnt, metric.GetFilterIDs(),
 			evNm); err != nil {
 			return
 		} else if !pass {
@@ -340,3 +342,28 @@ type StatQueues []*StatQueue
 func (sis StatQueues) Sort() {
 	sort.Slice(sis, func(i, j int) bool { return sis[i].sqPrfl.Weight > sis[j].sqPrfl.Weight })
 }
+
+func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
+	if sq == nil {
+		return []byte("null"), nil
+	}
+	guardian.Guardian.Guard(context.Background(), func(*context.Context) (_ interface{}, _ error) {
+		sq.RLock()
+		rply, err = json.Marshal(struct {
+			Tenant    string
+			ID        string
+			SQItems   []SQItem
+			SQMetrics map[string]StatMetric
+		}{
+			Tenant:    sq.Tenant,
+			ID:        sq.ID,
+			SQItems:   sq.SQItems,
+			SQMetrics: sq.SQMetrics,
+		})
+		sq.RUnlock()
+		return
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.StatQueuePrefix+sq.TenantID())
+	return
+}
+
+// func (sq *StatQueue) GobEncode() ([]byte, error)
