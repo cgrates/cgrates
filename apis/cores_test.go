@@ -44,7 +44,7 @@ func TestCoreSStatus(t *testing.T) {
 func TestCoreSSleep(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString,  make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
 		Duration: 1 * time.Millisecond,
