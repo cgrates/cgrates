@@ -47,6 +47,7 @@ type NatsPoster struct {
 	attempts   int
 	jetStream  bool
 	opts       []nats.Option
+	jsOpts     []nats.JSOpt
 	sync.Mutex // protect writer
 
 	poster   *nats.Conn
@@ -110,6 +111,15 @@ func (pstr *NatsPoster) parseOpt(opts map[string]interface{}, nodeID string, con
 		pstr.subject = utils.IfaceAsString(vals)
 	}
 	pstr.opts, err = GetNatsOpts(opts, nodeID, connTimeout)
+	if pstr.jetStream {
+		if maxWaitVal, has := opts[utils.NatsJetStreamMaxWait]; has {
+			var maxWait time.Duration
+			if maxWait, err = utils.IfaceAsDuration(maxWaitVal); err != nil {
+				return
+			}
+			pstr.jsOpts = []nats.JSOpt{nats.MaxWait(maxWait)}
+		}
+	}
 	return
 }
 
@@ -121,7 +131,7 @@ func (pstr *NatsPoster) newPostWriter() (err error) {
 			return
 		}
 		if pstr.jetStream {
-			pstr.posterJS, err = pstr.poster.JetStream()
+			pstr.posterJS, err = pstr.poster.JetStream(pstr.jsOpts...)
 		}
 	}
 	return

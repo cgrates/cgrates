@@ -21,6 +21,7 @@ package ers
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
@@ -76,6 +77,7 @@ type NatsER struct {
 	jetStream    bool
 	consumerName string
 	opts         []nats.Option
+	jsOpts       []nats.JSOpt
 
 	poster *engine.NatsPoster
 }
@@ -100,7 +102,7 @@ func (rdr *NatsER) Serve() (err error) {
 			return
 		}
 	} else {
-		js, err = nc.JetStream()
+		js, err = nc.JetStream(rdr.jsOpts...)
 		if err != nil {
 			return
 		}
@@ -201,6 +203,15 @@ func (rdr *NatsER) processOpts() (err error) {
 	if useJetStreamVal, has := rdr.Config().Opts[utils.NatsJetStream]; has {
 		if rdr.jetStream, err = utils.IfaceAsBool(useJetStreamVal); err != nil {
 			return
+		}
+	}
+	if rdr.jetStream {
+		if maxWaitVal, has := rdr.Config().Opts[utils.NatsJetStreamMaxWait]; has {
+			var maxWait time.Duration
+			if maxWait, err = utils.IfaceAsDuration(maxWaitVal); err != nil {
+				return
+			}
+			rdr.jsOpts = []nats.JSOpt{nats.MaxWait(maxWait)}
 		}
 	}
 	rdr.opts, err = engine.GetNatsOpts(rdr.Config().Opts,
