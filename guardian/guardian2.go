@@ -27,46 +27,44 @@ import (
 )
 
 // Guardian is the global package variable
-var Guardian = &GuardianLocker{
-	locks: make(map[string]*itemLock),
-	refs:  make(map[string][]string)}
+var Guardian2 = &GuardianLocker2{
+	locks: make(map[string]*itemLock2),
+	refs:  make(map[string]*refObj)}
 
-type itemLock struct {
-	lk  chan struct{} //better with  mutex
+type itemLock2 struct {
+	sync.Mutex
 	cnt int64
 }
 
-// GuardianLocker is an optimized locking system per locking key
-type GuardianLocker struct {
-	locks   map[string]*itemLock
-	lkMux   sync.Mutex          // protects the locks
-	refs    map[string][]string // used in case of remote locks
-	refsMux sync.RWMutex        // protects the map
+type refObj struct {
+	refs []string
+	tm   *time.Timer
 }
 
-func (gl *GuardianLocker) lockItem(itmID string) {
+// GuardianLocker2 is an optimized locking system per locking key
+type GuardianLocker2 struct {
+	locks   map[string]*itemLock2
+	lkMux   sync.Mutex         // protects the locks
+	refs    map[string]*refObj // used in case of remote locks
+	refsMux sync.RWMutex       // protects the map
+}
+
+func (gl *GuardianLocker2) lockItem(itmID string) {
 	if itmID == "" {
 		return
 	}
 	gl.lkMux.Lock()
 	itmLock, exists := gl.locks[itmID]
 	if !exists {
-		itmLock = &itemLock{lk: make(chan struct{}, 1)}
+		itmLock = new(itemLock2)
 		gl.locks[itmID] = itmLock
-		itmLock.lk <- struct{}{}
 	}
 	itmLock.cnt++
-	select {
-	case <-itmLock.lk:
-		gl.lkMux.Unlock()
-		return
-	default: // move further so we can unlock
-	}
 	gl.lkMux.Unlock()
-	<-itmLock.lk
+	itmLock.Lock()
 }
 
-func (gl *GuardianLocker) unlockItem(itmID string) {
+func (gl *GuardianLocker2) unlockItem(itmID string) {
 	gl.lkMux.Lock()
 	itmLock, exists := gl.locks[itmID]
 	if !exists {
@@ -77,12 +75,12 @@ func (gl *GuardianLocker) unlockItem(itmID string) {
 	if itmLock.cnt == 0 {
 		delete(gl.locks, itmID)
 	}
+	itmLock.Unlock()
 	gl.lkMux.Unlock()
-	itmLock.lk <- struct{}{} //the unlock should be above the gl.Lock
 }
 
 // lockWithReference will perform locks and also generate a lock reference for it (so it can be used when remotely locking)
-func (gl *GuardianLocker) lockWithReference(refID string, lkIDs []string) string {
+func (gl *GuardianLocker2) lockWithReference(refID string, timeout time.Duration, lkIDs ...string) string {
 	var refEmpty bool
 	if refID == "" {
 		refEmpty = true
@@ -97,7 +95,18 @@ func (gl *GuardianLocker) lockWithReference(refID string, lkIDs []string) string
 			return "" // no locking was done
 		}
 	}
-	gl.refs[refID] = lkIDs
+	var tm *time.Timer
+	if timeout != 0 {
+		tm = time.AfterFunc(timeout, func() {
+			if lkIDs := gl.unlockWithReference(refID); len(lkIDs) != 0 {
+				utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: %+v", lkIDs))
+			}
+		})
+	}
+	gl.refs[refID] = &refObj{
+		refs: lkIDs,
+		tm:   tm,
+	}
 	gl.refsMux.Unlock()
 	// execute the real locks
 	for _, lk := range lkIDs {
@@ -108,18 +117,21 @@ func (gl *GuardianLocker) lockWithReference(refID string, lkIDs []string) string
 }
 
 // unlockWithReference will unlock based on the reference ID
-func (gl *GuardianLocker) unlockWithReference(refID string) (lkIDs []string) {
+func (gl *GuardianLocker2) unlockWithReference(refID string) (lkIDs []string) {
 	gl.lockItem(refID)
 	gl.refsMux.Lock()
-	lkIDs, has := gl.refs[refID] // this value is local and not sent back
-
+	ref, has := gl.refs[refID]
 	if !has {
 		gl.refsMux.Unlock()
 		gl.unlockItem(refID)
 		return
 	}
+	if ref.tm != nil {
+		ref.tm.Stop()
+	}
 	delete(gl.refs, refID)
 	gl.refsMux.Unlock()
+	lkIDs = ref.refs
 	for _, lk := range lkIDs {
 		gl.unlockItem(lk)
 	}
@@ -128,58 +140,39 @@ func (gl *GuardianLocker) unlockWithReference(refID string) (lkIDs []string) {
 }
 
 // Guard executes the handler between locks
-func (gl *GuardianLocker) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) { // do we need the interface here as a reply?
+func (gl *GuardianLocker2) Guard(handler func() error, timeout time.Duration, lockIDs ...string) (err error) { // do we need the interface here as a reply?
 	for _, lockID := range lockIDs {
 		gl.lockItem(lockID)
 	}
-	rplyChan := make(chan interface{}) // make them buffered in order to not have a gorutine sitting on just because there is nobody to read from them
-	errChan := make(chan error)
-	go func(rplyChan chan interface{}, errChan chan error) {
-		// execute
-		if rply, err := handler(); err != nil {
-			errChan <- err
-		} else {
-			rplyChan <- rply
-		}
-	}(rplyChan, errChan)
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- handler()
+	}()
 	if timeout > 0 { // wait with timeout
 		select {
 		case err = <-errChan:
-		case reply = <-rplyChan:
+			close(errChan)
 		case <-time.After(timeout):
 			utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: %+v", lockIDs))
 		}
 	} else { // a bit dangerous but wait till handler finishes
-		select {
-		case err = <-errChan:
-		case reply = <-rplyChan:
-		}
+		err = <-errChan
+		close(errChan)
 	}
 	for _, lockID := range lockIDs {
 		gl.unlockItem(lockID)
 	}
-	// consider closing the return chanels if there is no timout
 	return
 }
 
 // GuardIDs aquires a lock for duration
 // returns the reference ID for the lock group aquired
-func (gl *GuardianLocker) GuardIDs(refID string, timeout time.Duration, lkIDs ...string) (retRefID string) {
-	retRefID = gl.lockWithReference(refID, lkIDs)
-	if timeout != 0 && retRefID != "" { // we should consider using time.AfterFunc and store the timer
-		go func() {
-			time.Sleep(timeout)
-			lkIDs := gl.unlockWithReference(retRefID)
-			if len(lkIDs) != 0 {
-				utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: %+v", lkIDs))
-			}
-		}()
-	}
-	return
+func (gl *GuardianLocker2) GuardIDs(refID string, timeout time.Duration, lkIDs ...string) string {
+	return gl.lockWithReference(refID, timeout, lkIDs...)
 }
 
 // UnguardIDs attempts to unlock a set of locks based on their reference ID received on lock
-func (gl *GuardianLocker) UnguardIDs(refID string) (lkIDs []string) {
+func (gl *GuardianLocker2) UnguardIDs(refID string) (_ []string) {
 	if refID == "" {
 		return
 	}
