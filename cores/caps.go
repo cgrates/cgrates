@@ -106,3 +106,88 @@ func (c *capsServerCodec) WriteResponse(r *birpc.Response, x interface{}) error 
 	return c.sc.WriteResponse(r, x)
 }
 func (c *capsServerCodec) Close() error { return c.sc.Close() }
+
+func newCapsBiRPCGOBCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.BirpcCodec) {
+	r = newCapsBiRPCCodec(birpc.NewGobBirpcCodec(conn), caps)
+	if anz != nil {
+		from := conn.RemoteAddr()
+		var fromstr string
+		if from != nil {
+			fromstr = from.String()
+		}
+		to := conn.LocalAddr()
+		var tostr string
+		if to != nil {
+			tostr = to.String()
+		}
+		return analyzers.NewAnalyzerBiRPCCodec(r, anz, utils.MetaGOB, fromstr, tostr)
+	}
+	return
+}
+
+func newCapsBiRPCJSONCodec(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) (r birpc.BirpcCodec) {
+	r = newCapsBiRPCCodec(jsonrpc.NewJSONBirpcCodec(conn), caps)
+	if anz != nil {
+		from := conn.RemoteAddr()
+		var fromstr string
+		if from != nil {
+			fromstr = from.String()
+		}
+		to := conn.LocalAddr()
+		var tostr string
+		if to != nil {
+			tostr = to.String()
+		}
+		return analyzers.NewAnalyzerBiRPCCodec(r, anz, utils.MetaJSON, fromstr, tostr)
+	}
+	return
+}
+
+func newCapsBiRPCCodec(sc birpc.BirpcCodec, caps *engine.Caps) birpc.BirpcCodec {
+	return &capsBiRPCCodec{
+		sc:   sc,
+		caps: caps,
+	}
+}
+
+type capsBiRPCCodec struct {
+	sc   birpc.BirpcCodec
+	caps *engine.Caps
+}
+
+// ReadHeader must read a message and populate either the request
+// or the response by inspecting the incoming message.
+func (c *capsBiRPCCodec) ReadHeader(req *birpc.Request, resp *birpc.Response) (err error) {
+	return c.sc.ReadHeader(req, resp)
+}
+
+// ReadRequestBody into args argument of handler function.
+func (c *capsBiRPCCodec) ReadRequestBody(x interface{}) (err error) {
+	if err = c.caps.Allocate(); err != nil {
+		return
+	}
+	return c.sc.ReadRequestBody(x)
+}
+
+// ReadResponseBody into reply argument of handler function.
+func (c *capsBiRPCCodec) ReadResponseBody(x interface{}) error {
+	return c.sc.ReadResponseBody(x)
+}
+
+// WriteRequest must be safe for concurrent use by multiple goroutines.
+func (c *capsBiRPCCodec) WriteRequest(req *birpc.Request, x interface{}) error {
+	return c.sc.WriteRequest(req, x)
+}
+
+// WriteResponse must be safe for concurrent use by multiple goroutines.
+func (c *capsBiRPCCodec) WriteResponse(r *birpc.Response, x interface{}) error {
+	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
+		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
+	} else {
+		defer c.caps.Deallocate()
+	}
+	return c.sc.WriteResponse(r, x)
+}
+
+// Close is called when client/server finished with the connection.
+func (c *capsBiRPCCodec) Close() error { return c.sc.Close() }

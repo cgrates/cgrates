@@ -58,7 +58,7 @@ func TestRadiusAgentReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
+		shdChan, nil, anz, srvDep)
 	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
@@ -122,7 +122,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
-		shdChan, nil, nil, anz, srvDep)
+		shdChan, nil, anz, srvDep)
 	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,

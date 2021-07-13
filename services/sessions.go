@@ -36,8 +36,7 @@ import (
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
 	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	caps *engine.Caps, anz *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
 		connChan: internalChan,
 		cfg:      cfg,
@@ -45,7 +44,6 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 		server:   server,
 		shdChan:  shdChan,
 		connMgr:  connMgr,
-		caps:     caps,
 		anz:      anz,
 		srvDep:   srvDep,
 	}
@@ -68,7 +66,6 @@ type SessionService struct {
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
 	connMgr      *engine.ConnManager
-	caps         *engine.Caps
 	anz          *AnalyzerService
 	srvDep       map[string]*sync.WaitGroup
 }
