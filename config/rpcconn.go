@@ -192,17 +192,17 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 	if jsnCfg.Tls != nil {
 		rh.TLS = *jsnCfg.Tls
 	}
-	if jsnCfg.Key_path != nil {
-		rh.KeyPath = *jsnCfg.Key_path
+	if jsnCfg.Client_key != nil {
+		rh.KeyPath = *jsnCfg.Client_key
 	}
-	if jsnCfg.Cert_path != nil {
-		rh.CertPath = *jsnCfg.Cert_path
+	if jsnCfg.Client_certificate != nil {
+		rh.CertPath = *jsnCfg.Client_certificate
 	}
-	if jsnCfg.Ca_path != nil {
-		rh.CaPath = *jsnCfg.Ca_path
+	if jsnCfg.Ca_certificate != nil {
+		rh.CaPath = *jsnCfg.Ca_certificate
 	}
-	if jsnCfg.Conn_attempts != nil {
-		rh.ConnAttempts = *jsnCfg.Conn_attempts
+	if jsnCfg.Connect_attempts != nil {
+		rh.ConnAttempts = *jsnCfg.Connect_attempts
 	}
 	if jsnCfg.Reconnects != nil {
 		rh.Reconnects = *jsnCfg.Reconnects
@@ -332,18 +332,18 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
-	Id              *string
-	Address         *string
-	Transport       *string
-	Synchronous     *bool
-	Tls             *bool
-	Key_path        *string
-	Cert_path       *string
-	Ca_path         *string
-	Conn_attempts   *int
-	Reconnects      *int
-	Connect_timeout *string
-	Reply_timeout   *string
+	Id                 *string
+	Address            *string
+	Transport          *string
+	Synchronous        *bool
+	Connect_attempts   *int
+	Reconnects         *int
+	Connect_timeout    *string
+	Reply_timeout      *string
+	Tls                *bool
+	Client_certificate *string
+	Client_key         *string
+	Ca_certificate     *string
 }
 
 func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
@@ -364,16 +364,16 @@ func diffRemoteHostJson(v1, v2 *RemoteHost) (d *RemoteHostJson) {
 		d.Tls = utils.BoolPointer(v2.TLS)
 	}
 	if v1.KeyPath != v2.KeyPath {
-		d.Key_path = utils.StringPointer(v2.KeyPath)
+		d.Client_key = utils.StringPointer(v2.KeyPath)
 	}
 	if v1.CertPath != v2.CertPath {
-		d.Cert_path = utils.StringPointer(v2.CertPath)
+		d.Client_certificate = utils.StringPointer(v2.CertPath)
 	}
 	if v1.CaPath != v2.CaPath {
-		d.Ca_path = utils.StringPointer(v2.CaPath)
+		d.Ca_certificate = utils.StringPointer(v2.CaPath)
 	}
 	if v1.ConnAttempts != v2.ConnAttempts {
-		d.Conn_attempts = utils.IntPointer(v2.ConnAttempts)
+		d.Connect_attempts = utils.IntPointer(v2.ConnAttempts)
 	}
 	if v1.Reconnects != v2.Reconnects {
 		d.Reconnects = utils.IntPointer(v2.Reconnects)
