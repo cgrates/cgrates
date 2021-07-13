@@ -704,9 +704,17 @@ type TPDispatcherHost struct {
 
 // TPDispatcherHostConn is used in TPDispatcherHost
 type TPDispatcherHostConn struct {
-	Address   string
-	Transport string
-	TLS       bool
+	Address           string
+	Transport         string
+	Synchronous       bool
+	ConnectAttempts   int
+	Reconnects        int
+	ConnectTimeout    time.Duration
+	ReplyTimeout      time.Duration
+	TLS               bool
+	ClientKey         string
+	ClientCertificate string
+	CaCertificate     string
 }
 
 type AttrRemoteLock struct {

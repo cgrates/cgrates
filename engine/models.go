@@ -274,14 +274,22 @@ func (DispatcherProfileMdl) TableName() string {
 }
 
 type DispatcherHostMdl struct {
-	PK        uint   `gorm:"primary_key"`
-	Tpid      string //
-	Tenant    string `index:"0" re:""`
-	ID        string `index:"1" re:""`
-	Address   string `index:"2" re:""`
-	Transport string `index:"3" re:""`
-	TLS       bool   `index:"4" re:""`
-	CreatedAt time.Time
+	PK             uint   `gorm:"primary_key"`
+	Tpid           string //
+	Tenant         string `index:"0" re:""`
+	ID             string `index:"1" re:""`
+	Address        string `index:"2" re:""`
+	Transport      string `index:"3" re:""`
+	Synchronous    bool   `index:"4" re:""`
+	ConnAttempts   int    `index:"5" re:""`
+	Reconnects     int    `index:"6" re:""`
+	ConnectTimeout string `index:"7" re:""`
+	ReplyTimeout   string `index:"8" re:""`
+	TLS            bool   `index:"9" re:""`
+	KeyPath        string `index:"10" re:""`
+	CertPath       string `index:"11" re:""`
+	CaPath         string `index:"12" re:""`
+	CreatedAt      time.Time
 }
 
 func (DispatcherHostMdl) TableName() string {
