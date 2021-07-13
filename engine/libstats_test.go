@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -693,4 +694,21 @@ func TestStatRemoveExpiredQueue(t *testing.T) {
 		sq.SQItems[1].EventID != "TestStatAddStatEvent_3" {
 		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
 	}
+}
+
+func TestStatQueueJSONMarshall(t *testing.T) {
+	rply := new(StatQueue)
+	exp, err := NewStatQueue("cgrates.org", "STS", []*MetricWithFilters{
+		{MetricID: utils.MetaASR},
+		{MetricID: utils.MetaTCD},
+	}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal([]byte(utils.ToJSON(exp)), rply); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rply, exp) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
 }
