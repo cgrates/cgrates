@@ -92,7 +92,7 @@ func TestServerIT(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	for _, test := range sTestsServer {
 		log.SetOutput(io.Discard)
-		t.Run("Running IT serve tests", test)
+		t.Run("TestServerIT", test)
 	}
 }
 
@@ -756,7 +756,7 @@ func testAcceptBiRPC(t *testing.T) {
 	l := &mockListener{
 		p1: p1,
 	}
-	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc.NewJSONBirpcCodec)
+	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, newCapsBiRPCJSONCodec)
 	rpc := jsonrpc.NewClient(p2)
 	var reply string
 	expected := "birpc: can't find method AttributeSv1.Ping"
@@ -777,14 +777,14 @@ func (mK *mockListenError) Accept() (net.Conn, error) {
 }
 
 func testAcceptBiRPCError(t *testing.T) {
-	caps := engine.NewCaps(0, utils.MetaBusy)
+	caps := engine.NewCaps(10, utils.MetaBusy)
 	server := NewServer(caps)
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
 	//it will contain "use of closed network connection"
 	l := new(mockListenError)
-	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, jsonrpc.NewJSONBirpcCodec)
+	go server.acceptBiRPC(server.birpcSrv, l, utils.JSONCaps, newCapsBiRPCJSONCodec)
 	runtime.Gosched()
 }
 

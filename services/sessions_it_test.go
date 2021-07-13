@@ -94,7 +94,7 @@ func TestSessionSReload1(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
 	})
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), shdChan, conMng, nil, anz, srvDep)
+	srv := NewSessionService(cfg, new(DataDBService), server, make(chan birpc.ClientConnector, 1), shdChan, conMng, anz, srvDep)
 	err := srv.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -154,7 +154,7 @@ func TestSessionSReload2(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
@@ -203,13 +203,8 @@ func TestSessionSReload3(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.Internal
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
-
-	srv.(*SessionService).sm = &sessions.SessionS{}
-	if !srv.IsRunning() {
-		t.Fatalf("\nExpecting service to be running")
-	}
 	err2 := srv.(*SessionService).start()
 	if err2 != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err2)

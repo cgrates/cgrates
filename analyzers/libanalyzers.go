@@ -82,6 +82,7 @@ type rpcAPI struct {
 	ID     uint64      `json:"id"`
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`
+	Error  string      `json:"err,omitempty"`
 
 	StartTime time.Time
 }

@@ -35,7 +35,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -263,14 +262,14 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(birpc.ClientCo
 	s.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
-		if ljson, err = s.listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, jsonrpc.NewJSONBirpcCodec); err != nil {
+		if ljson, err = s.listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, newCapsBiRPCJSONCodec); err != nil {
 			return
 		}
 		defer ljson.Close()
 	}
 	if addrGOB != utils.EmptyString {
 		var lgob net.Listener
-		if lgob, err = s.listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, birpc.NewGobBirpcCodec); err != nil {
+		if lgob, err = s.listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, newCapsBiRPCGOBCodec); err != nil {
 			return
 		}
 		defer lgob.Close()
@@ -279,7 +278,7 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn func(birpc.ClientCo
 	return
 }
 
-func (s *Server) listenBiRPC(srv *birpc.BirpcServer, addr, codecName string, newCodec func(io.ReadWriteCloser) birpc.BirpcCodec) (lBiRPC net.Listener, err error) {
+func (s *Server) listenBiRPC(srv *birpc.BirpcServer, addr, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.BirpcCodec) (lBiRPC net.Listener, err error) {
 	if lBiRPC, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("ServeBi%s listen error: %s \n", codecName, err)
 		return
@@ -289,7 +288,7 @@ func (s *Server) listenBiRPC(srv *birpc.BirpcServer, addr, codecName string, new
 	return
 }
 
-func (s *Server) acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName string, newCodec func(io.ReadWriteCloser) birpc.BirpcCodec) {
+func (s *Server) acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName string, newCodec func(conn conn, caps *engine.Caps, anz *analyzers.AnalyzerService) birpc.BirpcCodec) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -300,7 +299,7 @@ func (s *Server) acceptBiRPC(srv *birpc.BirpcServer, l net.Listener, codecName s
 			utils.Logger.Crit(fmt.Sprintf("Stoped Bi%s server beacause %s", codecName, err))
 			return // stop if we get Accept error
 		}
-		go srv.ServeCodec(newCodec(conn))
+		go srv.ServeCodec(newCodec(conn, s.caps, s.anz))
 	}
 }
 

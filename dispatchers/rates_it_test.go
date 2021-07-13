@@ -121,9 +121,8 @@ func testDspRPrfCostForEvent(t *testing.T) {
 		Cost: utils.NewDecimal(12, 2),
 		CostIntervals: []*utils.RateSIntervalCost{{
 			Increments: []*utils.RateSIncrementCost{{
-				Usage:             utils.NewDecimal(int64(time.Minute), 0),
-				IntervalRateIndex: 0,
-				CompressFactor:    1,
+				Usage:          utils.NewDecimal(int64(time.Minute), 0),
+				CompressFactor: 1,
 			}},
 			CompressFactor: 1,
 		}},
@@ -187,9 +186,8 @@ func testDspRPrfCostForEventWithoutFilters(t *testing.T) {
 		Cost: utils.NewDecimal(25, 2),
 		CostIntervals: []*utils.RateSIntervalCost{{
 			Increments: []*utils.RateSIncrementCost{{
-				Usage:             utils.NewDecimal(int64(time.Minute), 0),
-				IntervalRateIndex: 0,
-				CompressFactor:    60,
+				Usage:          utils.NewDecimal(int64(time.Minute), 0),
+				CompressFactor: 60,
 			}},
 			CompressFactor: 1,
 		}},
