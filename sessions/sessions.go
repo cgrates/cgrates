@@ -1867,7 +1867,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 	// RPC caching
@@ -1894,7 +1894,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		!args.GetMaxUsage && !args.GetSuppliers {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.GetAttributes {
@@ -1950,7 +1950,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		if err != nil && err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
-					utils.SessionS, err.Error(), args.CGREvent))
+					utils.SessionS, err.Error(), utils.ToJSON(args.CGREvent)))
 			withErrors = true
 		}
 		authReply.ThresholdIDs = &tIDs
@@ -2146,7 +2146,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 
@@ -2173,7 +2173,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
@@ -2371,7 +2371,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	if args.CGREvent == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 
@@ -2398,7 +2398,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	if !args.GetAttributes && !args.UpdateSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.GetAttributes {
@@ -2507,7 +2507,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 	// RPC caching
@@ -2532,7 +2532,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 	if !args.TerminateSession && !args.ReleaseResources {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	ev := engine.MapEvent(args.CGREvent.Event)
@@ -2636,7 +2636,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 // BiRPCv1ProcessCDR sends the CDR to CDRs
 func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	cgrEvWithArgDisp *utils.CGREventWithArgDispatcher, rply *string) (err error) {
-	if cgrEvWithArgDisp.ID == "" {
+	if cgrEvWithArgDisp.ID == utils.EmptyString {
 		cgrEvWithArgDisp.ID = utils.GenUUID()
 	}
 	if cgrEvWithArgDisp.Tenant == utils.EmptyString {
@@ -2879,7 +2879,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 
@@ -2903,7 +2903,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	}
 	// end of RPC caching
 
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	me := engine.MapEvent(args.CGREvent.Event)
@@ -3060,7 +3060,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	var withErrors bool
-	if args.CGREvent.ID == "" {
+	if args.CGREvent.ID == utils.EmptyString {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 
@@ -3084,7 +3084,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 	// end of RPC caching
 
-	if args.CGREvent.Tenant == "" {
+	if args.CGREvent.Tenant == utils.EmptyString {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	ev := engine.MapEvent(args.CGREvent.Event)
