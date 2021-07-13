@@ -5117,8 +5117,8 @@ func TestModelHelperAPItoFilterError(t *testing.T) {
 	}
 
 	_, err := APItoFilter(testStruct, "")
-	if err == nil || err.Error() != "emtpy RSRParser in rule: <>" {
-		t.Errorf("\nExpecting <emtpy RSRParser in rule: <>>,\n Received <%+v>", err)
+	if err == nil || err.Error() != "empty RSRParser in rule: <>" {
+		t.Errorf("\nExpecting <empty RSRParser in rule: <>>,\n Received <%+v>", err)
 	}
 
 }
