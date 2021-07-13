@@ -216,3 +216,31 @@ func TestNewAttributeFromInlineWithMultipleVaslues(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
 	}
 }
+
+func TestLibAttributesTenantIDInLine(t *testing.T) {
+	ap := &AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "AttrPrf",
+		Contexts: []string{utils.MetaAny},
+		Weight:   10,
+	}
+
+	exp := "cgrates.org:AttrPrf"
+	if rcv := ap.TenantIDInline(); rcv != exp {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
+
+func TestLibAttributesTenantIDMetaPrefix(t *testing.T) {
+	ap := &AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "*default",
+		Contexts: []string{utils.MetaAny},
+		Weight:   10,
+	}
+
+	exp := "*default"
+	if rcv := ap.TenantIDInline(); rcv != exp {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+	}
+}
