@@ -39,6 +39,7 @@ type DataDbCfg struct {
 	QueryTimeout       time.Duration
 	RmtConns           []string // Remote DataDB  connIDs
 	RplConns           []string // Replication connIDs
+	RplFiltered        bool
 	Items              map[string]*ItemOpt
 }
 
@@ -76,6 +77,9 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
 			return err
 		}
+	}
+	if jsnDbCfg.Replication_filtered != nil {
+		dbcfg.RplFiltered = *jsnDbCfg.Replication_filtered
 	}
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
@@ -125,6 +129,7 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 		DataDbSentinelName: dbcfg.DataDbSentinelName,
 		QueryTimeout:       dbcfg.QueryTimeout,
 		Items:              dbcfg.Items,
+		RplFiltered:        dbcfg.RplFiltered,
 	}
 }
 
@@ -140,17 +145,18 @@ func (dbcfg *DataDbCfg) AsMapInterface() map[string]interface{} {
 	dbPort, _ := strconv.Atoi(dbcfg.DataDbPort)
 
 	return map[string]interface{}{
-		utils.DataDbTypeCfg:         utils.Meta + dbcfg.DataDbType,
-		utils.DataDbHostCfg:         dbcfg.DataDbHost,
-		utils.DataDbPortCfg:         dbPort,
-		utils.DataDbNameCfg:         dbcfg.DataDbName,
-		utils.DataDbUserCfg:         dbcfg.DataDbUser,
-		utils.DataDbPassCfg:         dbcfg.DataDbPass,
-		utils.DataDbSentinelNameCfg: dbcfg.DataDbSentinelName,
-		utils.QueryTimeoutCfg:       queryTimeout,
-		utils.RmtConnsCfg:           dbcfg.RmtConns,
-		utils.RplConnsCfg:           dbcfg.RplConns,
-		utils.ItemsCfg:              items,
+		utils.DataDbTypeCfg:          utils.Meta + dbcfg.DataDbType,
+		utils.DataDbHostCfg:          dbcfg.DataDbHost,
+		utils.DataDbPortCfg:          dbPort,
+		utils.DataDbNameCfg:          dbcfg.DataDbName,
+		utils.DataDbUserCfg:          dbcfg.DataDbUser,
+		utils.DataDbPassCfg:          dbcfg.DataDbPass,
+		utils.DataDbSentinelNameCfg:  dbcfg.DataDbSentinelName,
+		utils.QueryTimeoutCfg:        queryTimeout,
+		utils.RmtConnsCfg:            dbcfg.RmtConns,
+		utils.RplConnsCfg:            dbcfg.RplConns,
+		utils.ItemsCfg:               items,
+		utils.ReplicationFilteredCfg: dbcfg.RplFiltered,
 	}
 }
 
