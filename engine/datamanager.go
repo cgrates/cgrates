@@ -389,11 +389,11 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]; itm.Replicate {
-		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.DestinationPrefix, destID, // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveDestination,
-			destID)
+			utils.DestinationPrefix, dest.Id, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetDestination,
+			dest)
 	}
 	return
 }
@@ -556,7 +556,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
-			sq)
+			ssq)
 	}
 	return
 }
@@ -896,6 +896,8 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			utils.ReplicatorSv1SetStatQueueProfile,
 			sqp); err != nil {
 			return
+		}
+	}
 	return
 }
 
@@ -1054,7 +1056,7 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.ResourcesPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveResource,
-			&utils.TenantID{Tenant: tenant, ID: id}
+			&utils.TenantID{Tenant: tenant, ID: id})
 	}
 	return
 }
@@ -1202,13 +1204,13 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	}
 	Cache.Remove(utils.CacheActionTriggers, id,
 		cacheCommit(transactionID), transactionID)
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
-			replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-				config.CgrConfig().DataDbCfg().RplFiltered,
-				utils.ACTION_TRIGGER_PREFIX, id, // this are used to get the host IDs from cache
-				utils.ReplicatorSv1RemoveActionTriggers,
-				id)
-		}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ACTION_TRIGGER_PREFIX, id, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveActionTriggers,
+			id)
+	}
 	return
 }
 
@@ -1297,13 +1299,13 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	}
 	Cache.Remove(utils.CacheSharedGroups, id,
 		cacheCommit(transactionID), transactionID)
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; itm.Replicate {
-			replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-				config.CgrConfig().DataDbCfg().RplFiltered,
-				utils.SHARED_GROUP_PREFIX, id, // this are used to get the host IDs from cache
-				utils.ReplicatorSv1RemoveSharedGroup,
-				id)
-		}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.SHARED_GROUP_PREFIX, id, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveSharedGroup,
+			id)
+	}
 	return
 }
 
@@ -1374,13 +1376,13 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	}
 	Cache.Remove(utils.CacheActions, key,
 		cacheCommit(transactionID), transactionID)
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
-			replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-				config.CgrConfig().DataDbCfg().RplFiltered,
-				utils.ACTION_PREFIX, key, // this are used to get the host IDs from cache
-				utils.ReplicatorSv1RemoveActions,
-				key)
-		}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.ACTION_PREFIX, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveActions,
+			key)
+	}
 	return
 }
 
@@ -1454,7 +1456,6 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 			&SetActionPlanArg{
 				Key: key,
 				Ats: ats})
-		}
 	}
 	return
 }
@@ -1647,13 +1648,13 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	}
 	Cache.Remove(utils.CacheRatingPlans, key,
 		cacheCommit(transactionID), transactionID)
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
-			replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-				config.CgrConfig().DataDbCfg().RplFiltered,
-				utils.RATING_PLAN_PREFIX, key, // this are used to get the host IDs from cache
-				utils.ReplicatorSv1RemoveRatingPlan,
-				key)
-		}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RATING_PLAN_PREFIX, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveRatingPlan,
+			key)
+	}
 	return
 }
 
@@ -1719,13 +1720,13 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	}
 	Cache.Remove(utils.CacheRatingProfiles, key,
 		cacheCommit(transactionID), transactionID)
-		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
-			replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
-				config.CgrConfig().DataDbCfg().RplFiltered,
-				utils.RATING_PROFILE_PREFIX, key, // this are used to get the host IDs from cache
-				utils.ReplicatorSv1RemoveRatingProfile,
-				key)
-		}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RATING_PROFILE_PREFIX, key, // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveRatingProfile,
+			key)
+	}
 	return
 }
 

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -65,6 +66,7 @@ func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	utils.Logger.Warning(fmt.Sprintf("yay2================================================================"))
 	if err := APIerSv1.DataManager.SetStatQueueProfile(arg.StatQueueProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -85,6 +87,7 @@ func (APIerSv1 *APIerSv1) SetStatQueueProfile(arg *engine.StatQueueWithCache, re
 	if has, err := APIerSv1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
 		return err
 	} else if !has {
+		utils.Logger.Warning(fmt.Sprintf("yay2================================================================"))
 		//compose metrics for StatQueue
 		metrics := make(map[string]engine.StatMetric)
 		for _, metric := range arg.Metrics {
