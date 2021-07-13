@@ -191,7 +191,7 @@ func splitInlineFilter(rule string) (splt []string) {
 
 // NewFilterFromInline parses an inline rule into a compiled Filter
 func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
-	ruleSplt := strings.SplitN(inlnRule, utils.InInFieldSep, 3)
+	ruleSplt := splitInlineFilter(inlnRule)
 	if len(ruleSplt) != 3 {
 		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
 	}
@@ -335,7 +335,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 	if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
 		return
 	} else if fltr.rsrElement == nil {
-		return fmt.Errorf("emtpy RSRParser in rule: <%s>", fltr.Element)
+		return fmt.Errorf("empty RSRParser in rule: <%s>", fltr.Element)
 	}
 	return
 }
