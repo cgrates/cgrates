@@ -1485,3 +1485,300 @@ func TestThresholdsStoreThresholdNilDirtyField(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestThresholdsSetCloneable(t *testing.T) {
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event:  map[string]interface{}{},
+		},
+		clnb: false,
+	}
+
+	exp := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EventTest",
+			Event:  map[string]interface{}{},
+		},
+		clnb: true,
+	}
+	args.SetCloneable(true)
+
+	if !reflect.DeepEqual(args, exp) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, args)
+	}
+}
+
+func TestThresholdsRPCClone(t *testing.T) {
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "EventTest",
+			Event:   make(map[string]interface{}),
+			APIOpts: make(map[string]interface{}),
+		},
+		clnb: true,
+	}
+
+	exp := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"THD_ID"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "EventTest",
+			Event:   make(map[string]interface{}),
+			APIOpts: make(map[string]interface{}),
+		},
+	}
+
+	if out, err := args.RPCClone(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out.(*ThresholdsArgsProcessEvent), exp) {
+		t.Errorf("expected: <%T>, \nreceived: <%T>",
+			args, exp)
+	}
+}
+
+func TestThresholdsProcessEventOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		MinHits: 2,
+		MaxHits: 5,
+		Weight:  10,
+		Blocker: true,
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH1",
+		Hits:   2,
+		tPrfl:  thPrf,
+	}
+
+	if err := dm.SetThresholdProfile(thPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH1"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	expIDs := []string{"TH1"}
+	expStored := utils.StringSet{
+		"cgrates.org:TH1": struct{}{},
+	}
+	if rcvIDs, err := tS.processEvent(args.Tenant, args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
+	} else if !reflect.DeepEqual(tS.storedTdIDs, expStored) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expStored, tS.storedTdIDs)
+	}
+
+}
+
+func TestThresholdsProcessEventStoreThOK(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().StoreInterval = -1
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		MinHits: 2,
+		MaxHits: 5,
+		Weight:  10,
+		Blocker: true,
+	}
+
+	if err := dm.SetThresholdProfile(thPrf, true); err != nil {
+		t.Error(err)
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH2"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+	exp := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH2",
+		Hits:   1,
+	}
+	expIDs := []string{"TH2"}
+	if rcvIDs, err := tS.processEvent(args.Tenant, args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvIDs, expIDs) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expIDs, rcvIDs)
+	} else if rcv, err := tS.dm.GetThreshold("cgrates.org", "TH2", true, false,
+		utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else {
+		rcv.tPrfl = nil
+		rcv.dirty = nil
+		var snooze time.Time
+		rcv.Snooze = snooze
+		if !reflect.DeepEqual(rcv, exp) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
+		}
+	}
+
+}
+
+func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(nil, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH3",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		MinHits: 2,
+		MaxHits: 5,
+		Weight:  10,
+		Blocker: true,
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH3",
+		Hits:   4,
+		tPrfl:  thPrf,
+	}
+
+	if err := dm.SetThresholdProfile(thPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH3"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	expLog1 := `[WARNING] <ThresholdService> failed removing from database non-recurrent threshold: cgrates.org:TH3, error: NO_DATABASE_CONNECTION`
+	expLog2 := `[WARNING] <ThresholdService> failed removing from cache non-recurrent threshold: cgrates.org:TH3, error: NO_DATABASE_CONNECTION`
+
+	if _, err := tS.processEvent(args.Tenant, args); err == nil ||
+		err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
+			utils.ErrPartiallyExecuted, err)
+	}
+
+	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
+		!strings.Contains(rcvLog, expLog2) {
+		t.Errorf("expected logs <%+v> and <%+v> to be included in: <%+v>",
+			expLog1, expLog2, rcvLog)
+	}
+
+	utils.Logger.SetLogLevel(0)
+}
+
+func TestThresholdsProcessEventNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true)
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, nil, dm)
+	tS := NewThresholdService(dm, cfg, filterS)
+
+	thPrf := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH5",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ExpiryTime: time.Date(2021, 6, 1, 12, 0, 0, 0, time.UTC),
+		},
+		MinHits: 2,
+		MaxHits: 5,
+		Weight:  10,
+		Blocker: true,
+	}
+	th := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH5",
+		Hits:   2,
+		tPrfl:  thPrf,
+	}
+
+	if err := dm.SetThresholdProfile(thPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dm.SetThreshold(th); err != nil {
+		t.Error(err)
+	}
+
+	args := &ThresholdsArgsProcessEvent{
+		ThresholdIDs: []string{"TH6"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ThdProcessEvent",
+			Event: map[string]interface{}{
+				utils.AccountField: "1001",
+			},
+		},
+	}
+
+	if _, err := tS.processEvent(args.Tenant, args); err == nil ||
+		err != utils.ErrNotFound {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
+	}
+
+}
