@@ -166,6 +166,29 @@ func splitDynFltrValues(val, sep string) (vals []string) {
 	return append(vals, valsEnd[1:]...)
 }
 
+func splitInlineFilter(rule string) (splt []string) {
+	var p, st int
+	splt = make([]string, 0, 3)
+	for i, b := range rule {
+		switch byte(b) {
+		case utils.InInFieldSep[0]:
+			if p == 0 {
+				splt = append(splt, rule[st:i])
+				st = i + 1
+				if len(splt) == 2 {
+					splt = append(splt, rule[st:])
+					return
+				}
+			}
+		case utils.IdxStart[0]:
+			p++
+		case utils.IdxEnd[0]:
+			p--
+		}
+	}
+	return
+}
+
 // NewFilterFromInline parses an inline rule into a compiled Filter
 func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	ruleSplt := strings.SplitN(inlnRule, utils.InInFieldSep, 3)

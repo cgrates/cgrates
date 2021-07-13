@@ -50,7 +50,7 @@ func TestSessionSCoverage(t *testing.T) {
 	db := NewDataDBService(cfg, nil, srvDep)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan rpcclient.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, nil, anz, srvDep)
+	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), shdChan, nil, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -62,7 +62,6 @@ func TestSessionSCoverage(t *testing.T) {
 		shdChan:  shdChan,
 		connChan: make(chan rpcclient.ClientConnector, 1),
 		connMgr:  nil,
-		caps:     nil,
 		anz:      anz,
 		srvDep:   srvDep,
 		sm:       &sessions.SessionS{},

@@ -56,7 +56,7 @@ func TestChargerSv1Interface(t *testing.T) {
 
 func TestSessionSv1Interface(t *testing.T) {
 	_ = SessionSv1Interface(NewDispatcherSessionSv1(nil))
-	_ = SessionSv1Interface(NewSessionSv1(nil, nil))
+	_ = SessionSv1Interface(NewSessionSv1(nil))
 }
 
 func TestResponderInterface(t *testing.T) {
